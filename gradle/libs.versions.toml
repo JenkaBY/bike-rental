@@ -2,6 +2,7 @@
 spring-boot = "4.0.1"
 spring-dependency-management = "1.1.7"
 spring-modulith = "2.0.1"
+junit="6.0.2"
 cucumber="7.33.0"
 testcontainers = "2.0.3"
 map-struct = '1.6.3'
@@ -14,6 +15,7 @@ spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies"
 spring-modulith-bom = { module = "org.springframework.modulith:spring-modulith-bom", version.ref = "spring-modulith" }
 testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
 cucumber-bom = { module = "io.cucumber:cucumber-bom", version.ref = "cucumber" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 
 # app libs
 spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
@@ -41,10 +43,21 @@ postgresql = { module = "org.postgresql:postgresql" }
 
 # Test libs
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-starter-webmvc-test = { module = 'org.springframework.boot:spring-boot-starter-webmvc-test' }
+spring-boot-starter-jdbc-test = { module = 'org.springframework.boot:spring-boot-starter-jdbc-test' }
+spring-boot-starter-restclient-test = { module = 'org.springframework.boot:spring-boot-starter-restclient-test' }
+spring-boot-resttestclient = { module = 'org.springframework.boot:spring-boot-resttestclient' }
+spring-boot-starter-security-test = { module = 'org.springframework.boot:spring-boot-starter-security-test' }
 spring-boot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
-spring-modulith-starter-test = { module = "org.springframework.modulith:spring-modulith-starter-test" }
 testcontainers-junit-jupiter = { module = 'org.testcontainers:testcontainers-junit-jupiter' }
 testcontainers-postgresql = { module = 'org.testcontainers:testcontainers-postgresql' }
+spring-modulith-starter-test = { module = "org.springframework.modulith:spring-modulith-starter-test" }
+
+# components for Cucumber tests
+cucumber-java = { module = 'io.cucumber:cucumber-java' }
+cucumber-junit = { module = 'io.cucumber:cucumber-junit-platform-engine' } # for junit 5
+cucumber-spring = { module = 'io.cucumber:cucumber-spring' }
+junit-platform-suite = { module = 'org.junit.platform:junit-platform-suite' } # test suite for junit 5 because Gradle can't run tests not-class-based tests
 
 # launcher for JUnit Platform, needed for Gradle TestKit tests
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
@@ -56,4 +69,28 @@ spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
 
 [bundles]
+spring-test = [
+    'spring-boot-testcontainers',
+    'spring-boot-starter-test',
+    'spring-boot-starter-webmvc-test',
+    'spring-boot-starter-jdbc-test',
+    'spring-boot-starter-restclient-test',
+    'spring-boot-resttestclient',
+    #    'spring-boot-starter-security-test',
+    'testcontainers-junit-jupiter',
+    'testcontainers-postgresql',
+]
+spring-modulith = [
+    'spring-modulith-starter-core',
+    'spring-modulith-starter-jpa',
+]
+spring-modulith-test = [
+    'spring-modulith-starter-test',
+]
 
+cucumber-test = [
+    'cucumber-java',
+    'cucumber-junit',
+    'cucumber-spring',
+    'junit-platform-suite',
+]
