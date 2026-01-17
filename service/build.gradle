@@ -4,9 +4,9 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = 'com.github.jenkaby.bikerent'
+group = 'com.github.jenkaby.bikerental'
 version = '0.0.1-SNAPSHOT'
-description = 'service'
+description = 'The main application module of the Bike Rental Application'
 
 java {
     toolchain {
@@ -14,12 +14,19 @@ java {
     }
 }
 
-
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
     mockitoAgent
+}
+
+compileJava {
+    options.compilerArgs = [
+            '-Amapstruct.suppressGeneratorTimestamp=true',
+            '-Amapstruct.defaultComponentModel=spring',
+            '-Amapstruct.unmappedTargetPolicy=IGNORE'
+    ]
 }
 
 dependencyManagement {
@@ -40,8 +47,7 @@ dependencies {
 //    implementation libs.spring.boot.starter.oauth2.resource.server
     implementation libs.springdoc.starter.webmvc.ui
 
-    implementation libs.spring.modulith.starter.core
-    implementation libs.spring.modulith.starter.jpa
+    implementation libs.bundles.spring.modulith
 
     implementation libs.mapstruct
 
@@ -53,11 +59,8 @@ dependencies {
     annotationProcessor libs.lombok
     annotationProcessor libs.mapstruct.processor
 
-    testImplementation libs.spring.boot.starter.test
-    testImplementation libs.spring.boot.testcontainers
-    testImplementation libs.spring.modulith.starter.test
-    testImplementation libs.testcontainers.junit.jupiter
-    testImplementation libs.testcontainers.postgresql
+    testImplementation libs.bundles.spring.test
+    testImplementation libs.bundles.spring.modulith.test
 
     testRuntimeOnly libs.junit.platform.launcher
 

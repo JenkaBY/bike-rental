@@ -5,6 +5,8 @@ plugins {
 
 
 allprojects {
+    apply plugin: 'java'
+
     repositories {
         mavenCentral()
     }
@@ -19,7 +21,6 @@ allprojects {
 def javaProjects = subprojects.findAll { it.name != 'load-test' }
 
 configure(javaProjects) {
-    apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
 
     configurations {
@@ -28,8 +29,10 @@ configure(javaProjects) {
 
     dependencyManagement {
         imports {
-            mavenBom libs.testcontainers.bom.get().toString()
             mavenBom libs.spring.boot.bom.get().toString()
+            mavenBom libs.spring.modulith.bom.get().toString()
+            mavenBom libs.junit.bom.get().toString()
+            mavenBom libs.testcontainers.bom.get().toString()
         }
     }
 

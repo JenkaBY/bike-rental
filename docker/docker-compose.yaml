@@ -9,11 +9,11 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_DB=bikerental
-      - POSTGRES_USER=admin
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
       - "bikesharing-db:/var/lib/postgresql/data"
-
+      - "./postgres/create_second_db.sh:/docker-entrypoint-initdb.d/create_second_db.sh"
 
 volumes:
   bikesharing-db:
