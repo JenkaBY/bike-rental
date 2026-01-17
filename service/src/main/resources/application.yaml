@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: bike-rental
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USER}
+    password: ${DATASOURCE_SECRET}
+  liquibase:
+    analytics-enabled: false
+    drop-first: false
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+  jpa:
+    open-in-view: false
+
+logging:
+  level:
+    root: info
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
