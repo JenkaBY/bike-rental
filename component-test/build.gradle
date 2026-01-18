@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.github.jenkaby.bikerental.componenttest'
+version = '0.0.1-SNAPSHOT'
+
+dependencyManagement {
+    imports {
+        mavenBom libs.cucumber.bom.get().toString()
+    }
+}
+
+dependencies {
+    testImplementation project(':service')
+
+    testImplementation libs.bundles.spring.test
+    testImplementation libs.bundles.cucumber.test
+
+    testAnnotationProcessor libs.lombok
+    testCompileOnly libs.lombok
+
+    testRuntimeOnly libs.junit.platform.launcher
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
