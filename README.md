@@ -21,12 +21,13 @@
 
 There are 2 kinds of tests: 
 - unit tests. Inside the `service` module.
-- component(integration) tests. It's located in the `component-test` module and implemented via Cucumber framework.
+- component(integration) tests. It's located in the `component-test` module and implemented via Cucumber framework. Read
+  more in the [component-test/README.md](./component-test/README.md).
 
 
 To run tests, use the following command from the root directory:
 ```shell
-./gradlew test
+./gradlew test -Dspring.profiles.active=test,docker
 ```
 
 
