@@ -1205,7 +1205,7 @@
 
 ```mermaid
 flowchart TD
-    subgraph ClientArrival [Приход клиента]
+    subgraph CustomerArrival [Приход клиента]
         A[Клиент приходит] --> B[Поиск по телефону]
         B --> C{Найден?}
         C -->|Да| D[Выбор клиента]

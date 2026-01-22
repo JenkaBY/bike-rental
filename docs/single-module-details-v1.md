@@ -126,7 +126,7 @@ com.github.jenkaby.bikerental.rental/
  */
 @ApplicationModule(
     displayName = "Rental Management",
-    allowedDependencies = {"client", "equipment", "tariff"}
+    allowedDependencies = {"customer", "equipment", "tariff"}
 )
 @NamedInterfaces({
     @NamedInterface(name = "events", packages = "event")

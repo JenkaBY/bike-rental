@@ -36,7 +36,7 @@
 ```mermaid
 flowchart TB
     subgraph CoreModules [Core Modules - Независимые]
-        Client[client<br/>FR-CL]
+        Customer[customer<br/>FR-CL]
         Equipment[equipment<br/>FR-EQ]
         Tariff[tariff<br/>FR-TR]
     end
@@ -52,19 +52,19 @@ flowchart TB
         Admin[admin<br/>FR-AD]
     end
 
-    Rental --> Client
+    Rental --> Customer
     Rental --> Equipment
     Rental --> Tariff
     Finance --> Rental
     Maintenance --> Equipment
     Reporting --> Rental
     Reporting --> Finance
-    Reporting --> Client
+    Reporting --> Customer
     Reporting --> Equipment
-    Admin --> Client
+    Admin --> Customer
 ```
 
-### 3.1 Модуль Client (FR-CL-001 - FR-CL-005)
+### 3.1 Модуль Customer (FR-CL-001 - FR-CL-005)
 
 **Ответственность:** Управление профилями клиентов
 
@@ -208,7 +208,7 @@ com.github.jenkaby.bikerental
 │   └── event/
 │       └── DomainEvent.java        # Базовый интерфейс событий
 │
-├── client/
+├── customer/
 │   ├── package-info.java           # @ApplicationModule
 │   ├── api/                        # Публичный API модуля
 │   │   ├── CustomerRef.java
@@ -581,7 +581,7 @@ public class CustomerController {
 
 Доступен для роли **OPERATOR** (и ADMIN). Основные рабочие операции.
 
-**Клиенты (client module):**
+**Клиенты (customer module):**
 
 | Метод | Endpoint | Описание |
 
@@ -1060,7 +1060,7 @@ public class SecurityConfig {
 
 **Phase 1 - MVP (Высокий приоритет):**
 
-1. client module - базовый CRUD + поиск по телефону
+1. customer module - базовый CRUD + поиск по телефону
 2. equipment module - каталог + статусы
 3. tariff module - справочник + расчет стоимости
 4. rental module - полный цикл аренды
