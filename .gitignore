@@ -16,6 +16,8 @@ out/
 
 ### VS Code ###
 .vscode/
+bin/
+**/bin/**
 
 ### Mac OS ###
 .DS_Store
