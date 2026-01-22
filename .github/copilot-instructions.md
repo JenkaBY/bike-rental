@@ -1,0 +1,1 @@
+Your instruction is [here](/docs/ai-rules/software-developer-role.md).
