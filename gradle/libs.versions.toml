@@ -7,7 +7,7 @@ cucumber="7.33.0"
 testcontainers = "2.0.3"
 map-struct = '1.6.3'
 springdoc = '3.0.1'
-java = "25"
+java = "21"
 
 [libraries]
 # BOMs
