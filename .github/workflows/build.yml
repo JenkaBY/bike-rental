@@ -3,53 +3,60 @@ name: CI Test
 on:
   push:
     branches:
-      - master
-      - main
-      - develop
+      - '**'
   pull_request:
     branches:
       - '*'
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
-  contents: read  # Only need read access for checkout and test execution
+  contents: write
 
 env:
   #  optimized args for CI environment
   GRADLE_ARGS: "--no-daemon --console=plain --stacktrace"
 
 jobs:
-  build:
-    name: "Gradle build on JDK 21"
+  dependency-submission:
+    name: "Submit Dependency Graph"
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
-
       - name: Setup Java 21
         uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: 'corretto'
-          cache: 'gradle'
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v5
 
+  build:
+    name: "Gradle build on JDK 25"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+      - name: Setup Java 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 25
+          distribution: 'corretto'
+          cache: 'gradle'
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-
       - name: Print gradlew version
         run: ./gradlew -v
-
+#      - name: Setup Gradle
+#        uses: gradle/actions/setup-gradle@v5
+#        with:
+#          cache-read-only: false
       - name: Build only service with Gradle. Skip tests
         run: ./gradlew :service:build -x test $GRADLE_ARGS
   test:
     name: "Tests: ${{ matrix.test-type }}"
     needs: [ build ]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -66,26 +73,25 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
-
       - name: Setup Java 21
         uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: 'corretto'
           cache: 'gradle'
-
+#      - name: Setup Gradle
+#        uses: gradle/actions/setup-gradle@v5
+#        with:
+#          cache-read-only: true
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-
       - name: Run ${{ matrix.test-type }} tests
         run: ./gradlew ${{ matrix.task }} $GRADLE_ARGS
         env:
           SPRING_PROFILES_ACTIVE: ${{ matrix.spring-profiles-active }}
-
       - name: Upload ${{ matrix.test-type }} test report
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.test-type }}-test-report
           path: ${{ matrix.report-path }}
-          retention-days: 7  # Keep test reports for 1 week
