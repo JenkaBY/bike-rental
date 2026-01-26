@@ -9,16 +9,16 @@
 
 ---
 
-## 2. Выбор архитектурного подхода
+## 2. Архитектурного подход
 
-### Решение: Spring Modulith (пакетная модульность)
+### Spring Modulith (пакетная модульность)
 
 **Обоснование:**
 
 - NFR-100 требует монолитной архитектуры с модульностью
 - NFR-110 требует деплоя одним файлом (fat JAR)
 - NFR-112 требует минимальной инфраструктуры
-- Spring Modulith уже интегрирован в проект ([`service/build.gradle`](service/build.gradle), строки 34-35, 50)
+- Spring Modulith уже интегрирован в проект ([`service/build.gradle`](service/build.gradle))
 
 **Преимущества:**
 
@@ -62,6 +62,22 @@ flowchart TB
     Reporting --> Customer
     Reporting --> Equipment
     Admin --> Customer
+```
+
+Каждый модуль в Spring Modulith следует многоуровневой архитектуре с четкими границами:
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│              web (REST API)                                    │  ← Входная точка (HTTP)
+├────────────────────────────────────────────────────────────────┤
+│         application (Use Cases)                                │  ← Бизнес-сценарии
+├────────────────────────────────────────────────────────────────┤
+│      domain (Domain repository interface & Business Logic)     │  ← Бизнес-логика
+├────────────────────────────────────────────────────────────────┤
+│      infrastructure (Persistant, adapter)                      │  ← Инфраструктура (БД, MessageBroker, Cache )
+├────────────────────────────────────────────────────────────────┤
+│        event (Public DTO events)                               │  ← Интерфейс для других модулей
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ### 3.1 Модуль Customer (FR-CL-001 - FR-CL-005)
@@ -202,135 +218,98 @@ flowchart TB
 com.github.jenkaby.bikerental
 ├── BikeRentalApplication.java
 ├── shared/                          # Shared Kernel
+│   ├── package-info.java            # @ApplicationModule(type = ApplicationModule.Type.OPEN)
+│   ├── exception/                   # Common exceptions
 │   ├── domain/
 │   │   ├── Money.java              # Value Object для денежных сумм
 │   │   └── TimeRange.java          # Value Object для временных интервалов
 │   └── event/
-│       └── DomainEvent.java        # Базовый интерфейс событий
-│
-├── customer/
-│   ├── package-info.java           # @ApplicationModule
-│   ├── api/                        # Публичный API модуля
-│   │   ├── CustomerRef.java
-│   │   └── CustomerLookupService.java
-│   ├── domain/
-│   │   ├── Customer.java
-│   │   └── CustomerRepository.java
-│   ├── application/
-│   │   └── CustomerService.java
+│   │   └── DomainEvent.java        # Базовый интерфейс событий
 │   └── web/
-│       └── OperatorCustomerController.java    # /api/operator/customers
-│
-├── equipment/
-│   ├── package-info.java
-│   ├── api/
-│   │   ├── EquipmentRef.java
-│   │   ├── EquipmentAvailabilityService.java
-│   │   └── event/
-│   │       └── EquipmentStatusChanged.java
-│   ├── domain/
-│   │   ├── Equipment.java
-│   │   ├── EquipmentType.java
-│   │   ├── EquipmentStatus.java
-│   │   └── EquipmentRepository.java
-│   ├── application/
-│   │   └── EquipmentService.java
-│   └── web/
-│       ├── OperatorEquipmentController.java   # /api/operator/equipment
-│       └── AdminEquipmentController.java      # /api/admin/equipment
-│
-├── tariff/
-│   ├── package-info.java
-│   ├── api/
-│   │   ├── TariffInfo.java
-│   │   ├── TariffSelectionService.java
-│   │   └── RentalCostCalculator.java
-│   ├── domain/
-│   │   ├── Tariff.java
-│   │   ├── TariffPeriod.java
-│   │   └── TariffRepository.java
-│   ├── application/
-│   │   └── TariffService.java
-│   └── web/
-│       ├── OperatorTariffController.java      # /api/operator/tariffs (read-only)
-│       └── AdminTariffController.java         # /api/admin/tariffs (full CRUD)
-│
+│       └── advice/
+│           └── CoreExceptionHandlerAdvice.java  # Глобальный обработчик исключений
 ├── rental/
-│   ├── package-info.java
-│   ├── api/
-│   │   ├── RentalInfo.java
-│   │   └── event/
-│   │       ├── RentalStarted.java
-│   │       ├── RentalCompleted.java
-│   │       └── RentalCancelled.java
-│   ├── domain/
-│   │   ├── Rental.java
-│   │   ├── RentalStatus.java
-│   │   └── RentalRepository.java
-│   ├── application/
-│   │   ├── CreateRentalUseCase.java
-│   │   ├── StartRentalUseCase.java
-│   │   ├── ReturnEquipmentUseCase.java
-│   │   └── CancelRentalUseCase.java
-│   └── web/
-│       └── OperatorRentalController.java      # /api/operator/rentals
-│
+│    │
+│    ├── package-info.java                       # @ApplicationModule + @NamedInterfaces
+│    ├── RentalFacade.java                       # PUBLIC - Facade для других модулей
+│    ├── RentalInfo.java                         # PUBLIC - DTO для других модулей
+│    ├── event/                                  # PUBLIC (через @NamedInterface)
+│    │   ├── RentalStarted.java
+│    │   ├── RentalCompleted.java
+│    │   └── RentalCancelled.java
+│    ├── domain/
+│    │   ├── model/
+│    │   │   ├── Rental.java                 # Aggregate Root (чистый POJO)
+│    │   │   ├── RentalStatus.java           # Enum
+│    │   │   └── vo/                         # Value Objects
+│    │   │       ├── RentTime.java
+│    │   │       ├── PayAmount.java
+│    │   │       ├── RentalId.java
+│    │   │       └── CustomerId.java
+│    │   └── repository/
+│    │       └── RentalRepository.java       # Domain repository interface
+│    ├── application/
+│    │   ├── usecase/                        # UseCase интерфейсы
+│    │   │   ├── CreateRentalUseCase.java
+│    │   │   ├── StartRentalUseCase.java
+│    │   │   ├── ReturnEquipmentUseCase.java
+│    │   │   ├── CancelRentalUseCase.java
+│    │   │   └── RentalQueryUseCase.java
+│    │   ├── service/                        # Реализации UseCase
+│    │   │   ├── CreateRentalService.java
+│    │   │   ├── StartRentalService.java
+│    │   │   ├── ReturnEquipmentService.java
+│    │   │   ├── CancelRentalService.java
+│    │   │   └── RentalQueryService.java
+│    │   ├── port/                           # Ports (абстракции)
+│    │   │   ├── DomainEventPublisher.java
+│    │   │   └── ClockService.java
+│    │   └── mapper/
+│    │       └── RentalMapper.java           # MapStruct: domain ↔ Public DTO
+│    ├── infrastructure/
+│    │   ├── persistence/
+│    │   │   ├── entity/
+│    │   │   │   └── RentalJpaEntity.java
+│    │   │   ├── repository/
+│    │   │   │   └── RentalJpaRepository.java
+│    │   │   ├── adapter/
+│    │   │   │   └── RentalRepositoryAdapter.java
+│    │   │   └── mapper/
+│    │   │       └── RentalJpaMapper.java    # MapStruct: domain ↔ JPA
+│    │   ├── event/
+│    │   │   └── SpringDomainEventPublisher.java
+│    │   └── time/
+│    │       └── SystemClockService.java
+│    └── web/
+│         ├── command/                        # Command контроллеры
+│         │   ├── RentalCommandController.java
+│         │   ├── dto/
+│         │   │   ├── CreateRentalRequest.java
+│         │   │   ├── StartRentalRequest.java
+│         │   │   ├── ReturnEquipmentRequest.java
+│         │   │   └── CancelRentalRequest.java
+│         │   └── mapper/
+│         │       └── RentalCommandMapper.java  # MapStruct: Web DTO ↔ UseCase Command
+│         └── query/                            # Query контроллеры
+│             ├── RentalQueryController.java
+│             ├── dto/
+│             │   └── RentalResponse.java
+│             └── mapper/
+│                 └── RentalQueryMapper.java    # MapStruct: RentalInfo ↔ Web Response
+├── customer/
+│     └─ # ometted for brevity, similar structure to other modules
+├── equipment/
+│     └─ # ometted for brevity, similar structure to other modules
+├── tariff/
+│     └─ # ometted for brevity, similar structure to other modules
 ├── finance/
-│   ├── package-info.java
-│   ├── domain/
-│   │   ├── Payment.java
-│   │   ├── PaymentType.java
-│   │   ├── PaymentMethod.java
-│   │   ├── CashRegister.java
-│   │   └── PaymentRepository.java
-│   ├── application/
-│   │   ├── PaymentService.java
-│   │   ├── CashRegisterService.java
-│   │   └── RentalEventHandler.java  # @EventListener
-│   └── web/
-│       └── OperatorFinanceController.java     # /api/operator/payments, /cash-register
-│
+│     └─ # ometted for brevity, similar structure to other modules
 ├── reporting/
-│   ├── package-info.java
-│   ├── application/
-│   │   ├── DashboardService.java
-│   │   ├── ShiftReportService.java
-│   │   ├── IncomeReportService.java
-│   │   ├── EquipmentUtilizationReportService.java
-│   │   └── CustomerAnalyticsService.java
-│   └── web/
-│       ├── OperatorReportController.java      # /api/operator/dashboard, /reports/shift
-│       └── AdminReportController.java         # /api/admin/reports (full analytics)
-│
+│     └─ # ometted for brevity, similar structure to other modules
 ├── maintenance/
-│   ├── package-info.java
-│   ├── domain/
-│   │   ├── MaintenanceRecord.java
-│   │   ├── MaintenanceSchedule.java
-│   │   └── MaintenanceRepository.java
-│   ├── application/
-│   │   ├── MaintenanceService.java
-│   │   └── EquipmentUsageTracker.java  # @EventListener
-│   └── web/
-│       └── OperatorMaintenanceController.java # /api/operator/maintenance
-│
+│     └─ # ometted for brevity, similar structure to other modules
 └── admin/
-    ├── package-info.java
-    ├── domain/
-    │   ├── User.java
-    │   ├── Role.java                          # enum: OPERATOR, ADMIN
-    │   ├── SystemSettings.java
-    │   └── AuditLog.java
-    ├── application/
-    │   ├── UserService.java
-    │   ├── SettingsService.java
-    │   ├── AuditService.java
-    │   └── BackupService.java
-    └── web/
-        ├── AdminUserController.java           # /api/admin/users
-        ├── AdminSettingsController.java       # /api/admin/settings
-        ├── AdminAuditController.java          # /api/admin/audit-log
-        └── AdminBackupController.java         # /api/admin/backup
+│     └─ # ometted for brevity, similar structure to other modules
 ```
 
 ---
@@ -512,29 +491,6 @@ application/vnd.bikerent.v1+json
 
 **Формат:** `application/vnd.{vendor}.{version}+json`
 
-**Примеры запросов:**
-
-```http
-# Запрос с указанием версии
-GET /api/customers HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
-
-# Ответ
-HTTP/1.1 200 OK
-Content-Type: application/vnd.bikerent.v1+json
-
-{"id": "uuid", "phone": "+79001234567", ...}
-```
-
-```http
-# POST запрос
-POST /api/rentals HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
-
-{"customer_id": "uuid", "equipment_id": "uuid", ...}
-```
-
 **Конфигурация Spring Boot:**
 
 ```java
@@ -563,14 +519,6 @@ public class CustomerController {
     }
 }
 ```
-
-**Преимущества подхода:**
-
-- Чистые URL без версии
-- Гибкость: можно поддерживать несколько версий одновременно
-- Соответствует HTTP спецификации (content negotiation)
-- Легко добавить v2 без изменения URL
-
 **Fallback:**
 
 - Если `Accept` header не указан, используется последняя стабильная версия (v1)
@@ -583,143 +531,74 @@ public class CustomerController {
 
 **Клиенты (customer module):**
 
-| Метод | Endpoint | Описание |
-
-|-------|----------|----------|
-
-| GET | `/customers` | Список клиентов с фильтрацией `?phone={digits}` |
-
-| POST | `/customers` | Создание клиента |
-
-| GET | `/customers/{id}` | Профиль клиента |
-
-| PUT | `/customers/{id}` | Полное обновление профиля |
-
-| PATCH | `/customers/{id}` | Частичное обновление профиля |
-
-| GET | `/customers/{id}/rentals` | История аренд клиента |
+| Метод | Endpoint                  | Описание                                        |
+|-------|---------------------------|-------------------------------------------------|
+| GET   | `/customers`              | Список клиентов с фильтрацией `?phone={digits}` |
+| POST  | `/customers`              | Создание клиента                                |
+| GET   | `/customers/{id}`         | Профиль клиента                                 |
+| PUT   | `/customers/{id}`         | Полное обновление профиля                       |
+| PATCH | `/customers/{id}`         | Частичное обновление профиля                    |
+| GET   | `/customers/{id}/rentals` | История аренд клиента                           |
 
 **Оборудование (equipment module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/equipments` | Список оборудования с фильтрацией `?number={num}&uid={nfc_uid}&status={status}` |
-
 | GET | `/equipments/{id}` | Детали оборудования |
-
 | PATCH | `/equipments/{id}` | Изменение статуса `{"status": "MAINTENANCE"}` |
 
 **Тарифы (tariff module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/tariffs` | Справочник активных тарифов |
-
 | GET | `/tariffs/{id}` | Детали тарифа |
-
 | GET | `/tariffs/cost` | Расчет стоимости `?equipment_type_id={id}&duration_minutes={min}` |
 
 **Аренда (rental module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/rentals` | Список аренд с фильтрацией `?status=ACTIVE&overdue=true` |
-
 | POST | `/rentals` | Создание аренды (статус DRAFT) |
-
 | GET | `/rentals/{id}` | Детали аренды |
-
 | PATCH | `/rentals/{id}` | Изменение статуса аренды |
-
 | GET | `/rentals/{id}/payments` | Платежи по аренде |
 
-**Статусы аренды (через PATCH):**
-
-```json
-// Запуск аренды (после предоплаты)
-PATCH /rentals/{
-  id
-}
-{
-  "status": "ACTIVE",
-  "started_at": "2026-01-21T10:00:00Z"
-}
-
-// Возврат оборудования
-PATCH /rentals/{
-  id
-}
-{
-  "status": "COMPLETED",
-  "returned_at": "2026-01-21T11:30:00Z"
-}
-
-// Отмена аренды
-PATCH /rentals/{
-  id
-}
-{
-  "status": "CANCELLED",
-  "cancellation_reason": "customer_request"
-}
-```
 
 **Платежи (finance module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/payments` | Список платежей с фильтрацией `?rental_id={id}&date_from={date}` |
-
 | POST | `/payments` | Регистрация платежа |
-
 | GET | `/payments/{id}` | Детали платежа |
 
 **Смены/Касса (finance module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/shifts` | Список смен `?status=OPEN&operator_id={id}` |
-
 | POST | `/shifts` | Открытие новой смены |
-
 | GET | `/shifts/current` | Текущая открытая смена |
-
 | GET | `/shifts/{id}` | Детали смены |
-
 | PATCH | `/shifts/{id}` | Закрытие смены `{"status": "CLOSED", "actual_cash": 15000}` |
 
 **Техническое обслуживание (maintenance module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/maintenance-records` | Записи ТО `?equipment_id={id}&status=PENDING` |
-
 | POST | `/maintenance-records` | Создание записи ТО |
-
 | GET | `/maintenance-records/{id}` | Детали записи ТО |
-
 | PATCH | `/maintenance-records/{id}` | Обновление записи `{"status": "COMPLETED"}` |
 
 **Дашборд и отчеты (reporting module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/dashboard` | Сводка текущего дня |
-
 | GET | `/reports/shift` | Отчет по смене `?shift_id={id}` |
 
 ---
@@ -731,133 +610,85 @@ PATCH /rentals/{
 **Пользователи (admin module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/admin/users` | Список пользователей |
-
 | POST | `/admin/users` | Создание пользователя |
-
 | GET | `/admin/users/{id}` | Данные пользователя |
-
 | PUT | `/admin/users/{id}` | Полное обновление |
-
 | PATCH | `/admin/users/{id}` | Частичное обновление `{"is_active": false}` |
-
 | PUT | `/admin/users/{id}/password` | Установка нового пароля |
 
 **Настройки системы (admin module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/admin/settings` | Все настройки |
-
 | GET | `/admin/settings/{key}` | Конкретная настройка |
-
 | PUT | `/admin/settings/{key}` | Обновление настройки |
-
 | PATCH | `/admin/settings` | Массовое обновление настроек |
 
 **Тарифы - полный CRUD (tariff module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/admin/tariffs` | Все тарифы (включая неактивные) |
-
 | POST | `/admin/tariffs` | Создание тарифа |
-
 | GET | `/admin/tariffs/{id}` | Детали тарифа |
-
 | PUT | `/admin/tariffs/{id}` | Полное обновление тарифа |
-
 | PATCH | `/admin/tariffs/{id}` | Частичное обновление `{"is_active": false}` |
-
 | DELETE | `/admin/tariffs/{id}` | Удаление (если не используется) |
 
 **Оборудование - полный CRUD (equipment module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/admin/equipments` | Все оборудование (включая списанное) |
-
 | POST | `/admin/equipments` | Добавление оборудования |
-
 | GET | `/admin/equipments/{id}` | Детали оборудования |
-
 | PUT | `/admin/equipments/{id}` | Полное обновление |
-
 | PATCH | `/admin/equipments/{id}` | Частичное обновление / списание `{"status": "DECOMMISSIONED"}` |
-
 | DELETE | `/admin/equipments/{id}` | Удаление (только если никогда не использовалось) |
 
 **Типы оборудования (equipment module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/admin/equipment-types` | Типы оборудования |
-
 | POST | `/admin/equipment-types` | Создание типа |
-
 | GET | `/admin/equipment-types/{id}` | Детали типа |
-
 | PUT | `/admin/equipment-types/{id}` | Обновление типа |
 
 **Отчетность и аналитика (reporting module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/admin/reports/income` | Доходы `?from={date}&to={date}&group_by=day` |
-
 | GET | `/admin/reports/equipment-utilization` | Загрузка `?from={date}&to={date}` |
-
 | GET | `/admin/reports/customer-analytics` | Аналитика клиентов |
-
 | GET | `/admin/reports/financial-reconciliation` | Финансовая сверка |
 
 **Экспорт (reporting module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/admin/exports/income` | Экспорт доходов `?format=xlsx&from={date}&to={date}` |
-
 | GET | `/admin/exports/audit-log` | Экспорт аудита `?format=pdf` |
 
 **Журнал аудита (admin module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/admin/audit-logs` | Журнал аудита `?user_id={id}&event_type={type}&from={date}` |
-
 | GET | `/admin/audit-logs/{id}` | Детали записи |
 
 **Резервные копии (admin module):**
 
 | Метод | Endpoint | Описание |
-
 |-------|----------|----------|
-
 | GET | `/admin/backups` | Список резервных копий |
-
 | POST | `/admin/backups` | Создание резервной копии |
-
 | GET | `/admin/backups/{id}` | Метаданные копии |
-
 | POST | `/admin/backups/{id}/restorations` | Запуск восстановления (создает ресурс restoration) |
-
 | GET | `/admin/restorations/{id}` | Статус восстановления |
 
 ---
@@ -903,98 +734,6 @@ flowchart LR
     ADMIN --> OperatorAPI
     ADMIN --> AdminAPI
 ```
-
-### 7.6 Примеры запросов
-
-**Создание и запуск аренды:**
-
-```http
-# 1. Поиск клиента по телефону
-GET /api/customers?phone=1234 HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
-
-# 2. Поиск оборудования по номеру
-GET /api/equipments?number=15 HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
-
-# 3. Расчет стоимости
-GET /api/tariffs/cost?equipment_type_id=uuid&duration_minutes=60 HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
-
-# 4. Создание аренды
-POST /api/rentals HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
-
-{
-  "customer_id": "uuid",
-  "equipment_id": "uuid",
-  "tariff_id": "uuid",
-  "planned_duration_minutes": 60
-}
-
-# 5. Регистрация предоплаты
-POST /api/payments HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
-
-{
-  "rental_id": "uuid",
-  "type": "PREPAYMENT",
-  "method": "CASH",
-  "amount": 500.00
-}
-
-# 6. Запуск аренды
-PATCH /api/rentals/{id} HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
-
-{
-  "status": "ACTIVE"
-}
-```
-
-**Возврат оборудования:**
-
-```http
-# 1. Поиск аренды по NFC-метке оборудования
-GET /api/rentals?status=ACTIVE&equipment_uid=nfc123 HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
-
-# 2. Завершение аренды (система рассчитает доплату)
-PATCH /api/rentals/{id} HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
-
-{
-  "status": "COMPLETED"
-}
-
-# Response:
-HTTP/1.1 200 OK
-Content-Type: application/vnd.bikerent.v1+json
-
-{
-  "id": "uuid",
-  "status": "COMPLETED",
-  "surcharge_amount": 100.00,
-  "surcharge_reason": "overtime_15_min"
-}
-
-# 3. Регистрация доплаты (если есть)
-POST /api/payments HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
-
-{
-  "rental_id": "uuid",
-  "type": "SURCHARGE",
-  "method": "CARD",
-  "amount": 100.00
-}
-```
-
 ---
 
 ## 8. Технические решения
@@ -1050,9 +789,9 @@ public class SecurityConfig {
 
 ### 8.4 Деплой (NFR-110, NFR-111)
 
-- GitHub Actions CI/CD (уже настроен в `.github/workflows/build.yml`)
+- GitHub Actions CI/CD (`.github/workflows/build.yml`)
 - Single fat JAR через `./gradlew bootJar`
-- Docker-compose для локальной разработки (уже есть в `docker/`)
+- Docker-compose для локальной разработки (`docker/`)
 
 ---
 
@@ -1096,9 +835,3 @@ void generateModuleDocumentation() {
             .writeDocumentation();
 }
 ```
-
-Эти тесты гарантируют:
-
-- Отсутствие циклических зависимостей между модулями
-- Доступ только через публичный API модуля
-- Корректную изоляцию internal-классов

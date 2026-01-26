@@ -9,7 +9,7 @@ needed. The system is designed for operational efficiency, quality of service, a
 
 ## Technology Stack
 
-- **Backend:** Java, Spring Boot, Spring Modulith
+- **Backend:** Java, Spring Boot 4, Spring Modulith
 - **Security:** Spring Security, OAuth2 (Google Sign-In), JWT
 - **Database:** PostgreSQL
 - **Build/CI:** Gradle, GitHub Actions
@@ -66,10 +66,6 @@ needed. The system is designed for operational efficiency, quality of service, a
 - Easy refactoring to microservices if scaling is required
 - Integration of advanced analytics and reporting
 - Expansion of NFC/QR and mobile features
-- Enhanced security and multi-factor authentication
+- Enhanced security authentication
 - Support for additional payment methods and integrations
 - Internationalization and multi-language support
-
-## Development Standards
-
-- Clean, readable, and well-documented code
