@@ -56,7 +56,7 @@ needed. The system is designed for operational efficiency, quality of service, a
 - Modular monolith with strict boundaries using Spring Modulith
 - Event-driven communication between modules (Spring Application Events)
 - REST API with role-based access (Operator/Admin)
-- API versioning via Content-Type negotiation (e.g., application/vnd.bikerent.v1+json)
+- API versioning via Content-Type negotiation (e.g., application/vnd.bikerental.v1+json)
 - CI/CD with GitHub Actions, single fat JAR deployment
 - Local development with Docker Compose and PostgreSQL
 - Automated modularity tests (Spring Modulith)

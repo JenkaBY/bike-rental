@@ -542,7 +542,7 @@ API разделен на два контекста по ролям: **Operator 
 Версия API указывается через заголовки `Accept` и `Content-Type` с использованием vendor-specific media type:
 
 ```
-application/vnd.bikerent.v1+json
+application/vnd.bikerental.v1+json
 ```
 
 **Формат:** `application/vnd.{vendor}.{version}+json`
@@ -552,11 +552,11 @@ application/vnd.bikerent.v1+json
 ```http
 # Запрос с указанием версии
 GET /api/customers HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 # Ответ
 HTTP/1.1 200 OK
-Content-Type: application/vnd.bikerent.v1+json
+Content-Type: application/vnd.bikerental.v1+json
 
 {"id": "uuid", "phone": "+79001234567", ...}
 ```
@@ -564,8 +564,8 @@ Content-Type: application/vnd.bikerent.v1+json
 ```http
 # POST запрос
 POST /api/rentals HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
+Content-Type: application/vnd.bikerental.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 {"customer_id": "uuid", "equipment_id": "uuid", ...}
 ```
@@ -577,7 +577,7 @@ Accept: application/vnd.bikerent.v1+json
 @Configuration
 public class ApiVersioningConfig implements WebMvcConfigurer {
 
-    public static final String V1_MEDIA_TYPE = "application/vnd.bikerent.v1+json";
+  public static final String V1_MEDIA_TYPE = "application/vnd.bikerental.v1+json";
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
@@ -592,7 +592,7 @@ public class ApiVersioningConfig implements WebMvcConfigurer {
 @RequestMapping("/api/customers")
 public class CustomerController {
 
-    @GetMapping(produces = "application/vnd.bikerent.v1+json")
+  @GetMapping(produces = "application/vnd.bikerental.v1+json")
     public List<CustomerDto> getCustomers(@RequestParam(required = false) String phone) {
         // ...
     }
@@ -902,7 +902,7 @@ PATCH /rentals/{
 ```mermaid
 flowchart LR
     subgraph Versioning [Версионирование]
-        V1["Accept: application/vnd.bikerent.v1+json"]
+      V1["Accept: application/vnd.bikerental.v1+json"]
     end
 
     subgraph Roles [Роли]
@@ -946,20 +946,20 @@ flowchart LR
 ```http
 # 1. Поиск клиента по телефону
 GET /api/customers?phone=1234 HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 # 2. Поиск оборудования по номеру
 GET /api/equipments?number=15 HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 # 3. Расчет стоимости
 GET /api/tariffs/cost?equipment_type_id=uuid&duration_minutes=60 HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 # 4. Создание аренды
 POST /api/rentals HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
+Content-Type: application/vnd.bikerental.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 {
   "customer_id": "uuid",
@@ -970,8 +970,8 @@ Accept: application/vnd.bikerent.v1+json
 
 # 5. Регистрация предоплаты
 POST /api/payments HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
+Content-Type: application/vnd.bikerental.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 {
   "rental_id": "uuid",
@@ -982,8 +982,8 @@ Accept: application/vnd.bikerent.v1+json
 
 # 6. Запуск аренды
 PATCH /api/rentals/{id} HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
+Content-Type: application/vnd.bikerental.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 {
   "status": "ACTIVE"
@@ -995,12 +995,12 @@ Accept: application/vnd.bikerent.v1+json
 ```http
 # 1. Поиск аренды по NFC-метке оборудования
 GET /api/rentals?status=ACTIVE&equipment_uid=nfc123 HTTP/1.1
-Accept: application/vnd.bikerent.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 # 2. Завершение аренды (система рассчитает доплату)
 PATCH /api/rentals/{id} HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
+Content-Type: application/vnd.bikerental.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 {
   "status": "COMPLETED"
@@ -1008,7 +1008,7 @@ Accept: application/vnd.bikerent.v1+json
 
 # Response:
 HTTP/1.1 200 OK
-Content-Type: application/vnd.bikerent.v1+json
+Content-Type: application/vnd.bikerental.v1+json
 
 {
   "id": "uuid",
@@ -1019,8 +1019,8 @@ Content-Type: application/vnd.bikerent.v1+json
 
 # 3. Регистрация доплаты (если есть)
 POST /api/payments HTTP/1.1
-Content-Type: application/vnd.bikerent.v1+json
-Accept: application/vnd.bikerent.v1+json
+Content-Type: application/vnd.bikerental.v1+json
+Accept: application/vnd.bikerental.v1+json
 
 {
   "rental_id": "uuid",

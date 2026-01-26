@@ -486,7 +486,7 @@ API разделен на два контекста по ролям: **Operator 
 Версия API указывается через заголовки `Accept` и `Content-Type` с использованием vendor-specific media type:
 
 ```
-application/vnd.bikerent.v1+json
+application/vnd.bikerental.v1+json
 ```
 
 **Формат:** `application/vnd.{vendor}.{version}+json`
@@ -498,7 +498,7 @@ application/vnd.bikerent.v1+json
 @Configuration
 public class ApiVersioningConfig implements WebMvcConfigurer {
 
-    public static final String V1_MEDIA_TYPE = "application/vnd.bikerent.v1+json";
+  public static final String V1_MEDIA_TYPE = "application/vnd.bikerental.v1+json";
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
@@ -513,7 +513,7 @@ public class ApiVersioningConfig implements WebMvcConfigurer {
 @RequestMapping("/api/customers")
 public class CustomerController {
 
-    @GetMapping(produces = "application/vnd.bikerent.v1+json")
+  @GetMapping(produces = "application/vnd.bikerental.v1+json")
     public List<CustomerDto> getCustomers(@RequestParam(required = false) String phone) {
         // ...
     }
@@ -698,7 +698,7 @@ public class CustomerController {
 ```mermaid
 flowchart LR
     subgraph Versioning [Версионирование]
-        V1["Accept: application/vnd.bikerent.v1+json"]
+      V1["Accept: application/vnd.bikerental.v1+json"]
     end
 
     subgraph Roles [Роли]
