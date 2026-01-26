@@ -13,7 +13,7 @@ import java.util.List;
 public class DbSteps {
 
     private static final List<String> TABLE_TO_TRUNCATE = List.of(
-//            TODO table
+            "customers"
     );
 
     private final JdbcClient jdbcClient;
