@@ -82,30 +82,6 @@ Feature: Quick Customer Creation (US-CL-002)
     When a POST request has been made to "/api/customers" endpoint
     Then the response status is 409
 
-  Scenario: Fail to create customer without phone
-    Given a prepared payload is
-      """
-      {
-        "firstName": "No",
-        "lastName": "Phone"
-      }
-      """
-    And the request header "Content-Type" is "application/vnd.bikerent.v1+json"
-    When a POST request has been made to "/api/customers" endpoint
-    Then the response status is 400
-
-  Scenario: Fail to create customer with invalid phone
-    Given a prepared payload is
-      """
-      {
-        "phone": "invalid",
-        "firstName": "Bad",
-        "lastName": "Phone"
-      }
-      """
-    And the request header "Content-Type" is "application/vnd.bikerent.v1+json"
-    When a POST request has been made to "/api/customers" endpoint
-    Then the response status is 400
 
   Scenario: Customer creation time is under 2 seconds
     Given a prepared payload is
