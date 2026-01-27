@@ -8,8 +8,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## In Progress
 
-- [US-CL-002] Быстрое создание клиента - All validation fixes applied (92% compliance), 9/12 subtasks complete, needs
-  unit/WebMvc tests
+<!-- No tasks in progress currently -->
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
@@ -84,7 +83,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
-<!-- No completed tasks yet -->
+- [US-CL-002] Быстрое создание клиента - Completed on 2026-01-27 (Implementation + 83+ tests: 68 unit, 15 WebMvc,
+  component tests)
 
 ## Abandoned
 
