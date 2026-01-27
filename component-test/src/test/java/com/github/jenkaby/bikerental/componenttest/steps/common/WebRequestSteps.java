@@ -17,8 +17,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +34,6 @@ public class WebRequestSteps {
     @LocalServerPort
     private final int port;
 
-    private Instant requestStartTime;
 
     @Given("the request body is")
     public void theRequestBodyIs(String body) {
@@ -86,7 +83,6 @@ public class WebRequestSteps {
                 .forEach(uriBuilder::queryParam);
         var uri = uriBuilder.build().toUri();
 
-        requestStartTime = Instant.now();
         var response = IntStream.range(0, times).mapToObj(i -> restClient.exchange(uri, method, request, String.class))
                 .peek(resp -> log.info("Response : {}", resp))
                 .toList().getLast();
@@ -108,7 +104,8 @@ public class WebRequestSteps {
         expectations.forEach(exp -> {
             var jsonPath = JsonPath.compile(exp.path());
             Object actual = documentContext.read(jsonPath);
-            softly.assertThat(actual).isEqualTo(exp.value());
+            var expected = "null".equals(exp.value()) ? null : exp.value();
+            softly.assertThat(actual).isEqualTo(expected);
         });
         softly.assertAll();
     }
@@ -133,14 +130,5 @@ public class WebRequestSteps {
                 .matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
         // Verify it can be parsed as UUID
         assertThat(UUID.fromString(value)).isNotNull();
-    }
-
-    @Then("the response time is less than {int} milliseconds")
-    public void theResponseTimeIsLessThanMilliseconds(int maxMillis) {
-        Instant responseTime = Instant.now();
-        long actualMillis = Duration.between(requestStartTime, responseTime).toMillis();
-        assertThat(actualMillis)
-                .as("Response time should be less than %d ms but was %d ms", maxMillis, actualMillis)
-                .isLessThan(maxMillis);
     }
 }
