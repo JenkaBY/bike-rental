@@ -63,7 +63,7 @@ dependencies {
     testImplementation libs.bundles.spring.modulith.test
 
     testRuntimeOnly libs.junit.platform.launcher
-
+    testRuntimeOnly libs.h2.database
 }
 
 tasks.named('test') {

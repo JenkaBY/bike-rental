@@ -63,6 +63,7 @@ junit-platform-suite = { module = 'org.junit.platform:junit-platform-suite' } # 
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
 mockito-core = { module = "org.mockito:mockito-core" }
+h2-database = { module = "com.h2database:h2" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
