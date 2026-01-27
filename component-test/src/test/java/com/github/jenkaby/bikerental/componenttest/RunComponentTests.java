@@ -17,7 +17,7 @@ import static io.cucumber.junit.platform.engine.Constants.GLUE_PROPERTY_NAME;
 
 @Suite
 @SelectClasspathResource("features")
-@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.github.jenkaby.bikerental.componenttest.steps")
+@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.github.jenkaby.bikerental")
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "not @skip")
 // uncomment the line below comment out the line above and mark @run the test to be executed
 //@ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "@run")
