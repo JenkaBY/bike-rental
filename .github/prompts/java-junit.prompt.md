@@ -22,11 +22,12 @@ approaches.
 
 - Test classes should have a `Test` suffix, e.g., `CalculatorTest` for a `Calculator` class.
 - Use `@Test` for test methods.
-- Follow the Arrange-Act-Assert (AAA) pattern.
+- Follow the Given-When-Then pattern.
 - Name tests using a descriptive convention, like `methodName_should_expectedBehavior_when_scenario`.
 - Use `@BeforeEach` and `@AfterEach` for per-test setup and teardown.
 - Use `@BeforeAll` and `@AfterAll` for per-class setup and teardown (must be static methods).
 - Use `@DisplayName` to provide a human-readable name for test classes and methods.
+- object returned by a method under test must be named `actual`. The expected object must be named `expected`.
 
 ## Standard Tests
 
@@ -47,8 +48,8 @@ approaches.
 ## Assertions
 
 - Use fluent and readable assertions, consider using a library like AssertJ (`assertThat(...).is...`).
-- Use `assertThrows` or `assertDoesNotThrow` to test for exceptions.
-- Group related assertions with `SoftAssertions..assertAll()` to ensure all assertions are checked before the test
+- Use `assertThatThrownBy` to test for exceptions.
+- Group related assertions with `SoftAssertions.assertAll()` to ensure all assertions are checked before the test
   fails.
 - Use descriptive messages in assertions to provide clarity on failure.
 
@@ -65,3 +66,52 @@ approaches.
   necessary.
 - Use `@Disabled` to temporarily skip a test method or class, providing a reason.
 - Use `@Nested` to group tests in a nested inner class for better organization and structure.
+
+## WebMvcTest (Spring Boot 4+)
+
+- use `@WebMvcTest`(org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest) to test Spring MVC controllers in
+  isolation.
+- Mock dependencies using `@MockitoBean`(org.springframework.test.context.bean.override.mockito.MockitoBean)
+- ObjectMapper comes from `tools.jackson.databind.ObjectMapper` packages
+- Assume that injected services(useCases) are not throw any exceptions, they always return not null results. Mock them
+  accordingly.
+- Don't verify response fields for positive scenarios, only check HTTP status codes
+- Don't verify any 409, 500, 415 status codes, assume that the controller never throws them.
+- Group test cases by HTTP methods(GET, POST, PUT, DELETE) using nested classes with `@Nested` annotation. E.g.
+
+```java
+
+@ApiTest
+class ControllerTest {
+
+  @Nested
+  class Post {
+    @Nested
+    class ShouldReturn404 {
+      @Test
+      @ParametrizedTest
+      void whenRequestContainsInvalidData(CreateRequest request, Expected expected) {
+        // test scenario here
+      }
+    }
+
+    @Nested
+    class ShouldReturn201 {
+      @ParametrizedTest
+      void whenRequestInvalidData(CreateRequest request) {
+        // test scenario here
+      }
+
+      @Test
+      void mayBeAnotherUseCase() {
+        // test scenario here
+      }
+    }
+  }
+
+  @Nested
+  class Get {
+    // similar structure for GET requests
+  }
+}
+```
