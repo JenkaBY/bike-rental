@@ -7,6 +7,8 @@ spring:
     #    disabled intentionally to speed up tests; assuming DB is already in correct state
     #    Once new DB change in the service module is introduced, the first run will require to one-time change this property to `true`
     enabled: false
+    #    enabled for initial development stage
+    drop-first: true
 logging:
   level:
     root: info
