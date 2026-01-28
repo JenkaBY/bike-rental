@@ -456,7 +456,7 @@ PATCH  /api/rentals/{id}/customer
 GET /api/rentals
 GET /api/rentals/{id}
 GET /api/rentals/active
-GET /api/rentals/search?customerId={id}
+GET /api/rentals?customerId={id}
 GET /api/dashboard
 ```
 

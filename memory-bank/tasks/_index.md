@@ -8,7 +8,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## In Progress
 
-- [US-CL-001] Поиск клиента по номеру телефона - High priority, customer module
+<!-- No tasks in progress currently -->
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
@@ -82,9 +82,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [US-CL-001] Поиск клиента по номеру телефона - Completed on 2026-01-28 (Implementation + unit, WebMvc, component
+  tests)
 - [US-CL-002] Быстрое создание клиента - Completed on 2026-01-27 (Implementation + 83+ tests: 68 unit, 15 WebMvc,
   component tests)
-
-## Abandoned
-
-<!-- No abandoned tasks -->
