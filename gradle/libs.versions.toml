@@ -1,7 +1,7 @@
 [versions]
 spring-boot = "4.0.2"
 spring-dependency-management = "1.1.7"
-spring-modulith = "2.0.1"
+spring-modulith = "2.0.2"
 junit="6.0.2"
 cucumber="7.33.0"
 testcontainers = "2.0.3"
