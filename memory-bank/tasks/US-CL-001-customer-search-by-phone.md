@@ -57,7 +57,7 @@ The implementation should focus on:
 - [ ] Create Cucumber feature for customer search scenarios
 - [ ] Implement query use case (SearchCustomersByPhoneUseCase)
 - [ ] Create query repository method with indexed lookup
-- [ ] Implement REST endpoint (GET /api/customers/search)
+- [ ] Implement REST endpoint (GET /api/customers)
 - [ ] Add database index migration for phone field
 - [ ] Optimize query performance (EXPLAIN ANALYZE)
 - [ ] Add pagination support if needed
@@ -67,18 +67,18 @@ The implementation should focus on:
 
 ## Progress Tracking
 
-**Overall Status:** In Progress - 15%
+**Overall Status:** In Progress - 55%
 
 ### Subtasks
 
-| ID  | Description                | Status      | Updated    | Notes |
-|-----|----------------------------|-------------|------------|-------|
-| 1.1 | Create component test      | Complete    | 2026-01-28 |       |
-| 1.2 | Implement search use case  | Not Started | 2026-01-26 |       |
-| 1.3 | Create query endpoint      | Not Started | 2026-01-26 |       |
-| 1.4 | Add database index         | Not Started | 2026-01-26 |       |
-| 1.5 | Optimize query performance | Not Started | 2026-01-26 |       |
-| 1.6 | Write tests                | Not Started | 2026-01-26 |       |
+| ID  | Description                | Status      | Updated    | Notes                  |
+|-----|----------------------------|-------------|------------|------------------------|
+| 1.1 | Create component test      | Complete    | 2026-01-28 |                        |
+| 1.2 | Implement search use case  | Complete    | 2026-01-28 |                        |
+| 1.3 | Create query endpoint      | Complete    | 2026-01-28 |                        |
+| 1.4 | Add database index         | Complete    | 2026-01-28 | Exists in v1 migration |
+| 1.5 | Optimize query performance | Not Started | 2026-01-26 |                        |
+| 1.6 | Write tests                | Not Started | 2026-01-26 |                        |
 
 ## Progress Log
 
@@ -89,8 +89,9 @@ The implementation should focus on:
 
 ### 2026-01-28
 
-- Added component test feature for phone search with 10-item limit and minimum length validation
-- Added component test steps for list size and list content assertions
+- Implemented customer search use case, repository query, and REST endpoint
+- Added search response DTO and mapper
+- Confirmed existing phone index in Liquibase migration
 
 ## Technical Details
 
@@ -111,7 +112,7 @@ com.github.jenkaby.bikerental.customer
 
 **API Endpoint:**
 
-- `GET /api/customers/search?phone={digits}`
+- `GET /api/customers?phone={digits}`
 - Query param: `phone` (4-11 digits)
 - Response: `200 OK` with array of matching customers
 - Response format: `[{ "id": "uuid", "phone": "string", "firstName": "string", "lastName": "string" }]`

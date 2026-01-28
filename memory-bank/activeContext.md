@@ -221,7 +221,7 @@ All files have been created and populated:
 - **US-CL-001: Customer Search by Phone** (HIGH PRIORITY)
   - Enables core rental operations
   - Depends on customer module foundation from US-CL-002 ✅
-  - GET /api/customers/search?phone={phone} endpoint
+  - GET /api/customers?phone={phone} endpoint
   - Reuse PhoneNumber value object and normalization
 
 - **US-CL-003: Full Customer Profile** (HIGH PRIORITY)

@@ -8,11 +8,10 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## In Progress
 
-<!-- No tasks in progress currently -->
+- [US-CL-001] Поиск клиента по номеру телефона - High priority, customer module
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
-- [US-CL-001] Поиск клиента по номеру телефона - High priority, customer module
 - [US-CL-003] Полное создание/редактирование профиля клиента - High priority, customer module
 - [US-EQ-001] Справочник оборудования - High priority, equipment module
 - [US-TR-001] Справочник тарифов - High priority, tariff module
