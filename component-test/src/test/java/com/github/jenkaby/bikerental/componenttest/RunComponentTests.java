@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.componenttest;
 import com.github.jenkaby.bikerental.BikeRentalApplication;
 import com.github.jenkaby.bikerental.componenttest.config.infra.TestcontainersConfiguration;
 import io.cucumber.spring.CucumberContextConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.suite.api.ConfigurationParameter;
 import org.junit.platform.suite.api.SelectClasspathResource;
 import org.junit.platform.suite.api.Suite;
@@ -14,7 +15,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import static io.cucumber.junit.platform.engine.Constants.FILTER_TAGS_PROPERTY_NAME;
 import static io.cucumber.junit.platform.engine.Constants.GLUE_PROPERTY_NAME;
 
-
+@Slf4j
 @Suite
 @SelectClasspathResource("features")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.github.jenkaby.bikerental")
@@ -33,6 +34,7 @@ public class RunComponentTests {
             String activeProfiles = System.getProperty("spring.profiles.active", "");
             if (activeProfiles.contains("docker")) {
 //              Assumes to run in CI/CD pipeline therefore liquibase is enabled.
+                log.info("!!!Docker profile is active - enabling liquibase migrations");
                 registry.add("spring.liquibase.enabled", () -> true);
             }
         }
