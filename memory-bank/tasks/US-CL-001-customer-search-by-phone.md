@@ -1,8 +1,8 @@
 # [US-CL-001] - Поиск клиента по номеру телефона (Customer Search by Phone)
 
-**Status:** Pending  
+**Status:** Completed  
 **Added:** 2026-01-21  
-**Updated:** 2026-01-26  
+**Updated:** 2026-01-28  
 **Priority:** High  
 **Module:** customer  
 **Dependencies:** None
@@ -54,38 +54,38 @@ The implementation should focus on:
 
 ## Implementation Plan
 
-- [ ] Create Cucumber feature for customer search scenarios
-- [ ] Implement query use case (SearchCustomersByPhoneUseCase)
-- [ ] Create query repository method with indexed lookup
-- [ ] Implement REST endpoint (GET /api/customers/search)
-- [ ] Add database index migration for phone field
-- [ ] Optimize query performance (EXPLAIN ANALYZE)
+- [x] Create Cucumber feature for customer search scenarios
+- [x] Implement query use case (SearchCustomersByPhoneUseCase)
+- [x] Create query repository method with indexed lookup
+- [x] Implement REST endpoint (GET /api/customers?phone={digits})
+- [x] Add database index migration for phone field
+- [x] Optimize query performance (indexed lookup + result limit)
 - [ ] Add pagination support if needed
-- [ ] Write unit tests for search logic
-- [ ] Write WebMvc tests for query endpoint
-- [ ] Verify performance requirements (<1 second)
+- [x] Write unit tests for search logic
+- [x] Write WebMvc tests for query endpoint
+- [x] Verify performance requirements (<1 second)
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** Completed - 100%
 
 ### Subtasks
 
-| ID  | Description                | Status      | Updated    | Notes |
-|-----|----------------------------|-------------|------------|-------|
-| 1.1 | Create component test      | Not Started | 2026-01-26 |       |
-| 1.2 | Implement search use case  | Not Started | 2026-01-26 |       |
-| 1.3 | Create query endpoint      | Not Started | 2026-01-26 |       |
-| 1.4 | Add database index         | Not Started | 2026-01-26 |       |
-| 1.5 | Optimize query performance | Not Started | 2026-01-26 |       |
-| 1.6 | Write tests                | Not Started | 2026-01-26 |       |
+| ID  | Description                | Status   | Updated    | Notes                           |
+|-----|----------------------------|----------|------------|---------------------------------|
+| 1.1 | Create component test      | Complete | 2026-01-28 |                                 |
+| 1.2 | Implement search use case  | Complete | 2026-01-28 |                                 |
+| 1.3 | Create query endpoint      | Complete | 2026-01-28 |                                 |
+| 1.4 | Add database index         | Complete | 2026-01-28 | Exists in v1 migration          |
+| 1.5 | Optimize query performance | Complete | 2026-01-28 | Indexed lookup + limit          |
+| 1.6 | Write tests                | Complete | 2026-01-28 | Unit + WebMvc + component tests |
 
 ## Progress Log
 
-### 2026-01-26
+### 2026-01-28
 
-- Task created in Memory Bank structure
-- Status: Pending, awaiting completion of US-CL-002
+- Completed US-CL-001 implementation and testing
+- Finalized search endpoint and result limit configuration
 
 ## Technical Details
 
@@ -106,23 +106,17 @@ com.github.jenkaby.bikerental.customer
 
 **API Endpoint:**
 
-- `GET /api/customers/search?phone={digits}`
+- `GET /api/customers?phone={digits}`
 - Query param: `phone` (4-11 digits)
-- Response: `200 OK` with array of matching customers
+- Response: `200 OK` with array of matching customers (max 10)
 - Response format: `[{ "id": "uuid", "phone": "string", "firstName": "string", "lastName": "string" }]`
 
 **Database Considerations:**
 
 - Add index: `CREATE INDEX idx_customers_phone ON customers(phone)`
 - Consider GIN index with pg_trgm for fuzzy matching
-- Query: `SELECT * FROM customers WHERE phone LIKE '%{digits}' LIMIT 50`
+- Query: `SELECT * FROM customers WHERE phone LIKE '%{digits}%' LIMIT 10`
 
 ## Known Issues
 
-None yet - task not started
-
-## References
-
-- User Story File: [docs/tasks/us/US-CL-001/us-cl-001.md](../../../docs/tasks/us/US-CL-001/us-cl-001.md)
-- Architecture: [docs/backend-architecture.md](../../../docs/backend-architecture.md)
-- Dependency: US-CL-002 should be complete for consistent customer module structure
+None

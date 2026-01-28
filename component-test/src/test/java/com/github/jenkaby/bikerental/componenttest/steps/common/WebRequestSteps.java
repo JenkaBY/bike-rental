@@ -65,7 +65,7 @@ public class WebRequestSteps {
     @When("a {httpMethod} request has been made to {string} endpoint with query parameters")
     public void requestHasBeenMadeToEndpoint(HttpMethod method,
                                              String endpoint,
-                                             @Transpose DataTable queryParams) {
+                                             DataTable queryParams) {
         requestHasBeenMadeToEndpointTimes(method, 1, endpoint, queryParams);
     }
 
@@ -130,5 +130,19 @@ public class WebRequestSteps {
                 .matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
         // Verify it can be parsed as UUID
         assertThat(UUID.fromString(value)).isNotNull();
+    }
+
+    @Then("the response list at {string} has size {int}")
+    public void theResponseListAtHasSize(String jsonPath, int expectedSize) {
+        var documentContext = JsonPath.parse(scenarioContext.getStringResponseBody());
+        java.util.List<?> actual = documentContext.read(jsonPath);
+        assertThat(actual).hasSize(expectedSize);
+    }
+
+    @Then("the response list at {string} contains values")
+    public void theResponseListAtContainsValues(String jsonPath, java.util.List<String> expectedValues) {
+        var documentContext = JsonPath.parse(scenarioContext.getStringResponseBody());
+        java.util.List<String> actual = documentContext.read(jsonPath);
+        assertThat(actual).containsAll(expectedValues);
     }
 }
