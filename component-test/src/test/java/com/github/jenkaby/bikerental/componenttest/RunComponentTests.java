@@ -31,6 +31,10 @@ public class RunComponentTests {
         @DynamicPropertySource
         static void overrideProperties(DynamicPropertyRegistry registry) {
             String activeProfiles = System.getProperty("spring.profiles.active", "");
+            String activeProfilesEnv = System.getenv("SPRING_PROFILES_ACTIVE");
+            if (activeProfilesEnv != null && !activeProfilesEnv.isBlank()) {
+                activeProfiles = activeProfiles + "," + activeProfilesEnv;
+            }
             if (activeProfiles.contains("docker")) {
 //              Assumes to run in CI/CD pipeline therefore liquibase is enabled.
                 registry.add("spring.liquibase.enabled", () -> true);
