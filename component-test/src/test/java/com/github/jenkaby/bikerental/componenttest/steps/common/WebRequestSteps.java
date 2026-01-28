@@ -5,6 +5,7 @@ import com.github.jenkaby.bikerental.componenttest.model.JsonPathExpectation;
 import com.jayway.jsonpath.JsonPath;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.Transpose;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.RequiredArgsConstructor;
@@ -13,15 +14,13 @@ import org.assertj.core.api.SoftAssertions;
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +33,29 @@ public class WebRequestSteps {
     private final ScenarioContext scenarioContext;
     @LocalServerPort
     private final int port;
+
+
+    @Given("the request body is")
+    public void theRequestBodyIs(String body) {
+        scenarioContext.setRequestBody(body);
+    }
+
+    @Given("the request header {string} is {string}")
+    public void theRequestHeaderIs(String headerName, String headerValue) {
+        scenarioContext.replaceHeader(headerName, headerValue);
+    }
+
+    @Given("the {string} header is set to {string}")
+    public void theHeaderIsSetTo(String headerName, String headerValue) {
+        log.info("Setting header '{}' to '{}'", headerName, headerValue);
+        scenarioContext.replaceHeader(headerName, headerValue);
+    }
+
+    @Given("the {string} header is removed")
+    public void theHeaderIsRemoved(String headerName, String headerValue) {
+        log.info("Removing header '{}'", headerName);
+        scenarioContext.removeHeader(headerName);
+    }
 
     @When("a {httpMethod} request has been made to {string} endpoint")
     public void requestHasBeenMadeToEndpoint(HttpMethod method, String endpoint) {
@@ -60,6 +82,7 @@ public class WebRequestSteps {
                 .orElse(Map.of())
                 .forEach(uriBuilder::queryParam);
         var uri = uriBuilder.build().toUri();
+
         var response = IntStream.range(0, times).mapToObj(i -> restClient.exchange(uri, method, request, String.class))
                 .peek(resp -> log.info("Response : {}", resp))
                 .toList().getLast();
@@ -81,8 +104,31 @@ public class WebRequestSteps {
         expectations.forEach(exp -> {
             var jsonPath = JsonPath.compile(exp.path());
             Object actual = documentContext.read(jsonPath);
-            softly.assertThat(actual).isEqualTo(exp.value());
+            var expected = "null".equals(exp.value()) ? null : exp.value();
+            softly.assertThat(actual).isEqualTo(expected);
         });
         softly.assertAll();
+    }
+
+    @Given("a prepared payload is")
+    public void aPreparedPayloadIs(String payload) {
+        acceptJsonPayload();
+        scenarioContext.setRequestBody(payload);
+    }
+
+    private void acceptJsonPayload() {
+        scenarioContext.replaceHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        scenarioContext.replaceHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+    }
+
+    @Then("the response contains a UUID at {string}")
+    public void theResponseContainsUuidAt(String jsonPath) {
+        var documentContext = JsonPath.parse(scenarioContext.getStringResponseBody());
+        String value = documentContext.read(jsonPath);
+        assertThat(value)
+                .as("Value at %s should be a valid UUID", jsonPath)
+                .matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+        // Verify it can be parsed as UUID
+        assertThat(UUID.fromString(value)).isNotNull();
     }
 }
