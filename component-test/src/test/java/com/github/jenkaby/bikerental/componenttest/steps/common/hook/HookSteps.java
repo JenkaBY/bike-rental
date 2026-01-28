@@ -1,8 +1,6 @@
 package com.github.jenkaby.bikerental.componenttest.steps.common.hook;
 
 
-import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import io.cucumber.java.After;
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.BeforeAll;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +14,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class HookSteps {
 
-    private final ScenarioContext scenarioContext;
-
     @BeforeAll
     public static void setUp() {
         speedUpAwaitility();
@@ -28,11 +24,6 @@ public class HookSteps {
         resetAwaitility();
     }
 
-    @After
-    public void clearScenarioResources() {
-        log.info("Clearing scenario resources...");
-        scenarioContext.clearHeaders();
-    }
 
     private static void speedUpAwaitility() {
         Awaitility.setDefaultTimeout(1, TimeUnit.SECONDS);
