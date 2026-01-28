@@ -21,4 +21,10 @@ public class CustomerDbSteps {
 
         log.debug("Customer created in database with ID: {}", saved);
     }
+
+    @Given("customers exist in the database with the following data")
+    public void customersExistInTheDatabaseWithTheFollowingData(java.util.List<CustomerJpaEntity> customers) {
+        log.info("Creating customers in database: {}", customers);
+        customerJpaRepository.saveAll(customers);
+    }
 }
