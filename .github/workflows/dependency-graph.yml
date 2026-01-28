@@ -1,0 +1,38 @@
+name: Dependency Graph Submission
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+concurrency:
+  group: dependency-graph-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write  # Required for dependency graph submission
+
+env:
+  #  optimized args for CI environment
+  GRADLE_ARGS: "--no-daemon --console=plain --stacktrace"
+
+jobs:
+  dependency-submission:
+    name: "Submit Dependency Graph"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: 'corretto'
+          cache: 'gradle'  # Enable Gradle dependency caching
+
+      - name: Generate and submit dependency graph
+        uses: gradle/gradle-build-action@v3
+        with:
+          dependency-graph: generate-and-submit
