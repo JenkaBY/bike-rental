@@ -61,9 +61,13 @@ dependencies {
 
     testImplementation libs.bundles.spring.test
     testImplementation libs.bundles.spring.modulith.test
+    testImplementation libs.archunit.junit5
 
     testRuntimeOnly libs.junit.platform.launcher
     testRuntimeOnly libs.h2.database
+
+    testCompileOnly libs.lombok
+    testAnnotationProcessor libs.lombok
 }
 
 tasks.named('test') {

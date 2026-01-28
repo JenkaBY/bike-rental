@@ -7,6 +7,7 @@ cucumber="7.33.0"
 testcontainers = "2.0.3"
 map-struct = '1.6.3'
 springdoc = '3.0.1'
+archunit = '1.4.1'
 java = "21"
 
 [libraries]
@@ -64,6 +65,7 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 
 mockito-core = { module = "org.mockito:mockito-core" }
 h2-database = { module = "com.h2database:h2" }
+archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
