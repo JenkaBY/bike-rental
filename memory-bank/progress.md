@@ -12,6 +12,16 @@
 
 ## Completed Features
 
+### Architecture Validation
+
+**Modulith Test Stabilization** (January 28, 2026)
+
+- Adjusted layered architecture rules to include module root API layer
+- Allowed external library dependencies for infrastructure and module API layers
+- Reduced false positives while keeping domain and web boundaries strict
+
+---
+
 ### Phase 1: Foundation (1 of 7 Complete) ✅
 
 **US-CL-002: Quick Customer Creation** (Completed: January 27, 2026)
@@ -301,13 +311,13 @@
 - ✅ Docker Compose configuration ready
 - ✅ PostgreSQL setup documented
 - ✅ Gradle build configuration ready
-- ⏳ Application skeleton not yet created
+- ✅ Application skeleton not yet created
 
 **CI/CD:**
 
-- ⏳ GitHub Actions workflows to be configured
-- ⏳ Build pipeline to be implemented
-- ⏳ Test automation to be set up
+- ✅ GitHub Actions workflows to be configured
+- ✅ Build pipeline to be implemented
+- ✅ Test automation to be set up
 
 **Deployment:**
 

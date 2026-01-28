@@ -50,6 +50,16 @@ successful completion of US-CL-002.
 
 ## Recent Changes
 
+### Completed (January 28, 2026)
+
+**1. Modulith Architecture Tests Stabilized**
+
+- Updated `ModulithBoundariesTest` layered architecture rules to reflect module root API layer usage
+- Ignored external library dependencies (Spring, MapStruct, Lombok, JDK) for infrastructure and module API layers
+- Reduced false positives in hexagonal architecture checks while preserving domain and web boundaries
+
+---
+
 ### Completed (January 27, 2026)
 
 **1. US-CL-002: Quick Customer Creation** ✅ COMPLETED
