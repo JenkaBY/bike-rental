@@ -3,10 +3,10 @@
 ## Project Overview
 
 **Project:** BikeRental Equipment Rental Management System  
-**Status:** 🚀 Active Implementation | Two User Stories Complete  
+**Status:** 🚀 Active Implementation | Three User Stories Complete  
 **Phase:** Phase 1 - Foundation (In Progress)  
-**Date:** January 28, 2026  
-**Overall Completion:** ~5% Implementation (2 of 43 user stories complete) | 100% Documentation
+**Date:** January 29, 2026  
+**Overall Completion:** ~7% Implementation (3 of 43 user stories complete) | 100% Documentation
 
 ---
 
@@ -22,7 +22,7 @@
 
 ---
 
-### Phase 1: Foundation (2 of 7 Complete) ✅
+### Phase 1: Foundation (3 of 7 Complete) ✅
 
 **US-CL-001: Customer Search by Phone** (Completed: January 28, 2026)
 
@@ -40,6 +40,65 @@
 - ✅ Unit tests for search normalization, limit handling, and mapping
 - ✅ WebMvc tests for valid, invalid, blank, and missing phone parameters
 - ✅ Component test for search behavior and result limit
+
+---
+
+**US-CL-003: Full Customer Profile Management** (Completed: January 29, 2026)
+
+**Module:** customer  
+**Effort:** 1 day (Jan 29, 2026)
+
+**Implementation Delivered:**
+
+- ✅ PUT /api/customers/{id} endpoint for full profile updates
+- ✅ Extended Customer domain model with comments field
+- ✅ UpdateCustomerService with duplicate phone and existence validation
+- ✅ Unified CustomerRequest DTO for POST and PUT operations
+- ✅ Database migration for comments column
+
+**Mapper Refactoring (Major Improvement):**
+
+- ✅ Created shared VO mappers: PhoneNumberMapper, EmailAddressMapper
+- ✅ Refactored 5 mappers to use shared VO mappers (DRY principle)
+- ✅ MapStruct auto-generation for UpdateCustomerCommand mapping
+- ✅ Reduced code duplication and improved maintainability
+
+**Testing Delivered:**
+
+- ✅ 11 Unit tests - UpdateCustomerService (success, validation, edge cases)
+- ✅ 15 WebMvc tests - PUT endpoint validation and error scenarios
+- ✅ Component tests - Consolidated BDD feature with CustomerResponseTransformer
+- ✅ **Total: 26 new tests** + enhanced existing tests
+- ✅ Test-to-code ratio: 2.25:1
+
+**Additional Improvements:**
+
+- ✅ Added @Email validation annotation to DTO
+- ✅ Added controller logging for all endpoints ([POST], [PUT], [GET] format)
+- ✅ Updated CreateCustomerServiceTest with new dependencies
+- ✅ Email format validation tests (6 invalid formats) for POST and PUT
+
+**Features:**
+
+- Full profile update with all fields
+- Phone uniqueness validation (allows same customer, blocks duplicates)
+- Optional fields: email, birthDate, comments
+- Immutable createdAt field protection
+- Proper HTTP status codes (200 OK, 404 Not Found, 409 Conflict, 400 Bad Request)
+
+**Code Quality:**
+
+- Zero compilation errors
+- Follows hexagonal architecture
+- Shared VO mappers for consistency
+- MapStruct best practices
+- Comprehensive test coverage
+
+**Technical Metrics:**
+
+- Implementation: ~400 lines
+- Tests: ~900 lines
+- Subtasks completed: 11/11
 
 ---
 
@@ -158,30 +217,31 @@
 
 **Recently Completed:**
 
+- ✅ US-CL-003: Full Customer Profile Management (January 29, 2026)
 - ✅ US-CL-001: Customer Search by Phone (January 28, 2026)
 - ✅ US-CL-002: Quick Customer Creation (January 27, 2026)
 
 **Next to Start:**
 
-- US-CL-003: Full Customer Profile (Phase 1 foundation)
+- US-CL-004: Customer Rental History (Phase 1 foundation)
+- US-CL-005: Customer Statistics (Phase 1 foundation)
 - US-EQ-001: Equipment Catalog (Phase 1 foundation)
 
 ---
 
 ## Planned Features
 
-### Phase 1: Foundation (2 of 7 Complete - 29% Done)
+### Phase 1: Foundation (3 of 7 Complete - 43% Done)
 
 **Priority: CRITICAL** - Must complete before other phases
 
 - [x] US-CL-001: Customer Search by Phone (core operation) ✅ **COMPLETED**
 - [x] US-CL-002: Quick Customer Creation (core operation) ✅ **COMPLETED**
-- [ ] US-CL-003: Full Customer Profile (customer management)
+- [x] US-CL-003: Full Customer Profile (customer management) ✅ **COMPLETED**
 - [ ] US-EQ-001: Equipment Catalog (core operation)
 - [ ] US-TR-001: Tariff Catalog (pricing foundation)
 - [ ] US-FN-001: Payment Acceptance (financial foundation)
 - [ ] US-AD-001: User Management (authentication foundation)
-- [ ] US-AD-006: Backup and Restore (data protection)
 
 **Dependencies:** None (foundation layer)  
 **Estimated Duration:** 2-4 weeks  

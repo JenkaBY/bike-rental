@@ -2,13 +2,14 @@
 spring-boot = "4.0.2"
 spring-dependency-management = "1.1.7"
 spring-modulith = "2.0.2"
-junit="6.0.2"
-cucumber="7.33.0"
+junit = "6.0.2"
+cucumber = "7.33.0"
 testcontainers = "2.0.3"
 map-struct = '1.6.3'
 springdoc = '3.0.1'
 archunit = '1.4.1'
 java = "21"
+uuidV7Generator = '6.1.1'
 
 [libraries]
 # BOMs
@@ -41,6 +42,8 @@ spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools
 spring-boot-configuration-processor = { module = "org.springframework.boot:spring-boot-configuration-processor" }
 
 postgresql = { module = "org.postgresql:postgresql" }
+
+uuid-v7-generator = { module = "com.github.f4b6a3:uuid-creator", version.ref = 'uuidV7Generator' }
 
 # Test libs
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }

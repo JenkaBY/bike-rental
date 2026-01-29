@@ -18,4 +18,5 @@ public class Customer {
     private final String lastName;
     private final EmailAddress email;
     private final LocalDate birthDate;
+    private final String comments;
 }

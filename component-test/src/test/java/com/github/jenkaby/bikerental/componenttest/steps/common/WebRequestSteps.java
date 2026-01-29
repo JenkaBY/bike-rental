@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.common;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.componenttest.model.JsonPathExpectation;
+import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
 import com.jayway.jsonpath.JsonPath;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.Transpose;
@@ -57,13 +58,27 @@ public class WebRequestSteps {
         scenarioContext.removeHeader(headerName);
     }
 
+    @When("a {httpMethod} request has been made to {string} endpoint with")
+    public void requestHasBeenMadeToEndpointWith(HttpMethod method, String endpoint, @Transpose DataTable dataTable) {
+        Map<String, String> pathParams = dataTable.asMap();
+        for (String token : pathParams.keySet()) {
+            if (!endpoint.contains(token)) {
+                throw new IllegalArgumentException("Endpoint " + endpoint + " must contain token " + token + " to be replaced. Whether remove token from table or add it to endpoint.");
+            }
+            var alias = pathParams.get(token);
+            var partialPath = Optional.ofNullable(Aliases.getValue(alias)).orElse(alias);
+            endpoint = endpoint.replace(token, partialPath);
+        }
+        requestHasBeenMadeToEndpointTimes(method, 1, endpoint, null);
+    }
+
     @When("a {httpMethod} request has been made to {string} endpoint")
     public void requestHasBeenMadeToEndpoint(HttpMethod method, String endpoint) {
         requestHasBeenMadeToEndpointTimes(method, 1, endpoint, null);
     }
 
     @When("a {httpMethod} request has been made to {string} endpoint with query parameters")
-    public void requestHasBeenMadeToEndpoint(HttpMethod method,
+    public void requestHasBeenMadeToEndpointWithQueryParams(HttpMethod method,
                                              String endpoint,
                                              DataTable queryParams) {
         requestHasBeenMadeToEndpointTimes(method, 1, endpoint, queryParams);
@@ -105,7 +120,7 @@ public class WebRequestSteps {
             var jsonPath = JsonPath.compile(exp.path());
             Object actual = documentContext.read(jsonPath);
             var expected = "null".equals(exp.value()) ? null : exp.value();
-            softly.assertThat(actual).isEqualTo(expected);
+            softly.assertThat(actual).as("For actual %s", scenarioContext.getStringResponseBody()).isEqualTo(expected);
         });
         softly.assertAll();
     }

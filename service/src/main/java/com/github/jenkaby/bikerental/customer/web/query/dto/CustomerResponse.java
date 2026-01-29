@@ -9,6 +9,7 @@ public record CustomerResponse(
         String firstName,
         String lastName,
         String email,
-        LocalDate birthDate
+        LocalDate birthDate,
+        String comments
 ) {
 }

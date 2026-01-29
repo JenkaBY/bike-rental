@@ -10,9 +10,12 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 <!-- No tasks in progress currently -->
 
+## Pending - Technical Improvements
+
+- [TECH-001] Custom UUID Generator for Hibernate Entity IDs - Medium priority, shared module, performance improvement
+
 ## Pending - Phase 1: Foundation (Core Stories)
 
-- [US-CL-003] Полное создание/редактирование профиля клиента - High priority, customer module
 - [US-EQ-001] Справочник оборудования - High priority, equipment module
 - [US-TR-001] Справочник тарифов - High priority, tariff module
 - [US-FN-001] Прием оплаты - High priority, finance module
@@ -20,6 +23,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 - [US-AD-006] Резервное копирование и восстановление - Low priority, admin module
 
 ## Pending - Phase 2: Basic Module Functions
+
+- [US-CL-006] Customer Profile Change Audit Trail - Medium priority, customer module, depends on US-CL-003
 
 - [US-EQ-002] Добавление оборудования по порядковому номеру - Depends on US-EQ-001
 - [US-EQ-004] Управление статусами оборудования - Depends on US-EQ-001
@@ -82,6 +87,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [US-CL-003] Полное создание/редактирование профиля клиента - Completed on 2026-01-29 (PUT endpoint + mapper
+  refactoring + 26 tests: 11 unit UpdateCustomerService, 15 WebMvc PUT, component tests)
 - [US-CL-001] Поиск клиента по номеру телефона - Completed on 2026-01-28 (Implementation + unit, WebMvc, component
   tests)
 - [US-CL-002] Быстрое создание клиента - Completed on 2026-01-27 (Implementation + 83+ tests: 68 unit, 15 WebMvc,

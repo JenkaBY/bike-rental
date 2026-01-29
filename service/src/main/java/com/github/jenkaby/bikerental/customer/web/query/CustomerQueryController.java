@@ -33,7 +33,9 @@ class CustomerQueryController {
             @RequestParam("phone")
             @Pattern(regexp = "^\\d{4,11}$", message = "Phone search must be 4 to 11 digits")
             String phone) {
+        log.info("[GET] Searching customers by phone: {}", phone);
         var results = customerQueryUseCase.searchByPhone(phone);
+        log.info("[GET] Found {} customers matching phone: {}", results.size(), phone);
         return ResponseEntity.ok(mapper.toSearchResponses(results));
     }
 }

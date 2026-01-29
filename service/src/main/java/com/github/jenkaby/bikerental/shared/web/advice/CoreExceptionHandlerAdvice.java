@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -37,6 +38,13 @@ public class CoreExceptionHandlerAdvice {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ProblemDetail> handleError(MethodArgumentTypeMismatchException ex) {
+        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        log.warn("Bad request for MethodArgumentTypeMismatchException: {}", body);
+        return ResponseEntity.of(body)
+                .build();
+    }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
     ResponseEntity<ProblemDetail> handleError(HandlerMethodValidationException ex) {
