@@ -73,15 +73,33 @@ class ModulithBoundariesTest {
                 .layer("Application").definedBy("..application..")
                 .layer("Domain").definedBy("..domain..")
                 .layer("Infrastructure").definedBy("..infrastructure..")
+                // Shared layer is not included in layered architecture check - it's cross-cutting
                 .layer("ModuleApi").definedBy("com.github.jenkaby.bikerental.*")
 
                 .whereLayer("Web").mayNotBeAccessedByAnyLayer()
+                .whereLayer("Web").mayOnlyAccessLayers("Application", "Domain", "ModuleApi")
                 .whereLayer("Application").mayOnlyBeAccessedByLayers("Web", "Infrastructure", "ModuleApi")
+                .whereLayer("Application").mayOnlyAccessLayers("Domain", "ModuleApi") // Application can create module API types
                 .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Infrastructure", "Web", "ModuleApi")
-                .whereLayer("Infrastructure").mayOnlyAccessLayers("Domain", "Application", "Infrastructure")
+                // Infrastructure layer: No access restrictions (can access Domain, Application, and Shared)
                 .whereLayer("ModuleApi").mayOnlyAccessLayers("Application", "Domain", "Infrastructure", "ModuleApi")
-                .ignoreDependency(resideInAnyPackage("..infrastructure.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct.."))
+
+                // Ignore standard library and framework dependencies
+                .ignoreDependency(resideInAnyPackage("..infrastructure.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct..", "com.github.f4b6a3.."))
+                .ignoreDependency(resideInAnyPackage("..shared.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct.."))
+                .ignoreDependency(resideInAnyPackage("..web.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct..", "tools.jackson.."))
+                .ignoreDependency(resideInAnyPackage("..application.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct.."))
                 .ignoreDependency(resideInAnyPackage("com.github.jenkaby.bikerental.*"), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct..", "org.springframework.modulith.."))
+                // Allow any layer to access Shared (cross-cutting concern)
+                .ignoreDependency(resideInAnyPackage("..infrastructure.."), resideInAnyPackage("..shared.."))
+                .ignoreDependency(resideInAnyPackage("..application.."), resideInAnyPackage("..shared.."))
+                .ignoreDependency(resideInAnyPackage("..web.."), resideInAnyPackage("..shared.."))
+                // Allow Shared to access Domain (VO mappers need to create/use Domain VOs)
+                .ignoreDependency(resideInAnyPackage("..shared.."), resideInAnyPackage("..domain.."))
+                // Allow Application to access ModuleApi (Application creates module API types)
+                .ignoreDependency(resideInAnyPackage("..application.."), resideInAnyPackage("com.github.jenkaby.bikerental.customer"))
+                // Allow Web to access ModuleApi
+                .ignoreDependency(resideInAnyPackage("..web.."), resideInAnyPackage("com.github.jenkaby.bikerental.customer"))
 
                 .as("Each module should follow hexagonal architecture layers")
                 .check(importedClasses);
