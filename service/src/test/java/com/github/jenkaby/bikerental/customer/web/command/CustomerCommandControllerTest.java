@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.customer.web.command;
 
 import com.github.jenkaby.bikerental.customer.application.usecase.CreateCustomerUseCase;
 import com.github.jenkaby.bikerental.customer.domain.model.Customer;
-import com.github.jenkaby.bikerental.customer.web.command.dto.CreateCustomerRequest;
+import com.github.jenkaby.bikerental.customer.web.command.dto.CustomerRequest;
 import com.github.jenkaby.bikerental.customer.web.command.mapper.CustomerCommandMapper;
 import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerResponse;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
@@ -53,7 +53,7 @@ class CustomerCommandControllerTest {
 
             @Test
             void whenRequestContainsAllValidFields() throws Exception {
-                CreateCustomerRequest request = createValidRequest();
+                CustomerRequest request = createValidRequest();
 
                 configureMapperDefaults();
                 given(createCustomerUseCase.execute(any(CreateCustomerUseCase.CreateCustomerCommand.class)))
@@ -75,7 +75,7 @@ class CustomerCommandControllerTest {
                     "'+15551234567'"
             })
             void whenPhoneHasVariousFormats(String inputPhone) throws Exception {
-                CreateCustomerRequest request = createValidRequestWithRequiredFields(inputPhone);
+                CustomerRequest request = createValidRequestWithRequiredFields(inputPhone);
 
                 configureMapperDefaults();
                 given(createCustomerUseCase.execute(any(CreateCustomerUseCase.CreateCustomerCommand.class)))
@@ -97,7 +97,7 @@ class CustomerCommandControllerTest {
             @ValueSource(strings = {"   ", "\t"})
             @NullAndEmptySource
             void whenPhoneIsBlank(String phone) throws Exception {
-                CreateCustomerRequest request = createValidRequestWithRequiredFields(phone);
+                CustomerRequest request = createValidRequestWithRequiredFields(phone);
 
                 mockMvc.perform(post("/api/customers")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -112,10 +112,11 @@ class CustomerCommandControllerTest {
             @ParameterizedTest
             @ValueSource(strings = {"invalid-phone", "abc", "@@##$$", "phone number", "+1.555.123.4567"})
             void whenPhoneFormatIsInvalid(String phone) throws Exception {
-                CreateCustomerRequest request = new CreateCustomerRequest(
+                CustomerRequest request = new CustomerRequest(
                         phone,
                         "John",
                         "Doe",
+                        null,
                         null,
                         null
                 );
@@ -134,10 +135,11 @@ class CustomerCommandControllerTest {
             @ValueSource(strings = {"   ", "\t"})
             @NullAndEmptySource
             void whenFirstNameIsBlank(String firstName) throws Exception {
-                CreateCustomerRequest request = new CreateCustomerRequest(
+                CustomerRequest request = new CustomerRequest(
                         "+79998887766",
                         firstName,
                         "Doe",
+                        null,
                         null,
                         null
                 );
@@ -156,10 +158,11 @@ class CustomerCommandControllerTest {
             @ValueSource(strings = {"   ", "\t"})
             @NullAndEmptySource
             void whenLastNameIsBlank(String lastName) throws Exception {
-                CreateCustomerRequest request = new CreateCustomerRequest(
+                CustomerRequest request = new CustomerRequest(
                         "+79998887766",
                         "John",
                         lastName,
+                        null,
                         null,
                         null
                 );
@@ -176,12 +179,13 @@ class CustomerCommandControllerTest {
 
             @Test
             void whenBirthDateIsInFuture() throws Exception {
-                CreateCustomerRequest request = new CreateCustomerRequest(
+                CustomerRequest request = new CustomerRequest(
                         "+79998887766",
                         "John",
                         "Doe",
                         null,
-                        LocalDate.now().plusDays(1)
+                        LocalDate.now().plusDays(1),
+                        null
                 );
 
                 mockMvc.perform(post("/api/customers")
@@ -236,28 +240,30 @@ class CustomerCommandControllerTest {
             }
         }
 
-        private static @NonNull CreateCustomerRequest createValidRequestWithRequiredFields(String phone) {
-            return new CreateCustomerRequest(
+        private static @NonNull CustomerRequest createValidRequestWithRequiredFields(String phone) {
+            return new CustomerRequest(
                     phone,
                     "Jane",
                     "Smith",
+                    null,
                     null,
                     null
             );
         }
 
-        private static @NonNull CreateCustomerRequest createValidRequest() {
-            return new CreateCustomerRequest(
+        private static @NonNull CustomerRequest createValidRequest() {
+            return new CustomerRequest(
                     "+7 (999) 888-77-66",
                     "John",
                     "Doe",
                     "john.doe@example.com",
-                    LocalDate.of(1990, 1, 15)
+                    LocalDate.of(1990, 1, 15),
+                    null
             );
         }
 
         private void configureMapperDefaults() {
-            given(mapper.toCreateCommand(any(CreateCustomerRequest.class)))
+            given(mapper.toCommand(any(CustomerRequest.class)))
                     .willReturn(mock(CreateCustomerUseCase.CreateCustomerCommand.class));
             given(mapper.toResponse(any(Customer.class)))
                     .willReturn(mock(CustomerResponse.class));

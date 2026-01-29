@@ -4,7 +4,7 @@ import com.github.jenkaby.bikerental.customer.application.usecase.CreateCustomer
 import com.github.jenkaby.bikerental.customer.domain.model.Customer;
 import com.github.jenkaby.bikerental.customer.domain.model.vo.EmailAddress;
 import com.github.jenkaby.bikerental.customer.domain.model.vo.PhoneNumber;
-import com.github.jenkaby.bikerental.customer.web.command.dto.CreateCustomerRequest;
+import com.github.jenkaby.bikerental.customer.web.command.dto.CustomerRequest;
 import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
@@ -12,7 +12,7 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CustomerCommandMapper {
 
-    CreateCustomerUseCase.CreateCustomerCommand toCreateCommand(CreateCustomerRequest request);
+    CreateCustomerUseCase.CreateCustomerCommand toCommand(CustomerRequest request);
 
     CustomerResponse toResponse(Customer customer);
 

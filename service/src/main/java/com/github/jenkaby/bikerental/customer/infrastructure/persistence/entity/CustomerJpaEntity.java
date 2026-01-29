@@ -1,15 +1,14 @@
 package com.github.jenkaby.bikerental.customer.infrastructure.persistence.entity;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
+@ToString
 @Getter
 @Setter
 @AllArgsConstructor
@@ -19,7 +18,6 @@ import java.util.UUID;
 public class CustomerJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, unique = true, length = 20)
@@ -39,4 +37,11 @@ public class CustomerJpaEntity {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
+
+    @PrePersist
+    public void prePersist() {
+        if (this.id == null) {
+            this.id = UuidCreator.getTimeOrderedEpoch();
+        }
+    }
 }

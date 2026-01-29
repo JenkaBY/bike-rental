@@ -27,6 +27,7 @@
             </column>
             <column name="email" type="VARCHAR(255)"/>
             <column name="birth_date" type="DATE"/>
+            <column name="comments" type="TEXT"/>
             <column name="created_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>

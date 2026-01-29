@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
 
-public record CreateCustomerRequest(
+public record CustomerRequest(
         @NotBlank(message = "Phone is required")
         @Pattern(regexp = "^\\+?[0-9\\-\\s()]+$", message = "Phone format is invalid")
         String phone,
@@ -20,6 +20,8 @@ public record CreateCustomerRequest(
         String email,
 
         @Past(message = "Birth date must be in the past")
-        LocalDate birthDate
+        LocalDate birthDate,
+
+        String comments
 ) {
 }

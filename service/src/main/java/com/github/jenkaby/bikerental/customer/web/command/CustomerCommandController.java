@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.customer.web.command;
 
 import com.github.jenkaby.bikerental.customer.application.usecase.CreateCustomerUseCase;
 import com.github.jenkaby.bikerental.customer.domain.model.Customer;
-import com.github.jenkaby.bikerental.customer.web.command.dto.CreateCustomerRequest;
+import com.github.jenkaby.bikerental.customer.web.command.dto.CustomerRequest;
 import com.github.jenkaby.bikerental.customer.web.command.mapper.CustomerCommandMapper;
 import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerResponse;
 import jakarta.validation.Valid;
@@ -28,8 +28,8 @@ class CustomerCommandController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CreateCustomerRequest request) {
-        var command = mapper.toCreateCommand(request);
+    public ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CustomerRequest request) {
+        var command = mapper.toCommand(request);
         Customer customer = createCustomerUseCase.execute(command);
         var response = mapper.toResponse(customer);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

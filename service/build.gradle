@@ -50,6 +50,7 @@ dependencies {
     implementation libs.bundles.spring.modulith
 
     implementation libs.mapstruct
+    implementation libs.uuid.v7.generator
 
     compileOnly libs.lombok
     developmentOnly libs.spring.boot.devtools
