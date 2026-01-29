@@ -1,30 +1,24 @@
 package com.github.jenkaby.bikerental.componenttest.steps.customer;
 
+import com.github.jenkaby.bikerental.componenttest.config.db.repository.InsertableCustomerRepository;
 import com.github.jenkaby.bikerental.customer.infrastructure.persistence.entity.CustomerJpaEntity;
-import com.github.jenkaby.bikerental.customer.infrastructure.persistence.repository.CustomerJpaRepository;
 import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 
 @Slf4j
 @RequiredArgsConstructor
 public class CustomerDbSteps {
 
-    private final CustomerJpaRepository customerJpaRepository;
+    private final InsertableCustomerRepository customerJpaRepository;
 
-    @Given("a customer exists in the database with the following data")
-    public void aCustomerExistsInTheDatabaseWithTheFollowingData(CustomerJpaEntity customer) {
-        log.info("Creating customer in database: {}", customer);
+    @Given("(a )customer(s) exist(s) in the database with the following data")
+    public void aCustomerExistsInTheDatabaseWithTheFollowingData(List<CustomerJpaEntity> customers) {
+        log.info("Creating customer in database: {}", customers);
 
-        var saved = customerJpaRepository.save(customer);
-
-        log.debug("Customer created in database with ID: {}", saved);
-    }
-
-    @Given("customers exist in the database with the following data")
-    public void customersExistInTheDatabaseWithTheFollowingData(java.util.List<CustomerJpaEntity> customers) {
-        log.info("Creating customers in database: {}", customers);
-        customerJpaRepository.saveAll(customers);
+        customerJpaRepository.insertAll(customers);
     }
 }
