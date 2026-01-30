@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.componenttest.context;
 
 
 import com.github.jenkaby.bikerental.componenttest.config.WebConfig;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import io.cucumber.spring.ScenarioScope;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
+import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.type.CollectionType;
 
@@ -28,6 +30,7 @@ public class ScenarioContext {
     private final Map<String, List<String>> requestHeaders = new HashMap<>();
     private ResponseEntity<String> response;
     private Object requestBody;
+    private String modifiedObjectId;
 
     @SneakyThrows
     public <T> T getResponseBody(Class<T> clazz) {
@@ -38,6 +41,12 @@ public class ScenarioContext {
     public <T> List<T> getResponseAsList(Class<T> clazz) {
         CollectionType collectionType = mapper.getTypeFactory().constructCollectionType(List.class, clazz);
         return mapper.readValue(response.getBody(), collectionType);
+    }
+
+    @SneakyThrows
+    public <T> Page<T> getResponseAsPage(Class<T> clazz) {
+        JavaType type = mapper.getTypeFactory().constructParametricType(Page.class, clazz);
+        return mapper.readValue(response.getBody(), type);
     }
 
     public String getStringResponseBody() {

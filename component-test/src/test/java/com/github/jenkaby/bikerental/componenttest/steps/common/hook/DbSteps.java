@@ -14,10 +14,11 @@ import java.util.List;
 public class DbSteps {
 
     private static final List<String> TABLE_TO_TRUNCATE = List.of(
+//            order is important due to foreign key constraints
             "customers",
+            "equipments",
             "equipment_statuses",
-            "equipment_types",
-            "equipments"
+            "equipment_types"
     );
 
     private final JdbcClient jdbcClient;

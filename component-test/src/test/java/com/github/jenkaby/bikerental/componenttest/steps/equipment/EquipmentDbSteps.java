@@ -30,6 +30,7 @@ public class EquipmentDbSteps {
 
     @Given("the following equipment record(s) exist(s) in db")
     public void theFollowingEquipmentExists(List<EquipmentJpaEntity> entities) {
+        log.info("Inserting equipments: {}", entities);
         insertRepository.insertAll(entities);
     }
 
@@ -56,33 +57,33 @@ public class EquipmentDbSteps {
                     var softly = new SoftAssertions();
                     if (exp.getId() != null) {
                         softly.assertThat(actual.getId())
-                                .as("Id should match for serialNumber: %s", exp.getSerialNumber())
+                                .as("Id should match for serialNumberValue: %s", exp.getSerialNumber())
                                 .isEqualTo(exp.getId());
                     } else {
                         softly.assertThat(actual.getId())
-                                .as("Id should not be null for serialNumber: %s", exp.getSerialNumber())
+                                .as("Id should not be null for serialNumberValue: %s", exp.getSerialNumber())
                                 .isNotNull();
                     }
                     softly.assertThat(actual.getSerialNumber())
                             .as("Serial number should match")
                             .isEqualTo(exp.getSerialNumber());
                     softly.assertThat(actual.getUid())
-                            .as("UID should match for serialNumber: %s", exp.getSerialNumber())
+                            .as("UID should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getUid());
                     softly.assertThat(actual.getStatusSlug())
-                            .as("Status slug should match for serialNumber: %s", exp.getSerialNumber())
+                            .as("Status slug should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getStatusSlug());
-                    softly.assertThat(actual.getEquipmentTypeSlug())
-                            .as("Equipment type slug should match for serialNumber: %s", exp.getSerialNumber())
-                            .isEqualTo(exp.getEquipmentTypeSlug());
+                    softly.assertThat(actual.getTypeSlug())
+                            .as("Equipment type slug should match for serialNumberValue: %s", exp.getSerialNumber())
+                            .isEqualTo(exp.getTypeSlug());
                     softly.assertThat(actual.getModel())
-                            .as("Model should match for serialNumber: %s", exp.getSerialNumber())
+                            .as("Model should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getModel());
                     softly.assertThat(actual.getCommissionedAt())
-                            .as("Commissioned date should match for serialNumber: %s", exp.getSerialNumber())
+                            .as("Commissioned date should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getCommissionedAt());
                     softly.assertThat(actual.getCondition())
-                            .as("Condition should match for serialNumber: %s", exp.getSerialNumber())
+                            .as("Condition should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getCondition());
                     softly.assertAll();
                 });

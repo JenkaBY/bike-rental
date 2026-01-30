@@ -10,6 +10,7 @@ Feature: Equipment management endpoints
       | BROKEN      | Broken      | Not Ready to rent |
       | AVAILABLE   | Available   | Ready to rent     |
       | MAINTENANCE | Maintenance | null              |
+      | RENTED      | Rented      | In use already    |
     And the following equipment types exist in the database
       | slug    | name    | description |
       | bicycle | Bicycle | Two-wheeled |
@@ -19,7 +20,7 @@ Feature: Equipment management endpoints
       | 1  | EQ-001       | BIKE-001   | AVAILABLE | bicycle | Model A |                | Good      |
       | 2  | EQ-002       | E-BIKE-001 | RENTED    | scooter | Model B |                | Excellent |
       | 3  | EQ-005       | BIKE-003   | AVAILABLE | bicycle | Model C |                | Fair      |
-      | 4  | EQ-004       | BIKE-002   | BROKEN    | bicycle | Model C |                | Fair      |
+      | 4  | EQ-004       | BIKE-002   | BROKEN    | bicycle | Model C | 2026-01-30     | Fair      |
 
   Scenario Outline: Get equipment by ID
     When a GET request has been made to "/api/equipments/{id}" endpoint with

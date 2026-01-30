@@ -72,6 +72,19 @@ public class WebRequestSteps {
         requestHasBeenMadeToEndpointTimes(method, 1, endpoint, null);
     }
 
+    @When("a {httpMethod} request has been made to {string} endpoint with context")
+    public void requestHasBeenMadeToEndpointWithContext(HttpMethod method, String endpoint) {
+        var token = "{modifiedObjectId}";
+        if (!endpoint.contains("{modifiedObjectId}")) {
+            throw new IllegalArgumentException("Endpoint " + endpoint + " must contain token '" + token + "' to be replaced. Whether remove token from table or add it to endpoint.");
+        }
+        if (scenarioContext.getModifiedObjectId() == null) {
+            throw new IllegalStateException("Scenario context does not have modifiedObjectId set.");
+        }
+        endpoint = endpoint.replace(token, scenarioContext.getModifiedObjectId());
+        requestHasBeenMadeToEndpointTimes(method, 1, endpoint, null);
+    }
+
     @When("a {httpMethod} request has been made to {string} endpoint")
     public void requestHasBeenMadeToEndpoint(HttpMethod method, String endpoint) {
         requestHasBeenMadeToEndpointTimes(method, 1, endpoint, null);
@@ -80,7 +93,7 @@ public class WebRequestSteps {
     @When("a {httpMethod} request has been made to {string} endpoint with query parameters")
     public void requestHasBeenMadeToEndpointWithQueryParams(HttpMethod method,
                                                             String endpoint,
-                                                            DataTable queryParams) {
+                                                            @Transpose DataTable queryParams) {
         requestHasBeenMadeToEndpointTimes(method, 1, endpoint, queryParams);
     }
 
@@ -150,7 +163,7 @@ public class WebRequestSteps {
     @Then("the response list at {string} has size {int}")
     public void theResponseListAtHasSize(String jsonPath, int expectedSize) {
         var documentContext = JsonPath.parse(scenarioContext.getStringResponseBody());
-        java.util.List<?> actual = documentContext.read(jsonPath);
+        List<?> actual = documentContext.read(jsonPath);
         assertThat(actual).hasSize(expectedSize);
     }
 

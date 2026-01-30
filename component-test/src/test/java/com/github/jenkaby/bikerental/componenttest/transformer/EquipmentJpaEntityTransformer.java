@@ -13,7 +13,7 @@ public class EquipmentJpaEntityTransformer {
         entity.setSerialNumber(entry.get("serialNumber"));
         entity.setUid(entry.get("uid"));
         entity.setStatusSlug(entry.get("status"));
-        entity.setEquipmentTypeSlug(entry.get("type"));
+        entity.setTypeSlug(entry.get("type"));
         entity.setModel(entry.getOrDefault("model", null));
         String commissionedAtStr = entry.get("commissionedAt");
         if (commissionedAtStr != null && !commissionedAtStr.isEmpty()) {

@@ -36,8 +36,8 @@ Feature: Equipment status endpoints
 
   Scenario Outline: Update status by slug
     Given the 'equipment status' request is prepared with the following data
-      | slug   | name          | description          |
-      | <slug> | <initialName> | <initialDescription> |
+      | slug   | name   | description   |
+      | <slug> | <name> | <description> |
     When a PUT request has been made to "/api/equipment-statuses/{slug}" endpoint with
       | {slug} |
       | <slug> |
@@ -45,12 +45,12 @@ Feature: Equipment status endpoints
     And the 'equipment status' response only contains
       | slug   | name   | description   |
       | <slug> | <name> | <description> |
-    And the following equipment type records was persisted in db
+    And the following equipment status records was persisted in db
       | slug   | name   | description   |
       | <slug> | <name> | <description> |
     Examples:
-      | slug        | initialName | initialDescription | slug        | name             | description      |
-      | MAINTENANCE | Maintenance | null               | MAINTENANCE | Very Maintenance | No longer in use |
+      | slug        | name             | description      |
+      | MAINTENANCE | Very Maintenance | No longer in use |
 
 
   Scenario: Update status by slug when no status exists
@@ -60,6 +60,6 @@ Feature: Equipment status endpoints
     When a PUT request has been made to "/api/equipment-statuses/NOT_EXISTS" endpoint
     Then the response status is 404
     And the response contains
-      | path     | value     |
+      | path     | value                                                  |
       | $.title  | Not Found                                              |
       | $.detail | EquipmentStatus with identifier 'NOT_EXISTS' not found |
