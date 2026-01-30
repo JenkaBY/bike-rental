@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "equipment")
+@Table(name = "equipments")
 public class EquipmentJpaEntity {
 
     @Id
@@ -41,7 +41,7 @@ public class EquipmentJpaEntity {
     private String condition;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
 
     @Column(name = "updated_at")
     private Instant updatedAt;
