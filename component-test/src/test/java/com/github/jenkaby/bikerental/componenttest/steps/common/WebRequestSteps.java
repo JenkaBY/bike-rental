@@ -79,8 +79,8 @@ public class WebRequestSteps {
 
     @When("a {httpMethod} request has been made to {string} endpoint with query parameters")
     public void requestHasBeenMadeToEndpointWithQueryParams(HttpMethod method,
-                                             String endpoint,
-                                             DataTable queryParams) {
+                                                            String endpoint,
+                                                            DataTable queryParams) {
         requestHasBeenMadeToEndpointTimes(method, 1, endpoint, queryParams);
     }
 

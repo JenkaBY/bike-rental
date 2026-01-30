@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.type.CollectionType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +32,12 @@ public class ScenarioContext {
     @SneakyThrows
     public <T> T getResponseBody(Class<T> clazz) {
         return mapper.readValue(response.getBody(), clazz);
+    }
+
+    @SneakyThrows
+    public <T> List<T> getResponseAsList(Class<T> clazz) {
+        CollectionType collectionType = mapper.getTypeFactory().constructCollectionType(List.class, clazz);
+        return mapper.readValue(response.getBody(), collectionType);
     }
 
     public String getStringResponseBody() {
