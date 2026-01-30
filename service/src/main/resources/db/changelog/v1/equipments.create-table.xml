@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="equipments.create-table" author="bikerental">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="equipments"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="equipments">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="serial_number" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="uid" type="VARCHAR(100)">
+                <constraints unique="true"/>
+            </column>
+            <column name="type_slug" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status_slug" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="model" type="VARCHAR(200)"/>
+            <column name="commissioned_at" type="DATE"/>
+            <column name="condition" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="equipments"
+                baseColumnNames="type_slug"
+                constraintName="fk_equipment_type"
+                referencedTableName="equipment_types"
+                referencedColumnNames="slug"/>
+
+        <addForeignKeyConstraint
+                baseTableName="equipments"
+                baseColumnNames="status_slug"
+                constraintName="fk_equipment_status"
+                referencedTableName="equipment_statuses"
+                referencedColumnNames="slug"/>
+    </changeSet>
+
+</databaseChangeLog>
