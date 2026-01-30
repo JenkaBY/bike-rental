@@ -1,20 +1,20 @@
 package com.github.jenkaby.bikerental.equipment.application.service;
 
 import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentStatusCommandToDomainMapper;
-import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentStatusUseCase;
+import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentStatusUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
-import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UpdateEquipmentStatusService implements UpdateEquipmentStatusUseCase {
+public class CreateEquipmentStatusService implements CreateEquipmentStatusUseCase {
 
     private final EquipmentStatusRepository repository;
     private final EquipmentStatusCommandToDomainMapper mapper;
 
-    UpdateEquipmentStatusService(EquipmentStatusRepository repository,
+    CreateEquipmentStatusService(EquipmentStatusRepository repository,
                                  EquipmentStatusCommandToDomainMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
@@ -22,13 +22,12 @@ public class UpdateEquipmentStatusService implements UpdateEquipmentStatusUseCas
 
     @Override
     @Transactional
-    public EquipmentStatus execute(UpdateEquipmentStatusCommand command) {
-        // ensure the status exists
-        EquipmentStatus loaded = repository.findBySlug(command.slug())
-                .orElseThrow(() -> new ResourceNotFoundException(EquipmentStatus.class.getSimpleName(), command.slug()));
+    public EquipmentStatus execute(CreateEquipmentStatusCommand command) {
+        if (repository.existsBySlug(command.slug())) {
+            throw new ResourceConflictException(EquipmentStatus.class, command.slug());
+        }
 
-        EquipmentStatus updated = mapper.toEquipmentStatus(loaded.getId(), command);
-
-        return repository.save(updated);
+        EquipmentStatus entity = mapper.toEquipmentStatus(command);
+        return repository.save(entity);
     }
 }

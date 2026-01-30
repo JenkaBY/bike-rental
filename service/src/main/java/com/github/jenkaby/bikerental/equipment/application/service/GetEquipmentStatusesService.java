@@ -2,8 +2,8 @@ package com.github.jenkaby.bikerental.equipment.application.service;
 
 import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentStatusesUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,15 +11,19 @@ import java.util.Optional;
 @Service
 class GetEquipmentStatusesService implements GetEquipmentStatusesUseCase {
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<EquipmentStatus> findAll() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    private final EquipmentStatusRepository repository;
+
+    GetEquipmentStatusesService(EquipmentStatusRepository repository) {
+        this.repository = repository;
     }
 
     @Override
-    @Transactional(readOnly = true)
+    public List<EquipmentStatus> findAll() {
+        return repository.findAll();
+    }
+
+    @Override
     public Optional<EquipmentStatus> findBySlug(String slug) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return repository.findBySlug(slug);
     }
 }

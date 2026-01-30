@@ -4,11 +4,14 @@ import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipme
 import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentTypeUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentType;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface EquipmentTypeCommandToDomainMapper {
+    @Mapping(target = "id", ignore = true)
     EquipmentType toEquipmentType(CreateEquipmentTypeUseCase.CreateEquipmentTypeCommand command);
 
-    EquipmentType toEquipmentType(UpdateEquipmentTypeUseCase.UpdateEquipmentTypeCommand command);
+    @Mapping(target = "id", source = "id")
+    EquipmentType toEquipmentType(Long id, UpdateEquipmentTypeUseCase.UpdateEquipmentTypeCommand command);
 }

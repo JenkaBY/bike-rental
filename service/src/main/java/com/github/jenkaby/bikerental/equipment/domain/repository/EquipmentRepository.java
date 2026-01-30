@@ -3,8 +3,9 @@ package com.github.jenkaby.bikerental.equipment.domain.repository;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface EquipmentRepository {
@@ -16,7 +17,7 @@ public interface EquipmentRepository {
 
     Optional<Equipment> findByUid(Uid uid);
 
-    List<Equipment> findAll(Optional<String> statusSlug, Optional<String> typeSlug);
+    Page<Equipment> findAll(Optional<String> statusSlug, Optional<String> typeSlug, PageRequest pageRequest);
 
     boolean existsBySerialNumber(SerialNumber serialNumber);
 }

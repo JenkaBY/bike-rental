@@ -24,21 +24,26 @@ class EquipmentTypeRepositoryAdapter implements EquipmentTypeRepository {
 
     @Override
     public EquipmentType save(EquipmentType equipmentType) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        var jpaEntity = mapper.toEntity(equipmentType);
+        var savedEntity = jpaRepository.save(jpaEntity);
+        return mapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<EquipmentType> findBySlug(String slug) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return jpaRepository.findBySlug(slug)
+                .map(mapper::toDomain);
     }
 
     @Override
     public List<EquipmentType> findAll() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return jpaRepository.findAll().stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override
     public boolean existsBySlug(String slug) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return jpaRepository.existsBySlug(slug);
     }
 }

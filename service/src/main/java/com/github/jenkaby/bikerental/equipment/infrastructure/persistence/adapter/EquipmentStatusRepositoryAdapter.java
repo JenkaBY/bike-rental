@@ -24,21 +24,26 @@ class EquipmentStatusRepositoryAdapter implements EquipmentStatusRepository {
 
     @Override
     public EquipmentStatus save(EquipmentStatus equipmentStatus) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        var entity = mapper.toEntity(equipmentStatus);
+        var savedEntity = jpaRepository.save(entity);
+        return mapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<EquipmentStatus> findBySlug(String slug) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return jpaRepository.findBySlug(slug)
+                .map(mapper::toDomain);
     }
 
     @Override
     public List<EquipmentStatus> findAll() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return jpaRepository.findAll().stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override
     public boolean existsBySlug(String slug) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return jpaRepository.existsBySlug(slug);
     }
 }

@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.shared.exception;
 
 import lombok.Getter;
+import org.jspecify.annotations.NonNull;
 
 @Getter
 public class ResourceNotFoundException extends BikeRentalException {
@@ -11,9 +12,12 @@ public class ResourceNotFoundException extends BikeRentalException {
     private final String identifier;
 
     public ResourceNotFoundException(String resourceName, String identifier) {
-
         super(MESSAGE_TEMPLATE.formatted(resourceName, identifier));
         this.resourceName = resourceName;
         this.identifier = identifier;
+    }
+
+    public ResourceNotFoundException(@NonNull Class<?> cls, @NonNull Object identifier) {
+        this(cls.getSimpleName(), identifier.toString());
     }
 }

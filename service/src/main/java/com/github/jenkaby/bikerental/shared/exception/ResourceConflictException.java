@@ -15,4 +15,8 @@ public class ResourceConflictException extends BikeRentalException {
         this.resourceName = resourceName;
         this.identifier = identifier;
     }
+
+    public ResourceConflictException(Class<?> cls, String identifier) {
+        this(cls.getSimpleName(), identifier);
+    }
 }
