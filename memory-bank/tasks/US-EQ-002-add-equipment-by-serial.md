@@ -115,7 +115,7 @@ com.github.jenkaby.bikerental.equipment
 {
   "id": "uuid",
   "serialNumber": "123",
-  "nfcUid": "uid",
+  "uid": "uid",
   "equipmentType": "bicycle",
   "model": "Mountain Bike Pro",
   "status": "AVAILABLE",

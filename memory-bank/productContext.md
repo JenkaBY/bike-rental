@@ -202,7 +202,7 @@ BikeRental provides a **comprehensive digital management system** that:
 
 7. **Return Process**
     - Customer returns with equipment
-    - Operator scans NFC tag with phone (or enters serial number)
+   - Operator scans tag with phone (or enters serial number)
     - System identifies active rental
     - System calculates actual duration
     - System applies business rules:
@@ -339,7 +339,6 @@ BikeRental provides a **comprehensive digital management system** that:
 
 - ✅ Equipment catalog with types (bike, scooter, etc.)
 - ✅ Equipment identification by serial number
-- ✅ NFC tag support for quick scanning
 - ✅ Real-time status tracking (available/rented/maintenance/decommissioned)
 - ✅ Usage hour accumulation
 - ✅ Maintenance scheduling
@@ -350,7 +349,6 @@ BikeRental provides a **comprehensive digital management system** that:
 - ✅ Automatic tariff selection based on equipment type and duration
 - ✅ Prepayment recording with receipt
 - ✅ Rental activation with time tracking
-- ✅ Equipment return with NFC scanning
 - ✅ Automatic cost calculation with business rules
 - ✅ 10-minute cancellation window with full refund
 
@@ -422,7 +420,7 @@ BikeRental provides a **comprehensive digital management system** that:
 **Mobile Experience**
 
 - Native mobile app for operators
-- Faster NFC scanning
+- Faster NFC/QR scanning
 - Offline mode support
 
 **Advanced Features**
@@ -518,7 +516,7 @@ BikeRental provides a **comprehensive digital management system** that:
 
 - Each equipment has unique serial number
 - Serial number never changes
-- NFC UID is optional but must be unique if provided
+- UID is optional but must be unique if provided
 
 ### Rental Operations
 

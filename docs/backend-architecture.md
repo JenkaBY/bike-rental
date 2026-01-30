@@ -374,7 +374,7 @@ erDiagram
     EQUIPMENT {
         uuid id PK
         string serial_number UK
-        string nfc_uid UK
+        string uid UK
         uuid equipment_type_id FK
         string status
         timestamp commissioned_at
@@ -542,11 +542,11 @@ public class CustomerController {
 
 **Оборудование (equipment module):**
 
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | `/equipments` | Список оборудования с фильтрацией `?number={num}&uid={nfc_uid}&status={status}` |
-| GET | `/equipments/{id}` | Детали оборудования |
-| PATCH | `/equipments/{id}` | Изменение статуса `{"status": "MAINTENANCE"}` |
+| Метод | Endpoint           | Описание                                                                    |
+|-------|--------------------|-----------------------------------------------------------------------------|
+| GET   | `/equipments`      | Список оборудования с фильтрацией `?number={num}&uid={uid}&status={status}` |
+| GET   | `/equipments/{id}` | Детали оборудования                                                         |
+| PATCH | `/equipments/{id}` | Изменение статуса `{"status": "MAINTENANCE"}`                               |
 
 **Тарифы (tariff module):**
 
@@ -778,7 +778,7 @@ public class SecurityConfig {
 
 ### 8.2 NFC/QR сканирование (FR-EQ-003)
 
-- Поиск оборудования: `GET /api/equipments?uid={nfc_uid}`
+- Поиск оборудования: `GET /api/equipments?uid={uid}`
 - Поиск активной аренды: `GET /api/rentals?status=ACTIVE&equipment_uid={nfc_uid}`
 - Frontend использует Web NFC API (Android Chrome) или камеру для QR
 

@@ -20,7 +20,7 @@
 
 **Последовательность действий:**
 
-1. Сканирование NFC-метки оборудования
+1. Сканирование метки оборудования
 2. Автоматическое определение аренды
 3. Фиксация времени возврата
 4. Расчет фактического времени аренды
@@ -39,7 +39,7 @@
 
 ## Thought Process
 
-Equipment return is the culmination of the rental process. Integrates: NFC scanning, duration calculation, cost
+Equipment return is the culmination of the rental process. Integrates: tag scanning, duration calculation, cost
 calculation, payment processing.
 
 **Workflow:**
@@ -60,7 +60,7 @@ calculation, payment processing.
 ## Implementation Plan
 
 - [ ] Create ReturnEquipmentUseCase
-- [ ] Integrate NFC scanning
+- [ ] Integrate tag scanning
 - [ ] Calculate final cost
 - [ ] Handle additional payment
 - [ ] Update rental status
@@ -89,7 +89,7 @@ calculation, payment processing.
 **API Endpoint:**
 
 - `POST /api/rentals/{id}/return` - Process return
-- Request: `{ "nfcUid": "ABC123", "returnTime": "2026-01-26T15:30:00" }`
+- Request: `{ "uid": "ABC123", "returnTime": "2026-01-26T15:30:00" }`
 
 **Use Case:**
 

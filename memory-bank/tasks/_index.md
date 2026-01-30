@@ -8,7 +8,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## In Progress
 
-<!-- No tasks in progress currently -->
+- [US-EQ-001] Equipment Catalog - Component tests for equipment status endpoints implemented (2026-01-30)
 
 ## Pending - Technical Improvements
 
@@ -51,7 +51,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 - [US-TR-002] Расчет стоимости аренды - Depends on US-TR-001, US-RN-007
 - [US-TR-003] Правило "прощения" просрочки - Depends on US-TR-002
 - [US-TR-004] Расчет доплаты за просрочку - Depends on US-TR-002, US-TR-003
-- [US-EQ-003] Сканирование NFC-метки при возврате - Depends on US-EQ-001, US-RN-005
+- [US-EQ-003] Сканирование метки при возврате - Depends on US-EQ-001, US-RN-005
 - [US-RN-006] Возврат оборудования - Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
 - [US-EQ-005] Учет износа и пробега - Depends on US-RN-006
 - [US-RN-008] Ранний возврат или замена оборудования - Depends on US-RN-005
