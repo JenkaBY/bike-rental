@@ -16,7 +16,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
-- [US-EQ-001] Справочник оборудования - High priority, equipment module
+- [US-EQ-001] Справочник оборудования - High priority, equipment module (Updated 2026-01-30: Long IDs, slug-based types,
+  REST endpoints)
 - [US-TR-001] Справочник тарифов - High priority, tariff module
 - [US-FN-001] Прием оплаты - High priority, finance module
 - [US-AD-001] Управление пользователями - High priority, admin module
