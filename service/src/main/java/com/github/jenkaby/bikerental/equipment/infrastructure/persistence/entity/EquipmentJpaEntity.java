@@ -51,7 +51,6 @@ public class EquipmentJpaEntity {
         if (this.createdAt == null) {
             this.createdAt = Instant.now();
         }
-        System.out.println("+++" + this);
     }
 
     @PreUpdate
