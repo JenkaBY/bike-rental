@@ -24,7 +24,8 @@ Feature: Customer Search by Phone
       | +79991234012 | Liam      | Doe      |
       | +70000000000 | Nora      | Doe      |
     When a GET request has been made to "/api/customers" endpoint with query parameters
-      | phone | 1234 |
+      | phone |
+      | 1234  |
     Then the response status is 200
     And the response list at "$" has size 10
     And the response list at "$[*].phone" contains values
@@ -34,5 +35,6 @@ Feature: Customer Search by Phone
 
   Scenario: Search requires at least 4 digits
     When a GET request has been made to "/api/customers" endpoint with query parameters
-      | phone | 123 |
+      | phone |
+      | 123   |
     Then the response status is 400
