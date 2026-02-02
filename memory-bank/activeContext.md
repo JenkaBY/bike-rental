@@ -212,7 +212,7 @@ US-CL-003.
     - Cost calculation with business rules
     - Forgiveness rule implementation
     - Overtime charge calculation
-    - NFC scanning on return
+  - Tag scanning on return
     - Equipment return workflow
     - Equipment usage tracking
     - Early return/replacement
@@ -360,7 +360,7 @@ Apply same TDD approach as US-CL-002:
 - End-to-end rental workflow operational
 - Cost calculations working correctly
 - Business rules (forgiveness, overtime) implemented
-- NFC scanning functional
+- tag scanning functional
 
 ### Long Term (3-6 Months)
 
@@ -592,3 +592,10 @@ Apply same TDD approach as US-CL-002:
 **Last Updated:** January 26, 2026  
 **Status:** Documentation Complete ✅ | Ready for Implementation 🚀  
 **Next Review:** At start of implementation phase
+
+## 2026-01-30
+
+- Component tests for equipment status endpoints (list, get by ID, update status) implemented and ready for execution
+- InsertableEquipmentRepository created for test DB setup in component tests
+- All step definitions and feature file follow project and Cucumber BDD standards
+- Next: Execute tests and review results, then proceed to further equipment module scenarios

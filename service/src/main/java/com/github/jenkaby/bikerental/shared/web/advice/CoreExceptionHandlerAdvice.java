@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.shared.web.advice;
 
+import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
@@ -105,6 +106,7 @@ public class CoreExceptionHandlerAdvice {
     ResponseEntity<ProblemDetail> handleError(Exception ex) {
         var message = ex.getMessage();
         log.error("Unexpected {} was thrown: {}", ex.getClass(), message);
+        log.debug("Unexpected error", ex);
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         return ResponseEntity.of(body).build();
     }
@@ -120,6 +122,13 @@ public class CoreExceptionHandlerAdvice {
         log.warn("The resource '{}[{}]' not found in DB", ex.getResourceName(), ex.getIdentifier());
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ReferenceNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleResourceConflictException(ReferenceNotFoundException ex) {
+        log.warn("The referenced resource '{}[{}]' not found in DB", ex.getResourceName(), ex.getIdentifier());
+        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 
     @ExceptionHandler(ResourceConflictException.class)

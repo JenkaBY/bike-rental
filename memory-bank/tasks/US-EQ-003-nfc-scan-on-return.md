@@ -1,4 +1,4 @@
-# [US-EQ-003] - Сканирование NFC-метки при возврате (NFC Tag Scanning on Return)
+# [US-EQ-003] - Сканирование метки при возврате (NFC Tag/QR code Scanning on Return)
 
 **Status:** Pending  
 **Added:** 2026-01-26  
@@ -10,13 +10,13 @@
 ## Original Request
 
 **Как** Оператор проката  
-**Я хочу** сканировать NFC-метку оборудования при возврате  
+**Я хочу** сканировать метку оборудования при возврате  
 **Чтобы** автоматически идентифицировать возвращаемое оборудование
 
 ## User Story Details
 
 **Описание:**  
-Система должна поддерживать считывание NFC-меток оборудования через мобильное устройство при возврате.
+Система должна поддерживать считывание меток оборудования через мобильное устройство при возврате.
 
 **Критерии приемки:**
 
@@ -29,11 +29,11 @@
 
 ## Thought Process
 
-NFC scanning automates equipment identification during return, reducing manual entry errors.
+Camera/NFC scanning automates equipment identification during return, reducing manual entry errors.
 
 **Technical Approach:**
 
-- Frontend uses Web NFC API or QR code scanning
+- Frontend uses Web NFC/Camera API or QR code scanning
 - Backend receives UID and looks up equipment
 - Validates equipment is currently rented
 - Returns rental information for completion
@@ -46,10 +46,10 @@ NFC scanning automates equipment identification during return, reducing manual e
 
 ## Implementation Plan
 
-- [ ] Create equipment lookup by NFC UID endpoint
+- [ ] Create equipment lookup by UID endpoint
 - [ ] Implement validation logic
 - [ ] Add error handling
-- [ ] Frontend: Web NFC API integration
+- [ ] Frontend: Web NFC/Camera API integration
 - [ ] Frontend: QR code fallback
 - [ ] Create component tests
 - [ ] Write unit tests
@@ -60,20 +60,20 @@ NFC scanning automates equipment identification during return, reducing manual e
 
 ### Subtasks
 
-| ID  | Description              | Status      | Updated    | Notes |
-|-----|--------------------------|-------------|------------|-------|
-| 3.1 | Create lookup endpoint   | Not Started | 2026-01-26 |       |
-| 3.2 | Implement validation     | Not Started | 2026-01-26 |       |
-| 3.3 | Add error handling       | Not Started | 2026-01-26 |       |
-| 3.4 | Frontend NFC integration | Not Started | 2026-01-26 |       |
-| 3.5 | Create tests             | Not Started | 2026-01-26 |       |
+| ID  | Description                       | Status      | Updated    | Notes |
+|-----|-----------------------------------|-------------|------------|-------|
+| 3.1 | Create lookup endpoint            | Not Started | 2026-01-26 |       |
+| 3.2 | Implement validation              | Not Started | 2026-01-26 |       |
+| 3.3 | Add error handling                | Not Started | 2026-01-26 |       |
+| 3.4 | Frontend tag scanning integration | Not Started | 2026-01-26 |       |
+| 3.5 | Create tests                      | Not Started | 2026-01-26 |       |
 
 ## Technical Details
 
 **API Endpoint:**
 
 - `POST /api/equipment/scan-return` - Scan NFC/QR for return
-- Request: `{ "nfcUid": "ABC123XYZ" }`
+- Request: `{ "uid": "ABC123XYZ" }`
 - Response: Equipment details + active rental info
 
 **Use Case:**
@@ -83,9 +83,9 @@ NFC scanning automates equipment identification during return, reducing manual e
 @Service
 public class ScanEquipmentForReturnUseCase {
 
-    public EquipmentReturnInfo execute(String nfcUid) {
-        Equipment equipment = equipmentRepository.findByNfcUid(nfcUid)
-                .orElseThrow(() -> new EquipmentNotFoundException(nfcUid));
+    public EquipmentReturnInfo execute(String uid) {
+        Equipment equipment = equipmentRepository.findByNfcUid(uid)
+                .orElseThrow(() -> new EquipmentNotFoundException(uid));
 
         if (equipment.getStatus() != EquipmentStatus.RENTED) {
             throw new EquipmentNotRentedException(equipment.getId());

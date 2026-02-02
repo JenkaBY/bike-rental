@@ -66,7 +66,7 @@
 | 🆕     | 24 | US-TR-002 | Расчет стоимости аренды                | Высокий   | tariff    | US-TR-001, US-RN-007                       | [us-tr-002.md](us/US-TR-002/us-tr-002.md) |
 | 🆕     | 25 | US-TR-003 | Правило "прощения" просрочки           | Высокий   | tariff    | US-TR-002                                  | [us-tr-003.md](us/US-TR-003/us-tr-003.md) |
 | 🆕     | 26 | US-TR-004 | Расчет доплаты за просрочку            | Высокий   | tariff    | US-TR-002, US-TR-003                       | [us-tr-004.md](us/US-TR-004/us-tr-004.md) |
-| 🆕     | 27 | US-EQ-003 | Сканирование NFC-метки при возврате    | Высокий   | equipment | US-EQ-001, US-RN-005                       | [us-eq-003.md](us/US-EQ-003/us-eq-003.md) |
+| 🆕     | 27 | US-EQ-003 | Сканирование метки при возврате        | Высокий   | equipment | US-EQ-001, US-RN-005                       | [us-eq-003.md](us/US-EQ-003/us-eq-003.md) |
 | 🆕     | 28 | US-RN-006 | Возврат оборудования                   | Высокий   | rental    | US-RN-005, US-EQ-003, US-RN-007, US-TR-002 | [us-rn-006.md](us/US-RN-006/us-rn-006.md) |
 | 🆕     | 29 | US-EQ-005 | Учет износа и пробега                  | Низкий    | equipment | US-RN-006                                  | [us-eq-005.md](us/US-EQ-005/us-eq-005.md) |
 | 🆕     | 30 | US-RN-008 | Ранний возврат или замена оборудования | Средний   | rental    | US-RN-005                                  | [us-rn-008.md](us/US-RN-008/us-rn-008.md) |

@@ -8,15 +8,18 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## In Progress
 
-<!-- No tasks in progress currently -->
+<!-- No tasks currently in progress -->
 
 ## Pending - Technical Improvements
 
 - [TECH-001] Custom UUID Generator for Hibernate Entity IDs - Medium priority, shared module, performance improvement
+- [TECH-002] Integrate specification-arg-resolver for equipment filtering - Add advanced query param-based
+  Specifications for equipment search (2026-02-02)
+- [TECH-003] Add PATCH Endpoint for Equipment Status Change - Medium priority, equipment module, RESTful partial updates
+  for status transitions (2026-02-02)
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
-- [US-EQ-001] Справочник оборудования - High priority, equipment module
 - [US-TR-001] Справочник тарифов - High priority, tariff module
 - [US-FN-001] Прием оплаты - High priority, finance module
 - [US-AD-001] Управление пользователями - High priority, admin module
@@ -50,7 +53,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 - [US-TR-002] Расчет стоимости аренды - Depends on US-TR-001, US-RN-007
 - [US-TR-003] Правило "прощения" просрочки - Depends on US-TR-002
 - [US-TR-004] Расчет доплаты за просрочку - Depends on US-TR-002, US-TR-003
-- [US-EQ-003] Сканирование NFC-метки при возврате - Depends on US-EQ-001, US-RN-005
+- [US-EQ-003] Сканирование метки при возврате - Depends on US-EQ-001, US-RN-005
 - [US-RN-006] Возврат оборудования - Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
 - [US-EQ-005] Учет износа и пробега - Depends on US-RN-006
 - [US-RN-008] Ранний возврат или замена оборудования - Depends on US-RN-005
@@ -87,6 +90,9 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [US-EQ-001] Equipment Catalog - Completed on 2026-02-02 (139 subtasks: Database migrations,
+  domain/infrastructure/application/web layers, 10 REST endpoints, WebMvc + Component tests, admin CRUD for
+  types/statuses)
 - [US-CL-003] Полное создание/редактирование профиля клиента - Completed on 2026-01-29 (PUT endpoint + mapper
   refactoring + 26 tests: 11 unit UpdateCustomerService, 15 WebMvc PUT, component tests)
 - [US-CL-001] Поиск клиента по номеру телефона - Completed on 2026-01-28 (Implementation + unit, WebMvc, component

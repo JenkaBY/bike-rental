@@ -374,7 +374,7 @@ erDiagram
     EQUIPMENT {
         uuid id PK
         string serial_number UK
-        string nfc_uid UK
+        string uid UK
         uuid equipment_type_id FK
         string status
         timestamp commissioned_at
@@ -542,11 +542,16 @@ public class CustomerController {
 
 **Оборудование (equipment module):**
 
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | `/equipments` | Список оборудования с фильтрацией `?number={num}&uid={nfc_uid}&status={status}` |
-| GET | `/equipments/{id}` | Детали оборудования |
-| PATCH | `/equipments/{id}` | Изменение статуса `{"status": "MAINTENANCE"}` |
+| Метод | Endpoint                               | Описание                                                                         |
+|-------|----------------------------------------|----------------------------------------------------------------------------------|
+| GET   | `/equipment-types`                     | Список типов оборудования (bicycle, scooter, etc.)                               |
+| GET   | `/equipment-statuses`                  | Список статусов оборудования (available, rented, etc.)                           |
+| GET   | `/equipments`                          | Список оборудования с фильтрацией `?status={slug}&type={slug}&page={n}&size={n}` |
+| POST  | `/equipments`                          | Создание нового оборудования                                                     |
+| GET   | `/equipments/{id}`                     | Детали оборудования по ID                                                        |
+| PUT   | `/equipments/{id}`                     | Полное обновление оборудования                                                   |
+| GET   | `/equipments/by-uid/{uid}`             | Поиск оборудования по UID (QR/NFC код)                                           |
+| GET   | `/equipments/by-serial/{serialNumber}` | Поиск оборудования по порядковому номеру                                         |
 
 **Тарифы (tariff module):**
 
@@ -638,25 +643,32 @@ public class CustomerController {
 | PATCH | `/admin/tariffs/{id}` | Частичное обновление `{"is_active": false}` |
 | DELETE | `/admin/tariffs/{id}` | Удаление (если не используется) |
 
-**Оборудование - полный CRUD (equipment module):**
-
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | `/admin/equipments` | Все оборудование (включая списанное) |
-| POST | `/admin/equipments` | Добавление оборудования |
-| GET | `/admin/equipments/{id}` | Детали оборудования |
-| PUT | `/admin/equipments/{id}` | Полное обновление |
-| PATCH | `/admin/equipments/{id}` | Частичное обновление / списание `{"status": "DECOMMISSIONED"}` |
-| DELETE | `/admin/equipments/{id}` | Удаление (только если никогда не использовалось) |
-
 **Типы оборудования (equipment module):**
 
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | `/admin/equipment-types` | Типы оборудования |
-| POST | `/admin/equipment-types` | Создание типа |
-| GET | `/admin/equipment-types/{id}` | Детали типа |
-| PUT | `/admin/equipment-types/{id}` | Обновление типа |
+| Метод | Endpoint                        | Описание                       |
+|-------|---------------------------------|--------------------------------|
+| GET   | `/admin/equipment-types`        | Список всех типов оборудования |
+| POST  | `/admin/equipment-types`        | Создание нового типа           |
+| PUT   | `/admin/equipment-types/{slug}` | Обновление типа по slug        |
+
+**Статусы оборудования (equipment module):**
+
+| Метод | Endpoint                           | Описание                   |
+|-------|------------------------------------|----------------------------|
+| GET   | `/admin/equipment-statuses`        | Список всех статусов       |
+| POST  | `/admin/equipment-statuses`        | Создание нового статуса    |
+| PUT   | `/admin/equipment-statuses/{slug}` | Обновление статуса по slug |
+
+**Оборудование - полный CRUD (equipment module):**
+
+| Метод | Endpoint                                     | Описание                                               |
+|-------|----------------------------------------------|--------------------------------------------------------|
+| GET   | `/admin/equipments`                          | Все оборудование (включая списанное) с фильтрацией     |
+| POST  | `/admin/equipments`                          | Добавление нового оборудования                         |
+| GET   | `/admin/equipments/{id}`                     | Детали оборудования по ID                              |
+| PUT   | `/admin/equipments/{id}`                     | Полное обновление оборудования                         |
+| GET   | `/admin/equipments/by-uid/{uid}`             | Поиск по UID (для административных целей)              |
+| GET   | `/admin/equipments/by-serial/{serialNumber}` | Поиск по серийному номеру (для административных целей) |
 
 **Отчетность и аналитика (reporting module):**
 
@@ -778,9 +790,11 @@ public class SecurityConfig {
 
 ### 8.2 NFC/QR сканирование (FR-EQ-003)
 
-- Поиск оборудования: `GET /api/equipments?uid={nfc_uid}`
-- Поиск активной аренды: `GET /api/rentals?status=ACTIVE&equipment_uid={nfc_uid}`
+- Поиск оборудования по UID: `GET /api/equipments/by-uid/{uid}`
+- Поиск оборудования по серийному номеру: `GET /api/equipments/by-serial/{serialNumber}`
+- Поиск активной аренды: `GET /api/rentals?status=ACTIVE&equipment_id={id}` (после получения equipment)
 - Frontend использует Web NFC API (Android Chrome) или камеру для QR
+- Дедуплицированные endpoints для точного поиска (не query params)
 
 ### 8.3 Экспорт отчетов (NFR-014)
 

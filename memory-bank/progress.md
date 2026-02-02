@@ -287,7 +287,7 @@
 - [ ] US-TR-002: Calculate Rental Cost (billing engine)
 - [ ] US-TR-003: Forgiveness Rule (business logic)
 - [ ] US-TR-004: Calculate Overtime Charge (complex pricing)
-- [ ] US-EQ-003: NFC Tag Scanning on Return (automation)
+- [ ] US-EQ-003: Tag Scanning on Return (automation)
 - [ ] US-RN-006: Equipment Return (completion workflow)
 - [ ] US-EQ-005: Track Equipment Usage (analytics foundation)
 - [ ] US-RN-008: Early Return or Replacement (customer service)
@@ -658,3 +658,12 @@
 **Last Updated:** January 26, 2026  
 **Next Review:** When implementation begins  
 **Status:** 📋 Documentation Complete | 🚀 Ready for Implementation
+
+### 2026-01-30 - Component Tests for Equipment Status Endpoints
+
+- Implemented Cucumber feature and step definitions for equipment status endpoints (list, get by ID, update status)
+- Created InsertableEquipmentRepository for test DB setup
+- All tests use real HTTP requests, test profile, and AssertJ for assertions
+- Tests cover positive scenarios and are self-contained
+- No errors found in step definitions
+- Ready for further test execution and review
