@@ -6,8 +6,8 @@ public record EquipmentResponse(
         Long id,
         String serialNumber,
         String uid,
-        String equipmentTypeSlug,
-        String statusSlug,
+        String type,
+        String status,
         String model,
         LocalDate commissionedAt,
         String condition

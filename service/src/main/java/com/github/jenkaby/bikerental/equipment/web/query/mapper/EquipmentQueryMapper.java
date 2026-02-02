@@ -16,18 +16,16 @@ import org.springframework.data.domain.Pageable;
         uses = {UidMapper.class, SerialNumberMapper.class, PageMapper.class})
 public interface EquipmentQueryMapper {
 
+    @Mapping(target = "status", source = "statusSlug")
+    @Mapping(target = "type", source = "typeSlug")
     EquipmentResponse toResponse(Equipment equipment);
 
-    @Mapping(target = "uidValue", source = "uid")
-    @Mapping(target = "serialNumberValue", source = "serialNumber")
     @Mapping(target = "typeSlug", source = "type")
     @Mapping(target = "statusSlug", source = "status")
     @Mapping(target = "pageRequest", source = "pageable")
     SearchEquipmentsUseCase.SearchEquipmentsQuery toSearchQuery(
             String status,
             String type,
-            String serialNumber,
-            String uid,
             Pageable pageable);
 
 }

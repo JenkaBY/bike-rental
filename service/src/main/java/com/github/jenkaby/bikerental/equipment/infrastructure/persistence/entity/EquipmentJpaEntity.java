@@ -25,8 +25,8 @@ public class EquipmentJpaEntity {
     @Column(unique = true, length = 100)
     private String uid;
 
-    @Column(name = "equipment_type_slug", nullable = false, length = 50)
-    private String equipmentTypeSlug;
+    @Column(name = "type_slug", nullable = false, length = 50)
+    private String typeSlug;
 
     @Column(name = "status_slug", nullable = false, length = 50)
     private String statusSlug;
@@ -51,6 +51,7 @@ public class EquipmentJpaEntity {
         if (this.createdAt == null) {
             this.createdAt = Instant.now();
         }
+        System.out.println("+++" + this);
     }
 
     @PreUpdate

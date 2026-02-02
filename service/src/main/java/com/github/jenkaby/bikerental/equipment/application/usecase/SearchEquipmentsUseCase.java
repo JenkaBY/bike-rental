@@ -12,8 +12,6 @@ public interface SearchEquipmentsUseCase {
     record SearchEquipmentsQuery(
             String statusSlug,
             String typeSlug,
-            String serialNumberValue,
-            String uidValue,
             PageRequest pageRequest
     ) {
         public Optional<String> status() {
@@ -22,14 +20,6 @@ public interface SearchEquipmentsUseCase {
 
         public Optional<String> type() {
             return Optional.ofNullable(typeSlug);
-        }
-
-        public Optional<String> serialNumber() {
-            return Optional.ofNullable(serialNumberValue);
-        }
-
-        public Optional<String> uid() {
-            return Optional.ofNullable(uidValue);
         }
     }
 }

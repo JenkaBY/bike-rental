@@ -16,7 +16,7 @@ public record EquipmentRequest(
         String uid,
 
         @Slug
-        String equipmentTypeSlug,
+        String typeSlug,
 
         @Slug
         String statusSlug,

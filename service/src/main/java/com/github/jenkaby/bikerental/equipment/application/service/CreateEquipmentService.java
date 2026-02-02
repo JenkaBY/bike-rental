@@ -6,6 +6,7 @@ import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateSerialN
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
+import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,24 +16,29 @@ class CreateEquipmentService implements CreateEquipmentUseCase {
     private final EquipmentRepository repository;
     private final EquipmentCommandToDomainMapper mapper;
     private final SerialNumberMapper serialNumberMapper;
+    private final UidMapper uidMapper;
 
     CreateEquipmentService(
             EquipmentRepository repository,
             EquipmentCommandToDomainMapper mapper,
-            SerialNumberMapper serialNumberMapper) {
+            SerialNumberMapper serialNumberMapper, UidMapper uidMapper) {
         this.repository = repository;
         this.mapper = mapper;
         this.serialNumberMapper = serialNumberMapper;
+        this.uidMapper = uidMapper;
     }
 
     @Override
     @Transactional
     public Equipment execute(CreateEquipmentCommand command) {
-        // validate and normalize serial number
         var serialNumber = serialNumberMapper.toSerialNumber(command.serialNumber());
-
         if (repository.existsBySerialNumber(serialNumber)) {
-            throw new DuplicateSerialNumberException(Equipment.class.getSimpleName(), serialNumber.value());
+            throw new DuplicateSerialNumberException(Equipment.class, serialNumber.value());
+        }
+
+        var uid = uidMapper.toUid(command.uid());
+        if (repository.existsByUid(uid)) {
+            throw new DuplicateSerialNumberException(Equipment.class, uid.value());
         }
 
         Equipment equipment = mapper.toEquipment(command);

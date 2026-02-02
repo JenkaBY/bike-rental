@@ -6,4 +6,8 @@ public class DuplicateSerialNumberException extends ResourceConflictException {
     public DuplicateSerialNumberException(String resourceName, String identifier) {
         super(resourceName, identifier);
     }
+
+    public DuplicateSerialNumberException(Class<?> cls, String identifier) {
+        super(cls, identifier);
+    }
 }

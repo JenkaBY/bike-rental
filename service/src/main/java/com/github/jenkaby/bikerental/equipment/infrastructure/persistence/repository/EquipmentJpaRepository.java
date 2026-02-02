@@ -16,9 +16,11 @@ public interface EquipmentJpaRepository extends JpaRepository<EquipmentJpaEntity
 
     boolean existsBySerialNumber(String serialNumber);
 
+    boolean existsByUid(String serialNumber);
+
     @Query("SELECT e FROM EquipmentJpaEntity e WHERE " +
             "(:statusSlug IS NULL OR e.statusSlug = :statusSlug) AND " +
-            "(:typeSlug IS NULL OR e.equipmentTypeSlug = :typeSlug)")
-    Page<EquipmentJpaEntity> findAllByFilters(@Param("statusSlug") String statusSlug, @Param("typeSlug") String typeSlug,
+            "(:typeSlug IS NULL OR e.typeSlug = :typeSlug)")
+    Page<EquipmentJpaEntity> findAllByFilters(@Param("status") String statusSlug, @Param("typeSlug") String typeSlug,
                                               Pageable pageRequest);
 }

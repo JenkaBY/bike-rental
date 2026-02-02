@@ -10,7 +10,7 @@ public interface CreateEquipmentUseCase {
     record CreateEquipmentCommand(
             String serialNumber,
             String uid,
-            String equipmentTypeSlug,
+            String typeSlug,
             String statusSlug,
             String model,
             LocalDate commissionedAt,

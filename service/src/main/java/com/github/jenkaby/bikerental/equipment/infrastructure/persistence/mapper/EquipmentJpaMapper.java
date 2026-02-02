@@ -13,6 +13,7 @@ import org.mapstruct.MappingConstants;
         uses = {SerialNumberMapper.class, UidMapper.class}
 )
 public interface EquipmentJpaMapper {
+
     Equipment toDomain(EquipmentJpaEntity entity);
 
     @Mapping(target = "createdAt", ignore = true)

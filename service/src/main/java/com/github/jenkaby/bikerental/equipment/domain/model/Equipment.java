@@ -14,7 +14,7 @@ public class Equipment {
     private Long id;
     private final SerialNumber serialNumber;
     private final Uid uid;
-    private final String equipmentTypeSlug;
+    private final String typeSlug;
     private final String statusSlug;
     private final String model;
     private final LocalDate commissionedAt;

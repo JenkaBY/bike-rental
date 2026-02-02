@@ -13,11 +13,9 @@ public interface EquipmentRepository {
 
     Optional<Equipment> findById(Long id);
 
-    Optional<Equipment> findBySerialNumber(SerialNumber serialNumber);
-
-    Optional<Equipment> findByUid(Uid uid);
-
     Page<Equipment> findAll(Optional<String> statusSlug, Optional<String> typeSlug, PageRequest pageRequest);
 
     boolean existsBySerialNumber(SerialNumber serialNumber);
+
+    boolean existsByUid(Uid uid);
 }

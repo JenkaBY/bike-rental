@@ -41,11 +41,11 @@ public class EquipmentQueryController {
     public ResponseEntity<Page<EquipmentResponse>> searchEquipments(
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "type", required = false) String type,
-            @RequestParam(name = "serial", required = false) String serialNumber,
-            @RequestParam(name = "uid", required = false) String uid,
+//            @RequestParam(name = "serial", required = false) String serialNumber,
+//            @RequestParam(name = "uid", required = false) String uid,
             @PageableDefault(size = 20, sort = "serialNumber", direction = Sort.Direction.ASC) Pageable pageable) {
 
-        var query = mapper.toSearchQuery(status, type, serialNumber, uid, pageable);
+        var query = mapper.toSearchQuery(status, type, pageable);
         var page = searchUseCase.execute(query).map(mapper::toResponse);
         return ResponseEntity.ok(page);
     }

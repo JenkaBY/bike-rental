@@ -43,18 +43,6 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     }
 
     @Override
-    public Optional<Equipment> findBySerialNumber(SerialNumber serialNumber) {
-        return jpaRepository.findBySerialNumber(serialNumber.value())
-                .map(mapper::toDomain);
-    }
-
-    @Override
-    public Optional<Equipment> findByUid(Uid uid) {
-        return jpaRepository.findByUid(uid.value())
-                .map(mapper::toDomain);
-    }
-
-    @Override
     public Page<Equipment> findAll(Optional<String> statusSlug, Optional<String> typeSlug, PageRequest request) {
         var pageRequest = pageMapper.toSpring(request);
 
@@ -66,5 +54,10 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     @Override
     public boolean existsBySerialNumber(SerialNumber serialNumber) {
         return jpaRepository.existsBySerialNumber(serialNumber.value());
+    }
+
+    @Override
+    public boolean existsByUid(Uid uid) {
+        return jpaRepository.existsByUid(uid.value());
     }
 }
