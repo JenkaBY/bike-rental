@@ -43,10 +43,10 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     }
 
     @Override
-    public Page<Equipment> findAll(Optional<String> statusSlug, Optional<String> typeSlug, PageRequest request) {
+    public Page<Equipment> findAll(String statusSlug, String typeSlug, PageRequest request) {
         var pageRequest = pageMapper.toSpring(request);
 
-        org.springframework.data.domain.Page<EquipmentJpaEntity> page = jpaRepository.findAllByFilters(statusSlug.orElse(null), typeSlug.orElse(null), pageRequest);
+        org.springframework.data.domain.Page<EquipmentJpaEntity> page = jpaRepository.findAllByFilters(statusSlug, typeSlug, pageRequest);
         return pageMapper.toDomain(page)
                 .map(mapper::toDomain);
     }
@@ -59,5 +59,15 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     @Override
     public boolean existsByUid(Uid uid) {
         return jpaRepository.existsByUid(uid.value());
+    }
+
+    @Override
+    public Optional<Equipment> findBySerialNumber(SerialNumber serialNumber) {
+        return jpaRepository.findBySerialNumber(serialNumber.value()).map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Equipment> findByUid(Uid uid) {
+        return jpaRepository.findByUid(uid.value()).map(mapper::toDomain);
     }
 }

@@ -33,7 +33,7 @@ public class EquipmentStatusCommandController {
     }
 
     @PostMapping
-    public ResponseEntity<EquipmentStatusResponse> create(@RequestBody EquipmentStatusRequest request) {
+    public ResponseEntity<EquipmentStatusResponse> create(@RequestBody @Valid EquipmentStatusRequest request) {
         var command = commandMapper.toCreateCommand(request);
         var created = createUseCase.execute(command);
         return ResponseEntity.status(201).body(queryMapper.toResponse(created));

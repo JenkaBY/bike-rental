@@ -106,6 +106,7 @@ public class CoreExceptionHandlerAdvice {
     ResponseEntity<ProblemDetail> handleError(Exception ex) {
         var message = ex.getMessage();
         log.error("Unexpected {} was thrown: {}", ex.getClass(), message);
+        log.debug("Unexpected error", ex);
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         return ResponseEntity.of(body).build();
     }

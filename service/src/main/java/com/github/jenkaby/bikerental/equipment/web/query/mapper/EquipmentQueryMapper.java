@@ -6,6 +6,7 @@ import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
 import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentResponse;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -13,7 +14,8 @@ import org.springframework.data.domain.Pageable;
 
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
-        uses = {UidMapper.class, SerialNumberMapper.class, PageMapper.class})
+        uses = {UidMapper.class, SerialNumberMapper.class, PageMapper.class},
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface EquipmentQueryMapper {
 
     @Mapping(target = "status", source = "statusSlug")
@@ -27,5 +29,4 @@ public interface EquipmentQueryMapper {
             String status,
             String type,
             Pageable pageable);
-
 }

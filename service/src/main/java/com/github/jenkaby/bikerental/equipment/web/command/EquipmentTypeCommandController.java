@@ -6,6 +6,7 @@ import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentTypeRequ
 import com.github.jenkaby.bikerental.equipment.web.command.mapper.EquipmentTypeCommandMapper;
 import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentTypeResponse;
 import com.github.jenkaby.bikerental.equipment.web.query.mapper.EquipmentTypeMapper;
+import com.github.jenkaby.bikerental.shared.web.support.Slug;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +34,14 @@ public class EquipmentTypeCommandController {
     }
 
     @PostMapping
-    public ResponseEntity<EquipmentTypeResponse> create(@RequestBody EquipmentTypeRequest request) {
+    public ResponseEntity<EquipmentTypeResponse> create(@RequestBody @Valid EquipmentTypeRequest request) {
         var command = commandMapper.toCreateCommand(request);
         var created = createUseCase.execute(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(queryMapper.toResponse(created));
     }
 
     @PutMapping("/{slug}")
-    public ResponseEntity<EquipmentTypeResponse> update(@PathVariable("slug") String slug,
+    public ResponseEntity<EquipmentTypeResponse> update(@PathVariable("slug") @Slug String slug,
                                                         @RequestBody @Valid EquipmentTypeRequest request) {
         var command = commandMapper.toUpdateCommand(slug, request);
         var updated = updateUseCase.execute(command);

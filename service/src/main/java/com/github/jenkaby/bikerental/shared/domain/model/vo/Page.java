@@ -1,9 +1,9 @@
 package com.github.jenkaby.bikerental.shared.domain.model.vo;
 
 import org.jspecify.annotations.NonNull;
-import org.springframework.util.Assert;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -21,7 +21,7 @@ public record Page<T>(List<T> items, long totalItems, PageRequest pageRequest) {
     }
 
     public <U> Page<U> map(@NonNull Function<? super T, ? extends U> mapper) {
-        Assert.notNull(mapper, "Mapper function must not be null");
+        Objects.requireNonNull(mapper, "Mapper function must not be null");
         return new Page<>(getConvertedContent(mapper), totalItems, pageRequest);
     }
 
