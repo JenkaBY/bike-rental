@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentB
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -18,7 +17,6 @@ class GetEquipmentByIdService implements GetEquipmentByIdUseCase {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<Equipment> execute(Long id) {
         return repository.findById(id);
     }

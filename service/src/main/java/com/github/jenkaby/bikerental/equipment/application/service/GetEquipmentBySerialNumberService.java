@@ -5,7 +5,6 @@ import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -19,7 +18,6 @@ class GetEquipmentBySerialNumberService implements GetEquipmentBySerialNumberUse
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<Equipment> execute(SerialNumber serialNumber) {
         return repository.findBySerialNumber(serialNumber);
     }
