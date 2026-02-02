@@ -36,12 +36,12 @@ component-test/
 │   │   ├── common/                           # Reusable steps (HTTP request/response, DB steps)
 │   │   │   └── hook/                         # Lifecycle hooks (clear scenario contexts, DB, message storage and etc.)
 │   │   └── {feature}/                        # Feature-specific steps
-│   │       └── {feature}WebSteps.java        # Feature-specific web related steps
-│   │       └── {feature}DbSteps.java         # Feature-specific db related steps
-│   │       └── {feature}MessagingSteps.java  # Feature-specific messaging related steps
+│   │       └── {Feature}WebSteps.java        # Feature-specific web related steps
+│   │       └── {Feature}DbSteps.java         # Feature-specific db related steps
+│   │       └── {Feature}MessagingSteps.java  # Feature-specific messaging related steps
 │   └── transformer/                          # Data transformers(Parameter transformers, )
 │       └── ParameterTypes.java               # Custom parameter types
-│       └── {modelOrEntity}Transformer.java   # Datatable transformers. Converts DataTable to domain objects
+│       └── {ModelOrEntity}Transformer.java   # Datatable transformers. Converts DataTable to domain objects
 └── src/test/resources/       
     ├── features/                             # Gherkin feature files
     │   ├── application.feature               # Basic app tests

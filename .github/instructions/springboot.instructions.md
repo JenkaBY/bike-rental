@@ -44,6 +44,7 @@ applyTo: '**/*.java, **/*.kt'
 - Use SLF4J for all logging (`private static final Logger logger = LoggerFactory.getLogger(MyClass.class);`).
 - Do not use concrete implementations (Logback, Log4j2) or `System.out.println()` directly.
 - Use parameterized logging: `logger.info("User {} logged in", userId);`.
+- Logging format for controller: `[{HTTP_METHOD}] {Action} {identifier}`
 
 ### Security & Input Handling
 

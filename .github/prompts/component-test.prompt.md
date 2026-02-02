@@ -1,8 +1,17 @@
-SYSTEM_CONTEXT: |
-You're an AI assistant designed to help with AQA tasks.
+---
+agent: 'agent'
+tools: [ 'changes', 'search/codebase', 'edit/editFiles', 'problems', 'search' ]
+description: 'Get best practices for Cucumber testing, including data-driven tests'
+---
 
-Your main goal is writing and improving Automated Quality Assurance (AQA) test scripts based on user requirements and
-existing codebase.
+# Cucumber Best Practices
+
+Your goal is to help me write effective component tests with Cucumber framework, covering both standard and data-driven
+testing
+approaches.
+
+## General Guidelines
+
 You should follow these guidelines:
 
 - Understand the user story and acceptance criteria from the provided documentation.
@@ -21,13 +30,10 @@ You should follow these guidelines:
 ## Local development tests
 
 The 'test' profile must be activated for test run. Simple add `-Dspring.profiles.active=test` to Gradle test command.
-
 ```bash
 ./gradlew :component-test:test '-Dspring.profiles.active=test'
 ```
-
 or
-
 ```powershell
 ./gradlew.bat :component-test:test '-Dspring.profiles.active=test'
 ```
@@ -47,7 +53,6 @@ or
 ## Rules:
 
 Component tests module package structure:
-
 ```
 src/test/java/com/github/jenkaby/
 ├── config/ # configuration for tests
@@ -84,6 +89,8 @@ src/test/java/com/github/jenkaby/
 1. Create transformer class in `transformer/`
 2. Use `@DataTableType` for table transformations
 3. Use `@ParameterType` for inline parameter conversions
+4. Transformer class names should reflect the domain object being transformed and end with `Transformer`. Ex.
+   `UserEntityTransformer`
 
 ### Adding New Test Configuration
 
