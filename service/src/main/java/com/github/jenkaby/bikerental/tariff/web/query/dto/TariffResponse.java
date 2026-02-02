@@ -1,6 +1,5 @@
 package com.github.jenkaby.bikerental.tariff.web.query.dto;
 
-import com.github.jenkaby.bikerental.tariff.domain.model.TariffPeriod;
 import com.github.jenkaby.bikerental.tariff.domain.model.TariffStatus;
 
 import java.math.BigDecimal;
@@ -11,7 +10,6 @@ public record TariffResponse(
         String name,
         String description,
         String equipmentTypeSlug,
-        TariffPeriod period,
         BigDecimal basePrice,
         BigDecimal halfHourPrice,
         BigDecimal hourPrice,

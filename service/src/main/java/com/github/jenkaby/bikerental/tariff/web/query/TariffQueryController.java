@@ -46,7 +46,7 @@ public class TariffQueryController {
 
     @GetMapping
     public ResponseEntity<Page<TariffResponse>> getAllTariffs(
-            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
         log.info("[GET] Get all tariffs with pagination {}", pageable);
 
         PageRequest pageRequest = new PageRequest(

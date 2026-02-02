@@ -23,12 +23,46 @@ public interface PageMapper {
     }
 
     default org.springframework.data.domain.PageRequest toSpring(PageRequest pageRequest) {
+        if (pageRequest.sortBy() == null) {
+            return org.springframework.data.domain.PageRequest.of(
+                    pageRequest.page(),
+                    pageRequest.size(),
+                    Sort.unsorted()
+            );
+        }
+
+        // Normalize sortBy which may contain direction info in various formats
+        String raw = pageRequest.sortBy().trim();
+        String property = raw;
+        Sort.Direction direction = Sort.Direction.ASC;
+
+        // Support formats: "name: ASC", "name,asc", "name asc", or just "name"
+        if (raw.contains(":")) {
+            String[] parts = raw.split(":");
+            property = parts[0].trim();
+            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("desc")) {
+                direction = Sort.Direction.DESC;
+            }
+        } else if (raw.contains(",")) {
+            String[] parts = raw.split(",");
+            property = parts[0].trim();
+            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("desc")) {
+                direction = Sort.Direction.DESC;
+            }
+        } else if (raw.toLowerCase().endsWith(" desc") || raw.toLowerCase().endsWith(" asc")) {
+            int idx = raw.lastIndexOf(' ');
+            property = raw.substring(0, idx).trim();
+            String d = raw.substring(idx + 1).trim();
+            if (d.equalsIgnoreCase("desc")) {
+                direction = Sort.Direction.DESC;
+            }
+        }
+
+        Sort sort = Sort.by(direction, property);
         return org.springframework.data.domain.PageRequest.of(
                 pageRequest.page(),
                 pageRequest.size(),
-                pageRequest.sortBy() != null ?
-                        Sort.by(pageRequest.sortBy()) :
-                        Sort.unsorted()
+                sort
         );
     }
 

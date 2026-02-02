@@ -1,7 +1,6 @@
 package com.github.jenkaby.bikerental.tariff.web.command.dto;
 
 import com.github.jenkaby.bikerental.shared.web.support.Slug;
-import com.github.jenkaby.bikerental.tariff.domain.model.TariffPeriod;
 import com.github.jenkaby.bikerental.tariff.domain.model.TariffStatus;
 import jakarta.validation.constraints.*;
 
@@ -19,9 +18,6 @@ public record TariffRequest(
 
         @Slug
         String equipmentTypeSlug,
-
-        @NotNull(message = "Period is required")
-        TariffPeriod period,
 
         @NotNull(message = "Base price is required")
         @DecimalMin(value = "0.0", inclusive = false, message = "Base price must be positive")
