@@ -14,7 +14,6 @@ public class Tariff {
     private final String name;
     private final String description;
     private final String equipmentTypeSlug;
-    private final TariffPeriod period;
     private final Money basePrice;
     private final Money halfHourPrice;
     private final Money hourPrice;
@@ -22,7 +21,7 @@ public class Tariff {
     private final Money hourDiscountedPrice;
     private final LocalDate validFrom;
     private final LocalDate validTo;
-    private TariffStatus status = TariffStatus.INACTIVE;
+    private TariffStatus status;
 
     public boolean isActive() {
         return TariffStatus.ACTIVE == status;

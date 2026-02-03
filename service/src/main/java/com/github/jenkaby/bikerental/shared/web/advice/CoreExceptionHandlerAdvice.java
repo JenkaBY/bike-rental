@@ -15,7 +15,9 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.MissingApiVersionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -47,14 +49,34 @@ public class CoreExceptionHandlerAdvice {
                 .build();
     }
 
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    ResponseEntity<ProblemDetail> handleError(MissingServletRequestParameterException ex) {
+        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        log.warn("Bad request for MissingServletRequestParameterException: {}", body);
+        return ResponseEntity.of(body)
+                .build();
+    }
+
     @ExceptionHandler(HandlerMethodValidationException.class)
     ResponseEntity<ProblemDetail> handleError(HandlerMethodValidationException ex) {
         var errors = ex.getValueResults().stream()
                 .flatMap(result -> result.getResolvableErrors().stream()
                         .map(MessageSourceResolvable::getDefaultMessage)
-                        .map(message -> String.join(" ",
-                                result.getMethodParameter().getParameterName(),
-                                message)))
+                        .map(message -> {
+                            String paramName = result.getMethodParameter().getParameterName();
+                            if (paramName == null) {
+                                // try to read from @PathVariable or fallback to arg index
+                                PathVariable pv = result.getMethodParameter().getParameterAnnotation(PathVariable.class);
+                                if (pv != null && !pv.name().isBlank()) {
+                                    paramName = pv.name();
+                                } else if (pv != null && !pv.value().isBlank()) {
+                                    paramName = pv.value();
+                                } else {
+                                    paramName = "arg" + result.getMethodParameter().getParameterIndex();
+                                }
+                            }
+                            return String.join(" ", paramName, message);
+                        }))
                 .collect(Collectors.joining(","));
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errors);
         log.warn("Bad request for HandlerMethodValidationException: {}", errors);

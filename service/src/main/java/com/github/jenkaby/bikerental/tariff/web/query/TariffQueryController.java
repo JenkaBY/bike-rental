@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.tariff.web.query;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import com.github.jenkaby.bikerental.shared.web.support.Id;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetActiveTariffsByEquipmentTypeUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetAllTariffsUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetTariffByIdUseCase;
@@ -38,7 +39,7 @@ public class TariffQueryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TariffResponse> getTariffById(@PathVariable("id") Long id) {
+    public ResponseEntity<TariffResponse> getTariffById(@PathVariable("id") @Id Long id) {
         log.info("[GET] Get tariff by id {}", id);
         Tariff tariff = getByIdUseCase.execute(id);
         return ResponseEntity.ok(mapper.toResponse(tariff));
