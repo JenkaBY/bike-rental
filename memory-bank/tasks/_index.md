@@ -8,7 +8,6 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## In Progress
 
-<!-- No tasks currently in progress -->
 
 ## Pending - Technical Improvements
 
@@ -20,10 +19,10 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
-- [US-TR-001] Справочник тарифов - High priority, tariff module
 - [US-FN-001] Прием оплаты - High priority, finance module
 - [US-AD-001] Управление пользователями - High priority, admin module
 - [US-AD-006] Резервное копирование и восстановление - Low priority, admin module
+- [US-TR-006] Tariff Versioning - Medium priority, tariff module (new task: implement immutable versioning)
 
 ## Pending - Phase 2: Basic Module Functions
 
@@ -90,6 +89,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [US-TR-001] Справочник тарифов - Completed on 2026-02-03 (domain + application + web layers, tests, migrations)
 - [US-EQ-001] Equipment Catalog - Completed on 2026-02-02 (139 subtasks: Database migrations,
   domain/infrastructure/application/web layers, 10 REST endpoints, WebMvc + Component tests, admin CRUD for
   types/statuses)

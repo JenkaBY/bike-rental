@@ -117,7 +117,7 @@ flowchart TB
 **Ключевые сущности:**
 
 - `Tariff` - тариф (тип оборудования, период, базовая цена, цена доп.времени)
-- `TariffPeriod` - enum: HOUR_1, HOUR_2, DAY
+- `TariffPeriod` - enum: HALF_HOUR, HOUR_1, DAY
 
 **Ключевые сервисы:**
 
@@ -555,11 +555,11 @@ public class CustomerController {
 
 **Тарифы (tariff module):**
 
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | `/tariffs` | Справочник активных тарифов |
-| GET | `/tariffs/{id}` | Детали тарифа |
-| GET | `/tariffs/cost` | Расчет стоимости `?equipment_type_id={id}&duration_minutes={min}` |
+| Метод | Endpoint        | Описание                                                            |
+|-------|-----------------|---------------------------------------------------------------------|
+| GET   | `/tariffs`      | Справочник активных тарифов                                         |
+| GET   | `/tariffs/{id}` | Детали тарифа                                                       |
+| GET   | `/tariffs/cost` | Расчет стоимости `?equipment_type_slug={id}&duration_minutes={min}` |
 
 **Аренда (rental module):**
 

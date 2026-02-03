@@ -1,0 +1,16 @@
+/**
+ * Tariff Management Module.
+ *
+ * <p>This module handles tariff catalog, pricing configuration, and cost calculation
+ * for equipment rentals. It provides tariff CRUD operations, activation/deactivation,
+ * and querying capabilities for rental pricing.
+ *
+ * <p>Public API:
+ * <ul>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffFacade} - External module interface</li>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffInfo} - Public tariff DTO</li>
+ * </ul>
+ *
+ * @since 1.0
+ */
+package com.github.jenkaby.bikerental.tariff;
