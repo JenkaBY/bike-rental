@@ -13,4 +13,7 @@
  *
  * @since 1.0
  */
+@org.springframework.modulith.ApplicationModule(
+        displayName = "Tariff Module"
+)
 package com.github.jenkaby.bikerental.tariff;

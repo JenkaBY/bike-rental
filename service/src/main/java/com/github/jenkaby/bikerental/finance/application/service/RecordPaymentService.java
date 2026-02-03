@@ -1,12 +1,12 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
-import com.github.f4b6a3.uuid.UuidCreator;
+import com.github.jenkaby.bikerental.finance.PaymentReceived;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordPaymentUseCase;
-import com.github.jenkaby.bikerental.finance.domain.event.PaymentReceived;
 import com.github.jenkaby.bikerental.finance.domain.model.Payment;
 import com.github.jenkaby.bikerental.finance.domain.repository.PaymentRepository;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
-import com.github.jenkaby.bikerental.shared.infrastructure.messaging.MessagePublisher;
+import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +23,14 @@ public class RecordPaymentService implements RecordPaymentUseCase {
 
     private final PaymentRepository repository;
     private final ReceiptNumberGenerationService receiptService;
-    private final MessagePublisher messagePublisher;
+    private final EventPublisher eventPublisher;
     private final Clock clock;
+    private final UuidGenerator uuidGenerator;
 
     @Override
     @Transactional
-    public RecordPaymentResponse execute(RecordPaymentCommand command) {
-        UUID id = UuidCreator.getTimeOrderedEpoch();
+    public Payment execute(RecordPaymentCommand command) {
+        UUID id = uuidGenerator.generate();
 
         String receipt = receiptService.generate();
 
@@ -48,9 +49,8 @@ public class RecordPaymentService implements RecordPaymentUseCase {
 
         repository.save(payment);
 
+        eventPublisher.publish(PAYMENT_EXCHANGER, new PaymentReceived(id, command.rentalId(), Money.of(command.amount()), command.paymentType(), now));
 
-        messagePublisher.publish(PAYMENT_EXCHANGER, new PaymentReceived(id, command.rentalId(), Money.of(command.amount()), command.paymentType(), now));
-
-        return new RecordPaymentResponse(id, receipt);
+        return payment;
     }
 }

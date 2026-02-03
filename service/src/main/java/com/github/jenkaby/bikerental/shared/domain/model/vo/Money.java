@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.shared.domain.model.vo;
 
 import java.math.BigDecimal;
 
-public record Money(BigDecimal amount) {
+public record Money(BigDecimal amount) implements Comparable<Money> {
 
     public Money {
         if (amount == null) {
@@ -56,5 +56,10 @@ public record Money(BigDecimal amount) {
     @Override
     public String toString() {
         return amount.toPlainString();
+    }
+
+    @Override
+    public int compareTo(Money o) {
+        return this.amount.compareTo(o.amount);
     }
 }

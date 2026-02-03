@@ -5,6 +5,12 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
     <changeSet id="tariffs.create-table" author="bikerental">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tariffs"/>
+            </not>
+        </preConditions>
+
         <createTable tableName="tariffs">
             <column name="id" type="bigserial">
                 <constraints primaryKey="true" nullable="false"/>

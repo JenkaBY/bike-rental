@@ -1,14 +1,14 @@
 package com.github.jenkaby.bikerental.finance.application.usecase;
 
+import com.github.jenkaby.bikerental.finance.domain.model.Payment;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 public interface RecordPaymentUseCase {
 
-    RecordPaymentResponse execute(RecordPaymentCommand command);
+    Payment execute(RecordPaymentCommand command);
 
     record RecordPaymentCommand(
             Long rentalId,
@@ -17,8 +17,5 @@ public interface RecordPaymentUseCase {
             PaymentMethod paymentMethod,
             String operatorId
     ) {
-    }
-
-    record RecordPaymentResponse(UUID paymentId, String receiptNumber) {
     }
 }

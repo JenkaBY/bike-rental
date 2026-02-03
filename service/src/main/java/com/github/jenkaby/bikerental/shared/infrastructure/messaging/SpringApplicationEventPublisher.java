@@ -13,7 +13,7 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class SpringApplicationEventPublisher implements MessagePublisher {
+public class SpringApplicationEventPublisher implements EventPublisher {
 
     private final ApplicationEventPublisher eventPublisher;
 
