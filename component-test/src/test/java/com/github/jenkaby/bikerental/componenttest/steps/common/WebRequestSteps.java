@@ -132,10 +132,20 @@ public class WebRequestSteps {
         expectations.forEach(exp -> {
             var jsonPath = JsonPath.compile(exp.path());
             Object actual = documentContext.read(jsonPath);
-            var expected = "null".equals(exp.value()) ? null : exp.value();
-            softly.assertThat(actual).as("For actual %s", scenarioContext.getStringResponseBody()).isEqualTo(expected);
+            var expected = convertToExpected(exp.value());
+            softly.assertThat(Optional.ofNullable(actual).map(Object::toString).orElse(null))
+                    .isEqualTo(expected);
         });
         softly.assertAll();
+    }
+
+    private static Object convertToExpected(Object expected) {
+        if ("true".equals(expected) || "false".equals(expected)) {
+            expected = Boolean.parseBoolean(expected.toString());
+        } else if ("null".equals(expected)) {
+            expected = null;
+        }
+        return expected;
     }
 
     @Given("a prepared payload is")
