@@ -11,6 +11,11 @@ spring:
     change-log: classpath:/db/changelog/db.changelog-master.xml
   jpa:
     open-in-view: false
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: true
 
 logging:
   level:

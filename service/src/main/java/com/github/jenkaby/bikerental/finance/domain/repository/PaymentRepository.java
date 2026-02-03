@@ -12,7 +12,7 @@ public interface PaymentRepository {
 
     Optional<Payment> findById(UUID id);
 
-    List<Payment> findByRentalId(Long rentalId);
+    List<Payment> getForRental(Long rentalId);
 
     boolean existsByReceiptNumber(String receiptNumber);
 

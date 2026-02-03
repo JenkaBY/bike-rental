@@ -19,7 +19,7 @@ public class Payment {
     private final PaymentType paymentType;
     private final PaymentMethod paymentMethod;
     private final Instant createdAt;
-    private final UUID operatorId;
+    private final String operatorId;
     private final String receiptNumber;
 
     public boolean hasRental() {
@@ -29,4 +29,6 @@ public class Payment {
     public boolean isForRental(Long rentalId) {
         return this.rentalId != null && this.rentalId.equals(rentalId);
     }
+
+
 }
