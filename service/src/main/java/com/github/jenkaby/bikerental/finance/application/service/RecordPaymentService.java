@@ -33,7 +33,7 @@ public class RecordPaymentService implements RecordPaymentUseCase {
 
         String receipt = receiptService.generate();
 
-        var now = Instant.now(clock);
+        Instant now = clock.instant();
 
         Payment payment = Payment.builder()
                 .id(id)
