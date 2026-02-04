@@ -149,6 +149,50 @@ shared/
 - Published after state changes
 - Consumed by other modules asynchronously
 - Examples: `RentalStarted`, `RentalCompleted`, `EquipmentStatusChanged`
+- **ARCHITECTURAL RULE**: All domain events MUST implement
+  `com.github.jenkaby.bikerental.shared.infrastructure.messaging.BikeRentalEvent` marker interface
+
+**Event Contract:**
+
+```java
+package com.github.jenkaby.bikerental.shared.infrastructure.messaging;
+
+/**
+ * Marker interface for all domain events in the BikeRental system.
+ * 
+ * Purpose:
+ * - Type safety for event handling and routing
+ * - Enables generic event processing infrastructure
+ * - Facilitates event filtering and validation
+ * - Serves as documentation of system-wide event contracts
+ * 
+ * Usage: All domain events (records or classes) published within 
+ * the system MUST implement this interface.
+ */
+public interface BikeRentalEvent {
+}
+```
+
+**Example Implementation:**
+
+```java
+public record PaymentReceived(
+    UUID paymentId,
+    Long rentalId,
+    Money amount,
+    PaymentType paymentType,
+    Instant receivedAt
+) implements BikeRentalEvent {
+}
+```
+
+**Benefits:**
+
+- **Type Safety**: Compile-time verification of event contracts
+- **Event Filtering**: Infrastructure can distinguish domain events from framework events
+- **Centralized Processing**: Generic handlers for all domain events
+- **Testing**: Simplified event capture and verification in tests
+- **Documentation**: Clear identification of domain events vs system events
 
 **5. Specification Pattern**
 

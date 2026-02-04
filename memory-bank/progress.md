@@ -3,10 +3,10 @@
 ## Project Overview
 
 **Project:** BikeRental Equipment Rental Management System  
-**Status:** 🚀 Active Implementation | Three User Stories Complete  
+**Status:** 🚀 Active Implementation | Four User Stories Complete  
 **Phase:** Phase 1 - Foundation (In Progress)  
-**Date:** January 29, 2026  
-**Overall Completion:** ~7% Implementation (3 of 43 user stories complete) | 100% Documentation
+**Date:** February 4, 2026  
+**Overall Completion:** ~9% Implementation (4 of 43 user stories complete) | 100% Documentation
 
 ---
 
@@ -22,7 +22,7 @@
 
 ---
 
-### Phase 1: Foundation (3 of 7 Complete) ✅
+### Phase 1: Foundation (4 of 7 Complete) ✅
 
 **US-CL-001: Customer Search by Phone** (Completed: January 28, 2026)
 
@@ -231,16 +231,16 @@
 
 ## Planned Features
 
-### Phase 1: Foundation (3 of 7 Complete - 43% Done)
+### Phase 1: Foundation (4 of 7 Complete - 57% Done)
 
 **Priority: CRITICAL** - Must complete before other phases
 
 - [x] US-CL-001: Customer Search by Phone (core operation) ✅ **COMPLETED**
 - [x] US-CL-002: Quick Customer Creation (core operation) ✅ **COMPLETED**
 - [x] US-CL-003: Full Customer Profile (customer management) ✅ **COMPLETED**
-- [ ] US-EQ-001: Equipment Catalog (core operation)
-- [ ] US-TR-001: Tariff Catalog (pricing foundation)
-- [ ] US-FN-001: Payment Acceptance (financial foundation)
+- [x] US-EQ-001: Equipment Catalog (core operation) ✅ **COMPLETED**
+- [x] US-TR-001: Tariff Catalog (pricing foundation) ✅ **COMPLETED**
+- [x] US-FN-001: Payment Acceptance (financial foundation) ✅ **COMPLETED**
 - [ ] US-AD-001: User Management (authentication foundation)
 
 **Dependencies:** None (foundation layer)  
@@ -363,7 +363,7 @@
 | customer    | 📋 Documented | 5     | 0%         |
 | equipment   | 📋 Documented | 5     | 0%         |
 | tariff      | 📋 Documented | 5     | 0%         |
-| finance     | 📋 Documented | 4     | 0%         |
+| finance     | 📋 Documented | 4     | 25%        |
 | admin       | 📋 Documented | 6     | 0%         |
 | maintenance | 📋 Documented | 4     | 0%         |
 | rental      | 📋 Documented | 9     | 0%         |
@@ -652,18 +652,3 @@
     - Performance targets met
     - Security review completed
     - Technical debt managed
-
----
-
-**Last Updated:** January 26, 2026  
-**Next Review:** When implementation begins  
-**Status:** 📋 Documentation Complete | 🚀 Ready for Implementation
-
-### 2026-01-30 - Component Tests for Equipment Status Endpoints
-
-- Implemented Cucumber feature and step definitions for equipment status endpoints (list, get by ID, update status)
-- Created InsertableEquipmentRepository for test DB setup
-- All tests use real HTTP requests, test profile, and AssertJ for assertions
-- Tests cover positive scenarios and are self-contained
-- No errors found in step definitions
-- Ready for further test execution and review
