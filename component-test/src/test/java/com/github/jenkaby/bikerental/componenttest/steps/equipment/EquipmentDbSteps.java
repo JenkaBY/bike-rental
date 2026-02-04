@@ -30,7 +30,7 @@ public class EquipmentDbSteps {
 
     @Given("the following equipment record(s) exist(s) in db")
     public void theFollowingEquipmentExists(List<EquipmentJpaEntity> entities) {
-        log.info("Inserting equipments: {}", entities);
+        log.debug("Inserting equipments: {}", entities);
         insertRepository.insertAll(entities);
     }
 

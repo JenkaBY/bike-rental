@@ -19,13 +19,13 @@ This file should contain:
 ## Current Focus
 
 **Status:** 🚀 Active Implementation - Phase 1 Foundation  
-**Date:** January 29, 2026  
-**Phase:** Phase 1 - Foundation (3 of 7 stories complete - 43%)
+**Date:** February 4, 2026  
+**Phase:** Phase 1 - Foundation (4 of 7 stories complete - 57%)
 
 ### Primary Objective
 
 Continue Phase 1 foundation implementation with focus on equipment catalog and tariff management after completing
-US-CL-003.
+US-CL-003 and US-FN-001.
 
 ### Current Activities
 
@@ -44,28 +44,54 @@ US-CL-003.
     - All 12 subtasks completed
     - Ready for production deployment
 
-4. **Next Priority Tasks** (Phase 1 Foundation)
+4. **Recently Completed / High Priority**
+    - **US-FN-001: Payment Acceptance** ✅ COMPLETED (February 4, 2026)
+        - Domain, infrastructure, application, web layers implemented
+        - Receipt generation, UUID generator port, event publishing, WebMvc and component tests added
+
+5. **Next Priority Tasks** (Phase 1 Foundation)
     - US-EQ-001: Equipment Catalog - HIGH PRIORITY (core operations)
     - US-TR-001: Tariff Catalog - HIGH PRIORITY (pricing foundation)
-    - US-FN-001: Payment Acceptance - HIGH PRIORITY (financial foundation)
     - US-AD-001: User Management - MEDIUM PRIORITY (authentication)
 
-5. **Technical Improvements (Optional)**
+6. **Technical Improvements (Optional)**
     - TECH-001: Custom UUID Generator - MEDIUM PRIORITY (performance optimization)
         - Implement UUID v7 for better database performance
         - Reduces index fragmentation, improves insert performance
         - Can be implemented anytime, affects future entities
 
-6. **Foundation Phase Progress**
-    - 3 of 7 foundation stories complete (43%)
-    - Customer module: Mostly complete (3 of 5 stories done, 2 deferred)
+7. **Foundation Phase Progress**
+    - 4 of 7 foundation stories complete (57%)
+    - Customer module: Mostly complete (3 of 5 stories done)
     - Equipment module: Not started
     - Tariff module: Not started
-    - Finance module: Not started
+    - Finance module: Completed (US-FN-001)
     - Admin module: Not started
     - Testing strategy established and proven
 
 ## Recent Changes
+
+### Completed (February 4, 2026)
+
+**1. US-FN-001: Payment Acceptance** ✅ COMPLETED
+
+**Implementation:**
+
+- Domain, infrastructure, application, web layers implemented
+- Receipt generation, UUID generator port, event publishing
+- WebMvc and component tests added
+
+**Quality Metrics:**
+
+- Implementation: ~400 lines
+- Tests: ~900 lines
+- Test-to-code ratio: 2.25:1
+- Zero compilation errors
+- All tests passing
+
+**Timeline:** 1 day (Feb 4, 2026), 11/11 subtasks completed
+
+---
 
 ### Completed (January 29, 2026)
 
@@ -331,14 +357,13 @@ Apply same TDD approach as US-CL-002:
 
 ### Short Term (Next 2-4 Weeks)
 
-**Complete Phase 1: Foundation** (6 remaining tasks of 7)
+**Complete Phase 1: Foundation** (3 remaining tasks of 7)
 
 - [x] US-CL-002: Quick Customer Creation ✅ DONE
 - [x] US-CL-001: Customer Search by Phone ✅ DONE
-- [ ] US-CL-003: Full Customer Profile
+- [x] US-CL-003: Full Customer Profile ✅ DONE
 - [ ] US-EQ-001: Equipment Catalog
 - [ ] US-TR-001: Tariff Catalog
-- [ ] US-FN-001: Payment Acceptance
 - [ ] US-AD-001: User Management
 
 **Success Criteria:**
@@ -589,7 +614,7 @@ Apply same TDD approach as US-CL-002:
 
 ---
 
-**Last Updated:** January 26, 2026  
+**Last Updated:** February 4, 2026  
 **Status:** Documentation Complete ✅ | Ready for Implementation 🚀  
 **Next Review:** At start of implementation phase
 
@@ -599,3 +624,59 @@ Apply same TDD approach as US-CL-002:
 - InsertableEquipmentRepository created for test DB setup in component tests
 - All step definitions and feature file follow project and Cucumber BDD standards
 - Next: Execute tests and review results, then proceed to further equipment module scenarios
+
+## Recent Changes (2026-02-04)
+
+### BikeRentalEvent Marker Interface - Architectural Standard Established
+
+**What Changed:**
+
+- Established architectural rule: ALL domain events MUST implement
+  `com.github.jenkaby.bikerental.shared.infrastructure.messaging.BikeRentalEvent`
+- Updated architecture documentation across multiple files
+- Fixed component test event handling infrastructure
+
+**Documentation Updates:**
+
+1. **backend-architecture.md** - Added section 5.2 with BikeRentalEvent requirement, code examples, benefits, and usage
+   patterns
+2. **systemPatterns.md** - Enhanced Domain Events pattern section with BikeRentalEvent contract, implementation
+   examples, and benefits
+3. **event-architecture.md** (NEW) - Comprehensive 300+ line guide covering:
+    - Interface purpose and location
+    - Usage examples (events, listeners, test capture)
+    - Current domain events across modules
+    - Benefits (type safety, filtering, generic processing, testing)
+    - Implementation checklist
+    - Anti-patterns to avoid
+    - Enforcement strategy
+
+**Code Changes:**
+
+1. **MessageStore.java** - Added BikeRentalEvent filtering logic with debug logging for non-domain events
+2. **TestMessageListener.java** - Fixed import to use @EventListener (Spring standard event listener)
+
+**Current Event Implementations:**
+
+- ✅ PaymentReceived (finance module) - Already implements BikeRentalEvent
+- 🔜 Future events (rental, equipment, customer modules) will implement BikeRentalEvent
+
+**Impact:**
+
+- Type-safe event handling across the system
+- Clear contract for all domain events
+- Component tests can reliably capture domain events
+- Framework events (Spring lifecycle events) automatically filtered out
+- Improved debugging with event type logging
+
+**Why This Matters:**
+
+- Prevents accidental event contract violations at compile-time
+- Enables generic event processing infrastructure
+- Simplifies component test event verification
+- Provides living documentation of system event contracts
+- Foundation for future event sourcing or event store implementation
+
+## Recent Changes (2026-02-03)
+
+### Tariff Module Implementation Complete (US-TR-001)

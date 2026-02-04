@@ -33,6 +33,7 @@ springdoc-starter-webmvc-ui = { module = 'org.springdoc:springdoc-openapi-starte
 
 spring-modulith-starter-core = { module = "org.springframework.modulith:spring-modulith-starter-core" }
 spring-modulith-starter-jpa = { module = "org.springframework.modulith:spring-modulith-starter-jpa" }
+spring-modulith-events-api = { module = "org.springframework.modulith:spring-modulith-events-api" }
 
 lombok = { module = "org.projectlombok:lombok" }
 mapstruct = { module = 'org.mapstruct:mapstruct', version.ref = 'map-struct' }
@@ -89,6 +90,7 @@ spring-test = [
 spring-modulith = [
     'spring-modulith-starter-core',
     'spring-modulith-starter-jpa',
+    'spring-modulith-events-api',
 ]
 spring-modulith-test = [
     'spring-modulith-starter-test',

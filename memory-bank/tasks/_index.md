@@ -16,10 +16,11 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   Specifications for equipment search (2026-02-02)
 - [TECH-003] Add PATCH Endpoint for Equipment Status Change - Medium priority, equipment module, RESTful partial updates
   for status transitions (2026-02-02)
+- [TECH-004] Rental Information Cache in Finance Module - Medium priority, finance module, event-driven rental
+  validation (2026-02-04)
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
-- [US-FN-001] Прием оплаты - High priority, finance module
 - [US-AD-001] Управление пользователями - High priority, admin module
 - [US-AD-006] Резервное копирование и восстановление - Low priority, admin module
 - [US-TR-006] Tariff Versioning - Medium priority, tariff module (new task: implement immutable versioning)
@@ -99,3 +100,4 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   tests)
 - [US-CL-002] Быстрое создание клиента - Completed on 2026-01-27 (Implementation + 83+ tests: 68 unit, 15 WebMvc,
   component tests)
+- [US-FN-001] Прием оплаты - Completed on 2026-02-04 (finance module: domain, application, infrastructure, web, tests)

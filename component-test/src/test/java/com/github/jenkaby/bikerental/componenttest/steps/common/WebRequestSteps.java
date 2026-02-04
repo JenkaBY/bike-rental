@@ -139,6 +139,13 @@ public class WebRequestSteps {
         softly.assertAll();
     }
 
+
+    @Then("the response is empty list")
+    public void theResponseIsEmptyList() {
+        var actual = scenarioContext.getResponseAsList(Object.class);
+        assertThat(actual).isEmpty();
+    }
+
     private static Object convertToExpected(Object expected) {
         if ("true".equals(expected) || "false".equals(expected)) {
             expected = Boolean.parseBoolean(expected.toString());

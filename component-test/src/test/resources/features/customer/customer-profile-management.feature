@@ -4,8 +4,7 @@ Feature: Customer Profile Management
   So that I can maintain accurate customer records for rental operations
 
   Background:
-    Given the database is empty for "customers" table
-    And the request header "Content-Type" is "application/vnd.bikerental.v1+json"
+    Given the request header "Content-Type" is "application/vnd.bikerental.v1+json"
     And customers exist in the database with the following data
       | id   | phone        | firstName | lastName | email                    | birthDate  | comments |
       | CUS1 | +79995551111 | Alex      | Johnson  | null                     | null       | null     |

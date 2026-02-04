@@ -15,10 +15,7 @@ import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.type.CollectionType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 @Setter
@@ -31,6 +28,7 @@ public class ScenarioContext {
     private ResponseEntity<String> response;
     private Object requestBody;
     private String modifiedObjectId;
+    private Set<UUID> persistedIds = new HashSet<>();
 
     @SneakyThrows
     public <T> T getResponseBody(Class<T> clazz) {
@@ -75,5 +73,9 @@ public class ScenarioContext {
 
     public MultiValueMap<String, String> getRequestHeaders() {
         return CollectionUtils.toMultiValueMap(requestHeaders);
+    }
+
+    public void addPersistedId(UUID id) {
+        this.persistedIds.add(id);
     }
 }

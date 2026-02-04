@@ -339,6 +339,76 @@ sequenceDiagram
 
 ### 5.2 Асинхронная (через Spring Application Events)
 
+**Архитектурное правило: Все доменные события ДОЛЖНЫ реализовывать интерфейс-маркер `BikeRentalEvent`**
+
+```java
+package com.github.jenkaby.bikerental.shared.infrastructure.messaging;
+
+/**
+ * Marker interface for all domain events in the BikeRental system.
+ *
+ * <p>Назначение:
+ * <ul>
+ *   <li>Обеспечивает типобезопасность для обработки и маршрутизации событий</li>
+ *   <li>Позволяет создавать общую инфраструктуру для обработки событий</li>
+ *   <li>Облегчает фильтрацию и валидацию событий</li>
+ *   <li>Служит документацией системных событий</li>
+ * </ul>
+ *
+ * <p>Использование:
+ * Все доменные события (records или classes), публикуемые в системе, 
+ * ОБЯЗАНЫ реализовывать этот интерфейс.
+ *
+ * <p>Пример:
+ * <pre>
+ * public record PaymentReceived(
+ *     UUID paymentId,
+ *     Long rentalId,
+ *     Money amount,
+ *     PaymentType paymentType,
+ *     Instant receivedAt
+ * ) implements BikeRentalEvent {
+ * }
+ * </pre>
+ */
+public interface BikeRentalEvent {
+}
+```
+
+**Преимущества использования маркерного интерфейса:**
+
+1. **Фильтрация событий** - Инфраструктурные компоненты могут отличать доменные события от системных (Spring Framework)
+2. **Типобезопасность** - Компилятор проверяет контракт событий на этапе сборки
+3. **Централизованная обработка** - Можно создавать общие обработчики для всех `BikeRentalEvent`
+4. **Документация** - Явно указывает, что класс является доменным событием
+5. **Тестирование** - Упрощает перехват и проверку событий в тестах
+
+**Пример использования в компонентных тестах:**
+
+```java
+
+@Component
+@ScenarioScope
+public class MessageStore {
+
+  /**
+   * Обрабатывает только доменные события, реализующие BikeRentalEvent.
+   * События, не реализующие этот интерфейс, игнорируются.
+   */
+  public void handleEvent(Object event) {
+    if (!(event instanceof BikeRentalEvent)) {
+      log.debug("Ignoring non-domain event: {}", event.getClass());
+      return;
+    }
+
+    // Сохраняем доменное событие для проверки в тестах
+    storeEvent(event);
+  }
+}
+```
+
+**Диаграмма обработки событий:**
+
 ```mermaid
 sequenceDiagram
     participant ReturnEquipmentUseCase
@@ -413,7 +483,7 @@ erDiagram
 
     PAYMENT {
         uuid id PK
-        uuid rental_id FK
+      bigint rental_id
         string payment_type
         string payment_method
         decimal amount
@@ -422,7 +492,7 @@ erDiagram
 
     MAINTENANCE_RECORD {
         uuid id PK
-        uuid equipment_id FK
+      int equipment_id
         string maintenance_type
         text description
         timestamp started_at

@@ -17,7 +17,7 @@ public class CustomerDbSteps {
 
     @Given("(a )customer(s) exist(s) in the database with the following data")
     public void aCustomerExistsInTheDatabaseWithTheFollowingData(List<CustomerJpaEntity> customers) {
-        log.info("Creating customer in database: {}", customers);
+        log.debug("Creating customer in database: {}", customers);
 
         customerJpaRepository.insertAll(customers);
     }

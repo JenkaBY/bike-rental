@@ -2,8 +2,8 @@ spring:
   jpa:
     properties:
       hibernate:
-        show_sql: true
-        highlight_sql: true
+        show_sql: false
+        highlight_sql: false
   datasource:
     url: jdbc:postgresql://localhost:5432/bikerental_component_test
     username: postgres
@@ -19,3 +19,4 @@ logging:
   level:
     root: info
     com.github.jenkaby.bikerental: debug
+    com.github.jenkaby.bikerental.componenttest: info

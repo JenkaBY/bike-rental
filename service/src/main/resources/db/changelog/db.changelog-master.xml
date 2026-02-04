@@ -5,6 +5,8 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
     <!-- add changelogs files here -->
+    <include relativeToChangelogFile="true" file="v1/event_publication.create-table.xml"/>
+    <include relativeToChangelogFile="true" file="v1/event_publication_archive.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/customers.create-table.xml"/>
 
     <!-- Equipment module -->
@@ -12,7 +14,12 @@
     <include relativeToChangelogFile="true" file="v1/equipment_statuses.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/equipments.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/tariffs.create-table.xml"/>
+    <include relativeToChangelogFile="true" file="v1/payments.create-table.xml"/>
+    <!--    provisioning data -->
     <include relativeToChangelogFile="true" file="data/equipment_types-provisioning.xml"/>
     <include relativeToChangelogFile="true" file="data/equipment_statuses-provisioning.xml"/>
     <include relativeToChangelogFile="true" file="data/tariffs-provisioning.xml"/>
+
+    <!--    provisioning data -->
+
 </databaseChangeLog>

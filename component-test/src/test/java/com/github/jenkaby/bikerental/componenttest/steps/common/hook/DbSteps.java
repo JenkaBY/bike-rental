@@ -1,7 +1,6 @@
 package com.github.jenkaby.bikerental.componenttest.steps.common.hook;
 
 import io.cucumber.java.After;
-import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -15,10 +14,14 @@ public class DbSteps {
 
     private static final List<String> TABLE_TO_TRUNCATE = List.of(
 //            order is important due to foreign key constraints
+            "event_publication", // from modulith event_api
+            "event_publication_archive", // from modulith event_api
             "customers",
             "equipments",
             "equipment_statuses",
-            "equipment_types"
+            "equipment_types",
+            "tariffs",
+            "payments"
     );
 
     private final JdbcClient jdbcClient;
@@ -27,16 +30,5 @@ public class DbSteps {
     public void truncateDb() {
         log.info("Deleting all records on tables {}", TABLE_TO_TRUNCATE);
         JdbcTestUtils.deleteFromTables(jdbcClient, TABLE_TO_TRUNCATE.toArray(new String[0]));
-    }
-
-    @Given("the database is empty for {string} table")
-    public void theDatabaseIsEmptyForTable(String tableName) {
-        log.info("Deleting all records from table {}", tableName);
-        JdbcTestUtils.deleteFromTables(jdbcClient, tableName);
-    }
-
-    @Given("the {string} table is empty")
-    public void theTableIsEmpty(String tableName) {
-        theDatabaseIsEmptyForTable(tableName);
     }
 }
