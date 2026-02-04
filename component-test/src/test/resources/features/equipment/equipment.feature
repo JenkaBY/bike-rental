@@ -4,8 +4,7 @@ Feature: Equipment management endpoints
   So that I can create, update, view and search equipment details
 
   Background:
-    Given the database is empty for "equipments" table
-    And the following equipment statues exist in the database
+    Given the following equipment statues exist in the database
       | slug        | name        | description       |
       | BROKEN      | Broken      | Not Ready to rent |
       | AVAILABLE   | Available   | Ready to rent     |

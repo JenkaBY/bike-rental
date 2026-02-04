@@ -27,7 +27,7 @@ public class TariffDbSteps {
 
     @Given("the following tariff record(s) exist(s) in db")
     public void theFollowingTariffsExist(List<TariffJpaEntity> entities) {
-        log.info("Inserting tariffs: {}", entities);
+        log.debug("Inserting tariffs: {}", entities);
         insertRepository.insertAll(entities);
     }
 

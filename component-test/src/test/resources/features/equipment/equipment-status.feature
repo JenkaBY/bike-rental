@@ -4,8 +4,7 @@ Feature: Equipment status endpoints
   So that I can track and update equipment availability
 
   Background:
-    Given the database is empty for "equipment_statuses" table
-    And the following equipment statues exist in the database
+    Given the following equipment statues exist in the database
       | slug        | name        | description   |
       | AVAILABLE   | Available   | Ready to rent |
       | MAINTENANCE | Maintenance | null          |

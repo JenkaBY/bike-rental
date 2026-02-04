@@ -4,8 +4,7 @@ Feature: Customer Search by Phone
   So that I can quickly identify a customer during rental
 
   Background:
-    Given the database is empty for "customers" table
-    And the request header "Content-Type" is "application/vnd.bikerental.v1+json"
+    Given the request header "Content-Type" is "application/vnd.bikerental.v1+json"
 
   Scenario: Search returns matching customers limited to 10 results
     Given customers exist in the database with the following data

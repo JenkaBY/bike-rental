@@ -4,8 +4,7 @@ Feature: Equipment type endpoints
   So that I can categorize and manage equipment
 
   Background:
-    Given the database is empty for "equipment_types" table
-    And the following equipment types exist in the database
+    Given the following equipment types exist in the database
       | slug    | name    | description |
       | bicycle | Bicycle | Two-wheeled |
       | scooter | Scooter | Electric    |

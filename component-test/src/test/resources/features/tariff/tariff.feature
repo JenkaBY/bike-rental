@@ -4,8 +4,7 @@ Feature: Tariff management endpoints
   So that I can create, activate, deactivate and query tariffs
 
   Background:
-    Given the database is empty for "tariffs" table
-    And the following equipment types exist in the database
+    Given the following equipment types exist in the database
       | slug    | name    | description        |
       | bicycle | Bicycle | Two-wheeled        |
       | scooter | Scooter | Electric           |
