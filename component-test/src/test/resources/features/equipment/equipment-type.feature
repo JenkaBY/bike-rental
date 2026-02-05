@@ -52,7 +52,7 @@ Feature: Equipment type endpoints
       | scooter | Big Trailer | Heavy-duty trailer |
 
   Scenario: Update equipment type by slug when no status exists
-    Given the 'equipment status' request is prepared with the following data
+    Given the equipment status request is prepared with the following data
       | slug       | name |
       | NOT_EXISTS | any  |
     When a PUT request has been made to "/api/equipment-types/NOT_EXISTS" endpoint

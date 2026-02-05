@@ -3,10 +3,10 @@
 ## Project Overview
 
 **Project:** BikeRental Equipment Rental Management System  
-**Status:** 🚀 Active Implementation | Four User Stories Complete  
+**Status:** 🚀 Active Implementation | Eight User Stories Complete  
 **Phase:** Phase 1 - Foundation (In Progress)  
-**Date:** February 4, 2026  
-**Overall Completion:** ~9% Implementation (4 of 43 user stories complete) | 100% Documentation
+**Date:** February 5, 2026  
+**Overall Completion:** ~19% Implementation (8 of 43 user stories complete) | 100% Documentation
 
 ---
 
@@ -22,7 +22,7 @@
 
 ---
 
-### Phase 1: Foundation (4 of 7 Complete) ✅
+### Phase 1: Foundation (6 of 7 Complete) ✅
 
 **US-CL-001: Customer Search by Phone** (Completed: January 28, 2026)
 
@@ -150,6 +150,145 @@
 
 ---
 
+**US-FN-001: Payment Acceptance** (Completed: February 4, 2026)
+
+**Module:** finance  
+**Effort:** 1 day (Feb 4, 2026)
+
+**Implementation Delivered:**
+
+- ✅ POST /api/payments endpoint with validation and event publishing
+- ✅ Domain layer: Payment aggregate with business logic and domain events
+- ✅ Application layer: RecordPaymentUseCase with rental existence validation
+- ✅ Infrastructure layer: JPA repository, event publisher, rental info cache
+- ✅ Database: Liquibase migration for payments table
+- ✅ Event-driven architecture: PaymentReceived event with BikeRentalEvent marker interface
+
+**Testing Delivered:**
+
+- ✅ Unit tests for domain, service, and event publishing
+- ✅ WebMvc tests for controller validation scenarios
+- ✅ Component tests for payment flow
+- ✅ Transactional event publishing test
+
+**Architecture Decisions:**
+
+- ✅ Created BikeRentalEvent marker interface for all domain events
+- ✅ Implemented rental validation cache to avoid cross-module repository calls
+- ✅ Used custom UUID generator (UuidCreator.getTimeOrderedEpoch) for performance
+- ✅ Separated domain events from infrastructure concerns
+
+**Features:**
+
+- Payment recording with multiple payment types (CASH, CARD, BANK_TRANSFER)
+- Rental existence validation (cached for 5 minutes)
+- Domain event publishing for cross-module integration
+- Proper HTTP status codes (201 Created, 400 Bad Request, 404 Not Found)
+
+**Code Quality:**
+
+- Zero compilation errors
+- Follows hexagonal architecture with event-driven communication
+- Transactional consistency guaranteed
+- Payment entity cannot be modified after creation (immutable)
+
+**Technical Metrics:**
+
+- Implementation: ~450 lines
+- Tests: ~300 lines
+- Subtasks completed: 100%
+
+---
+
+**Architecture Enhancement: DDD-Compliant Status Management** (Completed: February 5, 2026)
+
+**Module:** equipment  
+**Effort:** 2 days (Feb 4-5, 2026)
+
+**Architecture Delivered:**
+
+- ✅ Equipment.changeStatus() with dependency inversion
+- ✅ EquipmentStatus enhanced with allowedTransitionSlugs field
+- ✅ Liquibase changelog for equipment_status_transitions table
+- ✅ Embedded transition rules management via EquipmentStatus CRUD
+
+**Design Principles Applied:**
+
+- ✅ Hexagonal Architecture: Domain uses ports, infrastructure provides adapters
+- ✅ Dependency Inversion: Equipment entity doesn't depend on repositories
+- ✅ Event-Driven Cross-Module Communication: Rental events trigger equipment status changes
+- ✅ Bounded Context Isolation: No direct repository calls between modules
+- ✅ Invariant Protection: Status changes always validated through policy
+
+**Domain Model:**
+
+```java
+
+// Equipment entity uses port
+public class Equipment {
+    public void changeStatusTo(EquipmentStatus newStatus) {
+        if (!this.status.canTransitionTo(newStatus)) {
+            throw new InvalidStatusTransitionException(this.id, this.status, newStatus);
+        }
+        this.status = newStatus;
+    }
+}
+
+// EquipmentStatus with embedded transitions
+@Entity
+public class EquipmentStatus {
+    @ElementCollection
+    private Set<String> allowedTransitionSlugs;
+    
+    public boolean canTransitionTo(String toSlug) {
+        return allowedTransitionSlugs.contains(toSlug);
+    }
+}
+```
+
+**Cross-Module Communication:**
+
+- Rental module publishes: RentalReserved, RentalStarted, RentalCompleted
+- Equipment module reacts: RentalEventListener → UpdateEquipmentUseCase
+- No direct repository dependencies between modules
+
+**Benefits:**
+
+- Domain purity: no infrastructure dependencies in entities
+- Testability: mock StatusTransitionPolicy in unit tests
+- Flexibility: swap policy implementations (InMemory ↔ Database)
+- Module isolation: Rental and Equipment remain decoupled
+- Transition management: embedded in EquipmentStatus CRUD operations
+
+**Database Schema:**
+
+```sql
+CREATE TABLE equipment_status_transitions (
+    from_status_id BIGINT NOT NULL,
+    to_status_slug VARCHAR(50) NOT NULL
+);
+```
+
+**Technical Metrics:**
+
+- StatusSlug enum tests: 20 tests passing
+- Equipment status change tests: 10 tests passing
+- Documentation: systemPatterns.md updated with Port Pattern
+- Task documentation: US-EQ-004 updated with DDD approach
+
+---
+
+### Completed Features (additional recent)
+
+**US-EQ-002: Add Equipment by Serial Number** (Completed: February 5, 2026)
+
+- ✅ GET /api/equipment/search/serial/{serialNumber} endpoint with optional autocomplete
+- ✅ Status validation (only AVAILABLE equipment selectable)
+- ✅ Indexed serial_number for sub-second responses
+- ✅ Unit, WebMvc and component tests added
+
+---
+
 ### Documentation Phase ✅
 
 **Memory Bank Foundation** (100% Complete)
@@ -220,6 +359,8 @@
 - ✅ US-CL-003: Full Customer Profile Management (January 29, 2026)
 - ✅ US-CL-001: Customer Search by Phone (January 28, 2026)
 - ✅ US-CL-002: Quick Customer Creation (January 27, 2026)
+- ✅ US-FN-001: Payment Acceptance (February 4, 2026)
+- ✅ Architecture Enhancement: DDD-Compliant Status Management (February 5, 2026)
 
 **Next to Start:**
 
@@ -231,7 +372,7 @@
 
 ## Planned Features
 
-### Phase 1: Foundation (4 of 7 Complete - 57% Done)
+### Phase 1: Foundation (6 of 7 Complete - 86% Done)
 
 **Priority: CRITICAL** - Must complete before other phases
 

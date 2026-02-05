@@ -2,6 +2,9 @@ package com.github.jenkaby.bikerental.equipment.infrastructure.persistence.entit
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
+
+import java.util.Set;
 
 @ToString
 @Getter
@@ -24,4 +27,13 @@ public class EquipmentStatusJpaEntity {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "equipment_status_transition_rules",
+            joinColumns = @JoinColumn(name = "from_status_slug", referencedColumnName = "slug")
+    )
+    @Column(name = "to_status_slug")
+    @BatchSize(size = 10)
+    private Set<String> allowedTransitionSlugs;
 }

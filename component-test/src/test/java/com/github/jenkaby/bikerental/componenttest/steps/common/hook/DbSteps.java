@@ -16,6 +16,7 @@ public class DbSteps {
 //            order is important due to foreign key constraints
             "event_publication", // from modulith event_api
             "event_publication_archive", // from modulith event_api
+            "equipment_status_transition_rules",
             "customers",
             "equipments",
             "equipment_statuses",

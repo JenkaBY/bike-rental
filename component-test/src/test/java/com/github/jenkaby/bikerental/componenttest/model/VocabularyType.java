@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public enum VocabularyType {
-    EQUIPMENT_STATUS("equipment status"),
     EQUIPMENT_TYPE("equipment type");
 
     @Getter

@@ -14,9 +14,11 @@ import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 class UpdateEquipmentService implements UpdateEquipmentUseCase {
 
@@ -71,14 +73,14 @@ class UpdateEquipmentService implements UpdateEquipmentUseCase {
         }
 
         // validate status exists if changed
-        String newStatus = command.statusSlug();
-        if (newStatus != null && !newStatus.equals(existing.getStatusSlug())) {
-            if (!statusRepository.existsBySlug(newStatus)) {
-                throw new ReferenceNotFoundException(EquipmentStatus.class, newStatus);
-            }
+        String newStatusSlug = command.statusSlug();
+        if (!newStatusSlug.equals(existing.getStatus().getSlug())) {
+            EquipmentStatus newStatus = statusRepository.findBySlug(newStatusSlug)
+                    .orElseThrow(() -> new ReferenceNotFoundException(EquipmentStatus.class, newStatusSlug));
+            log.info("Changing status of equipment with id {} from {} to {}", existing.getId(), existing.getStatus().getSlug(), newStatusSlug);
+            existing.changeStatusTo(newStatus);
         }
-
-        var updated = mapper.toEquipment(command);
+        var updated = mapper.toEquipment(existing, command);
 
         return repository.save(updated);
     }

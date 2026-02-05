@@ -1,14 +1,30 @@
 package com.github.jenkaby.bikerental.equipment.domain.model;
 
 import lombok.*;
+import org.jspecify.annotations.NonNull;
+
+import java.util.Set;
 
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@ToString
+@EqualsAndHashCode
 public class EquipmentStatus {
+
     @Setter
     private Long id;
-    private final String slug;
-    private final String name;
-    private final String description;
+    private String slug;
+    private String name;
+    private String description;
+    private Set<String> allowedTransitions;
+
+
+    public boolean canTransitionTo(@NonNull EquipmentStatus another) {
+        return canTransitionTo(another.getSlug());
+    }
+
+    private boolean canTransitionTo(@NonNull String toStatusSlug) {
+        return allowedTransitions.contains(toStatusSlug);
+    }
 }

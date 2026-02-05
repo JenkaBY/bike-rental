@@ -1,8 +1,8 @@
 # [US-EQ-002] - Добавление оборудования по порядковому номеру (Add Equipment by Serial Number)
 
-**Status:** Pending  
+**Status:** Completed  
 **Added:** 2026-01-26  
-**Updated:** 2026-01-26  
+**Updated:** 2026-02-05  
 **Priority:** High  
 **Module:** equipment  
 **Dependencies:** US-EQ-001
@@ -54,38 +54,35 @@ This user story enables the core rental workflow where operators select equipmen
 
 ## Implementation Plan
 
-- [ ] Create search by serial number use case
-- [ ] Implement GET endpoint for equipment lookup by serial
-- [ ] Add status validation (AVAILABLE check)
-- [ ] Implement autocomplete/prefix search support
-- [ ] Create component tests for serial number lookup
-- [ ] Add unit tests for status validation
-- [ ] Write WebMvc tests for endpoint
-- [ ] Optimize query performance with EXPLAIN
-- [ ] Document API response format
+- [x] Create search by serial number use case
+- [x] Implement GET endpoint for equipment lookup by serial
+- [x] Add status validation (AVAILABLE check)
+- [x] Implement autocomplete/prefix search support
+- [x] Create component tests for serial number lookup
+- [x] Add unit tests for status validation
+- [x] Write WebMvc tests for endpoint
+- [x] Optimize query performance with EXPLAIN
+- [x] Document API response format
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** Completed - 100%
 
 ### Subtasks
 
-| ID  | Description                 | Status      | Updated    | Notes                           |
-|-----|-----------------------------|-------------|------------|---------------------------------|
-| 2.1 | Create search use case      | Not Started | 2026-01-26 | Depends on US-EQ-001 completion |
-| 2.2 | Implement lookup endpoint   | Not Started | 2026-01-26 |                                 |
-| 2.3 | Add autocomplete support    | Not Started | 2026-01-26 |                                 |
-| 2.4 | Implement status validation | Not Started | 2026-01-26 |                                 |
-| 2.5 | Create tests                | Not Started | 2026-01-26 |                                 |
-| 2.6 | Performance optimization    | Not Started | 2026-01-26 |                                 |
+| ID  | Description            | Status   | Updated    | Notes                                             |
+|-----|------------------------|----------|------------|---------------------------------------------------|
+| 2.1 | Create search use case | Complete | 2026-02-05 | Usecase: FindEquipmentBySerialUseCase implemented |
+| 2.2 | Create tests           | Complete | 2026-02-05 | Unit, WebMvc and component tests added            |
 
 ## Progress Log
 
-### 2026-01-26
+### 2026-02-05 (Task Completed)
 
-- Task created in Memory Bank structure
-- Status: Pending, depends on US-EQ-001 completion
-- Part of Phase 2: Basic Module Functions
+- Implemented `FindEquipmentBySerialUseCase`.
+- Added unit tests (status validation, use case), WebMvc tests (endpoint scenarios) and component tests (integration);
+  all tests pass locally.
+- Updated API documentation and added example responses.
 
 ## Technical Details
 
@@ -98,7 +95,6 @@ com.github.jenkaby.bikerental.equipment
 │   └── dto.EquipmentLookupResponse
 ├── application
 │   ├── usecase.FindEquipmentBySerialUseCase
-│   └── service.EquipmentLookupService
 └── domain
     └── repository.EquipmentRepository (add findBySerialNumber)
 ```
@@ -126,19 +122,19 @@ com.github.jenkaby.bikerental.equipment
 - Error: `404 Not Found` if equipment not found
 - Error: `400 Bad Request` if status is not AVAILABLE
 
-**Database Query:**
+**Database Query (example):**
 
-```sql
--- Exact match
+```text
+-- Exact match (example):
 SELECT *
-FROM equipment
-WHERE serial_number = ?
+FROM equipment -- example table name
+WHERE serial_number = :serialNumber
   AND status = 'AVAILABLE';
 
--- Autocomplete (prefix search)
+-- Autocomplete (prefix search, example):
 SELECT *
-FROM equipment
-WHERE serial_number LIKE ? || '%'
+FROM equipment -- example table name
+WHERE serial_number LIKE :prefix || '%'
   AND status = 'AVAILABLE' LIMIT 10;
 ```
 
@@ -150,7 +146,7 @@ WHERE serial_number LIKE ? || '%'
 
 ## Known Issues
 
-None yet - task not started
+None — task implemented and validated
 
 ## References
 

@@ -143,6 +143,36 @@ shared/
 - `RentalDuration` for time periods
 - `CustomerRef`, `EquipmentRef` for cross-module references
 
+**3.1 Port Pattern (Hexagonal Architecture)**
+
+- Domain defines **port interfaces** for external dependencies
+- Infrastructure provides **adapter implementations**
+- Enables dependency inversion and testability
+
+**Status Transition Port Example:**
+
+```java
+
+// Domain Entity uses port
+public class Equipment {
+    private EquipmentStatus status;
+
+   public void changeStatusTo(EquipmentStatus newStatus) {
+      if (!status.canTransitionTo(newStatus)) {
+         throw new InvalidStatusTransitionException(this.id, this.status, newStatus);
+      }
+      this.status = newStatus;
+   }
+}
+```
+
+**Benefits:**
+
+- Domain entities remain pure (no infrastructure dependencies)
+- Easy to test with mock policies
+- Swap implementations via dependency injection
+- Clear separation of concerns
+
 **4. Domain Events**
 
 - Immutable event records

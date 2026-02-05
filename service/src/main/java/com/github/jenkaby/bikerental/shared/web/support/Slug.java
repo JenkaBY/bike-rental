@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Size(max = 50, message = "Slug must not exceed 50 characters")
 @NotBlank
-@Target({METHOD, FIELD, ANNOTATION_TYPE, PARAMETER})
+@Target({TYPE_USE, METHOD, FIELD, ANNOTATION_TYPE, PARAMETER})
 @Retention(RUNTIME)
 @Constraint(validatedBy = {})
 @Documented

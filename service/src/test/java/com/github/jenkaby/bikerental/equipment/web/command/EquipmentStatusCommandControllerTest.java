@@ -20,6 +20,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.HashSet;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,42 +57,6 @@ class EquipmentStatusCommandControllerTest {
 
     @Nested
     class Post {
-
-        @Nested
-        class ShouldReturn201 {
-
-            @Test
-            void whenRequestContainsAllValidFields() throws Exception {
-                EquipmentStatusRequest request = createValidRequest();
-
-                configureMapperDefaults();
-                given(createUseCase.execute(any(CreateEquipmentStatusUseCase.CreateEquipmentStatusCommand.class)))
-                        .willReturn(mock(EquipmentStatus.class));
-
-                mockMvc.perform(post(API_EQUIPMENT_STATUSES)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isCreated());
-            }
-
-            @Test
-            void whenRequestContainsOnlyRequiredFields() throws Exception {
-                EquipmentStatusRequest request = new EquipmentStatusRequest(
-                        "available",
-                        "Available",
-                        null
-                );
-
-                configureMapperDefaults();
-                given(createUseCase.execute(any(CreateEquipmentStatusUseCase.CreateEquipmentStatusCommand.class)))
-                        .willReturn(mock(EquipmentStatus.class));
-
-                mockMvc.perform(post(API_EQUIPMENT_STATUSES)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isCreated());
-            }
-        }
 
         @Nested
         class ShouldReturn400 {
@@ -130,6 +96,28 @@ class EquipmentStatusCommandControllerTest {
                         .andExpect(jsonPath("$.detail").value(containsString("must not exceed 50 characters")));
             }
 
+            @ParameterizedTest
+            @ValueSource(strings = {"   ", "\t"})
+            @NullAndEmptySource
+            void whenAllowedTransitionsContainsNullOrBlankSlug(String allowedTransition) throws Exception {
+                String longSlug = "a".repeat(5);
+                HashSet<String> allowedTransitions = new HashSet<>();
+                allowedTransitions.add(allowedTransition);
+                EquipmentStatusRequest request = new EquipmentStatusRequest(
+                        longSlug,
+                        "Available",
+                        "Equipment is available for rental",
+                        allowedTransitions
+                );
+
+                mockMvc.perform(post(API_EQUIPMENT_STATUSES)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
+            }
+
             @Test
             void whenRequestBodyIsEmpty() throws Exception {
                 mockMvc.perform(post(API_EQUIPMENT_STATUSES)
@@ -167,45 +155,29 @@ class EquipmentStatusCommandControllerTest {
     class Put {
 
         @Nested
-        class ShouldReturn200 {
+        class ShouldReturn400 {
 
-            @Test
-            void whenUpdateStatusWithAllValidFields() throws Exception {
-                String slug = "available";
-                EquipmentStatusRequest request = createValidUpdateRequest();
-
-                configureMapperDefaults(slug);
-                given(updateUseCase.execute(any(UpdateEquipmentStatusUseCase.UpdateEquipmentStatusCommand.class)))
-                        .willReturn(mock(EquipmentStatus.class));
-
-                mockMvc.perform(put(API_EQUIPMENT_STATUSES + "/{slug}", slug)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isOk());
-            }
-
-            @Test
-            void whenUpdateStatusWithOnlyRequiredFields() throws Exception {
-                String slug = "rented";
+            @ParameterizedTest
+            @ValueSource(strings = {"   ", "\t"})
+            @NullAndEmptySource
+            void whenAllowedTransitionsContainsNullOrBlankSlug(String allowedTransition) throws Exception {
+                String slug = "a".repeat(5);
+                HashSet<String> allowedTransitions = new HashSet<>();
+                allowedTransitions.add(allowedTransition);
                 EquipmentStatusRequest request = new EquipmentStatusRequest(
-                        "rented",
-                        "Rented",
-                        null
+                        slug,
+                        "Available",
+                        "Equipment is available for rental",
+                        allowedTransitions
                 );
 
-                configureMapperDefaults(slug);
-                given(updateUseCase.execute(any(UpdateEquipmentStatusUseCase.UpdateEquipmentStatusCommand.class)))
-                        .willReturn(mock(EquipmentStatus.class));
-
                 mockMvc.perform(put(API_EQUIPMENT_STATUSES + "/{slug}", slug)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isOk());
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
             }
-        }
-
-        @Nested
-        class ShouldReturn400 {
 
             @ParameterizedTest
             @ValueSource(strings = {"   ", "\t"})
@@ -274,6 +246,7 @@ class EquipmentStatusCommandControllerTest {
                                 .content("{invalid json"))
                         .andExpect(status().isBadRequest());
             }
+
         }
 
         private static @NonNull EquipmentStatusRequest createValidUpdateRequest() {

@@ -26,4 +26,17 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="equipment_statuses.provisining-table_insert-default-record" author="bikerental" context="!test">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="equipment_statuses"/>
+            </not>
+        </preConditions>
+
+        <insert tableName="equipment_statuses">
+            <column name="slug" value="AVAILABLE"/>
+            <column name="name" value="Available"/>
+            <column name="description" value="Ready for rental"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

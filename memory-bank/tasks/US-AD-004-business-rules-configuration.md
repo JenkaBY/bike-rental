@@ -1,290 +1,190 @@
 # [US-AD-004] - Настройка бизнес-правил (Business Rules Configuration)
 
-- Affects: US-RN-008, US-TR-005 (refund windows use these settings)
-- Affects: US-TR-002, US-TR-003, US-TR-004 (tariff calculation uses these settings)
-- Dependency: US-AD-001 (User management for admin access)
-- Architecture: [docs/backend-architecture.md](../../../docs/backend-architecture.md)
-- User Story File: [docs/tasks/us/US-AD-004/us-ad-004.md](../../../docs/tasks/us/US-AD-004/us-ad-004.md)
-
-## References
-
-None yet - task not started
-
-## Known Issues
-
-```
-}
-    }
-        // Use configured values in calculation
-        
-        int rounding = config.getOvertimeRoundingMinutes();
-        int forgiveness = config.getForgivenessThresholdMinutes();
-        int increment = config.getTimeIncrementMinutes();
-    public Money calculateCost(Rental rental) {
-    
-    private final BusinessRulesConfig config;
-    
-public class RentalCostCalculator {
-@Service
-```java
-**Usage in Rental Calculation:**
-
-```
-
-}
-// ... other typed getters
-
-    }
-        );
-            Integer.class
-            SettingKey.FORGIVENESS_THRESHOLD_MINUTES, 
-        return settingsService.getSetting(
-    public int getForgivenessThresholdMinutes() {
-    
-    }
-        );
-            Integer.class
-            SettingKey.TIME_CALCULATION_INCREMENT_MINUTES, 
-        return settingsService.getSetting(
-    public int getTimeIncrementMinutes() {
-    
-    private final SystemSettingsService settingsService;
-
-public class BusinessRulesConfig {
-@Component
-
-```java
-**Strongly-
-Typed Access:**
-
-```
-
-}
-}
-// Business logic validation
-// Range validation (min/max)
-// Type validation
-private void validateValue(SettingKey key, Object value) {
-
-    }
-        saveHistory(key.getKey(), oldValue, setting.getValue(), updatedBy);
-        // Save history
-        
-        repository.save(setting);
-        
-        setting.setUpdatedBy(updatedBy);
-        setting.setUpdatedAt(LocalDateTime.now());
-        setting.setValue(convertToString(newValue));
-        String oldValue = setting.getValue();
-        
-            .orElse(new SystemSetting(key.getKey()));
-        SystemSetting setting = repository.findById(key.getKey())
-        
-        validateValue(key, newValue);
-    public void updateSetting(SettingKey key, Object newValue, UUID updatedBy) {
-    @CacheEvict(value = "system-settings", key = "#key")
-    
-    }
-            .orElse((T) key.getDefaultValue());
-            .map(setting -> convertValue(setting.getValue(), type))
-        return repository.findById(key.getKey())
-    public <T> T getSetting(SettingKey key, Class<T> type) {
-    @Cacheable(value = "system-settings", key = "#key")
-    
-    private final CacheManager cacheManager;
-    private final SystemSettingsRepository repository;
-
-public class SystemSettingsService {
-@Service
-
-```java
-**Configuration Service:**
-
-```
-
-}
-private final Object maxValue;
-private final Object minValue;
-private final Object defaultValue;
-private final String key;
-
-    MAINTENANCE_INTERVAL_SCOOTER_HOURS("maintenance.interval.scooter", 50, 10, 500);
-    MAINTENANCE_INTERVAL_BICYCLE_HOURS("maintenance.interval.bicycle", 100, 10, 1000),
-    // Maintenance
-    
-    PAYMENT_TIMEOUT_MINUTES("finance.payment.timeout", 15, 5, 120),
-    REFUND_WINDOW_MINUTES("finance.refund.window", 10, 1, 60),
-    // Financial
-    
-    OVERTIME_ROUNDING_MINUTES("rental.overtime.rounding", 10, 5, 60),
-    FORGIVENESS_THRESHOLD_MINUTES("rental.forgiveness.threshold", 7, 0, 30),
-    TIME_CALCULATION_INCREMENT_MINUTES("rental.time.increment", 5, 1, 60),
-    // Rental timing
-
-public enum SettingKey {
-
-```java
-**Setting Keys
-Enum:**
-
-```
-
-CREATE INDEX idx_settings_history_key ON system_settings_history(setting_key, changed_at DESC);
-
-);
-changed_by UUID REFERENCES app_users(id)
-changed_at TIMESTAMP NOT NULL,
-new_value TEXT,
-old_value TEXT,
-setting_key VARCHAR(100) NOT NULL,
-id UUID PRIMARY KEY,
-CREATE TABLE system_settings_history (
-
-);
-updated_by UUID REFERENCES app_users(id)
-updated_at TIMESTAMP NOT NULL,
-max_value TEXT, -- For validation
-min_value TEXT, -- For validation
-description TEXT,
-value_type VARCHAR(20) NOT NULL, -- INTEGER, DECIMAL, STRING, BOOLEAN
-value TEXT NOT NULL,
-key VARCHAR(100) PRIMARY KEY,
-CREATE TABLE system_settings (
-
-```sql
-*
-*Database Schema:**
-
-- `GET /api/admin/settings/{key}/history` - Get change history (ADMIN only)
-- `PUT /api/admin/settings/{key}` -
-Update setting (ADMIN only)
-    - `GET /api/admin/settings/{key}` - Get specific setting (ADMIN only)
-    - `GET /api/admin/settings` - Get all settings (ADMIN only)
-    **API Endpoints:**
-
-```
-
-    └── cache (Spring Cache configuration)
-
-└── infrastructure
-│ └── repository.SystemSettingsRepository
-│ ├── model.SettingKey (enum)
-│ ├── model.SystemSetting
-├── domain
-│ └── config.BusinessRulesConfig
-│ ├── service.SystemSettingsService
-├── application
-│ └── dto.SettingsResponse
-│ ├── SettingsQueryController
-├── web.query
-│ └── dto.UpdateSettingRequest
-│ ├── SettingsController
-├── web.command
-com.github.jenkaby.bikerental.admin
-
-```
-**Package Structure:**
-
-## Technical Details
-
-- Part of Phase 2: Basic Module Functions
-- Status: Pending, depends on US-AD-001 completion
-- Task created in Memory Bank structure
-### 2026-01-26
-
-## Progress Log
-
-| 4.7 | Create tests                         | Not Started | 2026-01-26 |       |
-| 4.6 | Create audit trail                   | Not Started | 2026-01-26 |       |
-| 4.5 | Implement validation                 | Not Started | 2026-01-26 |       |
-| 4.4 | Add caching mechanism                | Not Started | 2026-01-26 |       |
-| 4.3 | Create admin endpoints               | Not Started | 2026-01-26 |       |
-| 4.2 | Implement configuration service      | Not Started | 2026-01-26 |       |
-| 4.1 | Create settings domain model         | Not Started | 2026-01-26 |       |
-|-----|--------------------------------------|-------------|------------|-------|
-| ID  | Description                          | Status      | Updated    | Notes |
-
-### Subtasks
-
-**Overall Status:** Not Started - 0%
-
-## Progress Tracking
-
-- [ ] Document all configurable parameters
-- [ ] Write WebMvc tests for admin endpoints
-- [ ] Write unit tests for validation
-- [ ] Create component tests for settings
-- [ ] Implement cache invalidation on update
-- [ ] Add database migration for settings table
-- [ ] Create settings history/audit mechanism
-- [ ] Add validation for each setting type
-- [ ] Implement admin endpoints for settings management
-- [ ] Create typed configuration service with caching
-- [ ] Implement settings repository
-- [ ] Create SystemSettings domain model
-
-## Implementation Plan
-
-- Settings are global (not tenant-specific in this version)
-- Invalidate cache on settings update
-- Use caching to avoid database hits on every rental
-- Store in database (not application.yaml) for runtime changes
-**Architecture Decisions:**
-
-- Consider @ConfigurationProperties for strongly-typed access
-- Settings apply to new rentals (don't affect in-progress)
-- Admin API to update settings
-- Typed configuration service with caching
-- Database table for system_settings (key-value pairs with metadata)
-**Technical Approach:**
-
-- **System**: General operational parameters
-- **Maintenance**: Service intervals by equipment type
-- **Financial**: Refund windows, payment timeouts
-- **Rental Timing**: Time calculation, forgiveness, rounding
-**Configuration Categories:**
-
-6. **Defaults**: System should work with default values if not configured
-5. **Audit Trail**: Track who changed what and when
-4. **Hot Reload**: Settings changes should apply immediately (or with cache refresh)
-3. **Validation**: Ensure values are within reasonable ranges
-2. **Type Safety**: Each setting has a specific type (integer, decimal, boolean, etc.)
-1. **Key-Value Store**: Store settings as configurable parameters
-
-Business rules configuration allows customization without code changes. This is critical for business flexibility. Considerations:
-
-## Thought Process
-
-**Связанные требования:** FR-AD-004
-
-- История изменений параметров
-- Применение новых значений к новым арендам
-- Валидация значений (положительные числа, разумные диапазоны)
-- Интерфейс настроек
-**Критерии приемки:**
-
-- Периодичность ТО по умолчанию (для разных типов оборудования)
-- Время для возврата денег при отмене (по умолчанию 10 минут)
-- Округление просрочки (по умолчанию 10 минут)
-- Порог "прощения" просрочки (по умолчанию 7 минут)
-- Кратность расчета времени (по умолчанию 5 минут)
-**Настраиваемые параметры:**
-
-Система должна позволять настраивать основные бизнес-параметры.
-**Описание:**  
-
-## User Story Details
-
-**Чтобы** адаптировать систему под бизнес-процессы
-**Я хочу** настраивать основные бизнес-параметры  
-**Как** Администратор  
+**Status:** Pending  
+**Added:** 2026-01-26  
+**Updated:** 2026-01-26  
+**Priority:** Medium  
+**Module:** admin  
+**Dependencies:** US-AD-001
 
 ## Original Request
 
-**Dependencies:** US-AD-001
-**Module:** admin  
-**Priority:** Medium  
-**Updated:** 2026-01-26  
-**Added:** 2026-01-26  
-**Status:** Pending  
+**Как** Администратор  
+**Я хочу** иметь возможность настраивать бизнес-параметры системы  
+**Чтобы** адаптировать поведение приложения без перекомпиляции/деплоя
 
+## User Story Details
+
+Система должна позволять администраторам управлять глобальными системными настройками, которые влияют на:
+
+- расчеты стоимости аренды (округления, пороги, шаги расчета времени),
+- правила возврата и таймауты платежей,
+- интервалы обслуживания для разных типов оборудования.
+
+Ключевые требования:
+
+- типобезопасный доступ к настройкам (int/decimal/boolean/string),
+- проверка диапазонов и валидация значений при обновлении,
+- история изменений (audit) с информацией кто и когда изменил значение,
+- кэширование настроек для производительности и инвалидирование при обновлении,
+- API для получения и изменения значений (admin-only).
+
+## Acceptance Criteria
+
+- CRUD для системных настроек доступен только администраторам
+- Значения имеют типы и валидируются при сохранении
+- Изменения записываются в историю с updatedBy/updatedAt
+- Новые значения применяются к новым операциям (hot reload via cache invalidation)
+- Набор настроек включает: payment timeout, refund window, overtime rounding, forgiveness threshold, time increment
+
+## Thought Process
+
+Business rules must be runtime-configurable to allow quick changes without code deploys. Settings are global (not
+tenant-aware) in this version. Use a strongly-typed enum of keys (`SettingKey`) with default/min/max values and a
+`SystemSettingsService` that exposes typed getters and an update method with validation and cache eviction.
+
+Design considerations:
+
+- store as key-value in DB with metadata (type, min, max, description)
+- expose typed getters: `getSetting(SettingKey, Class<T>)` or domain wrapper `BusinessRulesConfig`
+- cache settings and evict on update
+- keep changes applied only to new rentals (no retroactive effect)
+
+## Implementation Plan
+
+- [ ] Create `SettingKey` enum with key, default, min, max, type metadata
+- [ ] Implement `SystemSetting` JPA entity and `SystemSettingsRepository`
+- [ ] Implement `SystemSettingsService` with typed getters and `updateSetting()` with validation and cache eviction
+- [ ] Create `SettingsController` (admin-only) with endpoints:
+    - GET `/api/admin/settings` - list settings
+    - GET `/api/admin/settings/{key}` - get specific setting
+    - PUT `/api/admin/settings/{key}` - update setting
+    - GET `/api/admin/settings/{key}/history` - change history
+- [ ] Implement `SystemSettingsHistory` for audit records
+- [ ] Add component tests (admin flows) and unit tests (validation, typed getters)
+- [ ] Add Liquibase migration for `system_settings` and `system_settings_history`
+- [ ] Document config keys and defaults in memory bank
+
+## Subtasks
+
+| ID  | Description                     | Status      | Updated    | Notes                                 |
+|-----|---------------------------------|-------------|------------|---------------------------------------|
+| 4.1 | Create settings domain model    | Not Started | 2026-01-26 | SettingKey enum, SystemSetting entity |
+| 4.2 | Implement configuration service | Not Started | 2026-01-26 | typed getters + cache                 |
+| 4.3 | Create admin endpoints          | Not Started | 2026-01-26 | SettingsController (admin-only)       |
+| 4.4 | Add caching mechanism           | Not Started | 2026-01-26 | Spring Cache + eviction on update     |
+| 4.5 | Implement validation            | Not Started | 2026-01-26 | range/type checks                     |
+| 4.6 | Create audit trail              | Not Started | 2026-01-26 | system_settings_history table         |
+| 4.7 | Create tests                    | Not Started | 2026-01-26 | unit, WebMvc, component               |
+
+**Overall Status:** Not Started - 0%
+
+## Progress Log
+
+### 2026-01-26
+
+- Task created in Memory Bank structure. Status: Pending.
+
+## Technical Details
+
+### Example - `SettingKey` enum (sketch)
+
+```java
+public enum SettingKey {
+    MAINTENANCE_INTERVAL_SCOOTER_HOURS("maintenance.interval.scooter", 50, 10, 500, Integer.class),
+    MAINTENANCE_INTERVAL_BICYCLE_HOURS("maintenance.interval.bicycle", 100, 10, 1000, Integer.class),
+
+    PAYMENT_TIMEOUT_MINUTES("finance.payment.timeout", 15, 5, 120, Integer.class),
+    REFUND_WINDOW_MINUTES("finance.refund.window", 10, 1, 60, Integer.class),
+
+    OVERTIME_ROUNDING_MINUTES("rental.overtime.rounding", 10, 5, 60, Integer.class),
+    FORGIVENESS_THRESHOLD_MINUTES("rental.forgiveness.threshold", 7, 0, 30, Integer.class),
+    TIME_CALCULATION_INCREMENT_MINUTES("rental.time.increment", 5, 1, 60, Integer.class);
+
+    private final String key;
+    private final Object defaultValue;
+    private final Object minValue;
+    private final Object maxValue;
+    private final Class<?> type;
+
+    // constructor + getters
+}
+```
+
+### Example - `SystemSettingsService` API (sketch)
+
+```java
+@Component
+public class SystemSettingsService {
+
+    private final SystemSettingsRepository repository;
+    private final CacheManager cacheManager;
+
+    @Cacheable(value = "system-settings", key = "#key")
+    public <T> T getSetting(SettingKey key, Class<T> type) {
+        return repository.findById(key.getKey())
+                .map(setting -> convertValue(setting.getValue(), type))
+                .orElse((T) key.getDefaultValue());
+    }
+
+    @CacheEvict(value = "system-settings", key = "#key")
+    public void updateSetting(SettingKey key, Object newValue, UUID updatedBy) {
+        validateValue(key, newValue);
+        var setting = repository.findById(key.getKey()).orElse(new SystemSetting(key.getKey()));
+        String oldValue = setting.getValue();
+        setting.setValue(convertToString(newValue));
+        setting.setUpdatedBy(updatedBy);
+        setting.setUpdatedAt(LocalDateTime.now());
+        repository.save(setting);
+        saveHistory(key.getKey(), oldValue, setting.getValue(), updatedBy);
+    }
+
+    // helper methods: convertValue, convertToString, validateValue, saveHistory
+}
+```
+
+### Database schema (example)
+
+```sql
+CREATE TABLE system_settings (
+  key VARCHAR(100) PRIMARY KEY,
+  value TEXT NOT NULL,
+  value_type VARCHAR(20) NOT NULL,
+  description TEXT,
+  min_value TEXT,
+  max_value TEXT,
+  default_value TEXT,
+  updated_by UUID, -- references app_users(id)
+  updated_at TIMESTAMP
+);
+
+CREATE TABLE system_settings_history (
+  id UUID PRIMARY KEY,
+  setting_key VARCHAR(100) NOT NULL,
+  old_value TEXT,
+  new_value TEXT,
+  changed_at TIMESTAMP NOT NULL,
+  changed_by UUID -- references app_users(id)
+);
+
+CREATE INDEX idx_settings_history_key ON system_settings_history(setting_key, changed_at DESC);
+```
+
+## API Endpoints (admin only)
+
+- `GET /api/admin/settings` - list all settings
+- `GET /api/admin/settings/{key}` - get specific setting
+- `PUT /api/admin/settings/{key}` - update setting value
+- `GET /api/admin/settings/{key}/history` - get change history
+
+## Notes
+
+- Settings should include sensible defaults so the system works without explicit configuration.
+- Cache invalidation on update is required to apply changes immediately to new operations.
+- For critical settings that affect monetary calculations, add additional review/approval workflow if needed.
+
+## References
+
+- Architecture: [docs/backend-architecture.md](../../../docs/backend-architecture.md)
+- User Story File: [docs/tasks/us/US-AD-004/us-ad-004.md](../../../docs/tasks/us/US-AD-004/us-ad-004.md)
+- Dependency: US-AD-001 (User management for admin access)
