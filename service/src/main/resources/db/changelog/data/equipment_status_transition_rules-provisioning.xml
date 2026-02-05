@@ -13,9 +13,8 @@
         <loadData tableName="equipment_status_transition_rules"
                   file="data/equipment_status_transition_rules.csv"
                   relativeToChangelogFile="true">
-            <column name="slug" type="string"/>
-            <column name="name" type="string"/>
-            <column name="description" type="string"/>
+            <column name="from_status_slug" type="string"/>
+            <column name="to_status_slug" type="string"/>
         </loadData>
     </changeSet>
 

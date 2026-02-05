@@ -18,6 +18,7 @@
     <!--    provisioning data -->
     <include relativeToChangelogFile="true" file="data/equipment_types-provisioning.xml"/>
     <include relativeToChangelogFile="true" file="data/equipment_statuses-provisioning.xml"/>
+    <include relativeToChangelogFile="true" file="data/equipment_status_transition_rules-provisioning.xml"/>
     <include relativeToChangelogFile="true" file="data/tariffs-provisioning.xml"/>
 
     <!--    provisioning data -->
