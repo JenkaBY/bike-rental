@@ -5,6 +5,7 @@ import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatus
 import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.mapper.EquipmentStatusJpaMapper;
 import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.repository.EquipmentStatusJpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,12 +31,14 @@ class EquipmentStatusRepositoryAdapter implements EquipmentStatusRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<EquipmentStatus> findBySlug(String slug) {
         return jpaRepository.findBySlug(slug)
                 .map(mapper::toDomain);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EquipmentStatus> findAll() {
         return jpaRepository.findAll().stream()
                 .map(mapper::toDomain)

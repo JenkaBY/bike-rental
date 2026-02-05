@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class DataTableHelper {
@@ -68,5 +69,14 @@ public class DataTableHelper {
             return null;
         }
         return Instant.parse(value);
+    }
+
+    public static Set<String> getSetOrDefault(Map<String, String> entry, String field, Set<String> defaultValue) {
+        if ("null".equals(entry.get(field))) {
+            return null;
+        }
+        return Optional.ofNullable(entry.get(field))
+                .map(s -> Set.of(s.split(",")))
+                .orElse(defaultValue);
     }
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="equipment_status_transition_rules.create-table" author="bikerental">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="equipment_status_transition_rules"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="equipment_status_transition_rules">
+            <column name="from_status_slug" type="VARCHAR(50)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_equipment_status_transition_rules"/>
+            </column>
+            <column name="to_status_slug" type="VARCHAR(50)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_equipment_status_transition_rules"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

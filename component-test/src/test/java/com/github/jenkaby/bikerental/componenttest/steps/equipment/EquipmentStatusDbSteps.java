@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 import org.jspecify.annotations.NonNull;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -31,6 +32,7 @@ public class EquipmentStatusDbSteps {
         repository.insertAll(entities);
     }
 
+    @Transactional(readOnly = true)
     @Then("the following equipment status record(s) was/were persisted in db")
     public void theFollowingEquipmentStatusesWerePersisted(List<EquipmentStatusJpaEntity> expected) {
         var serialNums = expected.stream()
@@ -48,8 +50,8 @@ public class EquipmentStatusDbSteps {
 
         assertThat(sortedActual)
                 .zipSatisfy(sortedExpected, (actual, exp) -> {
-                    log.info("Comparing actual equipment: {}", actual);
-                    log.info("Comparing expected equipment: {}", exp);
+                    log.debug("Comparing actual equipment: {}", actual);
+                    log.debug("Comparing expected equipment: {}", exp);
 
                     var softly = new SoftAssertions();
 
@@ -65,7 +67,9 @@ public class EquipmentStatusDbSteps {
                     softly.assertThat(actual.getDescription())
                             .as("Description should match for slug: %s", exp.getSlug())
                             .isEqualTo(exp.getDescription());
-
+                    softly.assertThat(actual.getAllowedTransitionSlugs())
+                            .as("Allowed transitions should match: %s", exp.getAllowedTransitionSlugs())
+                            .isEqualTo(exp.getAllowedTransitionSlugs());
                     softly.assertAll();
                 });
     }

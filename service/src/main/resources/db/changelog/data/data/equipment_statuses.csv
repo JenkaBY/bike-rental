@@ -1,5 +1,4 @@
 id,slug,name,description
-1,AVAILABLE,Available,Equipment is ready for rental
 2,RENTED,Rented,Equipment is currently in active rental
 3,MAINTENANCE,Under Maintenance,Equipment is being serviced or repaired
 4,DECOMMISSIONED,Decommissioned,Equipment has been removed from service

@@ -48,7 +48,7 @@ public class EquipmentWebSteps {
     }
 
     @Given("the '{vocabularyType}' request is prepared with the following data")
-    public void theVocabResponseContains(VocabularyType type, VocabularyUnit request) {
+    public void theVocabRequestContains(VocabularyType type, VocabularyUnit request) {
         log.info("Preparing '{}' request with data: {}", type.getHumanReadableName(), request);
 
         scenarioContext.setRequestBody(request);

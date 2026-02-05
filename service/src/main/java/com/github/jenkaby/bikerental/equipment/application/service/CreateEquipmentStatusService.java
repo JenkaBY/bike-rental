@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentStatu
 import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentStatusUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
+import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,11 @@ public class CreateEquipmentStatusService implements CreateEquipmentStatusUseCas
         if (repository.existsBySlug(command.slug())) {
             throw new ResourceConflictException(EquipmentStatus.class, command.slug());
         }
-
+        for (String toSlug : command.allowedTransitions()) {
+            if (!repository.existsBySlug(toSlug)) {
+                throw new ReferenceNotFoundException(EquipmentStatus.class, toSlug);
+            }
+        }
         EquipmentStatus entity = mapper.toEquipmentStatus(command);
         return repository.save(entity);
     }

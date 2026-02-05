@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentStatu
 import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentStatusUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
+import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,11 @@ public class UpdateEquipmentStatusService implements UpdateEquipmentStatusUseCas
         // ensure the status exists
         EquipmentStatus loaded = repository.findBySlug(command.slug())
                 .orElseThrow(() -> new ResourceNotFoundException(EquipmentStatus.class.getSimpleName(), command.slug()));
-
+        for (String toSlug : command.allowedTransitions()) {
+            if (!repository.existsBySlug(toSlug)) {
+                throw new ReferenceNotFoundException(EquipmentStatus.class, toSlug);
+            }
+        }
         EquipmentStatus updated = mapper.toEquipmentStatus(loaded.getId(), command);
 
         return repository.save(updated);
