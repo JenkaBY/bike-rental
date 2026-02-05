@@ -4,9 +4,12 @@ import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentComma
 import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateSerialNumberException;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
+import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
+import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,15 +20,17 @@ class CreateEquipmentService implements CreateEquipmentUseCase {
     private final EquipmentCommandToDomainMapper mapper;
     private final SerialNumberMapper serialNumberMapper;
     private final UidMapper uidMapper;
+    private final EquipmentStatusRepository statusRepository;
 
     CreateEquipmentService(
             EquipmentRepository repository,
             EquipmentCommandToDomainMapper mapper,
-            SerialNumberMapper serialNumberMapper, UidMapper uidMapper) {
+            SerialNumberMapper serialNumberMapper, UidMapper uidMapper, EquipmentStatusRepository statusRepository) {
         this.repository = repository;
         this.mapper = mapper;
         this.serialNumberMapper = serialNumberMapper;
         this.uidMapper = uidMapper;
+        this.statusRepository = statusRepository;
     }
 
     @Override
@@ -42,6 +47,9 @@ class CreateEquipmentService implements CreateEquipmentUseCase {
         }
 
         Equipment equipment = mapper.toEquipment(command);
+        var initialStatus = statusRepository.findBySlug(command.statusSlug())
+                .orElseThrow(() -> new ReferenceNotFoundException(EquipmentStatus.class, command.statusSlug()));
+        equipment.setInitialStatus(initialStatus);
 
         return repository.save(equipment);
     }

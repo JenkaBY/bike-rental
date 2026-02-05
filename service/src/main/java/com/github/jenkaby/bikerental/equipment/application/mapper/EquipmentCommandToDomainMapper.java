@@ -8,14 +8,18 @@ import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
 
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
         uses = {SerialNumberMapper.class, UidMapper.class})
 public interface EquipmentCommandToDomainMapper {
 
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "id", ignore = true)
     Equipment toEquipment(CreateEquipmentUseCase.CreateEquipmentCommand command);
 
-    Equipment toEquipment(UpdateEquipmentUseCase.UpdateEquipmentCommand command);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    Equipment toEquipment(@MappingTarget Equipment toUpdate, UpdateEquipmentUseCase.UpdateEquipmentCommand command);
 }

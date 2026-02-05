@@ -1,49 +1,68 @@
 package com.github.jenkaby.bikerental.equipment.domain.model;
 
+import com.github.jenkaby.bikerental.equipment.domain.exception.InvalidStatusTransitionException;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
-import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
+import static org.mockito.Mockito.*;
 
 class EquipmentTest {
 
     @Test
-    void shouldCreateEquipmentWithValidData() {
+    void setInitialStatus_shouldAssignStatus() {
+        var initialStatus = mock(EquipmentStatus.class);
+
         var equipment = Equipment.builder()
                 .id(1L)
                 .serialNumber(new SerialNumber("BK-001"))
-                .uid(new Uid("ABC123"))
                 .typeSlug("bicycle")
-                .statusSlug("available")
-                .model("Mountain Bike")
-                .commissionedAt(LocalDate.of(2023, 1, 1))
-                .condition("Good condition")
                 .build();
 
-        Assertions.assertThat(equipment.getId()).isEqualTo(1L);
-        Assertions.assertThat(equipment.getSerialNumber().value()).isEqualTo("BK-001");
-        Assertions.assertThat(equipment.getUid().value()).isEqualTo("ABC123");
-        Assertions.assertThat(equipment.getTypeSlug()).isEqualTo("bicycle");
-        Assertions.assertThat(equipment.getStatusSlug()).isEqualTo("available");
-        Assertions.assertThat(equipment.getModel()).isEqualTo("Mountain Bike");
-        Assertions.assertThat(equipment.getCommissionedAt()).isEqualTo(LocalDate.of(2023, 1, 1));
-        Assertions.assertThat(equipment.getCondition()).isEqualTo("Good condition");
+        equipment.setInitialStatus(initialStatus);
+
+        Assertions.assertThat(equipment.getStatus()).isEqualTo(initialStatus);
     }
 
     @Test
-    void shouldAllowNullValuesForOptionalFields() {
+    void changeStatusTo_shouldUpdateWhenTransitionAllowed() {
+        var currentStatus = mock(EquipmentStatus.class);
+        var newStatus = mock(EquipmentStatus.class);
+
+        when(currentStatus.canTransitionTo(newStatus)).thenReturn(true);
+
         var equipment = Equipment.builder()
                 .id(1L)
                 .serialNumber(new SerialNumber("BK-001"))
                 .typeSlug("bicycle")
-                .statusSlug("available")
+                .status(currentStatus)
                 .build();
 
-        Assertions.assertThat(equipment.getUid()).isNull();
-        Assertions.assertThat(equipment.getModel()).isNull();
-        Assertions.assertThat(equipment.getCommissionedAt()).isNull();
-        Assertions.assertThat(equipment.getCondition()).isNull();
+        equipment.changeStatusTo(newStatus);
+
+        Assertions.assertThat(equipment.getStatus()).isEqualTo(newStatus);
+        verify(currentStatus).canTransitionTo(newStatus);
+    }
+
+    @Test
+    void changeStatusTo_shouldThrowWhenTransitionNotAllowed() {
+        var currentStatus = mock(EquipmentStatus.class);
+        var newStatus = mock(EquipmentStatus.class);
+
+        when(currentStatus.canTransitionTo(newStatus)).thenReturn(false);
+
+        var equipment = Equipment.builder()
+                .id(1L)
+                .serialNumber(new SerialNumber("BK-001"))
+                .typeSlug("bicycle")
+                .status(currentStatus)
+                .build();
+
+        Assertions.assertThatThrownBy(() -> equipment.changeStatusTo(newStatus))
+                .isInstanceOf(InvalidStatusTransitionException.class);
+
+        // Ensure status was not changed
+        Assertions.assertThat(equipment.getStatus()).isEqualTo(currentStatus);
+        verify(currentStatus).canTransitionTo(newStatus);
     }
 }

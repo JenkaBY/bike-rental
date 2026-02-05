@@ -5,11 +5,11 @@ Feature: Equipment management endpoints
 
   Background:
     Given the following equipment statues exist in the database
-      | slug        | name        | description       |
-      | BROKEN      | Broken      | Not Ready to rent |
-      | AVAILABLE   | Available   | Ready to rent     |
-      | MAINTENANCE | Maintenance | null              |
-      | RENTED      | Rented      | In use already    |
+      | slug        | name        | description       | transitions               |
+      | BROKEN      | Broken      | Not Ready to rent | AVAILABLE,MAINTENANCE     |
+      | AVAILABLE   | Available   | Ready to rent     | BROKEN,MAINTENANCE,RENTED |
+      | MAINTENANCE | Maintenance | null              | AVAILABLE                 |
+      | RENTED      | Rented      | In use already    | AVAILABLE,BROKEN          |
     And the following equipment types exist in the database
       | slug    | name    | description |
       | bicycle | Bicycle | Two-wheeled |
@@ -106,8 +106,8 @@ Feature: Equipment management endpoints
       | serialNumber   | uid   | status   | type            | model   | commissionedAt   | condition   |
       | <serialNumber> | <uid> | <status> | <equipmentType> | <model> | <commissionedAt> | <condition> |
     Examples:
-      | serialNumber | uid          | equipmentType | status    | status    | model   | commissionedAt | condition |
-      | EQ-999       | BIKE-999-NEW | bicycle       | AVAILABLE | AVAILABLE | Model X | 2026-01-15     | Excellent |
+      | serialNumber | uid          | equipmentType | status      | model   | commissionedAt | condition |
+      | EQ-999       | BIKE-999-NEW | bicycle       | MAINTENANCE | Model X | 2026-01-15     | Excellent |
 
   Scenario Outline: Update existing equipment
     Given the equipment being updated is
@@ -124,6 +124,36 @@ Feature: Equipment management endpoints
     And the following equipment record was persisted in db
       | serialNumber   | uid   | status   | type            | model   | commissionedAt   | condition   |
       | <serialNumber> | <uid> | <status> | <equipmentType> | <model> | <commissionedAt> | <condition> |
+    Examples:
+      | serialNumber | uid             | equipmentType | status | model     | commissionedAt | condition |
+      | EQ-001-UPD   | BIKE-001-UPDATE | scooter       | BROKEN | Model A++ | 2026-01-20     | Fair      |
+
+  Scenario Outline: Create new equipment with not existing status
+    Given the equipment request is prepared with the following data
+      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <condition> |
+    When a POST request has been made to "/api/equipments" endpoint
+    Then the response status is 422
+    And the response contains
+      | path     | value                                                                 |
+      | $.title  | Unprocessable Content                                                 |
+      | $.detail | Referenced EquipmentStatus with identifier 'DOES_NOT_EXIST' not found |
+    Examples:
+      | serialNumber | uid          | equipmentType | status         | model   | commissionedAt | condition |
+      | EQ-999       | BIKE-999-NEW | bicycle       | DOES_NOT_EXIST | Model X | 2026-01-15     | Excellent |
+
+  Scenario Outline: Update existing equipment with violation of allowed status transitions
+    Given the equipment being updated is
+      | serialNumber | uid          | type    | status      | model   | commissionedAt | condition |
+      | EQ-TO-UPDATE | EQ-TO-UPDATE | bicycle | MAINTENANCE | Model C | 2026-01-30     | New       |
+    And the equipment request is prepared with the following data
+      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <condition> |
+    When a PUT request has been made to "/api/equipments/{modifiedObjectId}" endpoint with context
+    Then the response status is 422
+    And the response contains
+      | path    | value                     |
+      | $.title | Invalid status transition |
     Examples:
       | serialNumber | uid             | equipmentType | status | model     | commissionedAt | condition |
       | EQ-001-UPD   | BIKE-001-UPDATE | scooter       | BROKEN | Model A++ | 2026-01-20     | Fair      |

@@ -11,10 +11,12 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Repository
+@Transactional(readOnly = true)
 class EquipmentRepositoryAdapter implements EquipmentRepository {
 
     private final EquipmentJpaRepository jpaRepository;
