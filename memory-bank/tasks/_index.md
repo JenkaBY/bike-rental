@@ -6,8 +6,24 @@ Tasks are organized by status for easy tracking.
 Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 -->
 
-## In Progress
+[Task Priorities](../priorities.md) - URGENT / MEDIUM / LOW
 
+## Completed
+
+- [US-TR-001] Справочник тарифов - Completed on 2026-02-03 (domain + application + web layers, tests, migrations)
+- [US-EQ-001] Equipment Catalog - Completed on 2026-02-02 (139 subtasks: Database migrations,
+  domain/infrastructure/application/web layers, 10 REST endpoints, WebMvc + Component tests, admin CRUD for
+  types/statuses)
+- [US-CL-003] Полное создание/редактирование профиля клиента - Completed on 2026-01-29 (PUT endpoint + mapper
+  refactoring + 26 tests: 11 unit UpdateCustomerService, 15 WebMvc PUT, component tests)
+- [US-CL-001] Поиск клиента по номеру телефона - Completed on 2026-01-28 (Implementation + unit, WebMvc, component
+  tests)
+- [US-CL-002] Быстрое создание клиента - Completed on 2026-01-27 (Implementation + 83+ tests: 68 unit, 15 WebMvc,
+  component tests)
+- [US-FN-001] Прием оплаты - Completed on 2026-02-04 (finance module: domain, application, infrastructure, web, tests)
+- [US-EQ-004] Управление статусами оборудования - COMPLETED (2026-02-05) - URGENT, Depends on US-EQ-001
+- [US-EQ-002] Добавление оборудования по порядковому номеру - Completed on 2026-02-05 (search by serial number,
+  autocomplete, status validation, tests)
 
 ## Pending - Technical Improvements
 
@@ -21,43 +37,42 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
-- [US-AD-001] Управление пользователями - High priority, admin module
-- [US-AD-006] Резервное копирование и восстановление - Low priority, admin module
-- [US-TR-006] Tariff Versioning - Medium priority, tariff module (new task: implement immutable versioning)
+- [US-AD-001] Управление пользователями - MEDIUM, admin module
+- [US-AD-006] Резервное копирование и восстановление - LOW, admin module
+- [US-TR-006] Tariff Versioning - LOW, tariff module (new task: implement immutable versioning)
 
 ## Pending - Phase 2: Basic Module Functions
 
-- [US-CL-006] Customer Profile Change Audit Trail - Medium priority, customer module, depends on US-CL-003
-
-- [US-EQ-002] Добавление оборудования по порядковому номеру - Depends on US-EQ-001
-- [US-EQ-004] Управление статусами оборудования - Depends on US-EQ-001
+- [US-CL-006] Customer Profile Change Audit Trail - LOW, customer module, depends on US-CL-003
 - [US-FN-002] Возврат средств - Depends on US-FN-001
-- [US-AD-002] Управление ролями и правами доступа - Depends on US-AD-001
-- [US-AD-003] Настройка тарифов - Depends on US-TR-001
-- [US-AD-004] Настройка бизнес-правил - Depends on US-AD-001
-- [US-MT-002] Учет ремонтов и обслуживания - Depends on US-EQ-001
-- [US-MT-003] Вывод оборудования из эксплуатации - Depends on US-EQ-004
+- [US-AD-002] Управление ролями и правами доступа - LOW, Depends on US-AD-001
+- [US-AD-003] Настройка тарифов - LOW, Depends on US-TR-001
+- [US-AD-004] Настройка бизнес-правил - URGENT, Depends on US-AD-001
+- [US-MT-002] Учет ремонтов и обслуживания - LOW, Depends on US-EQ-001
+- [US-MT-003] Вывод оборудования из эксплуатации - LOW, Depends on US-EQ-004
 
 ## Pending - Phase 3: Main Rental Process
 
-- [US-RN-001] Создание записи аренды - Depends on US-CL-001, US-CL-002, US-EQ-002, US-TR-001
-- [US-RN-002] Автоматический подбор тарифа - Depends on US-TR-001
-- [US-RN-003] Установка даты и времени начала проката - Depends on US-RN-001
-- [US-RN-004] Внесение предоплаты - Depends on US-RN-001, US-FN-001
-- [US-RN-005] Запуск аренды - Depends on US-RN-001, US-RN-004, US-EQ-004
-- [US-RN-007] Расчет времени аренды - Depends on US-RN-003
-- [US-RN-009] Просмотр активных аренд - Depends on US-RN-005
+- [US-RN-001] Создание записи аренды - URGENT, Depends on US-CL-001, US-CL-002, US-EQ-002, US-TR-001
+- [US-RN-002] Автоматический подбор тарифа - URGENT, Depends on US-TR-001
+- [US-RN-003] Установка даты и времени начала проката - URGENT, Depends on US-RN-001
+- [US-RN-004] Внесение предоплаты - URGENT, Depends on US-RN-001, US-FN-001
+- [US-RN-005] Запуск аренды - URGENT, Depends on US-RN-001, US-RN-004, US-EQ-004
+- [US-RN-006] Возврат оборудования - URGENT, Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
+- [US-RN-007] Расчет времени аренды - URGENT, Depends on US-RN-003
+- [US-RN-008] Ранний возврат или замена оборудования - URGENT, Depends on US-RN-005
+- [US-RN-009] Просмотр активных аренд - URGENT, Depends on US-RN-005
 
 ## Pending - Phase 4: Return & Calculations
 
-- [US-TR-002] Расчет стоимости аренды - Depends on US-TR-001, US-RN-007
-- [US-TR-003] Правило "прощения" просрочки - Depends on US-TR-002
-- [US-TR-004] Расчет доплаты за просрочку - Depends on US-TR-002, US-TR-003
-- [US-EQ-003] Сканирование метки при возврате - Depends on US-EQ-001, US-RN-005
-- [US-RN-006] Возврат оборудования - Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
-- [US-EQ-005] Учет износа и пробега - Depends on US-RN-006
-- [US-RN-008] Ранний возврат или замена оборудования - Depends on US-RN-005
-- [US-TR-005] Возврат средств при отмене - Depends on US-RN-008, US-FN-002
+- [US-TR-002] Расчет стоимости аренды - URGENT, Depends on US-TR-001, US-RN-007
+- [US-TR-003] Правило "прощения" просрочки - URGENT, Depends on US-TR-002
+- [US-TR-004] Расчет доплаты за просрочку - URGENT, Depends on US-TR-002, US-TR-003
+- [US-EQ-003] Сканирование метки при возврате - URGENT, Depends on US-EQ-001, US-RN-005
+- [US-RN-006] Возврат оборудования - URGENT, Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
+- [US-EQ-005] Учет износа и пробега - LOW, Depends on US-RN-006
+- [US-RN-008] Ранний возврат или замена оборудования - URGENT, Depends on US-RN-005
+- [US-TR-005] Возврат средств при отмене - URGENT, Depends on US-RN-008, US-FN-002
 
 ## Pending - Phase 5: Finance & History
 
@@ -87,17 +102,3 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 ## Blocked
 
 <!-- No blocked tasks currently -->
-
-## Completed
-
-- [US-TR-001] Справочник тарифов - Completed on 2026-02-03 (domain + application + web layers, tests, migrations)
-- [US-EQ-001] Equipment Catalog - Completed on 2026-02-02 (139 subtasks: Database migrations,
-  domain/infrastructure/application/web layers, 10 REST endpoints, WebMvc + Component tests, admin CRUD for
-  types/statuses)
-- [US-CL-003] Полное создание/редактирование профиля клиента - Completed on 2026-01-29 (PUT endpoint + mapper
-  refactoring + 26 tests: 11 unit UpdateCustomerService, 15 WebMvc PUT, component tests)
-- [US-CL-001] Поиск клиента по номеру телефона - Completed on 2026-01-28 (Implementation + unit, WebMvc, component
-  tests)
-- [US-CL-002] Быстрое создание клиента - Completed on 2026-01-27 (Implementation + 83+ tests: 68 unit, 15 WebMvc,
-  component tests)
-- [US-FN-001] Прием оплаты - Completed on 2026-02-04 (finance module: domain, application, infrastructure, web, tests)
