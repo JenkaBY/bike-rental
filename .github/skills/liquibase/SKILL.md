@@ -63,6 +63,11 @@ service/src/main/resources/db/changelog/
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <!-- Example: Time columns MUST use TIMESTAMP WITH TIME ZONE -->
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <!-- Additional columns -->
         </createTable>
 
@@ -162,14 +167,15 @@ service/src/main/resources/db/changelog/
 
 1. **One Logical Change Per File**: Keep each changeset file focused on a single logical change
 2. **Use preconditions** Check existing structures before applying changes
-2. **Unique ChangeSet IDs**: Use descriptive, unique IDs following the pattern
+3. **Unique ChangeSet IDs**: Use descriptive, unique IDs following the pattern
    `{table}.{action}-table_{specific-action}`
-3. **Version Folders**: Organize changelogs by version (v1, v2, etc.) for better organization
-4. **Sequential Ordering**: Add new includes at the bottom of `db.changelog-master.xml`
-5. **Author Attribution**: Use consistent author name (e.g., "copilot", "ai_agent")
-6. **Rollback Support**: Consider adding rollback sections for complex changes
-7. **Index Creation**: Add indexes in the same changeset as table creation when possible
-8. **Constraints**: Define primary keys, unique constraints, and not null constraints during table creation
+4. **Version Folders**: Organize changelogs by version (v1, v2, etc.) for better organization
+5. **Sequential Ordering**: Add new includes at the bottom of `db.changelog-master.xml`
+6. **Author Attribution**: Use consistent author name (e.g., "copilot", "ai_agent")
+7. **Rollback Support**: Consider adding rollback sections for complex changes
+8. **Index Creation**: Add indexes in the same changeset as table creation when possible
+9. **Constraints**: Define primary keys, unique constraints, and not null constraints during table creation
+10. **Time Column Types**: **ALWAYS** use `TIMESTAMP WITH TIME ZONE` for all time-related columns (both audit fields like `created_at`, `updated_at` and business fields like `started_at`, `expected_return_at`). This ensures proper timezone handling and prevents issues with data migration.
 
 ## Testing with Liquibase
 

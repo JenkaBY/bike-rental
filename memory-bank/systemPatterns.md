@@ -281,6 +281,12 @@ public record PaymentReceived(
     - Domain ↔ Public DTO (API layer)
     - Domain ↔ JPA Entity (Persistence layer)
 - Type-safe compile-time code generation
+- Shared mappers (`MoneyMapper`, `InstantMapper`, `UuidMapper`) for common conversions
+- **Time Type Conventions:**
+    - `Instant` for audit fields (`createdAt`, `updatedAt`) - UTC timestamps
+    - `LocalDateTime` for business time (`startedAt`, `expectedReturnAt`) - timezone-agnostic local time
+    - `LocalDate` for date-only fields (`birthDate`, `validFrom`)
+    - Automatic conversion via `InstantMapper` when mapping between layers
 
 **13. Factory Pattern**
 

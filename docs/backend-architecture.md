@@ -101,8 +101,13 @@ flowchart TB
 **Ключевые сущности:**
 
 - `Equipment` - единица оборудования (порядковый номер, QR/NFC UID, тип, статус)
-- `EquipmentType` - тип оборудования (велосипед, самокат)
-- `EquipmentStatus` - enum: AVAILABLE, RENTED, MAINTENANCE, DECOMMISSIONED
+  - Хранит `statusSlug: String` (Value Object), не ссылку на Entity
+  - Использует порт `StatusTransitionPolicy` для валидации переходов
+- `EquipmentType` - тип оборудования (велосипед, самокат) - Reference Data Aggregate
+- `EquipmentStatus` - Reference Data Aggregate (не enum)
+  - Управляется через CRUD операции
+  - Содержит правила переходов: `allowedTransitions: Set<String>`
+  - Статусы: AVAILABLE, RENTED, MAINTENANCE, DECOMMISSIONED (по slug)
 
 **API для других модулей:**
 
@@ -866,12 +871,94 @@ public class SecurityConfig {
 - Frontend использует Web NFC API (Android Chrome) или камеру для QR
 - Дедуплицированные endpoints для точного поиска (не query params)
 
-### 8.3 Экспорт отчетов (NFR-014)
+### 8.3 Типы данных для работы с временем
+
+**Правила использования типов времени в доменной модели:**
+
+1. **`Instant`** - используется для **аудит-полей** (технических меток времени):
+   - `createdAt` - время создания записи
+   - `updatedAt` - время последнего обновления записи
+   - `receivedAt` - время получения платежа (в событиях)
+   - Всегда хранится в UTC, не зависит от временной зоны
+   - Используется для точного отслеживания момента времени в системе
+
+2. **`LocalDateTime`** - используется для **бизнес-времени** (временных меток бизнес-процессов):
+   - `startedAt` - время начала аренды
+   - `expectedReturnAt` - ожидаемое время возврата
+   - `actualReturnAt` - фактическое время возврата
+   - `shiftStartedAt` / `shiftClosedAt` - время открытия/закрытия смены
+   - `lastMaintenanceAt` / `nextMaintenanceAt` - время последнего/следующего ТО
+   - Хранится без временной зоны, представляет локальное время события
+   - Используется для бизнес-логики и расчетов длительности
+
+3. **`LocalDate`** - используется для **даты без времени**:
+   - `birthDate` - дата рождения клиента
+   - `validFrom` / `validTo` - период действия тарифа
+   - Используется когда важна только дата, без учета времени
+
+**Конвертация между типами:**
+
+- Конвертация `Instant` ↔ `LocalDateTime` выполняется через `InstantMapper` из модуля `shared`
+- MapStruct автоматически использует методы `instantToLocalDateTime()` и `localDateTimeToInstant()` при маппинге
+- При конвертации используется системная временная зона (`ZoneId.systemDefault()`)
+
+**Правила для Liquibase changelog файлов:**
+
+- **Все поля времени** в changelog файлах должны использовать тип `TIMESTAMP WITH TIME ZONE`
+- Это правило применяется как к аудит-полям (`created_at`, `updated_at`), так и к бизнес-полям (`started_at`, `expected_return_at`, `actual_return_at`)
+- PostgreSQL автоматически хранит значения в UTC и конвертирует их при выборке в соответствии с настройками сессии
+- Единый формат обеспечивает корректную работу с временными зонами и предотвращает проблемы при миграции данных
+
+**Пример использования в changelog:**
+
+```xml
+<column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+    <constraints nullable="false"/>
+</column>
+<column name="started_at" type="TIMESTAMP WITH TIME ZONE"/>
+```
+
+**Примеры использования:**
+
+```java
+// Доменная модель Rental
+public class Rental {
+    // Бизнес-время - LocalDateTime
+    private LocalDateTime startedAt;
+    private LocalDateTime expectedReturnAt;
+    private LocalDateTime actualReturnAt;
+    
+    // Аудит-поля - Instant
+    private Instant createdAt;
+    private Instant updatedAt;
+}
+
+// JPA Entity - типы совпадают с доменной моделью
+@Entity
+public class RentalJpaEntity {
+    @Column(name = "started_at")
+    private LocalDateTime startedAt;
+    
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+}
+
+// DTO для API - бизнес-время остается LocalDateTime, аудит-поля конвертируются
+public record RentalResponse(
+    LocalDateTime startedAt,
+    LocalDateTime expectedReturnAt,
+    LocalDateTime actualReturnAt,
+    LocalDateTime createdAt,  // Конвертировано из Instant через InstantMapper
+    LocalDateTime updatedAt   // Конвертировано из Instant через InstantMapper
+) {}
+```
+
+### 8.4 Экспорт отчетов (NFR-014)
 
 - Apache POI для Excel
 - iText/OpenPDF для PDF
 
-### 8.4 Деплой (NFR-110, NFR-111)
+### 8.5 Деплой (NFR-110, NFR-111)
 
 - GitHub Actions CI/CD (`.github/workflows/build.yml`)
 - Single fat JAR через `./gradlew bootJar`

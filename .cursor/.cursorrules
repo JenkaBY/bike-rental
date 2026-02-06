@@ -1,6 +1,6 @@
 # Project Context and Architecture
 SYSTEM_CONTEXT: |
-  Read the docs/ai-rules/software-architecture-role.md file for understanding your role.
+  Read the docs/ai-rules/software-developer-role.md file for understanding your role.
 
   Error handling:
   1. If file not found: STOP and notify user
