@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * DTO для ответа с информацией об аренде.
- */
+
 public record RentalResponse(
         Long id,
         UUID customerId,

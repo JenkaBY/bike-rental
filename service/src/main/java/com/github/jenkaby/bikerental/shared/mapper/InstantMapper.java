@@ -1,13 +1,12 @@
 package com.github.jenkaby.bikerental.shared.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface InstantMapper {
 
 
@@ -16,7 +15,6 @@ public interface InstantMapper {
     }
 
     default Instant localDateTimeToInstant(LocalDateTime localDateTime) {
-        LocalDateTime localDateTime = localDateTime.
         return localDateTime != null ? localDateTime.atZone(ZoneId.systemDefault()).toInstant() : null;
     }
 }

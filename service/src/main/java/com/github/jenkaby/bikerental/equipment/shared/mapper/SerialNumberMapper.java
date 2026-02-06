@@ -2,9 +2,8 @@ package com.github.jenkaby.bikerental.equipment.shared.mapper;
 
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface SerialNumberMapper {
     default SerialNumber toSerialNumber(String value) {
         return value != null ? new SerialNumber(value) : null;

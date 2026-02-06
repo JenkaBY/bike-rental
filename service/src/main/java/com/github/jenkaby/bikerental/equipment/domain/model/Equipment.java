@@ -28,8 +28,4 @@ public class Equipment {
         policy.validateTransition(this.statusSlug, newStatusSlug);
         this.statusSlug = newStatusSlug;
     }
-
-    public void setInitialStatus(@NonNull String initialStatusSlug) {
-        this.statusSlug = initialStatusSlug;
-    }
 }

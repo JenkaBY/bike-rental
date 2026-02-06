@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.shared.infrastructure.messaging.BikeRentalE
 
 import java.time.Instant;
 
-
 public record RentalCreated(
         Long rentalId,
         Instant createdAt

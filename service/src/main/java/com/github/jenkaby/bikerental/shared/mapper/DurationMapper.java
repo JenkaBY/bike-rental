@@ -1,12 +1,11 @@
 package com.github.jenkaby.bikerental.shared.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
 
 import java.time.Duration;
 
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface DurationMapper {
 
 

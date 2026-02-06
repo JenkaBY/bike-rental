@@ -380,7 +380,7 @@ import com.github.jenkaby.bikerental.rental.internal.web.command.dto.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface RentalCommandMapper {
 
     CreateRentalUseCase.CreateRentalCommand toCreateCommand(CreateRentalRequest request);
@@ -495,7 +495,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface RentalQueryMapper {
 
     @Mapping(source = "rentalId", target = "id")

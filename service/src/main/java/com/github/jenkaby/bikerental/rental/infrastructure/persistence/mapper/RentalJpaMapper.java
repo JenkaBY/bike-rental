@@ -8,16 +8,16 @@ import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        uses = {MoneyMapper.class, InstantMapper.class, RentalStatusMapper.class, DurationMapper.class},
-        injectionStrategy = InjectionStrategy.CONSTRUCTOR
-)
+@Mapper(uses = {MoneyMapper.class, InstantMapper.class, RentalStatusMapper.class, DurationMapper.class})
 public interface RentalJpaMapper {
 
+    @Mapping(target = "plannedDuration", source = "entity.plannedDurationMinutes")
+    @Mapping(target = "actualDuration", source = "entity.actualDurationMinutes")
     Rental toDomain(RentalJpaEntity entity);
 
+
+    @Mapping(target = "actualDurationMinutes", source = "rental.actualDuration")
+    @Mapping(target = "plannedDurationMinutes", source = "rental.plannedDuration")
     RentalJpaEntity toEntity(Rental rental);
 }

@@ -7,13 +7,8 @@ import com.github.jenkaby.bikerental.tariff.domain.model.Tariff;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        uses = {MoneyMapper.class},
-        injectionStrategy = InjectionStrategy.CONSTRUCTOR
-)
+@Mapper(uses = {MoneyMapper.class}, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface TariffCommandToDomainMapper {
 
     @Mapping(target = "id", ignore = true)

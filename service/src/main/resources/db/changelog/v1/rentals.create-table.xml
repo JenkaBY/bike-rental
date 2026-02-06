@@ -35,21 +35,6 @@
             <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
 
-        <createIndex tableName="rentals" indexName="idx_rentals_customer">
-            <column name="customer_id"/>
-        </createIndex>
-
-        <createIndex tableName="rentals" indexName="idx_rentals_equipment">
-            <column name="equipment_id"/>
-        </createIndex>
-
-        <createIndex tableName="rentals" indexName="idx_rentals_status">
-            <column name="status"/>
-        </createIndex>
-
-        <createIndex tableName="rentals" indexName="idx_rentals_started">
-            <column name="started_at"/>
-        </createIndex>
     </changeSet>
 
 </databaseChangeLog>
