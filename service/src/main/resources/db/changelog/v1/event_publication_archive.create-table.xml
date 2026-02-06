@@ -24,13 +24,13 @@
             <column name="serialized_event" type="text">
                 <constraints nullable="false"/>
             </column>
-            <column name="publication_date" type="timestamp with time zone">
+            <column name="publication_date" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="completion_date" type="timestamp with time zone"/>
+            <column name="completion_date" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="status" type="text"/>
             <column name="completion_attempts" type="int"/>
-            <column name="last_resubmission_date" type="timestamp with time zone"/>
+            <column name="last_resubmission_date" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
 
         <!-- Create index on completion_date using standard index -->

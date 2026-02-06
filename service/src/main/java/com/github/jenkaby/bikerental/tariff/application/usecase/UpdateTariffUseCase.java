@@ -1,7 +1,6 @@
 package com.github.jenkaby.bikerental.tariff.application.usecase;
 
 import com.github.jenkaby.bikerental.tariff.domain.model.Tariff;
-import com.github.jenkaby.bikerental.tariff.domain.model.TariffPeriod;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,7 +13,6 @@ public interface UpdateTariffUseCase {
             String name,
             String description,
             String equipmentTypeSlug,
-            TariffPeriod period,
             BigDecimal basePrice,
             BigDecimal halfHourPrice,
             BigDecimal hourPrice,

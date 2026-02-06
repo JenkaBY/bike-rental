@@ -47,6 +47,11 @@ This file should contain:
 
 - **MapStruct** - Compile-time type-safe mapping between DTOs and domain objects
 - Three-layer mapping: Web DTO ↔ Command/Query ↔ Domain ↔ JPA Entity
+- **Time Type Conventions:**
+    - `Instant` for audit fields (`createdAt`, `updatedAt`) - stored in UTC
+    - `LocalDateTime` for business time (`startedAt`, `expectedReturnAt`) - timezone-agnostic
+    - `LocalDate` for date-only fields (`birthDate`, `validFrom`)
+    - Shared `InstantMapper` provides automatic conversion between `Instant` and `LocalDateTime`
 
 **Reporting & Export:**
 

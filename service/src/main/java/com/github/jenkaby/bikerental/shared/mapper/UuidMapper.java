@@ -1,11 +1,10 @@
 package com.github.jenkaby.bikerental.shared.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
 
 import java.util.UUID;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface UuidMapper {
 
     default String toString(UUID uuid) {

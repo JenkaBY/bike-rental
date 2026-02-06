@@ -10,14 +10,10 @@ import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerResponse;
 import com.github.jenkaby.bikerental.shared.mapper.UuidMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 
 import java.util.UUID;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        uses = {UuidMapper.class, PhoneNumberMapper.class, EmailAddressMapper.class}
-)
+@Mapper(uses = {UuidMapper.class, PhoneNumberMapper.class, EmailAddressMapper.class})
 public interface CustomerCommandMapper {
 
     CreateCustomerUseCase.CreateCustomerCommand toCreateCommand(CustomerRequest request);

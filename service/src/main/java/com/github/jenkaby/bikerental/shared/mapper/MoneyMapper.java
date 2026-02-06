@@ -2,11 +2,10 @@ package com.github.jenkaby.bikerental.shared.mapper;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
 
 import java.math.BigDecimal;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface MoneyMapper {
 
     default Money toMoney(BigDecimal amount) {

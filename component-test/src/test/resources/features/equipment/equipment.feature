@@ -116,7 +116,7 @@ Feature: Equipment management endpoints
     And the equipment request is prepared with the following data
       | serialNumber   | uid   | type            | status   | model   | commissionedAt   | condition   |
       | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <condition> |
-    When a PUT request has been made to "/api/equipments/{modifiedObjectId}" endpoint with context
+    When a PUT request has been made to "/api/equipments/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the equipment response contains
       | serialNumber   | uid   | type            | status   | model   | commissionedAt   | condition   |
@@ -149,7 +149,7 @@ Feature: Equipment management endpoints
     And the equipment request is prepared with the following data
       | serialNumber   | uid   | type            | status   | model   | commissionedAt   | condition   |
       | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <condition> |
-    When a PUT request has been made to "/api/equipments/{modifiedObjectId}" endpoint with context
+    When a PUT request has been made to "/api/equipments/{requestedObjectId}" endpoint with context
     Then the response status is 422
     And the response contains
       | path    | value                     |

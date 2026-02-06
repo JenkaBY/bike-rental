@@ -5,15 +5,11 @@ import com.github.jenkaby.bikerental.finance.domain.model.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.PaymentJpaEntity;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
-import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
-        uses = {MoneyMapper.class},
-        imports = {PaymentType.class, PaymentMethod.class},
-        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(uses = {MoneyMapper.class},
+        imports = {PaymentType.class, PaymentMethod.class})
 public interface PaymentJpaMapper {
 
     @Mapping(target = "paymentType", expression = "java(PaymentType.valueOf(entity.getPaymentType()))")

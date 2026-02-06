@@ -1,4 +1,4 @@
-package com.github.jenkaby.bikerental.shared.infrastructure.messaging;
+package com.github.jenkaby.bikerental.shared.domain.event;
 
 /**
  * Marker interface for bike rental events.

@@ -180,7 +180,7 @@ public class Equipment {
 - Consumed by other modules asynchronously
 - Examples: `RentalStarted`, `RentalCompleted`, `EquipmentStatusChanged`
 - **ARCHITECTURAL RULE**: All domain events MUST implement
-  `com.github.jenkaby.bikerental.shared.infrastructure.messaging.BikeRentalEvent` marker interface
+  `com.github.jenkaby.bikerental.shared.domain.event.BikeRentalEvent` marker interface
 
 **Event Contract:**
 
@@ -281,6 +281,12 @@ public record PaymentReceived(
     - Domain ↔ Public DTO (API layer)
     - Domain ↔ JPA Entity (Persistence layer)
 - Type-safe compile-time code generation
+- Shared mappers (`MoneyMapper`, `InstantMapper`, `UuidMapper`) for common conversions
+- **Time Type Conventions:**
+    - `Instant` for audit fields (`createdAt`, `updatedAt`) - UTC timestamps
+    - `LocalDateTime` for business time (`startedAt`, `expectedReturnAt`) - timezone-agnostic local time
+    - `LocalDate` for date-only fields (`birthDate`, `validFrom`)
+    - Automatic conversion via `InstantMapper` when mapping between layers
 
 **13. Factory Pattern**
 

@@ -6,9 +6,8 @@ import com.github.jenkaby.bikerental.finance.web.command.dto.RecordPaymentReques
 import com.github.jenkaby.bikerental.finance.web.command.dto.RecordPaymentResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface PaymentCommandMapper {
 
     RecordPaymentCommand toCommand(RecordPaymentRequest request);

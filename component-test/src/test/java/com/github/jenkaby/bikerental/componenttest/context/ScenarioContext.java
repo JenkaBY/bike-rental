@@ -27,7 +27,7 @@ public class ScenarioContext {
     private final Map<String, List<String>> requestHeaders = new HashMap<>();
     private ResponseEntity<String> response;
     private Object requestBody;
-    private String modifiedObjectId;
+    private String requestedObjectId;
     private Set<UUID> persistedIds = new HashSet<>();
 
     @SneakyThrows

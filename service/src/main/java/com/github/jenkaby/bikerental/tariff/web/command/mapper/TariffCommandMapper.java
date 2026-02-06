@@ -4,9 +4,8 @@ import com.github.jenkaby.bikerental.tariff.application.usecase.CreateTariffUseC
 import com.github.jenkaby.bikerental.tariff.application.usecase.UpdateTariffUseCase.UpdateTariffCommand;
 import com.github.jenkaby.bikerental.tariff.web.command.dto.TariffRequest;
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface TariffCommandMapper {
 
     CreateTariffCommand toCreateCommand(TariffRequest request);

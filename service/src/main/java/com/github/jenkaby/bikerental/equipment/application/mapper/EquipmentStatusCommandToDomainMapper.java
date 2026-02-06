@@ -5,9 +5,8 @@ import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipme
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface EquipmentStatusCommandToDomainMapper {
 
     @Mapping(target = "id", ignore = true)

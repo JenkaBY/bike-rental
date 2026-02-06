@@ -6,12 +6,8 @@ import com.github.jenkaby.bikerental.customer.shared.mapper.EmailAddressMapper;
 import com.github.jenkaby.bikerental.customer.shared.mapper.PhoneNumberMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        uses = {PhoneNumberMapper.class, EmailAddressMapper.class}
-)
+@Mapper(uses = {PhoneNumberMapper.class, EmailAddressMapper.class})
 public interface CustomerJpaMapper {
 
     Customer toDomain(CustomerJpaEntity entity);

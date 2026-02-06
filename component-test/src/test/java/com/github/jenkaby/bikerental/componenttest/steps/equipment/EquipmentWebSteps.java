@@ -133,6 +133,6 @@ public class EquipmentWebSteps {
         scenarioContext.setRequestBody(request);
         webRequestSteps.requestHasBeenMadeToEndpoint(HttpMethod.POST, "/api/equipments");
         var response = scenarioContext.getResponseBody(EquipmentResponse.class);
-        scenarioContext.setModifiedObjectId(response.id().toString());
+        scenarioContext.setRequestedObjectId(response.id().toString());
     }
 }
