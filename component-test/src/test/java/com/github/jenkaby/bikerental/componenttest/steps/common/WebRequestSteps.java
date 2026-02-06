@@ -74,14 +74,14 @@ public class WebRequestSteps {
 
     @When("a {httpMethod} request has been made to {string} endpoint with context")
     public void requestHasBeenMadeToEndpointWithContext(HttpMethod method, String endpoint) {
-        var token = "{modifiedObjectId}";
-        if (!endpoint.contains("{modifiedObjectId}")) {
+        var token = "{requestedObjectId}";
+        if (!endpoint.contains("{requestedObjectId}")) {
             throw new IllegalArgumentException("Endpoint " + endpoint + " must contain token '" + token + "' to be replaced. Whether remove token from table or add it to endpoint.");
         }
-        if (scenarioContext.getModifiedObjectId() == null) {
-            throw new IllegalStateException("Scenario context does not have modifiedObjectId set.");
+        if (scenarioContext.getRequestedObjectId() == null) {
+            throw new IllegalStateException("Scenario context does not have requestedObjectId set.");
         }
-        endpoint = endpoint.replace(token, scenarioContext.getModifiedObjectId());
+        endpoint = endpoint.replace(token, scenarioContext.getRequestedObjectId());
         requestHasBeenMadeToEndpointTimes(method, 1, endpoint, null);
     }
 

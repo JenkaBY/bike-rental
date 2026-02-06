@@ -86,7 +86,6 @@ public class TariffWebSteps {
         scenarioContext.setRequestBody(request);
         webRequestSteps.requestHasBeenMadeToEndpoint(HttpMethod.POST, "/api/tariffs");
         var response = scenarioContext.getResponseBody(TariffResponse.class);
-        scenarioContext.setModifiedObjectId(response.id().toString());
-        ;
+        scenarioContext.setRequestedObjectId(response.id().toString());
     }
 }

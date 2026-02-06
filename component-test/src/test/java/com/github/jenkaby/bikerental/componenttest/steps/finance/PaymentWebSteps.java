@@ -49,7 +49,7 @@ public class PaymentWebSteps {
         assertThat(actual.paymentId()).isNotNull();
         assertThat(actual.receiptNumber()).isNotNull();
 
-        scenarioContext.setModifiedObjectId(actual.paymentId().toString());
+        scenarioContext.setRequestedObjectId(actual.paymentId().toString());
         scenarioContext.addPersistedId(actual.paymentId());
     }
 

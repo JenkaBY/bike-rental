@@ -32,7 +32,7 @@ public class PaymentMessagingSteps {
     public void theFollowingPaymentMessageWasPublished(PaymentReceived expectedMessage) {
         List<PaymentReceived> expected = List.of(
                 expectedMessage.toBuilder()
-                        .paymentId(UUID.fromString(scenarioContext.getModifiedObjectId()))
+                        .paymentId(UUID.fromString(scenarioContext.getRequestedObjectId()))
                         .build()
         );
 

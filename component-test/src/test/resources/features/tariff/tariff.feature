@@ -76,14 +76,14 @@ Feature: Tariff management endpoints
     And total tariff records in db is 5
 
   Scenario Outline: Update existing tariff and Get it by id
-    #    persist tariff id in the scenario context as modifiedObjectId
+    #    persist tariff id in the scenario context as requestedObjectId
     Given the tariff being updated is
       | name       | description | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo | status |
       | SamokatNew | For Samokat | samokat       | 25.00     | 22.50         | 25.00     | 22.00    | 24.50           | 2027-01-01 |         | ACTIVE |
     And the tariff request is prepared with the following data
       | name   | description   | equipmentType   | basePrice   | halfHourPrice   | hourPrice   | dayPrice   | discountedPrice   | validFrom   | validTo   | status   |
       | <name> | <description> | <equipmentType> | <basePrice> | <halfHourPrice> | <hourPrice> | <dayPrice> | <discountedPrice> | <validFrom> | <validTo> | <status> |
-    When a PUT request has been made to "/api/tariffs/{modifiedObjectId}" endpoint with context
+    When a PUT request has been made to "/api/tariffs/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the tariff response only contains
       | name   | description   | equipmentType   | basePrice   | halfHourPrice   | hourPrice   | dayPrice   | discountedPrice   | validFrom   | validTo   | status   |
@@ -92,7 +92,7 @@ Feature: Tariff management endpoints
       | name   | description   | equipmentType   | basePrice   | halfHourPrice   | hourPrice   | dayPrice   | discountedPrice   | validFrom   | validTo   | status   |
       | <name> | <description> | <equipmentType> | <basePrice> | <halfHourPrice> | <hourPrice> | <dayPrice> | <discountedPrice> | <validFrom> | <validTo> | <status> |
 #    retrieve by id
-    When a GET request has been made to "/api/tariffs/{modifiedObjectId}" endpoint with context
+    When a GET request has been made to "/api/tariffs/{requestedObjectId}" endpoint with context
     And the tariff response only contains
       | name   | description   | equipmentType   | basePrice   | halfHourPrice   | hourPrice   | dayPrice   | discountedPrice   | validFrom   | validTo   | status   |
       | <name> | <description> | <equipmentType> | <basePrice> | <halfHourPrice> | <hourPrice> | <dayPrice> | <discountedPrice> | <validFrom> | <validTo> | <status> |
@@ -104,12 +104,12 @@ Feature: Tariff management endpoints
     Given the tariff being updated is
       | name       | description | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo | status   |
       | SamokatNew | For Samokat | samokat       | 25.00     | 22.50         | 25.00     | 22.00    | 24.50           | 2027-01-01 |         | INACTIVE |
-    When a PATCH request has been made to "/api/tariffs/{modifiedObjectId}/activate" endpoint with context
+    When a PATCH request has been made to "/api/tariffs/{requestedObjectId}/activate" endpoint with context
     Then the response status is 200
     And the response contains
       | path     | value  |
       | $.status | ACTIVE |
-    When a PATCH request has been made to "/api/tariffs/{modifiedObjectId}/deactivate" endpoint with context
+    When a PATCH request has been made to "/api/tariffs/{requestedObjectId}/deactivate" endpoint with context
     Then the response status is 200
     And the response contains
       | path     | value    |

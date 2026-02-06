@@ -1,6 +1,6 @@
 package com.github.jenkaby.bikerental.componenttest.context;
 
-import com.github.jenkaby.bikerental.shared.infrastructure.messaging.BikeRentalEvent;
+import com.github.jenkaby.bikerental.shared.domain.event.BikeRentalEvent;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

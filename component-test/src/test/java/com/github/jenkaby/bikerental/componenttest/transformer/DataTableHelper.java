@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.componenttest.transformer;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +35,19 @@ public class DataTableHelper {
         return Long.valueOf(value);
     }
 
+    public static Integer toInt(Map<String, String> entry, String field) {
+        var value = entry.get(field);
+        if (value == null) {
+            return null;
+        }
+        value = value.trim();
+        if (value.isEmpty()) {
+            return null;
+        }
+
+        return Integer.valueOf(value);
+    }
+
     public static BigDecimal toBigDecimal(Map<String, String> entry, String field) {
         var value = entry.get(field);
         if (value == null) {
@@ -57,6 +71,14 @@ public class DataTableHelper {
             return null;
         }
         return LocalDate.parse(value);
+    }
+
+    public static LocalDateTime toLocalDateTime(Map<String, String> entry, String field) {
+        var value = getStringOrNull(entry, field);
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return LocalDateTime.parse(value.trim());
     }
 
     public static Instant toInstant(Map<String, String> entry, String field) {
