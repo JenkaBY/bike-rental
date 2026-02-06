@@ -15,6 +15,7 @@
     <include relativeToChangelogFile="true" file="v1/tariffs.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/payments.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/equipment_status_transition_rules.create-table.xml"/>
+    <include relativeToChangelogFile="true" file="v1/rentals.create-table.xml"/>
     <!--    provisioning data -->
     <include relativeToChangelogFile="true" file="data/equipment_types-provisioning.xml"/>
     <include relativeToChangelogFile="true" file="data/equipment_statuses-provisioning.xml"/>

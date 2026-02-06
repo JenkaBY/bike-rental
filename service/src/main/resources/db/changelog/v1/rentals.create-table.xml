@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="rentals.create-table" author="bikerental">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="rentals"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="rentals">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_id" type="UUID"/>
+            <column name="equipment_id" type="BIGINT"/>
+            <column name="tariff_id" type="BIGINT"/>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="started_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="expected_return_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="actual_return_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="planned_duration_minutes" type="INTEGER"/>
+            <column name="actual_duration_minutes" type="INTEGER"/>
+            <column name="estimated_cost" type="DECIMAL(10,2)"/>
+            <column name="final_cost" type="DECIMAL(10,2)"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <createIndex tableName="rentals" indexName="idx_rentals_customer">
+            <column name="customer_id"/>
+        </createIndex>
+
+        <createIndex tableName="rentals" indexName="idx_rentals_equipment">
+            <column name="equipment_id"/>
+        </createIndex>
+
+        <createIndex tableName="rentals" indexName="idx_rentals_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="rentals" indexName="idx_rentals_started">
+            <column name="started_at"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
