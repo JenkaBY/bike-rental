@@ -2,7 +2,7 @@
 
 **Status:** Completed  
 **Added:** 2026-01-26  
-**Updated:** 2026-02-05  
+**Updated:** 2026-02-06  
 **Priority:** High  
 **Module:** equipment  
 **Dependencies:** US-EQ-001
@@ -46,19 +46,24 @@
 Equipment status is central to the rental workflow and must be managed carefully. This involves both automatic (
 system-driven) and manual (user-driven) status transitions.
 
-**Key Design Decisions (Updated 2026-02-05):**
+**Key Design Decisions (Updated 2026-02-06):**
 
 1. **DDD-Compliant Architecture**: Domain entities use ports (interfaces) for validation, not direct infrastructure
    dependencies
-2. **StatusTransitionPolicy Port**: Domain layer defines interface, infrastructure provides implementations
-3. **Embedded Transition Rules**: `EquipmentStatus` entity contains `allowedTransitionSlugs` (Set<String>) for simpler
+2. **StatusTransitionPolicy Port**: Domain layer defines interface (`StatusTransitionPolicy`), application layer
+   provides implementation (`EquipmentStatusTransitionPolicy`)
+3. **EquipmentStatus as Separate Aggregate**: `EquipmentStatus` is a Reference Data Aggregate, not part of `Equipment`
+   aggregate
+4. **Status Reference by Slug**: `Equipment` stores `statusSlug` (String) as Value Object, not full `EquipmentStatus`
+   entity reference
+5. **Embedded Transition Rules**: `EquipmentStatus` entity contains `allowedTransitions` (Set<String>) for transition
    management
-4. **Status changes handled via equipment update**: Status changes are applied through the existing equipment update
+6. **Status changes handled via equipment update**: Status changes are applied through the existing equipment update
    operation (PUT /api/equipment/{id})
    rather than a separate status-change endpoint or separate service class. This simplifies the API surface and keeps
    equipment updates atomic.
-5. **Event-Driven Cross-Module Communication**: Rental module publishes events, Equipment module reacts via listeners
-6. **Status Reference by Slug**: Equipment stores `statusSlug` (String), not full entity reference
+7. **Event-Driven Cross-Module Communication**: Rental module publishes events, Equipment module reacts via listeners
+8. **Performance Optimization**: Direct mapping of `statusSlug` eliminates N+1 queries and unnecessary entity loading
 
 **State Machine Design:**
 
@@ -73,18 +78,24 @@ DECOMMISSIONED → (terminal, no transitions)
 **Architecture Pattern (DDD-Compliant):**
 
 ```
-Equipment Domain
-├── Equipment.changeStatus(newStatusSlug)
-└── Status
+Equipment Aggregate (Root)
+├── statusSlug: String (Value Object)
+└── changeStatusTo(slug, StatusTransitionPolicy)
 
-EquipmentStatus Aggregate
+EquipmentStatus Aggregate (Reference Data)
 ├── id, slug, name, description
-├── allowedTransitionSlugs: Set<String>
+├── allowedTransitions: Set<String>
+└── canTransitionTo(slug): boolean
 
+StatusTransitionPolicy (Domain Port)
+└── validateTransition(fromSlug, toSlug)
+
+EquipmentStatusTransitionPolicy (Application Service)
+└── implements StatusTransitionPolicy using EquipmentStatusRepository
 
 Cross-Module Communication
 ├── Rental Module publishes: RentalReserved, RentalStarted, RentalCompleted
-└── Equipment Module reacts: RentalEventListener → ChangeEquipmentStatusUseCase
+└── Equipment Module reacts: RentalEventListener → UpdateEquipmentUseCase
 ```
 
 **Architecture Considerations:**
@@ -125,6 +136,33 @@ Cross-Module Communication
 | 4.7 | Add audit logging                                | Complete | 2026-02-05 | Audit entries logged for status changes      |
 
 ## Progress Log
+
+### 2026-02-06 (DDD Refactoring Completed)
+
+**Major Architecture Improvement: EquipmentStatus as Separate Aggregate**
+
+- **Refactored Equipment domain model**: Changed from storing `EquipmentStatus` Entity to `statusSlug: String` (Value
+  Object)
+- **Created StatusTransitionPolicy port**: Domain layer interface (`domain/service/StatusTransitionPolicy`) for
+  validation
+- **Implemented EquipmentStatusTransitionPolicy**: Application service that implements the port using
+  `EquipmentStatusRepository`
+- **Updated Equipment.changeStatusTo()**: Now accepts `StatusTransitionPolicy` as parameter (dependency injection
+  pattern)
+- **Removed EquipmentJpaMapperDecorator**: Direct mapping of `statusSlug` eliminates N+1 queries and unnecessary entity
+  loading
+- **Updated all mappers**: `EquipmentJpaMapper`, `EquipmentCommandToDomainMapper`, `EquipmentQueryMapper` now work with
+  `statusSlug`
+- **Updated services**: `CreateEquipmentService` and `UpdateEquipmentService` use policy for validation
+- **Performance improvement**: No more additional database queries when loading Equipment entities
+- **DDD compliance**: EquipmentStatus is now correctly modeled as separate Reference Data Aggregate
+
+**Key Changes:**
+
+- Equipment stores `statusSlug: String` instead of `EquipmentStatus` Entity
+- StatusTransitionPolicy port in domain layer, implementation in application layer
+- Direct statusSlug mapping in persistence layer (no decorator needed)
+- All validation through policy, maintaining domain purity
 
 ### 2026-02-05 (Task Completed)
 
@@ -242,46 +280,54 @@ Cross-Module Communication
 **DDD-Compliant Domain Model:**
 
 ```java
-// Domain Port (interface)
+// Domain Port (interface) - domain/service layer
 public interface StatusTransitionPolicy {
-    void validateTransition(String fromStatusSlug, String toStatusSlug);
+  void validateTransition(@NonNull String fromStatusSlug, @NonNull String toStatusSlug);
 }
 
-// Domain Entity
+// Domain Entity - Equipment Aggregate Root
 public class Equipment {
-    private String statusSlug;
+  private Long id;
+  private String statusSlug;  // Value Object, not Entity reference
     
     // DDD-compliant: uses injected policy (dependency inversion)
-    public void changeStatus(String newStatusSlug, String reason, StatusTransitionPolicy policy) {
+    public void changeStatusTo(@NonNull String newStatusSlug, @NonNull StatusTransitionPolicy policy) {
         policy.validateTransition(this.statusSlug, newStatusSlug);
         this.statusSlug = newStatusSlug;
     }
+
+  public void setInitialStatus(@NonNull String initialStatusSlug) {
+    this.statusSlug = initialStatusSlug;
+  }
 }
 
-// EquipmentStatus with embedded transitions
-@Entity
-@Table(name = "equipment_statuses")
+// EquipmentStatus Aggregate (Reference Data) - Separate Aggregate
 public class EquipmentStatus {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false, unique = true)
     private String slug;
-    
-    @Column(nullable = false)
     private String name;
-    
-    @ElementCollection
-    @CollectionTable(
-        name = "equipment_status_transitions",
-        joinColumns = @JoinColumn(name = "from_status_id")
-    )
-    @Column(name = "to_status_slug")
-    private Set<String> allowedTransitionSlugs = new HashSet<>();
-    
-    public boolean canTransitionTo(String toSlug) {
-        return allowedTransitionSlugs.contains(toSlug);
+  private String description;
+  private Set<String> allowedTransitions;
+
+  public boolean canTransitionTo(@NonNull String toStatusSlug) {
+    return allowedTransitions != null && allowedTransitions.contains(toStatusSlug);
+  }
+}
+
+// Application Service - implements domain port
+@Service
+public class EquipmentStatusTransitionPolicy implements StatusTransitionPolicy {
+  private final EquipmentStatusRepository statusRepository;
+
+  @Override
+  public void validateTransition(@NonNull String fromStatusSlug, @NonNull String toStatusSlug) {
+    // Validates status exists and transition is allowed
+    EquipmentStatus fromStatus = statusRepository.findBySlug(fromStatusSlug)
+            .orElseThrow(() -> new ReferenceNotFoundException(EquipmentStatus.class, fromStatusSlug));
+
+    if (!fromStatus.canTransitionTo(toStatusSlug)) {
+      throw new InvalidStatusTransitionException(null, fromStatusSlug, toStatusSlug);
+    }
     }
 }
 ```
@@ -359,10 +405,10 @@ public class RentalEventListener {
 - com.github.jenkaby.bikerental.equipment
   - domain
     - model
-      - Equipment (uses StatusTransitionPolicy port)
-      - StatusSlug (enum, backward compatibility)
+      - Equipment (stores statusSlug: String, uses StatusTransitionPolicy port)
+      - EquipmentStatus (Reference Data Aggregate with allowedTransitions)
+    - service
       - StatusTransitionPolicy (port interface)
-      - InMemoryStatusTransitionPolicy (default implementation)
     - exception
       - InvalidStatusTransitionException
     - event
@@ -374,11 +420,18 @@ public class RentalEventListener {
     - service
       - CreateEquipmentStatusService
       - UpdateEquipmentService
+      - EquipmentStatusTransitionPolicy (implements domain port)
   - infrastructure
     - persistence
-      - adapter.DatabaseStatusTransitionPolicy (port implementation)
-      - entity.StatusTransitionRuleJpaEntity
-      - repository.StatusTransitionRuleJpaRepository
+      - adapter
+        - EquipmentRepositoryAdapter (direct statusSlug mapping)
+        - EquipmentStatusRepositoryAdapter
+      - entity
+        - EquipmentJpaEntity (stores statusSlug: String)
+        - EquipmentStatusJpaEntity (with allowedTransitionSlugs)
+      - mapper
+        - EquipmentJpaMapper (direct statusSlug mapping, no decorator)
+        - EquipmentStatusJpaMapper
     - eventlistener
       - RentalEventListener (reacts to rental events)
   - web

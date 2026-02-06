@@ -46,10 +46,11 @@ class CreateEquipmentService implements CreateEquipmentUseCase {
             throw new DuplicateSerialNumberException(Equipment.class, uid.value());
         }
 
+        if (!statusRepository.existsBySlug(command.statusSlug())) {
+            throw new ReferenceNotFoundException(EquipmentStatus.class, command.statusSlug());
+        }
+
         Equipment equipment = mapper.toEquipment(command);
-        var initialStatus = statusRepository.findBySlug(command.statusSlug())
-                .orElseThrow(() -> new ReferenceNotFoundException(EquipmentStatus.class, command.statusSlug()));
-        equipment.setInitialStatus(initialStatus);
 
         return repository.save(equipment);
     }
