@@ -220,29 +220,37 @@
 - ✅ Bounded Context Isolation: No direct repository calls between modules
 - ✅ Invariant Protection: Status changes always validated through policy
 
-**Domain Model:**
+**Domain Model (Updated 2026-02-06):**
 
 ```java
+// Domain Port (interface)
+public interface StatusTransitionPolicy {
+   void validateTransition(@NonNull String fromStatusSlug, @NonNull String toStatusSlug);
+}
 
-// Equipment entity uses port
+// Equipment Aggregate Root - stores statusSlug as Value Object
 public class Equipment {
-    public void changeStatusTo(EquipmentStatus newStatus) {
-        if (!this.status.canTransitionTo(newStatus)) {
-            throw new InvalidStatusTransitionException(this.id, this.status, newStatus);
-        }
-        this.status = newStatus;
+   private String statusSlug;  // Value Object, not Entity reference
+
+   public void changeStatusTo(@NonNull String newStatusSlug, @NonNull StatusTransitionPolicy policy) {
+      policy.validateTransition(this.statusSlug, newStatusSlug);
+      this.statusSlug = newStatusSlug;
     }
 }
 
-// EquipmentStatus with embedded transitions
-@Entity
+// EquipmentStatus Aggregate (Reference Data) - Separate Aggregate
 public class EquipmentStatus {
-    @ElementCollection
-    private Set<String> allowedTransitionSlugs;
-    
-    public boolean canTransitionTo(String toSlug) {
-        return allowedTransitionSlugs.contains(toSlug);
+   private Set<String> allowedTransitions;
+
+   public boolean canTransitionTo(@NonNull String toStatusSlug) {
+      return allowedTransitions != null && allowedTransitions.contains(toStatusSlug);
     }
+}
+
+// Application Service - implements domain port
+@Service
+public class EquipmentStatusTransitionPolicy implements StatusTransitionPolicy {
+   // Uses EquipmentStatusRepository to validate transitions
 }
 ```
 
@@ -255,10 +263,12 @@ public class EquipmentStatus {
 **Benefits:**
 
 - Domain purity: no infrastructure dependencies in entities
+- Performance: direct statusSlug mapping eliminates N+1 queries
 - Testability: mock StatusTransitionPolicy in unit tests
-- Flexibility: swap policy implementations (InMemory ↔ Database)
+- Flexibility: swap policy implementations via dependency injection
 - Module isolation: Rental and Equipment remain decoupled
 - Transition management: embedded in EquipmentStatus CRUD operations
+- DDD compliance: EquipmentStatus is separate Reference Data Aggregate
 
 **Database Schema:**
 
