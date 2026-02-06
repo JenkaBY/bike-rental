@@ -180,7 +180,7 @@ public class Equipment {
 - Consumed by other modules asynchronously
 - Examples: `RentalStarted`, `RentalCompleted`, `EquipmentStatusChanged`
 - **ARCHITECTURAL RULE**: All domain events MUST implement
-  `com.github.jenkaby.bikerental.shared.infrastructure.messaging.BikeRentalEvent` marker interface
+  `com.github.jenkaby.bikerental.shared.domain.event.BikeRentalEvent` marker interface
 
 **Event Contract:**
 

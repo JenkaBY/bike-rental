@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.tariff.application.mapper.TariffCommandToDomainMapper;
 import com.github.jenkaby.bikerental.tariff.application.usecase.CreateTariffUseCase;
 import com.github.jenkaby.bikerental.tariff.domain.model.Tariff;
-import com.github.jenkaby.bikerental.tariff.domain.model.TariffPeriod;
 import com.github.jenkaby.bikerental.tariff.domain.model.TariffStatus;
 import com.github.jenkaby.bikerental.tariff.domain.repository.TariffRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -40,7 +39,6 @@ class CreateTariffServiceTest {
                 "Hourly Rate",
                 "Standard hourly rental",
                 "bicycle",
-                TariffPeriod.HOUR,
                 new BigDecimal("100.00"),
                 new BigDecimal("60.00"),
                 new BigDecimal("100.00"),

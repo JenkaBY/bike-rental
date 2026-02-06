@@ -660,7 +660,7 @@ Apply same TDD approach as US-CL-002:
 **What Changed:**
 
 - Established architectural rule: ALL domain events MUST implement
-  `com.github.jenkaby.bikerental.shared.infrastructure.messaging.BikeRentalEvent`
+  `com.github.jenkaby.bikerental.shared.domain.event.BikeRentalEvent`
 - Updated architecture documentation across multiple files
 - Fixed component test event handling infrastructure
 
