@@ -44,10 +44,10 @@
             <column name="status" type="varchar(50)" defaultValue="INACTIVE">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="timestamp with timezone">
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="timestamp with timezone"/>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
 
         </createTable>
     </changeSet>
