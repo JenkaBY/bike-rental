@@ -5,11 +5,11 @@ import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipme
 import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateSerialNumberException;
 import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateUidException;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
-import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentType;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentTypeRepository;
+import com.github.jenkaby.bikerental.equipment.domain.service.StatusTransitionPolicy;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
@@ -28,6 +28,7 @@ class UpdateEquipmentService implements UpdateEquipmentUseCase {
     private final UidMapper uidMapper;
     private final EquipmentTypeRepository typeRepository;
     private final EquipmentStatusRepository statusRepository;
+    private final StatusTransitionPolicy statusTransitionPolicy;
 
     UpdateEquipmentService(
             EquipmentRepository repository,
@@ -35,13 +36,15 @@ class UpdateEquipmentService implements UpdateEquipmentUseCase {
             SerialNumberMapper serialNumberMapper,
             UidMapper uidMapper,
             EquipmentTypeRepository typeRepository,
-            EquipmentStatusRepository statusRepository) {
+            EquipmentStatusRepository statusRepository,
+            StatusTransitionPolicy statusTransitionPolicy) {
         this.repository = repository;
         this.mapper = mapper;
         this.serialNumberMapper = serialNumberMapper;
         this.typeRepository = typeRepository;
         this.statusRepository = statusRepository;
         this.uidMapper = uidMapper;
+        this.statusTransitionPolicy = statusTransitionPolicy;
     }
 
     @Override
@@ -74,11 +77,9 @@ class UpdateEquipmentService implements UpdateEquipmentUseCase {
 
         // validate status exists if changed
         String newStatusSlug = command.statusSlug();
-        if (!newStatusSlug.equals(existing.getStatus().getSlug())) {
-            EquipmentStatus newStatus = statusRepository.findBySlug(newStatusSlug)
-                    .orElseThrow(() -> new ReferenceNotFoundException(EquipmentStatus.class, newStatusSlug));
-            log.info("Changing status of equipment with id {} from {} to {}", existing.getId(), existing.getStatus().getSlug(), newStatusSlug);
-            existing.changeStatusTo(newStatus);
+        if (!newStatusSlug.equals(existing.getStatusSlug())) {
+            log.info("Changing status of equipment with id {} from {} to {}", existing.getId(), existing.getStatusSlug(), newStatusSlug);
+            existing.changeStatusTo(newStatusSlug, statusTransitionPolicy);
         }
         var updated = mapper.toEquipment(existing, command);
 

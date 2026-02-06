@@ -24,7 +24,7 @@ public class EquipmentStatus {
         return canTransitionTo(another.getSlug());
     }
 
-    private boolean canTransitionTo(@NonNull String toStatusSlug) {
-        return allowedTransitions.contains(toStatusSlug);
+    public boolean canTransitionTo(@NonNull String toStatusSlug) {
+        return allowedTransitions != null && allowedTransitions.contains(toStatusSlug);
     }
 }

@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
         injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface EquipmentQueryMapper {
 
-    @Mapping(target = "status", source = "status.slug")
+    @Mapping(target = "status", source = "statusSlug")
     @Mapping(target = "type", source = "typeSlug")
     EquipmentResponse toResponse(Equipment equipment);
 

@@ -15,11 +15,9 @@ import org.mapstruct.MappingTarget;
         uses = {SerialNumberMapper.class, UidMapper.class})
 public interface EquipmentCommandToDomainMapper {
 
-    @Mapping(target = "status", ignore = true)
     @Mapping(target = "id", ignore = true)
     Equipment toEquipment(CreateEquipmentUseCase.CreateEquipmentCommand command);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", ignore = true)
     Equipment toEquipment(@MappingTarget Equipment toUpdate, UpdateEquipmentUseCase.UpdateEquipmentCommand command);
 }
