@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.shared.web.advice;
 
+import com.github.jenkaby.bikerental.shared.exception.EquipmentNotAvailableException;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
@@ -159,5 +160,12 @@ public class CoreExceptionHandlerAdvice {
         HttpStatus status = HttpStatus.CONFLICT;
         var body = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
         return new ResponseEntity<>(body, status);
+    }
+
+    @ExceptionHandler(EquipmentNotAvailableException.class)
+    public ResponseEntity<ProblemDetail> handleEquipmentNotAvailableException(EquipmentNotAvailableException ex) {
+        log.warn("Equipment {} is not available for operation. Current status: {}", ex.getEquipmentId(), ex.getCurrentStatus());
+        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 }
