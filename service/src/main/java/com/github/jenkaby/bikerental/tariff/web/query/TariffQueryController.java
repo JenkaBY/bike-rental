@@ -41,7 +41,7 @@ public class TariffQueryController {
     @GetMapping("/{id}")
     public ResponseEntity<TariffResponse> getTariffById(@PathVariable("id") @Id Long id) {
         log.info("[GET] Get tariff by id {}", id);
-        Tariff tariff = getByIdUseCase.execute(id);
+        Tariff tariff = getByIdUseCase.get(id);
         return ResponseEntity.ok(mapper.toResponse(tariff));
     }
 
