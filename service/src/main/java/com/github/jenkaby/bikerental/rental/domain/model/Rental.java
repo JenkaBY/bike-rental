@@ -1,11 +1,15 @@
 package com.github.jenkaby.bikerental.rental.domain.model;
 
+import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
+import com.github.jenkaby.bikerental.rental.domain.exception.RentalNotReadyForActivationException;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -47,7 +51,7 @@ public class Rental {
 
     public void selectCustomer(UUID customerId) {
         if (this.status != RentalStatus.DRAFT) {
-            throw new IllegalStateException("Cannot select customer for rental that is not in DRAFT status");
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
         this.customerId = customerId;
         this.updatedAt = Instant.now();
@@ -55,7 +59,7 @@ public class Rental {
 
     public void selectEquipment(Long equipmentId) {
         if (this.status != RentalStatus.DRAFT) {
-            throw new IllegalStateException("Cannot select equipment for rental that is not in DRAFT status");
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
         this.equipmentId = equipmentId;
         this.updatedAt = Instant.now();
@@ -63,13 +67,16 @@ public class Rental {
 
     public void selectTariff(Long tariffId) {
         if (this.status != RentalStatus.DRAFT) {
-            throw new IllegalStateException("Cannot select tariff for rental that is not in DRAFT status");
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
         this.tariffId = tariffId;
         this.updatedAt = Instant.now();
     }
 
     public void setPlannedDuration(Duration duration, LocalDateTime startTime) {
+        if (this.status != RentalStatus.DRAFT) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
+        }
         this.plannedDuration = duration;
         this.startedAt = startTime;
         this.expectedReturnAt = startTime.plus(duration);
@@ -77,6 +84,9 @@ public class Rental {
     }
 
     public void setEstimatedCost(Money estimatedCost) {
+        if (this.status != RentalStatus.DRAFT) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
+        }
         this.estimatedCost = estimatedCost;
         this.updatedAt = Instant.now();
     }
@@ -88,5 +98,29 @@ public class Rental {
                 && tariffId != null
                 && plannedDuration != null
                 && estimatedCost != null;
+    }
+
+
+    public void activate(LocalDateTime actualStartTime) {
+        // Validate status
+        if (this.status != RentalStatus.DRAFT) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
+        }
+
+        // Validate required fields
+        if (!canBeActivated()) {
+            List<String> missingFields = new ArrayList<>();
+            if (customerId == null) missingFields.add("customerId");
+            if (equipmentId == null) missingFields.add("equipmentId");
+            if (tariffId == null) missingFields.add("tariffId");
+            if (plannedDuration == null) missingFields.add("plannedDuration");
+            if (estimatedCost == null) missingFields.add("estimatedCost");
+            throw new RentalNotReadyForActivationException(missingFields);
+        }
+
+        this.status = RentalStatus.ACTIVE;
+        this.startedAt = actualStartTime; // Actual start time
+        this.expectedReturnAt = actualStartTime.plus(this.plannedDuration);
+        this.updatedAt = Instant.now();
     }
 }
