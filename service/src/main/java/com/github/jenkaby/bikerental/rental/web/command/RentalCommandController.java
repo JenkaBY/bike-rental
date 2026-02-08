@@ -87,7 +87,7 @@ class RentalCommandController {
      */
     @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RentalResponse> updateRental(
-            @PathVariable Long id,
+            @PathVariable(name = "id") Long id,
             @Valid @RequestBody RentalUpdateJsonPatchRequest request) {
         log.info("[PATCH] Updating rental {} with {} patch operations", id, request.getOperations().size());
 

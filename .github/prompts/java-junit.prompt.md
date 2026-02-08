@@ -52,6 +52,7 @@ approaches.
 - Group related assertions with `SoftAssertions.assertAll()` to ensure all assertions are checked before the test
   fails.
 - Use descriptive messages in assertions to provide clarity on failure.
+- Never verify with using `any()`. Always verify with specific values, classes or conditions.
 
 ## Mocking and Isolation
 
