@@ -1,4 +1,4 @@
-package com.github.jenkaby.bikerental.rental.application.util;
+package com.github.jenkaby.bikerental.rental.infrastructure.util;
 
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;

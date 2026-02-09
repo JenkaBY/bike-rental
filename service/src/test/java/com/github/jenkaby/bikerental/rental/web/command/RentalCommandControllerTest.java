@@ -82,7 +82,6 @@ class RentalCommandControllerTest {
                         VALID_CUSTOMER_ID,
                         VALID_EQUIPMENT_ID,
                         VALID_DURATION,
-                        VALID_START_TIME,
                         null
                 );
 
@@ -110,7 +109,6 @@ class RentalCommandControllerTest {
                         VALID_CUSTOMER_ID,
                         VALID_EQUIPMENT_ID,
                         VALID_DURATION,
-                        VALID_START_TIME,
                         123L
                 );
 
@@ -144,7 +142,6 @@ class RentalCommandControllerTest {
                         customerId,
                         VALID_EQUIPMENT_ID,
                         VALID_DURATION,
-                        VALID_START_TIME,
                         null
                 );
 
@@ -166,7 +163,6 @@ class RentalCommandControllerTest {
                         VALID_CUSTOMER_ID,
                         equipmentId,
                         VALID_DURATION,
-                        VALID_START_TIME,
                         null
                 );
 
@@ -188,7 +184,6 @@ class RentalCommandControllerTest {
                         VALID_CUSTOMER_ID,
                         VALID_EQUIPMENT_ID,
                         duration,
-                        VALID_START_TIME,
                         null
                 );
 
@@ -202,27 +197,6 @@ class RentalCommandControllerTest {
                 verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
             }
 
-            @ParameterizedTest
-            @NullSource
-            @DisplayName("when startTime is null")
-            void whenStartTimeIsNull(LocalDateTime startTime) throws Exception {
-                CreateRentalRequest request = new CreateRentalRequest(
-                        VALID_CUSTOMER_ID,
-                        VALID_EQUIPMENT_ID,
-                        VALID_DURATION,
-                        startTime,
-                        null
-                );
-
-                mockMvc.perform(post(API_RENTALS)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Start time is required")));
-
-                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
-            }
         }
     }
 
@@ -313,14 +287,13 @@ class RentalCommandControllerTest {
             }
 
             @ParameterizedTest
-            @ValueSource(strings = {"/customerId", "/equipmentId", "/tariffId", "/duration", "/startTime", "/status"})
+            @ValueSource(strings = {"/customerId", "/equipmentId", "/tariffId", "/duration", "/status"})
             @DisplayName("when patch request uses valid paths")
             void whenPatchRequestUsesValidPaths(String path) throws Exception {
                 Object value = switch (path) {
                     case "/customerId" -> UUID.randomUUID().toString();
                     case "/equipmentId", "/tariffId" -> 123L;
                     case "/duration" -> "PT2H";
-                    case "/startTime" -> "2026-02-07T10:00:00";
                     case "/status" -> "ACTIVE";
                     default -> "value";
                 };
@@ -334,10 +307,9 @@ class RentalCommandControllerTest {
                 );
 
                 // Special handling for duration/startTime - they must be together
-                if ("/duration".equals(path) || "/startTime".equals(path)) {
+                if ("/duration".equals(path)) {
                     List<RentalPatchOperation> operations = List.of(
-                            new RentalPatchOperation(JsonPatchOperation.REPLACE, "/duration", "PT2H"),
-                            new RentalPatchOperation(JsonPatchOperation.REPLACE, "/startTime", "2026-02-07T10:00:00")
+                            new RentalPatchOperation(JsonPatchOperation.REPLACE, "/duration", "PT2H")
                     );
                     request = new RentalUpdateJsonPatchRequest(operations);
                 }
@@ -389,8 +361,7 @@ class RentalCommandControllerTest {
             void whenPatchRequestContainsDurationAndStartTimeTogether() throws Exception {
                 RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
                         List.of(
-                                new RentalPatchOperation(JsonPatchOperation.REPLACE, "/duration", "PT2H"),
-                                new RentalPatchOperation(JsonPatchOperation.REPLACE, "/startTime", "2026-02-07T10:00:00")
+                                new RentalPatchOperation(JsonPatchOperation.REPLACE, "/duration", "PT2H")
                         )
                 );
 
@@ -590,48 +561,6 @@ class RentalCommandControllerTest {
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
                         .andExpect(jsonPath("$.detail").value(containsString("Value is required for operation 'add'")));
-
-                verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
-            }
-
-            @Test
-            @DisplayName("when duration is provided without startTime")
-            void whenDurationIsProvidedWithoutStartTime() throws Exception {
-                RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
-                        List.of(new RentalPatchOperation(
-                                JsonPatchOperation.REPLACE,
-                                "/duration",
-                                "PT2H"
-                        ))
-                );
-
-                mockMvc.perform(patch(API_RENTALS + "/1")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Both duration and startTime must be provided together")));
-
-                verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
-            }
-
-            @Test
-            @DisplayName("when startTime is provided without duration")
-            void whenStartTimeIsProvidedWithoutDuration() throws Exception {
-                RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
-                        List.of(new RentalPatchOperation(
-                                JsonPatchOperation.REPLACE,
-                                "/startTime",
-                                "2026-02-07T10:00:00"
-                        ))
-                );
-
-                mockMvc.perform(patch(API_RENTALS + "/1")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Both duration and startTime must be provided together")));
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }

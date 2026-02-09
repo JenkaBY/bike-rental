@@ -45,20 +45,20 @@ class GetTariffByIdServiceTest {
                 .status(TariffStatus.ACTIVE)
                 .build();
 
-        given(repository.get(1L)).willReturn(tariff);
+        given(repository.findById(1L)).willReturn(Optional.of(tariff));
 
         Tariff result = service.get(1L);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getName()).isEqualTo("Hourly Rate");
-        then(repository).should().get(1L);
+        then(repository).should().findById(1L);
     }
 
 
     @Test
-    @DisplayName("Should get tariff by id successfully")
-    void shouldGetTariffByIdSuccessfully() {
+    @DisplayName("Should find tariff by id successfully")
+    void shouldFindTariffByIdSuccessfully() {
         Tariff tariff = Tariff.builder()
                 .id(1L)
                 .name("Hourly Rate")
