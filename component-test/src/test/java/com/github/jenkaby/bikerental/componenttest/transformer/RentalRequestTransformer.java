@@ -13,14 +13,12 @@ public class RentalRequestTransformer {
         var customerId = Aliases.getCustomerId(entry.get("customerId"));
         var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
         var duration = DataTableHelper.toDuration(entry, "duration");
-        var startTime = DataTableHelper.toLocalDateTime(entry, "startTime");
         var tariffId = DataTableHelper.toLong(entry, "tariffId");
 
         return new CreateRentalRequest(
                 customerId,
                 equipmentId,
                 duration,
-                startTime,
                 tariffId
         );
     }

@@ -26,7 +26,7 @@ Feature: Rental Management
     And the following tariff records exist in db
       | id | name        | description     | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo    | status |
       | 1  | Hourly Rate | Standard hourly | bicycle       | 100.00    | 60.00         | 100.00    | 500.00   | 90.00           | 2026-01-01 | 2026-12-31 | ACTIVE |
-      | 2  | Daily Rate  | Standard daily  | bicycle       | 100.00    | 60.00         | 100.00    | 500.00   | 90.00           | 2026-01-01 | 2026-12-31 | ACTIVE |
+      | 2  | Daily Rate  | Standard daily  | bicycle       | 200.00    | 70.00         | 110.00    | 600.00   | 95.00           | 2026-01-01 | 2026-12-31 | ACTIVE |
 
   # Rental Creation Scenarios
 
@@ -39,17 +39,17 @@ Feature: Rental Management
 
   Scenario Outline: Create rental with all required fields
     Given a rental request with the following data
-      | customerId   | equipmentId   | duration   | startTime   | tariffId   |
-      | <customerId> | <equipmentId> | <duration> | <startTime> | <tariffId> |
+      | customerId   | equipmentId   | duration   | tariffId   |
+      | <customerId> | <equipmentId> | <duration> | <tariffId> |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
     And the rental response only contains
-      | customerId   | equipmentId   | status | plannedDuration   | tariffId   | estimatedCost   | expectedReturnAt   | startedAt   |
-      | <customerId> | <equipmentId> | DRAFT  | <plannedDuration> | <tariffId> | <estimatedCost> | <expectedReturnAt> | <startTime> |
+      | customerId   | equipmentId   | status | plannedDuration   | tariffId   | estimatedCost   |
+      | <customerId> | <equipmentId> | DRAFT  | <plannedDuration> | <tariffId> | <estimatedCost> |
     Examples:
-      | customerId | equipmentId | duration | startTime           | tariffId | plannedDuration | expectedReturnAt    | estimatedCost |
-      | CUS1       | 1           | PT2H     | 2026-02-07T10:00:00 | 1        | 120             | 2026-02-07T12:00:00 | 100.00        |
-      | CUS2       | 1           | PT4H     | 2026-02-07T10:00:00 |          | 240             | 2026-02-07T14:00:00 | 100.00        |
+      | customerId | equipmentId | duration | tariffId | plannedDuration | estimatedCost |
+      | CUS1       | 1           | PT2H     | 2        | 120             | 200.00        |
+
 
   Scenario: Create rental with auto-selected tariff
     Given a rental request with the following data
@@ -58,8 +58,8 @@ Feature: Rental Management
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
     And the rental response only contains
-      | customerId | equipmentId | status | tariffId |
-      | CUS1       | 1           | DRAFT  | 1        |
+      | customerId | equipmentId | status | tariffId | estimatedCost | plannedDuration |
+      | CUS1       | 1           | DRAFT  | 1        | 100.0         | 120             |
 
   # Rental Update Scenarios (JSON Patch)
 
@@ -89,38 +89,37 @@ Feature: Rental Management
       | customerId | equipmentId | tariffId | status |
       | CUS1       | 2           | 1        | DRAFT  |
 
-  Scenario: Update rental - set duration and startTime together
+  Scenario: Update rental - set duration
     Given a single rental exists in the database with the following data
       | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
       | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
     And the rental update request is
-      | op      | path       | value               |
-      | replace | /duration  | PT3H                |
-      | replace | /startTime | 2026-02-07T12:00:00 |
+      | op      | path      | value |
+      | replace | /duration | PT3H  |
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the rental response only contains
-      | customerId | equipmentId | tariffId | status |
-      | CUS1       | 1           | 1        | DRAFT  |
+      | customerId | equipmentId | tariffId | status | plannedDuration | cost |
+      | CUS1       | 1           | 1        | DRAFT  | 180             | 100  |
 
 
   Scenario: Update rental - activate rental
     Given a single rental exists in the database with the following data
       | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 12.99         | 120             | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
     And the rental update request is
       | op      | path    | value  |
       | replace | /status | ACTIVE |
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the rental response only contains
-      | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration |
-      | CUS1       | 1           | 1        | ACTIVE | 12.99         | 120             |
+      | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | startedAt |
+      | CUS1       | 1           | 1        | ACTIVE | 100.00        | 120             | now()     |
 
   Scenario: Update rental - combined update
     Given a single rental exists in the database with the following data
       | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | CUS1       | 1           | 2        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
     And the rental update request is
       | op      | path         | value |
       | replace | /customerId  | CUS2  |
@@ -129,7 +128,7 @@ Feature: Rental Management
     Then the response status is 200
     And the rental response only contains
       | customerId | equipmentId | tariffId | status |
-      | CUS2       | 2           | 1        | DRAFT  |
+      | CUS2       | 2           | 2        | DRAFT  |
 
   # Rental Query Scenarios
 

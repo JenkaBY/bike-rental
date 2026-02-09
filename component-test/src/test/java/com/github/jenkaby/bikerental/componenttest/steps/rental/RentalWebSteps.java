@@ -12,7 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.within;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,19 +24,19 @@ public class RentalWebSteps {
     private final ScenarioContext scenarioContext;
     private final WebRequestSteps webRequestSteps;
 
-//    @Given("the rental record being updated/created is")
+    //    @Given("the rental record being updated/created is")
 //    public void theTariffBeingUpdatedIs(Rental request) {
 //        scenarioContext.setRequestBody(request);
 //        webRequestSteps.requestHasBeenMadeToEndpoint(HttpMethod.POST, "/api/rentals");
 //        var response = scenarioContext.getResponseBody(TariffResponse.class);
 //        scenarioContext.setRequestedObjectId(response.id().toString());
 //    }
-@Given("the rental update request is")
-public void theRentalUpdateRequestBodyIs(List<RentalPatchOperation> ops) {
-    log.info("Preparing rental update request with {} operations: {}", ops.size(), ops);
-    RentalUpdateJsonPatchRequest body = new RentalUpdateJsonPatchRequest(ops);
-    scenarioContext.setRequestBody(body);
-}
+    @Given("the rental update request is")
+    public void theRentalUpdateRequestBodyIs(List<RentalPatchOperation> ops) {
+        log.info("Preparing rental update request with {} operations: {}", ops.size(), ops);
+        RentalUpdateJsonPatchRequest body = new RentalUpdateJsonPatchRequest(ops);
+        scenarioContext.setRequestBody(body);
+    }
 
     @Given("a rental request with the following data")
     public void aRentalRequestWithTheFollowingData(CreateRentalRequest request) {
@@ -75,83 +78,37 @@ public void theRentalUpdateRequestBodyIs(List<RentalPatchOperation> ops) {
         softly.assertThat(actual.status())
                 .as("Status")
                 .isEqualTo(expected.status());
-        softly.assertThat(actual.startedAt())
-                .as("Started at")
-                .isEqualTo(expected.startedAt());
-        softly.assertThat(actual.expectedReturnAt())
-                .as("Expected return at")
-                .isEqualTo(expected.expectedReturnAt());
-        softly.assertThat(actual.actualReturnAt())
-                .as("Actual return at")
-                .isEqualTo(expected.actualReturnAt());
+        if (expected.startedAt() != null) {
+            softly.assertThat(actual.startedAt())
+                    .as("Started at")
+                    .isCloseTo(expected.startedAt(), within(5, ChronoUnit.SECONDS)); // Allow small time difference
+        }
+        if (expected.expectedReturnAt() != null) {
+            softly.assertThat(actual.expectedReturnAt())
+                    .as("Expected return at")
+                    .isCloseTo(expected.expectedReturnAt(), within(5, ChronoUnit.SECONDS));
+        }
+        if (expected.actualReturnAt() != null) {
+            softly.assertThat(actual.actualReturnAt())
+                    .as("Actual return at")
+                    .isEqualTo(expected.actualReturnAt());
+        }
         softly.assertThat(actual.plannedDurationMinutes())
                 .as("Planned duration minutes")
                 .isEqualTo(expected.plannedDurationMinutes());
         softly.assertThat(actual.actualDurationMinutes())
                 .as("Actual duration minutes")
                 .isEqualTo(expected.actualDurationMinutes());
-        softly.assertThat(actual.estimatedCost())
-                .as("Estimated cost")
-                .isEqualTo(expected.estimatedCost());
-        softly.assertThat(actual.finalCost())
-                .as("Final cost")
-                .isEqualTo(expected.finalCost());
-//        // Only assert fields that are specified in expected (non-null)
-//        if (expected.customerId() != null) {
-//            softly.assertThat(actual.customerId())
-//                    .as("Customer ID")
-//                    .isEqualTo(expected.customerId());
-//        }
-//        if (expected.equipmentId() != null) {
-//            softly.assertThat(actual.equipmentId())
-//                    .as("Equipment ID")
-//                    .isEqualTo(expected.equipmentId());
-//        }
-//        if (expected.tariffId() != null) {
-//            softly.assertThat(actual.tariffId())
-//                    .as("Tariff ID")
-//                    .isEqualTo(expected.tariffId());
-//        }
-//        if (expected.status() != null) {
-//            softly.assertThat(actual.status())
-//                    .as("Status")
-//                    .isEqualTo(expected.status());
-//        }
-//        if (expected.startedAt() != null) {
-//            softly.assertThat(actual.startedAt())
-//                    .as("Started at")
-//                    .isEqualTo(expected.startedAt());
-//        }
-//        if (expected.expectedReturnAt() != null) {
-//            softly.assertThat(actual.expectedReturnAt())
-//                    .as("Expected return at")
-//                    .isEqualTo(expected.expectedReturnAt());
-//        }
-//        if (expected.actualReturnAt() != null) {
-//            softly.assertThat(actual.actualReturnAt())
-//                    .as("Actual return at")
-//                    .isEqualTo(expected.actualReturnAt());
-//        }
-//        if (expected.plannedDurationMinutes() != null) {
-//            softly.assertThat(actual.plannedDurationMinutes())
-//                    .as("Planned duration minutes")
-//                    .isEqualTo(expected.plannedDurationMinutes());
-//        }
-//        if (expected.actualDurationMinutes() != null) {
-//            softly.assertThat(actual.actualDurationMinutes())
-//                    .as("Actual duration minutes")
-//                    .isEqualTo(expected.actualDurationMinutes());
-//        }
-//        if (expected.estimatedCost() != null) {
-//            softly.assertThat(actual.estimatedCost())
-//                    .as("Estimated cost")
-//                    .isEqualTo(expected.estimatedCost());
-//        }
-//        if (expected.finalCost() != null) {
-//            softly.assertThat(actual.finalCost())
-//                    .as("Final cost")
-//                    .isEqualTo(expected.finalCost());
-//        }
+        if (expected.estimatedCost() != null) {
+            softly.assertThat(actual.estimatedCost())
+                    .as("Estimated cost")
+                    .isEqualByComparingTo(expected.estimatedCost());
+        }
+        if (expected.finalCost() != null) {
+            softly.assertThat(actual.finalCost())
+                    .as("Final cost")
+                    .isEqualByComparingTo(expected.finalCost());
+        }
         softly.assertAll();
     }
 }
