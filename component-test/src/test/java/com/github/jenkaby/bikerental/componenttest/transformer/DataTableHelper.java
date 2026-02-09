@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -100,5 +101,17 @@ public class DataTableHelper {
         return Optional.ofNullable(entry.get(field))
                 .map(s -> Set.of(s.split(",")))
                 .orElse(defaultValue);
+    }
+
+    public static Duration toDuration(Map<String, String> entry, String field) {
+        var value = entry.get(field);
+        if (value == null) {
+            return null;
+        }
+        if ("null".equals(entry.get(field))) {
+            return null;
+        }
+        var durationString = entry.get(field);
+        return Duration.parse(durationString);
     }
 }

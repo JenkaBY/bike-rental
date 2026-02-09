@@ -28,8 +28,8 @@ public class RentalResponseTransformer {
         var expectedReturnAt = DataTableHelper.toLocalDateTime(entry, "expectedReturnAt");
         var actualReturnAt = DataTableHelper.toLocalDateTime(entry, "actualReturnAt");
 
-        var plannedDurationMinutes = DataTableHelper.toInt(entry, "plannedDurationMinutes");
-        var actualDurationMinutes = DataTableHelper.toInt(entry, "actualDurationMinutes");
+        var plannedDurationMinutes = DataTableHelper.toInt(entry, "plannedDuration");
+        var actualDurationMinutes = DataTableHelper.toInt(entry, "actualDuration");
 
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
         var finalCost = DataTableHelper.toBigDecimal(entry, "finalCost");
