@@ -10,6 +10,9 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [US-RN-001] Создание записи аренды - Completed on 2026-02-07 (rental module: domain model with RentalStatus enum,
+  Fast Path and Draft Path creation, JSON Patch (RFC 6902) for updates, REST endpoints, domain exceptions, mappers,
+  validators, unit/WebMvc/component tests)
 - [US-TR-001] Справочник тарифов - Completed on 2026-02-03 (domain + application + web layers, tests, migrations)
 - [US-EQ-001] Equipment Catalog - Completed on 2026-02-02 (139 subtasks: Database migrations,
   domain/infrastructure/application/web layers, 10 REST endpoints, WebMvc + Component tests, admin CRUD for
@@ -53,7 +56,6 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Phase 3: Main Rental Process
 
-- [US-RN-001] Создание записи аренды - URGENT, Depends on US-CL-001, US-CL-002, US-EQ-002, US-TR-001
 - [US-RN-002] Автоматический подбор тарифа - URGENT, Depends on US-TR-001
 - [US-RN-003] Установка даты и времени начала проката - URGENT, Depends on US-RN-001
 - [US-RN-004] Внесение предоплаты - URGENT, Depends on US-RN-001, US-FN-001
