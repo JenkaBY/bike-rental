@@ -12,7 +12,6 @@ import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -85,7 +84,7 @@ class RentalCommandController {
      * @param request validated JSON Patch request
      * @return updated rental
      */
-    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{id}")
     public ResponseEntity<RentalResponse> updateRental(
             @PathVariable(name = "id") Long id,
             @Valid @RequestBody RentalUpdateJsonPatchRequest request) {

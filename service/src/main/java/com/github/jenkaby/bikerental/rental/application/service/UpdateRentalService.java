@@ -17,6 +17,7 @@ import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
 import com.github.jenkaby.bikerental.tariff.TariffFacade;
 import com.github.jenkaby.bikerental.tariff.TariffInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 class UpdateRentalService implements UpdateRentalUseCase {
 
@@ -65,27 +67,11 @@ class UpdateRentalService implements UpdateRentalUseCase {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new ResourceNotFoundException(Rental.class, rentalId.toString()));
 
-        // Handle status update (rental activation)
-        if (patch.containsKey("status")) {
-            String newStatusStr = valueParser.parseString(patch.get("status"));
-            RentalStatus newStatus = RentalStatus.valueOf(newStatusStr);
-
-            if (RentalStatus.ACTIVE == newStatus) {
-                startRental(rental);
-            } else {
-                // Other status changes (if needed in future)
-                rental.setStatus(newStatus);
-            }
-        }
-
         // Handle customerId update
         if (patch.containsKey("customerId")) {
             UUID customerId = valueParser.parseUUID(patch.get("customerId"));
             customerFacade.findById(customerId)
-                    .orElseThrow(() -> new ReferenceNotFoundException(
-                            com.github.jenkaby.bikerental.customer.domain.model.Customer.class,
-                            customerId.toString()
-                    ));
+                    .orElseThrow(() -> new ReferenceNotFoundException("Customer", customerId.toString()));
             rental.selectCustomer(customerId);
         }
 
@@ -93,10 +79,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
         if (patch.containsKey("equipmentId")) {
             Long equipmentId = valueParser.parseLong(patch.get("equipmentId"));
             EquipmentInfo equipment = equipmentFacade.findById(equipmentId)
-                    .orElseThrow(() -> new ReferenceNotFoundException(
-                            com.github.jenkaby.bikerental.equipment.domain.model.Equipment.class,
-                            equipmentId.toString()
-                    ));
+                    .orElseThrow(() -> new ReferenceNotFoundException("Equipment", equipmentId.toString()));
 
             if (!equipment.isAvailable()) {
                 throw new EquipmentNotAvailableException(equipmentId, equipment.statusSlug());
@@ -133,15 +116,25 @@ class UpdateRentalService implements UpdateRentalUseCase {
         if (patch.containsKey("tariffId")) {
             Long tariffId = valueParser.parseLong(patch.get("tariffId"));
             tariffFacade.findById(tariffId)
-                    .orElseThrow(() -> new ReferenceNotFoundException(
-                            com.github.jenkaby.bikerental.tariff.domain.model.Tariff.class,
-                            tariffId.toString()
-                    ));
+                    .orElseThrow(() -> new ReferenceNotFoundException("Tariff", tariffId.toString()));
             rental.selectTariff(tariffId);
 
             // Recalculate cost
             if (rental.getPlannedDuration() != null && rental.getStartedAt() != null) {
                 calculateCost(rental);
+            }
+        }
+
+        // Handle status update (rental activation)
+        if (patch.containsKey("status")) {
+            String newStatusStr = valueParser.parseString(patch.get("status"));
+            RentalStatus newStatus = RentalStatus.valueOf(newStatusStr);
+            log.info("Updating rental {} status to {}", rental, newStatus);
+            if (RentalStatus.ACTIVE == newStatus) {
+                startRental(rental);
+            } else {
+                // Other status changes (if needed in future)
+                rental.setStatus(newStatus);
             }
         }
 
