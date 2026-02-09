@@ -10,10 +10,10 @@ Feature: Tariff management endpoints
       | scooter | Scooter | Electric           |
       | samokat | Samokat | Samokat mechanical |
     And the following tariff record exists in db
-      | name    | description | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo    | status   |
-      | Bike    | For bike    | bicycle       | 5.00      | 2.50          | 5.00      | 20.00    | 4.50            | 2026-01-01 | 2030-01-01 | INACTIVE |
-      | Samokat | For Samokat | samokat       | 25.00     | 22.50         | 25.00     | 22.00    | 24.50           | 2024-01-01 |            | ACTIVE   |
-      | E-Bike  | For ebike   | ebike         | 35.00     | 32.50         | 35.00     | 32.00    | 34.50           | 2026-05-01 |            | ACTIVE   |
+      | id | name    | description | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo    | status   |
+      | 1  | Bike    | For bike    | bicycle       | 5.00      | 2.50          | 5.00      | 20.00    | 4.50            | 2026-01-01 | 2030-01-01 | INACTIVE |
+      | 2  | Samokat | For Samokat | samokat       | 25.00     | 22.50         | 25.00     | 22.00    | 24.50           | 2024-01-01 |            | ACTIVE   |
+      | 3  | E-Bike  | For ebike   | ebike         | 35.00     | 32.50         | 35.00     | 32.00    | 34.50           | 2026-05-01 |            | ACTIVE   |
 
 
   Scenario Outline: Create a tariff

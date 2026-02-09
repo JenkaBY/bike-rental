@@ -4,6 +4,9 @@ import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import io.cucumber.java.DataTableType;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,12 +27,25 @@ public class RentalResponseTransformer {
         var tariffId = DataTableHelper.toLong(entry, "tariffId");
         var status = DataTableHelper.getStringOrNull(entry, "status");
 
-        var startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
-        var expectedReturnAt = DataTableHelper.toLocalDateTime(entry, "expectedReturnAt");
-        var actualReturnAt = DataTableHelper.toLocalDateTime(entry, "actualReturnAt");
+        var plannedDurationMinutes = DataTableHelper.toInt(entry, "plannedDuration");
+        var actualDurationMinutes = DataTableHelper.toInt(entry, "actualDuration");
 
-        var plannedDurationMinutes = DataTableHelper.toInt(entry, "plannedDurationMinutes");
-        var actualDurationMinutes = DataTableHelper.toInt(entry, "actualDurationMinutes");
+        LocalDateTime startedAt;
+        if ("now()".equals(entry.get("startedAt"))) {
+            startedAt = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.systemDefault());
+        } else {
+            startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
+        }
+        System.out.println("++++ " + startedAt);
+
+        LocalDateTime expectedReturnAt;
+        if (startedAt != null && plannedDurationMinutes != null) {
+            expectedReturnAt = startedAt.plusMinutes(plannedDurationMinutes);
+        } else {
+            expectedReturnAt = DataTableHelper.toLocalDateTime(entry, "expectedReturnAt");
+        }
+
+        var actualReturnAt = DataTableHelper.toLocalDateTime(entry, "actualReturnAt");
 
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
         var finalCost = DataTableHelper.toBigDecimal(entry, "finalCost");

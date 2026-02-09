@@ -9,6 +9,7 @@
  * <ul>
  *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffFacade} - External module interface</li>
  *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffInfo} - Public tariff DTO</li>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException} - Exception thrown by TariffFacade</li>
  * </ul>
  *
  * @since 1.0

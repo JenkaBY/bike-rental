@@ -49,6 +49,8 @@ or
 - Write component tests in `component-test` module for endpoints testing.
 - Don't write scenarios cover requests validation - they must be covered by WebMvc tests in `service` module.
 - Validate scenarios of failed requests due to business logic validation on the service layer.
+- for BigDecimal assertations use `isEqualByComparingTo()` method from assertJ library to avoid issues with scale
+  differences.
 
 ## Rules:
 

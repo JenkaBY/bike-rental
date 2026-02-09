@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.shared.web.advice;
 
+import com.github.jenkaby.bikerental.shared.exception.EquipmentNotAvailableException;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
@@ -33,12 +34,26 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ProblemDetail> handleError(MethodArgumentNotValidException ex) {
-        var errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> "%s: %s".formatted(error.getField(), error.getDefaultMessage()))
+        var fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> "%s: %s".formatted(error.getField(), error.getDefaultMessage()));
+
+        var globalErrors = ex.getBindingResult().getGlobalErrors().stream()
+                .map(error -> {
+                    var objectName = error.getObjectName();
+                    return "%s: %s".formatted(objectName, error.getDefaultMessage());
+                });
+
+        var errors = java.util.stream.Stream.concat(fieldErrors, globalErrors)
                 .collect(Collectors.joining(","));
+
+        if (errors.isBlank()) {
+            errors = ex.getMessage();
+        }
+
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errors);
         log.warn("Bad request for MethodArgumentNotValidException: {}", errors);
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.of(body)
+                .build();
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -159,5 +174,12 @@ public class CoreExceptionHandlerAdvice {
         HttpStatus status = HttpStatus.CONFLICT;
         var body = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
         return new ResponseEntity<>(body, status);
+    }
+
+    @ExceptionHandler(EquipmentNotAvailableException.class)
+    public ResponseEntity<ProblemDetail> handleEquipmentNotAvailableException(EquipmentNotAvailableException ex) {
+        log.warn("Equipment {} is not available for operation. Current status: {}", ex.getEquipmentId(), ex.getCurrentStatus());
+        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 }

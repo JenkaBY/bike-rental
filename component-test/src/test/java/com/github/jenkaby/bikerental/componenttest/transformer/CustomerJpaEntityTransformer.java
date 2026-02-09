@@ -7,6 +7,8 @@ import io.cucumber.java.DataTableType;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 
 public class CustomerJpaEntityTransformer {
@@ -18,7 +20,7 @@ public class CustomerJpaEntityTransformer {
         var email = DataTableHelper.getStringOrNull(entry, "email");
         var comments = DataTableHelper.getStringOrNull(entry, "comments");
         return new CustomerJpaEntity(
-                Aliases.getCustomerId(entry.get("id")),
+                Optional.ofNullable(Aliases.getCustomerId(entry.get("id"))).orElse(UUID.randomUUID()),
                 entry.get("phone"),
                 entry.get("firstName"),
                 entry.get("lastName"),

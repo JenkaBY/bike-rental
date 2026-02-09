@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -28,7 +29,7 @@ class GetTariffByIdServiceTest {
 
     @Test
     @DisplayName("Should get tariff by id successfully")
-    void shouldGetTariffByIdSuccessfully() {
+    void getShouldGetTariffByIdSuccessfully() {
         Tariff tariff = Tariff.builder()
                 .id(1L)
                 .name("Hourly Rate")
@@ -44,13 +45,53 @@ class GetTariffByIdServiceTest {
                 .status(TariffStatus.ACTIVE)
                 .build();
 
-        given(repository.get(1L)).willReturn(tariff);
+        given(repository.findById(1L)).willReturn(Optional.of(tariff));
 
-        Tariff result = service.execute(1L);
+        Tariff result = service.get(1L);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getName()).isEqualTo("Hourly Rate");
-        then(repository).should().get(1L);
+        then(repository).should().findById(1L);
+    }
+
+
+    @Test
+    @DisplayName("Should find tariff by id successfully")
+    void shouldFindTariffByIdSuccessfully() {
+        Tariff tariff = Tariff.builder()
+                .id(1L)
+                .name("Hourly Rate")
+                .description("Standard hourly rental")
+                .equipmentTypeSlug("bicycle")
+                .basePrice(Money.of("100.00"))
+                .halfHourPrice(Money.of("60.00"))
+                .hourPrice(Money.of("100.00"))
+                .dayPrice(Money.of("500.00"))
+                .hourDiscountedPrice(Money.of("90.00"))
+                .validFrom(LocalDate.of(2026, 1, 1))
+                .validTo(null)
+                .status(TariffStatus.ACTIVE)
+                .build();
+
+        given(repository.findById(1L)).willReturn(Optional.of(tariff));
+
+        Optional<Tariff> result = service.execute(1L);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(1L);
+        assertThat(result.get().getName()).isEqualTo("Hourly Rate");
+        then(repository).should().findById(1L);
+    }
+
+    @Test
+    @DisplayName("Should return empty Optional when tariff not found")
+    void shouldReturnEmptyOptionalWhenTariffNotFound() {
+        given(repository.findById(1L)).willReturn(Optional.empty());
+
+        Optional<Tariff> result = service.execute(1L);
+
+        assertThat(result).isEmpty();
+        then(repository).should().findById(1L);
     }
 }

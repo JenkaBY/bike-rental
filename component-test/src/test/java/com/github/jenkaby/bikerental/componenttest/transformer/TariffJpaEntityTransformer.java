@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.componenttest.transformer;
 import com.github.jenkaby.bikerental.tariff.infrastructure.persistence.entity.TariffJpaEntity;
 import io.cucumber.java.DataTableType;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,8 +29,8 @@ public class TariffJpaEntityTransformer {
         entity.setValidTo(toLocalDate(entry, "validTo"));
 
         entity.setStatus(entry.get("status"));
-        entity.setCreatedAt(toInstant(entry, "createdAt"));
-        entity.setCreatedAt(toInstant(entry, "updatedAt"));
+        entity.setCreatedAt(Optional.ofNullable(toInstant(entry, "createdAt")).orElse(Instant.now()));
+        entity.setUpdatedAt(toInstant(entry, "updatedAt"));
         return entity;
     }
 
