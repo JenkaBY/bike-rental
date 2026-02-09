@@ -49,6 +49,7 @@ public class RentalWebSteps {
     public void theRentalResponseOnlyContains(RentalResponse expectedRental) {
         var actualRental = scenarioContext.getResponseBody(RentalResponse.class);
         assertRentalResponse(actualRental, expectedRental);
+        scenarioContext.setRequestedObjectId(actualRental.id().toString());
     }
 
     private void assertRentalResponse(RentalResponse actual, RentalResponse expected) {

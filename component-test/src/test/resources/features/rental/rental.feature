@@ -36,6 +36,9 @@ Feature: Rental Management
     And the rental response only contains
       | status |
       | DRAFT  |
+    And the following rental created event was published
+      | status |
+      | DRAFT  |
 
   Scenario Outline: Create rental with all required fields
     Given a rental request with the following data
@@ -46,6 +49,9 @@ Feature: Rental Management
     And the rental response only contains
       | customerId   | equipmentId   | status | plannedDuration   | tariffId   | estimatedCost   |
       | <customerId> | <equipmentId> | DRAFT  | <plannedDuration> | <tariffId> | <estimatedCost> |
+    And the following rental created event was published
+      | customerId   | status |
+      | <customerId> | DRAFT  |
     Examples:
       | customerId | equipmentId | duration | tariffId | plannedDuration | estimatedCost |
       | CUS1       | 1           | PT2H     | 2        | 120             | 200.00        |
@@ -53,13 +59,16 @@ Feature: Rental Management
 
   Scenario: Create rental with auto-selected tariff
     Given a rental request with the following data
-      | customerId | equipmentId | duration | startTime           | tariffId |
-      | CUS1       | 1           | PT2H     | 2026-02-07T10:00:00 |          |
+      | customerId | equipmentId | duration | tariffId |
+      | CUS1       | 1           | PT2H     |          |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
     And the rental response only contains
       | customerId | equipmentId | status | tariffId | estimatedCost | plannedDuration |
       | CUS1       | 1           | DRAFT  | 1        | 100.0         | 120             |
+    And the following rental created event was published
+      | customerId | status |
+      | CUS1       | DRAFT  |
 
   # Rental Update Scenarios (JSON Patch)
 
@@ -115,6 +124,9 @@ Feature: Rental Management
     And the rental response only contains
       | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | startedAt |
       | CUS1       | 1           | 1        | ACTIVE | 100.00        | 120             | now()     |
+    And the following rental started event was published
+      | customerId | equipmentId | startedAt |
+      | CUS1       | 1           | now()     |
 
   Scenario: Update rental - combined update
     Given a single rental exists in the database with the following data
