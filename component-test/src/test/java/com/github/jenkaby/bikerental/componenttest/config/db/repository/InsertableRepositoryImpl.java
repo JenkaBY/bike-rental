@@ -1,34 +1,29 @@
 package com.github.jenkaby.bikerental.componenttest.config.db.repository;
 
-import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-
+@Slf4j
 @Repository
 @Transactional
 public class InsertableRepositoryImpl<ENTITY, ID> implements InsertableRepository<ENTITY, ID> {
 
-    private final EntityManager entityManager;
+    private final JpaEntityInserter entityInserter;
 
-    public InsertableRepositoryImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public InsertableRepositoryImpl(JpaEntityInserter entityInserter) {
+        this.entityInserter = entityInserter;
     }
 
     @Override
     public <S extends ENTITY> S insert(S entity) {
-        entityManager.persist(entity);
-        return entity;
+        log.debug("Inserting entity: {}", entity);
+        return entityInserter.insert(entity);
     }
 
     @Override
     public <S extends ENTITY> Iterable<S> insertAll(Iterable<S> entities) {
-        List<S> result = new ArrayList<>();
-        for (S entity : entities) {
-            result.add(insert(entity));
-        }
-        return result;
+        log.debug("Inserting multiple entities");
+        return entityInserter.insertAll(entities);
     }
 }
