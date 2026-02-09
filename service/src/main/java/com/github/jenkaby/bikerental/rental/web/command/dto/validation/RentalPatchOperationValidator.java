@@ -14,7 +14,6 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
             "/equipmentId",
             "/tariffId",
             "/duration",
-            "/startTime",
             "/status"
     );
 

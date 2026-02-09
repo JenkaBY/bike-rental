@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -14,5 +13,5 @@ public interface TariffFacade {
 
     TariffInfo selectTariff(String equipmentTypeSlug, Duration duration, LocalDate rentalDate);
 
-    Money calculateEstimatedCost(Long tariffId, Duration duration, LocalDateTime startTime);
+    Money calculateEstimatedCost(Long tariffId, Duration duration);
 }

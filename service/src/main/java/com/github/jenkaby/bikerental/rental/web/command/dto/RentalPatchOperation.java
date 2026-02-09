@@ -34,7 +34,6 @@ public class RentalPatchOperation {
      * - /equipmentId
      * - /tariffId
      * - /duration
-     * - /startTime
      * - /status
      */
     @NotBlank(message = "Path is required")
@@ -47,7 +46,6 @@ public class RentalPatchOperation {
      * - /equipmentId: Long number
      * - /tariffId: Long number
      * - /duration: ISO-8601 duration string (e.g., "PT2H")
-     * - /startTime: ISO-8601 date-time string (e.g., "2026-02-07T10:00:00")
      * - /status: {@link RentalStatus} enum value (e.g., "ACTIVE", "DRAFT", "COMPLETED", "CANCELLED")
      */
     private Object value;

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +70,7 @@ class TariffFacadeImpl implements TariffFacade {
     }
 
     @Override
-    public Money calculateEstimatedCost(Long tariffId, Duration duration, LocalDateTime startTime) {
+    public Money calculateEstimatedCost(Long tariffId, Duration duration) {
         Tariff tariff = getTariffByIdUseCase.get(tariffId);
 
         // Simple calculation: use base price for now

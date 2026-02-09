@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Service
 class CreateRentalService implements CreateRentalUseCase {
@@ -78,12 +77,12 @@ class CreateRentalService implements CreateRentalUseCase {
                 .build();
 
         // 4. Set planned duration
-        rental.setPlannedDuration(command.duration(), command.startTime());
+        rental.setPlannedDuration(command.duration());
 
         // 5. Select tariff (automatically or from command)
         Long tariffId = command.tariffId() != null
                 ? command.tariffId()
-                : autoSelectTariff(equipment, command.duration(), command.startTime());
+                : autoSelectTariff(equipment, command.duration());
 
         rental.selectTariff(tariffId);
 
@@ -93,8 +92,7 @@ class CreateRentalService implements CreateRentalUseCase {
 
         Money estimatedCost = tariffFacade.calculateEstimatedCost(
                 tariffId,
-                command.duration(),
-                command.startTime()
+                command.duration()
         );
         rental.setEstimatedCost(estimatedCost);
 
@@ -121,11 +119,11 @@ class CreateRentalService implements CreateRentalUseCase {
         return saved;
     }
 
-    private Long autoSelectTariff(EquipmentInfo equipment, java.time.Duration duration, LocalDateTime startTime) {
+    private Long autoSelectTariff(EquipmentInfo equipment, java.time.Duration duration) {
         TariffInfo selectedTariff = tariffFacade.selectTariff(
                 equipment.typeSlug(),
                 duration,
-                startTime.toLocalDate()
+                java.time.LocalDate.now()
         );
         return selectedTariff.id();
     }

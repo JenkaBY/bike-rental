@@ -3,7 +3,6 @@ package com.github.jenkaby.bikerental.rental.web.command.dto;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -18,9 +17,6 @@ public record CreateRentalRequest(
 
         @NotNull(message = "Duration is required")
         Duration duration,
-
-        @NotNull(message = "Start time is required")
-        LocalDateTime startTime,
 
         Long tariffId  // Optional - if not provided, will be auto-selected
 ) {

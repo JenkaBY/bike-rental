@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 /**
  * Validates the entire JSON Patch request for Rental.
- * Checks cross-operation constraints like duration/startTime pairing.
  */
 public class RentalPatchRequestValidator implements ConstraintValidator<ValidRentalPatchRequest, RentalUpdateJsonPatchRequest> {
 
@@ -32,26 +31,6 @@ public class RentalPatchRequestValidator implements ConstraintValidator<ValidRen
         context.disableDefaultConstraintViolation();
 
         List<RentalPatchOperation> operations = request.getOperations();
-
-        // Check if duration and startTime are provided together
-        boolean hasDuration = operations.stream()
-                .anyMatch(op -> "/duration".equals(op.getPath()) && op.getValue() != null);
-        boolean hasStartTime = operations.stream()
-                .anyMatch(op -> "/startTime".equals(op.getPath()) && op.getValue() != null);
-
-        if (hasDuration && !hasStartTime) {
-            context.buildConstraintViolationWithTemplate(
-                            "Both duration and startTime must be provided together")
-                    .addConstraintViolation();
-            isValid = false;
-        }
-
-        if (hasStartTime && !hasDuration) {
-            context.buildConstraintViolationWithTemplate(
-                            "Both duration and startTime must be provided together")
-                    .addConstraintViolation();
-            isValid = false;
-        }
 
         // Validate status values using RentalStatus enum
         boolean hasInvalidStatus = operations.stream()

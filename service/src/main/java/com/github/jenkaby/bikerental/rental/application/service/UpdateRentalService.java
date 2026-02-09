@@ -6,6 +6,7 @@ import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.application.util.PatchValueParser;
+import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
@@ -76,9 +77,10 @@ class UpdateRentalService implements UpdateRentalUseCase {
         }
 
         // Handle equipmentId update
+        EquipmentInfo equipment = null;
         if (patch.containsKey("equipmentId")) {
             Long equipmentId = valueParser.parseLong(patch.get("equipmentId"));
-            EquipmentInfo equipment = equipmentFacade.findById(equipmentId)
+            equipment = equipmentFacade.findById(equipmentId)
                     .orElseThrow(() -> new ReferenceNotFoundException("Equipment", equipmentId.toString()));
 
             if (!equipment.isAvailable()) {
@@ -86,43 +88,36 @@ class UpdateRentalService implements UpdateRentalUseCase {
             }
 
             rental.selectEquipment(equipmentId);
-
-            // Auto-select tariff if duration is already set
-            if (rental.getPlannedDuration() != null && rental.getStartedAt() != null) {
-                autoSelectTariffAndCalculateCost(rental, equipment);
-            }
         }
 
-        // Handle duration and startTime update (must be provided together)
-        if (patch.containsKey("duration") || patch.containsKey("startTime")) {
+        // Handle duration update
+        if (patch.containsKey("duration")) {
             Duration duration = valueParser.parseDuration(patch.get("duration"));
-            LocalDateTime startTime = valueParser.parseLocalDateTime(patch.get("startTime"));
-
-            if (duration == null || startTime == null) {
-                throw new IllegalArgumentException("Both duration and startTime must be provided together");
+            if (duration == null) {
+                throw new InvalidRentalUpdateException("Duration must be provided");
             }
-
-            rental.setPlannedDuration(duration, startTime);
-
-            // Auto-select tariff if equipment is already selected
-            if (rental.getEquipmentId() != null) {
-                EquipmentInfo equipment = equipmentFacade.findById(rental.getEquipmentId())
-                        .orElseThrow();
-                autoSelectTariffAndCalculateCost(rental, equipment);
-            }
+            rental.setPlannedDuration(duration);
         }
 
-        // Handle tariffId update (manual override)
+        // Auto-select tariff if equipment and duration are set, and tariff is not manually set
         if (patch.containsKey("tariffId")) {
+            // Handle tariffId update (manual override)
             Long tariffId = valueParser.parseLong(patch.get("tariffId"));
             tariffFacade.findById(tariffId)
                     .orElseThrow(() -> new ReferenceNotFoundException("Tariff", tariffId.toString()));
             rental.selectTariff(tariffId);
-
-            // Recalculate cost
-            if (rental.getPlannedDuration() != null && rental.getStartedAt() != null) {
-                calculateCost(rental);
+        } else if (rental.getEquipmentId() != null && rental.getPlannedDuration() != null) {
+            // Auto-select tariff if equipment and duration are already set
+            if (equipment == null) {
+                equipment = equipmentFacade.findById(rental.getEquipmentId())
+                        .orElseThrow(() -> new ReferenceNotFoundException("Equipment", rental.getEquipmentId().toString()));
             }
+            autoSelectTariff(rental, equipment);
+        }
+
+        // Calculate cost if tariff and duration are set
+        if (rental.getTariffId() != null && rental.getPlannedDuration() != null) {
+            calculateCost(rental);
         }
 
         // Handle status update (rental activation)
@@ -145,7 +140,8 @@ class UpdateRentalService implements UpdateRentalUseCase {
     private void startRental(Rental rental) {
         // TODO: Validate prepayment (when US-RN-004 is implemented)
         // if (!financeFacade.hasPrepayment(rental.getId())) {
-        //     throw new PrepaymentRequiredException("Prepayment must be received before starting rental");
+        // throw new PrepaymentRequiredException("Prepayment must be received before
+        // starting rental");
         // }
 
         // Activate rental (validations are performed in Rental.activate())
@@ -157,23 +153,19 @@ class UpdateRentalService implements UpdateRentalUseCase {
         eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);
     }
 
-    private void autoSelectTariffAndCalculateCost(Rental rental, EquipmentInfo equipment) {
+    private void autoSelectTariff(Rental rental, EquipmentInfo equipment) {
         TariffInfo selectedTariff = tariffFacade.selectTariff(
                 equipment.typeSlug(),
                 rental.getPlannedDuration(),
-                rental.getStartedAt().toLocalDate()
-        );
+                java.time.LocalDate.now());
 
         rental.selectTariff(selectedTariff.id());
-        calculateCost(rental);
     }
 
     private void calculateCost(Rental rental) {
         Money cost = tariffFacade.calculateEstimatedCost(
                 rental.getTariffId(),
-                rental.getPlannedDuration(),
-                rental.getStartedAt()
-        );
+                rental.getPlannedDuration());
         rental.setEstimatedCost(cost);
     }
 

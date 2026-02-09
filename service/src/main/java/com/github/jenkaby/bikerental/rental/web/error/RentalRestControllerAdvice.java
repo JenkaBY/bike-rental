@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.rental.web.error;
 
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
+import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
 import com.github.jenkaby.bikerental.rental.domain.exception.RentalNotReadyForActivationException;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,15 @@ public class RentalRestControllerAdvice {
         log.warn("Suitable tariff not found: {}", ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Suitable tariff not found");
+        problem.setDetail(ex.getMessage());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(InvalidRentalUpdateException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidRentalUpdate(InvalidRentalUpdateException ex) {
+        log.warn("Invalid rental update: {}", ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setTitle("Invalid rental update");
         problem.setDetail(ex.getMessage());
         return ResponseEntity.of(problem).build();
     }

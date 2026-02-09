@@ -73,13 +73,12 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    public void setPlannedDuration(Duration duration, LocalDateTime startTime) {
+    public void setPlannedDuration(Duration duration) {
         if (this.status != RentalStatus.DRAFT) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
         this.plannedDuration = duration;
-        this.startedAt = startTime;
-        this.expectedReturnAt = startTime.plus(duration);
+        // startedAt and expectedReturnAt will be set automatically when rental is activated
         this.updatedAt = Instant.now();
     }
 

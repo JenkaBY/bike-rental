@@ -70,11 +70,9 @@ class RentalCommandController {
      * Examples:
      * - Select customer: [{"op": "replace", "path": "/customerId", "value": "uuid"}]
      * - Select equipment: [{"op": "replace", "path": "/equipmentId", "value": 123}]
-     * - Set duration: [
-     * {"op": "replace", "path": "/duration", "value": "PT2H"},
-     * {"op": "replace", "path": "/startTime", "value": "2026-02-07T10:00:00"}
-     * ]
+     * - Set duration: [{"op": "replace", "path": "/duration", "value": "PT2H"}]
      * - Start rental: [{"op": "replace", "path": "/status", "value": "ACTIVE"}] (see {@link RentalStatus})
+     *   Note: startedAt is set automatically when rental is activated
      * - Combined update: [
      * {"op": "replace", "path": "/customerId", "value": "uuid"},
      * {"op": "replace", "path": "/equipmentId", "value": 123}
