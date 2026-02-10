@@ -22,7 +22,8 @@ public class DbSteps {
             "equipment_statuses",
             "equipment_types",
             "tariffs",
-            "payments"
+            "payments",
+            "rentals"
     );
 
     private final JdbcClient jdbcClient;

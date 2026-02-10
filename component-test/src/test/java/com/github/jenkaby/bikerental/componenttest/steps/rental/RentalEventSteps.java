@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -143,7 +142,7 @@ public class RentalEventSteps {
             // startedAt is always validated as "now()" in feature files, so just check it's recent
             softly.assertThat(actual.startedAt())
                     .as("Started at")
-                    .isCloseTo(LocalDateTime.now(), within(Duration.ofSeconds(5)));
+                    .isCloseTo(expected.startedAt(), within(Duration.ofSeconds(5)));
         } else {
             softly.assertThat(actual.startedAt())
                     .as("Started at should not be null")

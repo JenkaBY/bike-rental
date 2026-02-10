@@ -1,10 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.steps.rental;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.componenttest.steps.common.WebRequestSteps;
-import com.github.jenkaby.bikerental.rental.web.command.dto.CreateRentalRequest;
-import com.github.jenkaby.bikerental.rental.web.command.dto.RentalPatchOperation;
-import com.github.jenkaby.bikerental.rental.web.command.dto.RentalUpdateJsonPatchRequest;
+import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -16,13 +13,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.within;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @Slf4j
 @RequiredArgsConstructor
 public class RentalWebSteps {
 
     private final ScenarioContext scenarioContext;
-    private final WebRequestSteps webRequestSteps;
 
     @Given("the rental update request is")
     public void theRentalUpdateRequestBodyIs(List<RentalPatchOperation> ops) {
@@ -37,6 +34,30 @@ public class RentalWebSteps {
         scenarioContext.setRequestBody(request);
     }
 
+    @Given("the prepayment request is")
+    public void thePrepaymentRequestIs(RecordPrepaymentRequest request) {
+        log.info("Preparing prepayment request: {}", request);
+        scenarioContext.setRequestBody(request);
+    }
+
+    @Then("the prepayment response contains")
+    public void thePrepaymentRequestIs(PrepaymentResponse expected) {
+        log.info("Preparing prepayment response: {}", expected);
+        var actual = scenarioContext.getResponseBody(PrepaymentResponse.class);
+        assertSoftly(softly -> {
+            softly.assertThat(actual.paymentId()).as("Payment ID matches").isNotNull();
+            softly.assertThat(actual.amount()).as("Amount matches").isEqualByComparingTo(expected.amount());
+            softly.assertThat(actual.paymentMethod()).as("Payment method matches").isEqualTo(expected.paymentMethod());
+            softly.assertThat(actual.receiptNumber()).as("Receipt number matches").isNotBlank();
+            softly.assertThat(actual.createdAt()).as("Created at matches").isCloseTo(expected.createdAt(), within(5, ChronoUnit.SECONDS));
+        });
+
+        // Save paymentId to context for event validation
+        if (actual.paymentId() != null) {
+            log.info("Saving paymentId {} to scenario context for later validation", actual.paymentId());
+            scenarioContext.setRequestedObjectId(actual.paymentId().toString());
+        }
+    }
 
     @Then("the rental response only contains")
     public void theRentalResponseOnlyContains(RentalResponse expectedRental) {

@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
-import com.github.jenkaby.bikerental.finance.domain.model.PaymentMethod;
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
 import com.github.jenkaby.bikerental.finance.web.command.dto.RecordPaymentRequest;
 import io.cucumber.java.DataTableType;
