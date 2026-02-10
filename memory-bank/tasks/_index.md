@@ -29,6 +29,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   autocomplete, status validation, tests)
 - [US-RN-002] Автоматический подбор тарифа - Completed on 2026-02-09 (improved selection algorithm with period-specific
   prices, RESTful endpoint GET /api/tariffs/selection, TariffPriceSelector utility, comprehensive tests)
+- [US-RN-004] Внесение предоплаты - Completed on 2026-02-10 (prepayment recording with validation, integration with
+  finance module, PaymentReceived event, comprehensive tests: unit, WebMvc, component)
 
 ## Pending - Technical Improvements
 
@@ -60,8 +62,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Phase 3: Main Rental Process
 
-- [US-RN-003] Установка даты и времени начала проката - URGENT, Depends on US-RN-001
-- [US-RN-004] Внесение предоплаты - URGENT, Depends on US-RN-001, US-FN-001
+- [US-RN-003] Установка даты и времени начала проката - LOW, Depends on US-RN-001
 - [US-RN-005] Запуск аренды - URGENT, Depends on US-RN-001, US-RN-004, US-EQ-004
 - [US-RN-006] Возврат оборудования - URGENT, Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
 - [US-RN-007] Расчет времени аренды - URGENT, Depends on US-RN-003
