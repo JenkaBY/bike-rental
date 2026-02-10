@@ -127,8 +127,72 @@ Feature: Rental Management
       | customerId | equipmentId | tariffId | status | plannedDuration | cost |
       | CUS1       | 1           | 1        | DRAFT  | 180             | 100  |
 
+  Scenario Outline: Record prepayment for draft rental
+    Given now is "<now>"
+    And a single rental exists in the database with the following data
+      | id         | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt | updatedAt |
+      | <rentalId> | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | <now>Z    | <now>Z    |
+    And the prepayment request is
+      | amount   | method   | operator |
+      | <amount> | <method> | OP1      |
+    When a POST request has been made to "/api/rentals/<rentalId>/prepayments" endpoint
+    Then the response status is 201
+    And the prepayment response contains
+      | amount   | paymentMethod | createdAt |
+      | <amount> | <method>      | <now>Z    |
+    And the following payment received event was published
+      | rentalId   | amount   | type       | receivedAt |
+      | <rentalId> | <amount> | PREPAYMENT | <now>Z     |
+    Examples:
+      | rentalId | amount | method | now                 |
+      | 1        | 100.00 | CASH   | 2026-02-10T10:15:30 |
 
-  Scenario: Update rental - activate rental
+  Scenario: Reject prepayment when amount is below estimated cost
+    Given a single rental exists in the database with the following data
+      | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt            | updatedAt            |
+      | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+    And the prepayment request is
+      | amount | method | operator |
+      | 50.00  | CASH   | OP1      |
+    When a POST request has been made to "/api/rentals/{requestedObjectId}/prepayments" endpoint with context
+    Then the response status is 422
+    And the response contains
+      | path     | value                                                               |
+      | $.title  | Insufficient prepayment                                             |
+      | $.detail | Prepayment amount must be at least the estimated cost of the rental |
+
+  Scenario Outline: Update rental - activate rental
+    Given now is "<now>"
+    And a single rental exists in the database with the following data
+      | id         | customerId | equipmentId   | tariffId   | status | estimatedCost | plannedDuration | createdAt | updatedAt |
+      | <rentalId> | <customer> | <equipmentId> | <tariffId> | DRAFT  | 100.00        | 120             | <now>Z    | <now>Z    |
+    And the prepayment request is
+      | amount | method | operator |
+      | 100.00 | CASH   | OP1      |
+    When a POST request has been made to "/api/rentals/<rentalId>/prepayments" endpoint
+    Then the response status is 201
+    And the prepayment response contains
+      | amount             | paymentMethod | createdAt |
+      | <prepaymentAmount> | CASH          | <now>Z    |
+    And the following payment received event was published
+      | rentalId   | amount             | type       | receivedAt |
+      | <rentalId> | <prepaymentAmount> | PREPAYMENT | <now>Z     |
+    And the rental update request is
+      | op      | path    | value  |
+      | replace | /status | ACTIVE |
+    When a PATCH request has been made to "/api/rentals/<rentalId>" endpoint
+    Then the response status is 200
+    And the rental response only contains
+      | customerId | equipmentId   | tariffId   | status | estimatedCost | plannedDuration | startedAt |
+      | <customer> | <equipmentId> | <tariffId> | ACTIVE | 100.00        | 120             | <now>Z    |
+    And the following rental started event was published
+      | customerId | equipmentId   | startedAt |
+      | <customer> | <equipmentId> | <now>Z    |
+    Examples:
+      | rentalId | equipmentId | tariffId | customer | now                 | prepaymentAmount |
+      | 5        | 1           | 1        | CUS1     | 2026-02-10T10:30:00 | 100.00           |
+
+  Scenario: Attempt to activate rental without prepayment
     Given a single rental exists in the database with the following data
       | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt            | updatedAt            |
       | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
@@ -136,13 +200,11 @@ Feature: Rental Management
       | op      | path    | value  |
       | replace | /status | ACTIVE |
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
-    Then the response status is 200
-    And the rental response only contains
-      | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | startedAt |
-      | CUS1       | 1           | 1        | ACTIVE | 100.00        | 120             | now()     |
-    And the following rental started event was published
-      | customerId | equipmentId | startedAt |
-      | CUS1       | 1           | now()     |
+    Then the response status is 422
+    And the response contains
+      | path     | value                                              |
+      | $.title  | Prepayment required                                |
+      | $.detail | Prepayment must be received before starting rental |
 
   Scenario: Update rental - combined update
     Given a single rental exists in the database with the following data

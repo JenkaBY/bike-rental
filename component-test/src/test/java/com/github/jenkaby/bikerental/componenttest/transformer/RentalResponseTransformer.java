@@ -34,7 +34,8 @@ public class RentalResponseTransformer {
         if ("now()".equals(entry.get("startedAt"))) {
             startedAt = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.systemDefault());
         } else {
-            startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
+            Instant startedInstant = DataTableHelper.toInstant(entry, "startedAt");
+            startedAt = startedInstant != null ? startedInstant.atZone(ZoneOffset.systemDefault()).toLocalDateTime() : null;
         }
 
         LocalDateTime expectedReturnAt;

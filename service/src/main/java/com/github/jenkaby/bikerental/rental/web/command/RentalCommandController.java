@@ -1,10 +1,13 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.RecordPrepaymentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.web.command.dto.CreateRentalRequest;
+import com.github.jenkaby.bikerental.rental.web.command.dto.PrepaymentResponse;
+import com.github.jenkaby.bikerental.rental.web.command.dto.RecordPrepaymentRequest;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalUpdateJsonPatchRequest;
 import com.github.jenkaby.bikerental.rental.web.command.mapper.RentalCommandMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
@@ -26,16 +29,19 @@ class RentalCommandController {
 
     private final CreateRentalUseCase createRentalUseCase;
     private final UpdateRentalUseCase updateRentalUseCase;
+    private final RecordPrepaymentUseCase recordPrepaymentUseCase;
     private final RentalCommandMapper commandMapper;
     private final RentalQueryMapper queryMapper;
 
     RentalCommandController(
             CreateRentalUseCase createRentalUseCase,
             UpdateRentalUseCase updateRentalUseCase,
+            RecordPrepaymentUseCase recordPrepaymentUseCase,
             RentalCommandMapper commandMapper,
             RentalQueryMapper queryMapper) {
         this.createRentalUseCase = createRentalUseCase;
         this.updateRentalUseCase = updateRentalUseCase;
+        this.recordPrepaymentUseCase = recordPrepaymentUseCase;
         this.commandMapper = commandMapper;
         this.queryMapper = queryMapper;
     }
@@ -95,5 +101,17 @@ class RentalCommandController {
         var response = queryMapper.toResponse(rental);
         log.info("[PATCH] Rental {} updated successfully", id);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/{id}/prepayments")
+    public ResponseEntity<PrepaymentResponse> recordPrepayment(
+            @PathVariable(name = "id") Long id,
+            @Valid @RequestBody RecordPrepaymentRequest request) {
+        log.info("[POST] Recording prepayment for rental {}", id);
+        var command = commandMapper.toRecordPrepaymentCommand(id, request);
+        var paymentInfo = recordPrepaymentUseCase.execute(command);
+        var response = commandMapper.toPrepaymentResponse(paymentInfo);
+        log.info("[POST] Prepayment recorded for rental {} with receipt {}", id, paymentInfo.receiptNumber());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

@@ -1,10 +1,9 @@
 package com.github.jenkaby.bikerental.finance.application.usecase;
 
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.model.Payment;
-import com.github.jenkaby.bikerental.finance.domain.model.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
-
-import java.math.BigDecimal;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 
 public interface RecordPaymentUseCase {
 
@@ -12,7 +11,7 @@ public interface RecordPaymentUseCase {
 
     record RecordPaymentCommand(
             Long rentalId,
-            BigDecimal amount,
+            Money amount,
             PaymentType paymentType,
             PaymentMethod paymentMethod,
             String operatorId

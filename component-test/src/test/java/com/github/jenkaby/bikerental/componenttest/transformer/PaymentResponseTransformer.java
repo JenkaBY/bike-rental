@@ -2,7 +2,6 @@ package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
 import com.github.jenkaby.bikerental.finance.web.query.dto.PaymentResponse;
-import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import io.cucumber.java.DataTableType;
 
 import java.time.Instant;
@@ -24,8 +23,6 @@ public class PaymentResponseTransformer {
         var operatorId = Aliases.getOperatorId(entry.get("operator"));
         var receiptNumber = DataTableHelper.getStringOrNull(entry, "receipt");
 
-        var money = Money.of(amount);
-
-        return new PaymentResponse(id, rentalId, money, paymentType, paymentMethod, createdAt, operatorId, receiptNumber);
+        return new PaymentResponse(id, rentalId, amount, paymentType, paymentMethod, createdAt, operatorId, receiptNumber);
     }
 }

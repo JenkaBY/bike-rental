@@ -11,5 +11,6 @@ public interface PaymentQueryMapper {
 
     @Mapping(target = "paymentType", expression = "java(domain.getPaymentType().name())")
     @Mapping(target = "paymentMethod", expression = "java(domain.getPaymentMethod().name())")
+    @Mapping(target = "amount", source = "amount")
     PaymentResponse toResponse(Payment domain);
 }

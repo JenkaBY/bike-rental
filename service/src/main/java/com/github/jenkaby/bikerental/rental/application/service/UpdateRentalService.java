@@ -3,9 +3,11 @@ package com.github.jenkaby.bikerental.rental.application.service;
 import com.github.jenkaby.bikerental.customer.CustomerFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
+import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
+import com.github.jenkaby.bikerental.rental.domain.exception.PrepaymentRequiredException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
@@ -39,6 +41,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
     private final CustomerFacade customerFacade;
     private final EquipmentFacade equipmentFacade;
     private final TariffFacade tariffFacade;
+    private final FinanceFacade financeFacade;
     private final EventPublisher eventPublisher;
     private final Clock clock;
     private final RentalEventMapper eventMapper;
@@ -49,6 +52,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
             CustomerFacade customerFacade,
             EquipmentFacade equipmentFacade,
             TariffFacade tariffFacade,
+            FinanceFacade financeFacade,
             EventPublisher eventPublisher,
             Clock clock,
             RentalEventMapper eventMapper,
@@ -57,6 +61,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
         this.customerFacade = customerFacade;
         this.equipmentFacade = equipmentFacade;
         this.tariffFacade = tariffFacade;
+        this.financeFacade = financeFacade;
         this.eventPublisher = eventPublisher;
         this.clock = clock;
         this.eventMapper = eventMapper;
@@ -139,11 +144,9 @@ class UpdateRentalService implements UpdateRentalUseCase {
     }
 
     private void startRental(Rental rental) {
-        // TODO: Validate prepayment (when US-RN-004 is implemented)
-        // if (!financeFacade.hasPrepayment(rental.getId())) {
-        // throw new PrepaymentRequiredException("Prepayment must be received before
-        // starting rental");
-        // }
+        if (!financeFacade.hasPrepayment(rental.getId())) {
+            throw new PrepaymentRequiredException(rental.getId());
+        }
 
         // Activate rental (validations are performed in Rental.activate())
         LocalDateTime actualStartTime = LocalDateTime.now(clock);

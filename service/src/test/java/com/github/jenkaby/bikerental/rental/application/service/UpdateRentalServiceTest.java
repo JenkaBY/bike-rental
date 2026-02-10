@@ -4,8 +4,10 @@ import com.github.jenkaby.bikerental.customer.CustomerFacade;
 import com.github.jenkaby.bikerental.customer.CustomerInfo;
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
+import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
+import com.github.jenkaby.bikerental.rental.domain.exception.PrepaymentRequiredException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
@@ -62,6 +64,8 @@ class UpdateRentalServiceTest {
     private EquipmentFacade equipmentFacade;
     @Mock
     private TariffFacade tariffFacade;
+    @Mock
+    private FinanceFacade financeFacade;
     @Mock
     private EventPublisher eventPublisher;
     @Mock
@@ -355,9 +359,10 @@ class UpdateRentalServiceTest {
         given(equipmentFacade.findById(EQUIPMENT_ID)).willReturn(Optional.of(equipment));
         TariffInfo selectedTariff = createTariffInfo();
         given(tariffFacade.selectTariff(any(), any(), any())).willReturn(selectedTariff);
+        given(financeFacade.hasPrepayment(RENTAL_ID)).willReturn(true);
         // LocalDateTime.now(clock) uses clock internally, so we need to provide a fixed clock
         UpdateRentalService serviceWithFixedClock = new UpdateRentalService(
-                rentalRepository, customerFacade, equipmentFacade, tariffFacade,
+                rentalRepository, customerFacade, equipmentFacade, tariffFacade, financeFacade,
                 eventPublisher, FIXED_CLOCK, eventMapper, valueParser
         );
         given(eventMapper.toRentalStarted(any())).willReturn(event);
@@ -376,6 +381,39 @@ class UpdateRentalServiceTest {
         assertThat(result.getStatus()).isEqualTo(RentalStatus.ACTIVE);
         then(eventPublisher).should().publish(any(), any());
         then(rentalRepository).should().save(any(Rental.class));
+    }
+
+    @Test
+    @DisplayName("Should throw PrepaymentRequiredException when activating without prepayment")
+    void shouldThrowPrepaymentRequiredWhenActivatingWithoutPrepayment() {
+        // Given
+        Rental rental = createReadyForActivationRental();
+        Map<String, Object> patch = Map.of("status", "ACTIVE");
+
+        EquipmentInfo equipment = new EquipmentInfo(
+                EQUIPMENT_ID, "EQ-001", "BIKE-001", "bicycle", "AVAILABLE", "Model A"
+        );
+        TariffInfo selectedTariff = createTariffInfo();
+
+        given(rentalRepository.findById(RENTAL_ID)).willReturn(Optional.of(rental));
+        given(valueParser.parseString("ACTIVE")).willReturn("ACTIVE");
+        given(equipmentFacade.findById(EQUIPMENT_ID)).willReturn(Optional.of(equipment));
+        given(tariffFacade.selectTariff(any(), any(), any())).willReturn(selectedTariff);
+        given(tariffFacade.calculateEstimatedCost(TARIFF_ID, DURATION)).willReturn(Money.of("100.00"));
+        given(financeFacade.hasPrepayment(RENTAL_ID)).willReturn(false);
+
+        UpdateRentalService serviceWithFixedClock = new UpdateRentalService(
+                rentalRepository, customerFacade, equipmentFacade, tariffFacade, financeFacade,
+                eventPublisher, FIXED_CLOCK, eventMapper, valueParser
+        );
+
+        // When/Then
+        assertThatThrownBy(() -> serviceWithFixedClock.execute(RENTAL_ID, patch))
+                .isInstanceOf(PrepaymentRequiredException.class)
+                .hasMessageContaining("Prepayment must be received");
+
+        then(rentalRepository).should().findById(RENTAL_ID);
+        then(rentalRepository).shouldHaveNoMoreInteractions();
     }
 
     // Helper methods

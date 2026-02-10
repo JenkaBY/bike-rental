@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.finance.PaymentReceived;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordPaymentUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.Payment;
 import com.github.jenkaby.bikerental.finance.domain.repository.PaymentRepository;
-import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +38,7 @@ public class RecordPaymentService implements RecordPaymentUseCase {
         Payment payment = Payment.builder()
                 .id(id)
                 .rentalId(command.rentalId())
-                .amount(Money.of(command.amount()))
+                .amount(command.amount())
                 .paymentType(command.paymentType())
                 .paymentMethod(command.paymentMethod())
                 .createdAt(now)
@@ -49,7 +48,7 @@ public class RecordPaymentService implements RecordPaymentUseCase {
 
         repository.save(payment);
 
-        eventPublisher.publish(PAYMENT_EXCHANGER, new PaymentReceived(id, command.rentalId(), Money.of(command.amount()), command.paymentType(), now));
+        eventPublisher.publish(PAYMENT_EXCHANGER, new PaymentReceived(id, command.rentalId(), command.amount(), command.paymentType(), now));
 
         return payment;
     }

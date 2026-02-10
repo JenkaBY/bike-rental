@@ -3,10 +3,10 @@
 ## Project Overview
 
 **Project:** BikeRental Equipment Rental Management System  
-**Status:** 🚀 Active Implementation | Eight User Stories Complete  
+**Status:** 🚀 Active Implementation | Nine User Stories Complete  
 **Phase:** Phase 1 - Foundation (In Progress)  
-**Date:** February 5, 2026  
-**Overall Completion:** ~19% Implementation (8 of 43 user stories complete) | 100% Documentation
+**Date:** February 10, 2026  
+**Overall Completion:** ~21% Implementation (9 of 43 user stories complete) | 100% Documentation
 
 ---
 
@@ -299,6 +299,59 @@ CREATE TABLE equipment_status_transitions (
 
 ---
 
+**US-RN-004: Record Prepayment** (Completed: February 10, 2026)
+
+**Module:** rental  
+**Effort:** 4 days (Feb 6-10, 2026)
+
+**Implementation Delivered:**
+
+- ✅ POST /api/rentals/{id}/prepayments endpoint with comprehensive validation
+- ✅ Domain layer: `Rental.isPrepaymentSufficient()` method for business rule validation
+- ✅ Domain exceptions: `InsufficientPrepaymentException` with factory methods
+- ✅ Application layer: `RecordPrepaymentUseCase` with status and amount validation
+- ✅ Integration: `FinanceFacade.recordPrepayment()` for cross-module communication
+- ✅ Event publishing: `PaymentReceived` event after successful prepayment
+
+**Architecture Decisions:**
+
+- ✅ `PaymentMethod` enum moved to public `finance` package for module exposure
+- ✅ Domain validation logic encapsulated in `Rental` aggregate
+- ✅ Money value object used internally, BigDecimal in DTOs for API compatibility
+- ✅ MapStruct with `MoneyMapper` for automatic conversion
+
+**Testing Delivered:**
+
+- ✅ Unit tests: `RecordPrepaymentServiceTest` (success, validation, edge cases)
+- ✅ Domain tests: `RentalTest` for `isPrepaymentSufficient()` method
+- ✅ WebMvc tests: Parameterized tests for all validation scenarios (400, 422)
+- ✅ Component tests: Cucumber BDD scenarios with event validation
+- ✅ **Total: 15+ new tests** with comprehensive coverage
+
+**Features:**
+
+- Prepayment recording only for DRAFT rentals
+- Amount validation: must be >= estimated cost
+- Operator ID required for audit trail
+- PaymentReceived event published with PREPAYMENT type
+- Proper HTTP status codes (201 Created, 400 Bad Request, 422 Unprocessable Content)
+
+**Code Quality:**
+
+- Zero compilation errors
+- Follows hexagonal architecture with module boundaries
+- Domain-driven validation in aggregate root
+- Comprehensive error handling with descriptive messages
+- Spring Modulith compliance (public API exposure)
+
+**Technical Metrics:**
+
+- Implementation: ~350 lines
+- Tests: ~500 lines
+- Subtasks completed: 100%
+
+---
+
 ### Documentation Phase ✅
 
 **Memory Bank Foundation** (100% Complete)
@@ -415,14 +468,14 @@ CREATE TABLE equipment_status_transitions (
 **Estimated Duration:** 2-3 weeks  
 **Deliverable:** Enhanced configuration and status management
 
-### Phase 3: Rental Process (Not Started - 7 Tasks)
+### Phase 3: Rental Process (2 of 7 Complete)
 
 **Priority: HIGH** - Core business process
 
-- [ ] US-RN-001: Create Rental Record (main workflow)
-- [ ] US-RN-002: Automatic Tariff Selection (UX improvement)
+- [x] US-RN-001: Create Rental Record (main workflow) - ✅ Completed Feb 7, 2026
+- [x] US-RN-002: Automatic Tariff Selection (UX improvement) - ✅ Completed Feb 9, 2026
 - [ ] US-RN-003: Set Rental Start Time (time tracking)
-- [ ] US-RN-004: Record Prepayment (financial integration)
+- [x] US-RN-004: Record Prepayment (financial integration) - ✅ Completed Feb 10, 2026
 - [ ] US-RN-005: Start Rental (activation)
 - [ ] US-RN-007: Calculate Rental Duration (time calculation)
 - [ ] US-RN-009: View Active Rentals (dashboard)

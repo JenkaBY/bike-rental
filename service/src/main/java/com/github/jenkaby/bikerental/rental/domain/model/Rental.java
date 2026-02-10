@@ -90,6 +90,14 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
+
+    public boolean isPrepaymentSufficient(Money amount) {
+        if (estimatedCost == null) {
+            return false;
+        }
+        return amount.compareTo(estimatedCost) >= 0;
+    }
+
     public boolean canBeActivated() {
         return status == RentalStatus.DRAFT
                 && customerId != null

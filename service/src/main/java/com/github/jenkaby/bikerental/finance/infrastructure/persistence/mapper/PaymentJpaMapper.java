@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper;
 
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.model.Payment;
-import com.github.jenkaby.bikerental.finance.domain.model.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.PaymentJpaEntity;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;

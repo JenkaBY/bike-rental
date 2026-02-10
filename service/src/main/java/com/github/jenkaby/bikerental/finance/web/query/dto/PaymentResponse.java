@@ -1,14 +1,13 @@
 package com.github.jenkaby.bikerental.finance.web.query.dto;
 
-import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
-
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 public record PaymentResponse(
         UUID id,
         Long rentalId,
-        Money amount,
+        BigDecimal amount,
         String paymentType,
         String paymentMethod,
         Instant createdAt,

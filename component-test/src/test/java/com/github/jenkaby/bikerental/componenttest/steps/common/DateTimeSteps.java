@@ -6,10 +6,7 @@ import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +30,16 @@ public class DateTimeSteps {
         LocalDate today = LocalDate.parse(date);
         log.debug("parsed date: {}", today);
         var currentTime = today.atStartOfDay().toInstant(ZoneOffset.UTC);
+        log.debug("Set instant: {}", currentTime);
+        setCurrentTime(currentTime);
+    }
+
+    @Given("now is {string}")
+    public void nowIs(String instantString) {
+        log.info("Setting current instant to {}", instantString);
+        LocalDateTime now = LocalDateTime.parse(instantString);
+        log.debug("parsed now: {}", now);
+        var currentTime = now.toInstant(ZoneOffset.UTC);
         log.debug("Set instant: {}", currentTime);
         setCurrentTime(currentTime);
     }

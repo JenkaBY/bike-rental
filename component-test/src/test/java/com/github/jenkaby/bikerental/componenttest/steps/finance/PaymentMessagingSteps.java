@@ -66,8 +66,8 @@ public class PaymentMessagingSteps {
             softly.assertThat(act.paymentId()).isEqualTo(exp.paymentId());
             softly.assertThat(act).usingRecursiveComparison().ignoringFields("paymentId")
                     .withComparatorForType((a, e) -> {
-                        log.debug("[TEST] Comparing timestamps, actual: {}, expected: {}", a, e);
-                        log.debug("[TEST] Comparing timestamps, durations {}s", Duration.between(a, e).abs().getSeconds());
+                        log.trace("[TEST] Comparing timestamps, actual: {}, expected: {}", a, e);
+                        log.trace("[TEST] Comparing timestamps, durations {}s", Duration.between(a, e).abs().getSeconds());
                         return Duration.between(a, e).abs().getSeconds() > 5 ? -1 : 0;
                     }, Instant.class)
                     .isEqualTo(exp);
