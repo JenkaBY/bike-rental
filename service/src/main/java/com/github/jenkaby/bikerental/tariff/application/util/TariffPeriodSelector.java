@@ -9,18 +9,16 @@ import java.time.Duration;
 @Component
 public class TariffPeriodSelector {
 
+    private static final Duration HALF_HOUR_THRESHOLD = Duration.ofMinutes(30);
+    private static final Duration FOUR_HOURS_THRESHOLD = Duration.ofHours(4);
 
-    public Duration selectPeriodDuration(Duration rentalDuration) {
-        Duration halfHour = TariffPeriod.HALF_HOUR.getDuration();
-        Duration hour = TariffPeriod.HOUR.getDuration();
-        Duration day = TariffPeriod.DAY.getDuration();
-
-        if (rentalDuration.compareTo(halfHour) <= 0) {
-            return halfHour;
-        } else if (rentalDuration.compareTo(hour) <= 0) {
-            return hour;
+    public TariffPeriod selectPeriod(Duration rentalDuration) {
+        if (rentalDuration.compareTo(HALF_HOUR_THRESHOLD) <= 0) {
+            return TariffPeriod.HALF_HOUR;
+        } else if (rentalDuration.compareTo(FOUR_HOURS_THRESHOLD) < 0) {
+            return TariffPeriod.HOUR;
         } else {
-            return day;
+            return TariffPeriod.DAY;
         }
     }
 }

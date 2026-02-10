@@ -9,8 +9,9 @@ public record TariffInfo(
         String name,
         String equipmentTypeSlug,
         BigDecimal basePrice,
-        BigDecimal hourPrice,  // Can be zero if not applicable
-        BigDecimal dayPrice,   // Can be zero if not applicable
+        BigDecimal halfHourPrice,  // Price for half hour period
+        BigDecimal hourPrice,      // Can be zero if not applicable
+        BigDecimal dayPrice,       // Can be zero if not applicable
         LocalDate validFrom,
         LocalDate validTo,
         boolean active

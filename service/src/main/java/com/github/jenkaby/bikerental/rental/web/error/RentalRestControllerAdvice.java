@@ -39,7 +39,7 @@ public class RentalRestControllerAdvice {
     @ExceptionHandler(SuitableTariffNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleSuitableTariffNotFound(SuitableTariffNotFoundException ex) {
         log.warn("Suitable tariff not found: {}", ex.getMessage());
-        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
+        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problem.setTitle("Suitable tariff not found");
         problem.setDetail(ex.getMessage());
         return ResponseEntity.of(problem).build();

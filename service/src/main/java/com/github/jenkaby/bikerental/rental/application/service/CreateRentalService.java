@@ -18,7 +18,10 @@ import com.github.jenkaby.bikerental.tariff.TariffInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Service
 class CreateRentalService implements CreateRentalUseCase {
@@ -31,6 +34,7 @@ class CreateRentalService implements CreateRentalUseCase {
     private final TariffFacade tariffFacade;
     private final EventPublisher eventPublisher;
     private final RentalEventMapper eventMapper;
+    private final Clock clock;
 
     CreateRentalService(
             RentalRepository repository,
@@ -38,13 +42,14 @@ class CreateRentalService implements CreateRentalUseCase {
             EquipmentFacade equipmentFacade,
             TariffFacade tariffFacade,
             EventPublisher eventPublisher,
-            RentalEventMapper eventMapper) {
+            RentalEventMapper eventMapper, Clock clock) {
         this.repository = repository;
         this.customerFacade = customerFacade;
         this.equipmentFacade = equipmentFacade;
         this.tariffFacade = tariffFacade;
         this.eventPublisher = eventPublisher;
         this.eventMapper = eventMapper;
+        this.clock = clock;
     }
 
     @Override
@@ -119,11 +124,11 @@ class CreateRentalService implements CreateRentalUseCase {
         return saved;
     }
 
-    private Long autoSelectTariff(EquipmentInfo equipment, java.time.Duration duration) {
+    private Long autoSelectTariff(EquipmentInfo equipment, Duration duration) {
         TariffInfo selectedTariff = tariffFacade.selectTariff(
                 equipment.typeSlug(),
                 duration,
-                java.time.LocalDate.now()
+                LocalDate.now(clock)
         );
         return selectedTariff.id();
     }

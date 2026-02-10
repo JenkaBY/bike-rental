@@ -40,4 +40,12 @@ public class Tariff {
         boolean beforeEnd = validTo == null || !date.isAfter(validTo);
         return afterStart && beforeEnd;
     }
+
+    public Money getPriceForPeriod(TariffPeriod period) {
+        return switch (period) {
+            case HALF_HOUR -> halfHourPrice;
+            case HOUR -> hourPrice;
+            case DAY -> dayPrice;
+        };
+    }
 }

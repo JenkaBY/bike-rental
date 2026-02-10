@@ -10,10 +10,6 @@ import org.mapstruct.Mapping;
 @Mapper(uses = {MoneyMapper.class})
 public interface TariffToInfoMapper {
 
-
-    @Mapping(target = "basePrice", expression = "java(tariff.getBasePrice().amount())")
-    @Mapping(target = "hourPrice", expression = "java(tariff.getHourPrice() != null ? tariff.getHourPrice().amount() : java.math.BigDecimal.ZERO)")
-    @Mapping(target = "dayPrice", expression = "java(tariff.getDayPrice() != null ? tariff.getDayPrice().amount() : java.math.BigDecimal.ZERO)")
     @Mapping(target = "active", expression = "java(tariff.isActive())")
     TariffInfo toTariffInfo(Tariff tariff);
 }
