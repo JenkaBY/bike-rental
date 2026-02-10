@@ -70,6 +70,22 @@ Feature: Rental Management
       | customerId | status |
       | CUS1       | DRAFT  |
 
+  @ResetClock
+  Scenario: Create rental with auto-selected tariff when no suitable tariff found
+    Given today is "2026-02-09"
+    And the following equipment records exist in db
+      | id | serialNumber | uid      | status    | type    | model   | condition |
+      | 4  | EQ-004       | BIKE-004 | AVAILABLE | scooter | Model D | Good      |
+    And a rental request with the following data
+      | customerId | equipmentId | duration | tariffId |
+      | CUS1       | 4           | PT2H     |          |
+    When a POST request has been made to "/api/rentals" endpoint
+    Then the response status is 404
+    And the response contains
+      | path     | value                                                                                              |
+      | $.title  | Suitable tariff not found                                                                          |
+      | $.detail | No suitable tariff found for equipment type 'scooter' on date 2026-02-09 for duration: 120 minutes |
+
   # Rental Update Scenarios (JSON Patch)
 
   Scenario: Update rental - select customer
