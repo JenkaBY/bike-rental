@@ -3,19 +3,30 @@ package com.github.jenkaby.bikerental.tariff.web.query;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.web.support.Id;
+import com.github.jenkaby.bikerental.tariff.application.mapper.TariffToInfoMapper;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetActiveTariffsByEquipmentTypeUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetAllTariffsUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetTariffByIdUseCase;
+import com.github.jenkaby.bikerental.tariff.application.usecase.SelectTariffForRentalUseCase;
+import com.github.jenkaby.bikerental.tariff.application.util.TariffPeriodSelector;
 import com.github.jenkaby.bikerental.tariff.domain.model.Tariff;
+import com.github.jenkaby.bikerental.tariff.domain.model.TariffPeriod;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.TariffResponse;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.TariffSelectionResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.mapper.TariffQueryMapper;
+import com.github.jenkaby.bikerental.tariff.web.query.mapper.TariffSelectionMapper;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -26,16 +37,28 @@ public class TariffQueryController {
     private final GetTariffByIdUseCase getByIdUseCase;
     private final GetAllTariffsUseCase getAllUseCase;
     private final GetActiveTariffsByEquipmentTypeUseCase getActiveByTypeUseCase;
+    private final SelectTariffForRentalUseCase selectTariffForRentalUseCase;
+    private final TariffPeriodSelector tariffPeriodSelector;
+    private final TariffToInfoMapper tariffToInfoMapper;
     private final TariffQueryMapper mapper;
+    private final TariffSelectionMapper selectionMapper;
 
     TariffQueryController(GetTariffByIdUseCase getByIdUseCase,
                           GetAllTariffsUseCase getAllUseCase,
                           GetActiveTariffsByEquipmentTypeUseCase getActiveByTypeUseCase,
-                          TariffQueryMapper mapper) {
+                          SelectTariffForRentalUseCase selectTariffForRentalUseCase,
+                          TariffPeriodSelector tariffPeriodSelector,
+                          TariffToInfoMapper tariffToInfoMapper,
+                          TariffQueryMapper mapper,
+                          TariffSelectionMapper selectionMapper) {
         this.getByIdUseCase = getByIdUseCase;
         this.getAllUseCase = getAllUseCase;
         this.getActiveByTypeUseCase = getActiveByTypeUseCase;
+        this.selectTariffForRentalUseCase = selectTariffForRentalUseCase;
+        this.tariffPeriodSelector = tariffPeriodSelector;
+        this.tariffToInfoMapper = tariffToInfoMapper;
         this.mapper = mapper;
+        this.selectionMapper = selectionMapper;
     }
 
     @GetMapping("/{id}")
@@ -71,6 +94,29 @@ public class TariffQueryController {
                 .map(mapper::toResponse)
                 .toList();
 
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/selection")
+    public ResponseEntity<TariffSelectionResponse> selectTariff(
+            @RequestParam("equipmentType") @NotBlank String equipmentType,
+            @RequestParam("durationMinutes") @Positive int durationMinutes,
+            @RequestParam(value = "rentalDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate rentalDate) {
+        log.info("[GET] Select tariff for equipmentType={}, durationMinutes={}, rentalDate={}",
+                equipmentType, durationMinutes, rentalDate);
+
+        var command = new SelectTariffForRentalUseCase.SelectTariffCommand(equipmentType, durationMinutes, rentalDate);
+        Tariff selectedTariff = selectTariffForRentalUseCase.execute(command);
+
+        Duration duration = Duration.ofMinutes(durationMinutes);
+        TariffPeriod period = tariffPeriodSelector.selectPeriod(duration);
+
+        TariffSelectionResponse response = selectionMapper.toSelectionResponse(
+                tariffToInfoMapper.toTariffInfo(selectedTariff),
+                period
+        );
+        
         return ResponseEntity.ok(response);
     }
 }

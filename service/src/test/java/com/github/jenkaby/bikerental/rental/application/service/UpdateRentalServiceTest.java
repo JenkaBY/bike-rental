@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UpdateRentalService Tests")
@@ -63,12 +65,11 @@ class UpdateRentalServiceTest {
     @Mock
     private EventPublisher eventPublisher;
     @Mock
-    private Clock clock;
-    @Mock
     private RentalEventMapper eventMapper;
     @Mock
     private PatchValueParser valueParser;
-
+    @Spy
+    private Clock realClock = spy(Clock.systemDefaultZone());
     @InjectMocks
     private UpdateRentalService service;
 
@@ -427,6 +428,7 @@ class UpdateRentalServiceTest {
                 TARIFF_ID,
                 "Standard Rate",
                 "bicycle",
+                new BigDecimal("100.00"),
                 new BigDecimal("100.00"),
                 new BigDecimal("100.00"),
                 new BigDecimal("500.00"),

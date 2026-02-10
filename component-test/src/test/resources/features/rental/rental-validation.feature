@@ -132,6 +132,44 @@ Feature: Rental Update Validation
       | $.title  | Unprocessable Content                             |
       | $.detail | Referenced Tariff with identifier '999' not found |
 
+  @ResetClock
+  Scenario: Update rental equipment when no suitable tariff found for new equipment type
+    Given today is "2026-02-09"
+    And the following equipment records exist in db
+      | id | serialNumber | uid      | status    | type    | model   | condition |
+      | 4  | EQ-004       | BIKE-004 | AVAILABLE | scooter | Model D | Good      |
+    And a single rental exists in the database with the following data
+      | customerId | equipmentId | tariffId | status | plannedDuration | createdAt            | updatedAt            |
+      | CUS1       | 1           | 1        | DRAFT  | 120             | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+    And the rental update request is
+      | op      | path         | value |
+      | replace | /equipmentId | 4     |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
+    Then the response status is 404
+    And the response contains
+      | path     | value                                                                                              |
+      | $.title  | Suitable tariff not found                                                                          |
+      | $.detail | No suitable tariff found for equipment type 'scooter' on date 2026-02-09 for duration: 120 minutes |
+
+  @ResetClock
+  Scenario: Update rental duration when no suitable tariff found for equipment type
+    Given today is "2026-02-09"
+    And the following equipment records exist in db
+      | id | serialNumber | uid      | status    | type    | model   | condition |
+      | 4  | EQ-004       | BIKE-004 | AVAILABLE | scooter | Model D | Good      |
+    And a single rental exists in the database with the following data
+      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
+      | CUS1       | 4           |          | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+    And the rental update request is
+      | op      | path      | value |
+      | replace | /duration | PT2H  |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
+    Then the response status is 404
+    And the response contains
+      | path     | value                                                                                              |
+      | $.title  | Suitable tariff not found                                                                          |
+      | $.detail | No suitable tariff found for equipment type 'scooter' on date 2026-02-09 for duration: 120 minutes |
+
   Scenario: Update rental duration when equipment is deleted
     Given a single rental exists in the database with the following data
       | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |

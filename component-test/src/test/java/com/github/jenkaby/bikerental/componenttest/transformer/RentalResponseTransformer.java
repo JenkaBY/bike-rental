@@ -36,7 +36,6 @@ public class RentalResponseTransformer {
         } else {
             startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
         }
-        System.out.println("++++ " + startedAt);
 
         LocalDateTime expectedReturnAt;
         if (startedAt != null && plannedDurationMinutes != null) {

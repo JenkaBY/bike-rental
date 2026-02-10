@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.componenttest.steps.common.WebRequestSteps;
 import com.github.jenkaby.bikerental.tariff.web.command.dto.TariffRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.TariffResponse;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.TariffSelectionResponse;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,20 @@ public class TariffWebSteps {
                 .toList();
         var expectedResponses = List.of(expectedResponse);
         assertResult(expectedResponses, actual);
+    }
+
+    @Then("the tariff selection response contains")
+    public void theTariffSelectionResponseContains(TariffSelectionResponse expected) {
+        var actual = scenarioContext.getResponseBody(TariffSelectionResponse.class);
+
+        log.info("Comparing tariff selection response actual: {} with expected: {}", actual, expected);
+        assertSoftly(softly -> {
+            softly.assertThat(actual.id()).as("ID matches").isEqualTo(expected.id());
+            softly.assertThat(actual.name()).as("Name matches").isEqualTo(expected.name());
+            softly.assertThat(actual.equipmentType()).as("Equipment type matches").isEqualTo(expected.equipmentType());
+            softly.assertThat(actual.price()).as("Price matches").isEqualByComparingTo(expected.price());
+            softly.assertThat(actual.period()).as("Period matches").isEqualTo(expected.period());
+        });
     }
 
     @Then("the tariff response only contains page of")

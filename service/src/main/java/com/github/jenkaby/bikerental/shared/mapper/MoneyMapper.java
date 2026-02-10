@@ -13,6 +13,6 @@ public interface MoneyMapper {
     }
 
     default BigDecimal toBigDecimal(Money money) {
-        return money != null ? money.amount() : null;
+        return money != null ? money.amount() : java.math.BigDecimal.ZERO;
     }
 }

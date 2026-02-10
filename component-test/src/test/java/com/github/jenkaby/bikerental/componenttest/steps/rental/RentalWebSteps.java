@@ -24,13 +24,6 @@ public class RentalWebSteps {
     private final ScenarioContext scenarioContext;
     private final WebRequestSteps webRequestSteps;
 
-    //    @Given("the rental record being updated/created is")
-//    public void theTariffBeingUpdatedIs(Rental request) {
-//        scenarioContext.setRequestBody(request);
-//        webRequestSteps.requestHasBeenMadeToEndpoint(HttpMethod.POST, "/api/rentals");
-//        var response = scenarioContext.getResponseBody(TariffResponse.class);
-//        scenarioContext.setRequestedObjectId(response.id().toString());
-//    }
     @Given("the rental update request is")
     public void theRentalUpdateRequestBodyIs(List<RentalPatchOperation> ops) {
         log.info("Preparing rental update request with {} operations: {}", ops.size(), ops);
