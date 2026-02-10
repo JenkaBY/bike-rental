@@ -630,11 +630,12 @@ public class CustomerController {
 
 **Тарифы (tariff module):**
 
-| Метод | Endpoint        | Описание                                                            |
-|-------|-----------------|---------------------------------------------------------------------|
-| GET   | `/tariffs`      | Справочник активных тарифов                                         |
-| GET   | `/tariffs/{id}` | Детали тарифа                                                       |
-| GET   | `/tariffs/cost` | Расчет стоимости `?equipment_type_slug={id}&duration_minutes={min}` |
+| Метод | Endpoint             | Описание                                                                                     |
+|-------|----------------------|----------------------------------------------------------------------------------------------|
+| GET   | `/tariffs`           | Справочник активных тарифов                                                                  |
+| GET   | `/tariffs/{id}`      | Детали тарифа                                                                                |
+| GET   | `/tariffs/selection` | Автоматический подбор тарифа `?equipmentType={slug}&durationMinutes={min}&rentalDate={date}` |
+| GET   | `/tariffs/active`    | Активные тарифы по типу оборудования `?equipmentType={slug}`                                 |
 
 **Аренда (rental module):**
 

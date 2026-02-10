@@ -27,6 +27,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 - [US-EQ-004] Управление статусами оборудования - COMPLETED (2026-02-05) - URGENT, Depends on US-EQ-001
 - [US-EQ-002] Добавление оборудования по порядковому номеру - Completed on 2026-02-05 (search by serial number,
   autocomplete, status validation, tests)
+- [US-RN-002] Автоматический подбор тарифа - Completed on 2026-02-09 (improved selection algorithm with period-specific
+  prices, RESTful endpoint GET /api/tariffs/selection, TariffPriceSelector utility, comprehensive tests)
 
 ## Pending - Technical Improvements
 
@@ -37,6 +39,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   for status transitions (2026-02-02)
 - [TECH-004] Rental Information Cache in Finance Module - Medium priority, finance module, event-driven rental
   validation (2026-02-04)
+- [TECH-005] Tariff Selection Cache - Medium priority, tariff module, Spring Cache for tariff selection performance
+  improvement (2026-02-09)
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
@@ -56,7 +60,6 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Phase 3: Main Rental Process
 
-- [US-RN-002] Автоматический подбор тарифа - URGENT, Depends on US-TR-001
 - [US-RN-003] Установка даты и времени начала проката - URGENT, Depends on US-RN-001
 - [US-RN-004] Внесение предоплаты - URGENT, Depends on US-RN-001, US-FN-001
 - [US-RN-005] Запуск аренды - URGENT, Depends on US-RN-001, US-RN-004, US-EQ-004
