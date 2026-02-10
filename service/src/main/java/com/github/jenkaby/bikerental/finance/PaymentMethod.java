@@ -1,4 +1,4 @@
-package com.github.jenkaby.bikerental.finance.domain.model;
+package com.github.jenkaby.bikerental.finance;
 
 public enum PaymentMethod {
     CASH,

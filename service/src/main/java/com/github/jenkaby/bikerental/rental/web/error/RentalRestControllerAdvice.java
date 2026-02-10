@@ -1,8 +1,6 @@
 package com.github.jenkaby.bikerental.rental.web.error;
 
-import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
-import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
-import com.github.jenkaby.bikerental.rental.domain.exception.RentalNotReadyForActivationException;
+import com.github.jenkaby.bikerental.rental.domain.exception.*;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
@@ -50,6 +48,24 @@ public class RentalRestControllerAdvice {
         log.warn("Invalid rental update: {}", ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Invalid rental update");
+        problem.setDetail(ex.getMessage());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(PrepaymentRequiredException.class)
+    public ResponseEntity<ProblemDetail> handlePrepaymentRequired(PrepaymentRequiredException ex) {
+        log.warn("Prepayment required for rental {}: {}", ex.getRentalId(), ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
+        problem.setTitle("Prepayment required");
+        problem.setDetail(ex.getMessage());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(InsufficientPrepaymentException.class)
+    public ResponseEntity<ProblemDetail> handleInsufficientPrepayment(InsufficientPrepaymentException ex) {
+        log.warn("Insufficient prepayment for rental {}: {}", ex.getRentalId(), ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
+        problem.setTitle("Insufficient prepayment");
         problem.setDetail(ex.getMessage());
         return ResponseEntity.of(problem).build();
     }

@@ -4,10 +4,11 @@ import com.github.jenkaby.bikerental.finance.application.usecase.RecordPaymentUs
 import com.github.jenkaby.bikerental.finance.domain.model.Payment;
 import com.github.jenkaby.bikerental.finance.web.command.dto.RecordPaymentRequest;
 import com.github.jenkaby.bikerental.finance.web.command.dto.RecordPaymentResponse;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper
+@Mapper(uses = {MoneyMapper.class})
 public interface PaymentCommandMapper {
 
     RecordPaymentCommand toCommand(RecordPaymentRequest request);

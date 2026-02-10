@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.finance.domain.model;
 
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
 
