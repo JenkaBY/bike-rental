@@ -213,4 +213,70 @@ class TariffTest {
 
         assertThat(tariff.getId()).isEqualTo(123L);
     }
+
+    @Test
+    @DisplayName("Should return halfHourPrice for HALF_HOUR period")
+    void shouldReturnHalfHourPriceForHalfHourPeriod() {
+        Tariff tariff = Tariff.builder()
+                .name("Test Tariff")
+                .description("Test")
+                .equipmentTypeSlug("bike")
+                .basePrice(Money.of("100.00"))
+                .halfHourPrice(Money.of("60.00"))
+                .hourPrice(Money.of("100.00"))
+                .dayPrice(Money.of("500.00"))
+                .hourDiscountedPrice(Money.of("90.00"))
+                .validFrom(LocalDate.of(2026, 1, 1))
+                .validTo(null)
+                .status(TariffStatus.ACTIVE)
+                .build();
+
+        Money price = tariff.getPriceForPeriod(TariffPeriod.HALF_HOUR);
+
+        assertThat(price.amount()).isEqualByComparingTo(Money.of("60.00").amount());
+    }
+
+    @Test
+    @DisplayName("Should return hourPrice for HOUR period")
+    void shouldReturnHourPriceForHourPeriod() {
+        Tariff tariff = Tariff.builder()
+                .name("Test Tariff")
+                .description("Test")
+                .equipmentTypeSlug("bike")
+                .basePrice(Money.of("100.00"))
+                .halfHourPrice(Money.of("60.00"))
+                .hourPrice(Money.of("100.00"))
+                .dayPrice(Money.of("500.00"))
+                .hourDiscountedPrice(Money.of("90.00"))
+                .validFrom(LocalDate.of(2026, 1, 1))
+                .validTo(null)
+                .status(TariffStatus.ACTIVE)
+                .build();
+
+        Money price = tariff.getPriceForPeriod(TariffPeriod.HOUR);
+
+        assertThat(price.amount()).isEqualByComparingTo(Money.of("100.00").amount());
+    }
+
+    @Test
+    @DisplayName("Should return dayPrice for DAY period")
+    void shouldReturnDayPriceForDayPeriod() {
+        Tariff tariff = Tariff.builder()
+                .name("Test Tariff")
+                .description("Test")
+                .equipmentTypeSlug("bike")
+                .basePrice(Money.of("100.00"))
+                .halfHourPrice(Money.of("60.00"))
+                .hourPrice(Money.of("100.00"))
+                .dayPrice(Money.of("500.00"))
+                .hourDiscountedPrice(Money.of("90.00"))
+                .validFrom(LocalDate.of(2026, 1, 1))
+                .validTo(null)
+                .status(TariffStatus.ACTIVE)
+                .build();
+
+        Money price = tariff.getPriceForPeriod(TariffPeriod.DAY);
+
+        assertThat(price.amount()).isEqualByComparingTo(Money.of("500.00").amount());
+    }
 }
