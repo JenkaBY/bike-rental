@@ -188,6 +188,9 @@ Feature: Rental Management
     And the following rental started event was published
       | customerId | equipmentId   | startedAt |
       | <customer> | <equipmentId> | <now>Z    |
+    And the following equipment record was persisted in db
+      | id            | serialNumber | uid      | status | type    | model   | condition |
+      | <equipmentId> | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
     Examples:
       | rentalId | equipmentId | tariffId | customer | now                 | prepaymentAmount |
       | 5        | 1           | 1        | CUS1     | 2026-02-10T10:30:00 | 100.00           |

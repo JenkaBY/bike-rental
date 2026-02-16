@@ -3,7 +3,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.rental;
 import com.github.jenkaby.bikerental.componenttest.context.MessageStore;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.rental.event.RentalCreated;
-import com.github.jenkaby.bikerental.rental.event.RentalStarted;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

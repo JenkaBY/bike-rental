@@ -345,8 +345,8 @@ class UpdateRentalServiceTest {
         // Given
         Rental rental = createReadyForActivationRental();
         Map<String, Object> patch = Map.of("status", "ACTIVE");
-        com.github.jenkaby.bikerental.rental.event.RentalStarted event =
-                new com.github.jenkaby.bikerental.rental.event.RentalStarted(
+        com.github.jenkaby.bikerental.shared.domain.event.RentalStarted event =
+                new com.github.jenkaby.bikerental.shared.domain.event.RentalStarted(
                         RENTAL_ID, CUSTOMER_ID, EQUIPMENT_ID, FIXED_TIME, FIXED_TIME.plus(DURATION)
                 );
 
