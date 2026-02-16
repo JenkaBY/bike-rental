@@ -11,12 +11,14 @@ import org.assertj.core.api.SoftAssertions;
 import org.jspecify.annotations.NonNull;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @Slf4j
 @ContextConfiguration
@@ -36,6 +38,13 @@ public class EquipmentDbSteps {
 
     @Then("the following equipment record(s) was/were persisted in db")
     public void theFollowingEquipmentsWerePersisted(List<EquipmentJpaEntity> expected) {
+        await()
+                .atMost(Duration.ofSeconds(5))
+                .pollInterval(Duration.ofMillis(100))
+                .untilAsserted(() -> assertEquipmentsPersisted(expected));
+    }
+
+    private void assertEquipmentsPersisted(List<EquipmentJpaEntity> expected) {
         var serialNums = expected.stream()
                 .map(EquipmentJpaEntity::getSerialNumber)
                 .collect(Collectors.toSet());
