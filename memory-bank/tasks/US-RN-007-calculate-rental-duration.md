@@ -31,6 +31,11 @@ public class RentalDurationCalculator {
 
 - Part of Phase 3: Main Rental Process
 - Task created in Memory Bank structure
+- Updated 2026-02-16: Dependency changed from US-RN-003 to US-RN-005 (startTime устанавливается автоматически при активации)
+
+### 2026-02-16
+- Dependency updated: US-RN-003 → US-RN-005 (startTime устанавливается автоматически при активации аренды через US-RN-005)
+
 ### 2026-01-26
 
 ## Progress Log
@@ -89,10 +94,10 @@ Duration calculation is critical for cost calculation. Must follow business rule
 
 ## Original Request
 
-**Dependencies:** US-RN-003
+**Dependencies:** US-RN-005 (startTime устанавливается автоматически при активации аренды)
 **Module:** rental  
 **Priority:** High  
-**Updated:** 2026-01-26  
+**Updated:** 2026-02-16  
 **Added:** 2026-01-26  
 **Status:** Pending  
 
