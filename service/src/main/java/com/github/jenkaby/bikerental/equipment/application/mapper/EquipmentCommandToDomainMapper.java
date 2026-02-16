@@ -18,4 +18,7 @@ public interface EquipmentCommandToDomainMapper {
 
     @Mapping(target = "id", ignore = true)
     Equipment toEquipment(@MappingTarget Equipment toUpdate, UpdateEquipmentUseCase.UpdateEquipmentCommand command);
+
+    @Mapping(target = "statusSlug", source = "newStatusSlug")
+    UpdateEquipmentUseCase.UpdateEquipmentCommand toUpdateCommand(Equipment equipment, String newStatusSlug);
 }

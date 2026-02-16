@@ -11,8 +11,8 @@ import com.github.jenkaby.bikerental.rental.domain.exception.PrepaymentRequiredE
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
-import com.github.jenkaby.bikerental.rental.event.RentalStarted;
 import com.github.jenkaby.bikerental.rental.infrastructure.util.PatchValueParser;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.EquipmentNotAvailableException;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
