@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
 
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleName;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
@@ -110,6 +111,8 @@ class ModulithBoundariesTest {
                 .ignoreDependency(resideInAnyPackage("com.github.jenkaby.bikerental.tariff"), resideInAnyPackage("..shared.exception.."))
                 // Allow Application to access Infrastructure (for utilities like PatchValueParser)
                 .ignoreDependency(resideInAnyPackage("..application.."), resideInAnyPackage("..infrastructure.util.."))
+                // Exclude package-info classes from layer checks (they're metadata annotations, not actual classes)
+                .ignoreDependency(simpleName("package-info"), resideInAnyPackage(".."))
 
                 .as("Each module should follow hexagonal architecture layers")
                 .check(importedClasses);
