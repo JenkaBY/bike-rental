@@ -18,14 +18,14 @@ This file should contain:
 
 ## Current Focus
 
-**Status:** 🚀 Active Implementation - Phase 1 Foundation  
-**Date:** February 6, 2026  
-**Phase:** Phase 1 - Foundation (4 of 7 stories complete - 57%)
+**Status:** 🚀 Active Implementation - Phase 3 Main Rental Process  
+**Date:** February 18, 2026  
+**Phase:** Phase 3 - Main Rental Process (1 of 5 stories complete - 20%)
 
 ### Primary Objective
 
-Continue Phase 1 foundation implementation with focus on equipment catalog and tariff management after completing
-US-CL-003 and US-FN-001.
+Continue Phase 3 main rental process implementation. Recently completed US-RN-007 (Rental Duration Calculation). Next
+priorities: US-RN-008 (Early Return/Replacement), US-RN-009 (View Active Rentals), and US-TR-002 (Cost Calculation).
 
 ### Current Activities
 
@@ -45,11 +45,19 @@ US-CL-003 and US-FN-001.
     - Ready for production deployment
 
 4. **Recently Completed / High Priority**
+    - **US-RN-007: Rental Duration Calculation** ✅ COMPLETED (February 18, 2026)
+        - RentalDurationCalculator service with RentalDurationResult interface
+        - BaseRentalDurationResult record (billableMinutes, actualDuration)
+        - Application properties configuration (app.rental.time-increment: 5m)
+        - calculateActualDuration() method in Rental entity
+        - Comprehensive parameterized unit tests with @ParameterizedTest
+        - Formula: (actualMinutes + increment - 1) / increment * increment for rounding up
+        - Supports durations from 0 minutes to multiple days
     - **US-FN-001: Payment Acceptance** ✅ COMPLETED (February 4, 2026)
         - Domain, infrastructure, application, web layers implemented
         - Receipt generation, UUID generator port, event publishing, WebMvc and component tests added
 
-5. **Next Priority Tasks** (Phase 1 Foundation)
+5. **Next Priority Tasks** (Phase 3 Main Rental Process)
     - US-EQ-001: Equipment Catalog - HIGH PRIORITY (core operations)
     - US-TR-001: Tariff Catalog - HIGH PRIORITY (pricing foundation)
     - US-AD-001: User Management - MEDIUM PRIORITY (authentication)
@@ -70,6 +78,53 @@ US-CL-003 and US-FN-001.
     - Testing strategy established and proven
 
 ## Recent Changes
+
+### Completed (February 18, 2026)
+
+**1. US-RN-007: Rental Duration Calculation** ✅ COMPLETED
+
+**Implementation:**
+
+- RentalDurationCalculator port interface in domain.service (follows Dependency Inversion pattern)
+- RentalDurationCalculatorImpl implementation in application.service
+- RentalDurationResult interface and BaseRentalDurationResult record in domain.service
+- RentalProperties with @ConfigurationProperties(prefix = "app.rental")
+- Application property: app.rental.time-increment: 5m
+- calculateActualDuration() method added to Rental entity (uses domain port)
+- Comprehensive parameterized unit tests using @ParameterizedTest with @ValueSource, @CsvSource, @MethodSource
+
+**Architecture:**
+
+- Domain layer defines RentalDurationCalculator port (interface)
+- Application layer provides RentalDurationCalculatorImpl implementation
+- Domain model (Rental) depends only on domain interfaces, not application layer
+- Follows same pattern as StatusTransitionPolicy in equipment module
+
+**Key Features:**
+
+- Formula: (actualMinutes + increment - 1) / increment * increment for rounding up
+- Supports durations from 0 minutes to multiple days
+- actualMinutes computed from actualDuration (no redundant storage)
+- Configuration-ready for future app.rental.forgiveness.overtime-duration property
+
+**Testing:**
+
+- Parameterized tests covering all edge cases (small, medium, large values)
+- Tests for cancellation window (US-RN-008 integration)
+- Tests with different time increments (5m, 10m, 15m)
+- Tests for very long durations (multiple days)
+- All tests passing
+
+**Quality Metrics:**
+
+- Implementation: ~150 lines
+- Tests: ~200 lines (parameterized)
+- Test-to-code ratio: 1.3:1
+- Zero compilation errors
+
+**Timeline:** 1 day (Feb 18, 2026), 9/9 subtasks completed
+
+---
 
 ### Completed (February 6, 2026)
 
@@ -642,9 +697,35 @@ Apply same TDD approach as US-CL-002:
 
 ---
 
-**Last Updated:** February 6, 2026  
+**Last Updated:** February 18, 2026  
 **Status:** Documentation Complete ✅ | Active Implementation 🚀  
 **Next Review:** At start of next implementation phase
+
+## Recent Changes (2026-02-18 - Architecture Fix)
+
+### US-RN-007: Architecture Compliance Fix
+
+**What Changed:**
+
+- Refactored RentalDurationCalculator to follow Dependency Inversion pattern
+- Created port interface in domain.service (RentalDurationCalculator)
+- Moved implementation to application.service (RentalDurationCalculatorImpl)
+- Moved RentalDurationResult and BaseRentalDurationResult to domain.service
+- Domain model (Rental) now depends only on domain interfaces
+
+**Architecture Pattern:**
+
+- Follows same pattern as StatusTransitionPolicy in equipment module
+- Domain layer defines contracts (ports), application layer provides implementations
+- Ensures domain layer never depends on application layer
+- Fixes hexagonal architecture violations detected by ModulithBoundariesTest
+
+**Impact:**
+
+- ✅ Architecture tests now pass
+- ✅ Better separation of concerns
+- ✅ Domain layer remains pure (no application dependencies)
+- ✅ Easier to test domain logic with mock implementations
 
 ## 2026-01-30
 
