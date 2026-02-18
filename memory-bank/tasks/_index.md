@@ -33,6 +33,11 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   finance module, PaymentReceived event, comprehensive tests: unit, WebMvc, component)
 - [US-RN-005] Запуск аренды - Completed on 2026-02-16 (rental activation via PATCH status=ACTIVE, RentalEventListener
   updates equipment status to RENTED, prepayment validation, component tests)
+- [US-RN-007] Расчет времени аренды - Completed on 2026-02-18 (RentalDurationCalculator port in domain.service +
+  RentalDurationCalculatorImpl in application.service, RentalDurationResult interface and BaseRentalDurationResult
+  record in domain.service, application properties configuration app.rental.time-increment: 5m,
+  calculateActualDuration() method in Rental entity using domain port, follows Dependency Inversion pattern like
+  StatusTransitionPolicy)
 
 ## Pending - Technical Improvements
 
@@ -67,8 +72,6 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 - [US-RN-003] Установка даты и времени начала проката - DEFERRED (not priority, startTime устанавливается автоматически
   при старте аренды), Depends on US-RN-001
 - [US-RN-006] Возврат оборудования - URGENT, Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
-- [US-RN-007] Расчет времени аренды - URGENT, Depends on US-RN-005 (startTime устанавливается автоматически при
-  активации)
 - [US-RN-008] Ранний возврат или замена оборудования - URGENT, Depends on US-RN-005
 - [US-RN-009] Просмотр активных аренд - URGENT, Depends on US-RN-005
 
@@ -78,9 +81,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 - [US-TR-003] Правило "прощения" просрочки - URGENT, Depends on US-TR-002
 - [US-TR-004] Расчет доплаты за просрочку - URGENT, Depends on US-TR-002, US-TR-003
 - [US-EQ-003] Сканирование метки при возврате - URGENT, Depends on US-EQ-001, US-RN-005
-- [US-RN-006] Возврат оборудования - URGENT, Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
 - [US-EQ-005] Учет износа и пробега - LOW, Depends on US-RN-006
-- [US-RN-008] Ранний возврат или замена оборудования - URGENT, Depends on US-RN-005
 - [US-TR-005] Возврат средств при отмене - URGENT, Depends on US-RN-008, US-FN-002
 
 ## Pending - Phase 5: Finance & History

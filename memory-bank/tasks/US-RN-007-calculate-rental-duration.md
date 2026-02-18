@@ -33,6 +33,22 @@ public class RentalDurationCalculator {
 - Task created in Memory Bank structure
 - Updated 2026-02-16: Dependency changed from US-RN-003 to US-RN-005 (startTime устанавливается автоматически при активации)
 
+### 2026-02-18
+- **COMPLETED**: Implementation finished
+  - Created RentalDurationCalculator port interface in domain.service (Dependency Inversion pattern)
+  - Created RentalDurationCalculatorImpl implementation in application.service
+  - Created RentalDurationResult interface and BaseRentalDurationResult record in domain.service
+  - RentalDurationResult with actualMinutes() (default method computed from actualDuration), billableMinutes(), actualDuration() methods
+  - BaseRentalDurationResult record with 2 fields: billableMinutes and actualDuration (actualMinutes computed from actualDuration)
+  - Created RentalProperties with @ConfigurationProperties(prefix = "app.rental")
+  - Added app.rental.time-increment: 5m to application.yaml
+  - Added calculateActualDuration() method to Rental entity (uses domain port interface)
+  - Comprehensive parameterized unit tests using @ParameterizedTest with @ValueSource, @CsvSource, @MethodSource
+  - Formula: (actualMinutes + increment - 1) / increment * increment for rounding up
+  - Supports durations from 0 minutes to multiple days
+  - Prepared structure for future app.rental.forgiveness.overtime-duration property
+  - **Architecture**: Domain layer defines port, application provides implementation (follows StatusTransitionPolicy pattern)
+
 ### 2026-02-16
 - Dependency updated: US-RN-003 → US-RN-005 (startTime устанавливается автоматически при активации аренды через US-RN-005)
 
@@ -40,25 +56,26 @@ public class RentalDurationCalculator {
 
 ## Progress Log
 
-| 7.4 | Create tests                  | Not Started | 2026-01-26 |       |
-| 7.3 | Add configuration support     | Not Started | 2026-01-26 |       |
-| 7.2 | Implement rounding logic      | Not Started | 2026-01-26 |       |
-| 7.1 | Create duration calculator    | Not Started | 2026-01-26 |       |
+| 7.4 | Create tests                  | Completed   | 2026-02-18 | Comprehensive unit tests with all edge cases |
+| 7.3 | Add configuration support     | Completed   | 2026-02-18 | RentalProperties with application.yaml |
+| 7.2 | Implement rounding logic      | Completed   | 2026-02-18 | Rounding formula implemented |
+| 7.1 | Create duration calculator    | Completed   | 2026-02-18 | RentalDurationCalculator port (domain) + RentalDurationCalculatorImpl (application) with RentalDurationResult |
 |-----|-------------------------------|-------------|------------|-------|
 | ID  | Description                   | Status      | Updated    | Notes |
 
 ### Subtasks
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** Completed - 100%
 
 ## Progress Tracking
 
-- [ ] Document calculation examples
-- [ ] Add unit tests for rounding scenarios
-- [ ] Create value object for Duration
-- [ ] Add configuration support
-- [ ] Implement rounding logic
-- [ ] Create RentalDurationCalculator service
+- [x] Document calculation examples
+- [x] Add unit tests for rounding scenarios
+- [x] Create value object for Duration (RentalDurationResult interface + BaseRentalDurationResult record in domain.service)
+- [x] Add configuration support (RentalProperties with @ConfigurationProperties)
+- [x] Implement rounding logic
+- [x] Create RentalDurationCalculator port interface in domain.service
+- [x] Create RentalDurationCalculatorImpl implementation in application.service
 
 ## Implementation Plan
 
@@ -97,7 +114,7 @@ Duration calculation is critical for cost calculation. Must follow business rule
 **Dependencies:** US-RN-005 (startTime устанавливается автоматически при активации аренды)
 **Module:** rental  
 **Priority:** High  
-**Updated:** 2026-02-16  
+**Updated:** 2026-02-18  
 **Added:** 2026-01-26  
-**Status:** Pending  
+**Status:** Completed  
 

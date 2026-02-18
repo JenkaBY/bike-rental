@@ -146,23 +146,55 @@ shared/
 **3.1 Port Pattern (Hexagonal Architecture)**
 
 - Domain defines **port interfaces** for external dependencies
-- Infrastructure provides **adapter implementations**
+- Application layer provides **implementations** of domain ports
 - Enables dependency inversion and testability
+- Domain layer never depends on application layer
 
 **Status Transition Port Example:**
 
 ```java
+// Domain Port (interface)
+public interface StatusTransitionPolicy {
+    void validateTransition(String fromStatusSlug, String toStatusSlug);
+}
 
 // Domain Entity uses port
 public class Equipment {
-    private EquipmentStatus status;
+    public void changeStatusTo(String newStatusSlug, StatusTransitionPolicy policy) {
+        policy.validateTransition(this.statusSlug, newStatusSlug);
+        this.statusSlug = newStatusSlug;
+    }
+}
 
-   public void changeStatusTo(EquipmentStatus newStatus) {
-      if (!status.canTransitionTo(newStatus)) {
-         throw new InvalidStatusTransitionException(this.id, this.status, newStatus);
-      }
-      this.status = newStatus;
-   }
+// Application Implementation
+@Service
+public class EquipmentStatusTransitionPolicy implements StatusTransitionPolicy {
+    // Implementation uses repositories, configuration, etc.
+}
+```
+
+**Rental Duration Calculator Port Example:**
+
+```java
+// Domain Port (interface)
+public interface RentalDurationCalculator {
+    RentalDurationResult calculate(LocalDateTime start, LocalDateTime end);
+}
+
+// Domain Entity uses port
+public class Rental {
+    public RentalDurationResult calculateActualDuration(
+            RentalDurationCalculator calculator, 
+            LocalDateTime returnTime) {
+        return calculator.calculate(this.startedAt, returnTime);
+    }
+}
+
+// Application Implementation
+@Service
+public class RentalDurationCalculatorImpl implements RentalDurationCalculator {
+    private final RentalProperties properties;
+    // Implementation uses configuration, performs calculations
 }
 ```
 
@@ -247,6 +279,40 @@ public record PaymentReceived(
 - Validated before execution
 - Examples: `CreateRentalCommand`, `ReturnEquipmentCommand`
 
+**7.1. Result Object Pattern**
+
+- Encapsulates calculation results in immutable objects
+- Provides computed values via default methods
+- Single source of truth for calculation outputs
+- Located in domain layer (domain.service package)
+- Example: `RentalDurationResult` interface with `BaseRentalDurationResult` record implementation
+
+**Example:**
+
+```java
+// Domain layer (rental.domain.service)
+public interface RentalDurationResult {
+    default int actualMinutes() {
+        return (int) actualDuration().toMinutes();
+    }
+    int billableMinutes();
+    Duration actualDuration();
+}
+
+public record BaseRentalDurationResult(
+    int billableMinutes,
+    Duration actualDuration
+) implements RentalDurationResult {}
+```
+
+**Benefits:**
+
+- Encapsulation: all calculation results in one object
+- Performance: calculations performed once
+- Immutability: record ensures thread-safety
+- Computed values: default methods avoid redundant storage
+- Domain ownership: result objects belong to domain layer
+
 **8. Facade Pattern**
 
 - Public API for each module
@@ -259,6 +325,45 @@ public record PaymentReceived(
 - Cost calculation strategies
 - Payment method strategies
 - Example: `TariffSelectionService` with different matching strategies
+
+**9.1. Calculator Pattern**
+
+- Dedicated services for complex calculations
+- Configuration-driven behavior via application properties
+- Single responsibility: perform calculations only
+- Follows Dependency Inversion: domain defines port interface, application provides implementation
+- Example: `RentalDurationCalculator` port in domain with `RentalDurationCalculatorImpl` in application
+
+**Example:**
+
+```java
+// Domain Port (interface)
+public interface RentalDurationCalculator {
+    RentalDurationResult calculate(LocalDateTime start, LocalDateTime end);
+}
+
+// Application Implementation
+@Service
+public class RentalDurationCalculatorImpl implements RentalDurationCalculator {
+    private final RentalProperties properties;
+    
+    @Override
+    public RentalDurationResult calculate(LocalDateTime start, LocalDateTime end) {
+        Duration actualDuration = Duration.between(start, end);
+        int increment = getTimeIncrementMinutes();
+        int billableMinutes = roundUp(actualDuration.toMinutes(), increment);
+        return new BaseRentalDurationResult(billableMinutes, actualDuration);
+    }
+}
+```
+
+**Benefits:**
+
+- Separation of concerns: calculation logic isolated
+- Configuration: business rules externalized (app.rental.time-increment)
+- Testability: easy to unit test with different configurations
+- Reusability: can be used by multiple use cases
+- Architecture compliance: domain layer doesn't depend on application layer
 
 **10. State Machine Pattern**
 
