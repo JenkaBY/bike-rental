@@ -2,6 +2,8 @@ package com.github.jenkaby.bikerental.rental.domain.model;
 
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
 import com.github.jenkaby.bikerental.rental.domain.exception.RentalNotReadyForActivationException;
+import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
+import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationResult;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
 
@@ -129,5 +131,22 @@ public class Rental {
         this.startedAt = actualStartTime; // Actual start time
         this.expectedReturnAt = actualStartTime.plus(this.plannedDuration);
         this.updatedAt = Instant.now();
+    }
+
+    public RentalDurationResult calculateActualDuration(RentalDurationCalculator calculator, LocalDateTime returnTime) {
+        if (this.status != RentalStatus.ACTIVE && this.status != RentalStatus.COMPLETED) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);
+        }
+
+        if (this.startedAt == null) {
+            throw new IllegalStateException("Cannot calculate duration: rental start time is not set");
+        }
+
+        RentalDurationResult result = calculator.calculate(this.startedAt, returnTime);
+        this.actualDuration = result.actualDuration();
+        this.actualReturnAt = returnTime;
+        this.updatedAt = Instant.now();
+
+        return result;
     }
 }
