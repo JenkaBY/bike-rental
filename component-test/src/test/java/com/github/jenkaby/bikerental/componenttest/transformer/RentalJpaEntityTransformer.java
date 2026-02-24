@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalJpaEntity;
 import io.cucumber.java.DataTableType;
 
-import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,10 +26,10 @@ public class RentalJpaEntityTransformer {
         var actualDurationMinutes = DataTableHelper.toInt(entry, "actualDuration");
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
         var finalCost = DataTableHelper.toBigDecimal(entry, "finalCost");
-        var createdAtString = DataTableHelper.getStringOrNull(entry, "createdAt");
-        var createdAt = createdAtString != null ? Instant.parse(createdAtString) : Instant.now();
-        var updatedAtString = DataTableHelper.getStringOrNull(entry, "updatedAt");
-        var updatedAt = updatedAtString != null ? Instant.parse(updatedAtString) : Instant.now();
+
+        var createdAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "createdAt");
+        var updatedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "updatedAt");
+        ;
 
         return RentalJpaEntity.builder()
                 .id(id)

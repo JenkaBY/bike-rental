@@ -44,8 +44,8 @@ Feature: Rental Update Validation
 
   Scenario: Update rental with non-existent customer
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path        | value |
       | replace | /customerId | CUS3  |
@@ -58,8 +58,8 @@ Feature: Rental Update Validation
 
   Scenario: Update rental with non-existent equipment
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path         | value |
       | replace | /equipmentId | 999   |
@@ -74,8 +74,8 @@ Feature: Rental Update Validation
 
   Scenario: Update rental with rented equipment
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path         | value |
       | replace | /equipmentId | 2     |
@@ -88,8 +88,8 @@ Feature: Rental Update Validation
 
   Scenario: Update rental with broken equipment
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path         | value |
       | replace | /equipmentId | 3     |
@@ -102,8 +102,8 @@ Feature: Rental Update Validation
 
   Scenario Outline: Update rental with incorrect duration
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path      | value      |
       | replace | /duration | <duration> |
@@ -120,8 +120,8 @@ Feature: Rental Update Validation
 
   Scenario: Update rental with non-existent tariff
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path      | value |
       | replace | /tariffId | 999   |
@@ -139,8 +139,8 @@ Feature: Rental Update Validation
       | id | serialNumber | uid      | status    | type    | model   | condition |
       | 4  | EQ-004       | BIKE-004 | AVAILABLE | scooter | Model D | Good      |
     And a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | plannedDuration | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 120             | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | plannedDuration | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 120             | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path         | value |
       | replace | /equipmentId | 4     |
@@ -158,8 +158,8 @@ Feature: Rental Update Validation
       | id | serialNumber | uid      | status    | type    | model   | condition |
       | 4  | EQ-004       | BIKE-004 | AVAILABLE | scooter | Model D | Good      |
     And a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 4           |          | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 4           |          | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path      | value |
       | replace | /duration | PT2H  |
@@ -172,8 +172,8 @@ Feature: Rental Update Validation
 
   Scenario: Update rental duration when equipment is deleted
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 999         |          | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 999         |          | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path      | value |
       | replace | /duration | PT2H  |

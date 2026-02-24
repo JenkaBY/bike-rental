@@ -30,8 +30,7 @@ public class RentalStartedEventTransformer {
             if ("now()".equals(startedAtString)) {
                 startedAt = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.systemDefault());
             } else {
-                Instant startedAtInstant = DataTableHelper.toInstant(entry, "startedAt");
-                startedAt = startedAtInstant != null ? startedAtInstant.atZone(ZoneOffset.systemDefault()).toLocalDateTime() : null;
+                startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
             }
         }
 

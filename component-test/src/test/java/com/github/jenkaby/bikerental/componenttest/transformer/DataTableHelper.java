@@ -1,10 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -82,6 +79,13 @@ public class DataTableHelper {
         return LocalDateTime.parse(value.trim());
     }
 
+    public static Instant toInstant(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return null;
+        }
+        return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+    }
+
     public static Instant toInstant(Map<String, String> entry, String field) {
         var value = entry.get(field);
         if (value == null) {
@@ -92,6 +96,11 @@ public class DataTableHelper {
             return null;
         }
         return Instant.parse(value);
+    }
+
+    public static Instant parseLocalDateTimeToInstant(Map<String, String> entry, String field) {
+        var localDateTime = toLocalDateTime(entry, field);
+        return toInstant(localDateTime);
     }
 
     public static Set<String> getSetOrDefault(Map<String, String> entry, String field, Set<String> defaultValue) {

@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.rental;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
+import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -19,6 +22,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 @RequiredArgsConstructor
 public class RentalWebSteps {
 
+    public static final Comparator<RentalSummaryResponse> COMPARING_BY_ID = Comparator.comparing(RentalSummaryResponse::id);
     private final ScenarioContext scenarioContext;
 
     @Given("the rental update request is")
@@ -38,6 +42,47 @@ public class RentalWebSteps {
     public void thePrepaymentRequestIs(RecordPrepaymentRequest request) {
         log.info("Preparing prepayment request: {}", request);
         scenarioContext.setRequestBody(request);
+    }
+
+    @Then("the rental response only contains page of")
+    public void theRentalResponseOnlyContainsPageOf(List<RentalSummaryResponse> expectedRentals) {
+        var actualRentals = scenarioContext.getResponseAsPage(RentalSummaryResponse.class).items().stream().sorted(COMPARING_BY_ID).toList();
+        log.info("Comparing rental response list actual: {} with expected: {}", actualRentals, expectedRentals);
+        assertThat(actualRentals)
+                .as("Rental response list size")
+                .hasSize(expectedRentals.size());
+        assertThat(actualRentals).zipSatisfy(expectedRentals.stream().sorted(COMPARING_BY_ID).toList(), this::validateSummary);
+    }
+
+    private void validateSummary(RentalSummaryResponse actual, RentalSummaryResponse expected) {
+        log.info("Comparing rental summary response actual: {} with expected: {}", actual, expected);
+        var softly = new SoftAssertions();
+        softly.assertThat(actual.id())
+                .as("Rental ID")
+                .isEqualTo(expected.id());
+        softly.assertThat(actual.customerId())
+                .as("Customer ID")
+                .isEqualTo(expected.customerId());
+        softly.assertThat(actual.equipmentId())
+                .as("Equipment ID")
+                .isEqualTo(expected.equipmentId());
+        softly.assertThat(actual.status())
+                .as("Status")
+                .isEqualTo(expected.status());
+        if (expected.startedAt() != null) {
+            softly.assertThat(actual.startedAt())
+                    .as("Started at")
+                    .isCloseTo(expected.startedAt(), within(5, ChronoUnit.SECONDS));
+        }
+        if (expected.expectedReturnAt() != null) {
+            softly.assertThat(actual.expectedReturnAt())
+                    .as("Expected return at")
+                    .isCloseTo(expected.expectedReturnAt(), within(5, ChronoUnit.SECONDS));
+        }
+        assertThat(actual.overdueMinutes())
+                .as("Overdue minutes")
+                .isEqualTo(expected.overdueMinutes());
+        softly.assertAll();
     }
 
     @Then("the prepayment response contains")
