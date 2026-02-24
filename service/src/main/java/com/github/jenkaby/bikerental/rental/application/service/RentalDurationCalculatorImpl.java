@@ -1,9 +1,9 @@
 package com.github.jenkaby.bikerental.rental.application.service;
 
-import com.github.jenkaby.bikerental.rental.application.config.RentalProperties;
 import com.github.jenkaby.bikerental.rental.domain.service.BaseRentalDurationResult;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationResult;
+import com.github.jenkaby.bikerental.shared.config.RentalProperties;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 

@@ -27,6 +27,5 @@ app:
     search-limit-result: 10
   rental:
     time-increment: 5m
-    # Future property for US-TR-003 (will be added later)
-    # forgiveness:
-    #   overtime-duration: 10m
+    forgiveness:
+      overtime-duration: 7m

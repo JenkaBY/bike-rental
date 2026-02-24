@@ -1,20 +1,36 @@
 package com.github.jenkaby.bikerental.shared.domain.model.vo;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public record Money(BigDecimal amount) implements Comparable<Money> {
+
+    private static final int MONEY_SCALE = 2;
+    private static final RoundingMode MONEY_ROUNDING_MODE = RoundingMode.HALF_UP;
 
     public Money {
         if (amount == null) {
             throw new IllegalArgumentException("Amount cannot be null");
         }
-        if (amount.scale() > 2) {
-            throw new IllegalArgumentException("Amount cannot have more than 2 decimal places");
+        if (amount.scale() > MONEY_SCALE) {
+            throw new IllegalArgumentException("Amount cannot have more than " + MONEY_SCALE + " decimal places");
         }
     }
 
+    /**
+     * Creates Money from BigDecimal, automatically rounding to 2 decimal places if needed.
+     *
+     * @param amount amount to create Money from
+     * @return Money instance with rounded amount
+     */
     public static Money of(BigDecimal amount) {
-        return new Money(amount);
+        if (amount == null) {
+            throw new IllegalArgumentException("Amount cannot be null");
+        }
+        BigDecimal roundedAmount = amount.scale() > MONEY_SCALE
+                ? amount.setScale(MONEY_SCALE, MONEY_ROUNDING_MODE)
+                : amount;
+        return new Money(roundedAmount);
     }
 
     public static Money of(String amount) {
@@ -50,7 +66,7 @@ public record Money(BigDecimal amount) implements Comparable<Money> {
     }
 
     public Money multiply(BigDecimal multiplier) {
-        return new Money(this.amount.multiply(multiplier).setScale(2, BigDecimal.ROUND_HALF_UP));
+        return Money.of(this.amount.multiply(multiplier));
     }
 
     @Override

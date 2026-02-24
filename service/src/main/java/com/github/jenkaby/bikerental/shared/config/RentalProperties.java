@@ -1,4 +1,4 @@
-package com.github.jenkaby.bikerental.rental.application.config;
+package com.github.jenkaby.bikerental.shared.config;
 
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,13 +13,23 @@ public record RentalProperties(
         @NotNull
         Duration timeIncrement,
 
-        // Future property for US-TR-003 (forgiveness rule)
-        // Can be null until US-TR-003 is implemented
+        @NotNull
         ForgivenessProperties forgiveness
 ) {
     public record ForgivenessProperties(
             @NotNull
             Duration overtimeDuration
     ) {
+        public int overtimeDurationMinutes() {
+            return (int) overtimeDuration.toMinutes();
+        }
+    }
+
+    public int getForgivenessThresholdMinutes() {
+        return forgiveness.overtimeDurationMinutes();
+    }
+
+    public int getTimeIncrementMinutes() {
+        return (int) timeIncrement.toMinutes();
     }
 }
