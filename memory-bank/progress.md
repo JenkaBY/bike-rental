@@ -3,10 +3,10 @@
 ## Project Overview
 
 **Project:** BikeRental Equipment Rental Management System  
-**Status:** 🚀 Active Implementation | Ten User Stories Complete  
+**Status:** 🚀 Active Implementation | Eleven User Stories Complete  
 **Phase:** Phase 3 - Main Rental Process (In Progress)  
-**Date:** February 18, 2026  
-**Overall Completion:** ~23% Implementation (10 of 43 user stories complete) | 100% Documentation
+**Date:** February 24, 2026  
+**Overall Completion:** ~26% Implementation (11 of 43 user stories complete) | 100% Documentation
 
 ---
 
@@ -436,6 +436,64 @@ CREATE TABLE equipment_status_transitions (
 
 ---
 
+**US-TR-002: Calculate Rental Cost** (Completed: February 24, 2026)
+
+**Module:** tariff  
+**Effort:** 1 day (Feb 24, 2026)
+
+**Implementation Delivered:**
+
+- ✅ Use Case pattern: `CalculateRentalCostUseCase` interface and `CalculateRentalCostService` implementation
+- ✅ Strategy Pattern: `ForgivenessStrategy` and `OvertimeCalculationStrategy` interfaces with implementations
+- ✅ `RentalCost` interface (public API in module root) and `BaseRentalCostResult` record (domain service)
+- ✅ Tariff selection based on actual duration (not planned duration)
+- ✅ Money encapsulation: automatic rounding in `Money.of(BigDecimal)` factory method
+- ✅ Configuration via `RentalProperties` (forgiveness threshold: 7 minutes, time-increment: 5 minutes)
+- ✅ Resolved cyclic dependency by accepting primitive types (`Duration actualDuration`, `int billableMinutes`)
+- ✅ `TariffFacade.calculateFinalCost()` method for cross-module access
+
+**Key Features:**
+
+- Base cost calculation using `TariffPeriodSelector` based on actual duration
+- Configurable forgiveness rule (7 minutes threshold) via `ThresholdForgivenessStrategy`
+- Proportional overtime calculation via `ProportionalOvertimeCalculationStrategy`
+- Extensible design allows swapping strategies without modifying core service
+- Money value object automatically rounds to 2 decimal places
+
+**Testing Delivered:**
+
+- ✅ Comprehensive parameterized unit tests covering all scenarios
+- ✅ Tests for forgiveness rule application
+- ✅ Tests for overtime calculation with various durations
+- ✅ Tests for tariff period selection (HALF_HOUR, HOUR, DAY)
+- ✅ All tests passing, no unnecessary stubbings
+- ✅ Component test feature file prepared (disabled for future use)
+
+**Architecture Decisions:**
+
+- ✅ Use Case pattern for application-level business operations
+- ✅ Strategy Pattern for flexible business rules (forgiveness and overtime)
+- ✅ Result Object Pattern: public interface in module root, implementation in domain service
+- ✅ No cyclic dependencies: accepts primitive types instead of domain objects
+- ✅ Configuration-driven via Spring Configuration Properties
+
+**Code Quality:**
+
+- Zero compilation errors
+- Follows hexagonal architecture with module boundaries
+- Comprehensive test coverage with parameterized tests
+- Clean, maintainable code structure
+- Ready for integration with US-RN-006 (Equipment Return)
+
+**Technical Metrics:**
+
+- Implementation: ~400 lines
+- Tests: ~600 lines (parameterized)
+- Test-to-code ratio: 1.5:1
+- Subtasks completed: 8/8 (100%)
+
+---
+
 **US-RN-007: Calculate Rental Duration** (Completed: February 18, 2026)
 
 **Module:** rental  
@@ -562,6 +620,7 @@ CREATE TABLE equipment_status_transitions (
 
 **Recently Completed:**
 
+- ✅ US-TR-002: Calculate Rental Cost (February 24, 2026)
 - ✅ US-RN-007: Calculate Rental Duration (February 18, 2026)
 - ✅ US-RN-005: Start Rental (February 16, 2026)
 - ✅ US-RN-004: Record Prepayment (February 10, 2026)
@@ -631,19 +690,6 @@ CREATE TABLE equipment_status_transitions (
 **Dependencies:** Phase 1, Phase 2  
 **Estimated Duration:** 3-4 weeks  
 **Deliverable:** Complete rental creation and tracking
-
-### Phase 4: Return & Calculations (Not Started - 8 Tasks)
-
-**Priority: HIGH** - Completes rental lifecycle
-
-- [ ] US-TR-002: Calculate Rental Cost (billing engine)
-- [ ] US-TR-003: Forgiveness Rule (business logic)
-- [ ] US-TR-004: Calculate Overtime Charge (complex pricing)
-- [ ] US-EQ-003: Tag Scanning on Return (automation)
-- [ ] US-RN-006: Equipment Return (completion workflow)
-- [ ] US-EQ-005: Track Equipment Usage (analytics foundation)
-- [ ] US-RN-008: Early Return or Replacement (customer service)
-- [ ] US-TR-005: Refund on Cancellation (policy implementation)
 
 **Dependencies:** Phase 1, Phase 2, Phase 3  
 **Estimated Duration:** 3-4 weeks  
@@ -721,7 +767,7 @@ CREATE TABLE equipment_status_transitions (
 | rental      | 🚀 In Progress    | 9     | 44% (4 of 9 tasks) |
 | reporting   | 📋 Documented     | 5     | 0%                 |
 
-**Total:** 43 tasks across 8 modules (~23% implemented - 10 of 43 tasks complete)
+**Total:** 43 tasks across 8 modules (~26% implemented - 11 of 43 tasks complete)
 
 ### Phase Status
 

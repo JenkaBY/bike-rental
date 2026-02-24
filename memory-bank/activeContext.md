@@ -19,8 +19,8 @@ This file should contain:
 ## Current Focus
 
 **Status:** 🚀 Active Implementation - Phase 3 Main Rental Process  
-**Date:** February 18, 2026  
-**Phase:** Phase 3 - Main Rental Process (1 of 5 stories complete - 20%)
+**Date:** February 24, 2026  
+**Phase:** Phase 3 - Main Rental Process (4 of 7 stories complete - 57%)
 
 ### Primary Objective
 
@@ -45,6 +45,16 @@ priorities: US-RN-008 (Early Return/Replacement), US-RN-009 (View Active Rentals
     - Ready for production deployment
 
 4. **Recently Completed / High Priority**
+    - **US-TR-002: Calculate Rental Cost** ✅ COMPLETED (February 24, 2026)
+        - Use Case pattern: CalculateRentalCostUseCase interface and CalculateRentalCostService implementation
+        - Strategy Pattern: ForgivenessStrategy and OvertimeCalculationStrategy for flexible business rules
+        - RentalCost interface (public API) and BaseRentalCostResult record (domain service)
+        - Tariff selection based on actual duration (not planned duration)
+        - Money encapsulation: automatic rounding in Money.of(BigDecimal) factory method
+        - Configuration via RentalProperties (forgiveness threshold: 7 minutes, time-increment: 5 minutes)
+        - Resolved cyclic dependency by accepting primitive types (Duration actualDuration, int billableMinutes)
+        - Comprehensive parameterized unit tests, all passing, no unnecessary stubbings
+        - Component test feature file prepared for future integration with US-RN-006
     - **US-RN-007: Rental Duration Calculation** ✅ COMPLETED (February 18, 2026)
         - RentalDurationCalculator service with RentalDurationResult interface
         - BaseRentalDurationResult record (billableMinutes, actualDuration)

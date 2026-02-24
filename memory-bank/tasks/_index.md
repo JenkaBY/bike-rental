@@ -43,6 +43,13 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   Clock injection, RentalOverdueMapper and RentalQueryMapper, default sorting by expectedReturnAt, comprehensive tests:
   unit, WebMvc, component tests with RentalSummaryResponseTransformer, strict modular monolith architecture - no JOINs
   or enrichment)
+- [US-TR-002] Расчет стоимости аренды - Completed on 2026-02-24 (Use Case pattern: CalculateRentalCostUseCase and
+  CalculateRentalCostService, Strategy Pattern: ForgivenessStrategy and OvertimeCalculationStrategy for flexible
+  business
+  rules, RentalCost interface in module root, tariff selection based on actual duration, Money encapsulation with
+  automatic
+  rounding, configuration via RentalProperties, resolved cyclic dependencies, comprehensive parameterized unit tests,
+  component test feature file prepared for future integration)
 
 ## Pending - Technical Improvements
 
@@ -83,7 +90,6 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Phase 4: Return & Calculations
 
-- [US-TR-002] Расчет стоимости аренды - URGENT, Depends on US-TR-001, US-RN-007
 - [US-TR-003] Правило "прощения" просрочки - URGENT, Depends on US-TR-002
 - [US-TR-004] Расчет доплаты за просрочку - URGENT, Depends on US-TR-002, US-TR-003
 - [US-EQ-003] Сканирование метки при возврате - URGENT, Depends on US-EQ-001, US-RN-005
