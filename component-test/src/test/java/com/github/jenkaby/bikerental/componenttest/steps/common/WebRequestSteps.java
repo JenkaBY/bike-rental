@@ -108,7 +108,7 @@ public class WebRequestSteps {
         Optional.ofNullable(queryParams)
                 .map(DataTable::asMap)
                 .orElse(Map.of())
-                .forEach(uriBuilder::queryParam);
+                .forEach((key, value) -> uriBuilder.queryParam(key, Aliases.getValueOrDefault(value)));
         var uri = uriBuilder.build().toUri();
 
         var response = IntStream.range(0, times).mapToObj(i -> restClient.exchange(uri, method, request, String.class))

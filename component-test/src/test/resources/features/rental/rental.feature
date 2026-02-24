@@ -90,8 +90,8 @@ Feature: Rental Management
 
   Scenario: Update rental - select customer
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path        | value |
       | replace | /customerId | CUS2  |
@@ -103,8 +103,8 @@ Feature: Rental Management
 
   Scenario: Update rental - select equipment
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path         | value |
       | replace | /equipmentId | 2     |
@@ -116,8 +116,8 @@ Feature: Rental Management
 
   Scenario: Update rental - set duration
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path      | value |
       | replace | /duration | PT3H  |
@@ -131,7 +131,7 @@ Feature: Rental Management
     Given now is "<now>"
     And a single rental exists in the database with the following data
       | id         | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt | updatedAt |
-      | <rentalId> | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | <now>Z    | <now>Z    |
+      | <rentalId> | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | <now>     | <now>     |
     And the prepayment request is
       | amount   | method   | operator |
       | <amount> | <method> | OP1      |
@@ -139,18 +139,18 @@ Feature: Rental Management
     Then the response status is 201
     And the prepayment response contains
       | amount   | paymentMethod | createdAt |
-      | <amount> | <method>      | <now>Z    |
+      | <amount> | <method>      | <now>     |
     And the following payment received event was published
       | rentalId   | amount   | type       | receivedAt |
-      | <rentalId> | <amount> | PREPAYMENT | <now>Z     |
+      | <rentalId> | <amount> | PREPAYMENT | <now>      |
     Examples:
       | rentalId | amount | method | now                 |
       | 1        | 100.00 | CASH   | 2026-02-10T10:15:30 |
 
   Scenario: Reject prepayment when amount is below estimated cost
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the prepayment request is
       | amount | method | operator |
       | 50.00  | CASH   | OP1      |
@@ -165,7 +165,7 @@ Feature: Rental Management
     Given now is "<now>"
     And a single rental exists in the database with the following data
       | id         | customerId | equipmentId   | tariffId   | status | estimatedCost | plannedDuration | createdAt | updatedAt |
-      | <rentalId> | <customer> | <equipmentId> | <tariffId> | DRAFT  | 100.00        | 120             | <now>Z    | <now>Z    |
+      | <rentalId> | <customer> | <equipmentId> | <tariffId> | DRAFT  | 100.00        | 120             | <now>     | <now>     |
     And the prepayment request is
       | amount | method | operator |
       | 100.00 | CASH   | OP1      |
@@ -173,10 +173,10 @@ Feature: Rental Management
     Then the response status is 201
     And the prepayment response contains
       | amount             | paymentMethod | createdAt |
-      | <prepaymentAmount> | CASH          | <now>Z    |
+      | <prepaymentAmount> | CASH          | <now>     |
     And the following payment received event was published
       | rentalId   | amount             | type       | receivedAt |
-      | <rentalId> | <prepaymentAmount> | PREPAYMENT | <now>Z     |
+      | <rentalId> | <prepaymentAmount> | PREPAYMENT | <now>      |
     And the rental update request is
       | op      | path    | value  |
       | replace | /status | ACTIVE |
@@ -184,10 +184,10 @@ Feature: Rental Management
     Then the response status is 200
     And the rental response only contains
       | customerId | equipmentId   | tariffId   | status | estimatedCost | plannedDuration | startedAt |
-      | <customer> | <equipmentId> | <tariffId> | ACTIVE | 100.00        | 120             | <now>Z    |
+      | <customer> | <equipmentId> | <tariffId> | ACTIVE | 100.00        | 120             | <now>     |
     And the following rental started event was published
       | customerId | equipmentId   | startedAt |
-      | <customer> | <equipmentId> | <now>Z    |
+      | <customer> | <equipmentId> | <now>     |
     And the following equipment record was persisted in db
       | id            | serialNumber | uid      | status | type    | model   | condition |
       | <equipmentId> | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
@@ -197,8 +197,8 @@ Feature: Rental Management
 
   Scenario: Attempt to activate rental without prepayment
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt            | updatedAt            |
-      | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt           | updatedAt           |
+      | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path    | value  |
       | replace | /status | ACTIVE |
@@ -211,8 +211,8 @@ Feature: Rental Management
 
   Scenario: Update rental - combined update
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | createdAt            | updatedAt            |
-      | CUS1       | 1           | 2        | DRAFT  | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
+      | CUS1       | 1           | 2        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And the rental update request is
       | op      | path         | value |
       | replace | /customerId  | CUS2  |
@@ -227,8 +227,8 @@ Feature: Rental Management
 
   Scenario Outline: Get rental by ID
     Given a single rental exists in the database with the following data
-      | customerId   | equipmentId   | tariffId   | status   | createdAt            | updatedAt            |
-      | <customerId> | <equipmentId> | <tariffId> | <status> | 2026-02-06T10:00:00Z | 2026-02-06T10:00:00Z |
+      | customerId   | equipmentId   | tariffId   | status   | createdAt           | updatedAt           |
+      | <customerId> | <equipmentId> | <tariffId> | <status> | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     When a GET request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the rental response only contains

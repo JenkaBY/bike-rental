@@ -48,6 +48,10 @@ public class Aliases {
         return ALIASES.get(alias);
     }
 
+    public static @Nullable String getValueOrDefault(@NonNull String alias) {
+        return ALIASES.getOrDefault(alias, alias);
+    }
+
     public static @Nullable String getOperatorId(String alias) {
         return Optional.ofNullable(ALIASES.get(alias))
                 .orElse(null);

@@ -36,12 +36,14 @@ public class DateTimeSteps {
 
     @Given("now is {string}")
     public void nowIs(String instantString) {
-        log.info("Setting current instant to {}", instantString);
+        log.info("Setting current local datetime to {}", instantString);
         LocalDateTime now = LocalDateTime.parse(instantString);
         log.debug("parsed now: {}", now);
-        var currentTime = now.toInstant(ZoneOffset.UTC);
-        log.debug("Set instant: {}", currentTime);
-        setCurrentTime(currentTime);
+        var currentTime = now.atZone(ZoneId.systemDefault());
+        log.debug("Set ZDT: {}", currentTime);
+        log.debug("Set instant: {}", currentTime.toInstant());
+        log.debug("Set local datetime: {}", currentTime.toLocalDateTime());
+        setCurrentTime(currentTime.toInstant());
     }
 
     private void setCurrentTime(Instant currentTime) {

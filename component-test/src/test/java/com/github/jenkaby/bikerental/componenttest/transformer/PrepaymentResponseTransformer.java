@@ -26,7 +26,7 @@ public class PrepaymentResponseTransformer {
                 .orElse(null);
 
         var receiptNumber = DataTableHelper.getStringOrNull(entry, "receiptNumber");
-        var createdAt = Optional.ofNullable(DataTableHelper.toInstant(entry, "createdAt"))
+        var createdAt = Optional.ofNullable(DataTableHelper.toLocalDateTime(entry, "createdAt")).map(DataTableHelper::toInstant)
                 .orElse(Instant.now());
 
         return new PrepaymentResponse(paymentId, amount, paymentMethod, receiptNumber, createdAt);
