@@ -45,11 +45,19 @@ class MoneyTest {
     }
 
     @Test
-    @DisplayName("Should throw exception when amount has more than 2 decimal places")
-    void shouldThrowExceptionWhenAmountHasMoreThan2DecimalPlaces() {
-        assertThatThrownBy(() -> Money.of(new BigDecimal("100.123")))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Amount cannot have more than 2 decimal places");
+    @DisplayName("Should round amount with more than 2 decimal places to 2 decimal places")
+    void shouldRoundAmountWithMoreThan2DecimalPlaces() {
+        Money money = Money.of(new BigDecimal("100.123"));
+
+        assertThat(money.amount()).isEqualByComparingTo(new BigDecimal("100.12"));
+    }
+
+    @Test
+    @DisplayName("Should round amount with more than 2 decimal places using HALF_UP rounding")
+    void shouldRoundAmountUsingHalfUpRounding() {
+        Money money = Money.of(new BigDecimal("100.125"));
+
+        assertThat(money.amount()).isEqualByComparingTo(new BigDecimal("100.13"));
     }
 
     @Test
