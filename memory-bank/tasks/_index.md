@@ -38,6 +38,11 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   record in domain.service, application properties configuration app.rental.time-increment: 5m,
   calculateActualDuration() method in Rental entity using domain port, follows Dependency Inversion pattern like
   StatusTransitionPolicy)
+- [US-RN-009] Просмотр активных аренд - Completed on 2026-02-18 (RESTful endpoint GET /api/rentals?status=ACTIVE,
+  RentalSummaryResponse DTO, FindRentalsUseCase with filtering by status and customerId, RentalOverdueCalculator with
+  Clock injection, RentalOverdueMapper and RentalQueryMapper, default sorting by expectedReturnAt, comprehensive tests:
+  unit, WebMvc, component tests with RentalSummaryResponseTransformer, strict modular monolith architecture - no JOINs
+  or enrichment)
 
 ## Pending - Technical Improvements
 
@@ -50,6 +55,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   validation (2026-02-04)
 - [TECH-005] Tariff Selection Cache - Medium priority, tariff module, Spring Cache for tariff selection performance
   improvement (2026-02-09)
+- [TECH-006] Integrate specification-arg-resolver for rental filtering - Medium priority, rental module, replace manual
+  filtering logic with declarative Specifications (2026-02-18)
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
@@ -73,7 +80,6 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   при старте аренды), Depends on US-RN-001
 - [US-RN-006] Возврат оборудования - URGENT, Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
 - [US-RN-008] Ранний возврат или замена оборудования - URGENT, Depends on US-RN-005
-- [US-RN-009] Просмотр активных аренд - URGENT, Depends on US-RN-005
 
 ## Pending - Phase 4: Return & Calculations
 

@@ -1,25 +1,25 @@
 <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="Feature: all" type="CucumberJavaRunConfigurationType"
-                   factoryName="Cucumber java">
-        <option name="CUCUMBER_CORE_VERSION" value="7"/>
-        <envs>
-            <env name="SPRING_PROFILES_ACTIVE" value="test"/>
-        </envs>
-        <option name="FILE_PATH" value="$PROJECT_DIR$/component-test/src/test/resources/features/"/>
-        <option name="MAIN_CLASS_NAME" value="io.cucumber.core.cli.Main"/>
-        <module name="bikerent.component-test.test"/>
-        <option name="PROGRAM_PARAMETERS" value=" --plugin teamcity"/>
-        <shortenClasspath name="ARGS_FILE"/>
-        <option name="SUGGESTED_NAME" value="Feature: customer-search-by-phone"/>
-        <option name="WORKING_DIRECTORY" value="$MODULE_WORKING_DIR$"/>
-        <extension name="coverage">
-            <pattern>
-                <option name="PATTERN" value="io.cucumber.core.cli.*"/>
-                <option name="ENABLED" value="true"/>
-            </pattern>
-        </extension>
-        <method v="2">
-            <option name="Make" enabled="true"/>
-        </method>
-    </configuration>
+  <configuration default="false" name="Feature: all" type="CucumberJavaRunConfigurationType"
+                 factoryName="Cucumber java">
+    <option name="CUCUMBER_CORE_VERSION" value="7"/>
+    <envs>
+      <env name="SPRING_PROFILES_ACTIVE" value="test"/>
+    </envs>
+    <option name="FILE_PATH" value="$PROJECT_DIR$/component-test/src/test/resources/features/"/>
+    <option name="MAIN_CLASS_NAME" value="io.cucumber.core.cli.Main"/>
+    <module name="bikerent.component-test.test"/>
+    <option name="PROGRAM_PARAMETERS" value=" --plugin teamcity"/>
+    <shortenClasspath name="ARGS_FILE"/>
+    <option name="SUGGESTED_NAME" value="Feature: customer-search-by-phone"/>
+    <option name="WORKING_DIRECTORY" value="$MODULE_WORKING_DIR$"/>
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="io.cucumber.core.cli.*"/>
+        <option name="ENABLED" value="true"/>
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true"/>
+    </method>
+  </configuration>
 </component>
