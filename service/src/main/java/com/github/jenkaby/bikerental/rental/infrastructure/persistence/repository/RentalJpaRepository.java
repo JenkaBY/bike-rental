@@ -14,4 +14,6 @@ public interface RentalJpaRepository extends JpaRepository<RentalJpaEntity, Long
     Page<RentalJpaEntity> findByStatusAndCustomerId(String status, UUID customerId, Pageable pageable);
 
     Page<RentalJpaEntity> findByCustomerId(UUID customerId, Pageable pageable);
+
+    Page<RentalJpaEntity> findByStatusAndEquipmentUid(String status, String equipmentUid, Pageable pageable);
 }

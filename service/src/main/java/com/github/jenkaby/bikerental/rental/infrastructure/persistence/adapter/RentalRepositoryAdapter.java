@@ -66,4 +66,12 @@ class RentalRepositoryAdapter implements RentalRepository {
         return pageMapper.toDomain(page)
                 .map(mapper::toDomain);
     }
+
+    @Override
+    public Page<Rental> findByStatusAndEquipmentUid(RentalStatus status, String equipmentUid, PageRequest pageRequest) {
+        var springPageRequest = pageMapper.toSpring(pageRequest);
+        var page = repository.findByStatusAndEquipmentUid(status.name(), equipmentUid, springPageRequest);
+        return pageMapper.toDomain(page)
+                .map(mapper::toDomain);
+    }
 }

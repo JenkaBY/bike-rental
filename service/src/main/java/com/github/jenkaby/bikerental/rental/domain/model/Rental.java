@@ -25,6 +25,7 @@ public class Rental {
     
     private UUID customerId;
     private Long equipmentId;
+    private String equipmentUid;
     private Long tariffId;
     
     @Setter
@@ -64,6 +65,11 @@ public class Rental {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
         this.equipmentId = equipmentId;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setEquipmentUid(String equipmentUid) {
+        this.equipmentUid = equipmentUid;
         this.updatedAt = Instant.now();
     }
 

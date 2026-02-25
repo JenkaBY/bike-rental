@@ -94,6 +94,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
             }
 
             rental.selectEquipment(equipmentId);
+            rental.setEquipmentUid(equipment.uid()); // Update equipment UID when equipment changes
         }
 
         // Handle duration update

@@ -54,11 +54,12 @@ class RentalQueryController {
     public ResponseEntity<Page<RentalSummaryResponse>> getRentals(
             @RequestParam(name = "status", required = false) RentalStatus status,
             @RequestParam(name = "customerId", required = false) UUID customerId,
+            @RequestParam(name = "equipmentUid", required = false) String equipmentUid,
             @PageableDefault(size = 20, sort = "expectedReturnAt", direction = Sort.Direction.ASC) Pageable pageable) {
-        log.info("[GET] Get rentals with filters status={}, customerId={}", status, customerId);
+        log.info("[GET] Get rentals with filters status={}, customerId={}, equipmentUid={}", status, customerId, equipmentUid);
 
         PageRequest pageRequest = pageMapper.toPageRequest(pageable);
-        var query = new FindRentalsUseCase.FindRentalsQuery(status, customerId, pageRequest);
+        var query = new FindRentalsUseCase.FindRentalsQuery(status, customerId, equipmentUid, pageRequest);
 
         Page<Rental> rentals = findRentalsUseCase.execute(query);
 

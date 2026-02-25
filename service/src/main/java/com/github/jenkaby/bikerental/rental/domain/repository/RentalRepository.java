@@ -22,4 +22,6 @@ public interface RentalRepository {
     Page<Rental> findByStatusAndCustomerId(RentalStatus status, UUID customerId, PageRequest pageRequest);
 
     Page<Rental> findByCustomerId(UUID customerId, PageRequest pageRequest);
+
+    Page<Rental> findByStatusAndEquipmentUid(RentalStatus status, String equipmentUid, PageRequest pageRequest);
 }

@@ -28,6 +28,9 @@ public class RentalJpaEntity {
     @Column(name = "equipment_id")
     private Long equipmentId;
 
+    @Column(name = "equipment_uid", length = 100)
+    private String equipmentUid;
+
     @Column(name = "tariff_id")
     private Long tariffId;
 

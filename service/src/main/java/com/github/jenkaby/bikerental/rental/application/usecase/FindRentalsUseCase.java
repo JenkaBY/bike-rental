@@ -13,6 +13,7 @@ public interface FindRentalsUseCase {
     record FindRentalsQuery(
             RentalStatus status,
             UUID customerId,
+            String equipmentUid,
             PageRequest pageRequest
     ) {
     }
