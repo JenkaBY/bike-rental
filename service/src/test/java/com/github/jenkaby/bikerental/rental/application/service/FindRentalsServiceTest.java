@@ -54,8 +54,8 @@ class FindRentalsServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getEquipmentUid()).isEqualTo(EQUIPMENT_UID);
+        assertThat(result.items()).hasSize(1);
+        assertThat(result.items().get(0).getEquipmentUid()).isEqualTo(EQUIPMENT_UID);
         then(repository).should().findByStatusAndEquipmentUid(STATUS, EQUIPMENT_UID, PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
@@ -79,7 +79,7 @@ class FindRentalsServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.items()).hasSize(1);
         then(repository).should().findByStatusAndCustomerId(STATUS, CUSTOMER_ID, PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
@@ -103,7 +103,7 @@ class FindRentalsServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.items()).hasSize(1);
         then(repository).should().findByStatusAndEquipmentUid(STATUS, EQUIPMENT_UID, PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
@@ -126,7 +126,7 @@ class FindRentalsServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.items()).hasSize(1);
         then(repository).should().findByCustomerId(CUSTOMER_ID, PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
@@ -149,7 +149,7 @@ class FindRentalsServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.items()).hasSize(1);
         then(repository).should().findByStatus(STATUS, PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
