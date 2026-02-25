@@ -17,6 +17,7 @@ public class RentalJpaEntityTransformer {
                 .map(Aliases::getCustomerId)
                 .orElse(null);
         var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
+        var equipmentUid = DataTableHelper.getStringOrNull(entry, "equipmentUid");
         var tariffId = DataTableHelper.toLong(entry, "tariffId");
         var status = DataTableHelper.getStringOrNull(entry, "status");
         var startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
@@ -35,6 +36,7 @@ public class RentalJpaEntityTransformer {
                 .id(id)
                 .customerId(customerId)
                 .equipmentId(equipmentId)
+                .equipmentUid(equipmentUid)
                 .tariffId(tariffId)
                 .status(status)
                 .startedAt(startedAt)

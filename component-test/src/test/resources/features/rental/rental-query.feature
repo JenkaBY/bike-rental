@@ -32,11 +32,11 @@ Feature: Rental Query
   Scenario Outline: Get active rentals with status filter
     Given now is "<now>"
     And rentals exist in the database with the following data
-      | id | customerId | equipmentId | tariffId | status    | startedAt   | expectedReturnAt    | createdAt   | updatedAt   |
-      | 1  | CUS1       | 1           | 1        | ACTIVE    | <startedAt> | <expectedReturnAt>  | <startedAt> | <startedAt> |
-      | 2  | CUS2       | 2           | 1        | ACTIVE    | <startedAt> | <expectedReturnAt2> | <startedAt> | <startedAt> |
-      | 3  | CUS1       | 1           | 1        | DRAFT     | null        | null                | <startedAt> | <startedAt> |
-      | 4  | CUS2       | 2           | 1        | COMPLETED | <startedAt> | <expectedReturnAt>  | <startedAt> | <startedAt> |
+      | id | customerId | equipmentId | equipmentUid | tariffId | status    | startedAt   | expectedReturnAt    | createdAt   | updatedAt   |
+      | 1  | CUS1       | 1           | BIKE-001     | 1        | ACTIVE    | <startedAt> | <expectedReturnAt>  | <startedAt> | <startedAt> |
+      | 2  | CUS2       | 2           | E-BIKE-001   | 1        | ACTIVE    | <startedAt> | <expectedReturnAt2> | <startedAt> | <startedAt> |
+      | 3  | CUS1       | 1           | BIKE-001     | 1        | DRAFT     | null        | null                | <startedAt> | <startedAt> |
+      | 4  | CUS2       | 2           | E-BIKE-001   | 1        | COMPLETED | <startedAt> | <expectedReturnAt>  | <startedAt> | <startedAt> |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | status |
       | ACTIVE |
@@ -58,10 +58,10 @@ Feature: Rental Query
   Scenario Outline: Get active rentals filtered by customerId
     Given now is "<now>"
     And rentals exist in the database with the following data
-      | id | customerId | equipmentId | tariffId | status | startedAt   | expectedReturnAt   | createdAt   | updatedAt   |
-      | 1  | CUS1       | 1           | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 2  | CUS2       | 2           | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 3  | CUS1       | 3           | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | id | customerId | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt   | createdAt   | updatedAt   |
+      | 1  | CUS1       | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | 2  | CUS2       | 2           | E-BIKE-001   | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | 3  | CUS1       | 3           | E-BIKE-002   | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | status | customerId |
       | ACTIVE | CUS1       |
@@ -83,9 +83,9 @@ Feature: Rental Query
   Scenario Outline: Get active rentals with overdue calculation
     Given now is "<now>"
     And rentals exist in the database with the following data
-      | id | customerId | equipmentId | tariffId | status | startedAt   | expectedReturnAt       | createdAt   | updatedAt   |
-      | 1  | CUS1       | 1           | 1        | ACTIVE | <startedAt> | <overdueExpectedAt>    | <startedAt> | <startedAt> |
-      | 2  | CUS2       | 2           | 1        | ACTIVE | <startedAt> | <notOverdueExpectedAt> | <startedAt> | <startedAt> |
+      | id | customerId | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt       | createdAt   | updatedAt   |
+      | 1  | CUS1       | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <overdueExpectedAt>    | <startedAt> | <startedAt> |
+      | 2  | CUS2       | 2           | E-BIKE-001   | 1        | ACTIVE | <startedAt> | <notOverdueExpectedAt> | <startedAt> | <startedAt> |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | status |
       | ACTIVE |
@@ -101,9 +101,9 @@ Feature: Rental Query
   Scenario: Get active rentals with pagination
     Given now is "2026-02-18T10:00:00"
     And rentals exist in the database with the following data
-      | id | customerId | equipmentId | tariffId | status | startedAt           | expectedReturnAt    | createdAt           | updatedAt           |
-      | 1  | CUS1       | 1           | 1        | ACTIVE | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 2026-02-18T10:00:00 | 2026-02-18T10:00:00 |
-      | 2  | CUS2       | 2           | 1        | ACTIVE | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 2026-02-18T10:00:00 | 2026-02-18T10:00:00 |
+      | id | customerId | equipmentId | equipmentUid | tariffId | status | startedAt           | expectedReturnAt    | createdAt           | updatedAt           |
+      | 1  | CUS1       | 1           | BIKE-001     | 1        | ACTIVE | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 2026-02-18T10:00:00 | 2026-02-18T10:00:00 |
+      | 2  | CUS2       | 2           | E-BIKE-001   | 1        | ACTIVE | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 2026-02-18T10:00:00 | 2026-02-18T10:00:00 |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | status | page | size |
       | ACTIVE | 0    | 1    |
@@ -117,8 +117,8 @@ Feature: Rental Query
   Scenario: Get rentals with non-existent status returns empty page
     Given now is "2026-02-18T10:00:00"
     And rental exists in the database with the following data
-      | id | customerId | equipmentId | tariffId | status | startedAt           | expectedReturnAt    | createdAt           | updatedAt           |
-      | 1  | CUS1       | 1           | 1        | ACTIVE | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 2026-02-18T10:00:00 | 2026-02-18T10:00:00 |
+      | id | customerId | equipmentId | equipmentUid | tariffId | status | startedAt           | expectedReturnAt    | createdAt           | updatedAt           |
+      | 1  | CUS1       | 1           | BIKE-001     | 1        | ACTIVE | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 2026-02-18T10:00:00 | 2026-02-18T10:00:00 |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | status    |
       | CANCELLED |
@@ -130,11 +130,11 @@ Feature: Rental Query
   Scenario Outline: Get rentals filtered only by customerId
     Given now is "<now>"
     And rentals exist in the database with the following data
-      | id | customerId | equipmentId | tariffId | status    | startedAt   | expectedReturnAt   | createdAt   | updatedAt   |
-      | 1  | CUS1       | 1           | 1        | ACTIVE    | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 2  | CUS2       | 2           | 1        | ACTIVE    | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 3  | CUS1       | 3           | 1        | COMPLETED | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 4  | CUS1       | 1           | 1        | DRAFT     | null        | null               | <startedAt> | <startedAt> |
+      | id | customerId | equipmentId | equipmentUid | tariffId | status    | startedAt   | expectedReturnAt   | createdAt   | updatedAt   |
+      | 1  | CUS1       | 1           | BIKE-001     | 1        | ACTIVE    | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | 2  | CUS2       | 2           | E-BIKE-001   | 1        | ACTIVE    | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | 3  | CUS1       | 3           | E-BIKE-002   | 1        | COMPLETED | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | 4  | CUS1       | 1           | BIKE-001     | 1        | DRAFT     | null        | null               | <startedAt> | <startedAt> |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | customerId |
       | CUS1       |
@@ -153,3 +153,40 @@ Feature: Rental Query
     Examples:
       | now                 | startedAt           | expectedReturnAt    |
       | 2026-02-18T12:00:00 | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 |
+
+  Scenario Outline: Get active rentals filtered by equipmentUid
+    Given now is "<now>"
+    And rentals exist in the database with the following data
+      | id | customerId | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt   | createdAt   | updatedAt   |
+      | 1  | CUS1       | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | 2  | CUS2       | 2           | E-BIKE-001   | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | 3  | CUS1       | 1           | BIKE-001     | 1        | DRAFT  | null        | null               | <startedAt> | <startedAt> |
+    When a GET request has been made to "/api/rentals" endpoint with query parameters
+      | status | equipmentUid |
+      | ACTIVE | BIKE-001     |
+    Then the response status is 200
+    And the rental response only contains page of
+      | id | customerId | equipmentId | tariffId | status | startedAt   | expectedReturnAt   | overdueMin |
+      | 1  | CUS1       | 1           | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | 60         |
+    And the response contains
+      | path                 | value            |
+      | $.totalItems         | 1                |
+      | $.pageRequest.size   | 20               |
+      | $.pageRequest.page   | 0                |
+      | $.pageRequest.sortBy | expectedReturnAt |
+    Examples:
+      | now                 | startedAt           | expectedReturnAt    |
+      | 2026-02-18T12:00:00 | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 |
+
+  Scenario: Get rentals filtered by equipmentUid returns empty when no match
+    Given now is "2026-02-18T10:00:00"
+    And rentals exist in the database with the following data
+      | id | customerId | equipmentId | equipmentUid | tariffId | status | startedAt           | expectedReturnAt    | createdAt           | updatedAt           |
+      | 1  | CUS1       | 1           | BIKE-001     | 1        | ACTIVE | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 2026-02-18T10:00:00 | 2026-02-18T10:00:00 |
+    When a GET request has been made to "/api/rentals" endpoint with query parameters
+      | status | equipmentUid |
+      | ACTIVE | NONEXISTENT  |
+    Then the response status is 200
+    And the response contains
+      | path         | value |
+      | $.totalItems | 0     |
