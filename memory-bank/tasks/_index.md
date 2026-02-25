@@ -50,6 +50,10 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   automatic
   rounding, configuration via RentalProperties, resolved cyclic dependencies, comprehensive parameterized unit tests,
   component test feature file prepared for future integration)
+- [US-TR-003] Правило "прощения" просрочки - Completed on 2026-02-25 (MessageSource localization with properties files,
+  Russian messages in messages_ru.properties, English fallback in messages.properties, integrated into
+  ThresholdForgivenessStrategy via MessageSource.getMessage(), MessageSourceConfig with default locale ru, all unit
+  tests updated with Russian messages)
 
 ## Pending - Technical Improvements
 
@@ -90,7 +94,6 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Phase 4: Return & Calculations
 
-- [US-TR-003] Правило "прощения" просрочки - URGENT, Depends on US-TR-002
 - [US-TR-004] Расчет доплаты за просрочку - URGENT, Depends on US-TR-002, US-TR-003
 - [US-EQ-003] Сканирование метки при возврате - URGENT, Depends on US-EQ-001, US-RN-005
 - [US-EQ-005] Учет износа и пробега - LOW, Depends on US-RN-006
