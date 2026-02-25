@@ -23,6 +23,7 @@ springdoc:
     enabled: true
 
 app:
+  default-locale: en
   customers:
     search-limit-result: 10
   rental:
