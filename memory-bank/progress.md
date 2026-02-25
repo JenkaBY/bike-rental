@@ -494,6 +494,58 @@ CREATE TABLE equipment_status_transitions (
 
 ---
 
+**US-TR-003: Forgiveness Rule Localization** (Completed: February 25, 2026)
+
+**Module:** tariff  
+**Effort:** 1 day (Feb 25, 2026)
+
+**Implementation Delivered:**
+
+- ✅ MessageSource configuration with AcceptHeaderLocaleResolver for HTTP-based locale resolution
+- ✅ MessageService interface and MessageServiceImpl to encapsulate MessageSource access
+- ✅ Properties files: messages.properties (English fallback) and messages_ru.properties (Russian) with UTF-8 encoding
+- ✅ AppProperties with app.default-locale: en configuration property
+- ✅ Default locale bean in MessageSourceConfig reading from AppProperties
+- ✅ Updated ThresholdForgivenessStrategy to use MessageService instead of direct MessageSource
+- ✅ All unit tests updated with Russian messages
+
+**Key Features:**
+
+- AcceptHeaderLocaleResolver determines locale from HTTP Accept-Language header
+- Default locale configurable via app.default-locale property (default: en)
+- MessageService pattern encapsulates MessageSource access for better testability
+- UTF-8 encoding for properties files ensures proper Cyrillic character support
+- Fallback to default locale when HTTP context unavailable
+
+**Testing Delivered:**
+
+- ✅ All 17 unit tests updated with Russian messages
+- ✅ All tests passing successfully
+- ✅ Properties files properly encoded in UTF-8
+
+**Architecture Decisions:**
+
+- ✅ Service Pattern: MessageService encapsulates MessageSource access
+- ✅ Configuration-driven: Default locale via AppProperties
+- ✅ AcceptHeaderLocaleResolver for HTTP-based locale resolution
+- ✅ UTF-8 encoding for properties files
+- ✅ Fallback mechanism when HTTP context unavailable
+
+**Code Quality:**
+
+- Zero compilation errors
+- Follows Spring Boot best practices for internationalization
+- Clean separation of concerns with MessageService
+- Easy to extend with additional locales
+
+**Technical Metrics:**
+
+- Implementation: ~150 lines (MessageService + configuration)
+- Properties files: 2 files with localized messages
+- Subtasks completed: 7/9 (78% - 2 deferred to future tasks)
+
+---
+
 **US-RN-007: Calculate Rental Duration** (Completed: February 18, 2026)
 
 **Module:** rental  

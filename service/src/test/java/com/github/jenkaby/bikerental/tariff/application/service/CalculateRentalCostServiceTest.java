@@ -74,7 +74,7 @@ class CalculateRentalCostServiceTest {
         given(getTariffByIdUseCase.get(tariffId)).willReturn(tariff);
         given(tariffPeriodSelector.selectPeriod(actualDuration)).willReturn(TariffPeriod.HOUR);
         given(forgivenessStrategy.shouldForgive(-5)).willReturn(true);
-        given(forgivenessStrategy.getForgivenessMessage(-5)).willReturn("On time or early return");
+        given(forgivenessStrategy.getForgivenessMessage(-5)).willReturn("Возврат вовремя или досрочно");
 
         CalculateRentalCostUseCase.CalculateRentalCostCommand command =
                 new CalculateRentalCostUseCase.CalculateRentalCostCommand(tariffId, actualDuration, billableMinutes, plannedDuration);
@@ -92,7 +92,7 @@ class CalculateRentalCostServiceTest {
         assertThat(result.plannedMinutes()).isEqualTo(60);
         assertThat(result.overtimeMinutes()).isEqualTo(-5);
         assertThat(result.forgivenessApplied()).isTrue();
-        assertThat(result.calculationMessage()).contains("On time");
+        assertThat(result.calculationMessage()).contains("Возврат вовремя");
     }
 
     @Test
@@ -108,7 +108,7 @@ class CalculateRentalCostServiceTest {
         given(getTariffByIdUseCase.get(tariffId)).willReturn(tariff);
         given(tariffPeriodSelector.selectPeriod(actualDuration)).willReturn(TariffPeriod.HOUR);
         given(forgivenessStrategy.shouldForgive(5)).willReturn(true);
-        given(forgivenessStrategy.getForgivenessMessage(5)).willReturn("Forgiven (5 minutes overtime)");
+        given(forgivenessStrategy.getForgivenessMessage(5)).willReturn("Просрочка прощена (5 минут просрочки)");
 
         CalculateRentalCostUseCase.CalculateRentalCostCommand command =
                 new CalculateRentalCostUseCase.CalculateRentalCostCommand(tariffId, actualDuration, billableMinutes, plannedDuration);
@@ -123,7 +123,7 @@ class CalculateRentalCostServiceTest {
         assertThat(result.totalCost()).isEqualByComparingTo(Money.of("100.00"));
         assertThat(result.overtimeMinutes()).isEqualTo(5);
         assertThat(result.forgivenessApplied()).isTrue();
-        assertThat(result.calculationMessage()).contains("Forgiven");
+        assertThat(result.calculationMessage()).contains("Просрочка прощена");
     }
 
     @Test
@@ -139,7 +139,7 @@ class CalculateRentalCostServiceTest {
         given(getTariffByIdUseCase.get(tariffId)).willReturn(tariff);
         given(tariffPeriodSelector.selectPeriod(actualDuration)).willReturn(TariffPeriod.HOUR);
         given(forgivenessStrategy.shouldForgive(7)).willReturn(true);
-        given(forgivenessStrategy.getForgivenessMessage(7)).willReturn("Forgiven (7 minutes overtime)");
+        given(forgivenessStrategy.getForgivenessMessage(7)).willReturn("Просрочка прощена (7 минут просрочки)");
 
         CalculateRentalCostUseCase.CalculateRentalCostCommand command =
                 new CalculateRentalCostUseCase.CalculateRentalCostCommand(tariffId, actualDuration, billableMinutes, plannedDuration);
@@ -279,7 +279,7 @@ class CalculateRentalCostServiceTest {
         given(tariffPeriodSelector.selectPeriod(actualDuration)).willReturn(TariffPeriod.HOUR);
         given(forgivenessStrategy.shouldForgive(overtimeMinutes)).willReturn(true);
         given(forgivenessStrategy.getForgivenessMessage(overtimeMinutes)).willReturn(
-                overtimeMinutes <= 0 ? "On time or early return" : String.format("Forgiven (%d minutes overtime)", overtimeMinutes));
+                overtimeMinutes <= 0 ? "Возврат вовремя или досрочно" : String.format("Просрочка прощена (%d минут просрочки)", overtimeMinutes));
 
         CalculateRentalCostUseCase.CalculateRentalCostCommand command =
                 new CalculateRentalCostUseCase.CalculateRentalCostCommand(tariffId, actualDuration, billableMinutes, plannedDuration);
@@ -343,7 +343,7 @@ class CalculateRentalCostServiceTest {
         given(getTariffByIdUseCase.get(tariffId)).willReturn(tariff);
         given(tariffPeriodSelector.selectPeriod(actualDuration)).willReturn(TariffPeriod.HALF_HOUR);
         given(forgivenessStrategy.shouldForgive(0)).willReturn(true);
-        given(forgivenessStrategy.getForgivenessMessage(0)).willReturn("On time or early return");
+        given(forgivenessStrategy.getForgivenessMessage(0)).willReturn("Возврат вовремя или досрочно");
 
         CalculateRentalCostUseCase.CalculateRentalCostCommand command =
                 new CalculateRentalCostUseCase.CalculateRentalCostCommand(tariffId, actualDuration, billableMinutes, plannedDuration);
@@ -368,7 +368,7 @@ class CalculateRentalCostServiceTest {
         given(getTariffByIdUseCase.get(tariffId)).willReturn(tariff);
         given(tariffPeriodSelector.selectPeriod(actualDuration)).willReturn(TariffPeriod.DAY);
         given(forgivenessStrategy.shouldForgive(0)).willReturn(true);
-        given(forgivenessStrategy.getForgivenessMessage(0)).willReturn("On time or early return");
+        given(forgivenessStrategy.getForgivenessMessage(0)).willReturn("Возврат вовремя или досрочно");
 
         CalculateRentalCostUseCase.CalculateRentalCostCommand command =
                 new CalculateRentalCostUseCase.CalculateRentalCostCommand(tariffId, actualDuration, billableMinutes, plannedDuration);

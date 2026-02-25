@@ -18,14 +18,15 @@ This file should contain:
 
 ## Current Focus
 
-**Status:** 🚀 Active Implementation - Phase 3 Main Rental Process  
-**Date:** February 24, 2026  
-**Phase:** Phase 3 - Main Rental Process (4 of 7 stories complete - 57%)
+**Status:** 🚀 Active Implementation - Phase 4 Return & Calculations  
+**Date:** February 25, 2026  
+**Phase:** Phase 4 - Return & Calculations (1 of 8 stories complete - 12.5%)
 
 ### Primary Objective
 
-Continue Phase 3 main rental process implementation. Recently completed US-RN-007 (Rental Duration Calculation). Next
-priorities: US-RN-008 (Early Return/Replacement), US-RN-009 (View Active Rentals), and US-TR-002 (Cost Calculation).
+Continue Phase 4 return and calculations implementation. Recently completed US-TR-003 (Forgiveness Rule Localization).
+Next
+priorities: US-TR-004 (Overtime Charge Calculation), US-RN-006 (Equipment Return), and US-EQ-003 (NFC Scan on Return).
 
 ### Current Activities
 
@@ -45,6 +46,14 @@ priorities: US-RN-008 (Early Return/Replacement), US-RN-009 (View Active Rentals
     - Ready for production deployment
 
 4. **Recently Completed / High Priority**
+    - **US-TR-003: Forgiveness Rule Localization** ✅ COMPLETED (February 25, 2026)
+        - MessageSource configuration with AcceptHeaderLocaleResolver for HTTP-based locale resolution
+        - MessageService interface and implementation to encapsulate MessageSource access
+        - Properties files: messages.properties (EN) and messages_ru.properties (RU) with UTF-8 encoding
+        - AppProperties with app.default-locale: en configuration property
+        - Updated ThresholdForgivenessStrategy to use MessageService instead of direct MessageSource
+        - Default locale configurable via application properties
+        - All unit tests updated with Russian messages, all 17 tests passing
     - **US-TR-002: Calculate Rental Cost** ✅ COMPLETED (February 24, 2026)
         - Use Case pattern: CalculateRentalCostUseCase interface and CalculateRentalCostService implementation
         - Strategy Pattern: ForgivenessStrategy and OvertimeCalculationStrategy for flexible business rules
