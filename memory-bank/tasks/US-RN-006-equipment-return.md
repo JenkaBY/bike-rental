@@ -2,10 +2,10 @@
 
 **Status:** Pending  
 **Added:** 2026-01-26  
-**Updated:** 2026-01-26  
+**Updated:** 2026-02-25  
 **Priority:** High  
 **Module:** rental  
-**Dependencies:** US-RN-005, US-EQ-003, US-RN-007, US-TR-002
+**Dependencies:** US-RN-005, TECH-007, US-RN-007, US-TR-002
 
 ## Original Request
 
@@ -44,13 +44,14 @@ calculation, payment processing.
 
 **Workflow:**
 
-1. Scan equipment (US-EQ-003)
-2. Calculate duration (US-RN-007)
-3. Calculate cost (US-TR-002)
-4. If additional payment needed → record payment (US-FN-001)
-5. Complete rental (ACTIVE → COMPLETED)
-6. Update equipment status (RENTED → AVAILABLE)
-7. Publish RentalCompleted event
+1. Client scans equipment tag → gets UID
+2. Find active rental by equipmentUid: `GET /api/rentals?status=ACTIVE&equipmentUid={uid}`
+3. Calculate duration (US-RN-007)
+4. Calculate cost (US-TR-002)
+5. If additional payment needed → record payment (US-FN-001)
+6. Complete rental (ACTIVE → COMPLETED)
+7. Update equipment status (RENTED → AVAILABLE) via RentalCompleted event
+8. Publish RentalCompleted event
 
 **Events:**
 
@@ -60,7 +61,7 @@ calculation, payment processing.
 ## Implementation Plan
 
 - [ ] Create ReturnEquipmentUseCase
-- [ ] Integrate tag scanning
+- [ ] Support finding rental by equipmentUid (via TECH-007)
 - [ ] Calculate final cost
 - [ ] Handle additional payment
 - [ ] Update rental status
@@ -88,8 +89,10 @@ calculation, payment processing.
 
 **API Endpoint:**
 
-- `POST /api/rentals/{id}/return` - Process return
-- Request: `{ "uid": "ABC123", "returnTime": "2026-01-26T15:30:00" }`
+- `POST /api/rentals/{id}/return` - Process return by rental ID
+- `POST /api/rentals/return-by-equipment-uid` - Process return by equipment UID (alternative)
+- Request: `{ "returnTime": "2026-01-26T15:30:00" }` (equipmentUid can be found via GET
+  /api/rentals?status=ACTIVE&equipmentUid={uid})
 
 **Use Case:**
 
@@ -136,4 +139,5 @@ public class ReturnEquipmentUseCase {
 ## References
 
 - User Story File: [docs/tasks/us/US-RN-006/us-rn-006.md](../../../docs/tasks/us/US-RN-006/us-rn-006.md)
-- Dependencies: US-RN-005, US-EQ-003, US-RN-007, US-TR-002
+- Dependencies: US-RN-005, TECH-007, US-RN-007, US-TR-002
+- Related: US-EQ-003 removed (scanning happens on client side, UID lookup via GET /api/rentals?equipmentUid={uid})

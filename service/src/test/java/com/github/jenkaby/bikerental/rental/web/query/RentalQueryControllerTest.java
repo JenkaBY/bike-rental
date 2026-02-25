@@ -81,16 +81,19 @@ class RentalQueryControllerTest {
         static Stream<Arguments> searchParameterCombinations() {
             var customerId = UUID.randomUUID().toString();
             return Stream.of(
-                    Arguments.of("status only", "ACTIVE", null),
-                    Arguments.of("customerId only", null, customerId),
-                    Arguments.of("both params", "ACTIVE", customerId),
-                    Arguments.of("no params", null, null)
+                    Arguments.of("status only", "ACTIVE", null, null),
+                    Arguments.of("customerId only", null, customerId, null),
+                    Arguments.of("equipmentUid only", null, null, "BIKE-001"),
+                    Arguments.of("status and customerId", "ACTIVE", customerId, null),
+                    Arguments.of("status and equipmentUid", "ACTIVE", null, "BIKE-001"),
+                    Arguments.of("all params", "ACTIVE", customerId, "BIKE-001"),
+                    Arguments.of("no params", null, null, null)
             );
         }
 
         @ParameterizedTest(name = "{0}")
         @MethodSource("searchParameterCombinations")
-        void getRentals_returnsOk(String description, String status, String customerId) throws Exception {
+        void getRentals_returnsOk(String description, String status, String customerId, String equipmentUid) throws Exception {
             var pageRequest = new PageRequest(20, 0, null);
             var page = new Page<>(List.of(mock(Rental.class)), 1L, pageRequest);
 
@@ -101,6 +104,7 @@ class RentalQueryControllerTest {
             var request = get(API_RENTALS).accept(MediaType.APPLICATION_JSON);
             if (status != null) request = request.param("status", status);
             if (customerId != null) request = request.param("customerId", customerId);
+            if (equipmentUid != null) request = request.param("equipmentUid", equipmentUid);
 
             mockMvc.perform(request)
                     .andExpect(status().isOk());

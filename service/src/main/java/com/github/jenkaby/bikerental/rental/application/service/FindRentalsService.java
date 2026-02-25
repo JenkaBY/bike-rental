@@ -17,7 +17,10 @@ class FindRentalsService implements FindRentalsUseCase {
 
     @Override
     public Page<Rental> execute(FindRentalsQuery query) {
-        if (query.customerId() != null && query.status() != null) {
+        // Priority: equipmentUid + status > customerId + status > customerId > status
+        if (query.equipmentUid() != null && query.status() != null) {
+            return repository.findByStatusAndEquipmentUid(query.status(), query.equipmentUid(), query.pageRequest());
+        } else if (query.customerId() != null && query.status() != null) {
             return repository.findByStatusAndCustomerId(query.status(), query.customerId(), query.pageRequest());
         } else if (query.customerId() != null) {
             return repository.findByCustomerId(query.customerId(), query.pageRequest());

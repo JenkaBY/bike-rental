@@ -54,6 +54,9 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   Russian messages in messages_ru.properties, English fallback in messages.properties, integrated into
   ThresholdForgivenessStrategy via MessageSource.getMessage(), MessageSourceConfig with default locale ru, all unit
   tests updated with Russian messages)
+- [TECH-007] Добавление equipmentUid в таблицу rental - Completed on 2026-02-25 (rental module: добавлено поле
+  equipment_uid в таблицу rentals, обновлены domain model и JPA entity, добавлена фильтрация по equipmentUid в GET
+  /api/rentals, обновлены все сервисы для сохранения equipmentUid, полное покрытие тестами: unit, WebMvc, component)
 
 ## Pending - Technical Improvements
 
@@ -89,13 +92,12 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 - [US-RN-003] Установка даты и времени начала проката - DEFERRED (not priority, startTime устанавливается автоматически
   при старте аренды), Depends on US-RN-001
-- [US-RN-006] Возврат оборудования - URGENT, Depends on US-RN-005, US-EQ-003, US-RN-007, US-TR-002
+- [US-RN-006] Возврат оборудования - URGENT, Depends on US-RN-005, TECH-007, US-RN-007, US-TR-002
 - [US-RN-008] Ранний возврат или замена оборудования - URGENT, Depends on US-RN-005
 
 ## Pending - Phase 4: Return & Calculations
 
 - [US-TR-004] Расчет доплаты за просрочку - URGENT, Depends on US-TR-002, US-TR-003
-- [US-EQ-003] Сканирование метки при возврате - URGENT, Depends on US-EQ-001, US-RN-005
 - [US-EQ-005] Учет износа и пробега - LOW, Depends on US-RN-006
 - [US-TR-005] Возврат средств при отмене - URGENT, Depends on US-RN-008, US-FN-002
 

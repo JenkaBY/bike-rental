@@ -228,22 +228,29 @@ class UpdateRentalServiceTest {
         // Given
         Rental rental = createDraftRental();
         Map<String, Object> patch = Map.of("equipmentId", EQUIPMENT_ID);
+        String equipmentUid = "BIKE-001";
         EquipmentInfo availableEquipment = new EquipmentInfo(
-                EQUIPMENT_ID, "EQ-001", "BIKE-001", "bicycle", "AVAILABLE", "Model A"
+                EQUIPMENT_ID, "EQ-001", equipmentUid, "bicycle", "AVAILABLE", "Model A"
         );
         Rental savedRental = createDraftRental();
         savedRental.selectEquipment(EQUIPMENT_ID);
+        savedRental.setEquipmentUid(equipmentUid);
 
         given(rentalRepository.findById(RENTAL_ID)).willReturn(Optional.of(rental));
         given(valueParser.parseLong(EQUIPMENT_ID)).willReturn(EQUIPMENT_ID);
         given(equipmentFacade.findById(EQUIPMENT_ID)).willReturn(Optional.of(availableEquipment));
-        given(rentalRepository.save(any(Rental.class))).willReturn(savedRental);
+        given(rentalRepository.save(any(Rental.class))).willAnswer(invocation -> {
+            Rental saved = invocation.getArgument(0);
+            return saved;
+        });
 
         // When
         Rental result = service.execute(RENTAL_ID, patch);
 
         // Then
         assertThat(result).isNotNull();
+        assertThat(result.getEquipmentId()).isEqualTo(EQUIPMENT_ID);
+        assertThat(result.getEquipmentUid()).isEqualTo(equipmentUid);
         then(rentalRepository).should().save(any(Rental.class));
     }
 

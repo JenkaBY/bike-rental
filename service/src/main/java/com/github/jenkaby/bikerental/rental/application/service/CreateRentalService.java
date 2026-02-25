@@ -78,6 +78,7 @@ class CreateRentalService implements CreateRentalUseCase {
                 .status(RentalStatus.DRAFT)
                 .customerId(command.customerId())
                 .equipmentId(command.equipmentId())
+                .equipmentUid(equipment.uid())
                 .createdAt(Instant.now())
                 .build();
 
