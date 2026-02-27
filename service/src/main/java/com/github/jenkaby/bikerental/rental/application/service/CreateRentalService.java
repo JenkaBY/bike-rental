@@ -96,10 +96,10 @@ class CreateRentalService implements CreateRentalUseCase {
         TariffInfo tariff = tariffFacade.findById(tariffId)
                 .orElseThrow(() -> new ReferenceNotFoundException("Tariff", tariffId.toString()));
 
-        Money estimatedCost = tariffFacade.calculateEstimatedCost(
+        Money estimatedCost = tariffFacade.calculateRentalCost(
                 tariffId,
                 command.duration()
-        );
+        ).totalCost();
         rental.setEstimatedCost(estimatedCost);
 
         // 7. Save

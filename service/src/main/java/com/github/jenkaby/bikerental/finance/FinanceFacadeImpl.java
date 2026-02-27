@@ -43,6 +43,19 @@ class FinanceFacadeImpl implements FinanceFacade {
     }
 
     @Override
+    public PaymentInfo recordAdditionalPayment(Long rentalId, Money amount, PaymentMethod method, String operatorId) {
+        var command = new RecordPaymentUseCase.RecordPaymentCommand(
+                rentalId,
+                amount,
+                PaymentType.ADDITIONAL_PAYMENT,
+                method,
+                operatorId
+        );
+        Payment payment = recordPaymentUseCase.execute(command);
+        return paymentToInfoMapper.toPaymentInfo(payment);
+    }
+
+    @Override
     public boolean hasPrepayment(Long rentalId) {
         return getPaymentsByRentalIdUseCase.execute(rentalId).stream()
                 .anyMatch(IS_PREPAYMENT);

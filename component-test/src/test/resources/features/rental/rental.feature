@@ -54,7 +54,7 @@ Feature: Rental Management
       | <customerId> | DRAFT  |
     Examples:
       | customerId | equipmentId | duration | tariffId | plannedDuration | estimatedCost |
-      | CUS1       | 1           | PT2H     | 2        | 120             | 200.00        |
+      | CUS1       | 1           | PT2H     | 2        | 120             | 220.00        |
 
 
   Scenario: Create rental with auto-selected tariff
@@ -65,7 +65,7 @@ Feature: Rental Management
     Then the response status is 201
     And the rental response only contains
       | customerId | equipmentId | status | tariffId | estimatedCost | plannedDuration |
-      | CUS1       | 1           | DRAFT  | 1        | 100.0         | 120             |
+      | CUS1       | 1           | DRAFT  | 1        | 200.0         | 120             |
     And the following rental created event was published
       | customerId | status |
       | CUS1       | DRAFT  |
@@ -184,7 +184,7 @@ Feature: Rental Management
     Then the response status is 200
     And the rental response only contains
       | customerId | equipmentId   | tariffId   | status | estimatedCost | plannedDuration | startedAt |
-      | <customer> | <equipmentId> | <tariffId> | ACTIVE | 100.00        | 120             | <now>     |
+      | <customer> | <equipmentId> | <tariffId> | ACTIVE | 200.00        | 120             | <now>     |
     And the following rental started event was published
       | customerId | equipmentId   | startedAt |
       | <customer> | <equipmentId> | <now>     |

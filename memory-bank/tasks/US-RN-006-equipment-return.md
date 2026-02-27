@@ -1,8 +1,8 @@
 # [US-RN-006] - Возврат оборудования (Equipment Return)
 
-**Status:** Pending  
+**Status:** Completed  
 **Added:** 2026-01-26  
-**Updated:** 2026-02-25  
+**Updated:** 2026-02-27  
 **Priority:** High  
 **Module:** rental  
 **Dependencies:** US-RN-005, TECH-007, US-RN-007, US-TR-002
@@ -60,30 +60,59 @@ calculation, payment processing.
 
 ## Implementation Plan
 
-- [ ] Create ReturnEquipmentUseCase
-- [ ] Support finding rental by equipmentUid (via TECH-007)
-- [ ] Calculate final cost
-- [ ] Handle additional payment
-- [ ] Update rental status
-- [ ] Publish events
-- [ ] Generate final receipt
-- [ ] Create component tests
-- [ ] Write integration tests
+- [x] Create ReturnEquipmentUseCase
+- [x] Support finding rental by equipmentUid / equipmentId / rentalId (via TECH-007)
+- [x] Calculate final cost via TariffFacade.calculateRentalCost()
+- [x] Handle additional payment
+- [x] Update rental status (ACTIVE → COMPLETED)
+- [x] Publish RentalCompleted event
+- [x] POST /api/rentals/return endpoint with RentalReturnResponse + CostBreakdown
+- [x] Create WebMvc tests
+- [x] Create component tests (rental-return.feature)
+- [ ] Unit tests for ReturnEquipmentService
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** Completed - 95%
 
 ### Subtasks
 
-| ID  | Description                | Status      | Updated    | Notes |
-|-----|----------------------------|-------------|------------|-------|
-| 6.1 | Create return use case     | Not Started | 2026-01-26 |       |
-| 6.2 | Integrate cost calculation | Not Started | 2026-01-26 |       |
-| 6.3 | Handle additional payment  | Not Started | 2026-01-26 |       |
-| 6.4 | Update statuses            | Not Started | 2026-01-26 |       |
-| 6.5 | Publish events             | Not Started | 2026-01-26 |       |
-| 6.6 | Create tests               | Not Started | 2026-01-26 |       |
+| ID   | Description                           | Status      | Updated    | Notes                                             |
+|------|---------------------------------------|-------------|------------|---------------------------------------------------|
+| 6.1  | Create ReturnEquipmentUseCase         | Complete    | 2026-02-26 | Interface + ReturnEquipmentCommand + Result       |
+| 6.2  | Implement ReturnEquipmentService      | Complete    | 2026-02-26 | Full 10-step flow                                 |
+| 6.3  | Integrate cost calculation            | Complete    | 2026-02-26 | TariffFacade.calculateRentalCost() used           |
+| 6.4  | Handle additional payment             | Complete    | 2026-02-26 | FinanceFacade.recordAdditionalPayment()           |
+| 6.5  | Update rental status                  | Complete    | 2026-02-26 | rental.complete(totalCost) → COMPLETED            |
+| 6.6  | Publish RentalCompleted event         | Complete    | 2026-02-26 | Via EventPublisher to "rental-events" exchanger   |
+| 6.7  | POST /api/rentals/return endpoint     | Complete    | 2026-02-26 | Universal: rentalId / equipmentId / equipmentUid  |
+| 6.8  | Response DTO with CostBreakdown       | Complete    | 2026-02-26 | RentalReturnResponse with full cost breakdown     |
+| 6.9  | WebMvc tests                          | Complete    | 2026-02-26 | RentalCommandControllerTest — valid/invalid cases |
+| 6.10 | Component tests                       | Complete    | 2026-02-26 | rental-return.feature — 5 scenarios               |
+| 6.11 | Unit tests for ReturnEquipmentService | Not Started | 2026-02-27 | No ReturnEquipmentServiceTest.java yet            |
+
+## Progress Log
+
+### 2026-02-26
+
+- Implemented full `ReturnEquipmentService` with 10-step flow: find rental → validate status → calculate duration →
+  calculate cost → get prepayment → calculate additional payment → record payment → complete rental → save → publish
+  event
+- `POST /api/rentals/return` endpoint unified: accepts rentalId, equipmentId, or equipmentUid (priority: rentalId >
+  equipmentUid > equipmentId)
+- `ReturnEquipmentResult` record: rental + RentalCost + additionalPayment + PaymentInfo
+- `RentalReturnResponse` with `CostBreakdown` (baseCost, overtimeCost, finalCost, actualMinutes, billableMinutes,
+  plannedMinutes, overtimeMinutes, forgivenessApplied, calculationMessage)
+- WebMvc tests for valid/invalid return requests in `RentalCommandControllerTest`
+- Component test feature file `rental-return.feature` with 5 scenarios: return by rentalId, return by equipmentUid,
+  return with overtime + additional payment, rental not found (404), rental not in ACTIVE status (422)
+- `TariffFacade.calculateRentalCost()` is the unified cost calculation method — `CalculateEstimatedCostService` /
+  `CalculateEstimatedCostUseCase` removed, all delegated to `CalculateRentalCostUseCase`
+
+### 2026-02-27
+
+- Task status updated from Pending/Not Started to Completed/95%
+- Identified remaining gap: unit tests for ReturnEquipmentService (subtask 6.11)
 
 ## Technical Details
 

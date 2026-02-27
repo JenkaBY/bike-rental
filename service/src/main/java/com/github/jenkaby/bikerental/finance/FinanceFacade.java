@@ -9,6 +9,8 @@ public interface FinanceFacade {
 
     PaymentInfo recordPrepayment(Long rentalId, Money amount, PaymentMethod method, String operatorId);
 
+    PaymentInfo recordAdditionalPayment(Long rentalId, Money amount, PaymentMethod method, String operatorId);
+
     boolean hasPrepayment(Long rentalId);
 
     Optional<PaymentInfo> getPrepayment(Long rentalId);

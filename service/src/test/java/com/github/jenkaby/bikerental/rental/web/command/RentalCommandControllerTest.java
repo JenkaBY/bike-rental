@@ -1,16 +1,16 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
-import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
-import com.github.jenkaby.bikerental.rental.application.usecase.RecordPrepaymentUseCase;
-import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.*;
 import com.github.jenkaby.bikerental.rental.domain.exception.InsufficientPrepaymentException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.command.mapper.RentalCommandMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
+import com.github.jenkaby.bikerental.tariff.RentalCost;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -64,6 +64,9 @@ class RentalCommandControllerTest {
 
     @MockitoBean
     private RecordPrepaymentUseCase recordPrepaymentUseCase;
+
+    @MockitoBean
+    private ReturnEquipmentUseCase returnEquipmentUseCase;
 
     @MockitoBean
     private RentalCommandMapper commandMapper;
@@ -675,6 +678,108 @@ class RentalCommandControllerTest {
                             "Operator is required"
                     )
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/rentals/return")
+    class PostRentalReturn {
+
+        @Nested
+        @DisplayName("Should return 200 OK")
+        class ShouldReturn200 {
+
+            @ParameterizedTest(name = "{1}")
+            @MethodSource("validReturnRequestTestCases")
+            @DisplayName("when return request contains valid identifier")
+            void whenReturnRequestContainsValidIdentifier(ReturnEquipmentRequest request, String scenario) throws Exception {
+                var returnResult = buildReturnResult();
+                given(commandMapper.toReturnCommand(any(ReturnEquipmentRequest.class)))
+                        .willReturn(mock(ReturnEquipmentUseCase.ReturnEquipmentCommand.class));
+                given(returnEquipmentUseCase.execute(any()))
+                        .willReturn(returnResult);
+                given(queryMapper.toResponse(any(Rental.class)))
+                        .willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(post(API_RENTALS + "/return")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isOk());
+
+                verify(returnEquipmentUseCase).execute(any(ReturnEquipmentUseCase.ReturnEquipmentCommand.class));
+            }
+
+            private static Stream<Arguments> validReturnRequestTestCases() {
+                return Stream.of(
+                        Arguments.of(
+                                new ReturnEquipmentRequest(1L, null, null, PaymentMethod.CASH, "operator-1"),
+                                "identified by rentalId"
+                        ),
+                        Arguments.of(
+                                new ReturnEquipmentRequest(null, 1L, null, null, null),
+                                "identified by equipmentId"
+                        ),
+                        Arguments.of(
+                                new ReturnEquipmentRequest(null, null, "BIKE-001", null, null),
+                                "identified by equipmentUid"
+                        )
+                );
+            }
+
+            private ReturnEquipmentResult buildReturnResult() {
+                Rental rental = mock(Rental.class);
+                when(rental.getId()).thenReturn(1L);
+
+                Money zero = Money.zero();
+                RentalCost cost = mock(RentalCost.class);
+                when(cost.baseCost()).thenReturn(zero);
+                when(cost.overtimeCost()).thenReturn(zero);
+                when(cost.actualMinutes()).thenReturn(60);
+                when(cost.billableMinutes()).thenReturn(60);
+                when(cost.plannedMinutes()).thenReturn(60);
+                when(cost.overtimeMinutes()).thenReturn(0);
+                when(cost.forgivenessApplied()).thenReturn(false);
+                when(cost.calculationMessage()).thenReturn("OK");
+
+                return new ReturnEquipmentResult(rental, cost, zero, null);
+            }
+        }
+
+        @Nested
+        @DisplayName("Should return 400 Bad Request")
+        class ShouldReturn400 {
+
+            @ParameterizedTest(name = "{1}")
+            @MethodSource("invalidReturnRequestTestCases")
+            @DisplayName("when return request is invalid")
+            void whenReturnRequestIsInvalid(ReturnEquipmentRequest request, String scenario) throws Exception {
+                mockMvc.perform(post(API_RENTALS + "/return")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value(containsString(
+                                "At least one of rentalId, equipmentId, or equipmentUid must be provided")));
+
+                verify(returnEquipmentUseCase, never()).execute(any(ReturnEquipmentUseCase.ReturnEquipmentCommand.class));
+            }
+
+            private static Stream<Arguments> invalidReturnRequestTestCases() {
+                return Stream.of(
+                        Arguments.of(
+                                new ReturnEquipmentRequest(null, null, null, null, null),
+                                "all identifiers are null"
+                        ),
+                        Arguments.of(
+                                new ReturnEquipmentRequest(null, null, "", null, null),
+                                "equipmentUid is empty, rentalId and equipmentId are null"
+                        ),
+                        Arguments.of(
+                                new ReturnEquipmentRequest(null, null, "   ", null, null),
+                                "equipmentUid is blank, rentalId and equipmentId are null"
+                        )
+                );
+            }
         }
     }
 }
