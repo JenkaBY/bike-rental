@@ -15,5 +15,24 @@ services:
       - "bikesharing-db:/var/lib/postgresql/data"
       - "./postgres/create_second_db.sh:/docker-entrypoint-initdb.d/create_second_db.sh"
 
+  bike-rental-app:
+    build:
+      context: ..
+      dockerfile: service/Dockerfile
+      args:
+        SERVICE: service
+    container_name: bike-rental-app
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - DATASOURCE_URL=jdbc:postgresql://postgres:5432/bikerental
+      - DATASOURCE_USER=postgres
+      - DATASOURCE_SECRET=postgres
+      - SERVER_PORT=80
+      - SPRING_LIQUIBASE_DROP_FIRST=true
+    depends_on:
+      - postgres
+
 volumes:
   bikesharing-db:
