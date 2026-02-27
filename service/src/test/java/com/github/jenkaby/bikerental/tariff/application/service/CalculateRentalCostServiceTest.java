@@ -116,8 +116,6 @@ class CalculateRentalCostServiceTest {
         Tariff tariff = createTestTariff();
         given(getTariffByIdUseCase.get(tariffId)).willReturn(tariff);
         given(tariffPeriodSelector.selectPeriod(actualDuration)).willReturn(TariffPeriod.HOUR);
-        given(forgivenessStrategy.getForgivenessMessage(30))
-                .willReturn("Overtime covered by period pricing (30 minute(s) over plan, 2 period(s) charged)");
 
         RentalCost result = calculator.execute(
                 new CalculateRentalCostUseCase.CalculateRentalCostCommand(tariffId, actualDuration, billableMinutes, plannedDuration));
@@ -213,7 +211,6 @@ class CalculateRentalCostServiceTest {
         Tariff tariff = createTestTariff();
         given(getTariffByIdUseCase.get(tariffId)).willReturn(tariff);
         given(tariffPeriodSelector.selectPeriod(actualDuration)).willReturn(period);
-        given(forgivenessStrategy.getForgivenessMessage(expectedOvertime)).willReturn("msg");
 
         RentalCost result = calculator.execute(
                 new CalculateRentalCostUseCase.CalculateRentalCostCommand(tariffId, actualDuration, actualMinutes, plannedDuration));

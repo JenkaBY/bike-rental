@@ -775,10 +775,6 @@ class RentalCommandControllerTest {
                                 "equipmentUid is empty, rentalId and equipmentId are null"
                         ),
                         Arguments.of(
-                                new ReturnEquipmentRequest(1L, null, "BIKE", null, null),
-                                "equipmentId is blank, rentalId and equipmentId are null"
-                        ),
-                        Arguments.of(
                                 new ReturnEquipmentRequest(null, null, "   ", null, null),
                                 "equipmentUid is blank, rentalId and equipmentId are null"
                         )
