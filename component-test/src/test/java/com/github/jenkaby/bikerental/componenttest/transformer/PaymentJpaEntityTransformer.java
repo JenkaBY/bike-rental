@@ -12,7 +12,7 @@ public class PaymentJpaEntityTransformer {
 
     @DataTableType
     public PaymentJpaEntity paymentJpaEntity(Map<String, String> entry) {
-        var id = Aliases.getPaymentId(entry.get("id"));
+        var id = Optional.ofNullable(entry.get("id")).map(Aliases::getPaymentId).orElse(null);
         var rentalId = DataTableHelper.toLong(entry, "rentalId");
         var amount = DataTableHelper.toBigDecimal(entry, "amount");
         var paymentType = DataTableHelper.getStringOrNull(entry, "type");

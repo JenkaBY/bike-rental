@@ -123,4 +123,12 @@ public class DataTableHelper {
         var durationString = entry.get(field);
         return Duration.parse(durationString);
     }
+
+    public static Boolean toBooleanOrNull(Map<String, String> entry, String field) {
+        var value = getStringOrNull(entry, field);
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return Boolean.parseBoolean(value.trim());
+    }
 }
