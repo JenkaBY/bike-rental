@@ -1,6 +1,6 @@
 # [TECH-008] - Continuous Deploy to Dev Environment
 
-**Status:** Pending  
+**Status:** In Progress  
 **Added:** 2026-02-27  
 **Updated:** 2026-02-27
 
@@ -55,20 +55,20 @@ The current pipeline has no deployment stage. The next logical step is to add CD
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** In Progress - 88%
 
 ### Subtasks
 
-| ID  | Description                                           | Status      | Updated    | Notes                                                                     |
-|-----|-------------------------------------------------------|-------------|------------|---------------------------------------------------------------------------|
-| 1.1 | Create multi-stage Dockerfile                         | Not Started | 2026-02-27 | Java 21 Corretto, fat JAR from :service:build                             |
-| 1.2 | Add `app` service to docker-compose.yaml              | Not Started | 2026-02-27 | Depends on 1.1                                                            |
-| 1.3 | Choose and document hosting provider                  | Not Started | 2026-02-27 | Selected: Render                                                          |
-| 1.4 | Create `render.yaml` Blueprint config                 | Not Started | 2026-02-27 | Defines web service + PostgreSQL add-on                                   |
-| 1.5 | Create `.github/workflows/deploy.yml`                 | Not Started | 2026-02-27 | Triggered on main/develop push after tests; deploy via Render deploy hook |
-| 1.6 | Document required GitHub Actions secrets              | Not Started | 2026-02-27 | RENDER_DEPLOY_HOOK_URL, DB credentials, etc.                              |
-| 1.7 | Add dev environment application properties / env vars | Not Started | 2026-02-27 | Spring profile `dev` or environment variables                             |
-| 1.8 | End-to-end pipeline validation                        | Not Started | 2026-02-27 | Push to develop, verify full deploy cycle                                 |
+| ID  | Description                                           | Status      | Updated    | Notes                                                                   |
+|-----|-------------------------------------------------------|-------------|------------|-------------------------------------------------------------------------|
+| 1.1 | Create multi-stage Dockerfile                         | Complete    | 2026-02-27 | Already existed in service/Dockerfile                                   |
+| 1.2 | Add `app` service to docker-compose.yaml              | Complete    | 2026-02-27 | context: .., dockerfile: service/Dockerfile, env vars mapped            |
+| 1.3 | Choose and document hosting provider                  | Complete    | 2026-02-27 | Selected: Render                                                        |
+| 1.4 | Create `render.yaml` Blueprint config                 | Complete    | 2026-02-27 | runtime: docker, builds from service/Dockerfile, watches render-deploy  |
+| 1.5 | Create `.github/workflows/deploy.yml`                 | Complete    | 2026-02-27 | workflow_run trigger, force-push to render-deploy branch, no secrets    |
+| 1.6 | Document required GitHub Actions secrets              | Complete    | 2026-02-27 | No extra secrets needed — GITHUB_TOKEN is automatic                     |
+| 1.7 | Add dev environment application properties / env vars | Complete    | 2026-02-27 | Documented in docs/deployment.md; env vars in docker-compose and Render |
+| 1.8 | End-to-end pipeline validation                        | Not Started | 2026-02-27 | Requires Render account setup + GitHub secrets                          |
 
 ## Progress Log
 
@@ -82,6 +82,37 @@ The current pipeline has no deployment stage. The next logical step is to add CD
 - Defined 8-subtask implementation plan covering Dockerfile, docker-compose update, provider config, CD workflow,
   secrets, and dev environment configuration.
 
+### 2026-02-27 (Implementation)
 
+- Inspected existing `service/Dockerfile` — multi-stage build (gradle:jdk21-alpine → eclipse-temurin:21-jre-alpine),
+  uses layered JAR extraction for optimal image layers. Subtask 1.1 already complete.
+- Updated `docker/docker-compose.yaml` — added `app` service with `context: ..`, `dockerfile: service/Dockerfile`,
+  correct env vars (`DATASOURCE_URL/USER/SECRET`) matching `application.yaml`, `depends_on: postgres`.
+- Created `render.yaml` — Render Blueprint defining web service (Docker image from ghcr.io) and free PostgreSQL
+  database. DB credentials injected via `fromDatabase` property references. Removed `healthCheckPath` — Spring Boot
+  Actuator not in project dependencies.
+- Created `.github/workflows/deploy.yml` — CD workflow triggered via `workflow_run` on successful `CI Test`
+  completion. Steps: checkout → login to ghcr.io → docker metadata (sha + latest/develop tags) → buildx build+push
+  → Render deploy hook POST. Uses GitHub Actions cache for Docker layers.
+- Created `docs/deployment.md` — full setup guide covering Render Blueprint, image registry credentials, deploy hook,
+  GitHub secrets, image tag strategy, and local full-stack run instructions.
+- Subtask 1.8 (end-to-end validation) remains — requires live Render account + GitHub secrets configured.
 
+### 2026-02-27 (Render free plan pivot)
 
+- Deploy hook requires Render Pro plan — not available on free tier.
+- Switched strategy: `render.yaml` now uses `runtime: docker` — Render builds the image from `service/Dockerfile`
+  directly instead of pulling from GHCR.
+- CD workflow simplified: no Docker build/push steps, no secrets needed. After CI passes, workflow force-pushes
+  HEAD to `render-deploy` branch; Render detects the push and triggers its own build+deploy.
+- Removed `packages: write` permission and all GHCR/docker steps from `deploy.yml`.
+- Updated `docs/deployment.md` — removed GHCR and secrets sections, documented new force-push flow.
+
+### 2026-02-27 (Render Blueprint removal)
+
+- Render Blueprint is also a paid feature — removed `render.yaml` entirely.
+- Services must be created manually via Render Dashboard (New → Web Service, New → PostgreSQL).
+- Updated `docs/deployment.md` — replaced Blueprint section with step-by-step manual setup guide including
+  Web Service config, PostgreSQL creation, env var mapping, and JDBC URL conversion note.
+- Fixed `workflow_run` trigger — `branches` filter under `workflow_run` does not filter by source branch;
+  moved branch filtering into the job `if` condition instead.

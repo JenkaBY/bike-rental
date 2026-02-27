@@ -62,10 +62,13 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   публикация RentalCompleted; POST /api/rentals/return; RentalReturnResponse с CostBreakdown; WebMvc + component
   тесты rental-return.feature с 5 сценариями; единый метод TariffFacade.calculateRentalCost())
 
+## In Progress
+
+- [TECH-008] Continuous Deploy to Dev Environment - In Progress (88%), subtasks 1.1-1.7 complete, pending end-to-end
+  validation (2026-02-27)
+
 ## Pending - Technical Improvements
 
-- [TECH-008] Continuous Deploy to Dev Environment - Medium priority, infrastructure, Dockerfile + GitHub Actions CD
-  workflow to deploy to Render dev environment (2026-02-27)
 - [TECH-009] Swagger / OpenAPI Annotations for All Controllers - Medium priority, all modules, add `@Tag` /
   `@Operation` / `@ApiResponse` / `@Schema` to 14 controllers and their DTOs (2026-02-27)
 - [TECH-001] Custom UUID Generator for Hibernate Entity IDs - Medium priority, shared module, performance improvement

@@ -2,65 +2,66 @@
 
 ## Overview
 
-The CD pipeline builds a Docker image, pushes it to GitHub Container Registry (`ghcr.io`), and triggers a deploy
-on [Render](https://render.com) via a deploy hook after every successful CI run on `main`, `master`, or `develop`.
+The CD pipeline force-pushes to a dedicated `render-deploy` branch after every successful CI run on
+`main`, `master`, or `develop`. Render watches that branch, builds the Docker image from `service/Dockerfile`
+directly, and deploys automatically. No paid plan, no deploy hook, no Blueprint required.
+
+## Deploy Flow
+
+```
+push to main/master/develop
+    → CI Test (build.yml)
+        → on success: CD Deploy (deploy.yml)
+            → force-push HEAD to render-deploy
+                → Render detects change
+                    → builds Docker image from service/Dockerfile
+                        → deploys bike-rental-api
+```
 
 ## One-time Setup
 
-### 1. Render — Create Services via Blueprint
+### 1. Render — Create Web Service manually
 
-1. Go to [render.com](https://render.com) → **New → Blueprint**
+1. Go to [render.com](https://render.com) → **New → Web Service**
 2. Connect the GitHub repository
-3. Render will detect `render.yaml` and create:
-   - **Web Service** `bike-rental-api` (Docker image from `ghcr.io`)
-   - **PostgreSQL Database** `bike-rental-db` (free tier)
+3. Configure:
 
-### 2. Render — Configure Image Registry Credentials
+| Field               | Value                  |
+|---------------------|------------------------|
+| **Name**            | `bike-rental-api`      |
+| **Branch**          | `render-deploy`        |
+| **Runtime**         | `Docker`               |
+| **Dockerfile Path** | `./service/Dockerfile` |
+| **Docker Context**  | `.` (repo root)        |
 
-The web service pulls from `ghcr.io` (GitHub Container Registry, public image).
+### 2. Render — Create PostgreSQL Database manually
 
-If the image is **private**:
+1. **New → PostgreSQL**
+2. Configure:
 
-1. In Render dashboard → **bike-rental-api** → **Settings → Image**
-2. Add credentials:
-   - **Registry**: `ghcr.io`
-   - **Username**: your GitHub username
-   - **Password**: a GitHub PAT with `read:packages` scope
+| Field    | Value            |
+|----------|------------------|
+| **Name** | `bike-rental-db` |
+| **Plan** | Free             |
 
-### 3. Render — Get Deploy Hook URL
+3. After creation, copy the **Internal Database URL** from the database dashboard.
 
-1. Render dashboard → **bike-rental-api** → **Settings → Deploy Hook**
-2. Copy the URL (looks like `https://api.render.com/deploy/srv-xxx?key=yyy`)
+### 3. Render — Set Environment Variables on the Web Service
 
-### 4. GitHub — Add Repository Secrets
+Go to **bike-rental-api → Environment** and add:
 
-Go to **GitHub repository → Settings → Secrets and variables → Actions → New repository secret**:
+| Key                 | Value                                                     |
+|---------------------|-----------------------------------------------------------|
+| `DATASOURCE_URL`    | Internal Database URL from step 2 (jdbc:postgresql://...) |
+| `DATASOURCE_USER`   | Database user from Render DB dashboard                    |
+| `DATASOURCE_SECRET` | Database password from Render DB dashboard                |
 
-| Secret name              | Value                                     |
-|--------------------------|-------------------------------------------|
-| `RENDER_DEPLOY_HOOK_URL` | Deploy hook URL copied from Render        |
+> Render provides the DB connection string in the format `postgres://user:password@host:port/db`.
+> Convert it to JDBC format: `jdbc:postgresql://host:port/db`
 
-> `GITHUB_TOKEN` is provided automatically by GitHub Actions — no manual setup needed for pushing to `ghcr.io`.
+### 4. GitHub — No additional secrets required
 
-### 5. Render — Set `GHCR_IMAGE_NAME` environment variable
-
-In Render dashboard → **bike-rental-api** → **Environment**:
-
-| Key               | Value                                       |
-|-------------------|---------------------------------------------|
-| `GHCR_IMAGE_NAME` | `<github-owner>/bike-rental:latest`         |
-
-Example: `jenkaby/bike-rental:latest`
-
----
-
-## Image Tags
-
-| Branch      | Tag            |
-|-------------|----------------|
-| `main`      | `latest`, `<sha>` |
-| `master`    | `latest`, `<sha>` |
-| `develop`   | `develop`, `<sha>` |
+`GITHUB_TOKEN` is provided automatically by GitHub Actions — no manual setup needed.
 
 ---
 
@@ -78,9 +79,8 @@ The application will be available at `http://localhost:8080`.
 
 Environment variables used by the `app` service (configured in `docker-compose.yaml`):
 
-| Variable          | Value                                        |
-|-------------------|----------------------------------------------|
-| `DATASOURCE_URL`  | `jdbc:postgresql://postgres:5432/bikerental` |
-| `DATASOURCE_USER` | `postgres`                                   |
-| `DATASOURCE_SECRET` | `postgres`                                 |
-
+| Variable            | Value                                        |
+|---------------------|----------------------------------------------|
+| `DATASOURCE_URL`    | `jdbc:postgresql://postgres:5432/bikerental` |
+| `DATASOURCE_USER`   | `postgres`                                   |
+| `DATASOURCE_SECRET` | `postgres`                                   |
