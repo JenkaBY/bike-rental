@@ -1,9 +1,11 @@
 services:
   - type: web
     name: bike-rental-api
-    runtime: image
-    image:
-      url: ghcr.io/${{GHCR_IMAGE_NAME}}
+    runtime: docker
+    repo: https://github.com/JenkaBY/bike-rental
+    branch: render-deploy
+    dockerfilePath: ./service/Dockerfile
+    dockerContext: .
     envVars:
       - key: DATASOURCE_URL
         fromDatabase:
