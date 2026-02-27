@@ -14,30 +14,36 @@ Build continuous deployment to any hosting. Includes:
 ## Thought Process
 
 The project already has a CI pipeline (`build.yml`) that runs build and tests on push to `master`/`main`/`develop`.
-The current pipeline has no deployment stage. The next logical step is to add CD:
+The current pipeline has no deployment stage. The next logical step is to add CD.
 
-1. **Dockerfile** - Package the Spring Boot fat JAR into a Docker image. The `service` module is the deployable unit.
-   Java 21 (Amazon Corretto) should be used to match the CI build environment. A multi-stage build is preferred to
-   keep the image lean.
+### Render Free Plan Limitations (discovered during implementation)
 
-2. **Docker Compose update** - Extend `docker/docker-compose.yaml` to include the application service alongside
-   PostgreSQL, for local and dev environment usage.
+| Feature                 | Free Plan | Notes                                    |
+|-------------------------|-----------|------------------------------------------|
+| Deploy Hook URL         | ❌ Paid    | Requires Pro plan                        |
+| Blueprint / render.yaml | ❌ Paid    | Requires paid plan                       |
+| Web Service (Docker)    | ✅ Free    | Manual setup via Dashboard               |
+| PostgreSQL DB           | ✅ Free    | 1 free DB, 90-day expiry on inactivity   |
+| Auto-deploy on push     | ✅ Free    | Watches a branch, builds from Dockerfile |
 
-3. **GitHub Actions CD workflow** (or extend `build.yml`) - After successful build + tests on `develop`/`main`:
-    - Build and push the Docker image to a container registry (GitHub Container Registry `ghcr.io` is the natural
-      choice as it's free and tightly integrated with GitHub Actions).
-    - Deploy to a dev hosting environment. Suitable free/cheap options:
-        - **Railway** - simple Dockerfile-based deploy, free tier, supports PostgreSQL add-on.
-        - **Render** - similar to Railway, supports Docker and PostgreSQL.
-        - **Fly.io** - Docker-native PaaS, generous free tier.
-    - The task will target **Render** as the chosen provider (Docker-native, free tier, PostgreSQL add-on,
-      deploy-hook or GitHub-native integration for CI-triggered deployments).
+### Final Chosen Approach
 
-4. **Secrets management** - Deployment credentials (Fly.io API token, DB URL, etc.) stored as GitHub Actions secrets.
+1. **Dockerfile** (`service/Dockerfile`) — already existed. Multi-stage build:
+   `gradle:jdk21-alpine` (builder) → `eclipse-temurin:21-jre-alpine` (runtime). Fixed Windows CRLF
+   issue with `sed -i 's/\r$//'` before `chmod +x`.
 
-5. **Environment configuration** - The application needs an `application-dev.yml` or env-var overrides for
-   `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` and any other
-   environment-specific properties.
+2. **docker-compose** (`docker/docker-compose.yaml`) — added `app` service for local full-stack run.
+   `context: ..`, `dockerfile: service/Dockerfile`, env vars matching `application.yaml`.
+
+3. **Render Web Service** — created manually via Dashboard (Blueprint is paid).
+   Watches `render-deploy` branch. Builds from `service/Dockerfile`. DB credentials set as env vars.
+
+4. **CD workflow** (`.github/workflows/deploy.yml`) — triggered via `workflow_run` after `CI Test` succeeds
+   on `main`/`master`/`develop`. Force-pushes to `render-deploy` branch → triggers Render auto-build.
+   No secrets required — only built-in `GITHUB_TOKEN`.
+
+5. **Render PostgreSQL** — created manually via Dashboard. Internal DB URL converted from
+   `postgres://user:pass@host/db` to `jdbc:postgresql://host/db` for Spring Boot.
 
 ## Implementation Plan
 
@@ -55,20 +61,20 @@ The current pipeline has no deployment stage. The next logical step is to add CD
 
 ## Progress Tracking
 
-**Overall Status:** In Progress - 88%
+**Overall Status:** In Progress - 95%
 
 ### Subtasks
 
-| ID  | Description                                           | Status      | Updated    | Notes                                                                   |
-|-----|-------------------------------------------------------|-------------|------------|-------------------------------------------------------------------------|
-| 1.1 | Create multi-stage Dockerfile                         | Complete    | 2026-02-27 | Already existed in service/Dockerfile                                   |
-| 1.2 | Add `app` service to docker-compose.yaml              | Complete    | 2026-02-27 | context: .., dockerfile: service/Dockerfile, env vars mapped            |
-| 1.3 | Choose and document hosting provider                  | Complete    | 2026-02-27 | Selected: Render                                                        |
-| 1.4 | Create `render.yaml` Blueprint config                 | Complete    | 2026-02-27 | runtime: docker, builds from service/Dockerfile, watches render-deploy  |
-| 1.5 | Create `.github/workflows/deploy.yml`                 | Complete    | 2026-02-27 | workflow_run trigger, force-push to render-deploy branch, no secrets    |
-| 1.6 | Document required GitHub Actions secrets              | Complete    | 2026-02-27 | No extra secrets needed — GITHUB_TOKEN is automatic                     |
-| 1.7 | Add dev environment application properties / env vars | Complete    | 2026-02-27 | Documented in docs/deployment.md; env vars in docker-compose and Render |
-| 1.8 | End-to-end pipeline validation                        | Not Started | 2026-02-27 | Requires Render account setup + GitHub secrets                          |
+| ID  | Description                                           | Status      | Updated    | Notes                                                                         |
+|-----|-------------------------------------------------------|-------------|------------|-------------------------------------------------------------------------------|
+| 1.1 | Create multi-stage Dockerfile                         | Complete    | 2026-02-27 | Already existed; fixed CRLF with sed -i 's/\r$//'                             |
+| 1.2 | Add `app` service to docker-compose.yaml              | Complete    | 2026-02-27 | context: .., dockerfile: service/Dockerfile, env vars mapped                  |
+| 1.3 | Choose and document hosting provider                  | Complete    | 2026-02-27 | Render free plan; Blueprint and Deploy Hook are paid — manual Dashboard setup |
+| 1.4 | Create provider config                                | Complete    | 2026-02-27 | render.yaml removed (paid); setup documented in docs/deployment.md            |
+| 1.5 | Create `.github/workflows/deploy.yml`                 | Complete    | 2026-02-27 | workflow_run trigger, force-push to render-deploy, no secrets needed          |
+| 1.6 | Document required GitHub Actions secrets              | Complete    | 2026-02-27 | No secrets needed — GITHUB_TOKEN is automatic                                 |
+| 1.7 | Add dev environment application properties / env vars | Complete    | 2026-02-27 | Documented in docs/deployment.md; set manually in Render Dashboard            |
+| 1.8 | End-to-end pipeline validation                        | Not Started | 2026-02-27 | Requires manual Render Dashboard setup (Web Service + PostgreSQL)             |
 
 ## Progress Log
 
@@ -116,3 +122,12 @@ The current pipeline has no deployment stage. The next logical step is to add CD
   Web Service config, PostgreSQL creation, env var mapping, and JDBC URL conversion note.
 - Fixed `workflow_run` trigger — `branches` filter under `workflow_run` does not filter by source branch;
   moved branch filtering into the job `if` condition instead.
+
+### 2026-02-27 (Render free plan restrictions documented + build.yml fix)
+
+- Documented full Render free plan limitation matrix: Deploy Hook ❌ paid, Blueprint ❌ paid,
+  Web Service Docker ✅ free, PostgreSQL ✅ free, auto-deploy on push ✅ free.
+- Fixed `build.yml` — action versions `checkout@v6`, `setup-java@v5`, `upload-artifact@v6` do not exist;
+  corrected to `@v4` across all steps in both `build` and `test` jobs.
+- Updated task thought process with final architecture summary and Render limitations table.
+
