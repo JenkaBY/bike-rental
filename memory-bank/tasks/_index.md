@@ -64,6 +64,10 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Technical Improvements
 
+- [TECH-008] Continuous Deploy to Dev Environment - Medium priority, infrastructure, Dockerfile + GitHub Actions CD
+  workflow to deploy to Render dev environment (2026-02-27)
+- [TECH-009] Swagger / OpenAPI Annotations for All Controllers - Medium priority, all modules, add `@Tag` /
+  `@Operation` / `@ApiResponse` / `@Schema` to 14 controllers and their DTOs (2026-02-27)
 - [TECH-001] Custom UUID Generator for Hibernate Entity IDs - Medium priority, shared module, performance improvement
 - [TECH-002] Integrate specification-arg-resolver for equipment filtering - Add advanced query param-based
   Specifications for equipment search (2026-02-02)
