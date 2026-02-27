@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: bike-rental-api
+    runtime: image
+    image:
+      url: ghcr.io/${{GHCR_IMAGE_NAME}}
+    envVars:
+      - key: DATASOURCE_URL
+        fromDatabase:
+          name: bike-rental-db
+          property: connectionString
+      - key: DATASOURCE_USER
+        fromDatabase:
+          name: bike-rental-db
+          property: user
+      - key: DATASOURCE_SECRET
+        fromDatabase:
+          name: bike-rental-db
+          property: password
+
+databases:
+  - name: bike-rental-db
+    databaseName: bikerental
+    plan: free
