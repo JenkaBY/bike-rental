@@ -106,6 +106,10 @@ public class Rental {
         return amount.compareTo(estimatedCost) >= 0;
     }
 
+    public boolean hasActiveStatus() {
+        return status == RentalStatus.ACTIVE;
+    }
+
     public boolean canBeActivated() {
         return status == RentalStatus.DRAFT
                 && customerId != null
@@ -154,5 +158,28 @@ public class Rental {
         this.updatedAt = Instant.now();
 
         return result;
+    }
+
+    public void complete(Money finalCost) {
+        // Validate status
+        if (this.status != RentalStatus.ACTIVE) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);
+        }
+
+        if (this.startedAt == null) {
+            throw new IllegalStateException("Cannot complete rental: rental start time is not set");
+        }
+
+        if (finalCost == null) {
+            throw new IllegalArgumentException("Final cost cannot be null");
+        }
+
+        if (this.actualReturnAt == null || this.actualDuration == null) {
+            throw new IllegalStateException("Cannot complete rental: actual return time and duration must be set before completing");
+        }
+
+        this.finalCost = finalCost;
+        this.status = RentalStatus.COMPLETED;
+        this.updatedAt = Instant.now();
     }
 }

@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentComma
 import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalCompleted;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.modulith.events.ApplicationModuleListener;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class RentalEventListener {
 
     private static final String RENTED_STATUS = "RENTED";
+    private static final String AVAILABLE_STATUS = "AVAILABLE";
 
     private final EquipmentRepository equipmentRepository;
     private final UpdateEquipmentUseCase updateEquipmentUseCase;
@@ -54,6 +56,36 @@ public class RentalEventListener {
 
         } catch (Exception e) {
             log.error("Failed to update equipment {} status to RENTED: {}",
+                    event.equipmentId(), e.getMessage(), e);
+        }
+    }
+
+    @ApplicationModuleListener
+    public void onRentalCompleted(RentalCompleted event) {
+        log.info("Received RentalCompleted event for equipment {}", event.equipmentId());
+
+        try {
+            Equipment equipment = equipmentRepository.findById(event.equipmentId())
+                    .orElseGet(() -> {
+                        log.warn("Equipment {} not found, skipping status update", event.equipmentId());
+                        return null;
+                    });
+
+            if (equipment == null) {
+                return;
+            }
+
+            if (AVAILABLE_STATUS.equals(equipment.getStatusSlug())) {
+                log.debug("Equipment {} already in AVAILABLE status, skipping", event.equipmentId());
+                return;
+            }
+
+            var command = equipmentCommandToDomainMapper.toUpdateCommand(equipment, AVAILABLE_STATUS);
+            updateEquipmentUseCase.execute(command);
+            log.info("Successfully changed equipment {} status to AVAILABLE", event.equipmentId());
+
+        } catch (Exception e) {
+            log.error("Failed to update equipment {} status to AVAILABLE: {}",
                     event.equipmentId(), e.getMessage(), e);
         }
     }
