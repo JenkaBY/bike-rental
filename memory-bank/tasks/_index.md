@@ -57,6 +57,10 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 - [TECH-007] Добавление equipmentUid в таблицу rental - Completed on 2026-02-25 (rental module: добавлено поле
   equipment_uid в таблицу rentals, обновлены domain model и JPA entity, добавлена фильтрация по equipmentUid в GET
   /api/rentals, обновлены все сервисы для сохранения equipmentUid, полное покрытие тестами: unit, WebMvc, component)
+- [US-RN-006] Возврат оборудования - Completed on 2026-02-26 (ReturnEquipmentService с 10-шаговым flow: поиск аренды
+  по rentalId/equipmentUid/equipmentId, расчёт длительности и стоимости, запись доплаты, завершение аренды,
+  публикация RentalCompleted; POST /api/rentals/return; RentalReturnResponse с CostBreakdown; WebMvc + component
+  тесты rental-return.feature с 5 сценариями; единый метод TariffFacade.calculateRentalCost())
 
 ## Pending - Technical Improvements
 
@@ -92,12 +96,13 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 - [US-RN-003] Установка даты и времени начала проката - DEFERRED (not priority, startTime устанавливается автоматически
   при старте аренды), Depends on US-RN-001
-- [US-RN-006] Возврат оборудования - URGENT, Depends on US-RN-005, TECH-007, US-RN-007, US-TR-002
 - [US-RN-008] Ранний возврат или замена оборудования - URGENT, Depends on US-RN-005
 
 ## Pending - Phase 4: Return & Calculations
 
-- [US-TR-004] Расчет доплаты за просрочку - URGENT, Depends on US-TR-002, US-TR-003
+- [US-TR-004] Эндпоинт расчёта стоимости аренды - High priority, tariff module, GET /api/tariffs/cost-estimate с
+  разрешением по equipmentType / equipmentUid / tariffId, Depends on US-TR-002, US-RN-002
+- [US-EQ-005] Учет износа и пробега - LOW, Depends on US-RN-006
 - [US-EQ-005] Учет износа и пробега - LOW, Depends on US-RN-006
 - [US-TR-005] Возврат средств при отмене - URGENT, Depends on US-RN-008, US-FN-002
 
