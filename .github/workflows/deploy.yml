@@ -5,9 +5,10 @@ on:
     workflows: [ "CI Test" ]
     types: [ completed ]
     branches:
-      - main
-      - master
-      - develop
+      - "**"
+#      - main
+#      - master
+#      - develop
 
 concurrency:
   group: deploy-${{ github.event.workflow_run.head_branch }}
