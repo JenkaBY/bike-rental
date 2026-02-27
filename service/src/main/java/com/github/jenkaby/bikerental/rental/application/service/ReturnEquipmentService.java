@@ -87,7 +87,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
         var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);
 
         // 4. Calculate final cost via tariff facade (public API, respects module boundaries)
-        RentalCost cost = tariffFacade.calculateFinalCost(
+        RentalCost cost = tariffFacade.calculateRentalCost(
                 rental.getTariffId(),
                 rental.getActualDuration(),
                 durationResult.billableMinutes(),

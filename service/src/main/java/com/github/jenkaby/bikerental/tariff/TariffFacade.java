@@ -1,7 +1,5 @@
 package com.github.jenkaby.bikerental.tariff;
 
-import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -13,7 +11,7 @@ public interface TariffFacade {
 
     TariffInfo selectTariff(String equipmentTypeSlug, Duration duration, LocalDate rentalDate);
 
-    Money calculateEstimatedCost(Long tariffId, Duration duration);
+    RentalCost calculateRentalCost(Long tariffId, Duration duration);
 
     /**
      * Calculates final rental cost based on actual duration and planned duration.
@@ -34,5 +32,5 @@ public interface TariffFacade {
      * @param plannedDuration planned rental duration (used for overtime calculation)
      * @return detailed cost breakdown
      */
-    RentalCost calculateFinalCost(Long tariffId, Duration actualDuration, int billableMinutes, Duration plannedDuration);
+    RentalCost calculateRentalCost(Long tariffId, Duration actualDuration, int billableMinutes, Duration plannedDuration);
 }

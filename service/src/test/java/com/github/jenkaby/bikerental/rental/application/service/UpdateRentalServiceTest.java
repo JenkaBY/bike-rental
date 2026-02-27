@@ -17,6 +17,7 @@ import com.github.jenkaby.bikerental.shared.exception.EquipmentNotAvailableExcep
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import com.github.jenkaby.bikerental.tariff.RentalCost;
 import com.github.jenkaby.bikerental.tariff.TariffFacade;
 import com.github.jenkaby.bikerental.tariff.TariffInfo;
 import org.junit.jupiter.api.DisplayName;
@@ -64,6 +65,8 @@ class UpdateRentalServiceTest {
     private EquipmentFacade equipmentFacade;
     @Mock
     private TariffFacade tariffFacade;
+    @Mock
+    private RentalCost estimatedCost;
     @Mock
     private FinanceFacade financeFacade;
     @Mock
@@ -312,7 +315,8 @@ class UpdateRentalServiceTest {
         given(rentalRepository.findById(RENTAL_ID)).willReturn(Optional.of(rental));
         given(equipmentFacade.findById(EQUIPMENT_ID)).willReturn(Optional.of(equipment));
         given(tariffFacade.selectTariff(any(), any(), any())).willReturn(selectedTariff);
-        given(tariffFacade.calculateEstimatedCost(any(), any())).willReturn(Money.of("100.00"));
+        given(tariffFacade.calculateRentalCost(any(), any())).willReturn(estimatedCost);
+        given(estimatedCost.totalCost()).willReturn(Money.of("100.00"));
         given(rentalRepository.save(any(Rental.class))).willReturn(rental);
 
         // When
@@ -321,7 +325,7 @@ class UpdateRentalServiceTest {
         // Then
         assertThat(result).isNotNull();
         then(tariffFacade).should().selectTariff("bicycle", DURATION, LocalDate.now());
-        then(tariffFacade).should().calculateEstimatedCost(TARIFF_ID, DURATION);
+        then(tariffFacade).should().calculateRentalCost(TARIFF_ID, DURATION);
         then(rentalRepository).should().save(any(Rental.class));
     }
 
@@ -334,7 +338,8 @@ class UpdateRentalServiceTest {
         Money expectedCost = Money.of("150.00");
 
         given(rentalRepository.findById(RENTAL_ID)).willReturn(Optional.of(rental));
-        given(tariffFacade.calculateEstimatedCost(TARIFF_ID, DURATION)).willReturn(expectedCost);
+        given(tariffFacade.calculateRentalCost(TARIFF_ID, DURATION)).willReturn(estimatedCost);
+        given(estimatedCost.totalCost()).willReturn(expectedCost);
         given(rentalRepository.save(any(Rental.class))).willReturn(rental);
 
         // When
@@ -342,7 +347,7 @@ class UpdateRentalServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        then(tariffFacade).should().calculateEstimatedCost(TARIFF_ID, DURATION);
+        then(tariffFacade).should().calculateRentalCost(TARIFF_ID, DURATION);
         then(rentalRepository).should().save(any(Rental.class));
     }
 
@@ -378,7 +383,8 @@ class UpdateRentalServiceTest {
             return saved;
         });
         // Rental already has tariff and duration, so cost calculation will be triggered
-        given(tariffFacade.calculateEstimatedCost(TARIFF_ID, DURATION)).willReturn(Money.of("100.00"));
+        given(tariffFacade.calculateRentalCost(TARIFF_ID, DURATION)).willReturn(estimatedCost);
+        given(estimatedCost.totalCost()).willReturn(Money.of("100.00"));
 
         // When
         Rental result = serviceWithFixedClock.execute(RENTAL_ID, patch);
@@ -406,7 +412,8 @@ class UpdateRentalServiceTest {
         given(valueParser.parseString("ACTIVE")).willReturn("ACTIVE");
         given(equipmentFacade.findById(EQUIPMENT_ID)).willReturn(Optional.of(equipment));
         given(tariffFacade.selectTariff(any(), any(), any())).willReturn(selectedTariff);
-        given(tariffFacade.calculateEstimatedCost(TARIFF_ID, DURATION)).willReturn(Money.of("100.00"));
+        given(tariffFacade.calculateRentalCost(TARIFF_ID, DURATION)).willReturn(estimatedCost);
+        given(estimatedCost.totalCost()).willReturn(Money.of("100.00"));
         given(financeFacade.hasPrepayment(RENTAL_ID)).willReturn(false);
 
         UpdateRentalService serviceWithFixedClock = new UpdateRentalService(

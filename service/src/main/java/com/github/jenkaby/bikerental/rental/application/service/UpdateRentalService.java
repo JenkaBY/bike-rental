@@ -168,9 +168,9 @@ class UpdateRentalService implements UpdateRentalUseCase {
     }
 
     private void calculateCost(Rental rental) {
-        Money cost = tariffFacade.calculateEstimatedCost(
+        Money cost = tariffFacade.calculateRentalCost(
                 rental.getTariffId(),
-                rental.getPlannedDuration());
+                rental.getPlannedDuration()).totalCost();
         rental.setEstimatedCost(cost);
     }
 
