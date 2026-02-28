@@ -19,6 +19,7 @@ logging:
 springdoc:
   swagger-ui:
     enabled: true
+    urls-primary-name: all
   api-docs:
     enabled: true
 

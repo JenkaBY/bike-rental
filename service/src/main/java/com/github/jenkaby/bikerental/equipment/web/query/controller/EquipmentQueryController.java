@@ -7,12 +7,21 @@ import com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipme
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentResponse;
 import com.github.jenkaby.bikerental.equipment.web.query.mapper.EquipmentQueryMapper;
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/api/equipments")
+@Tag(name = OpenApiConfig.Tags.EQUIPMENT)
 public class EquipmentQueryController {
 
 
@@ -43,7 +53,15 @@ public class EquipmentQueryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EquipmentResponse> getEquipmentById(@PathVariable("id") Long id) {
+    @Operation(summary = "Get equipment by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Equipment found",
+                    content = @Content(schema = @Schema(implementation = EquipmentResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Equipment not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<EquipmentResponse> getEquipmentById(
+            @Parameter(description = "Equipment ID", example = "1") @PathVariable("id") Long id) {
         log.info("[GET] Get equipment by id {}", id);
         return getById.execute(id)
                 .map(mapper::toResponse)
@@ -52,7 +70,15 @@ public class EquipmentQueryController {
     }
 
     @GetMapping("/by-uid/{uid}")
-    public ResponseEntity<EquipmentResponse> getEquipmentByUid(@PathVariable("uid") String uid) {
+    @Operation(summary = "Get equipment by UID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Equipment found",
+                    content = @Content(schema = @Schema(implementation = EquipmentResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Equipment not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<EquipmentResponse> getEquipmentByUid(
+            @Parameter(description = "Equipment UID", example = "BIKE-001") @PathVariable("uid") String uid) {
         log.info("[GET] Get equipment by uid {}", uid);
         var result = getByUid.execute(new com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid(uid));
         return result.map(mapper::toResponse)
@@ -61,7 +87,15 @@ public class EquipmentQueryController {
     }
 
     @GetMapping("/by-serial/{serialNumber}")
-    public ResponseEntity<EquipmentResponse> getEquipmentBySerial(@PathVariable("serialNumber") String serialNumber) {
+    @Operation(summary = "Get equipment by serial number")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Equipment found",
+                    content = @Content(schema = @Schema(implementation = EquipmentResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Equipment not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<EquipmentResponse> getEquipmentBySerial(
+            @Parameter(description = "Serial number", example = "SN-123456") @PathVariable("serialNumber") String serialNumber) {
         log.info("[GET] Get equipment by serial number{}", serialNumber);
         var result = getBySerial.execute(new com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber(serialNumber));
         return result.map(mapper::toResponse)
@@ -70,9 +104,15 @@ public class EquipmentQueryController {
     }
 
     @GetMapping
+    @Operation(summary = "Search equipment", description = "Returns paginated equipment list filtered by status and/or type")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Equipment page returned"),
+            @ApiResponse(responseCode = "400", description = "Invalid filter parameters",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<Page<EquipmentResponse>> searchEquipments(
-            @RequestParam(name = "status", required = false) String status,
-            @RequestParam(name = "type", required = false) String type,
+            @Parameter(description = "Status slug filter", example = "available") @RequestParam(name = "status", required = false) String status,
+            @Parameter(description = "Type slug filter", example = "bike") @RequestParam(name = "type", required = false) String type,
             @PageableDefault(size = 20, sort = "serialNumber", direction = Sort.Direction.ASC) Pageable pageable) {
 
         log.info("[GET] Search equipments filters status={} type={}", status, type);
