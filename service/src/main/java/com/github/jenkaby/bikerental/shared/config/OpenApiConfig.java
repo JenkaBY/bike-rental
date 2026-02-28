@@ -3,11 +3,18 @@ package com.github.jenkaby.bikerental.shared.config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ProblemDetail;
 
 import java.util.List;
 import java.util.Optional;
@@ -129,5 +136,29 @@ public class OpenApiConfig {
                 .displayName(Tags.TARIFFS)
                 .pathsToMatch("/api/tariffs/**")
                 .build();
+    }
+
+    @Bean
+    public GlobalOpenApiCustomizer globalOpenApiCustomizer() {
+        var internalErrorResponse = new ApiResponse()
+                .description("Internal server error")
+                .content(new Content().addMediaType(
+                        org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                        new MediaType().schema(new Schema<ProblemDetail>().$ref("#/components/schemas/ProblemDetail"))
+                ));
+
+        return openApi -> {
+            if (openApi.getPaths() == null) return;
+            openApi.getPaths().values().forEach(pathItem ->
+                    pathItem.readOperations().forEach(operation -> {
+                        ApiResponses responses = operation.getResponses();
+                        if (responses == null) {
+                            responses = new ApiResponses();
+                            operation.setResponses(responses);
+                        }
+                        responses.putIfAbsent("500", internalErrorResponse);
+                    })
+            );
+        };
     }
 }
