@@ -1,0 +1,40 @@
+name: CD Deploy
+
+on:
+  workflow_run:
+    workflows: [ "CI Test" ]
+    types: [ completed ]
+
+concurrency:
+  group: deploy-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write  # Need write access to push to dev-deploy branch
+
+jobs:
+  deploy:
+    name: "Promote to dev-deploy branch"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      (
+        github.event.workflow_run.head_branch == 'main' ||
+        github.event.workflow_run.head_branch == 'master' ||
+        github.event.workflow_run.head_branch == 'develop'
+      )
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to dev-deploy branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git push origin HEAD:refs/heads/dev-deploy --force
