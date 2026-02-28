@@ -16,8 +16,6 @@ RUN ./gradlew :$SERVICE:dependencies $CI_ARGS || true
 
 COPY --chown=gradle:gradle ["/$SERVICE/src/main/", "./$SERVICE/src/main/"]
 
-#CMD ["tail","-f","/dev/null"]
-
 RUN ./gradlew :$SERVICE:bootJar -x test $CI_ARGS
 
 WORKDIR $APP_HOME/layers

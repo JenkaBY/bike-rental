@@ -12,7 +12,7 @@ directly, and deploys automatically. No paid plan, no deploy hook, no Blueprint 
 push to main/master/develop
     → CI Test (build.yml)
         → on success: CD Deploy (deploy.yml)
-            → force-push HEAD to render-deploy
+            → force-push HEAD to dev-deploy
                 → Render detects change
                     → builds Docker image from service/Dockerfile
                         → deploys bike-rental-api
@@ -72,7 +72,8 @@ To run the full application stack locally (app + database):
 ```bash
 # From the project root
 cd docker
-docker compose up --build
+docker compose up -d --build
+docker compose --profile 'app' up -d --build
 ```
 
 The application will be available at `http://localhost:8080`.
