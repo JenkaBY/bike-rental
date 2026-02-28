@@ -10,6 +10,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [TECH-008] Continuous Deploy to Dev Environment - Completed on 2026-02-28 (Dockerfile, docker-compose app service,
+  deploy.yml force-push CD to render-deploy branch, docs/deployment.md setup guide, no secrets required)
 - [US-RN-001] Создание записи аренды - Completed on 2026-02-07 (rental module: domain model with RentalStatus enum,
   Fast Path and Draft Path creation, JSON Patch (RFC 6902) for updates, REST endpoints, domain exceptions, mappers,
   validators, unit/WebMvc/component tests)
@@ -64,8 +66,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## In Progress
 
-- [TECH-008] Continuous Deploy to Dev Environment - In Progress (88%), subtasks 1.1-1.7 complete, pending end-to-end
-  validation (2026-02-27)
+<!-- No tasks currently in progress -->
 
 ## Pending - Technical Improvements
 

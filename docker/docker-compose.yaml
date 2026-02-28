@@ -33,6 +33,7 @@ services:
       - SPRING_LIQUIBASE_DROP_FIRST=true
     depends_on:
       - postgres
-
+    profiles:
+      - app
 volumes:
   bikesharing-db:
