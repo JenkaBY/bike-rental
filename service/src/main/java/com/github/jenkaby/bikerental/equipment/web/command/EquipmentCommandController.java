@@ -6,9 +6,18 @@ import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentRequest;
 import com.github.jenkaby.bikerental.equipment.web.command.mapper.EquipmentCommandMapper;
 import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentResponse;
 import com.github.jenkaby.bikerental.equipment.web.query.mapper.EquipmentQueryMapper;
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/equipments")
 @Validated
+@Tag(name = OpenApiConfig.Tags.EQUIPMENT)
 public class EquipmentCommandController {
 
     private final CreateEquipmentUseCase createUseCase;
@@ -35,6 +45,15 @@ public class EquipmentCommandController {
     }
 
     @PostMapping
+    @Operation(summary = "Create equipment", description = "Registers a new piece of equipment in the catalog")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Equipment created",
+                    content = @Content(schema = @Schema(implementation = EquipmentResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Serial number already exists",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<EquipmentResponse> createEquipment(@Valid @RequestBody EquipmentRequest request) {
         log.info("[POST] Create equipment with id {}", request.serialNumber());
         log.debug("[POST] Create equipment {}", request);
@@ -44,8 +63,17 @@ public class EquipmentCommandController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update equipment", description = "Replaces all fields of an existing equipment record")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Equipment updated",
+                    content = @Content(schema = @Schema(implementation = EquipmentResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Equipment not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<EquipmentResponse> updateEquipment(
-            @PathVariable("id") Long id,
+            @Parameter(description = "Equipment ID", example = "1") @PathVariable("id") Long id,
             @Valid @RequestBody EquipmentRequest request) {
         log.info("[PUT] Update equipment and id {}", id);
         log.debug("[PUT] Update equipment {}", request);

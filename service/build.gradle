@@ -8,6 +8,24 @@ group = 'com.github.jenkaby.bikerental'
 version = '0.0.1-SNAPSHOT'
 description = 'The main application module of the Bike Rental Application'
 
+def resolveGitCommit = {
+    try {
+        def process = 'git rev-parse --short HEAD'.execute([], project.rootDir)
+        process.waitFor()
+        return process.exitValue() == 0 ? process.text.trim() : 'unknown'
+    } catch (ignored) {
+        return 'unknown'
+    }
+}
+
+springBoot {
+    buildInfo {
+        properties {
+            additional = ['git.commit': resolveGitCommit()]
+        }
+    }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(libs.versions.java.get() as int)
