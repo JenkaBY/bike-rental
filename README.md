@@ -2,6 +2,7 @@
 
 The API is available at: [API](https://bike-rental-app-8pwz.onrender.com/swagger-ui/index.htm). Be patient; it loads
 slowly on the first request because of the free tier.
+
 It's swagger documentation is available
 at: [swagger-ui/index.html](https://bike-rental-app-8pwz.onrender.com/swagger-ui/index.htm)
 
@@ -39,7 +40,7 @@ To run tests, use the following command from the root directory:
 ./gradlew test -Dspring.profiles.active=test,docker
 ```
 
-## Deployment
+## Dev Deployment
 
 The application is deployed on Render.com using Docker. See [deployment.md](./deployment.md) for detailed deployment
 instructions.

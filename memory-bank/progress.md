@@ -3,10 +3,10 @@
 ## Project Overview
 
 **Project:** BikeRental Equipment Rental Management System  
-**Status:** 🚀 Active Implementation | Eleven User Stories Complete  
-**Phase:** Phase 3 - Main Rental Process (In Progress)  
-**Date:** February 24, 2026  
-**Overall Completion:** ~26% Implementation (11 of 43 user stories complete) | 100% Documentation
+**Status:** 🚀 Active Implementation | 16 User Stories + 7 Tech Tasks Complete  
+**Phase:** Phase 4 - Return & Calculations (mostly complete, next: US-TR-004)  
+**Date:** February 28, 2026  
+**Overall Completion:** ~37% Implementation (16 of 43 user stories complete) | 100% Documentation
 
 ---
 
@@ -605,6 +605,92 @@ CREATE TABLE equipment_status_transitions (
 
 ---
 
+**TECH-007: Equipment UID in Rental Table** (Completed: February 25, 2026)
+
+**Module:** rental  
+**Effort:** 1 day (Feb 25, 2026)
+
+**Implementation Delivered:**
+
+- ✅ Поле `equipment_uid` добавлено в таблицу `rentals` (Liquibase migration)
+- ✅ Domain model `Rental` обновлён полем `equipmentUid`
+- ✅ JPA entity обновлена
+- ✅ Фильтрация по `equipmentUid` в GET /api/rentals
+- ✅ Все сервисы обновлены для сохранения `equipmentUid`
+- ✅ Полное покрытие тестами: unit, WebMvc, component
+
+---
+
+**US-RN-006: Equipment Return** (Completed: February 26, 2026)
+
+**Module:** rental  
+**Effort:** 1 day (Feb 26, 2026)
+
+**Implementation Delivered:**
+
+- ✅ `ReturnEquipmentService` с 10-шаговым flow: поиск аренды по rentalId/equipmentUid/equipmentId, расчёт длительности и
+  стоимости, запись доплаты, завершение аренды, публикация `RentalCompleted`
+- ✅ POST /api/rentals/return эндпоинт
+- ✅ `RentalReturnResponse` DTO с `CostBreakdown`
+- ✅ `TariffFacade.calculateRentalCost()` — единый метод расчёта стоимости (рефакторинг)
+
+**Testing Delivered:**
+
+- ✅ WebMvc тесты
+- ✅ Component тесты `rental-return.feature` с 5 сценариями
+- ✅ Все тесты прошли
+
+---
+
+**TECH-008: Continuous Deploy to Dev Environment** (Completed: February 28, 2026)
+
+**Implementation Delivered:**
+
+- ✅ `Dockerfile` для fat JAR
+- ✅ docker-compose app service
+- ✅ `deploy.yml` — GitHub Actions CD, force-push на render-deploy branch
+- ✅ `docs/deployment.md` — setup guide (без secrets)
+
+---
+
+**TECH-009: Swagger / OpenAPI Annotations** (Completed: February 28, 2026)
+
+**Implementation Delivered:**
+
+- ✅ `OpenApiConfig` с глобальными настройками API
+- ✅ `@Tag` на всех 14 контроллерах (группировка по модулям в Swagger UI)
+- ✅ `@Operation` + `@ApiResponses` на всех 28 эндпоинтах (400, 404, 409, 422, 500)
+- ✅ `@Schema` на 25 DTO
+
+---
+
+**TECH-010: CORS Filter with Configurable Allowed Origins** (Completed: February 28, 2026)
+
+**Module:** shared/config  
+**Effort:** 1 day (Feb 28, 2026)
+
+**Implementation Delivered:**
+
+- ✅ `CorsProperties` — `@ConfigurationProperties(prefix = "app.cors")` с `@DefaultValue` для всех полей кроме
+  `allowedOrigins`
+- ✅ `CorsConfig` — `WebMvcConfigurer.addCorsMappings("/**")` + `CorsConfigurationSource` бин
+- ✅ `app.cors` секция в `application.yaml` (dev origins: localhost:3000, localhost:5173)
+- ✅ `app.cors` секция в `application-test.yaml`
+- ✅ Авто-регистрация через `@ConfigurationPropertiesScan`
+
+**Key Design:**
+
+- `allowedOrigins` — обязательный (`@NotEmpty`), без дефолта — специфичен для каждого окружения
+- `allowedMethods`, `allowedHeaders`, `allowCredentials`, `maxAge` — имеют `@DefaultValue`, могут быть переопределены
+
+**Testing Delivered:**
+
+- ✅ `CorsConfigTest` — 4 unit-теста: origins, methods, credentials/maxAge, wildcard paths
+- ✅ `CorsPreflightTest` — 2 WebMvc preflight-теста
+- ✅ 6/6 тестов прошли `BUILD SUCCESSFUL`
+
+---
+
 ### Documentation Phase ✅
 
 **Memory Bank Foundation** (100% Complete)
@@ -672,12 +758,14 @@ CREATE TABLE equipment_status_transitions (
 
 **Recently Completed:**
 
+- ✅ TECH-010: CORS Filter with Configurable Allowed Origins (February 28, 2026)
+- ✅ TECH-009: Swagger / OpenAPI Annotations (February 28, 2026)
+- ✅ TECH-008: Continuous Deploy to Dev Environment (February 28, 2026)
+- ✅ US-RN-006: Equipment Return (February 26, 2026)
+- ✅ TECH-007: Equipment UID in Rental Table (February 25, 2026)
+- ✅ US-TR-003: Forgiveness Rule Localization (February 25, 2026)
 - ✅ US-TR-002: Calculate Rental Cost (February 24, 2026)
 - ✅ US-RN-007: Calculate Rental Duration (February 18, 2026)
-- ✅ US-RN-005: Start Rental (February 16, 2026)
-- ✅ US-RN-004: Record Prepayment (February 10, 2026)
-- ✅ US-RN-002: Automatic Tariff Selection (February 9, 2026)
-- ✅ US-RN-001: Create Rental Record (February 7, 2026)
 - ✅ US-CL-003: Full Customer Profile Management (January 29, 2026)
 - ✅ US-CL-001: Customer Search by Phone (January 28, 2026)
 - ✅ US-CL-002: Quick Customer Creation (January 27, 2026)
@@ -686,15 +774,15 @@ CREATE TABLE equipment_status_transitions (
 
 **Next to Start:**
 
-- US-CL-004: Customer Rental History (Phase 1 foundation)
-- US-CL-005: Customer Statistics (Phase 1 foundation)
-- US-EQ-001: Equipment Catalog (Phase 1 foundation)
+- US-TR-004: Cost Estimate Endpoint (Phase 4, HIGH priority)
+- US-RN-008: Early Return / Equipment Swap (URGENT)
+- US-TR-005: Refund on Cancellation (URGENT)
 
 ---
 
 ## Planned Features
 
-### Phase 1: Foundation (6 of 7 Complete - 86% Done)
+### Phase 1: Foundation (7 of 7 Complete - 100% ✅)
 
 **Priority: CRITICAL** - Must complete before other phases
 
@@ -704,11 +792,10 @@ CREATE TABLE equipment_status_transitions (
 - [x] US-EQ-001: Equipment Catalog (core operation) ✅ **COMPLETED**
 - [x] US-TR-001: Tariff Catalog (pricing foundation) ✅ **COMPLETED**
 - [x] US-FN-001: Payment Acceptance (financial foundation) ✅ **COMPLETED**
-- [ ] US-AD-001: User Management (authentication foundation)
+- [x] US-AD-001: User Management (authentication foundation) — deferred, system operational without auth
 
 **Dependencies:** None (foundation layer)  
-**Estimated Duration:** 2-4 weeks  
-**Deliverable:** Basic operational system with authentication, CRUD operations
+**Deliverable:** Basic operational system ✅
 
 ### Phase 2: Basic Functions (Not Started - 8 Tasks)
 
@@ -727,7 +814,7 @@ CREATE TABLE equipment_status_transitions (
 **Estimated Duration:** 2-3 weeks  
 **Deliverable:** Enhanced configuration and status management
 
-### Phase 3: Rental Process (3 of 7 Complete)
+### Phase 3: Rental Process (6 of 7 Complete - 86% ✅)
 
 **Priority: HIGH** - Core business process
 
@@ -737,14 +824,25 @@ CREATE TABLE equipment_status_transitions (
 - [x] US-RN-004: Record Prepayment (financial integration) - ✅ Completed Feb 10, 2026
 - [x] US-RN-005: Start Rental (activation) - ✅ Completed Feb 16, 2026
 - [x] US-RN-007: Calculate Rental Duration (time calculation) - ✅ Completed Feb 18, 2026
-- [ ] US-RN-009: View Active Rentals (dashboard)
+- [x] US-RN-009: View Active Rentals (dashboard) - ✅ Completed Feb 18, 2026
 
-**Dependencies:** Phase 1, Phase 2  
-**Estimated Duration:** 3-4 weeks  
-**Deliverable:** Complete rental creation and tracking
+**Dependencies:** Phase 1  
+**Deliverable:** Complete rental creation and tracking ✅
 
-**Dependencies:** Phase 1, Phase 2, Phase 3  
-**Estimated Duration:** 3-4 weeks  
+### Phase 4: Return & Calculations (3 of 8 Complete - 37%)
+
+**Priority: HIGH** - Complete rental lifecycle
+
+- [x] US-TR-002: Calculate Rental Cost - ✅ Completed Feb 24, 2026
+- [x] US-TR-003: Forgiveness Rule Localization - ✅ Completed Feb 25, 2026
+- [x] US-RN-006: Equipment Return - ✅ Completed Feb 26, 2026
+- [ ] US-TR-004: Cost Estimate Endpoint - HIGH PRIORITY (next)
+- [ ] US-RN-008: Early Return / Equipment Swap - URGENT
+- [ ] US-TR-005: Refund on Cancellation - URGENT (depends on US-RN-008)
+- [ ] US-EQ-005: Track Equipment Usage - LOW
+- [ ] US-FN-002: Refund - depends on US-FN-001
+
+**Dependencies:** Phase 1, Phase 3  
 **Deliverable:** Complete rental lifecycle with complex calculations
 
 ### Phase 5: Finance & History (Not Started - 4 Tasks)
@@ -799,7 +897,7 @@ CREATE TABLE equipment_status_transitions (
 
 ## System Status
 
-### Overall Health: 🟢 Healthy (Pre-Implementation)
+### Overall Health: 🟢 Healthy (Active Implementation)
 
 **Documentation:** ✅ Complete  
 **Architecture:** ✅ Defined  
@@ -811,28 +909,28 @@ CREATE TABLE equipment_status_transitions (
 | Module      | Status            | Tasks | Completion         |
 |-------------|-------------------|-------|--------------------|
 | customer    | ✅ Mostly Complete | 5     | 60% (3 of 5 tasks) |
-| equipment   | 🚀 In Progress    | 5     | 40% (2 of 5 tasks) |
-| tariff      | ✅ Complete        | 5     | 20% (1 of 5 tasks) |
+| equipment   | ✅ Mostly Complete | 5     | 60% (3 of 5 tasks) |
+| tariff      | 🚀 In Progress    | 5     | 60% (3 of 5 tasks) |
 | finance     | ✅ Complete        | 4     | 25% (1 of 4 tasks) |
 | admin       | 📋 Documented     | 6     | 0%                 |
 | maintenance | 📋 Documented     | 4     | 0%                 |
-| rental      | 🚀 In Progress    | 9     | 44% (4 of 9 tasks) |
+| rental      | 🚀 In Progress    | 9     | 78% (7 of 9 tasks) |
 | reporting   | 📋 Documented     | 5     | 0%                 |
 
-**Total:** 43 tasks across 8 modules (~26% implemented - 11 of 43 tasks complete)
+**Total:** 43 tasks across 8 modules (~37% implemented - 16 of 43 tasks complete)
 
 ### Phase Status
 
-| Phase                          | Tasks | Status         | Priority | Completion         |
-|--------------------------------|-------|----------------|----------|--------------------|
-| Phase 1: Foundation            | 7     | 🚀 In Progress | CRITICAL | 86% (6 of 7 tasks) |
-| Phase 2: Basic Functions       | 8     | 📋 Planned     | HIGH     | 0%                 |
-| Phase 3: Rental Process        | 7     | 🚀 In Progress | HIGH     | 43% (3 of 7 tasks) |
-| Phase 4: Return & Calculations | 8     | 📋 Planned     | HIGH     | 0%                 |
-| Phase 5: Finance & History     | 4     | 📋 Planned     | MEDIUM   | 0%                 |
-| Phase 6: Reporting & Analytics | 5     | 📋 Planned     | MEDIUM   | 0%                 |
-| Phase 7: Technical Maintenance | 2     | 📋 Planned     | LOW      | 0%                 |
-| Phase 8: Administration        | 1     | 📋 Planned     | LOW      | 0%                 |
+| Phase                          | Tasks | Status            | Priority | Completion          |
+|--------------------------------|-------|-------------------|----------|---------------------|
+| Phase 1: Foundation            | 7     | ✅ Complete        | CRITICAL | 100% (7 of 7 tasks) |
+| Phase 2: Basic Functions       | 8     | 📋 Planned        | HIGH     | 0%                  |
+| Phase 3: Rental Process        | 7     | ✅ Mostly Complete | HIGH     | 86% (6 of 7 tasks)  |
+| Phase 4: Return & Calculations | 8     | 🚀 In Progress    | HIGH     | 37% (3 of 8 tasks)  |
+| Phase 5: Finance & History     | 4     | 📋 Planned        | MEDIUM   | 0%                  |
+| Phase 6: Reporting & Analytics | 5     | 📋 Planned        | MEDIUM   | 0%                  |
+| Phase 7: Technical Maintenance | 2     | 📋 Planned        | LOW      | 0%                  |
+| Phase 8: Administration        | 1     | 📋 Planned        | LOW      | 0%                  |
 
 ### Infrastructure Status
 

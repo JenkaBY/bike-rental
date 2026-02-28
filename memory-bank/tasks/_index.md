@@ -10,6 +10,9 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [TECH-010] CORS Filter with Configurable Allowed Origins - Completed on 2026-02-28 (CorsProperties
+  @ConfigurationProperties, CorsConfig WebMvcConfigurer + CorsConfigurationSource bean, app.cors in application.yaml, 6
+  tests: 4 unit + 2 WebMvc preflight)
 - [TECH-009] Swagger / OpenAPI Annotations for All Controllers - Completed on 2026-02-28 (OpenApiConfig, @Tag per
   module, @Operation + @ApiResponses on all 28 endpoints, @Schema on 25 DTOs)
 - [TECH-008] Continuous Deploy to Dev Environment - Completed on 2026-02-28 (Dockerfile, docker-compose app service,
@@ -110,7 +113,6 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 - [US-TR-004] Эндпоинт расчёта стоимости аренды - High priority, tariff module, GET /api/tariffs/cost-estimate с
   разрешением по equipmentType / equipmentUid / tariffId, Depends on US-TR-002, US-RN-002
-- [US-EQ-005] Учет износа и пробега - LOW, Depends on US-RN-006
 - [US-EQ-005] Учет износа и пробега - LOW, Depends on US-RN-006
 - [US-TR-005] Возврат средств при отмене - URGENT, Depends on US-RN-008, US-FN-002
 

@@ -19,84 +19,146 @@ This file should contain:
 ## Current Focus
 
 **Status:** 🚀 Active Implementation - Phase 4 Return & Calculations  
-**Date:** February 25, 2026  
-**Phase:** Phase 4 - Return & Calculations (1 of 8 stories complete - 12.5%)
+**Date:** February 28, 2026  
+**Phase:** Phase 4 - Return & Calculations (US-RN-006 complete, next: US-TR-004)
 
 ### Primary Objective
 
-Continue Phase 4 return and calculations implementation. Recently completed US-TR-003 (Forgiveness Rule Localization).
-Next
-priorities: US-TR-004 (Overtime Charge Calculation), US-RN-006 (Equipment Return), and US-EQ-003 (NFC Scan on Return).
+Phase 4 return & calculations практически завершена. Последний крупный итог — US-RN-006 (Equipment Return) и связанные
+технические задачи TECH-008, TECH-009, TECH-010. Следующий приоритет: US-TR-004 (Cost Estimate Endpoint).
 
 ### Current Activities
 
-1. **US-CL-003: Full Customer Profile Management** ✅ COMPLETED (January 29, 2026)
-    - PUT /api/customers/{id} endpoint with full validation
-    - Mapper refactoring with shared VO mappers
-    - Comprehensive unit, WebMvc, and component tests
-    - All 11 subtasks completed
+1. **TECH-010: CORS Filter** ✅ COMPLETED (February 28, 2026)
+    - `CorsProperties` — `@ConfigurationProperties(prefix = "app.cors")` с `@DefaultValue` для всех полей кроме
+      `allowedOrigins`
+    - `CorsConfig` — `WebMvcConfigurer.addCorsMappings()` + `CorsConfigurationSource` бин для `/**`
+    - `app.cors` секция в `application.yaml` (dev: localhost:3000, localhost:5173)
+    - `app.cors` секция в `application-test.yaml`
+    - 4 unit-теста (`CorsConfigTest`) + 2 WebMvc preflight-теста (`CorsPreflightTest`), все 6 прошли
 
-2. **US-CL-001: Customer Search by Phone** ✅ COMPLETED (January 28, 2026)
-    - GET /api/customers endpoint with validation
-    - Search limit configurable and covered by unit, WebMvc, and component tests
+2. **TECH-009: Swagger / OpenAPI Annotations** ✅ COMPLETED (February 28, 2026)
+    - `OpenApiConfig` с глобальной конфигурацией
+    - `@Tag` на всех 14 контроллерах по модулям
+    - `@Operation` + `@ApiResponses` на всех 28 эндпоинтах
+    - `@Schema` на 25 DTO
 
-3. **US-CL-002: Quick Customer Creation** ✅ COMPLETED (January 27, 2026)
-    - Full implementation delivered with 83+ automated tests
-    - All 12 subtasks completed
-    - Ready for production deployment
+3. **TECH-008: Continuous Deploy** ✅ COMPLETED (February 28, 2026)
+    - Dockerfile, docker-compose app service
+    - `deploy.yml` force-push CD на render-deploy branch
+    - `docs/deployment.md` setup guide
 
-4. **Recently Completed / High Priority**
-    - **US-TR-003: Forgiveness Rule Localization** ✅ COMPLETED (February 25, 2026)
-        - MessageSource configuration with AcceptHeaderLocaleResolver for HTTP-based locale resolution
-        - MessageService interface and implementation to encapsulate MessageSource access
-        - Properties files: messages.properties (EN) and messages_ru.properties (RU) with UTF-8 encoding
-        - AppProperties with app.default-locale: en configuration property
-        - Updated ThresholdForgivenessStrategy to use MessageService instead of direct MessageSource
-        - Default locale configurable via application properties
-        - All unit tests updated with Russian messages, all 17 tests passing
-    - **US-TR-002: Calculate Rental Cost** ✅ COMPLETED (February 24, 2026)
-        - Use Case pattern: CalculateRentalCostUseCase interface and CalculateRentalCostService implementation
-        - Strategy Pattern: ForgivenessStrategy and OvertimeCalculationStrategy for flexible business rules
-        - RentalCost interface (public API) and BaseRentalCostResult record (domain service)
-        - Tariff selection based on actual duration (not planned duration)
-        - Money encapsulation: automatic rounding in Money.of(BigDecimal) factory method
-        - Configuration via RentalProperties (forgiveness threshold: 7 minutes, time-increment: 5 minutes)
-        - Resolved cyclic dependency by accepting primitive types (Duration actualDuration, int billableMinutes)
-        - Comprehensive parameterized unit tests, all passing, no unnecessary stubbings
-        - Component test feature file prepared for future integration with US-RN-006
-    - **US-RN-007: Rental Duration Calculation** ✅ COMPLETED (February 18, 2026)
-        - RentalDurationCalculator service with RentalDurationResult interface
-        - BaseRentalDurationResult record (billableMinutes, actualDuration)
-        - Application properties configuration (app.rental.time-increment: 5m)
-        - calculateActualDuration() method in Rental entity
-        - Comprehensive parameterized unit tests with @ParameterizedTest
-        - Formula: (actualMinutes + increment - 1) / increment * increment for rounding up
-        - Supports durations from 0 minutes to multiple days
-    - **US-FN-001: Payment Acceptance** ✅ COMPLETED (February 4, 2026)
-        - Domain, infrastructure, application, web layers implemented
-        - Receipt generation, UUID generator port, event publishing, WebMvc and component tests added
+4. **US-RN-006: Equipment Return** ✅ COMPLETED (February 26, 2026)
+    - `ReturnEquipmentService` с 10-шаговым flow
+    - POST /api/rentals/return эндпоинт
+    - `RentalReturnResponse` с `CostBreakdown`
+    - `TariffFacade.calculateRentalCost()` — единый метод
+    - WebMvc + component тесты (5 сценариев)
 
-5. **Next Priority Tasks** (Phase 3 Main Rental Process)
-    - US-EQ-001: Equipment Catalog - HIGH PRIORITY (core operations)
-    - US-TR-001: Tariff Catalog - HIGH PRIORITY (pricing foundation)
-    - US-AD-001: User Management - MEDIUM PRIORITY (authentication)
+5. **TECH-007: Equipment UID in Rental** ✅ COMPLETED (February 25, 2026)
+    - Поле `equipment_uid` в таблице `rentals`
+    - Фильтрация по `equipmentUid` в GET /api/rentals
 
-6. **Technical Improvements (Optional)**
-    - TECH-001: Custom UUID Generator - MEDIUM PRIORITY (performance optimization)
-        - Implement UUID v7 for better database performance
-        - Reduces index fragmentation, improves insert performance
-        - Can be implemented anytime, affects future entities
+6. **US-TR-003: Forgiveness Rule Localization** ✅ COMPLETED (February 25, 2026)
+    - `MessageSource` с `AcceptHeaderLocaleResolver`
+    - `messages.properties` (EN) и `messages_ru.properties` (RU)
 
-7. **Foundation Phase Progress**
-    - 4 of 7 foundation stories complete (57%)
-    - Customer module: Mostly complete (3 of 5 stories done)
-    - Equipment module: Not started
-    - Tariff module: Not started
-    - Finance module: Completed (US-FN-001)
-    - Admin module: Not started
-    - Testing strategy established and proven
+### Next Priority Tasks
+
+1. **US-TR-004: Cost Estimate Endpoint** — HIGH PRIORITY
+    - GET /api/tariffs/cost-estimate
+    - Разрешение по `equipmentType` / `equipmentUid` / `tariffId`
+    - Depends on US-TR-002 ✅, US-RN-002 ✅
+
+2. **US-RN-008: Early Return / Equipment Swap** — URGENT
+    - Depends on US-RN-005 ✅
+
+3. **US-TR-005: Refund on Cancellation** — URGENT
+    - Depends on US-RN-008, US-FN-002
 
 ## Recent Changes
+
+### Completed (February 28, 2026)
+
+**1. TECH-010: CORS Filter with Configurable Allowed Origins** ✅ COMPLETED
+
+**Implementation:**
+
+- `CorsProperties` record — `@ConfigurationProperties(prefix = "app.cors")`, поля: `allowedOrigins` (`@NotEmpty`,
+  обязательный), `allowedMethods` (`@DefaultValue` GET/POST/PUT/PATCH/DELETE/OPTIONS), `allowedHeaders` (
+  `@DefaultValue` *), `allowCredentials` (`@DefaultValue` true), `maxAge` (`@DefaultValue` 3600)
+- `CorsConfig` — `@Configuration` + `WebMvcConfigurer.addCorsMappings("/**")` + `CorsConfigurationSource` бин
+- `application.yaml` дополнен секцией `app.cors` (dev: localhost:3000, localhost:5173)
+- `application-test.yaml` дополнен секцией `app.cors`
+- Авто-регистрация через `@ConfigurationPropertiesScan` в `BikeRentalApplication`
+
+**Testing:**
+
+- `CorsConfigTest` — 4 unit-теста: origins, methods, credentials/maxAge, wildcard paths
+- `CorsPreflightTest` — 2 WebMvc preflight-теста: разрешённый origin → 200 + заголовки; запрещённый → нет
+  `Access-Control-Allow-Origin`
+- Все 6 тестов прошли `BUILD SUCCESSFUL`
+
+---
+
+**2. TECH-009: Swagger / OpenAPI Annotations** ✅ COMPLETED (February 28, 2026)
+
+**Implementation:**
+
+- `OpenApiConfig` с глобальными настройками API
+- `@Tag` на всех 14 контроллерах (группировка по модулям)
+- `@Operation` + `@ApiResponses` на всех 28 эндпоинтах (включая 400, 404, 409, 422, 500)
+- `@Schema` на 25 DTO
+
+---
+
+**3. TECH-008: Continuous Deploy to Dev Environment** ✅ COMPLETED (February 28, 2026)
+
+**Implementation:**
+
+- `Dockerfile` для fat JAR
+- docker-compose app service
+- `deploy.yml` — GitHub Actions CD, force-push на render-deploy branch
+- `docs/deployment.md` — setup guide
+
+---
+
+### Completed (February 26, 2026)
+
+**1. US-RN-006: Equipment Return** ✅ COMPLETED
+
+**Implementation:**
+
+- `ReturnEquipmentService` с 10-шаговым flow: поиск аренды по rentalId/equipmentUid/equipmentId, расчёт длительности и
+  стоимости, запись доплаты, завершение аренды, публикация `RentalCompleted`
+- POST /api/rentals/return эндпоинт
+- `RentalReturnResponse` с `CostBreakdown`
+- `TariffFacade.calculateRentalCost()` — единый метод для расчёта
+
+**Testing:**
+
+- WebMvc тесты
+- Component тесты `rental-return.feature` с 5 сценариями
+
+---
+
+### Completed (February 25, 2026)
+
+**1. TECH-007: Equipment UID in Rental Table** ✅ COMPLETED
+
+- Поле `equipment_uid` в таблице `rentals`
+- Обновлены domain model и JPA entity
+- Фильтрация по `equipmentUid` в GET /api/rentals
+- Полное покрытие тестами: unit, WebMvc, component
+
+**2. US-TR-003: Forgiveness Rule Localization** ✅ COMPLETED
+
+- `MessageSource` с `AcceptHeaderLocaleResolver`
+- `messages.properties` (EN) и `messages_ru.properties` (RU) с UTF-8
+- `MessageService` интерфейс и реализация
+- Все 17 unit-тестов прошли
+
+---
 
 ### Completed (February 18, 2026)
 
