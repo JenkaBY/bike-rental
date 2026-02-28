@@ -89,7 +89,7 @@ class ModulithBoundariesTest {
                 // Ignore standard library and framework dependencies
                 .ignoreDependency(resideInAnyPackage("..infrastructure.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct..", "com.github.f4b6a3..", "tools.jackson.."))
                 .ignoreDependency(resideInAnyPackage("..shared.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct.."))
-                .ignoreDependency(resideInAnyPackage("..web.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct..", "tools.jackson..", "com.fasterxml.jackson.."))
+                .ignoreDependency(resideInAnyPackage("..web.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct..", "tools.jackson..", "com.fasterxml.jackson..", "io.swagger.."))
                 .ignoreDependency(resideInAnyPackage("..application.."), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct.."))
                 .ignoreDependency(resideInAnyPackage("com.github.jenkaby.bikerental.*"), resideInAnyPackage("java..", "javax..", "jakarta..", "org.springframework..", "org.slf4j..", "lombok..", "org.mapstruct..", "org.springframework.modulith.."))
                 // Allow ModuleApi to access standard library (records extend java.lang.Record)
