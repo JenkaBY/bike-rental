@@ -10,6 +10,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [TECH-009] Swagger / OpenAPI Annotations for All Controllers - Completed on 2026-02-28 (OpenApiConfig, @Tag per
+  module, @Operation + @ApiResponses on all 28 endpoints, @Schema on 25 DTOs)
 - [TECH-008] Continuous Deploy to Dev Environment - Completed on 2026-02-28 (Dockerfile, docker-compose app service,
   deploy.yml force-push CD to render-deploy branch, docs/deployment.md setup guide, no secrets required)
 - [US-RN-001] Создание записи аренды - Completed on 2026-02-07 (rental module: domain model with RentalStatus enum,
@@ -70,8 +72,6 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Technical Improvements
 
-- [TECH-009] Swagger / OpenAPI Annotations for All Controllers - Medium priority, all modules, add `@Tag` /
-  `@Operation` / `@ApiResponse` / `@Schema` to 14 controllers and their DTOs (2026-02-27)
 - [TECH-001] Custom UUID Generator for Hibernate Entity IDs - Medium priority, shared module, performance improvement
 - [TECH-002] Integrate specification-arg-resolver for equipment filtering - Add advanced query param-based
   Specifications for equipment search (2026-02-02)
