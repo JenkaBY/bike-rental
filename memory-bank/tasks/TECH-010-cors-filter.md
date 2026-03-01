@@ -109,3 +109,7 @@ app:
 - Написан `CorsPreflightTest` с 2 WebMvc-тестами: preflight с разрешённым origin и запрос с запрещённым origin
 - Все 6 тестов прошли: `BUILD SUCCESSFUL`
 
+### 2026-03-01
+
+- Исправлена регистрация `CorsProperties` в WebMvc тестах через `@EnableConfigurationProperties` в `ApiTest`
+- Подтверждено прохождение `CorsPreflightTest` и WebMvc тестов тарифа

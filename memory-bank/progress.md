@@ -12,6 +12,14 @@
 
 ## Completed Features
 
+### Maintenance Fixes (March 1, 2026)
+
+- Исправлена регистрация `CorsProperties` в WebMvc тестах через `@EnableConfigurationProperties` в `ApiTest`
+- Ошибка `No qualifying bean of type 'boolean'` устранена для WebMvc контекста
+- `CorsPreflightTest` и WebMvc тесты тарифа проходят
+
+---
+
 ### Architecture Validation
 
 **Modulith Test Stabilization** (January 28, 2026)
