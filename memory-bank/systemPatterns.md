@@ -749,10 +749,14 @@ public Customer createCustomer(...) {
 
 ### API Security
 
-**CORS Configuration:**
+**CORS Configuration (Implemented):**
 
-- Whitelist allowed origins
-- Credentials support
+- `CorsProperties` — `@ConfigurationProperties(prefix = "app.cors")` с `@DefaultValue` для всех полей кроме
+  `allowedOrigins`
+- `CorsConfig` — `WebMvcConfigurer.addCorsMappings("/**")` + `CorsConfigurationSource` бин
+- `allowedOrigins` — обязательный, задаётся в `application.yaml` для каждого окружения
+- Дефолты: methods = GET/POST/PUT/PATCH/DELETE/OPTIONS, headers = *, credentials = true, maxAge = 3600
+- Расположение: `shared/config/` (web infrastructure adapter layer)
 
 **Rate Limiting:**
 

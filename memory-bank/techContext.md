@@ -107,6 +107,31 @@ This file should contain:
 - **Java 21+ Runtime** - JVM required on target servers
 - Minimal infrastructure requirements (single server deployment)
 
+### Application Configuration Properties
+
+All typed configuration uses `@ConfigurationProperties` records auto-discovered via `@ConfigurationPropertiesScan`
+on `BikeRentalApplication`. Properties can be overridden per environment via `application-{profile}.yaml`.
+
+| Prefix          | Class                       | Key Fields                                                                                    | Notes                                                                                             |
+|-----------------|-----------------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| `app`           | `AppProperties`             | `defaultLocale`                                                                               | Default locale for i18n                                                                           |
+| `app.rental`    | `RentalProperties`          | `timeIncrement`, `forgiveness.overtimeDuration`                                               | Rental calculation rules                                                                          |
+| `app.customers` | *(inline in AppProperties)* | `searchLimitResult`                                                                           | Customer search limit                                                                             |
+| `app.cors`      | `CorsProperties`            | `allowedOrigins` (required), `allowedMethods`, `allowedHeaders`, `allowCredentials`, `maxAge` | CORS filter — `allowedOrigins` must be set per environment, all other fields have `@DefaultValue` |
+
+**CORS defaults (overridable):**
+
+```yaml
+app:
+  cors:
+    allowed-origins:          # REQUIRED — no default, set per environment
+      - "http://localhost:3000"
+    allowed-methods:          # default: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers:          # default: *
+    allow-credentials: true   # default: true
+    max-age: 3600             # default: 3600 (seconds)
+```
+
 ## Development Setup
 
 ### Prerequisites
