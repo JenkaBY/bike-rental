@@ -42,5 +42,6 @@ To run tests, use the following command from the root directory:
 
 ## Dev Deployment
 
-The application is deployed on Render.com using Docker. See [deployment.md](./deployment.md) for detailed deployment
+The application is deployed on Render.com as Docker container. See [deployment.md](./deployment.md) for detailed
+deployment
 instructions.
