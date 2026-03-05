@@ -353,8 +353,7 @@ localhost:5432  → PostgreSQL Database (Docker)
 
 Configured in `application-management-config.yaml` (imported via `spring.config.import` in `application.yaml`).
 Endpoints: `/actuator/health`, `/actuator/info`, `/actuator/metrics`. Build info (version = git commit hash, git.commit)
-from `buildInfo` in `service/build.gradle`. Component tests override via `BuildPropertiesTestConfig` for predictable
-assertions.
+from `buildInfo` in `service/build.gradle`.
 
 **Logging:**
 
