@@ -34,7 +34,6 @@ This file should contain:
 - **PostgreSQL 15+** - Primary relational database
 - ACID compliance for financial transactions
 - JSON/JSONB support for flexible data structures
-- Full-text search capabilities
 
 **Security:**
 
@@ -248,10 +247,10 @@ bikerent/
 
 ```bash
 # All tests
-./gradlew test
+./gradlew test -Dspring.profiles.active=test
 
 # Specific module
-./gradlew :service:test
+./gradlew :service:test -Dspring.profiles.active=test
 ./gradlew :component-test:test -Dspring.profiles.active=test,docker
 
 # Specific test class
@@ -352,17 +351,10 @@ localhost:5432  → PostgreSQL Database (Docker)
 
 **Spring Boot Actuator:**
 
-```yaml
-# application.yaml
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: when-authorized
-```
+Configured in `application-management-config.yaml` (imported via `spring.config.import` in `application.yaml`).
+Endpoints: `/actuator/health`, `/actuator/info`, `/actuator/metrics`. Build info (version = git commit hash, git.commit)
+from `buildInfo` in `service/build.gradle`. Component tests override via `BuildPropertiesTestConfig` for predictable
+assertions.
 
 **Logging:**
 
@@ -395,7 +387,7 @@ logging:
        │  Component  │  ← Few (End-to-end, positive scenarios)
        │    Tests    │
        ├─────────────┤
-       │     Unit    │  ← Many (Business logic, edge cases)
+       │     Unit    │  ← Many (Endpoints validation, Business logic, edge cases)
        │    Tests    │
        └─────────────┘
 ```

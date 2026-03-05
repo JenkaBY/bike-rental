@@ -21,7 +21,11 @@ def resolveGitCommit = {
 springBoot {
     buildInfo {
         properties {
-            additional = ['git.commit': resolveGitCommit()]
+            var hashCommit = resolveGitCommit()
+            artifact = "bike-rental-api"
+            name = "Bike Rental API"
+            version = hashCommit
+            additional = ['git.commit': hashCommit]
         }
     }
 }
@@ -59,6 +63,7 @@ dependencies {
     implementation libs.spring.boot.starter.data.jpa
     implementation libs.spring.boot.starter.liquibase
     implementation libs.spring.boot.starter.logging
+    implementation libs.spring.boot.starter.actuator
 
 //    temporarily disable security to speed up development
 //    implementation libs.spring.boot.starter.security
