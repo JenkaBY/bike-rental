@@ -3,6 +3,7 @@ FROM gradle:jdk21-alpine AS builder
 ARG APP_HOME=/home/gradle/src
 ARG SERVICE=service
 ARG CI_ARGS='--no-daemon --stacktrace'
+ARG GIT_COMMIT=unknown
 
 WORKDIR $APP_HOME
 # don't copy the settings.gradle file because it includes all submodules and gradle will require all of them to be present in order to run any task.
@@ -16,7 +17,7 @@ RUN ./gradlew :$SERVICE:dependencies $CI_ARGS || true
 
 COPY --chown=gradle:gradle ["/$SERVICE/src/main/", "./$SERVICE/src/main/"]
 
-RUN ./gradlew :$SERVICE:bootJar -x test $CI_ARGS
+RUN ./gradlew :$SERVICE:bootJar -x test $CI_ARGS -PgitCommit=$GIT_COMMIT
 
 WORKDIR $APP_HOME/layers
 RUN java -Djarmode=tools -jar $APP_HOME/$SERVICE/build/libs/*.jar extract --layers --launcher --destination extracted

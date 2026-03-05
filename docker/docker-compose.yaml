@@ -21,6 +21,7 @@ services:
       dockerfile: service/Dockerfile
       args:
         SERVICE: service
+        GIT_COMMIT: ${GIT_COMMIT:-localRun}
     container_name: bike-rental-app
     restart: always
     ports:
