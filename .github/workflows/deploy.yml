@@ -27,14 +27,23 @@ jobs:
 
     steps:
       - name: Checkout sources
+        id: checkout
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 1
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Inject commit hash into Dockerfile
+        run: |
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          sed -i "s/ARG GIT_COMMIT=.*/ARG GIT_COMMIT=$GIT_COMMIT/" service/Dockerfile
+          echo "Injected GIT_COMMIT=$GIT_COMMIT into service/Dockerfile"
+
       - name: Push to dev-deploy branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add service/Dockerfile
+          git diff --staged --quiet || git commit -m "build: inject commit ${{ github.event.workflow_run.head_sha }} into Dockerfile"
           git push origin HEAD:refs/heads/dev-deploy --force
