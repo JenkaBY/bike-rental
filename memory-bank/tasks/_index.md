@@ -10,6 +10,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [TECH-012] Connect Spring Boot Actuator - Completed on 2026-03-05 (spring-boot-starter-actuator,
+  application-management-config.yaml, actuator.feature component test)
 - [TECH-011] Add Proprietary License (All Rights Reserved) - Completed on 2026-03-02 (LICENSE file in project root, License section in README.md, all dependencies verified as permissive-compatible)
 - [TECH-010] CORS Filter with Configurable Allowed Origins - Completed on 2026-02-28 (CorsProperties
   @ConfigurationProperties, CorsConfig WebMvcConfigurer + CorsConfigurationSource bean, app.cors in application.yaml, 6

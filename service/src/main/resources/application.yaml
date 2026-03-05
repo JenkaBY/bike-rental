@@ -1,6 +1,8 @@
 spring:
   application:
     name: bike-rental
+  config:
+    import: application-management-config.yaml
   datasource:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USER}
