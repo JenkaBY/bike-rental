@@ -9,6 +9,10 @@ version = '0.0.1-SNAPSHOT'
 description = 'The main application module of the Bike Rental Application'
 
 def resolveGitCommit = {
+    // gitCommit is the property set from dockerfile
+    if (project.hasProperty('gitCommit')) {
+        return project.findProperty('gitCommit') ?: 'unknown'
+    }
     try {
         def process = 'git rev-parse --short HEAD'.execute([], project.rootDir)
         process.waitFor()
