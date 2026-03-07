@@ -23,7 +23,7 @@ public class ParameterTypes {
         return objectMapper.convertValue(fromValue, objectMapper.constructType(toValueType));
     }
 
-    @ParameterType("GET|POST|PUT|PATCH|DELETE")
+    @ParameterType("GET|POST|PUT|PATCH|DELETE|OPTIONS")
     public HttpMethod httpMethod(String methodName) {
         return HttpMethod.valueOf(methodName);
     }

@@ -146,6 +146,26 @@ public class WebRequestSteps {
         assertThat(actual).isEmpty();
     }
 
+    @Then("the response headers contain")
+    public void theResponseHeadersContain(DataTable table) {
+        var headers = scenarioContext.getResponse().getHeaders();
+        var map = table.asMaps().get(0);
+        var name = map.get("name");
+        var value = map.get("value");
+        if (value == null || value.isEmpty()) {
+            throw new IllegalArgumentException("Expected value must be provided for header '" + name + "'");
+        }
+        assertThat(headers.getFirst(name)).isEqualTo(value);
+    }
+
+    @Then("the response headers do not contain")
+    public void theResponseHeadersDoNotContain(DataTable table) {
+        var headers = scenarioContext.getResponse().getHeaders();
+        var map = table.asMaps().get(0);
+        var name = map.get("name");
+        assertThat(headers.getFirst(name)).isNull();
+    }
+
     private static Object convertToExpected(Object expected) {
         if ("true".equals(expected) || "false".equals(expected)) {
             expected = Boolean.parseBoolean(expected.toString());

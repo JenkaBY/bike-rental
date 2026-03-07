@@ -20,3 +20,7 @@ logging:
     root: info
     com.github.jenkaby.bikerental: debug
     com.github.jenkaby.bikerental.componenttest: info
+
+app:
+  cors:
+    allowed-origins: http://localhost:4200
