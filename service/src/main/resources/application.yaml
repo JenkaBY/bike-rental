@@ -35,3 +35,7 @@ app:
       overtime-duration: 7m
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: "*"
+    allow-credentials: false
+    max-age: 3600
