@@ -6,6 +6,8 @@ slowly on the first request because of the free tier.
 It's swagger documentation is available
 at: [swagger-ui/index.html](https://bike-rental-app-8pwz.onrender.com/swagger-ui/index.htm)
 
+The UI project is available at: [UI](https://github.com/JenkaBY/bikerental-ui). Follow the readme.md file there.
+
 ## Project Overview
 
 This project is a bike rental application designed to manage the rental process, including customer management,
