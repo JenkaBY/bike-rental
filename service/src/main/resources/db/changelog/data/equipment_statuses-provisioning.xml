@@ -13,7 +13,6 @@
         <loadData tableName="equipment_statuses"
                   file="data/equipment_statuses.csv"
                   relativeToChangelogFile="true">
-            <column name="id" type="numeric"/>
             <column name="slug" type="string"/>
             <column name="name" type="string"/>
             <column name="description" type="string"/>
