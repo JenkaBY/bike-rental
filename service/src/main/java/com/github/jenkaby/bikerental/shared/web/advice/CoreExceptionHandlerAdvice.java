@@ -25,6 +25,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -142,9 +143,11 @@ public class CoreExceptionHandlerAdvice {
     @ExceptionHandler(Exception.class)
     ResponseEntity<ProblemDetail> handleError(Exception ex) {
         var message = ex.getMessage();
-        log.error("Unexpected {} was thrown: {}", ex.getClass(), message);
-        log.debug("Unexpected error", ex);
-        var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        var errorId = UUID.randomUUID();
+        log.error("[{}] Unexpected {} was thrown: {}", errorId, ex.getClass(), message);
+        log.debug("[{}] Unexpected error", errorId, ex);
+        var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
+        body.setProperty("errorId", errorId);
         return ResponseEntity.of(body).build();
     }
 
