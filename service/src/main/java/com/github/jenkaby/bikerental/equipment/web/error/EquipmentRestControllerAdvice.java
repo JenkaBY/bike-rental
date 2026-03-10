@@ -10,20 +10,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.UUID;
+
 @Slf4j
 @RestControllerAdvice(basePackages = "com.github.jenkaby.bikerental.equipment")
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
 public class EquipmentRestControllerAdvice {
 
-    // Add exception handlers as needed
     @ExceptionHandler(InvalidStatusTransitionException.class)
     public ResponseEntity<ProblemDetail> handleInvalidStatusTransition(InvalidStatusTransitionException ex) {
-        log.warn("Attempt to change status for Equipment {}: {}", ex.getMessage(), ex.getId());
+        var errorId = UUID.randomUUID();
+        log.warn("[errorId={}] Attempt to change status for Equipment {}: {}", errorId, ex.getId(), ex.getMessage());
 
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
 
         problem.setTitle("Invalid status transition");
         problem.setDetail(ex.getMessage());
+        problem.setProperty("errorId", errorId);
         return ResponseEntity.of(problem)
                 .build();
     }
