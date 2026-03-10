@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.UUID;
+
 @Slf4j
 @RestControllerAdvice(basePackages = "com.github.jenkaby.bikerental.tariff")
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
@@ -17,10 +19,12 @@ public class TariffRestControllerAdvice {
 
     @ExceptionHandler(SuitableTariffNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleSuitableTariffNotFound(SuitableTariffNotFoundException ex) {
-        log.warn("Suitable tariff not found: {}", ex.getMessage());
+        var errorId = UUID.randomUUID();
+        log.warn("[errorId={}] Suitable tariff not found: {}", errorId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problem.setTitle("Suitable tariff not found");
         problem.setDetail(ex.getMessage());
+        problem.setProperty("errorId", errorId);
         return ResponseEntity.of(problem).build();
     }
 }

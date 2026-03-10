@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.equipment.web.command;
 import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentStatusUseCase;
 import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentStatusUseCase;
 import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentStatusRequest;
+import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentStatusUpdateRequest;
 import com.github.jenkaby.bikerental.equipment.web.command.mapper.EquipmentStatusCommandMapper;
 import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentStatusResponse;
 import com.github.jenkaby.bikerental.equipment.web.query.mapper.EquipmentStatusMapper;
@@ -73,7 +74,7 @@ public class EquipmentStatusCommandController {
     })
     public ResponseEntity<EquipmentStatusResponse> update(
             @Parameter(description = "Equipment status slug", example = "available") @PathVariable("slug") @Slug String slug,
-            @RequestBody @Valid EquipmentStatusRequest request) {
+            @RequestBody @Valid EquipmentStatusUpdateRequest request) {
         var command = commandMapper.toUpdateCommand(slug, request);
         var updated = updateUseCase.execute(command);
         return ResponseEntity.ok(queryMapper.toResponse(updated));

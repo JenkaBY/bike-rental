@@ -40,8 +40,8 @@ Feature: Equipment status endpoints
       | slug    | name    | description      | transitions |
       | RETIRED | Retired | No longer in use |             |
     And the equipment status request is prepared with the following data
-      | slug   | name   | description   | transitions   |
-      | <slug> | <name> | <description> | <transitions> |
+      | name   | description   | transitions   |
+      | <name> | <description> | <transitions> |
     When a PUT request has been made to "/api/equipment-statuses/{slug}" endpoint with
       | {slug} |
       | <slug> |
@@ -70,8 +70,8 @@ Feature: Equipment status endpoints
 
   Scenario Outline: Update status by slug when no allowed transition exists
     Given the equipment status request is prepared with the following data
-      | slug   | name   | description   | transitions    |
-      | <slug> | <name> | <description> | DOES_NOT_EXIST |
+      | name   | description   | transitions    |
+      | <name> | <description> | DOES_NOT_EXIST |
     When a PUT request has been made to "/api/equipment-statuses/{slug}" endpoint with
       | {slug} |
       | <slug> |

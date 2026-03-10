@@ -35,8 +35,8 @@ Feature: Equipment type endpoints
 
   Scenario Outline: Update type by slug
     Given the 'equipment type' request is prepared with the following data
-      | slug   | name   | description   |
-      | <slug> | <name> | <description> |
+      | name   | description   |
+      | <name> | <description> |
     When a PUT request has been made to "/api/equipment-types/{slug}" endpoint with
       | {slug} |
       | <slug> |

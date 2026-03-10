@@ -1,4 +1,4 @@
-id,slug,name,description
-1,bicycle,Bicycle,Standard bicycles for rental
-2,scooter,Scooter,Electric and manual scooters
-3,other,Other,Other equipment types
+slug,name,description
+bicycle,Bicycle,Standard bicycles for rental
+scooter,Scooter,Electric and manual scooters
+other,Other,Other equipment types

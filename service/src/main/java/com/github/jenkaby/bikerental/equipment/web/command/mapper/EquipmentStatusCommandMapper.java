@@ -3,11 +3,12 @@ package com.github.jenkaby.bikerental.equipment.web.command.mapper;
 import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentStatusUseCase;
 import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentStatusUseCase;
 import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentStatusRequest;
+import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentStatusUpdateRequest;
 import org.mapstruct.Mapper;
 
 @Mapper
 public interface EquipmentStatusCommandMapper {
     CreateEquipmentStatusUseCase.CreateEquipmentStatusCommand toCreateCommand(EquipmentStatusRequest request);
 
-    UpdateEquipmentStatusUseCase.UpdateEquipmentStatusCommand toUpdateCommand(String slug, EquipmentStatusRequest request);
+    UpdateEquipmentStatusUseCase.UpdateEquipmentStatusCommand toUpdateCommand(String slug, EquipmentStatusUpdateRequest request);
 }

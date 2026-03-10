@@ -13,7 +13,6 @@
         <loadData tableName="tariffs"
                   file="/data/tariffs.csv"
                   relativeToChangelogFile="true">
-            <column name="id" type="numeric"/>
             <column name="name" type="string"/>
             <column name="description" type="string"/>
             <column name="equipment_type_slug" type="string"/>

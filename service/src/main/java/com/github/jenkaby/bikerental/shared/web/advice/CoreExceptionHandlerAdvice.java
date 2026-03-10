@@ -25,6 +25,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -51,7 +52,9 @@ public class CoreExceptionHandlerAdvice {
         }
 
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errors);
-        log.warn("Bad request for MethodArgumentNotValidException: {}", errors);
+        var errorId = UUID.randomUUID();
+        body.setProperty("errorId", errorId);
+        log.warn("[errorId={}] Bad request for MethodArgumentNotValidException: {}", errorId, errors);
         return ResponseEntity.of(body)
                 .build();
     }
@@ -59,7 +62,9 @@ public class CoreExceptionHandlerAdvice {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity<ProblemDetail> handleError(MethodArgumentTypeMismatchException ex) {
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        log.warn("Bad request for MethodArgumentTypeMismatchException: {}", body);
+        var errorId = UUID.randomUUID();
+        body.setProperty("errorId", errorId);
+        log.warn("[errorId={}] Bad request for MethodArgumentTypeMismatchException: {}", errorId, ex.getMessage());
         return ResponseEntity.of(body)
                 .build();
     }
@@ -67,7 +72,9 @@ public class CoreExceptionHandlerAdvice {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     ResponseEntity<ProblemDetail> handleError(MissingServletRequestParameterException ex) {
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        log.warn("Bad request for MissingServletRequestParameterException: {}", body);
+        var errorId = UUID.randomUUID();
+        body.setProperty("errorId", errorId);
+        log.warn("[errorId={}] Bad request for MissingServletRequestParameterException: {}", errorId, ex.getMessage());
         return ResponseEntity.of(body)
                 .build();
     }
@@ -94,7 +101,9 @@ public class CoreExceptionHandlerAdvice {
                         }))
                 .collect(Collectors.joining(","));
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errors);
-        log.warn("Bad request for HandlerMethodValidationException: {}", errors);
+        var errorId = UUID.randomUUID();
+        body.setProperty("errorId", errorId);
+        log.warn("[errorId={}] Bad request for HandlerMethodValidationException: {}", errorId, errors);
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
@@ -105,7 +114,9 @@ public class CoreExceptionHandlerAdvice {
                 .map(violation -> "%s: %s".formatted(violation.getPropertyPath(), violation.getMessage()))
                 .collect(Collectors.joining(","));
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errors);
-        log.warn("Bad request for ConstraintViolationException: {}", errors);
+        var errorId = UUID.randomUUID();
+        body.setProperty("errorId", errorId);
+        log.warn("[errorId={}] Bad request for ConstraintViolationException: {}", errorId, errors);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
@@ -113,21 +124,33 @@ public class CoreExceptionHandlerAdvice {
     ResponseEntity<ProblemDetail> handleError(HttpMessageNotReadableException ex) {
         var message = ex.getMessage() != null ? ex.getMessage() : "Malformed or missing request body";
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, message);
-        log.warn("Bad request for HttpMessageNotReadableException: {}", message);
+        var errorId = UUID.randomUUID();
+        body.setProperty("errorId", errorId);
+        log.warn("[errorId={}] Bad request for HttpMessageNotReadableException: {}", errorId, message);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({InvalidApiVersionException.class, MissingApiVersionException.class})
     ResponseEntity<ProblemDetail> handleError(ResponseStatusException ex) {
-        log.warn("Invalid api version requested: ", ex);
-        return new ResponseEntity<>(ex.getBody(), ex.getStatusCode());
+        var errorId = UUID.randomUUID();
+        log.warn("[errorId={}] Invalid api version requested", errorId, ex);
+        var body = ex.getBody();
+        if (body != null) {
+            body.setProperty("errorId", errorId);
+            return new ResponseEntity<>(body, ex.getStatusCode());
+        }
+        var pd = ProblemDetail.forStatusAndDetail(ex.getStatusCode(), ex.getMessage());
+        pd.setProperty("errorId", errorId);
+        return new ResponseEntity<>(pd, ex.getStatusCode());
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     ResponseEntity<ProblemDetail> handleError(HttpRequestMethodNotSupportedException ex) {
         var message = ex.getMessage() != null ? ex.getMessage() : "HTTP method not supported";
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.METHOD_NOT_ALLOWED, message);
-        log.warn("Method not allowed for HttpRequestMethodNotSupportedException: {}", message);
+        var errorId = UUID.randomUUID();
+        body.setProperty("errorId", errorId);
+        log.warn("[errorId={}] Method not allowed for HttpRequestMethodNotSupportedException: {}", errorId, message);
         return new ResponseEntity<>(body, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
@@ -135,51 +158,69 @@ public class CoreExceptionHandlerAdvice {
     ResponseEntity<ProblemDetail> handleError(HttpMediaTypeNotSupportedException ex) {
         var message = ex.getMessage() != null ? ex.getMessage() : "Media type not supported";
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);
-        log.warn("Unsupported media type for HttpMediaTypeNotSupportedException: {}", message);
+        var errorId = UUID.randomUUID();
+        body.setProperty("errorId", errorId);
+        log.warn("[errorId={}] Unsupported media type for HttpMediaTypeNotSupportedException: {}", errorId, message);
         return new ResponseEntity<>(body, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<ProblemDetail> handleError(Exception ex) {
         var message = ex.getMessage();
-        log.error("Unexpected {} was thrown: {}", ex.getClass(), message);
-        log.debug("Unexpected error", ex);
-        var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        var errorId = UUID.randomUUID();
+        log.error("[errorId={}] Unexpected {} was thrown: {}", errorId, ex.getClass(), message);
+        log.debug("[errorId={}] Unexpected error", errorId, ex);
+        var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
+        body.setProperty("errorId", errorId);
         return ResponseEntity.of(body).build();
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ProblemDetail> handleNoResourceFound(NoResourceFoundException ex) {
-        log.warn("The resource '{}' not found by reason: {}", ex.getResourcePath(), ex.getMessage());
-        return ResponseEntity.of(ex.getBody()).build();
+        var errorId = UUID.randomUUID();
+        var body = ex.getBody();
+        if (body == null) {
+            body = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        }
+        body.setProperty("errorId", errorId);
+        log.warn("[errorId={}] The resource '{}' not found by reason: {}", errorId, ex.getResourcePath(), ex.getMessage());
+        return ResponseEntity.of(body).build();
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        log.warn("The resource '{}[{}]' not found in DB", ex.getResourceName(), ex.getIdentifier());
+        var errorId = UUID.randomUUID();
+        log.warn("[errorId={}] The resource '{}[{}]' not found in DB", errorId, ex.getResourceName(), ex.getIdentifier());
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        body.setProperty("errorId", errorId);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ReferenceNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleResourceConflictException(ReferenceNotFoundException ex) {
-        log.warn("The referenced resource '{}[{}]' not found in DB", ex.getResourceName(), ex.getIdentifier());
+        var errorId = UUID.randomUUID();
+        log.warn("[errorId={}] The referenced resource '{}[{}]' not found in DB", errorId, ex.getResourceName(), ex.getIdentifier());
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+        body.setProperty("errorId", errorId);
         return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 
     @ExceptionHandler(ResourceConflictException.class)
     public ResponseEntity<ProblemDetail> handleResourceConflictException(ResourceConflictException ex) {
-        log.warn("The resource '{}[{}]' conflicts with other entity in DB", ex.getResourceName(), ex.getIdentifier());
+        var errorId = UUID.randomUUID();
+        log.warn("[errorId={}] The resource '{}[{}]' conflicts with other entity in DB", errorId, ex.getResourceName(), ex.getIdentifier());
         HttpStatus status = HttpStatus.CONFLICT;
         var body = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
+        body.setProperty("errorId", errorId);
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(EquipmentNotAvailableException.class)
     public ResponseEntity<ProblemDetail> handleEquipmentNotAvailableException(EquipmentNotAvailableException ex) {
-        log.warn("Equipment {} is not available for operation. Current status: {}", ex.getEquipmentId(), ex.getCurrentStatus());
+        var errorId = UUID.randomUUID();
+        log.warn("[errorId={}] Equipment {} is not available for operation. Current status: {}", errorId, ex.getEquipmentId(), ex.getCurrentStatus());
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+        body.setProperty("errorId", errorId);
         return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 }
