@@ -1,11 +1,11 @@
 package com.github.jenkaby.bikerental.equipment.web.command;
 
-import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentStatusUseCase;
-import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentStatusUseCase;
-import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentStatusRequest;
-import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentStatusUpdateRequest;
-import com.github.jenkaby.bikerental.equipment.web.command.mapper.EquipmentStatusCommandMapper;
-import com.github.jenkaby.bikerental.equipment.web.query.mapper.EquipmentStatusMapper;
+import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentTypeUseCase;
+import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentTypeUseCase;
+import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentTypeRequest;
+import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentTypeUpdateRequest;
+import com.github.jenkaby.bikerental.equipment.web.command.mapper.EquipmentTypeCommandMapper;
+import com.github.jenkaby.bikerental.equipment.web.query.mapper.EquipmentTypeMapper;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Nested;
@@ -19,18 +19,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.HashSet;
-
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ApiTest(controllers = EquipmentStatusCommandController.class)
-class EquipmentStatusCommandControllerTest {
+@ApiTest(controllers = EquipmentTypeCommandController.class)
+class EquipmentTypeCommandControllerTest {
 
-    public static final String API_EQUIPMENT_STATUSES = "/api/equipment-statuses";
+    public static final String API_EQUIPMENT_TYPES = "/api/equipment-types";
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,16 +37,16 @@ class EquipmentStatusCommandControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private CreateEquipmentStatusUseCase createUseCase;
+    private CreateEquipmentTypeUseCase createUseCase;
 
     @MockitoBean
-    private UpdateEquipmentStatusUseCase updateUseCase;
+    private UpdateEquipmentTypeUseCase updateUseCase;
 
     @MockitoBean
-    private EquipmentStatusCommandMapper commandMapper;
+    private EquipmentTypeCommandMapper commandMapper;
 
     @MockitoBean
-    private EquipmentStatusMapper queryMapper;
+    private EquipmentTypeMapper queryMapper;
 
     @Nested
     class Post {
@@ -60,13 +58,13 @@ class EquipmentStatusCommandControllerTest {
             @ValueSource(strings = {"   ", "\t"})
             @NullAndEmptySource
             void whenSlugIsBlank(String slug) throws Exception {
-                EquipmentStatusRequest request = new EquipmentStatusRequest(
+                EquipmentTypeRequest request = new EquipmentTypeRequest(
                         slug,
-                        "Available",
-                        "Equipment is available for rental"
+                        "Bike",
+                        "Two wheeled vehicle"
                 );
 
-                mockMvc.perform(post(API_EQUIPMENT_STATUSES)
+                mockMvc.perform(post(API_EQUIPMENT_TYPES)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
@@ -77,13 +75,13 @@ class EquipmentStatusCommandControllerTest {
             @Test
             void whenSlugExceedsMaxLength() throws Exception {
                 String longSlug = "a".repeat(51);
-                EquipmentStatusRequest request = new EquipmentStatusRequest(
+                EquipmentTypeRequest request = new EquipmentTypeRequest(
                         longSlug,
-                        "Available",
-                        "Equipment is available for rental"
+                        "Bike",
+                        "Two wheeled vehicle"
                 );
 
-                mockMvc.perform(post(API_EQUIPMENT_STATUSES)
+                mockMvc.perform(post(API_EQUIPMENT_TYPES)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
@@ -91,31 +89,9 @@ class EquipmentStatusCommandControllerTest {
                         .andExpect(jsonPath("$.detail").value(containsString("must not exceed 50 characters")));
             }
 
-            @ParameterizedTest
-            @ValueSource(strings = {"   ", "\t"})
-            @NullAndEmptySource
-            void whenAllowedTransitionsContainsNullOrBlankSlug(String allowedTransition) throws Exception {
-                String longSlug = "a".repeat(5);
-                HashSet<String> allowedTransitions = new HashSet<>();
-                allowedTransitions.add(allowedTransition);
-                EquipmentStatusRequest request = new EquipmentStatusRequest(
-                        longSlug,
-                        "Available",
-                        "Equipment is available for rental",
-                        allowedTransitions
-                );
-
-                mockMvc.perform(post(API_EQUIPMENT_STATUSES)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
-            }
-
             @Test
             void whenRequestBodyIsEmpty() throws Exception {
-                mockMvc.perform(post(API_EQUIPMENT_STATUSES)
+                mockMvc.perform(post(API_EQUIPMENT_TYPES)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{}"))
                         .andExpect(status().isBadRequest());
@@ -123,7 +99,7 @@ class EquipmentStatusCommandControllerTest {
 
             @Test
             void whenRequestBodyIsMalformed() throws Exception {
-                mockMvc.perform(post(API_EQUIPMENT_STATUSES)
+                mockMvc.perform(post(API_EQUIPMENT_TYPES)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{invalid json"))
                         .andExpect(status().isBadRequest());
@@ -137,37 +113,15 @@ class EquipmentStatusCommandControllerTest {
         @Nested
         class ShouldReturn400 {
 
-            @ParameterizedTest
-            @ValueSource(strings = {"   ", "\t"})
-            @NullAndEmptySource
-            void whenAllowedTransitionsContainsNullOrBlankSlug(String allowedTransition) throws Exception {
-                String slug = "a".repeat(5);
-                HashSet<String> allowedTransitions = new HashSet<>();
-                allowedTransitions.add(allowedTransition);
-                EquipmentStatusRequest request = new EquipmentStatusRequest(
-                        slug,
-                        "Available",
-                        "Equipment is available for rental",
-                        allowedTransitions
-                );
-
-                mockMvc.perform(put(API_EQUIPMENT_STATUSES + "/{slug}", slug)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
-            }
-
             @Test
             void whenSlugExceedsMaxLength() throws Exception {
                 String longSlug = "a".repeat(51);
-                var request = new EquipmentStatusUpdateRequest(
-                        "Available",
-                        "Equipment is available for rental"
+                var request = new EquipmentTypeUpdateRequest(
+                        "Bike",
+                        "Two wheeled vehicle"
                 );
 
-                mockMvc.perform(put(API_EQUIPMENT_STATUSES + "/{slug}", longSlug)
+                mockMvc.perform(put(API_EQUIPMENT_TYPES + "/{slug}", longSlug)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
@@ -178,9 +132,9 @@ class EquipmentStatusCommandControllerTest {
             @ParameterizedTest
             @ValueSource(strings = {"   ", "\t"})
             void whenPathSlugIsBlank(String pathSlug) throws Exception {
-                EquipmentStatusRequest request = createValidUpdateRequest();
+                var request = createValidUpdateRequest();
 
-                mockMvc.perform(put(API_EQUIPMENT_STATUSES + "/{slug}", pathSlug)
+                mockMvc.perform(put(API_EQUIPMENT_TYPES + "/{slug}", pathSlug)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest());
@@ -188,9 +142,9 @@ class EquipmentStatusCommandControllerTest {
 
             @Test
             void whenRequestBodyIsEmpty() throws Exception {
-                String pathSlug = "available";
+                String pathSlug = "bike";
 
-                mockMvc.perform(put(API_EQUIPMENT_STATUSES + "/{slug}", pathSlug)
+                mockMvc.perform(put(API_EQUIPMENT_TYPES + "/{slug}", pathSlug)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{}"))
                         .andExpect(status().isBadRequest());
@@ -198,9 +152,9 @@ class EquipmentStatusCommandControllerTest {
 
             @Test
             void whenRequestBodyIsMalformed() throws Exception {
-                String pathSlug = "available";
+                String pathSlug = "bike";
 
-                mockMvc.perform(put(API_EQUIPMENT_STATUSES + "/{slug}", pathSlug)
+                mockMvc.perform(put(API_EQUIPMENT_TYPES + "/{slug}", pathSlug)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{invalid json"))
                         .andExpect(status().isBadRequest());
@@ -208,12 +162,12 @@ class EquipmentStatusCommandControllerTest {
 
         }
 
-        private static @NonNull EquipmentStatusRequest createValidUpdateRequest() {
-            return new EquipmentStatusRequest(
-                    "maintenance",
-                    "Maintenance",
-                    "Equipment is under maintenance"
+        private static @NonNull EquipmentTypeUpdateRequest createValidUpdateRequest() {
+            return new EquipmentTypeUpdateRequest(
+                    "scooter",
+                    "Scooter"
             );
         }
     }
 }
+
