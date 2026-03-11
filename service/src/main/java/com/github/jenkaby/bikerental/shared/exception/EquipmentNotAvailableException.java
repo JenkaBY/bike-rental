@@ -11,13 +11,15 @@ import lombok.Getter;
 @Getter
 public class EquipmentNotAvailableException extends BikeRentalException {
 
+    public static final String ERROR_CODE = "shared.equipment.not_available";
+
     private static final String MESSAGE_TEMPLATE = "Equipment with id %s is not available. Current status: %s";
 
     private final Long equipmentId;
     private final String currentStatus;
 
     public EquipmentNotAvailableException(Long equipmentId, String currentStatus) {
-        super(MESSAGE_TEMPLATE.formatted(equipmentId, currentStatus));
+        super(MESSAGE_TEMPLATE.formatted(equipmentId, currentStatus), ERROR_CODE);
         this.equipmentId = equipmentId;
         this.currentStatus = currentStatus;
     }

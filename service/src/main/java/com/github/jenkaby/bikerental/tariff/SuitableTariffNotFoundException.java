@@ -13,6 +13,8 @@ import java.time.LocalDate;
 @Getter
 public class SuitableTariffNotFoundException extends BikeRentalException {
 
+    public static final String ERROR_CODE = "tariff.suitable.not_found";
+
     private static final String MESSAGE_TEMPLATE = "No suitable tariff found for equipment type '%s' on date %s";
 
     private final String equipmentTypeSlug;
@@ -20,7 +22,7 @@ public class SuitableTariffNotFoundException extends BikeRentalException {
     private final Duration duration;
 
     public SuitableTariffNotFoundException(String equipmentTypeSlug, LocalDate rentalDate) {
-        super(MESSAGE_TEMPLATE.formatted(equipmentTypeSlug, rentalDate));
+        super(MESSAGE_TEMPLATE.formatted(equipmentTypeSlug, rentalDate), ERROR_CODE);
         this.equipmentTypeSlug = equipmentTypeSlug;
         this.rentalDate = rentalDate;
         this.duration = null;
@@ -28,7 +30,7 @@ public class SuitableTariffNotFoundException extends BikeRentalException {
 
     public SuitableTariffNotFoundException(String equipmentTypeSlug, LocalDate rentalDate, Duration duration) {
         super(MESSAGE_TEMPLATE.formatted(equipmentTypeSlug, rentalDate) +
-                (duration != null ? " for duration: " + duration.toMinutes() + " minutes" : ""));
+                (duration != null ? " for duration: " + duration.toMinutes() + " minutes" : ""), ERROR_CODE);
         this.equipmentTypeSlug = equipmentTypeSlug;
         this.rentalDate = rentalDate;
         this.duration = duration;

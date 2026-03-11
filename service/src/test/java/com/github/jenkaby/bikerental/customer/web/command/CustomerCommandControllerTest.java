@@ -179,7 +179,9 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Last name is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("Last name is required")))
+                        .andExpect(jsonPath("$.errors[0].code").value(containsString("Last name is required")));
 
                 verify(createCustomerUseCase, never()).execute(any());
             }

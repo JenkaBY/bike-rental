@@ -10,6 +10,9 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Completed
 
+- [TECH-013] Unified Error Codes, CorrelationId Filter & i18n-Ready Problem Details - Completed on 2026-03-11
+  (errorCode on all 14 domain exceptions, CorrelationIdFilter OncePerRequestFilter, correlationId replaces errorId in
+  all 5 ControllerAdvice classes, structured errors array on 3 validation handlers, 11 new tests, i18n message keys)
 - [TECH-012] Connect Spring Boot Actuator - Completed on 2026-03-05 (spring-boot-starter-actuator,
   application-management-config.yaml, actuator.feature component test)
 - [TECH-011] Add Proprietary License (All Rights Reserved) - Completed on 2026-03-02 (LICENSE file in project root, License section in README.md, all dependencies verified as permissive-compatible)

@@ -7,10 +7,12 @@ import lombok.Getter;
 @Getter
 public class InsufficientPrepaymentException extends BikeRentalException {
 
+    public static final String ERROR_CODE = "rental.prepayment.insufficient";
+
     private final Long rentalId;
 
     public InsufficientPrepaymentException(Long rentalId, String message) {
-        super(message);
+        super(message, ERROR_CODE);
         this.rentalId = rentalId;
     }
 

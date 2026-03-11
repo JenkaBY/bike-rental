@@ -7,7 +7,9 @@ import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
  */
 public class InvalidRentalUpdateException extends BikeRentalException {
 
+    public static final String ERROR_CODE = "rental.update.invalid";
+
     public InvalidRentalUpdateException(String message) {
-        super(message);
+        super(message, ERROR_CODE);
     }
 }

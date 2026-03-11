@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.equipment.web.error;
 
 import com.github.jenkaby.bikerental.equipment.domain.exception.InvalidStatusTransitionException;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -19,15 +20,18 @@ public class EquipmentRestControllerAdvice {
 
     @ExceptionHandler(InvalidStatusTransitionException.class)
     public ResponseEntity<ProblemDetail> handleInvalidStatusTransition(InvalidStatusTransitionException ex) {
-        var errorId = UUID.randomUUID();
-        log.warn("[errorId={}] Attempt to change status for Equipment {}: {}", errorId, ex.getId(), ex.getMessage());
-
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Attempt to change status for Equipment {}: {}", correlationId, ex.getId(), ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
-
         problem.setTitle("Invalid status transition");
         problem.setDetail(ex.getMessage());
-        problem.setProperty("errorId", errorId);
-        return ResponseEntity.of(problem)
-                .build();
+        problem.setProperty("correlationId", correlationId);
+        problem.setProperty("errorCode", ex.getErrorCode());
+        return ResponseEntity.of(problem).build();
+    }
+
+    private String resolveCorrelationId() {
+        String correlationId = MDC.get("correlationId");
+        return correlationId != null ? correlationId : UUID.randomUUID().toString();
     }
 }
