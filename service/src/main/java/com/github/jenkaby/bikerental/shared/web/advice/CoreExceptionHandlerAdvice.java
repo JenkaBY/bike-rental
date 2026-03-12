@@ -83,53 +83,6 @@ public class CoreExceptionHandlerAdvice {
         return ResponseEntity.of(body).build();
     }
 
-//    @ExceptionHandler(HandlerMethodValidationException.class)
-//    ResponseEntity<ProblemDetail> handleError(HandlerMethodValidationException ex) {
-//        var results = ex.getValueResults();
-//        var detail = results.stream()
-//                .flatMap(result -> result.getResolvableErrors().stream()
-//                        .map(MessageSourceResolvable::getDefaultMessage)
-//                        .map(message -> {
-//                            String paramName = result.getMethodParameter().getParameterName();
-//                            if (paramName == null) {
-//                                PathVariable pv = result.getMethodParameter().getParameterAnnotation(PathVariable.class);
-//                                if (pv != null && !pv.name().isBlank()) {
-//                                    paramName = pv.name();
-//                                } else if (pv != null && !pv.value().isBlank()) {
-//                                    paramName = pv.value();
-//                                } else {
-//                                    paramName = "arg" + result.getMethodParameter().getParameterIndex();
-//                                }
-//                            }
-//                            return String.join(" ", paramName, message);
-//                        }))
-//                .collect(Collectors.joining(","));
-//
-//        var errorsList = results.stream()
-//                .flatMap(result -> result.getResolvableErrors().stream()
-//                        .map(resolvable -> {
-//                            String paramName = result.getMethodParameter().getParameterName();
-//                            if (paramName == null) {
-//                                PathVariable pv = result.getMethodParameter().getParameterAnnotation(PathVariable.class);
-//                                paramName = (pv != null && !pv.name().isBlank()) ? pv.name()
-//                                        : (pv != null && !pv.value().isBlank()) ? pv.value()
-//                                        : "arg" + result.getMethodParameter().getParameterIndex();
-//                            }
-//                            String[] codes = resolvable.getCodes();
-//                            String code = (codes != null && codes.length > 0) ? toValidationCode(codes[codes.length - 1]) : "";
-//                            return Map.<String, String>of("field", paramName, "code", code);
-//                        }))
-//                .toList();
-//
-//        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation error");
-//        var correlationId = resolveCorrelationId();
-//        body.setProperty(CORRELATION_ID, correlationId);
-//        body.setProperty(ERROR_CODE, VALIDATION_ERROR);
-//        body.setProperty(ERRORS, errorsList);
-//        log.warn("[correlationId={}] Bad request for HandlerMethodValidationException: {}", correlationId, detail);
-//        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-//    }
-
     //  Occurs when validation failed in annotated @RequestParam, @PathVariable, @RequestHeader, @CookieValue, @ModelAttribute
     @ExceptionHandler(HandlerMethodValidationException.class)
     ResponseEntity<ProblemDetail> handleError(HandlerMethodValidationException ex) {
