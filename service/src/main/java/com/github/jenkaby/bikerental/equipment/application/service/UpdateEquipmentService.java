@@ -7,7 +7,6 @@ import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateUidExce
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentType;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
-import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentTypeRepository;
 import com.github.jenkaby.bikerental.equipment.domain.service.StatusTransitionPolicy;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
@@ -27,7 +26,6 @@ class UpdateEquipmentService implements UpdateEquipmentUseCase {
     private final SerialNumberMapper serialNumberMapper;
     private final UidMapper uidMapper;
     private final EquipmentTypeRepository typeRepository;
-    private final EquipmentStatusRepository statusRepository;
     private final StatusTransitionPolicy statusTransitionPolicy;
 
     UpdateEquipmentService(
@@ -36,13 +34,11 @@ class UpdateEquipmentService implements UpdateEquipmentUseCase {
             SerialNumberMapper serialNumberMapper,
             UidMapper uidMapper,
             EquipmentTypeRepository typeRepository,
-            EquipmentStatusRepository statusRepository,
             StatusTransitionPolicy statusTransitionPolicy) {
         this.repository = repository;
         this.mapper = mapper;
         this.serialNumberMapper = serialNumberMapper;
         this.typeRepository = typeRepository;
-        this.statusRepository = statusRepository;
         this.uidMapper = uidMapper;
         this.statusTransitionPolicy = statusTransitionPolicy;
     }

@@ -110,13 +110,16 @@ Feature: Rental Update Validation
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
     Then the response status is 400
     And the response contains
-      | path     | value       |
-      | $.title  | Bad Request |
-      | $.detail | <detail>    |
+      | path              | value                                     |
+      | $.title           | Bad Request                               |
+      | $.errorCode       | shared.method_arguments.validation_failed |
+      | $.detail          | <detail>                                  |
+      | $.errors[0].field | operations[0].value                       |
+      | $.errors[0].code  | validation.valid_rental_patch_operation   |
     Examples:
-      | duration | detail                                                                                                   |
-      |          | operations[0].value: Value is required for operation 'replace'                                           |
-      | any      | operations[0].value: Value for path '/duration' must be a valid ISO-8601 duration string, e.g. 'PT1H30M' |
+      | duration | detail           |
+      |          | Validation error |
+      | any      | Validation error |
 
   Scenario: Update rental with non-existent tariff
     Given a single rental exists in the database with the following data

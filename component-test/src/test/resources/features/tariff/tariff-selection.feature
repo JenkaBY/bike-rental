@@ -90,9 +90,9 @@ Feature: Tariff selection endpoint
       | unknown       | 60              | 2026-02-10 |
     Then the response status is 404
     And the response contains
-      | path     | value                                                                                             |
-      | $.title  | Suitable tariff not found                                                                         |
-      | $.detail | No suitable tariff found for equipment type 'unknown' on date 2026-02-10 for duration: 60 minutes |
+      | path     | value                     |
+      | $.title  | Resource not found        |
+      | $.detail | Suitable tariff not found |
 
   @ResetClock
   Scenario: Return 404 when no active tariffs for equipment type
@@ -108,6 +108,6 @@ Feature: Tariff selection endpoint
       | e-car         | 60              | 2026-02-07 |
     Then the response status is 404
     And the response contains
-      | path     | value                                                                                           |
-      | $.title  | Suitable tariff not found                                                                       |
-      | $.detail | No suitable tariff found for equipment type 'e-car' on date 2026-02-07 for duration: 60 minutes |
+      | path     | value                     |
+      | $.title  | Resource not found        |
+      | $.detail | Suitable tariff not found |

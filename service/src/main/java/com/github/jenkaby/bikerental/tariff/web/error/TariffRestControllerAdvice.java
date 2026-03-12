@@ -1,7 +1,9 @@
 package com.github.jenkaby.bikerental.tariff.web.error;
 
+import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -19,12 +21,19 @@ public class TariffRestControllerAdvice {
 
     @ExceptionHandler(SuitableTariffNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleSuitableTariffNotFound(SuitableTariffNotFoundException ex) {
-        var errorId = UUID.randomUUID();
-        log.warn("[errorId={}] Suitable tariff not found: {}", errorId, ex.getMessage());
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Suitable tariff not found: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problem.setTitle("Suitable tariff not found");
-        problem.setDetail(ex.getMessage());
-        problem.setProperty("errorId", errorId);
+        problem.setTitle("Resource not found");
+        problem.setDetail("Suitable tariff not found");
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
         return ResponseEntity.of(problem).build();
+    }
+
+    private String resolveCorrelationId() {
+        String correlationId = MDC.get("correlationId");
+        return correlationId != null ? correlationId : UUID.randomUUID().toString();
     }
 }

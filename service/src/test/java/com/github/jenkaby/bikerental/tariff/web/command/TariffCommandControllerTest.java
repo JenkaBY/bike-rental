@@ -5,10 +5,10 @@ import com.github.jenkaby.bikerental.tariff.application.usecase.ActivateTariffUs
 import com.github.jenkaby.bikerental.tariff.application.usecase.CreateTariffUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.DeactivateTariffUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.UpdateTariffUseCase;
+import com.github.jenkaby.bikerental.tariff.domain.model.Tariff;
 import com.github.jenkaby.bikerental.tariff.web.command.dto.TariffRequest;
 import com.github.jenkaby.bikerental.tariff.web.command.mapper.TariffCommandMapper;
 import com.github.jenkaby.bikerental.tariff.web.query.mapper.TariffQueryMapper;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -94,7 +94,8 @@ class TariffCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(Matchers.containsString("Tariff name is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("name"));
             }
 
             @Test
@@ -120,7 +121,8 @@ class TariffCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(Matchers.containsString("must not exceed 200 characters")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("name"));
             }
 
             @Test
@@ -146,7 +148,8 @@ class TariffCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(Matchers.containsString("must not exceed 1000 characters")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("description"));
             }
 
             @ParameterizedTest
@@ -174,7 +177,9 @@ class TariffCommandControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"));
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("basePrice"));
             }
 
             @ParameterizedTest
@@ -202,7 +207,9 @@ class TariffCommandControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"));
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("halfHourPrice"));
             }
 
             @ParameterizedTest
@@ -230,7 +237,9 @@ class TariffCommandControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"));
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("hourPrice"));
             }
 
             @ParameterizedTest
@@ -258,7 +267,9 @@ class TariffCommandControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"));
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("dayPrice"));
             }
 
             @ParameterizedTest
@@ -286,7 +297,9 @@ class TariffCommandControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"));
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("hourDiscountedPrice"));
             }
 
             @Test
@@ -311,7 +324,8 @@ class TariffCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(Matchers.containsString("max 2 decimal places")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("basePrice"));
             }
 
             @Test
@@ -336,7 +350,11 @@ class TariffCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(Matchers.containsString("Valid from date is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.status").value(400))
+                        .andExpect(jsonPath("$.errorCode").value("shared.method_arguments.validation_failed"))
+                        .andExpect(jsonPath("$.errors[0].field").value("validFrom"))
+                        .andExpect(jsonPath("$.errors[0].code").value("validation.not_null"));
             }
 
             @Test
@@ -361,7 +379,9 @@ class TariffCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(Matchers.containsString("Status is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("status"))
+                        .andExpect(jsonPath("$.errors[0].code").value("validation.not_null"));
             }
 
             @Test
@@ -417,7 +437,9 @@ class TariffCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(Matchers.containsString("Tariff name is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("name"))
+                        .andExpect(jsonPath("$.errors[0].code").value("validation.not_blank"));
             }
         }
     }
@@ -426,18 +448,25 @@ class TariffCommandControllerTest {
     @DisplayName("PATCH /api/tariffs/{id}/activate|deactivate")
     class Patch {
 
-        @ParameterizedTest
-        @ValueSource(strings = {"activate", "deactivate"})
-        @DisplayName("should return 200 when activating or deactivating tariff")
-        void patchActivateOrDeactivateShouldReturn200(String action) throws Exception {
+        @Test
+        @DisplayName("should return 200 when activating tariff")
+        void patchActivateShouldReturn200() throws Exception {
             long id = 1L;
-            if ("activate".equals(action)) {
-                given(activateUseCase.execute(eq(id))).willReturn(mock(com.github.jenkaby.bikerental.tariff.domain.model.Tariff.class));
-            } else {
-                given(deactivateUseCase.execute(eq(id))).willReturn(mock(com.github.jenkaby.bikerental.tariff.domain.model.Tariff.class));
-            }
 
-            mockMvc.perform(patch(API_TARIFFS + "/{id}/" + action, id))
+            given(activateUseCase.execute(eq(id))).willReturn(mock(Tariff.class));
+
+
+            mockMvc.perform(patch(API_TARIFFS + "/{id}/activate", id))
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("should return 200 when activating or deactivating tariff")
+        void patchDeactivateShouldReturn200() throws Exception {
+            long id = 1L;
+            given(deactivateUseCase.execute(eq(id))).willReturn(mock(Tariff.class));
+
+            mockMvc.perform(patch(API_TARIFFS + "/{id}/deactivate", id))
                     .andExpect(status().isOk());
         }
     }

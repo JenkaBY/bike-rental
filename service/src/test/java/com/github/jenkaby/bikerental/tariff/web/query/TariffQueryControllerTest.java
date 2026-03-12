@@ -79,10 +79,8 @@ class TariffQueryControllerTest {
             @DisplayName("when id is not positive")
             void getById_shouldReturnBadRequest_whenIdInvalid(long id) throws Exception {
                 mockMvc.perform(get(API_TARIFFS + "/{id}", id))
-                        .andExpect(status().isBadRequest()).andExpect(
-                                jsonPath("$.detail").value(
-                                        containsString("must be greater than 0")
-                                ));
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.detail").value("Bad Request"));
             }
         }
     }

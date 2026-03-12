@@ -6,12 +6,20 @@ import lombok.Getter;
 @Getter
 public class PrepaymentRequiredException extends BikeRentalException {
 
+    public static final String ERROR_CODE = "rental.prepayment.required";
+
     private static final String MESSAGE = "Prepayment must be received before starting rental";
 
-    private final Long rentalId;
-
     public PrepaymentRequiredException(Long rentalId) {
-        super(MESSAGE);
-        this.rentalId = rentalId;
+        super(MESSAGE, ERROR_CODE, new PrepaymentRequiredDetails(rentalId));
+    }
+
+    public PrepaymentRequiredDetails getDetails() {
+        return getParams()
+                .map(d -> (PrepaymentRequiredDetails) d)
+                .orElseThrow(() -> new IllegalArgumentException("Expected PrepaymentRequiredDetails in exception parameters"));
+    }
+
+    public record PrepaymentRequiredDetails(Long rentalId) {
     }
 }

@@ -1,22 +1,34 @@
 package com.github.jenkaby.bikerental.shared.exception;
 
+import org.jspecify.annotations.Nullable;
+
+import java.util.Optional;
+
 /**
  * Base exception for bike rental application.
  */
 public class BikeRentalException extends RuntimeException {
 
-    public BikeRentalException() {
+    private final String errorCode;
+    private final Object params;
+
+    // TODO Revise constructor
+    protected BikeRentalException(String message, String errorCode) {
+        this(message, errorCode, null);
     }
 
-    public BikeRentalException(String message) {
+    // TODO Revise constructor
+    protected BikeRentalException(String message, String errorCode, @Nullable Object params) {
         super(message);
+        this.errorCode = errorCode;
+        this.params = params;
     }
 
-    public BikeRentalException(String message, Throwable cause) {
-        super(message, cause);
+    public String getErrorCode() {
+        return errorCode;
     }
 
-    public BikeRentalException(Throwable cause) {
-        super(cause);
+    public Optional<Object> getParams() {
+        return Optional.ofNullable(params);
     }
 }

@@ -19,15 +19,26 @@ This file should contain:
 ## Current Focus
 
 **Status:** 🚀 Active Implementation - Phase 4 Return & Calculations  
-**Date:** February 28, 2026  
-**Phase:** Phase 4 - Return & Calculations (US-RN-006 complete, next: US-TR-004)
+**Date:** March 11, 2026  
+**Phase:** Phase 4 - Return & Calculations + Technical Improvements
 
 ### Primary Objective
 
-Phase 4 return & calculations практически завершена. Последний крупный итог — US-RN-006 (Equipment Return) и связанные
-технические задачи TECH-008, TECH-009, TECH-010. Следующий приоритет: US-TR-004 (Cost Estimate Endpoint).
+TECH-013 (Unified Error Codes, CorrelationId Filter & i18n-Ready Problem Details) завершён. Все 5 ControllerAdvice
+классов унифицированы: `correlationId` вместо `errorId`, `errorCode` на всех ответах, структурированный массив
+`errors` для валидационных ошибок. Следующий приоритет: US-TR-004 (Cost Estimate Endpoint).
 
 ### Current Activities
+
+1. **TECH-013: Unified Error Codes, CorrelationId Filter & i18n-Ready Problem Details** ✅ COMPLETED (March 11, 2026)
+    - `BikeRentalException` — поле `errorCode` + `getErrorCode()`, новый protected конструктор
+    - `ResourceConflictException` — threading constructor для переопределения кода в подклассах
+    - 14 domain exceptions — каждый получил `ERROR_CODE` константу и передаёт её через super()
+    - `CorrelationIdFilter` — `@Component OncePerRequestFilter`, читает/генерирует `X-Correlation-ID`,
+      хранит в MDC, добавляет в response header
+    - Все 5 ControllerAdvice классов — `correlationId` из MDC, `errorCode` из исключения/хардкода,
+      `errors` List<Map<String,String>> на 3 валидационных handler'ах
+    - 11 новых тестов: `CorrelationIdFilterTest` (4) + `CoreExceptionHandlerAdviceTest` (7)
 
 1. **TECH-010: CORS Filter** ✅ COMPLETED (February 28, 2026)
     - `CorsProperties` — `@ConfigurationProperties(prefix = "app.cors")` с `@DefaultValue` для всех полей кроме
