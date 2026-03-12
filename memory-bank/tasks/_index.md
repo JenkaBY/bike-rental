@@ -92,6 +92,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   improvement (2026-02-09)
 - [TECH-006] Integrate specification-arg-resolver for rental filtering - Medium priority, rental module, replace manual
   filtering logic with declarative Specifications (2026-02-18)
+- [TECH-014] Improve negative scenario responses and tests - Medium priority, standardize error responses, add
+  validation/missing-parameter details, update WebMvc and component negative tests (2026-03-12)
 
 ## Pending - Phase 1: Foundation (Core Stories)
 
