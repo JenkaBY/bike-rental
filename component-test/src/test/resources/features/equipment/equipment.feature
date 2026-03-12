@@ -152,8 +152,11 @@ Feature: Equipment management endpoints
     When a PUT request has been made to "/api/equipments/{requestedObjectId}" endpoint with context
     Then the response status is 422
     And the response contains
-      | path    | value                     |
-      | $.title | Invalid status transition |
+      | path                | value                               |
+      | $.title             | Invalid status transition           |
+      | $.errorCode         | equipment.status.invalid_transition |
+      | $.params.fromStatus | MAINTENANCE                         |
+      | $.params.toStatus   | BROKEN                              |
     Examples:
       | serialNumber | uid             | equipmentType | status | model     | commissionedAt | condition |
       | EQ-001-UPD   | BIKE-001-UPDATE | scooter       | BROKEN | Model A++ | 2026-01-20     | Fair      |
