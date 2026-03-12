@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -64,7 +63,7 @@ class CustomerQueryControllerTest {
             mockMvc.perform(get(API_CUSTOMERS).queryParam("phone", phone))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Bad Request"))
-                    .andExpect(jsonPath("$.detail").value(containsString("Phone search must be 4 to 11 digits")));
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.pattern"));
         }
 
         @ParameterizedTest
@@ -73,7 +72,7 @@ class CustomerQueryControllerTest {
             mockMvc.perform(get(API_CUSTOMERS).queryParam("phone", phone))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Bad Request"))
-                    .andExpect(jsonPath("$.detail").value(containsString("Phone search must be 4 to 11 digits")));
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.pattern"));
         }
     }
 }

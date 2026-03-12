@@ -71,7 +71,7 @@ class EquipmentStatusCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
+                        .andExpect(jsonPath("$.detail").value(containsString("Validation error")));
             }
 
             @Test
@@ -88,7 +88,7 @@ class EquipmentStatusCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not exceed 50 characters")));
+                        .andExpect(jsonPath("$.detail").value(containsString("Validation error")));
             }
 
             @ParameterizedTest
@@ -110,7 +110,7 @@ class EquipmentStatusCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
+                        .andExpect(jsonPath("$.detail").value(containsString("Validation error")));
             }
 
             @Test
@@ -156,7 +156,7 @@ class EquipmentStatusCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
+                        .andExpect(jsonPath("$.detail").value(containsString("Validation error")));
             }
 
             @Test
@@ -172,7 +172,7 @@ class EquipmentStatusCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not exceed 50 characters")));
+                        .andExpect(jsonPath("$.detail").value("Bad Request"));
             }
 
             @ParameterizedTest

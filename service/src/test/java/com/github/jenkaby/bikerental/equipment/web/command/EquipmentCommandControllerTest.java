@@ -22,7 +22,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -120,7 +120,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Serial number is required")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='serialNumber')].code").value(hasItem("validation.not_blank")));
             }
 
             @Test
@@ -141,7 +141,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Serial number must not exceed 50 characters")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='serialNumber')].code").value(hasItem("validation.size")));
             }
 
             @Test
@@ -162,7 +162,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("UID must not exceed 100 characters")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='uid')].code").value(hasItem("validation.size")));
             }
 
             @ParameterizedTest
@@ -184,7 +184,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='typeSlug')].code").value(hasItem("validation.not_blank")));
             }
 
             @ParameterizedTest
@@ -206,7 +206,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='statusSlug')].code").value(hasItem("validation.not_blank")));
             }
 
             @Test
@@ -227,7 +227,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Model must not exceed 200 characters")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='model')].code").value(hasItem("validation.size")));
             }
 
             @Test
@@ -312,7 +312,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Serial number is required")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='serialNumber')].code").value(hasItem("validation.not_blank")));
             }
 
             @Test
@@ -334,7 +334,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Serial number must not exceed 50 characters")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='serialNumber')].code").value(hasItem("validation.size")));
             }
 
             @Test
@@ -356,7 +356,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("UID must not exceed 100 characters")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='uid')].code").value(hasItem("validation.size")));
             }
 
             @ParameterizedTest
@@ -379,7 +379,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='typeSlug')].code").value(hasItem("validation.not_blank")));
             }
 
             @ParameterizedTest
@@ -402,7 +402,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("must not be blank")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='statusSlug')].code").value(hasItem("validation.not_blank")));
             }
 
             @Test
@@ -424,7 +424,7 @@ class EquipmentCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Model must not exceed 200 characters")));
+                        .andExpect(jsonPath("$.errors[?(@.field=='model')].code").value(hasItem("validation.size")));
             }
 
             @Test

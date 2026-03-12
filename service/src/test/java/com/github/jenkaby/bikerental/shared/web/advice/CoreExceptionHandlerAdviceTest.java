@@ -67,7 +67,7 @@ class CoreExceptionHandlerAdviceTest {
                             .content("{\"name\": \"\", \"label\": \"valid\"}"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.detail").value("Validation error"))
-                    .andExpect(jsonPath("$.errorCode").value("shared.request.validation_failed"))
+                    .andExpect(jsonPath("$.errorCode").value("shared.method_arguments.validation_failed"))
                     .andExpect(jsonPath("$.errors").isArray())
                     .andExpect(jsonPath("$.errors", hasSize(1)))
                     .andExpect(jsonPath("$.errors[0].field").value("name"))

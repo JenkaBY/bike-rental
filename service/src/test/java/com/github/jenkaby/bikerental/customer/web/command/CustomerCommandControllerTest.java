@@ -111,7 +111,8 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Phone is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("phone")));
 
                 verify(createCustomerUseCase, never()).execute(any());
             }
@@ -133,7 +134,9 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Phone format is invalid")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("phone")))
+                        .andExpect(jsonPath("$.errors[0].code").value(containsString("pattern")));
 
                 verify(createCustomerUseCase, never()).execute(any());
             }
@@ -156,7 +159,8 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("First name is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("firstName")));
 
                 verify(createCustomerUseCase, never()).execute(any());
             }
@@ -180,8 +184,8 @@ class CustomerCommandControllerTest {
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
                         .andExpect(jsonPath("$.detail").value("Validation error"))
-                        .andExpect(jsonPath("$.errors[0].field").value(containsString("Last name is required")))
-                        .andExpect(jsonPath("$.errors[0].code").value(containsString("Last name is required")));
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("lastName")))
+                        .andExpect(jsonPath("$.errors[0].code").value(containsString("validation")));
 
                 verify(createCustomerUseCase, never()).execute(any());
             }
@@ -202,7 +206,8 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Birth date must be in the past")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("birthDate")));
 
                 verify(createCustomerUseCase, never()).execute(any());
             }
@@ -224,7 +229,8 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Email format is invalid")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("email")));
 
                 verify(createCustomerUseCase, never()).execute(any());
             }
@@ -258,14 +264,15 @@ class CustomerCommandControllerTest {
                                 .content(requestJson))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
 
                 assertThat(response)
-                        .contains("Phone is required")
-                        .contains("First name is required")
-                        .contains("Last name is required");
+                        .contains("phone")
+                        .contains("firstName")
+                        .contains("lastName");
 
                 verify(createCustomerUseCase, never()).execute(any());
             }
@@ -394,7 +401,8 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Phone is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("phone")));
 
                 verify(updateCustomerUseCase, never()).execute(any());
             }
@@ -417,7 +425,9 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Phone format is invalid")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("phone")))
+                        .andExpect(jsonPath("$.errors[0].code").value(containsString("pattern")));
 
                 verify(updateCustomerUseCase, never()).execute(any());
             }
@@ -441,7 +451,8 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("First name is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("firstName")));
 
                 verify(updateCustomerUseCase, never()).execute(any());
             }
@@ -465,7 +476,8 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Last name is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("lastName")));
 
                 verify(updateCustomerUseCase, never()).execute(any());
             }
@@ -487,7 +499,8 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Birth date must be in the past")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("birthDate")));
 
                 verify(updateCustomerUseCase, never()).execute(any());
             }
@@ -510,7 +523,8 @@ class CustomerCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Email format is invalid")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value(containsString("email")));
 
                 verify(updateCustomerUseCase, never()).execute(any());
             }
@@ -549,14 +563,15 @@ class CustomerCommandControllerTest {
                                 .content(requestJson))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
 
                 assertThat(response)
-                        .contains("Phone is required")
-                        .contains("First name is required")
-                        .contains("Last name is required");
+                        .contains("phone")
+                        .contains("firstName")
+                        .contains("lastName");
 
                 verify(updateCustomerUseCase, never()).execute(any());
             }

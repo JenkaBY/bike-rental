@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.shared.config;
 
+import com.github.jenkaby.bikerental.support.web.TestingAppConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CorsPreflightTest.StubController.class)
-@Import({CorsConfig.class})
+@Import({CorsConfig.class, TestingAppConfig.class})
 @EnableConfigurationProperties(CorsProperties.class)
 @ActiveProfiles("test")
 @TestPropertySource(properties = {

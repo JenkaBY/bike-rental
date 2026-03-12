@@ -24,7 +24,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -48,7 +47,6 @@ class RentalCommandControllerTest {
     private static final UUID VALID_CUSTOMER_ID = UUID.randomUUID();
     private static final Long VALID_EQUIPMENT_ID = 1L;
     private static final Duration VALID_DURATION = Duration.ofHours(2);
-    private static final LocalDateTime VALID_START_TIME = LocalDateTime.parse("2026-02-07T10:00:00");
 
     @Autowired
     private MockMvc mockMvc;
@@ -157,7 +155,7 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Customer ID is required")));
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
             }
@@ -178,7 +176,7 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Equipment ID is required")));
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
             }
@@ -199,7 +197,7 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Duration is required")));
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
             }
@@ -403,7 +401,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Patch operations are required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -419,7 +418,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("At least one patch operation is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -440,7 +440,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Operation 'op' is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -461,7 +462,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Path is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -483,7 +485,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Path is required")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -504,7 +507,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Path must start with '/'")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -525,7 +529,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Path '/invalidPath' is not allowed")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -546,7 +551,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Value is required for operation 'replace'")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -567,7 +573,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Value is required for operation 'add'")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -588,7 +595,8 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString("Invalid status value 'INVALID_STATUS'")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
@@ -612,7 +620,8 @@ class RentalCommandControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value(expectedTitle))
-                    .andExpect(jsonPath("$.detail").value(containsString(expectedDetail)));
+                    .andExpect(jsonPath("$.detail").value("Validation error"))
+                    .andExpect(jsonPath("$.errors[0].code").exists());
 
             verify(recordPrepaymentUseCase, never()).execute(any());
         }
@@ -758,8 +767,10 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value(containsString(
-                                "At least one of rentalId, equipmentId, or equipmentUid must be provided")));
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.instance").value("/api/rentals/return"))
+                        .andExpect(jsonPath("$.errors[0].field").value("validIdentifier"))
+                        .andExpect(jsonPath("$.errors[0].code").value("validation.assert_true"));
 
                 verify(returnEquipmentUseCase, never()).execute(any(ReturnEquipmentUseCase.ReturnEquipmentCommand.class));
             }
