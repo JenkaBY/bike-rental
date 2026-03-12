@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.equipment.web.error;
 
 import com.github.jenkaby.bikerental.equipment.domain.exception.InvalidStatusTransitionException;
+import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
@@ -21,12 +22,13 @@ public class EquipmentRestControllerAdvice {
     @ExceptionHandler(InvalidStatusTransitionException.class)
     public ResponseEntity<ProblemDetail> handleInvalidStatusTransition(InvalidStatusTransitionException ex) {
         var correlationId = resolveCorrelationId();
-        log.warn("[correlationId={}] Attempt to change status for Equipment {}: {}", correlationId, ex.getId(), ex.getMessage());
+        log.warn("[correlationId={}] Attempt to change status for Equipment {}: {}", correlationId, ex.getDetails().id(), ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Invalid status transition");
         problem.setDetail(ex.getMessage());
-        problem.setProperty("correlationId", correlationId);
-        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
         return ResponseEntity.of(problem).build();
     }
 

@@ -10,14 +10,19 @@ public class InvalidStatusTransitionException extends BikeRentalException {
 
     private static final String MESSAGE_TEMPLATE = "Invalid status transition from '%s' to '%s' for equipment with id %s";
 
-    private final Object id;
-    private final String fromStatusSlug;
-    private final String toStatusSlug;
-
     public InvalidStatusTransitionException(Object equipmentId, String fromStatusSlug, String toStatusSlug) {
-        super(MESSAGE_TEMPLATE.formatted(fromStatusSlug, toStatusSlug, equipmentId), ERROR_CODE);
-        this.id = equipmentId;
-        this.fromStatusSlug = fromStatusSlug;
-        this.toStatusSlug = toStatusSlug;
+        this(new InvalidStatusTransitionException.StatusTransitionDetails(equipmentId, fromStatusSlug, toStatusSlug));
+    }
+
+    public InvalidStatusTransitionException(StatusTransitionDetails details) {
+        super(MESSAGE_TEMPLATE.formatted(details.fromStatus(), details.toStatus(), details.id()), ERROR_CODE, details);
+    }
+
+    public StatusTransitionDetails getDetails() {
+        return super.getParams().map(params -> (StatusTransitionDetails) params)
+                .orElseThrow(() -> new IllegalArgumentException("InvalidStatusTransitionException must have StatusTransitionDetails as params"));
+    }
+
+    public record StatusTransitionDetails(Object id, String fromStatus, String toStatus) {
     }
 }

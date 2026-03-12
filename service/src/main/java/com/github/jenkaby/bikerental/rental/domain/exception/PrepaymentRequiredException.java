@@ -10,10 +10,16 @@ public class PrepaymentRequiredException extends BikeRentalException {
 
     private static final String MESSAGE = "Prepayment must be received before starting rental";
 
-    private final Long rentalId;
-
     public PrepaymentRequiredException(Long rentalId) {
-        super(MESSAGE, ERROR_CODE);
-        this.rentalId = rentalId;
+        super(MESSAGE, ERROR_CODE, new PrepaymentRequiredDetails(rentalId));
+    }
+
+    public PrepaymentRequiredDetails getDetails() {
+        return getParams()
+                .map(d -> (PrepaymentRequiredDetails) d)
+                .orElseThrow(() -> new IllegalArgumentException("Expected PrepaymentRequiredDetails in exception parameters"));
+    }
+
+    public record PrepaymentRequiredDetails(Long rentalId) {
     }
 }

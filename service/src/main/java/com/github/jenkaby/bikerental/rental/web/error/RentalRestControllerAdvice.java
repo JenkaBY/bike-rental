@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.rental.web.error;
 
 import com.github.jenkaby.bikerental.rental.domain.exception.*;
+import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -26,8 +27,9 @@ public class RentalRestControllerAdvice {
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Invalid rental status");
         problem.setDetail(ex.getMessage());
-        problem.setProperty("correlationId", correlationId);
-        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
         return ResponseEntity.of(problem).build();
     }
 
@@ -37,9 +39,9 @@ public class RentalRestControllerAdvice {
         log.warn("[correlationId={}] Rental not ready for activation: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Rental not ready for activation");
-        problem.setDetail(ex.getMessage());
-        problem.setProperty("correlationId", correlationId);
-        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
         return ResponseEntity.of(problem).build();
     }
 
@@ -50,8 +52,9 @@ public class RentalRestControllerAdvice {
         var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problem.setTitle("Suitable tariff not found");
         problem.setDetail(ex.getMessage());
-        problem.setProperty("correlationId", correlationId);
-        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
         return ResponseEntity.of(problem).build();
     }
 
@@ -62,32 +65,32 @@ public class RentalRestControllerAdvice {
         var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Invalid rental update");
         problem.setDetail(ex.getMessage());
-        problem.setProperty("correlationId", correlationId);
-        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
         return ResponseEntity.of(problem).build();
     }
 
     @ExceptionHandler(PrepaymentRequiredException.class)
     public ResponseEntity<ProblemDetail> handlePrepaymentRequired(PrepaymentRequiredException ex) {
         var correlationId = resolveCorrelationId();
-        log.warn("[correlationId={}] Prepayment required for rental {}: {}", correlationId, ex.getRentalId(), ex.getMessage());
+        log.warn("[correlationId={}] Prepayment required for rental {}: {}", correlationId, ex.getDetails().rentalId(), ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Prepayment required");
         problem.setDetail(ex.getMessage());
-        problem.setProperty("correlationId", correlationId);
-        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
         return ResponseEntity.of(problem).build();
     }
 
     @ExceptionHandler(InsufficientPrepaymentException.class)
     public ResponseEntity<ProblemDetail> handleInsufficientPrepayment(InsufficientPrepaymentException ex) {
         var correlationId = resolveCorrelationId();
-        log.warn("[correlationId={}] Insufficient prepayment for rental {}: {}", correlationId, ex.getRentalId(), ex.getMessage());
+        log.warn("[correlationId={}] Insufficient prepayment for rental {}: {}", correlationId, ex.getDetails().rentalId(), ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Insufficient prepayment");
         problem.setDetail(ex.getMessage());
-        problem.setProperty("correlationId", correlationId);
-        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
         return ResponseEntity.of(problem).build();
     }
 

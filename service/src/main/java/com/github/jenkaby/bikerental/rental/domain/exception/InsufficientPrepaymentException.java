@@ -9,11 +9,8 @@ public class InsufficientPrepaymentException extends BikeRentalException {
 
     public static final String ERROR_CODE = "rental.prepayment.insufficient";
 
-    private final Long rentalId;
-
     public InsufficientPrepaymentException(Long rentalId, String message) {
-        super(message, ERROR_CODE);
-        this.rentalId = rentalId;
+        super(message, ERROR_CODE, new InsufficientPrepaymentDetails(rentalId));
     }
 
     public static InsufficientPrepaymentException forInsufficientPrepayment(Rental rental) {
@@ -30,5 +27,14 @@ public class InsufficientPrepaymentException extends BikeRentalException {
     public static InsufficientPrepaymentException amountBelowEstimatedCost(Long rentalId) {
         return new InsufficientPrepaymentException(rentalId,
                 "Prepayment amount must be at least the estimated cost of the rental");
+    }
+
+    public InsufficientPrepaymentDetails getDetails() {
+        return getParams()
+                .map(d -> (InsufficientPrepaymentDetails) d)
+                .orElseThrow(() -> new IllegalArgumentException("Expected InsufficientPrepaymentDetails in exception parameters"));
+    }
+
+    public record InsufficientPrepaymentDetails(Long rentalId) {
     }
 }

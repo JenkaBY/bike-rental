@@ -23,13 +23,30 @@ Additionally, validation error responses must include a structured `errors` fiel
   "errors": [
     {
       "field": "fieldName",
-      "code": "error.code"
+      "code": "error.code",
+      "message": "error message 1",
+      "params: { "min": 1, "max": 100 } // optional, for message formatting
     },
     {
-      "field": "fieldName",
-      "code": "error.code"
-    }
+      "field": "fieldName2",
+      "code": "error.code",
+      "message": "error message 2",
+      "params: { "value": "abc" } // optional, for message formatting
+    },
+    //...
   ]
+}
+```
+
+Response shape of business exceptions that requires additional parameters (e.g. `InvalidStatusTransitionException`)
+looks like:
+
+```json
+{
+  // existing ProblemDetail fields...
+  "detail": "Business validation failed",
+  "errorCode": "equipment.status.invalid_transition",
+  "params: { "fromStatus": "AVAIALABLE", "toStatus": "RENTED" }
 }
 ```
 
@@ -46,7 +63,7 @@ Currently the API has four structural issues that block i18n on the UI:
 1. **No `errorCode` in responses** — `ProblemDetail` contains only a human-readable `detail` string in
    English. The UI cannot perform i18n lookups without a machine-readable code.
 2. **No `correlationId` propagation** — `errorId` is a UUID generated per exception-handler call with
-   `UUID.randomUUID()`. It is not shared with the client before the error happens, and there is no
+   `UuidGenerator.generate()`. It is not shared with the client before the error happens, and there is no
    per-request tracing ID the UI can attach to outgoing requests.
 3. **Inconsistent `ProblemDetail` shape** — 5 ControllerAdvice classes each generate `errorId`
    independently with duplicated boilerplate.
@@ -74,19 +91,21 @@ compatibility. Full response shape:
 ```json
 {
   "type": "about:blank",
-  "title": "Bad Request",
+  "title": "Validation Failed",
   "status": 400,
-  "detail": "fieldName: message, fieldName2: message2",
+  "detail": "Fields ['name','email'] are invalid",
   "correlationId": "550e8400-e29b-41d4-a716-446655440000",
   "errorCode": "shared.request.validation_failed",
+  "instance": "/api/customers",
   "errors": [
     {
-      "fieldName": "error message"
+      "field": "fieldName",
+      "code": "error.code",
+      "message": "error message",
+      "params: { "min": 1, "max": 100 } // optional, for message formatting
     },
-    {
-      "fieldName2": "error message2"
-    }
-  ]
+    //...
+  ],
 }
 ```
 
@@ -260,6 +279,31 @@ without the filter), handlers fall back to `UUID.randomUUID().toString()`.
     - `CorrelationIdFilterTest` — 4 unit tests: header reuse, UUID generation, uniqueness, MDC cleanup
     - `CoreExceptionHandlerAdviceTest` — 7 WebMvc tests: correlationId propagation, errors array, error codes
     - `messages.properties` (EN) and `messages_ru.properties` (RU) — 24 `error.{code}` keys each
-- Build result: 540 tests, 539 passed, 1 pre-existing failure (`BikeRentalApplicationTest.contextLoads`
-  — requires running DB via testcontainers, unrelated to this task)
+
+### 2026-03-11 (follow-up)
+
+- Corrected `errors` array format in all three validation handlers — now uses `{ "field", "code" }` objects
+- Code pattern updated to match the global `errorCode` convention (`{module}.{entity}.{error_type}`):
+  - Constraint annotation simple name (e.g. `NotBlank`) is converted via `toValidationCode()` helper:
+    CamelCase → snake_case with `([a-z])([A-Z])` regex → lowercase → prefixed with `validation.`
+  - Examples: `NotBlank` → `validation.not_blank`, `NotNull` → `validation.not_null`,
+    `PositiveOrZero` → `validation.positive_or_zero`
+- `MethodArgumentNotValidException`: last element of `FieldError.getCodes()` passed through `toValidationCode()`
+- `HandlerMethodValidationException`: last element of `MessageSourceResolvable.getCodes()` passed through
+  `toValidationCode()`
+- `ConstraintViolationException`: annotation simple name from `getConstraintDescriptor()` passed through
+  `toValidationCode()`
+- `toValidationCode(String)` private static helper added to `CoreExceptionHandlerAdvice`
+- `CoreExceptionHandlerAdviceTest`: `whenBodyHasInvalidField_thenErrorsArrayIsPresent` updated to assert
+  `$.errors[0].code = "validation.not_blank"`
+- All 7 WebMvc tests pass
+
+### 2026-03-11 (follow-up 2)
+
+- Added `error.validation.*` keys to `messages.properties` (EN) and `messages_ru.properties` (RU)
+  for all 12 constraint annotations actually used in the codebase:
+  `not_blank`, `not_null`, `not_empty`, `size`, `min`, `positive`, `decimal_min`,
+  `digits`, `email`, `past`, `pattern`, `assert_true`
+- Key format matches existing convention: `error.{errorCode}` → `error.validation.not_blank` etc.
+- Discovered by scanning all `@*` annotations in `service/src/main/**/*.java`
 

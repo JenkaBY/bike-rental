@@ -70,7 +70,8 @@ class CoreExceptionHandlerAdviceTest {
                     .andExpect(jsonPath("$.errorCode").value("shared.request.validation_failed"))
                     .andExpect(jsonPath("$.errors").isArray())
                     .andExpect(jsonPath("$.errors", hasSize(1)))
-                    .andExpect(jsonPath("$.errors[0].name").exists());
+                    .andExpect(jsonPath("$.errors[0].field").value("name"))
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.not_blank"));
         }
 
         @Test
@@ -81,7 +82,11 @@ class CoreExceptionHandlerAdviceTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.detail").value("Validation error"))
                     .andExpect(jsonPath("$.errors").isArray())
-                    .andExpect(jsonPath("$.errors", hasSize(2)));
+                    .andExpect(jsonPath("$.errors", hasSize(2)))
+                    .andExpect(jsonPath("$.errors[0].field").exists())
+                    .andExpect(jsonPath("$.errors[0].code").exists())
+                    .andExpect(jsonPath("$.errors[1].field").exists())
+                    .andExpect(jsonPath("$.errors[1].code").exists());
         }
     }
 

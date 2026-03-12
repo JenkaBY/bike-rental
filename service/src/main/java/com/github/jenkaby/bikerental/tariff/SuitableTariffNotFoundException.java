@@ -17,22 +17,17 @@ public class SuitableTariffNotFoundException extends BikeRentalException {
 
     private static final String MESSAGE_TEMPLATE = "No suitable tariff found for equipment type '%s' on date %s";
 
-    private final String equipmentTypeSlug;
-    private final LocalDate rentalDate;
-    private final Duration duration;
-
-    public SuitableTariffNotFoundException(String equipmentTypeSlug, LocalDate rentalDate) {
-        super(MESSAGE_TEMPLATE.formatted(equipmentTypeSlug, rentalDate), ERROR_CODE);
-        this.equipmentTypeSlug = equipmentTypeSlug;
-        this.rentalDate = rentalDate;
-        this.duration = null;
-    }
-
     public SuitableTariffNotFoundException(String equipmentTypeSlug, LocalDate rentalDate, Duration duration) {
         super(MESSAGE_TEMPLATE.formatted(equipmentTypeSlug, rentalDate) +
-                (duration != null ? " for duration: " + duration.toMinutes() + " minutes" : ""), ERROR_CODE);
-        this.equipmentTypeSlug = equipmentTypeSlug;
-        this.rentalDate = rentalDate;
-        this.duration = duration;
+                        (duration != null ? " for duration: " + duration.toMinutes() + " minutes" : ""), ERROR_CODE,
+                new Details(equipmentTypeSlug, rentalDate, duration));
+    }
+
+    public Details getDetails() {
+        return getParams().map(params -> (Details) params)
+                .orElseThrow(() -> new IllegalArgumentException("Expected Details in exception parameters"));
+    }
+
+    public record Details(String equipmentType, LocalDate rentalDate, Duration duration) {
     }
 }

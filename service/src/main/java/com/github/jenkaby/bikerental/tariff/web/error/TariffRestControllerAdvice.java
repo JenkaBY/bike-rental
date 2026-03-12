@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.tariff.web.error;
 
+import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -23,10 +24,11 @@ public class TariffRestControllerAdvice {
         var correlationId = resolveCorrelationId();
         log.warn("[correlationId={}] Suitable tariff not found: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problem.setTitle("Suitable tariff not found");
-        problem.setDetail(ex.getMessage());
-        problem.setProperty("correlationId", correlationId);
-        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setTitle("Resource not found");
+        problem.setDetail("Suitable tariff not found");
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
         return ResponseEntity.of(problem).build();
     }
 

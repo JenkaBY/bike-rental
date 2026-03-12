@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.customer.web.error;
 
 import com.github.jenkaby.bikerental.customer.domain.exception.DuplicatePhoneException;
+import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
@@ -25,8 +26,9 @@ public class CustomerRestControllerAdvice {
         var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
         problem.setTitle("Duplicate phone number");
         problem.setDetail(ex.getMessage());
-        problem.setProperty("correlationId", correlationId);
-        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
         return ResponseEntity.of(problem)
                 .build();
     }

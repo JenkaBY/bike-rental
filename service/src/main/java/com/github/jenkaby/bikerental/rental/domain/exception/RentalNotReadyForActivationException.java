@@ -28,4 +28,12 @@ public class RentalNotReadyForActivationException extends BikeRentalException {
         super(MESSAGE_TEMPLATE.formatted(String.join(", ", missingFields)), ERROR_CODE);
         this.missingFields = missingFields;
     }
+
+    public MissingFields getDetails() {
+        return this.getParams().map(params -> (MissingFields) params)
+                .orElseThrow(() -> new IllegalArgumentException("Expected MissingFields in exception parameters"));
+    }
+
+    public record MissingFields(List<String> fields) {
+    }
 }
