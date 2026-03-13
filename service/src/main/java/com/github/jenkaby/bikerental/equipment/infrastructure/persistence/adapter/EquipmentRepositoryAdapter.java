@@ -12,7 +12,9 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -42,6 +44,16 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     public Optional<Equipment> findById(Long id) {
         return jpaRepository.findById(id)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Equipment> findByIds(List<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return List.of();
+        }
+        return jpaRepository.findAllByIdIn(ids).stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override

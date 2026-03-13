@@ -32,61 +32,30 @@ public class RentalEventListener {
 
     @ApplicationModuleListener
     public void onRentalStarted(RentalStarted event) {
-        log.info("Received RentalStarted event for equipment {}", event.equipmentId());
-
-        try {
-            Equipment equipment = equipmentRepository.findById(event.equipmentId())
-                    .orElseGet(() -> {
-                        log.warn("Equipment {} not found, skipping status update", event.equipmentId());
-                        return null;
-                    });
-
-            if (equipment == null) {
-                return;
-            }
-
-            if (RENTED_STATUS.equals(equipment.getStatusSlug())) {
-                log.debug("Equipment {} already in RENTED status, skipping", event.equipmentId());
-                return;
-            }
-
-            var command = equipmentCommandToDomainMapper.toUpdateCommand(equipment, RENTED_STATUS);
-            updateEquipmentUseCase.execute(command);
-            log.info("Successfully changed equipment {} status to RENTED", event.equipmentId());
-
-        } catch (Exception e) {
-            log.error("Failed to update equipment {} status to RENTED: {}",
-                    event.equipmentId(), e.getMessage(), e);
-        }
+        log.info("Received RentalStarted event for equipments {}", event.equipmentIds());
+        equipmentRepository.findByIds(event.equipmentIds())
+                .forEach(equipment -> setStatusForEquipment(equipment, RENTED_STATUS));
     }
 
     @ApplicationModuleListener
     public void onRentalCompleted(RentalCompleted event) {
-        log.info("Received RentalCompleted event for equipment {}", event.equipmentId());
+        log.info("Received RentalCompleted event for equipments {}", event.equipmentIds());
+        equipmentRepository.findByIds(event.equipmentIds())
+                .forEach(equipment -> setStatusForEquipment(equipment, AVAILABLE_STATUS));
+    }
 
+    private void setStatusForEquipment(Equipment equipment, String targetStatus) {
         try {
-            Equipment equipment = equipmentRepository.findById(event.equipmentId())
-                    .orElseGet(() -> {
-                        log.warn("Equipment {} not found, skipping status update", event.equipmentId());
-                        return null;
-                    });
-
-            if (equipment == null) {
+            if (targetStatus.equals(equipment.getStatusSlug())) {
+                log.debug("Equipment {} already in {} status, skipping", equipment.getId(), targetStatus);
                 return;
             }
-
-            if (AVAILABLE_STATUS.equals(equipment.getStatusSlug())) {
-                log.debug("Equipment {} already in AVAILABLE status, skipping", event.equipmentId());
-                return;
-            }
-
-            var command = equipmentCommandToDomainMapper.toUpdateCommand(equipment, AVAILABLE_STATUS);
+            var command = equipmentCommandToDomainMapper.toUpdateCommand(equipment, targetStatus);
             updateEquipmentUseCase.execute(command);
-            log.info("Successfully changed equipment {} status to AVAILABLE", event.equipmentId());
+            log.info("Successfully changed equipment {} status to {}", equipment.getId(), targetStatus);
 
         } catch (Exception e) {
-            log.error("Failed to update equipment {} status to AVAILABLE: {}",
-                    event.equipmentId(), e.getMessage(), e);
+            log.error("Failed to update equipment {} status to {}: {}", equipment.getId(), targetStatus, e.getMessage(), e);
         }
     }
 }
