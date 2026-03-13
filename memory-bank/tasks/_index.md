@@ -77,7 +77,8 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## In Progress
 
-<!-- No tasks currently in progress -->
+- [US-RN-010] Поддержка аренды нескольких единиц оборудования - URGENT - Начало: 2026-03-12
+  (изменение структуры БД, DTO и логики расчёта тарифа; предусмотреть обратную совместимость)
 
 ## Pending - Technical Improvements
 
