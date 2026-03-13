@@ -6,6 +6,8 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -25,14 +27,8 @@ public class RentalJpaEntity {
     @Column(name = "customer_id")
     private UUID customerId;
 
-    @Column(name = "equipment_id")
-    private Long equipmentId;
-
-    @Column(name = "equipment_uid", length = 100)
-    private String equipmentUid;
-
-    @Column(name = "tariff_id")
-    private Long tariffId;
+    @OneToMany(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RentalEquipmentJpaEntity> rentalEquipments = new ArrayList<>();
 
     @Column(nullable = false, length = 20)
     private String status;
@@ -52,17 +48,33 @@ public class RentalJpaEntity {
     @Column(name = "actual_duration_minutes")
     private Integer actualDurationMinutes;
 
-    @Column(name = "estimated_cost", precision = 10, scale = 2)
-    private BigDecimal estimatedCost;
-
-    @Column(name = "final_cost", precision = 10, scale = 2)
-    private BigDecimal finalCost;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    public BigDecimal getEstimatedCost() {
+        return this.rentalEquipments.stream()
+                .map(RentalEquipmentJpaEntity::getEstimatedCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal getFinalCost() {
+        return this.rentalEquipments.stream()
+                .map(RentalEquipmentJpaEntity::getFinalCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public void addRentalEquipment(RentalEquipmentJpaEntity equipment) {
+        equipment.setRental(this);
+        this.rentalEquipments.add(equipment);
+    }
+
+    public void removeRentalEquipment(RentalEquipmentJpaEntity equipment) {
+        equipment.setRental(null);
+        this.rentalEquipments.remove(equipment);
+    }
 
     @PrePersist
     protected void onCreate() {
