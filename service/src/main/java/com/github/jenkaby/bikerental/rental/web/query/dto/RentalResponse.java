@@ -4,14 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Schema(description = "Full rental details")
 public record RentalResponse(
         @Schema(description = "Rental ID", example = "1") Long id,
         @Schema(description = "Customer UUID") UUID customerId,
-        @Schema(description = "Equipment ID", example = "1") Long equipmentId,
-        @Schema(description = "Tariff ID", example = "3") Long tariffId,
+        @Schema(description = "List of equipment items in this rental") List<EquipmentItemResponse> equipmentItems,
         @Schema(description = "Rental status", example = "ACTIVE") String status,
         @Schema(description = "Rental start time") LocalDateTime startedAt,
         @Schema(description = "Expected return time") LocalDateTime expectedReturnAt,

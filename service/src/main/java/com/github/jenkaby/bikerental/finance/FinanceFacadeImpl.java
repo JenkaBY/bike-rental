@@ -8,6 +8,7 @@ import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -67,5 +68,12 @@ class FinanceFacadeImpl implements FinanceFacade {
                 .filter(IS_PREPAYMENT)
                 .findFirst()
                 .map(paymentToInfoMapper::toPaymentInfo);
+    }
+
+    @Override
+    public List<PaymentInfo> getPayments(Long rentalId) {
+        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()
+                .map(paymentToInfoMapper::toPaymentInfo)
+                .toList();
     }
 }

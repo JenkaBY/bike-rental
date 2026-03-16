@@ -12,37 +12,48 @@ import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import com.github.jenkaby.bikerental.tariff.RentalCost;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 @Mapper(uses = {MoneyMapper.class, RentalQueryMapper.class})
-public interface RentalCommandMapper {
+public abstract class RentalCommandMapper {
 
-    CreateRentalUseCase.CreateRentalCommand toCreateCommand(CreateRentalRequest request);
+    protected RentalQueryMapper rentalQueryMapper;
+
+    @Autowired
+    public void setQueryMapper(RentalQueryMapper queryMapper) {
+        this.rentalQueryMapper = queryMapper;
+    }
+
+    public abstract CreateRentalUseCase.CreateRentalCommand toCreateCommand(CreateRentalRequest request);
 
     @Mapping(target = "rentalId", expression = "java(rentalId)")
     @Mapping(target = "amount", source = "request.amount")
     @Mapping(target = "paymentMethod", source = "request.paymentMethod")
     @Mapping(target = "operatorId", source = "request.operatorId")
-    RecordPrepaymentUseCase.RecordPrepaymentCommand toRecordPrepaymentCommand(Long rentalId, RecordPrepaymentRequest request);
+    public abstract RecordPrepaymentUseCase.RecordPrepaymentCommand toRecordPrepaymentCommand(Long rentalId, RecordPrepaymentRequest request);
 
     @Mapping(target = "paymentId", source = "id")
     @Mapping(target = "amount", source = "amount")
-    PrepaymentResponse toPrepaymentResponse(PaymentInfo paymentInfo);
+    public abstract PrepaymentResponse toPrepaymentResponse(PaymentInfo paymentInfo);
 
-    ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request);
+    public abstract ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request);
 
-    default RentalReturnResponse toReturnResponse(ReturnEquipmentResult result, RentalQueryMapper rentalQueryMapper) {
+    public RentalReturnResponse toReturnResponse(ReturnEquipmentResult result) {
         RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());
-        RentalReturnResponse.CostBreakdown costBreakdown = toCostBreakdown(result.cost());
+        var costsBreakdown = result.breakDownCosts().entrySet().stream()
+                .map(entry -> toCostBreakdown(entry.getKey(), entry.getValue()))
+                .toList();
         BigDecimal additionalPayment = result.additionalPayment() != null ? result.additionalPayment().amount() : null;
-        return new RentalReturnResponse(rentalResponse, costBreakdown, additionalPayment, result.paymentInfo());
+        return new RentalReturnResponse(rentalResponse, costsBreakdown, additionalPayment, result.paymentInfo());
     }
 
-    default RentalReturnResponse.CostBreakdown toCostBreakdown(RentalCost cost) {
+    RentalReturnResponse.CostBreakdown toCostBreakdown(Long equipmentId, RentalCost cost) {
         return new RentalReturnResponse.CostBreakdown(
+                equipmentId,
                 cost.baseCost().amount(),
                 cost.overtimeCost().amount(),
                 cost.totalCost().amount(),
@@ -55,19 +66,15 @@ public interface RentalCommandMapper {
         );
     }
 
-    default Map<String, Object> toPatchMap(RentalUpdateJsonPatchRequest request) {
+    public Map<String, Object> toPatchMap(RentalUpdateJsonPatchRequest request) {
         Map<String, Object> patch = new HashMap<>();
-
         for (RentalPatchOperation operation : request.getOperations()) {
             String path = operation.getPath();
-            // Remove leading slash from path
             String fieldName = path.startsWith("/") ? path.substring(1) : path;
-
             if (operation.getOp() != null) {
                 patch.put(fieldName, operation.getValue());
             }
         }
-
         return patch;
     }
 }

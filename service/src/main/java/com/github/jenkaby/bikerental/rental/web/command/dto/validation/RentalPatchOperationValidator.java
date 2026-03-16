@@ -12,7 +12,7 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
 
     private static final Set<String> ALLOWED_PATHS = Set.of(
             "/customerId",
-            "/equipmentId",
+            "/equipmentIds",
             "/tariffId",
             "/duration",
             "/status"
@@ -21,7 +21,7 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
     @Override
     public boolean isValid(RentalPatchOperation operation, ConstraintValidatorContext context) {
         if (operation == null) {
-            return true; // Null validation is handled by @NotNull
+            return true;
         }
 
         boolean isValid = true;

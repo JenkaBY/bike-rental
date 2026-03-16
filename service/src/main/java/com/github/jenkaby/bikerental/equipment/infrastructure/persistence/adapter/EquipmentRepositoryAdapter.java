@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +48,7 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     }
 
     @Override
-    public List<Equipment> findByIds(List<Long> ids) {
+    public List<Equipment> findByIds(Collection<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return List.of();
         }

@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.finance;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -14,4 +15,6 @@ public interface FinanceFacade {
     boolean hasPrepayment(Long rentalId);
 
     Optional<PaymentInfo> getPrepayment(Long rentalId);
+
+    List<PaymentInfo> getPayments(Long rentalId);
 }

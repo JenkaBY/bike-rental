@@ -5,16 +5,16 @@ import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
+import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
 import com.github.jenkaby.bikerental.rental.domain.exception.PrepaymentRequiredException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.util.PatchValueParser;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
-import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
-import com.github.jenkaby.bikerental.shared.exception.EquipmentNotAvailableException;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
@@ -28,6 +28,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -46,6 +48,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
     private final Clock clock;
     private final RentalEventMapper eventMapper;
     private final PatchValueParser valueParser;
+    private final RequestedEquipmentValidator validator;
 
     UpdateRentalService(
             RentalRepository rentalRepository,
@@ -56,7 +59,8 @@ class UpdateRentalService implements UpdateRentalUseCase {
             EventPublisher eventPublisher,
             Clock clock,
             RentalEventMapper eventMapper,
-            PatchValueParser valueParser) {
+            PatchValueParser valueParser,
+            RequestedEquipmentValidator validator) {
         this.rentalRepository = rentalRepository;
         this.customerFacade = customerFacade;
         this.equipmentFacade = equipmentFacade;
@@ -66,6 +70,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
         this.clock = clock;
         this.eventMapper = eventMapper;
         this.valueParser = valueParser;
+        this.validator = validator;
     }
 
     @Override
@@ -73,7 +78,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
     public Rental execute(Long rentalId, Map<String, Object> patch) {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new ResourceNotFoundException(Rental.class, rentalId.toString()));
-
+        var previousState = eventMapper.toRentalState(rental);
         // Handle customerId update
         if (patch.containsKey("customerId")) {
             UUID customerId = valueParser.parseUUID(patch.get("customerId"));
@@ -82,22 +87,6 @@ class UpdateRentalService implements UpdateRentalUseCase {
             rental.selectCustomer(customerId);
         }
 
-        // Handle equipmentId update
-        EquipmentInfo equipment = null;
-        if (patch.containsKey("equipmentId")) {
-            Long equipmentId = valueParser.parseLong(patch.get("equipmentId"));
-            equipment = equipmentFacade.findById(equipmentId)
-                    .orElseThrow(() -> new ReferenceNotFoundException("Equipment", equipmentId.toString()));
-
-            if (!equipment.isAvailable()) {
-                throw new EquipmentNotAvailableException(equipmentId, equipment.statusSlug());
-            }
-
-            rental.selectEquipment(equipmentId);
-            rental.setEquipmentUid(equipment.uid()); // Update equipment UID when equipment changes
-        }
-
-        // Handle duration update
         if (patch.containsKey("duration")) {
             Duration duration = valueParser.parseDuration(patch.get("duration"));
             if (duration == null) {
@@ -106,28 +95,34 @@ class UpdateRentalService implements UpdateRentalUseCase {
             rental.setPlannedDuration(duration);
         }
 
-        // Auto-select tariff if equipment and duration are set, and tariff is not manually set
+        List<EquipmentInfo> equipments = new ArrayList<>();
+        if (patch.containsKey("equipmentIds")) {
+            List<Long> equipmentIds = valueParser.parseListOfLong(patch.get("equipmentIds"));
+            List<EquipmentInfo> foundEquipments = equipmentFacade.findByIds(equipmentIds);
+            validator.validateSize(equipmentIds, foundEquipments);
+            validator.validateAvailability(foundEquipments);
+            equipments.addAll(foundEquipments);
+
+            rental.clearEquipmentRentals();
+            for (var equipment : equipments) {
+                RentalEquipment rentalEquipment = RentalEquipment.assigned(equipment.id(), equipment.uid());
+                ;
+                TariffInfo tariff = selectTariff(equipment, rental.getPlannedDuration());
+                var cost = tariffFacade.calculateRentalCost(tariff.id(), rental.getPlannedDuration());
+                rentalEquipment.setTariffId(tariff.id());
+                rentalEquipment.setEstimatedCost(cost.totalCost());
+                rental.addEquipment(rentalEquipment);
+            }
+        }
+
         if (patch.containsKey("tariffId")) {
-            // Handle tariffId update (manual override)
+            // Handle tariffId update (manual override) for special cases. Have no idea how to implement this at the moment.
             Long tariffId = valueParser.parseLong(patch.get("tariffId"));
             tariffFacade.findById(tariffId)
                     .orElseThrow(() -> new ReferenceNotFoundException("Tariff", tariffId.toString()));
             rental.selectTariff(tariffId);
-        } else if (rental.getEquipmentId() != null && rental.getPlannedDuration() != null) {
-            // Auto-select tariff if equipment and duration are already set
-            if (equipment == null) {
-                equipment = equipmentFacade.findById(rental.getEquipmentId())
-                        .orElseThrow(() -> new ReferenceNotFoundException("Equipment", rental.getEquipmentId().toString()));
-            }
-            autoSelectTariff(rental, equipment);
         }
 
-        // Calculate cost if tariff and duration are set
-        if (rental.getTariffId() != null && rental.getPlannedDuration() != null) {
-            calculateCost(rental);
-        }
-
-        // Handle status update (rental activation)
         if (patch.containsKey("status")) {
             String newStatusStr = valueParser.parseString(patch.get("status"));
             RentalStatus newStatus = RentalStatus.valueOf(newStatusStr);
@@ -135,13 +130,13 @@ class UpdateRentalService implements UpdateRentalUseCase {
             if (RentalStatus.ACTIVE == newStatus) {
                 startRental(rental);
             } else {
-                // Other status changes (if needed in future)
                 rental.setStatus(newStatus);
+                var currentState = eventMapper.toRentalState(rental);
+                eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalUpdated(rental, previousState, currentState));
             }
         }
 
-        Rental saved = rentalRepository.save(rental);
-        return saved;
+        return rentalRepository.save(rental);
     }
 
     private void startRental(Rental rental) {
@@ -158,20 +153,10 @@ class UpdateRentalService implements UpdateRentalUseCase {
         eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);
     }
 
-    private void autoSelectTariff(Rental rental, EquipmentInfo equipment) {
-        TariffInfo selectedTariff = tariffFacade.selectTariff(
+    private TariffInfo selectTariff(EquipmentInfo equipment, Duration plannedDuration) {
+        return tariffFacade.selectTariff(
                 equipment.typeSlug(),
-                rental.getPlannedDuration(),
+                plannedDuration,
                 LocalDate.now(clock));
-
-        rental.selectTariff(selectedTariff.id());
     }
-
-    private void calculateCost(Rental rental) {
-        Money cost = tariffFacade.calculateRentalCost(
-                rental.getTariffId(),
-                rental.getPlannedDuration()).totalCost();
-        rental.setEstimatedCost(cost);
-    }
-
 }

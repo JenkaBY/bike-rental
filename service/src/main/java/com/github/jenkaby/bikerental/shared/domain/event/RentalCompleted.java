@@ -8,7 +8,8 @@ import java.util.List;
 public record RentalCompleted(
         Long rentalId,
         List<Long> equipmentIds,
+        List<Long> returnedEquipmentIds,
         LocalDateTime returnTime,
-        Money finalCost
+        Money totalCost
 ) implements BikeRentalEvent {
 }

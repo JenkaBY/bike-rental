@@ -3,6 +3,8 @@ package com.github.jenkaby.bikerental.rental.application.usecase;
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import org.jspecify.annotations.NonNull;
 
+import java.util.List;
+
 public interface ReturnEquipmentUseCase {
 
     @NonNull
@@ -10,8 +12,8 @@ public interface ReturnEquipmentUseCase {
 
     record ReturnEquipmentCommand(
             Long rentalId,
-            Long equipmentId,
-            String equipmentUid,
+            List<Long> equipmentIds,
+            List<String> equipmentUids,
             PaymentMethod paymentMethod,
             String operatorId
     ) {
