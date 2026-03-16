@@ -6,12 +6,15 @@ import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
+import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
 import com.github.jenkaby.bikerental.rental.domain.exception.PrepaymentRequiredException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.util.PatchValueParser;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.EquipmentNotAvailableException;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
@@ -30,10 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -75,6 +75,8 @@ class UpdateRentalServiceTest {
     private RentalEventMapper eventMapper;
     @Mock
     private PatchValueParser valueParser;
+    @Mock
+    private RequestedEquipmentValidator validator;
     @Spy
     private Clock realClock = spy(Clock.systemDefaultZone());
     @InjectMocks
@@ -236,8 +238,6 @@ class UpdateRentalServiceTest {
                 EQUIPMENT_ID, "EQ-001", equipmentUid, "bicycle", "AVAILABLE", "Model A"
         );
         Rental savedRental = createDraftRental();
-        savedRental.selectEquipment(EQUIPMENT_ID);
-        savedRental.setEquipmentUid(equipmentUid);
 
         given(rentalRepository.findById(RENTAL_ID)).willReturn(Optional.of(rental));
         given(valueParser.parseLong(EQUIPMENT_ID)).willReturn(EQUIPMENT_ID);
@@ -252,8 +252,6 @@ class UpdateRentalServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getEquipmentId()).isEqualTo(EQUIPMENT_ID);
-        assertThat(result.getEquipmentUid()).isEqualTo(equipmentUid);
         then(rentalRepository).should().save(any(Rental.class));
     }
 
@@ -303,7 +301,7 @@ class UpdateRentalServiceTest {
 
     @Test
     @DisplayName("Should auto-select tariff when equipment and duration are set")
-    void shouldAutoSelectTariffWhenEquipmentAndDurationAreSet() {
+    void shouldSelectTariffWhenEquipmentAndDurationAreSet() {
         // Given
         Rental rental = createDraftRentalWithEquipmentAndDuration();
         Map<String, Object> patch = new HashMap<>();
@@ -357,9 +355,9 @@ class UpdateRentalServiceTest {
         // Given
         Rental rental = createReadyForActivationRental();
         Map<String, Object> patch = Map.of("status", "ACTIVE");
-        com.github.jenkaby.bikerental.shared.domain.event.RentalStarted event =
-                new com.github.jenkaby.bikerental.shared.domain.event.RentalStarted(
-                        RENTAL_ID, CUSTOMER_ID, EQUIPMENT_ID, FIXED_TIME, FIXED_TIME.plus(DURATION)
+        RentalStarted event =
+                new RentalStarted(
+                        RENTAL_ID, CUSTOMER_ID, List.of(EQUIPMENT_ID), FIXED_TIME, FIXED_TIME.plus(DURATION)
                 );
 
         given(rentalRepository.findById(RENTAL_ID)).willReturn(Optional.of(rental));
@@ -375,7 +373,7 @@ class UpdateRentalServiceTest {
         // LocalDateTime.now(clock) uses clock internally, so we need to provide a fixed clock
         UpdateRentalService serviceWithFixedClock = new UpdateRentalService(
                 rentalRepository, customerFacade, equipmentFacade, tariffFacade, financeFacade,
-                eventPublisher, FIXED_CLOCK, eventMapper, valueParser
+                eventPublisher, FIXED_CLOCK, eventMapper, valueParser, validator
         );
         given(eventMapper.toRentalStarted(any())).willReturn(event);
         given(rentalRepository.save(any(Rental.class))).willAnswer(invocation -> {
@@ -418,7 +416,7 @@ class UpdateRentalServiceTest {
 
         UpdateRentalService serviceWithFixedClock = new UpdateRentalService(
                 rentalRepository, customerFacade, equipmentFacade, tariffFacade, financeFacade,
-                eventPublisher, FIXED_CLOCK, eventMapper, valueParser
+                eventPublisher, FIXED_CLOCK, eventMapper, valueParser, validator
         );
 
         // When/Then
@@ -442,7 +440,7 @@ class UpdateRentalServiceTest {
 
     private Rental createDraftRentalWithEquipmentAndDuration() {
         Rental rental = createDraftRental();
-        rental.selectEquipment(EQUIPMENT_ID);
+        rental.addEquipment(RentalEquipment.assigned(EQUIPMENT_ID, "BIKE-001"));
         rental.setPlannedDuration(DURATION);
         return rental;
     }
@@ -457,7 +455,7 @@ class UpdateRentalServiceTest {
     private Rental createReadyForActivationRental() {
         Rental rental = createDraftRental();
         rental.selectCustomer(CUSTOMER_ID);
-        rental.selectEquipment(EQUIPMENT_ID);
+        rental.addEquipment(RentalEquipment.assigned(EQUIPMENT_ID, "BIKE-001"));
         rental.selectTariff(TARIFF_ID);
         rental.setPlannedDuration(DURATION);
         rental.setEstimatedCost(Money.of("100.00"));

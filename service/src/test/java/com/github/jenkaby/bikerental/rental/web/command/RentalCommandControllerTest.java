@@ -24,6 +24,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -85,7 +86,7 @@ class RentalCommandControllerTest {
             void whenRequestContainsAllRequiredFields() throws Exception {
                 CreateRentalRequest request = new CreateRentalRequest(
                         VALID_CUSTOMER_ID,
-                        VALID_EQUIPMENT_ID,
+                        List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
                         null
                 );
@@ -112,7 +113,7 @@ class RentalCommandControllerTest {
             void whenRequestContainsAllFieldsIncludingOptionalTariffId() throws Exception {
                 CreateRentalRequest request = new CreateRentalRequest(
                         VALID_CUSTOMER_ID,
-                        VALID_EQUIPMENT_ID,
+                        List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
                         123L
                 );
@@ -145,7 +146,7 @@ class RentalCommandControllerTest {
             void whenCustomerIdIsNull(UUID customerId) throws Exception {
                 CreateRentalRequest request = new CreateRentalRequest(
                         customerId,
-                        VALID_EQUIPMENT_ID,
+                        List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
                         null
                 );
@@ -164,9 +165,11 @@ class RentalCommandControllerTest {
             @NullSource
             @DisplayName("when equipmentId is null")
             void whenEquipmentIdIsNull(Long equipmentId) throws Exception {
+                List<Long> eqIds = new ArrayList<>();
+                eqIds.add(equipmentId);
                 CreateRentalRequest request = new CreateRentalRequest(
                         VALID_CUSTOMER_ID,
-                        equipmentId,
+                        eqIds,
                         VALID_DURATION,
                         null
                 );
@@ -187,7 +190,7 @@ class RentalCommandControllerTest {
             void whenDurationIsNull(Duration duration) throws Exception {
                 CreateRentalRequest request = new CreateRentalRequest(
                         VALID_CUSTOMER_ID,
-                        VALID_EQUIPMENT_ID,
+                        List.of(VALID_EQUIPMENT_ID),
                         duration,
                         null
                 );
@@ -725,11 +728,11 @@ class RentalCommandControllerTest {
                                 "identified by rentalId"
                         ),
                         Arguments.of(
-                                new ReturnEquipmentRequest(null, 1L, null, null, null),
+                                new ReturnEquipmentRequest(null, List.of(1L), null, null, null),
                                 "identified by equipmentId"
                         ),
                         Arguments.of(
-                                new ReturnEquipmentRequest(null, null, "BIKE-001", null, null),
+                                new ReturnEquipmentRequest(null, null, List.of("BIKE-001"), null, null),
                                 "identified by equipmentUid"
                         )
                 );
@@ -750,7 +753,7 @@ class RentalCommandControllerTest {
                 when(cost.forgivenessApplied()).thenReturn(false);
                 when(cost.calculationMessage()).thenReturn("OK");
 
-                return new ReturnEquipmentResult(rental, cost, zero, null);
+                return new ReturnEquipmentResult(rental, Map.of(VALID_EQUIPMENT_ID, cost), zero, null);
             }
         }
 
@@ -782,11 +785,11 @@ class RentalCommandControllerTest {
                                 "all identifiers are null"
                         ),
                         Arguments.of(
-                                new ReturnEquipmentRequest(null, null, "", null, null),
+                                new ReturnEquipmentRequest(null, null, List.of(""), null, null),
                                 "equipmentUid is empty, rentalId and equipmentId are null"
                         ),
                         Arguments.of(
-                                new ReturnEquipmentRequest(null, null, "   ", null, null),
+                                new ReturnEquipmentRequest(null, null, List.of("   "), null, null),
                                 "equipmentUid is blank, rentalId and equipmentId are null"
                         )
                 );
