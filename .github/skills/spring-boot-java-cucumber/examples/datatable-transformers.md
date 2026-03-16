@@ -1,3 +1,19 @@
+# Main rule
+
+- If an object being transformed consists of nested objects, create a separate transformer for each of them.
+  Use main object identifier (`String groupSlug, String hierarchySlug` in the provided example) to be able to combine it
+  into final object in steps.
+  An example is:
+
+```java
+public record HierarchyGroup(Membership membership, String groupSlug, String hierarchySlug, String parentRef,
+                             String displayName) {
+}
+
+public record Membership(String personRef) {
+}
+```
+
 ```gherkin
     Given application is started
 #  Datatable transformers allow converting datatables directly into domain objects and avoid using JSON in steps:
@@ -14,11 +30,11 @@
 #    And the hierarchy-group records are committed
 #    """
 #    [
-#      {"group": [{ "slug": "h-group-slug-1". "personRef": "P.ref10@email.com"}],
-#        "hierarchySlug":"h-slug","parentRef":null,"displayName":"Parent 1"
+#      {"group": [{"personRef": "P.ref10@email.com"}],
+#        "hierarchySlug":"h-slug", "slug": "h-group-slug-1", "parentRef":null,"displayName":"Parent 1"
 #      },
-#      {"group": [{ "slug": "h-group-slug-0". "personRef": "P.ref21@email.com"}, { "slug": "h-group-slug-0". "personRef": "P.ref22@email.com"}],
-#        "hierarchySlug":"h-slug","parentRef":null,"displayName":"Parent 0"
+#      {"group": [{ "personRef": "P.ref21@email.com"}, { "slug": "h-group-slug-0". "personRef": "P.ref22@email.com"}],
+#        "hierarchySlug":"h-slug", "slug": "h-group-slug-0", "parentRef":null,"displayName":"Parent 0"
 #     }
 #    ]
 #    """
@@ -77,20 +93,14 @@ class HierarchyGroupDbSteps {
     @Given("the following hierarchy group(s) is/are")
     public void theFollowingHierarchyGroupsAre(List<HierarchyGroupHolder> hierarchyGroupHolders) {
         for (HierarchyGroupHolder hierarchyGroupHolder : hierarchyGroupHolders) {
-            hgScenarioContext.addHierarchyGroup(
-                    hierarchyGroupHolder.key(),
-                    hierarchyGroupHolder.hierarchyGroup()
-            );
+            hgScenarioContext.addHierarchyGroup(hierarchyGroupHolder.key(), hierarchyGroupHolder.hierarchyGroup());
         }
     }
 
     @Given("the following membership(s) is/are")
     public void theFollowingMembershipsAre(List<MembershipHolder> membershipHolders) {
         for (MembershipHolder membershipHolder : membershipHolders) {
-            hgScenarioContext.addMembershipToGroup(
-                    membershipHolder.key(),
-                    membershipHolder.membership()
-            );
+            hgScenarioContext.addMembershipToGroup(membershipHolder.key(), membershipHolder.membership());
         }
     }
 
@@ -98,10 +108,7 @@ class HierarchyGroupDbSteps {
     public void theHierarchyGroupsRecordsAreCommitted() {
         for (var group : hgScenarioContext.getHierarchyGroups().values()) {
             log.info("Persisting into collection `{}`: {}", COLLECTION_NAME, group);
-            mongoTemplate.save(
-                    group,
-                    COLLECTION_NAME
-            );
+            mongoTemplate.save(group, COLLECTION_NAME);
         }
     }
 }

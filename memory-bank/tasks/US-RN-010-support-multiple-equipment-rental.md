@@ -93,12 +93,12 @@
 
 | ID  | Description                                                                      | Status      | Updated    | Notes                             |
 |-----|----------------------------------------------------------------------------------|-------------|------------|-----------------------------------|
-| 1.1 | Анализ кода и мест использования equipmentId/equipmentUid                        | In Progress | 2026-03-12 | Найти все usages через grep/IDE   |
-| 2.1 | Liquibase миграция: создать rental_equipments                                    | Not Started |            | Изменить существующую миграцию    |
-| 3.1 | Добавить domain + JPA entity RentalEquipment                                     | Not Started |            | MapStruct mapper                  |
-| 4.1 | Обновить DTO: CreateRentalRequest, ReturnEquipmentRequest, RentalResponse и т.д. | Not Started |            | Обратная совместимость не нужна   |
-| 5.1 | Обновить CreateRentalService и ReturnEquipmentService                            | Not Started |            | Включая prepayment расчёт         |
-| 6.1 | Обновить TariffFacade / CalculateRentalCostUseCase                               | Not Started |            | Возвращать breakdown по equipment |
+| 1.1 | Анализ кода и мест использования equipmentId/equipmentUid                        | Done        | 2026-03-12 | Найти все usages через grep/IDE   |
+| 2.1 | Liquibase миграция: создать rental_equipments                                    | Done        | 2026-03-13 | Изменить существующую миграцию    |
+| 3.1 | Добавить domain + JPA entity RentalEquipment                                     | Done        | 2026-03-13 | MapStruct mapper                  |
+| 4.1 | Обновить DTO: CreateRentalRequest, ReturnEquipmentRequest, RentalResponse и т.д. | Not Started | 2026-03-13 | Обратная совместимость не нужна   |
+| 5.1 | Обновить CreateRentalService и ReturnEquipmentService                            | Not Started | 2026-03-13 | Включая prepayment расчёт         |
+| 6.1 | Обновить TariffFacade / CalculateRentalCostUseCase                               | Not Started | 2026-03-13 | Возвращать breakdown по equipment |
 | 7.1 | Обновить unit/WebMvc/component тесты                                             | Not Started |            | Обновить feature файлы BDD        |
 
 ## Steps

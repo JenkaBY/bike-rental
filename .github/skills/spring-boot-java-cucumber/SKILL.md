@@ -62,6 +62,8 @@ component-test/
   See [the example](./examples/datatable-transformers.md)
 - If datatable becomes too large, split object creation into several steps and save intermediate state in scenario
   context. See [the example](./examples/datatable-transformers.md)
+- Use transformers to convert datatables directly into domain objects and avoid using JSON in steps.
+  See [the example](./examples/datatable-transformers.md)
 - Use `Scenario Outline:` with `Examples:` for data repeated across multiple steps.
   See [the example](./examples/use-examples-as-variable.feature)
 
@@ -93,13 +95,12 @@ component-test/
 1. **Isolation**: Each scenario should be independent
 2. **Reusability**: Keep common steps (like common Db steps, performing http requests, sending messages and so) in
    `steps/common/`
-3. **Performance**: Use Background for expensive setup or repeated steps
-4. **Debugging**: Log request/response in hooks for failed scenarios
-5. **Organization**: Group features by domain module
-6. **Naming**: Use descriptive scenario names tied to user stories
-7. **Assertions**: Use AssertJ for fluent, readable assertions
-8. **Context**: Keep scenario context clean and minimal
-9. **Don't repeat yourself**: Don't duplicate already existing steps. Try to reuse them, refactor existing ones to be
+3. **Debugging**: Log request/response in hooks for failed scenarios
+4. **Organization**: Group features by domain module
+5. **Naming**: Use descriptive scenario names tied to user stories
+6. **Assertions**: Use AssertJ for fluent, readable assertions
+7. **Context**: Keep scenario context clean and minimal
+8. **Don't repeat yourself**: Don't duplicate already existing steps. Try to reuse them, refactor existing ones to be
    reusable
-10. **No comments**: Avoid comments in the code and Gherkin files
+9. **No comments**: Avoid comments in the code and Gherkin files
 
