@@ -143,7 +143,7 @@ Feature: Equipment Return
     Then the response status is 200
     And the rental return response contains
       | additionalPayment | paymentMethod | receiptNumber | paymentAmount |
-      | -200.00           |               |               |               |
+      | 0.00              |               |               |               |
     And the rental return response contains rental
       | customerId | status | actualDuration | plannedDuration | estimatedCost |
       | CUS1       | ACTIVE | 120            | 120             | 400.00        |
@@ -168,10 +168,20 @@ Feature: Equipment Return
       | <rentalId> | <remainingId> | CASH          | <operator> |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
-#    FIX me wrong calculation logic
+#    FIXME wrong calculation logic
     And the rental return response contains
       | additionalPayment | paymentMethod | receiptNumber | paymentAmount |
-      | -100.00           |               |               |               |
+      | 100.00            |               |               |               |
+    And the rental return response contains rental
+      | customerId | status    | actualDuration | plannedDuration | estimatedCost | finalCost |
+      | CUS1       | COMPLETED | 180            | 120             | 400.00        | 500.00    |
+    And the rental return response contains the following break down costs
+      | equipmentId   | baseCost | overtimeCost | totalCost | actualMinutes | billableMinutes | plannedMinutes | overtimeMinutes | forgivenessApplied | calculationMessage |
+      | <remainingId> | 300.00   | 0.00         | 300.00    | 180           | 180             | 120            | 60              | true               |                    |
+    And the rental return response contains rental equipments
+      | equipmentId   | equipmentUid | status   | tariffId | estimatedCost | finalCost |
+      | <returnedId>  | BIKE-001     | RETURNED | 1        | 200.00        | 200.00    |
+      | <remainingId> | BIKE-002     | RETURNED | 1        | 200.00        | 300.00    |
     Examples:
       | rentalId | now                 | nowReturn           | startedAt           | operator | returnedId | remainingId |
       | 20       | 2026-02-10T10:00:00 | 2026-02-10T11:00:00 | 2026-02-10T08:00:00 | OP1      | 1          | 2           |

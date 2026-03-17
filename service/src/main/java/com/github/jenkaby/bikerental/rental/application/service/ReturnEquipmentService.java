@@ -7,6 +7,8 @@ import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentR
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipmentStatus;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
@@ -86,13 +88,32 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
             rentalCostMapToEquipment.put(equipment.getEquipmentId(), cost);
             totalCost = totalCost.add(cost.totalCost());
         }
+// 1. Sum final costs of equipment returned in PREVIOUS partial returns
+        Money previouslyReturnedCost = rental.getEquipments().stream()
+                .filter(e -> e.getStatus() == RentalEquipmentStatus.RETURNED)
+                .filter(e -> !equipmentsToReturn.contains(e))
+                .map(RentalEquipment::getFinalCost)
+                .reduce(Money.zero(), Money::add);
+
+// 2. Estimated cost of equipment STILL ACTIVE after this return
+        Money remainingEstimatedCost = rental.getEquipments().stream()
+                .filter(e -> e.getStatus() != RentalEquipmentStatus.RETURNED)
+                .map(RentalEquipment::getEstimatedCost)
+                .reduce(Money.zero(), Money::add);
+
 
         List<PaymentInfo> paymentsMade = financeFacade.getPayments(rental.getId());
         Money paymentsTotalAmount = paymentsMade.stream()
                 .map(PaymentInfo::amount)
                 .reduce(Money.zero(), Money::add);
 
-        Money toPay = totalCost.subtract(paymentsTotalAmount);
+// 3. Correct balance:
+// toPay = previouslyReturned + currentReturned + remainingEstimated - allPayments
+        Money toPay = previouslyReturnedCost
+                .add(totalCost)
+                .add(remainingEstimatedCost)
+                .subtract(paymentsTotalAmount);
+//        Money toPay = totalCost.subtract(paymentsTotalAmount);
 
         PaymentInfo paymentInfo = null;
         if (toPay.isPositive()) {

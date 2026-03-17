@@ -14,7 +14,7 @@ public record ReturnEquipmentRequest(
         @Schema(description = "Rental ID", example = "1") Long rentalId,
         @Schema(description = "List of equipment IDs to return") List<@NotNull Long> equipmentIds,
         @Schema(description = "List of equipment UIDs to return") List<@NotEmpty String> equipmentUids,
-        @Schema(description = "Payment method for any additional charge") @NotNull PaymentMethod paymentMethod,
+        @Schema(description = "Payment method for any additional charge") PaymentMethod paymentMethod,
         @Schema(description = "Operator identifier", example = "operator-1") @NotEmpty String operatorId
 ) {
     @AssertTrue(message = "At least one of rentalId, equipmentId, or equipmentUid must be provided")

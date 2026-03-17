@@ -22,6 +22,12 @@ import java.util.Map;
 public abstract class RentalCommandMapper {
 
     protected RentalQueryMapper rentalQueryMapper;
+    protected PaymentInfoMapper paymentInfoMapper;
+
+    @Autowired
+    public void setPaymentInfoMapper(PaymentInfoMapper paymentInfoMapper) {
+        this.paymentInfoMapper = paymentInfoMapper;
+    }
 
     @Autowired
     public void setQueryMapper(RentalQueryMapper queryMapper) {
@@ -48,7 +54,7 @@ public abstract class RentalCommandMapper {
                 .map(entry -> toCostBreakdown(entry.getKey(), entry.getValue()))
                 .toList();
         BigDecimal additionalPayment = result.additionalPayment() != null ? result.additionalPayment().amount() : null;
-        return new RentalReturnResponse(rentalResponse, costsBreakdown, additionalPayment, result.paymentInfo());
+        return new RentalReturnResponse(rentalResponse, costsBreakdown, additionalPayment, paymentInfoMapper.toResponse(result.paymentInfo()));
     }
 
     RentalReturnResponse.CostBreakdown toCostBreakdown(Long equipmentId, RentalCost cost) {

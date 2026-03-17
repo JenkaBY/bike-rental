@@ -1,6 +1,5 @@
 package com.github.jenkaby.bikerental.rental.web.command.dto;
 
-import com.github.jenkaby.bikerental.finance.PaymentInfo;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -12,7 +11,7 @@ public record RentalReturnResponse(
         @Schema(description = "Updated rental details") RentalResponse rental,
         @Schema(description = "Cost breakdown for the rental") List<CostBreakdown> costs,
         @Schema(description = "Additional payment charged at return (0 if prepayment covered all)", example = "50.00") BigDecimal additionalPayment,
-        @Schema(description = "Payment info for the additional charge") PaymentInfo paymentInfo
+        @Schema(description = "Payment info for the additional charge") PaymentInfoResponse paymentInfo
 ) {
     @Schema(description = "Detailed cost breakdown")
     public record CostBreakdown(
