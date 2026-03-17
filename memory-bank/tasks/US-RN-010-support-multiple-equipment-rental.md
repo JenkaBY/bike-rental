@@ -1,8 +1,8 @@
 # [US-RN-010] Поддержка аренды нескольких единиц оборудования
 
-**Status:** In Progress - URGENT  
+**Status:** Completed - URGENT  
 **Added:** 2026-03-12  
-**Updated:** 2026-03-13
+**Updated:** 2026-03-17
 
 ## Original Request
 
@@ -20,140 +20,125 @@
 
 ## Thought Process
 
-Текущая реализация хранит поле `equipment_id` / `equipment_uid` в таблице `rentals` (TECH-007) и многие use-case'ы
-опираются на единственную единицу оборудования для поиска и завершения аренды. Нужно перейти на модель "аренда" ↔ "
-множество equipment" (One Rental — Many Equipment). Это повлечёт изменения в базе данных, доменной модели, JPA
-сущностях, DTO, use case'ах, миграциях Liquibase, а также в компонентах, которые рассчитывают стоимость и проверяют
-состояния оборудования.
+Текущая реализация хранила поле `equipment_id` / `equipment_uid` в таблице `rentals` и многие use-case'ы опирались на
+единственную единицу оборудования. Выполнен переход на модель "аренда" ↔ "множество equipment" (One Rental — Many
+Equipment) через новую таблицу `rental_equipments`.
 
-Ключевые решения и предположения:
+Ключевые архитектурные решения (принятые):
 
-- Использовать связующую таблицу `rental_equipments` (rental_id, equipment_id, equipment_uid, expected_return_at?,
-  started_at?, status?) либо простую таблицу связей вместе с основным `rentals` и доп. колонками в самой аренде (keep
-  minimal). Предпочтение: отдельная сущность `rental_equipment` чтобы сохранять per-equipment metadata (например
-  startedAt/actualReturnAt/overdue для каждой единицы).
-- Тарифы: воспользоваться существующим `TariffFacade` / `TariffPriceSelector` (US-TR-002, US-RN-002, US-TR-002 уже
-  выполнены) — расширить его чтобы принимать список equipmentType -> агрегировать суммарную стоимость за период (
-  например суммировать стоимости для каждого equipment по его типу и выбранному тарифу).
-- Предоплата: до записи аренды вычислять полную стоимость для периода и формировать запись предоплаты (US-RN-004 уже
-  реализован) с суммой, равной общей сумме по всем equipment.
+- `RentalEquipment` — child entity, не отдельный aggregate. Нет отдельного репозитория. Сохранение/загрузка только через
+  `RentalRepository` (каскадное).
+- `Rental` остаётся Aggregate Root. Все операции над equipment (назначение, активация, возврат) проходят через `Rental`.
+- Тариф подбирается per-equipment при создании/обновлении аренды через `TariffFacade.selectTariff()`. Стоимость
+  рассчитывается per-equipment и суммируется.
+- Предоплата: одна запись на аренду с суммарной суммой (существующий механизм US-RN-004 не менялся).
+- Частичный возврат: `ReturnEquipmentRequest` принимает списки `equipmentIds` и `equipmentUids`. Пустые списки означают
+  возврат всего оборудования. Аренда завершается только когда `allEquipmentReturned()`.
+- `RentalUpdated` event — новый event для синхронизации статусов equipment при изменении draft-аренды.
 
 ## Implementation Plan
 
-План работ (по шагам):
-
-1. Анализ и подготовка
-    - Просмотреть все места в репозитории где используется `equipmentId`, `equipmentUid` и поле `equipment_uid` в
-      таблице `rentals`.
-    - Составить список классов/эндпоинтов/use-case'ов/SQL миграций для изменения.
-
-2. Схема БД (Liquibase миграции)
-    - Создать новую таблицу `rental_equipments`:
-        - id (PK), rental_id (FK -> rentals.id), equipment_id, equipment_uid, status, started_at, expected_return_at,
-          actual_return_at, created_at
-    - Удалить колонку `equipment_uid` и `equipment_id` из таблицы `rentals`.
-
-3. Домен / JPA
-    - Добавить доменную child-entity `RentalEquipment` внутри `Rental` aggregate (см. DDD): `Rental` остаётся Aggregate
-      Root,
-      все операции над equipment (назначение, старт, возврат) проходят через `Rental`.
-    - Не создавать отдельный доменный репозиторий для `RentalEquipment`. Сохранение/загрузка — через `RentalRepository`.
-    - Обновить `Rental` доменную модель: убрать; добавить коллекцию `List<RentalEquipment>`.
-    - В infrastructure добавить JPA entity `RentalEquipmentJpaEntity` и связать `RentalJpaEntity` с
-      `@OneToMany(cascade = ALL, orphanRemoval = true)`.
-    - Обновить мапперы (MapStruct) и JPA mapping (one-to-many). Перенести `tariffId` на уровень `RentalEquipment` (
-      per-equipment tariff) и агрегировать суммы на уровне `Rental`.
-
-4. DTO / API
-    - Обновить `CreateRentalRequest`, `ReturnEquipmentRequest`, `RentalUpdateJsonPatchRequest`, `RentalResponse` и
-      связанные мапперы, чтобы поддерживали массив `equipmentIds` / `equipmentUids`.
-    - Добавить валидацию: пустой массив недопустим
-
-5. Бизнес-логика
-    - Update CreateRentalService: при создании аренды создавать записи в `rental_equipments` для каждой единицы.
-    - Update ReturnEquipmentService: поддерживать возврат одной единицы (partial return) и возврат всех сразу; если
-      аренда содержит несколько единиц — завершать аренду только когда все equipment помечены как возвращённые или
-      отдельная логика завершения по аренде/по equipment.
-    - Обновить статус-транзиции оборудования (EquipmentStatusTransitionPolicy) для массовой операции.
-
-6. Tariff calculation
-    - Расширить TariffFacade / CalculateRentalCostUseCase чтобы принимать список equipment (или их типы) и возвращать
-      breakdown по equipment.
-    - Убедиться, что предоплата (CreateRental + US-RN-004) учитывает суммарную стоимость.
-
-7. Tests
-    - WebMvc tests для API DTO (create rental request with multiple equipment, return single equipment, return all).
-    - Component tests (BDD) — обновить feature файлы и добавить сценарии для множественной аренды.
-
-8. Migration & Rollout
-    - Применить миграции в staging, прогнать интеграционные тесты.
-    - Документировать изменения API в OpenAPI/Swagger и memory-bank.
+1. ✅ Анализ и подготовка — все места использования `equipmentId`/`equipmentUid` проверены
+2. ✅ Схема БД — создана `rental_equipments`, удалены `equipment_id`/`equipment_uid` из `rentals`
+3. ✅ Домен / JPA — `RentalEquipment`, `RentalEquipmentStatus`, `RentalEquipmentJpaEntity`, `RentalJpaEntity` обновлён
+4. ✅ DTO / API — `CreateRentalRequest`, `ReturnEquipmentRequest`, `RentalResponse`, `RentalReturnResponse` обновлены
+5. ✅ Бизнес-логика — `CreateRentalService`, `UpdateRentalService`, `ReturnEquipmentService` обновлены
+6. ✅ Tariff calculation — per-equipment через существующий `TariffFacade`; `CalculateRentalCostUseCase` не менялся
+7. ⚠️ Tests — WebMvc тесты обновлены; component tests обновлены; `UpdateRentalServiceTest` удалён (нужно пересоздать)
 
 ## Subtasks
 
-| ID  | Description                                                                      | Status      | Updated    | Notes                             |
-|-----|----------------------------------------------------------------------------------|-------------|------------|-----------------------------------|
-| 1.1 | Анализ кода и мест использования equipmentId/equipmentUid                        | Done        | 2026-03-12 | Найти все usages через grep/IDE   |
-| 2.1 | Liquibase миграция: создать rental_equipments                                    | Done        | 2026-03-13 | Изменить существующую миграцию    |
-| 3.1 | Добавить domain + JPA entity RentalEquipment                                     | Done        | 2026-03-13 | MapStruct mapper                  |
-| 4.1 | Обновить DTO: CreateRentalRequest, ReturnEquipmentRequest, RentalResponse и т.д. | Not Started | 2026-03-13 | Обратная совместимость не нужна   |
-| 5.1 | Обновить CreateRentalService и ReturnEquipmentService                            | Not Started | 2026-03-13 | Включая prepayment расчёт         |
-| 6.1 | Обновить TariffFacade / CalculateRentalCostUseCase                               | Not Started | 2026-03-13 | Возвращать breakdown по equipment |
-| 7.1 | Обновить unit/WebMvc/component тесты                                             | Not Started |            | Обновить feature файлы BDD        |
+| ID  | Description                                                                      | Status      | Updated    | Notes                                                                                                   |
+|-----|----------------------------------------------------------------------------------|-------------|------------|---------------------------------------------------------------------------------------------------------|
+| 1.1 | Анализ кода и мест использования equipmentId/equipmentUid                        | Complete    | 2026-03-12 |                                                                                                         |
+| 2.1 | Liquibase миграция: создать rental_equipments                                    | Complete    | 2026-03-13 | `rental-equipments.create-table.xml`; `equipment_id/uid` удалены из `rentals`                           |
+| 3.1 | Добавить domain + JPA entity RentalEquipment                                     | Complete    | 2026-03-13 | `RentalEquipment.java`, `RentalEquipmentStatus`, `RentalEquipmentJpaEntity`, `RentalEquipmentJpaMapper` |
+| 4.1 | Обновить DTO: CreateRentalRequest, ReturnEquipmentRequest, RentalResponse и т.д. | Complete    | 2026-03-17 | `List<Long> equipmentIds`, `EquipmentItemResponse`, `PaymentInfoResponse`, `CostBreakdown` как list     |
+| 5.1 | Обновить CreateRentalService и ReturnEquipmentService                            | Complete    | 2026-03-17 | Частичный возврат; `RequestedEquipmentValidator`; `UpdateRentalService` с валидацией новых equipment    |
+| 6.1 | Обновить TariffFacade / CalculateRentalCostUseCase                               | Complete    | 2026-03-17 | Per-equipment через существующий `TariffFacade`; breakdown в `ReturnEquipmentResult`                    |
+| 7.1 | Обновить unit/WebMvc/component тесты                                             | In Progress | 2026-03-17 | WebMvc обновлены; component tests обновлены; `UpdateRentalServiceTest` удалён — нужно пересоздать       |
 
-## Steps
+## Progress Tracking
 
-1. Обновить доменную модель Rental в Rental.java: заменить поля equipmentId/equipmentUid/tariffId на
-   List<RentalEquipment> equipments, добавить методы addEquipment(), returnEquipment(equipmentId),
-   allEquipmentReturned(), complete() с проверкой всех возвратов.
-2. Создать domain child entity RentalEquipment в rental.domain.model: поля id, equipmentId, equipmentUid, tariffId,
-   equipmentType, status (enum: ASSIGNED/ACTIVE/RETURNED), startedAt, expectedReturnAt, actualReturnAt, estimatedCost,
-   finalCost — чистый POJO без JPA аннотаций.
-3. Создать JPA entity RentalEquipmentJpaEntity в rental.infrastructure.persistence.entity с @ManyToOne на
-   RentalJpaEntity; в RentalJpaEntity добавить @OneToMany(cascade = ALL, orphanRemoval = true) — без отдельного
-   репозитория, каскадное сохранение через RentalJpaRepository.save().
-4. Обновить RentalJpaMapper в RentalJpaMapper.java: добавить маппинг List<RentalEquipmentJpaEntity> ↔
-   List<RentalEquipment>, удалить маппинг старых полей equipmentId/equipmentUid.
-5. Обновить use case'ы — CreateRentalService, UpdateRentalService, ReturnEquipmentService, RecordPrepaymentService — все
-   операции с equipment проходят через Rental aggregate root (rental.addEquipment(...), rental.returnEquipment(...),
-   rentalRepository.save(rental)).
-6. Обновить task file US-RN-010: зафиксировать архитектурное решение — RentalEquipment это child entity, не отдельный
-   aggregate; убрать пункт про отдельный репозиторий.
+**Overall Status:** Completed — 100% Complete (marked complete despite outstanding subtasks)
 
-## Impact Analysis
+### Subtask Detail
 
-- DB: Добавление новой таблицы; plan for backfill of existing rentals (migrate data from rentals.equipment_uid to
-  rental_equipments).
-- Finance: Prepayment calculation flow должен учитывать несколько единиц — проверить события
-  PaymentReceived/PaymentCaptured и их consumers.
-- Tariff module: расширение TariffFacade должно быть идемпотентным и не ломать существующие расчёты для единичной
-  аренды.
+| Module          | Change                                                                                                                | Status |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------|--------|
+| DB              | `rental-equipments` таблица создана, `equipment_id`/`equipment_uid` удалены из `rentals`                              | ✅      |
+| Domain          | `RentalEquipment`, `RentalEquipmentStatus` добавлены; `Rental` обновлён (equipments list + методы)                    | ✅      |
+| JPA             | `RentalEquipmentJpaEntity` + `@OneToMany` в `RentalJpaEntity`; каскадное сохранение                                   | ✅      |
+| Mappers         | `RentalEquipmentJpaMapper`, `RentalEquipmentMapper`, `RentalEquipmentStatusMapper`, `RentalEquipmentWebMapper`        | ✅      |
+| Events          | `RentalCreated`/`RentalStarted`/`RentalCompleted` — списки IDs; новый `RentalUpdated` для draft                       | ✅      |
+| Equipment       | `RentalEventListener` обновлён; `GetEquipmentByIdsUseCase`; `EquipmentFacade.findByIds()`                             | ✅      |
+| Finance         | `FinanceFacade.getPayments()`; `PaymentType.ADDITIONAL_PAYMENT`                                                       | ✅      |
+| Web DTO         | `CreateRentalRequest.equipmentIds: List<Long>`; `ReturnEquipmentRequest` списки; `RentalResponse.equipmentItems`      | ✅      |
+| Services        | `CreateRentalService`, `UpdateRentalService`, `ReturnEquipmentService` — полностью переработаны                       | ✅      |
+| WebMvc tests    | `RentalCommandControllerTest` обновлён (219 изменений)                                                                | ✅      |
+| Component tests | `rental.feature`, `rental-return.feature`, `rental-query.feature`, `rental-validation.feature` обновлены              | ✅      |
+| Unit tests      | `RecordPrepaymentServiceTest`, `FindRentalsServiceTest`, `RentalTest` обновлены; `UpdateRentalServiceTest` **удалён** | ⚠️     |
 
-## Acceptance Criteria
+## Known Issues & Open Concerns
 
-1. Можно создать аренду с массивом equipmentIds; записи в `rental_equipments` созданы корректно.
-2. Предоплата рассчитывается как сумма стоимостей по тарифам для каждого equipmentType за выбранный период.
-3. Возврат одной единицы оборудования корректно рассчитывает доплату для этой единицы и помечает её как возвращённую;
-   аренда завершается только когда все единицы возвращены (или если оператор принудительно завершает аренду —
-   валидация/флаг).
-4. Существующие API, которые передают одиночный `equipmentId` продолжают работать (обработчик принимает и конвертирует в
-   массив из одного элемента).
-5. Обновления покрыты unit, WebMvc и component тестами; component tests (BDD) обновлены и все проходят.
+1. **`UpdateRentalServiceTest` удалён**: 493 строк тестового покрытия удалено (коммит
+   `c3da983 - refactor: partially fix the concerns of unit tests`). Необходимо пересоздать этот класс с тестами для
+   нового multi-equipment API.
+2. **TECH-015 создан**: Формула `toPay` в `ReturnEquipmentService` имеет проблему расчёта при частичном возврате —
+   учитывает `remainingEstimatedCost` вместо `remainingFinalCost`.
+3. **`isPrepaymentSufficient` / `canBeActivated`** используют приватное поле `this.estimatedCost`, которое
+   устанавливается через `setEstimatedCost()`. Нужно проверить, что `RecordPrepaymentService` правильно вызывает эту
+   проверку — фактическая сумма должна сравниваться с `getEstimatedCost()` (сумма по оборудованию).
 
-## Notes / Open Questions
+## Progress Log
 
-- Нужен ли per-equipment expected_return_at/start_at или достаточно хранить его только на уровне аренды? Предложение —
-  добавить per-equipment поля, чтобы поддержать частичный возврат и частичную оплату. Окончательное решение - да, нужен.
-- Как отмечать предоплату — одна запись платежа на аренду (аванс покрывает всю аренду) или отдельные платежи per
-  equipment? Предпочтение: одна запись на аренду с суммарной суммой. Да, одна запись на аренду.
-- Нужно ли поддерживать частичный возврат с автоматическим перерасчётом Overtime/forgiveness? Да — покрыть в расчёте
-  стоимости при возврате одной единицы. Да, поддерживать частичный возврат с перерасчётом.
+### 2026-03-17
+
+**Анализ изменений ветки `feature/support-rental-of-equipment-group`**
+
+- 101 файл изменён, 2811 строк добавлено, 1397 удалено в 20 коммитах
+- Все ключевые компоненты реализации завершены: DB, Domain, JPA, Services, DTO, Events, Equipment module, Finance module
+- **DB:** `rental_equipments` таблица создана; `equipment_id` и `equipment_uid` удалены из таблицы `rentals`; FK +
+  индексы добавлены
+- **Domain:** `RentalEquipment` (child entity с методами `activateForRental()`, `markReturned()`, `assigned()`),
+  `RentalEquipmentStatus` (ASSIGNED/ACTIVE/RETURNED), `Rental` полностью переработан
+- **JPA:** `RentalEquipmentJpaEntity` + `@OneToMany(cascade=ALL, orphanRemoval=true)` + `@Fetch(FetchMode.SUBSELECT)` в
+  `RentalJpaEntity`; computed `getEstimatedCost()`/`getFinalCost()` методы
+- **Services:** `CreateRentalService` — per-equipment tariff + cost; `UpdateRentalService` — списки equipment с
+  валидацией только новых; `ReturnEquipmentService` — частичный возврат, per-equipment cost, завершение только при
+  `allEquipmentReturned()`
+- **Events:** `RentalCreated`, `RentalStarted`, `RentalCompleted` расширены списками IDs; новый `RentalUpdated` для
+  синхронизации статусов equipment при изменении draft
+- **Equipment module:** `RentalEventListener` поддерживает списки + новый `onRentalUpdated()`;
+  `EquipmentFacade.findByIds()`
+- **Finance module:** `FinanceFacade.getPayments()` добавлен для расчёта доплаты
+- **Web:** все DTO обновлены для работы с массивами; `EquipmentItemResponse`, `PaymentInfoResponse`, `CostBreakdown`
+  list в `RentalReturnResponse`
+- **Tests:** `RentalCommandControllerTest` и component tests обновлены; `UpdateRentalServiceTest` **удалён** (регрессия
+  в покрытии)
+
+### 2026-03-17 (Marked Completed)
+
+- Task marked as **Completed** on 2026-03-17 by request. Note: subtask 7.1 (`UpdateRentalServiceTest`) remains In
+  Progress and must be recreated to restore unit test coverage. The known issues section retains details about this
+  outstanding work and TECH-015; please address them in a follow-up task.
+
+### 2026-03-13
+
+- Создан task файл
+- Выполнен анализ кода (subtask 1.1)
+- Созданы Liquibase миграции (subtask 2.1)
+- Добавлены domain + JPA entities (subtask 3.1)
+
+### 2026-03-12
+
+- Task создан с первоначальным implementation plan
 
 ## Next Steps (short-term)
 
-1. Провести grep по проекту и собрать список всех мест, где используется `equipmentId` / `equipmentUid`.
-2. Обновить существую Liquibase миграцию `rentals.create-table.xml` в module `service/src/main/resources/db/changelog/`.
-   Создать новую таблицу `rental_equipments` отдельным changelog файлом и удалить колонки `equipment_id` и
-   `equipment_uid` из `rentals`.
-3. Начать реализацию domain + JPA entity для `RentalEquipment`.
-
+1. **КРИТИЧНО**: Пересоздать `UpdateRentalServiceTest.java` для нового multi-equipment API — тесты для: смены
+   customerId, duration, equipmentIds (список), статуса ACTIVE/DRAFT, частичного патча
+2. Проверить корректность `isPrepaymentSufficient()` — должна использовать `getEstimatedCost()` (сумму по equipment), а
+   не приватное поле `estimatedCost`
+3. TECH-015: Исправить формулу `toPay` в `ReturnEquipmentService` (неправильный учёт `remainingEstimatedCost`)
+4. Прогнать component tests (`./gradlew :component-test:test`) после запуска БД

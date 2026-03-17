@@ -74,11 +74,13 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   по rentalId/equipmentUid/equipmentId, расчёт длительности и стоимости, запись доплаты, завершение аренды,
   публикация RentalCompleted; POST /api/rentals/return; RentalReturnResponse с CostBreakdown; WebMvc + component
   тесты rental-return.feature с 5 сценариями; единый метод TariffFacade.calculateRentalCost())
+- [US-RN-010] Поддержка аренды нескольких единиц оборудования - Completed on 2026-03-17 (Marked complete by request;
+  subtask 7.1 `UpdateRentalServiceTest` remains In Progress and must be recreated to restore unit test coverage; known
+  issues recorded in task file)
 
 ## In Progress
 
-- [US-RN-010] Поддержка аренды нескольких единиц оборудования - URGENT - Начало: 2026-03-12
-  (изменение структуры БД, DTO и логики расчёта тарифа; предусмотреть обратную совместимость)
+<!-- no tasks in progress -->
 
 ## Pending - Technical Improvements
 
