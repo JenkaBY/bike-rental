@@ -139,6 +139,49 @@ Feature: Rental Management
       | rentalId | customerId | plannedDuration |
       | 1        | CUS1       | 60              |
 
+  Scenario Outline: Update rental - select equipment twice
+    Given a single rental exists in the database with the following data
+      | id         | customerId   | plannedDuration   | status | createdAt           | updatedAt           |
+      | <rentalId> | <customerId> | <plannedDuration> | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
+    And the rental update request is
+      | op      | path          | value |
+      | replace | /equipmentIds | [2]   |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
+    Then the response status is 200
+    And the rental response only contains
+      | customerId   | status | plannedDuration   | estimatedCost |
+      | <customerId> | DRAFT  | <plannedDuration> | 300.00        |
+    And the rental response only contains rental equipments
+      | equipmentId | equipmentUid | status   | tariffId | estimatedCost | finalCost |
+      | 2           | E-BIKE-001   | ASSIGNED | 4        | 300.00        |           |
+    #    rental module
+    And rental was persisted in database
+      | customerId   | status | plannedDuration   |
+      | <customerId> | DRAFT  | <plannedDuration> |
+    And rental equipment was persisted in database
+      | rentalId   | equipmentId | equipmentUid | status   | estimatedCost | tariffId |
+      | <rentalId> | 2           | E-BIKE-001   | ASSIGNED | 300.00        | 4        |
+#    equipment module
+    And the following equipment record was persisted in db
+      | id | serialNumber | uid        | status   | type    | model   | condition |
+      | 2  | EQ-002       | E-BIKE-001 | RESERVED | scooter | Model B | Excellent |
+# second update equipments
+    And the rental update request is
+      | op      | path          | value |
+      | replace | /equipmentIds | [2,1] |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
+    Then the response status is 200
+    And the rental response only contains
+      | customerId   | status | plannedDuration   | estimatedCost |
+      | <customerId> | DRAFT  | <plannedDuration> | 400.00        |
+    And the rental response only contains rental equipments
+      | equipmentId | equipmentUid | status   | tariffId | estimatedCost | finalCost |
+      | 1           | BIKE-001     | ASSIGNED | 1        | 100.00        |           |
+      | 2           | E-BIKE-001   | ASSIGNED | 4        | 300.00        |           |
+    Examples:
+      | rentalId | customerId | plannedDuration |
+      | 1        | CUS1       | 60              |
+
   Scenario Outline: Update rental - set duration
     Given a single rental exists in the database with the following data
       | id         | customerId   | status | createdAt           | updatedAt           |
@@ -241,9 +284,9 @@ Feature: Rental Management
     And rental was persisted in database
       | customerId | status | createdAt | plannedDuration   |
       | <customer> | ACTIVE | <now>     | <plannedDuration> |
-    And the following equipment records were persisted in db
-      | id            | serialNumber | uid      | status | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
+    And rental equipment was persisted in database
+      | rentalId   | equipmentId   | equipmentUid | status | estimatedCost | tariffId |
+      | <rentalId> | <equipmentId> | BIKE-001     | ACTIVE | 200.00        | 1        |
 #    equipment module
     And the following rental started event was published
       | customerId | equipmentId   | startedAt |

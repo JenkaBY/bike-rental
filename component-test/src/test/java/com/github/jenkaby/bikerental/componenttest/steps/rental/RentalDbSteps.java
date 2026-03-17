@@ -68,11 +68,6 @@ public class RentalDbSteps {
     }
 
     private void assertRentalsPersisted(List<RentalJpaEntity> expected) {
-        var ids = expected.stream()
-                .map(RentalJpaEntity::getId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
         List<RentalJpaEntity> actualList = rentalJpaRepository.findAll();
 
         var sortedActual = actualList.stream()
