@@ -9,15 +9,15 @@ import java.util.Map;
 public class RentalRequestTransformer {
 
     @DataTableType
-    public CreateRentalRequest createRentalRequest(Map<String, String> entry) {
+    public CreateRentalRequest transform(Map<String, String> entry) {
         var customerId = Aliases.getCustomerId(entry.get("customerId"));
-        var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
+        var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
         var duration = DataTableHelper.toDuration(entry, "duration");
         var tariffId = DataTableHelper.toLong(entry, "tariffId");
 
         return new CreateRentalRequest(
                 customerId,
-                equipmentId,
+                equipmentIds,
                 duration,
                 tariffId
         );

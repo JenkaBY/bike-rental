@@ -7,6 +7,7 @@ import io.cucumber.java.DataTableType;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,8 +24,6 @@ public class RentalResponseTransformer {
         var customerId = Optional.ofNullable(customerIdString).map(Aliases::getCustomerId)
                 .orElse(null);
 
-        var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
-        var tariffId = DataTableHelper.toLong(entry, "tariffId");
         var status = DataTableHelper.getStringOrNull(entry, "status");
 
         var plannedDurationMinutes = DataTableHelper.toInt(entry, "plannedDuration");
@@ -47,13 +46,12 @@ public class RentalResponseTransformer {
         var actualReturnAt = DataTableHelper.toLocalDateTime(entry, "actualReturnAt");
 
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
-        var finalCost = DataTableHelper.toBigDecimal(entry, "finalCost");
+        var finalCost = DataTableHelper.toBigDecimal(entry, "totalCost");
 
         return new RentalResponse(
                 id,
                 customerId,
-                equipmentId,
-                tariffId,
+                new ArrayList<>(),// will be populated later on
                 status,
                 startedAt,
                 expectedReturnAt,

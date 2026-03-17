@@ -13,7 +13,7 @@ public class RentalReturnResponseTransformer {
                 DataTableHelper.getStringOrNull(entry, "status"),
                 DataTableHelper.toBigDecimal(entry, "baseCost"),
                 DataTableHelper.toBigDecimal(entry, "overtimeCost"),
-                DataTableHelper.toBigDecimal(entry, "finalCost"),
+                DataTableHelper.toBigDecimal(entry, "totalCost"),
                 DataTableHelper.toInt(entry, "actualMinutes"),
                 DataTableHelper.toInt(entry, "plannedMinutes"),
                 DataTableHelper.toInt(entry, "overtimeMinutes"),

@@ -2,10 +2,8 @@ package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import java.math.BigDecimal;
 import java.time.*;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class DataTableHelper {
 
@@ -130,5 +128,16 @@ public class DataTableHelper {
             return null;
         }
         return Boolean.parseBoolean(value.trim());
+    }
+
+    public static List<Long> toLongList(Map<String, String> entry, String field) {
+        var value = getStringOrNull(entry, field);
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return Stream.of(value.split(","))
+                .map(String::trim)
+                .map(Long::valueOf)
+                .toList();
     }
 }

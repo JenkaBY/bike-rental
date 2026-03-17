@@ -13,6 +13,7 @@ public class RentalCreatedEventTransformer {
     @DataTableType
     public RentalCreated transform(Map<String, String> entry) {
         Long rentalId = DataTableHelper.toLong(entry, "rentalId");
+        var equipmentIds = DataTableHelper.toLongList(entry, "eqIds");
 
         UUID customerId = null;
         String customerIdString = DataTableHelper.getStringOrNull(entry, "customerId");
@@ -23,6 +24,6 @@ public class RentalCreatedEventTransformer {
         String status = DataTableHelper.getStringOrNull(entry, "status");
         Instant createdAt = DataTableHelper.toInstant(entry, "createdAt");
 
-        return new RentalCreated(rentalId, customerId, status, createdAt);
+        return new RentalCreated(rentalId, customerId, equipmentIds, status, createdAt);
     }
 }

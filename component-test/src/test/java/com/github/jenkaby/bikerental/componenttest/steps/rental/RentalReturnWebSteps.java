@@ -20,14 +20,13 @@ public class RentalReturnWebSteps {
     @Given("the return equipment request is")
     public void theReturnEquipmentRequestIs(ReturnEquipmentRequest request) {
         log.info("Preparing return equipment request: rentalId={}, equipmentId={}, equipmentUid={}",
-                request.rentalId(), request.equipmentId(), request.equipmentUid());
+                request.rentalId(), request.equipmentIds(), request.equipmentUids());
 
-        // Resolve {requestedObjectId} placeholder in rentalId from scenario context
         if (request.rentalId() == null && scenarioContext.getRequestedObjectId() != null) {
             var resolvedRequest = new ReturnEquipmentRequest(
                     Long.valueOf(scenarioContext.getRequestedObjectId()),
-                    request.equipmentId(),
-                    request.equipmentUid(),
+                    request.equipmentIds(),
+                    request.equipmentUids(),
                     request.paymentMethod(),
                     request.operatorId()
             );
@@ -40,10 +39,7 @@ public class RentalReturnWebSteps {
     @Then("the rental return response contains")
     public void theRentalReturnResponseContains(RentalReturnExpectation expected) {
         var actual = scenarioContext.getResponseBody(RentalReturnResponse.class);
-        log.info("Validating rental return response: status={}, finalCost={}, additionalPayment={}",
-                actual.rental() != null ? actual.rental().status() : null,
-                actual.cost() != null ? actual.cost().totalCost() : null,
-                actual.additionalPayment());
+        log.info("Validating rental return response: {}", actual);
 
         assertSoftly(softly -> {
             if (expected.status() != null) {
@@ -54,43 +50,52 @@ public class RentalReturnWebSteps {
                         .as("Rental status")
                         .isEqualTo(expected.status());
             }
-            if (expected.baseCost() != null) {
-                softly.assertThat(actual.cost().baseCost())
-                        .as("Base cost")
-                        .isEqualByComparingTo(expected.baseCost());
+            var hasCostExpectation = expected.baseCost() != null || expected.overtimeCost() != null
+                    || expected.finalCost() != null || expected.actualMinutes() != null
+                    || expected.plannedMinutes() != null || expected.overtimeMinutes() != null
+                    || expected.forgivenessApplied() != null;
+            if (hasCostExpectation) {
+                softly.assertThat(actual.costs())
+                        .as("Cost breakdowns in return response")
+                        .isNotEmpty();
             }
-            if (expected.overtimeCost() != null) {
-                softly.assertThat(actual.cost().overtimeCost())
-                        .as("Overtime cost")
-                        .isEqualByComparingTo(expected.overtimeCost());
-            }
-            if (expected.finalCost() != null) {
-                softly.assertThat(actual.cost())
-                        .as("Cost breakdown in return response")
-                        .isNotNull();
-                softly.assertThat(actual.cost().totalCost())
-                        .as("Final total cost")
-                        .isEqualByComparingTo(expected.finalCost());
-            }
-            if (expected.actualMinutes() != null) {
-                softly.assertThat(actual.cost().actualMinutes())
-                        .as("Actual minutes")
-                        .isEqualTo(expected.actualMinutes());
-            }
-            if (expected.plannedMinutes() != null) {
-                softly.assertThat(actual.cost().plannedMinutes())
-                        .as("Planned minutes")
-                        .isEqualTo(expected.plannedMinutes());
-            }
-            if (expected.overtimeMinutes() != null) {
-                softly.assertThat(actual.cost().overtimeMinutes())
-                        .as("Overtime minutes")
-                        .isEqualTo(expected.overtimeMinutes());
-            }
-            if (expected.forgivenessApplied() != null) {
-                softly.assertThat(actual.cost().forgivenessApplied())
-                        .as("Forgiveness applied")
-                        .isEqualTo(expected.forgivenessApplied());
+            if (actual.costs() != null && !actual.costs().isEmpty()) {
+                var cost = actual.costs().getFirst();
+                if (expected.baseCost() != null) {
+                    softly.assertThat(cost.baseCost())
+                            .as("Base cost")
+                            .isEqualByComparingTo(expected.baseCost());
+                }
+                if (expected.overtimeCost() != null) {
+                    softly.assertThat(cost.overtimeCost())
+                            .as("Overtime cost")
+                            .isEqualByComparingTo(expected.overtimeCost());
+                }
+                if (expected.finalCost() != null) {
+                    softly.assertThat(cost.totalCost())
+                            .as("Final total cost")
+                            .isEqualByComparingTo(expected.finalCost());
+                }
+                if (expected.actualMinutes() != null) {
+                    softly.assertThat(cost.actualMinutes())
+                            .as("Actual minutes")
+                            .isEqualTo(expected.actualMinutes());
+                }
+                if (expected.plannedMinutes() != null) {
+                    softly.assertThat(cost.plannedMinutes())
+                            .as("Planned minutes")
+                            .isEqualTo(expected.plannedMinutes());
+                }
+                if (expected.overtimeMinutes() != null) {
+                    softly.assertThat(cost.overtimeMinutes())
+                            .as("Overtime minutes")
+                            .isEqualTo(expected.overtimeMinutes());
+                }
+                if (expected.forgivenessApplied() != null) {
+                    softly.assertThat(cost.forgivenessApplied())
+                            .as("Forgiveness applied")
+                            .isEqualTo(expected.forgivenessApplied());
+                }
             }
             if (expected.additionalPayment() != null) {
                 softly.assertThat(actual.additionalPayment())
@@ -99,7 +104,6 @@ public class RentalReturnWebSteps {
             }
         });
 
-        // Save rental id to context for subsequent event validation
         if (actual.rental() != null && actual.rental().id() != null) {
             scenarioContext.setRequestedObjectId(actual.rental().id().toString());
         }

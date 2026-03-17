@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.rental.web.command.dto.ReturnEquipmentRequest;
 import io.cucumber.java.DataTableType;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,7 +21,8 @@ public class ReturnEquipmentRequestTransformer {
                 .orElse(null);
         var operatorId = DataTableHelper.getStringOrNull(entry, "operatorId");
 
-        return new ReturnEquipmentRequest(rentalId, equipmentId, equipmentUid, paymentMethod, operatorId);
+// TODO make it better
+        return new ReturnEquipmentRequest(rentalId, List.of(equipmentId), List.of(equipmentUid), paymentMethod, operatorId);
     }
 }
 

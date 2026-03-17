@@ -60,10 +60,10 @@ public class RentalCompletedEventSteps {
                     .isEqualTo(expected.rentalId());
         }
 
-        if (expected.equipmentId() != null) {
-            softly.assertThat(actual.equipmentId())
-                    .as("Equipment ID")
-                    .isEqualTo(expected.equipmentId());
+        if (expected.equipmentIds() != null) {
+            softly.assertThat(actual.equipmentIds())
+                    .as("Equipment IDs")
+                    .isEqualTo(expected.equipmentIds());
         }
 
         softly.assertThat(actual.returnTime())
@@ -76,12 +76,12 @@ public class RentalCompletedEventSteps {
                     .isCloseTo(expected.returnTime(), within(5, ChronoUnit.SECONDS));
         }
 
-        if (expected.finalCost() != null) {
-            softly.assertThat(actual.finalCost())
+        if (expected.totalCost() != null) {
+            softly.assertThat(actual.totalCost())
                     .as("Final cost")
-                    .isEqualByComparingTo(expected.finalCost());
+                    .isEqualByComparingTo(expected.totalCost());
         } else {
-            softly.assertThat(actual.finalCost())
+            softly.assertThat(actual.totalCost())
                     .as("Final cost should not be null")
                     .isNotNull();
         }

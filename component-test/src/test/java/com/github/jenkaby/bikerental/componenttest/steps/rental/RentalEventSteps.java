@@ -132,10 +132,10 @@ public class RentalEventSteps {
                     .isEqualTo(expected.customerId());
         }
 
-        if (expected.equipmentId() != null) {
-            softly.assertThat(actual.equipmentId())
+        if (expected.equipmentIds() != null) {
+            softly.assertThat(actual.equipmentIds())
                     .as("Equipment ID")
-                    .isEqualTo(expected.equipmentId());
+                    .isEqualTo(expected.equipmentIds());
         }
 
         if (expected.startedAt() != null) {

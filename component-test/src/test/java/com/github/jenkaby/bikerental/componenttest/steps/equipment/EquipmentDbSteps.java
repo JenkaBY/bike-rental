@@ -25,7 +25,7 @@ import static org.awaitility.Awaitility.await;
 @RequiredArgsConstructor
 public class EquipmentDbSteps {
 
-    public static final Comparator<EquipmentJpaEntity> BY_SERIAL_NUMBER = Comparator.comparing(EquipmentJpaEntity::getSerialNumber);
+    public static final Comparator<EquipmentJpaEntity> BY_UID = Comparator.comparing(EquipmentJpaEntity::getUid);
     private final InsertableEquipmentRepository insertRepository;
     private final EquipmentJpaRepository jpaRepository;
 
@@ -39,19 +39,20 @@ public class EquipmentDbSteps {
     @Then("the following equipment record(s) was/were persisted in db")
     public void theFollowingEquipmentsWerePersisted(List<EquipmentJpaEntity> expected) {
         await()
-                .atMost(Duration.ofSeconds(5))
+                .atMost(Duration.ofSeconds(2))
                 .pollInterval(Duration.ofMillis(100))
                 .untilAsserted(() -> assertEquipmentsPersisted(expected));
     }
 
     private void assertEquipmentsPersisted(List<EquipmentJpaEntity> expected) {
+        log.info("Asserting equipments persisted in db. Expected: {}", expected);
         var serialNums = expected.stream()
                 .map(EquipmentJpaEntity::getSerialNumber)
                 .collect(Collectors.toSet());
         var sortedActual = getEquipments(actual -> serialNums.contains(actual.getSerialNumber()));
 
         var sortedExpected = expected.stream()
-                .sorted(BY_SERIAL_NUMBER)
+                .sorted(BY_UID)
                 .toList();
 
         assertThat(sortedActual)
@@ -105,7 +106,7 @@ public class EquipmentDbSteps {
 
         return allActual.stream()
                 .filter(filter)
-                .sorted(BY_SERIAL_NUMBER)
+                .sorted(BY_UID)
                 .toList();
     }
 
