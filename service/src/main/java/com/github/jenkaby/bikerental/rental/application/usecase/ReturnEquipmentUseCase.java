@@ -17,5 +17,12 @@ public interface ReturnEquipmentUseCase {
             PaymentMethod paymentMethod,
             String operatorId
     ) {
+        public List<Long> getEquipmentIds() {
+            return equipmentIds != null ? equipmentIds : List.of();
+        }
+
+        public List<String> getEquipmentUids() {
+            return equipmentUids != null ? equipmentUids : List.of();
+        }
     }
 }

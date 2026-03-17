@@ -27,35 +27,41 @@ Feature: Equipment Return
   Scenario Outline: Return equipment - identified by <identified>, no additional payment
     Given now is "<now>"
     And a single rental exists in the database with the following data
-      | id         | customerId | equipmentId | equipmentUid   | tariffId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
-      | <rentalId> | CUS1       | 1           | <equipmentUid> | 1        | ACTIVE | 200.00        | 120             | <startedAt> | <startedAt> | <startedAt> |
+      | id         | customerId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
+      | <rentalId> | CUS1       | ACTIVE | 200.00        | 120             | <startedAt> | <startedAt> | <startedAt> |
+    And rental equipments exist in the database with the following data
+      | rentalId   | equipmentId   | equipmentUid   | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | <equipmentId> | <equipmentUid> | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
     And the following payment record exists in db
       | id   | rentalId   | amount | type       | method | operator | receipt   |
       | PAY1 | <rentalId> | 200.00 | PREPAYMENT | CASH   | OP1      | <receipt> |
     And the return equipment request is
-      | rentalId   | equipmentUid   | paymentMethod | operatorId |
-      | <rentalId> | <equipmentUid> | CASH          | <operator> |
+      | rentalId   | equipmentIds  | paymentMethod | operatorId |
+      | <rentalId> | <equipmentId> | CASH          | <operator> |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains
       | status    | baseCost | overtimeCost | finalCost | actualMinutes | plannedMinutes | overtimeMinutes | forgivenessApplied | additionalPayment |
       | COMPLETED | 200.00   | 0.00         | 200.00    | 120           | 120            | 0               | true               | 0.00              |
     And the following rental completed event was published
-      | rentalId   | equipmentId | finalCost | returnTime |
-      | <rentalId> | 1           | 200.00    | <now>      |
+      | rentalId   | equipmentId   | finalCost | returnTime |
+      | <rentalId> | <equipmentId> | 200.00    | <now>      |
     And the following equipment record was persisted in db
-      | id | serialNumber | uid      | status    | type    | model   | condition |
-      | 1  | EQ-001       | BIKE-001 | AVAILABLE | bicycle | Model A | Good      |
+      | id            | serialNumber | uid      | status    | type    | model   | condition |
+      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | bicycle | Model A | Good      |
     Examples:
-      | identified   | equipmentUid | rentalId | now                 | startedAt           | operator | receipt |
-      | rentalId     |              | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | REC-10  |
-      | equipmentUid | BIKE-001     | 11       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | REC-11  |
+      | identified   | equipmentUid | rentalId | now                 | startedAt           | operator | receipt | equipmentId |
+      | rentalId     |              | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | REC-10  | 1           |
+      | equipmentUid | BIKE-001     | 11       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | REC-11  | 1           |
 
   Scenario Outline: Return equipment - with overtime, additional payment required
     Given now is "<now>"
     And a single rental exists in the database with the following data
-      | id         | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
-      | <rentalId> | CUS1       | 1           | 1        | ACTIVE | 100.00        | 30              | <startedAt> | <startedAt> | <startedAt> |
+      | id         | customerId | tariffId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
+      | <rentalId> | CUS1       | 1        | ACTIVE | 100.00        | 30              | <startedAt> | <startedAt> | <startedAt> |
+    And rental equipments exist in the database with the following data
+      | rentalId   | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <startedAt>      | 100.00        | <startedAt> | <startedAt> |
     And the following payment record exists in db
       | id   | rentalId   | amount | type       | method | operator | receipt |
       | PAY1 | <rentalId> | 100.00 | PREPAYMENT | CASH   | OP1      | REC-12  |
@@ -77,7 +83,7 @@ Feature: Equipment Return
   Scenario: Return equipment - rental not found
     And the return equipment request is
       | rentalId | paymentMethod | operatorId |
-      | 999      |               |            |
+      | 999      | CASH          | OP1        |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 404
     And the response contains
@@ -85,16 +91,24 @@ Feature: Equipment Return
       | $.title  | Not Found                              |
       | $.detail | Rental with identifier '999' not found |
 
-  Scenario: Return equipment - rental not in ACTIVE status
+  Scenario Outline: Return equipment - rental not in ACTIVE status
     Given a single rental exists in the database with the following data
-      | customerId | equipmentId | tariffId | status | estimatedCost | plannedDuration | createdAt           | updatedAt           |
-      | CUS1       | 1           | 1        | DRAFT  | 100.00        | 120             | 2026-02-10T10:00:00 | 2026-02-10T10:00:00 |
+      | id | customerId | tariffId | status   | estimatedCost | plannedDuration | createdAt           | updatedAt           |
+      | 1  | CUS1       | 1        | <status> | 100.00        | 120             | 2026-02-10T10:00:00 | 2026-02-10T10:00:00 |
+    And rental equipments exist in the database with the following data
+      | rentalId | equipmentId | equipmentUid | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
+      | 1        | 1           | BIKE-001     | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 100.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the return equipment request is
       | rentalId | paymentMethod | operatorId |
-      |          |               |            |
+      | 1        | CASH          | Op1        |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 422
     And the response contains
-      | path     | value                                                                         |
-      | $.title  | Invalid rental status                                                         |
-      | $.detail | Cannot perform operation on rental with status DRAFT. Expected status: ACTIVE |
+      | path     | value                                                                            |
+      | $.title  | Invalid rental status                                                            |
+      | $.detail | Cannot perform operation on rental with status <status>. Expected status: ACTIVE |
+    Examples:
+      | status    |
+      | DRAFT     |
+      | CANCELLED |
+      | COMPLETED |

@@ -140,4 +140,14 @@ public class DataTableHelper {
                 .map(Long::valueOf)
                 .toList();
     }
+
+    public static List<String> toStringList(Map<String, String> entry, String field) {
+        var value = getStringOrNull(entry, field);
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return Stream.of(value.split(","))
+                .map(String::trim)
+                .toList();
+    }
 }

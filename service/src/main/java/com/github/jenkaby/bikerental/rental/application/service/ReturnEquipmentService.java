@@ -72,7 +72,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
             throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);
         }
         var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);
-        var equipmentsToReturn = rental.equipmentsToReturn(command.equipmentIds(), command.equipmentUids(), returnTime);
+        var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);
         Money totalCost = Money.zero();
         Map<Long, RentalCost> rentalCostMapToEquipment = new HashMap<>();
         for (var equipment : equipmentsToReturn) {

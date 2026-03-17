@@ -162,8 +162,13 @@ public class Rental {
     }
 
     public List<RentalEquipment> equipmentsToReturn(List<Long> toReturnEquipmentIds, List<String> toReturnEquipmentUids, LocalDateTime returnedAt) {
+//         assume when no equipments are present in request, entire rental must be completed
+        var isEmptyRequest = CollectionUtils.isEmpty(toReturnEquipmentIds) && CollectionUtils.isEmpty(toReturnEquipmentUids);
+        Predicate<RentalEquipment> filter = eq -> isEmptyRequest
+                || toReturnEquipmentIds.contains(eq.getEquipmentId())
+                || toReturnEquipmentUids.contains(eq.getEquipmentUid());
         return rentedEquipments().stream()
-                .filter(eq -> toReturnEquipmentIds.contains(eq.getEquipmentId()) || toReturnEquipmentUids.contains(eq.getEquipmentUid()))
+                .filter(filter)
                 .map(eq -> eq.markReturned(returnedAt))
                 .toList();
     }
