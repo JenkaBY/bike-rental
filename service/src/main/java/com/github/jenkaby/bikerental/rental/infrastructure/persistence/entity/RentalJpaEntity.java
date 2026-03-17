@@ -2,12 +2,15 @@ package com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -27,6 +30,7 @@ public class RentalJpaEntity {
     @Column(name = "customer_id")
     private UUID customerId;
 
+    @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RentalEquipmentJpaEntity> rentalEquipments = new ArrayList<>();
 
@@ -57,12 +61,14 @@ public class RentalJpaEntity {
     public BigDecimal getEstimatedCost() {
         return this.rentalEquipments.stream()
                 .map(RentalEquipmentJpaEntity::getEstimatedCost)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public BigDecimal getFinalCost() {
         return this.rentalEquipments.stream()
                 .map(RentalEquipmentJpaEntity::getFinalCost)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

@@ -33,11 +33,6 @@
             <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
 
-        <!-- Create index for equipment_uid for performance -->
-        <createIndex tableName="rentals" indexName="idx_rentals_equipment_uid">
-            <column name="equipment_uid"/>
-        </createIndex>
-
     </changeSet>
 
 </databaseChangeLog>

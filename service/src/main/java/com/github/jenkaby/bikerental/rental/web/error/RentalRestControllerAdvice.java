@@ -94,6 +94,18 @@ public class RentalRestControllerAdvice {
         return ResponseEntity.of(problem).build();
     }
 
+    @ExceptionHandler(InvalidRentalPlannedDurationException.class)
+    public ResponseEntity<ProblemDetail> handleInsufficientPrepayment(InvalidRentalPlannedDurationException ex) {
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Planned duration is missing for rental {}: {}", correlationId, ex.getDetails().rentalId(), ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
+        problem.setTitle("Invalid rental planned duration");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        return ResponseEntity.of(problem).build();
+    }
+
     private String resolveCorrelationId() {
         String correlationId = MDC.get("correlationId");
         return correlationId != null ? correlationId : UUID.randomUUID().toString();

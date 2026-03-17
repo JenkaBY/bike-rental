@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentComma
 import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
+import com.github.jenkaby.bikerental.rental.event.RentalCreated;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalCompleted;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalUpdated;
@@ -41,6 +42,13 @@ public class RentalEventListener {
     }
 
     @ApplicationModuleListener
+    public void onRentalStarted(RentalCreated event) {
+        log.info("Received RentalCreated event {}", event);
+        equipmentRepository.findByIds(event.equipmentIds())
+                .forEach(equipment -> setStatusForEquipment(equipment, EquipmentStatus.RESERVED.name()));
+    }
+
+    @ApplicationModuleListener
     public void onRentalCompleted(RentalCompleted event) {
         log.info("Received RentalCompleted event for equipments {}", event.equipmentIds());
         equipmentRepository.findByIds(event.returnedEquipmentIds())
@@ -60,15 +68,14 @@ public class RentalEventListener {
             equipmentRepository.findByIds(ids)
                     .forEach(equipment -> setStatusForEquipment(equipment, EquipmentStatus.AVAILABLE.name()));
         }
-// TODO Verify this
+        // TODO Verify this
         if (RentalStatus.isDraft(event.currentState().rentalStatus())) {
             if (!CollectionUtils.isEmpty(event.previousState().equipmentIds())) {
                 equipmentRepository.findByIds(event.previousState().equipmentIds())
                         .forEach(equipment -> setStatusForEquipment(equipment, EquipmentStatus.AVAILABLE.name()));
-                return;
             }
             if (!CollectionUtils.isEmpty(event.currentState().equipmentIds())) {
-                equipmentRepository.findByIds(event.previousState().equipmentIds())
+                equipmentRepository.findByIds(event.currentState().equipmentIds())
                         .forEach(equipment -> setStatusForEquipment(equipment, EquipmentStatus.RESERVED.name()));
             }
         }

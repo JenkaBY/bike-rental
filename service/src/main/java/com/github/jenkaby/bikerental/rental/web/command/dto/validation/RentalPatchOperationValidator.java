@@ -75,6 +75,18 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
                 isValid = false;
             }
         }
+//        if (operation.getOp() != null && "/equipmentIds".equals(operation.getPath()) && operation.getValue() != null) {
+//            // For equipmentIds, value must be an array
+//            try {
+//                Duration.parse(operation.getValue().toString());
+//            } catch (Exception e) {
+//                context.buildConstraintViolationWithTemplate(
+//                                "Value for path '/equipmentIds' must be an array of int64")
+//                        .addPropertyNode("value")
+//                        .addConstraintViolation();
+//                isValid = false;
+//            }
+//        }
         return isValid;
     }
 }

@@ -7,6 +7,7 @@ import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalPlannedDurationException;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
 import com.github.jenkaby.bikerental.rental.domain.exception.PrepaymentRequiredException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
@@ -79,7 +80,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new ResourceNotFoundException(Rental.class, rentalId.toString()));
         var previousState = eventMapper.toRentalState(rental);
-        // Handle customerId update
+
         if (patch.containsKey("customerId")) {
             UUID customerId = valueParser.parseUUID(patch.get("customerId"));
             customerFacade.findById(customerId)
@@ -106,8 +107,8 @@ class UpdateRentalService implements UpdateRentalUseCase {
             rental.clearEquipmentRentals();
             for (var equipment : equipments) {
                 RentalEquipment rentalEquipment = RentalEquipment.assigned(equipment.id(), equipment.uid());
-                ;
-                TariffInfo tariff = selectTariff(equipment, rental.getPlannedDuration());
+
+                TariffInfo tariff = selectTariff(rental, equipment);
                 var cost = tariffFacade.calculateRentalCost(tariff.id(), rental.getPlannedDuration());
                 rentalEquipment.setTariffId(tariff.id());
                 rentalEquipment.setEstimatedCost(cost.totalCost());
@@ -127,13 +128,16 @@ class UpdateRentalService implements UpdateRentalUseCase {
             String newStatusStr = valueParser.parseString(patch.get("status"));
             RentalStatus newStatus = RentalStatus.valueOf(newStatusStr);
             log.info("Updating rental {} status to {}", rental, newStatus);
+
             if (RentalStatus.ACTIVE == newStatus) {
                 startRental(rental);
             } else {
                 rental.setStatus(newStatus);
-                var currentState = eventMapper.toRentalState(rental);
-                eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalUpdated(rental, previousState, currentState));
             }
+        }
+        if (rental.getStatus() != RentalStatus.ACTIVE) {
+            var currentState = eventMapper.toRentalState(rental);
+            eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalUpdated(rental, previousState, currentState));
         }
 
         return rentalRepository.save(rental);
@@ -153,7 +157,11 @@ class UpdateRentalService implements UpdateRentalUseCase {
         eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);
     }
 
-    private TariffInfo selectTariff(EquipmentInfo equipment, Duration plannedDuration) {
+    private TariffInfo selectTariff(Rental rental, EquipmentInfo equipment) {
+        var plannedDuration = rental.getPlannedDuration();
+        if (plannedDuration == null) {
+            throw new InvalidRentalPlannedDurationException(rental.getId());
+        }
         return tariffFacade.selectTariff(
                 equipment.typeSlug(),
                 plannedDuration,

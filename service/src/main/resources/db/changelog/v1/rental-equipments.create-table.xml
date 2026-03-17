@@ -33,6 +33,7 @@
             <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
 
         <createIndex tableName="rental_equipments" indexName="idx_rent_equip_rental_id">

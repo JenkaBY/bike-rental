@@ -1,6 +1,5 @@
 package com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity;
 
-import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
+@ToString()
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class RentalEquipmentJpaEntity {
 
@@ -23,6 +22,7 @@ public class RentalEquipmentJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rental_id", nullable = false)
     private RentalJpaEntity rental;
@@ -35,7 +35,7 @@ public class RentalEquipmentJpaEntity {
     private String equipmentUid;
 
     @Column(nullable = false, length = 20)
-    private RentalStatus status;
+    private String status;
 
     @Column(name = "started_at")
     private LocalDateTime startedAt;

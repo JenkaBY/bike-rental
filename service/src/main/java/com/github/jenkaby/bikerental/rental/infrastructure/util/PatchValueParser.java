@@ -38,7 +38,7 @@ public class PatchValueParser {
     }
 
     public List<Long> parseListOfLong(Object value) {
-        log.info("Value is class: {}", value.getClass());
+        log.info("Value is class: {} and value: {}", value.getClass(), value);
         if (value instanceof List<?> list) {
             return list.stream()
                     .filter(item -> item instanceof Number)
@@ -46,7 +46,9 @@ public class PatchValueParser {
                     .toList();
         }
         var listLongType = objectMapper.getTypeFactory().constructCollectionType(List.class, Long.class);
-        ;
+        if (value instanceof String str) {
+            return objectMapper.readValue(str, listLongType);
+        }
         return objectMapper.convertValue(value, listLongType);
     }
 
