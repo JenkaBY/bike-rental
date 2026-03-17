@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.Duration;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 
 public class RentalPatchOperationValidator implements ConstraintValidator<ValidRentalPatchOperation, RentalPatchOperation> {
@@ -17,6 +18,8 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
             "/duration",
             "/status"
     );
+
+    private static final Pattern IS_ARRAY_OF_NUMBERS = Pattern.compile("^\\s*\\[\\s*(?:\\d+\\s*(?:,\\s*\\d+\\s*)*)?\\]\\s*$");
 
     @Override
     public boolean isValid(RentalPatchOperation operation, ConstraintValidatorContext context) {
@@ -75,18 +78,15 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
                 isValid = false;
             }
         }
-//        if (operation.getOp() != null && "/equipmentIds".equals(operation.getPath()) && operation.getValue() != null) {
-//            // For equipmentIds, value must be an array
-//            try {
-//                Duration.parse(operation.getValue().toString());
-//            } catch (Exception e) {
-//                context.buildConstraintViolationWithTemplate(
-//                                "Value for path '/equipmentIds' must be an array of int64")
-//                        .addPropertyNode("value")
-//                        .addConstraintViolation();
-//                isValid = false;
-//            }
-//        }
+        if (operation.getOp() != null && "/equipmentIds".equals(operation.getPath()) && operation.getValue() != null) {
+            if (!IS_ARRAY_OF_NUMBERS.matcher(operation.getValue().toString()).matches()) {
+                context.buildConstraintViolationWithTemplate(
+                                "Value for path '/equipmentIds' must be an array of int64")
+                        .addPropertyNode("value")
+                        .addConstraintViolation();
+                isValid = false;
+            }
+        }
         return isValid;
     }
 }

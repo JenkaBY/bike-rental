@@ -605,6 +605,29 @@ class RentalCommandControllerTest {
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
+
+            @ParameterizedTest
+            @DisplayName("when EquipmentIds value is invalid")
+            @CsvSource(value = {"[", "]", "123", "1,2,3"})
+            void whenEquipmentIdsValueIsInvalid(String value) throws Exception {
+                RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
+                        List.of(new RentalPatchOperation(
+                                JsonPatchOperation.ADD,
+                                "/equipmentIds",
+                                value
+                        ))
+                );
+
+                mockMvc.perform(patch(API_RENTALS + "/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].code").exists());
+
+                verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
+            }
         }
     }
 
