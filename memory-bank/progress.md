@@ -3,14 +3,52 @@
 ## Project Overview
 
 **Project:** BikeRental Equipment Rental Management System  
-**Status:** 🚀 Active Implementation | 16 User Stories + 7 Tech Tasks Complete  
-**Phase:** Phase 4 - Return & Calculations (mostly complete, next: US-TR-004)  
-**Date:** February 28, 2026  
-**Overall Completion:** ~37% Implementation (16 of 43 user stories complete) | 100% Documentation
+**Status:** 🚀 Active Implementation | 16 User Stories + 8 Tech Tasks Complete | US-RN-010 ~85%  
+**Phase:** Phase 4 - Return & Calculations (US-RN-010 in progress, TECH-015 pending)  
+**Date:** March 17, 2026  
+**Overall Completion:** ~40% Implementation (16+ of 43 user stories, US-RN-010 ~85%) | 100% Documentation
+
+---
+
+## In Progress
+
+### US-RN-010: Поддержка аренды нескольких единиц оборудования (March 12–17, 2026)
+
+**Branch:** `feature/support-rental-of-equipment-group`  
+**Status:** ~85% Complete — основная реализация завершена, тестовый долг остался
+
+**Реализовано:**
+
+- Таблица `rental_equipments` в БД; `equipment_id`/`equipment_uid` удалены из `rentals`
+- `RentalEquipment` child entity + `RentalEquipmentStatus` (ASSIGNED/ACTIVE/RETURNED)
+- `Rental` aggregate root переработан: `List<RentalEquipment> equipments`, методы `addEquipment()`,
+  `allEquipmentReturned()`, `equipmentsToReturn()`
+- `CreateRentalService` — per-equipment tariff + cost
+- `UpdateRentalService` — список equipmentIds, валидация только новых
+- `ReturnEquipmentService` — частичный возврат, per-equipment cost, завершение только при `allEquipmentReturned()`
+- Новые события: `RentalUpdated`; расширены `RentalCreated`/`RentalStarted`/`RentalCompleted` списками IDs
+- `RentalEventListener` в equipment module поддерживает списки + `onRentalUpdated()`
+- `FinanceFacade.getPayments()` для расчёта доплаты
+- Все web DTO переведены на массивы: `List<Long> equipmentIds`, `List<EquipmentItemResponse>`, `List<CostBreakdown>`
+- WebMvc тесты (`RentalCommandControllerTest`) и component tests обновлены
+
+**Остаток:**
+
+- ⚠️ `UpdateRentalServiceTest.java` удалён (493 строки) — **критично пересоздать**
+- ⚠️ TECH-015: формула `toPay` в `ReturnEquipmentService` некорректна при частичном возврате
+- ⚠️ Проверить `isPrepaymentSufficient()` — должна использовать `getEstimatedCost()` вместо приватного поля
 
 ---
 
 ## Completed Features
+
+### TECH-013: Unified Error Codes, CorrelationId Filter (March 11, 2026)
+
+- `CorrelationIdFilter` — `@Component OncePerRequestFilter`, X-Correlation-ID в MDC
+- `errorCode` на всех ответах, `correlationId` вместо `errorId`, `errors` list на валидационных ответах
+- 11 новых тестов
+
+---
 
 ### Maintenance Fixes (March 1, 2026)
 

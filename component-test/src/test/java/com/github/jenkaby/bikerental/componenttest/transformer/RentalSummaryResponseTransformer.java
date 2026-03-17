@@ -21,7 +21,7 @@ public class RentalSummaryResponseTransformer {
                 .map(Aliases::getCustomerId)
                 .orElse(null);
 
-        var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
+        var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
         var status = DataTableHelper.getStringOrNull(entry, "status");
 
         var startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
@@ -35,7 +35,7 @@ public class RentalSummaryResponseTransformer {
         return new RentalSummaryResponse(
                 id,
                 customerId,
-                equipmentId,
+                equipmentIds,
                 status,
                 startedAt,
                 expectedReturnAt,

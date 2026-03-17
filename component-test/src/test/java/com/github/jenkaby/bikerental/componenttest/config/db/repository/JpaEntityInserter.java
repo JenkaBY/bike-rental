@@ -181,16 +181,42 @@ public class JpaEntityInserter {
     private List<FieldMetadata> extractFieldsMetadataForEntity(Object entity, Class<?> entityClass) {
         List<FieldMetadata> fields = new ArrayList<>();
         for (Field field : getAllFields(entityClass)) {
-            if (shouldIncludeField(field)) {
-                if (field.isAnnotationPresent(Id.class)) {
-                    Object idValue = getFieldValue(entity, field);
-                    if (idValue == null) {
-                        continue;
-                    }
-                }
-                String columnName = getColumnName(field);
-                fields.add(new FieldMetadata(field, columnName));
+            if (!shouldIncludeField(field)) {
+                continue;
             }
+
+            // Primary id: only include if present (we don't insert null PKs for entities with generated ids)
+            if (field.isAnnotationPresent(Id.class)) {
+                Object idValue = getFieldValue(entity, field);
+                if (idValue == null) {
+                    continue;
+                }
+            }
+
+            // Handle ManyToOne specially: include foreign key column and remember referenced id field
+            if (field.isAnnotationPresent(ManyToOne.class)) {
+                // determine join column name (prefer @JoinColumn, fallback to fieldName + "_id")
+                JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+                String columnName;
+                if (joinColumn != null && !joinColumn.name().isEmpty()) {
+                    columnName = joinColumn.name();
+                } else {
+                    columnName = convertCamelCaseToSnakeCase(field.getName()) + "_id";
+                }
+
+                // find id field on referenced entity
+                Class<?> referencedClass = field.getType();
+                Field referencedId = extractIdField(referencedClass);
+                if (referencedId == null) {
+                    throw new IllegalStateException("Referenced entity " + referencedClass.getName() + " has no @Id field");
+                }
+
+                fields.add(new FieldMetadata(field, columnName, referencedId));
+                continue;
+            }
+
+            String columnName = getColumnName(field);
+            fields.add(new FieldMetadata(field, columnName));
         }
         return fields;
     }
@@ -209,14 +235,14 @@ public class JpaEntityInserter {
             return false;
         }
 
-        if (isRelationshipField(field)) {
-            return false;
-        }
-
+        // include ManyToOne relationships (we need to write FK column). Other relationship types are skipped.
         if (field.isAnnotationPresent(ElementCollection.class)) {
             return false;
         }
 
+        if (isRelationshipField(field) && !field.isAnnotationPresent(ManyToOne.class)) {
+            return false;
+        }
 
         return true;
     }
@@ -229,10 +255,17 @@ public class JpaEntityInserter {
     }
 
     private String getColumnName(Field field) {
+        // If there is an explicit @JoinColumn (ManyToOne), prefer it
+        JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+        if (joinColumn != null && !joinColumn.name().isEmpty()) {
+            return joinColumn.name();
+        }
+
         Column columnAnnotation = field.getAnnotation(Column.class);
         if (columnAnnotation != null && !columnAnnotation.name().isEmpty()) {
             return columnAnnotation.name();
         }
+
         return convertCamelCaseToSnakeCase(field.getName());
     }
 
@@ -272,8 +305,18 @@ public class JpaEntityInserter {
     private List<Object> extractParameters(Object entity, List<FieldMetadata> fields) {
         List<Object> parameters = new ArrayList<>();
         for (FieldMetadata fieldMetadata : fields) {
-            Object value = getFieldValue(entity, fieldMetadata.field);
-            parameters.add(convertToSqlType(value));
+            if (fieldMetadata.referencedIdField != null) {
+                // ManyToOne: extract referenced entity id
+                Object referencedEntity = getFieldValue(entity, fieldMetadata.field);
+                Object idValue = null;
+                if (referencedEntity != null) {
+                    idValue = getFieldValue(referencedEntity, fieldMetadata.referencedIdField);
+                }
+                parameters.add(convertToSqlType(idValue));
+            } else {
+                Object value = getFieldValue(entity, fieldMetadata.field);
+                parameters.add(convertToSqlType(value));
+            }
         }
         return parameters;
     }
@@ -462,10 +505,16 @@ public class JpaEntityInserter {
     private static class FieldMetadata {
         final Field field;
         final String columnName;
+        final Field referencedIdField; // non-null for ManyToOne fields: the id field on referenced entity
 
         FieldMetadata(Field field, String columnName) {
+            this(field, columnName, null);
+        }
+
+        FieldMetadata(Field field, String columnName, Field referencedIdField) {
             this.field = field;
             this.columnName = columnName;
+            this.referencedIdField = referencedIdField;
         }
     }
 

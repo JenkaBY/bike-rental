@@ -6,12 +6,16 @@ import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface EquipmentRepository {
     Equipment save(Equipment equipment);
 
     Optional<Equipment> findById(Long id);
+
+    List<Equipment> findByIds(Collection<Long> ids);
 
     Page<Equipment> findAll(String statusSlug, String typeSlug, PageRequest pageRequest);
 

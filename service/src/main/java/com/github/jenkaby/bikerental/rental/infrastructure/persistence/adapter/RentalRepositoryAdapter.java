@@ -9,11 +9,13 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@Transactional(readOnly = true)
 class RentalRepositoryAdapter implements RentalRepository {
 
     private final RentalJpaRepository repository;
@@ -27,6 +29,7 @@ class RentalRepositoryAdapter implements RentalRepository {
     }
 
     @Override
+    @Transactional
     public Rental save(Rental rental) {
         var entity = mapper.toEntity(rental);
         var savedEntity = repository.save(entity);

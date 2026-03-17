@@ -1,20 +1,21 @@
 package com.github.jenkaby.bikerental.rental.web.command.dto;
 
-import com.github.jenkaby.bikerental.finance.PaymentInfo;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Schema(description = "Result of equipment return operation")
 public record RentalReturnResponse(
         @Schema(description = "Updated rental details") RentalResponse rental,
-        @Schema(description = "Cost breakdown for the rental") CostBreakdown cost,
+        @Schema(description = "Cost breakdown for the rental") List<CostBreakdown> costs,
         @Schema(description = "Additional payment charged at return (0 if prepayment covered all)", example = "50.00") BigDecimal additionalPayment,
-        @Schema(description = "Payment info for the additional charge") PaymentInfo paymentInfo
+        @Schema(description = "Payment info for the additional charge") PaymentInfoResponse paymentInfo
 ) {
     @Schema(description = "Detailed cost breakdown")
     public record CostBreakdown(
+            @Schema(description = "Equipment ID", example = "1") Long equipmentId,
             @Schema(description = "Base cost for planned duration", example = "200.00") BigDecimal baseCost,
             @Schema(description = "Overtime cost", example = "50.00") BigDecimal overtimeCost,
             @Schema(description = "Total cost", example = "250.00") BigDecimal totalCost,

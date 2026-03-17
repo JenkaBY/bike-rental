@@ -6,22 +6,25 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.Duration;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 
 public class RentalPatchOperationValidator implements ConstraintValidator<ValidRentalPatchOperation, RentalPatchOperation> {
 
     private static final Set<String> ALLOWED_PATHS = Set.of(
             "/customerId",
-            "/equipmentId",
+            "/equipmentIds",
             "/tariffId",
             "/duration",
             "/status"
     );
 
+    private static final Pattern IS_ARRAY_OF_NUMBERS = Pattern.compile("^\\s*\\[\\s*(?:\\d+\\s*(?:,\\s*\\d+\\s*)*)?\\]\\s*$");
+
     @Override
     public boolean isValid(RentalPatchOperation operation, ConstraintValidatorContext context) {
         if (operation == null) {
-            return true; // Null validation is handled by @NotNull
+            return true;
         }
 
         boolean isValid = true;
@@ -70,6 +73,15 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
             } catch (Exception e) {
                 context.buildConstraintViolationWithTemplate(
                                 "Value for path '/duration' must be a valid ISO-8601 duration string, e.g. 'PT1H30M'")
+                        .addPropertyNode("value")
+                        .addConstraintViolation();
+                isValid = false;
+            }
+        }
+        if (operation.getOp() != null && "/equipmentIds".equals(operation.getPath()) && operation.getValue() != null) {
+            if (!IS_ARRAY_OF_NUMBERS.matcher(operation.getValue().toString()).matches()) {
+                context.buildConstraintViolationWithTemplate(
+                                "Value for path '/equipmentIds' must be an array of int64")
                         .addPropertyNode("value")
                         .addConstraintViolation();
                 isValid = false;

@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
-import com.github.jenkaby.bikerental.rental.event.RentalCreated;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
 import io.cucumber.java.DataTableType;
 
 import java.time.Instant;
@@ -13,6 +13,7 @@ public class RentalCreatedEventTransformer {
     @DataTableType
     public RentalCreated transform(Map<String, String> entry) {
         Long rentalId = DataTableHelper.toLong(entry, "rentalId");
+        var equipmentIds = DataTableHelper.toLongList(entry, "eqIds");
 
         UUID customerId = null;
         String customerIdString = DataTableHelper.getStringOrNull(entry, "customerId");
@@ -23,6 +24,6 @@ public class RentalCreatedEventTransformer {
         String status = DataTableHelper.getStringOrNull(entry, "status");
         Instant createdAt = DataTableHelper.toInstant(entry, "createdAt");
 
-        return new RentalCreated(rentalId, customerId, status, createdAt);
+        return new RentalCreated(rentalId, customerId, equipmentIds, status, createdAt);
     }
 }

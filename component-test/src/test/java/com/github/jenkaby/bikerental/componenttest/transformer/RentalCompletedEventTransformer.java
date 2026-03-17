@@ -12,12 +12,13 @@ public class RentalCompletedEventTransformer {
     @DataTableType
     public RentalCompleted rentalCompletedEvent(Map<String, String> entry) {
         var rentalId = DataTableHelper.toLong(entry, "rentalId");
-        var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
+        var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
+        var returnedEquipmentIds = DataTableHelper.toLongList(entry, "returnedEquipmentIds");
         var returnTime = DataTableHelper.toLocalDateTime(entry, "returnTime");
-        var finalCost = Optional.ofNullable(DataTableHelper.toBigDecimal(entry, "finalCost"))
+        var finalCost = Optional.ofNullable(DataTableHelper.toBigDecimal(entry, "totalCost"))
                 .map(Money::of)
                 .orElse(null);
-        return new RentalCompleted(rentalId, equipmentId, returnTime, finalCost);
+        return new RentalCompleted(rentalId, equipmentIds, returnedEquipmentIds, returnTime, finalCost);
     }
 }
 

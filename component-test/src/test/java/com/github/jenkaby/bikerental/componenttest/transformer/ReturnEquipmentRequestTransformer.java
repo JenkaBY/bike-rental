@@ -12,15 +12,15 @@ public class ReturnEquipmentRequestTransformer {
     @DataTableType
     public ReturnEquipmentRequest returnEquipmentRequest(Map<String, String> entry) {
         var rentalId = DataTableHelper.toLong(entry, "rentalId");
-        var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
-        var equipmentUid = DataTableHelper.getStringOrNull(entry, "equipmentUid");
+        var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
+        var equipmentUids = DataTableHelper.toStringList(entry, "equipmentUids");
         var paymentMethodStr = DataTableHelper.getStringOrNull(entry, "paymentMethod");
         var paymentMethod = Optional.ofNullable(paymentMethodStr)
                 .map(PaymentMethod::valueOf)
                 .orElse(null);
         var operatorId = DataTableHelper.getStringOrNull(entry, "operatorId");
 
-        return new ReturnEquipmentRequest(rentalId, equipmentId, equipmentUid, paymentMethod, operatorId);
+        return new ReturnEquipmentRequest(rentalId, equipmentIds, equipmentUids, paymentMethod, operatorId);
     }
 }
 

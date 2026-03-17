@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -71,8 +72,8 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<RentalResponse> createRental(@Valid @RequestBody CreateRentalRequest request) {
-        log.info("[POST] Creating rental with customerId: {}, equipmentId: {}",
-                request.customerId(), request.equipmentId());
+        log.info("[POST] Creating rental with customerId: {}, equipmentIds: {}",
+                request.customerId(), request.equipmentIds());
         var command = commandMapper.toCreateCommand(request);
         Rental rental = createRentalUseCase.execute(command);
         var response = queryMapper.toResponse(rental);
@@ -117,7 +118,7 @@ class RentalCommandController {
      */
     @PatchMapping(value = "/{id}")
     @Operation(summary = "Update rental via JSON Patch (RFC 6902)",
-            description = "Applies partial updates to a rental. Supported paths: /customerId, /equipmentId, /duration, /status. Setting status=ACTIVE activates the rental.")
+            description = "Applies partial updates to a rental. Supported paths: /customerId, /equipmentIds, /duration, /status. Setting status=ACTIVE activates the rental.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Rental updated",
                     content = @Content(schema = @Schema(implementation = RentalResponse.class))),
@@ -129,7 +130,7 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<RentalResponse> updateRental(
-            @Parameter(description = "Rental ID", example = "1") @PathVariable(name = "id") Long id,
+            @Parameter(description = "Rental ID", example = "1") @PathVariable(name = "id") @Positive Long id,
             @Valid @RequestBody RentalUpdateJsonPatchRequest request) {
         log.info("[PATCH] Updating rental {} with {} patch operations", id, request.getOperations().size());
 
@@ -176,11 +177,11 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<RentalReturnResponse> returnEquipment(@Valid @RequestBody ReturnEquipmentRequest request) {
-        log.info("[POST] Processing equipment return for rentalId={}, equipmentId={}, equipmentUid={}",
-                request.rentalId(), request.equipmentId(), request.equipmentUid());
+        log.info("[POST] Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}",
+                request.rentalId(), request.equipmentIds(), request.equipmentUids());
         var command = commandMapper.toReturnCommand(request);
         var result = returnEquipmentUseCase.execute(command);
-        var response = commandMapper.toReturnResponse(result, queryMapper);
+        var response = commandMapper.toReturnResponse(result);
         log.info("[POST] Equipment return processed successfully for rental {}", result.rental().getId());
         return ResponseEntity.ok(response);
     }

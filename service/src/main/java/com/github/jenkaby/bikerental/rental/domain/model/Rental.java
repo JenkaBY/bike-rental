@@ -11,8 +11,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 
 @Getter
@@ -20,27 +22,26 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Rental {
 
+    public static final Predicate<RentalEquipment> RETURNED = e -> e.getStatus() == RentalEquipmentStatus.RETURNED;
     @Setter
     private Long id;
-    
+
     private UUID customerId;
-    private Long equipmentId;
-    private String equipmentUid;
-    private Long tariffId;
-    
+    private List<RentalEquipment> equipments;
+
     @Setter
     private RentalStatus status;
-    
+
     private LocalDateTime startedAt;
     private LocalDateTime expectedReturnAt;
     private LocalDateTime actualReturnAt;
-    
+
     private Duration plannedDuration;
     private Duration actualDuration;
-    
+
     private Money estimatedCost;
     private Money finalCost;
-    
+
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -49,6 +50,7 @@ public class Rental {
         return Rental.builder()
                 .status(RentalStatus.DRAFT)
                 .createdAt(Instant.now())
+                .equipments(new ArrayList<>())
                 .build();
     }
 
@@ -60,24 +62,10 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    public void selectEquipment(Long equipmentId) {
-        if (this.status != RentalStatus.DRAFT) {
-            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
-        }
-        this.equipmentId = equipmentId;
-        this.updatedAt = Instant.now();
-    }
-
-    public void setEquipmentUid(String equipmentUid) {
-        this.equipmentUid = equipmentUid;
-        this.updatedAt = Instant.now();
-    }
-
     public void selectTariff(Long tariffId) {
         if (this.status != RentalStatus.DRAFT) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
-        this.tariffId = tariffId;
         this.updatedAt = Instant.now();
     }
 
@@ -98,6 +86,11 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
+    public Money getEstimatedCost() {
+        return this.equipments.stream()
+                .map(RentalEquipment::getEstimatedCost)
+                .reduce(Money.zero(), Money::add);
+    }
 
     public boolean isPrepaymentSufficient(Money amount) {
         if (estimatedCost == null) {
@@ -111,14 +104,13 @@ public class Rental {
     }
 
     public boolean canBeActivated() {
+        boolean hasEquipment = !isEmpty(equipments);
         return status == RentalStatus.DRAFT
                 && customerId != null
-                && equipmentId != null
-                && tariffId != null
+                && hasEquipment
                 && plannedDuration != null
                 && estimatedCost != null;
     }
-
 
     public void activate(LocalDateTime actualStartTime) {
         // Validate status
@@ -130,17 +122,54 @@ public class Rental {
         if (!canBeActivated()) {
             List<String> missingFields = new ArrayList<>();
             if (customerId == null) missingFields.add("customerId");
-            if (equipmentId == null) missingFields.add("equipmentId");
-            if (tariffId == null) missingFields.add("tariffId");
             if (plannedDuration == null) missingFields.add("plannedDuration");
             if (estimatedCost == null) missingFields.add("estimatedCost");
+            if (equipments == null) missingFields.add("equipmentIds");
             throw new RentalNotReadyForActivationException(missingFields);
         }
 
         this.status = RentalStatus.ACTIVE;
         this.startedAt = actualStartTime; // Actual start time
         this.expectedReturnAt = actualStartTime.plus(this.plannedDuration);
+
+        equipments.forEach(e -> e.activateForRental(this));
         this.updatedAt = Instant.now();
+    }
+
+    // For cases update rental during patch
+    public void clearEquipmentRentals() {
+        this.equipments.clear();
+    }
+
+    public void addEquipment(RentalEquipment equipment) {
+        if (this.status != RentalStatus.DRAFT) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
+        }
+        this.equipments.add(equipment);
+        this.updatedAt = Instant.now();
+    }
+
+    public boolean allEquipmentReturned() {
+        return equipments.stream()
+                .allMatch(RETURNED);
+    }
+
+    private List<RentalEquipment> rentedEquipments() {
+        return equipments.stream()
+                .filter(Predicate.not(RETURNED))
+                .toList();
+    }
+
+    public List<RentalEquipment> equipmentsToReturn(List<Long> toReturnEquipmentIds, List<String> toReturnEquipmentUids, LocalDateTime returnedAt) {
+//         assume when no equipments are present in request, entire rental must be completed
+        var isEmptyRequest = isEmpty(toReturnEquipmentIds) && isEmpty(toReturnEquipmentUids);
+        Predicate<RentalEquipment> filter = eq -> isEmptyRequest
+                || toReturnEquipmentIds.contains(eq.getEquipmentId())
+                || toReturnEquipmentUids.contains(eq.getEquipmentUid());
+        return rentedEquipments().stream()
+                .filter(filter)
+                .map(eq -> eq.markReturned(returnedAt))
+                .toList();
     }
 
     public RentalDurationResult calculateActualDuration(RentalDurationCalculator calculator, LocalDateTime returnTime) {
@@ -179,7 +208,13 @@ public class Rental {
         }
 
         this.finalCost = finalCost;
-        this.status = RentalStatus.COMPLETED;
+        if (allEquipmentReturned()) {
+            this.status = RentalStatus.COMPLETED;
+        }
         this.updatedAt = Instant.now();
+    }
+
+    private static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
     }
 }

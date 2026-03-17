@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.rental.application.service;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.FindRentalsUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
@@ -43,7 +44,7 @@ class FindRentalsServiceTest {
         var rental = Rental.builder()
                 .id(1L)
                 .status(STATUS)
-                .equipmentUid(EQUIPMENT_UID)
+                .equipments(List.of(RentalEquipment.assigned(1L, EQUIPMENT_UID)))
                 .build();
         var page = new Page<>(List.of(rental), 1L, PAGE_REQUEST);
 
@@ -55,7 +56,8 @@ class FindRentalsServiceTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.items()).hasSize(1);
-        assertThat(result.items().get(0).getEquipmentUid()).isEqualTo(EQUIPMENT_UID);
+        assertThat(result.items().get(0).getEquipments()).isNotEmpty();
+        assertThat(result.items().get(0).getEquipments().get(0).getEquipmentUid()).isEqualTo(EQUIPMENT_UID);
         then(repository).should().findByStatusAndEquipmentUid(STATUS, EQUIPMENT_UID, PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
@@ -92,7 +94,7 @@ class FindRentalsServiceTest {
         var rental = Rental.builder()
                 .id(1L)
                 .status(STATUS)
-                .equipmentUid(EQUIPMENT_UID)
+                .equipments(List.of(RentalEquipment.assigned(1L, EQUIPMENT_UID)))
                 .build();
         var page = new Page<>(List.of(rental), 1L, PAGE_REQUEST);
 

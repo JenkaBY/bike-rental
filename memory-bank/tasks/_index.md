@@ -74,13 +74,19 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
   по rentalId/equipmentUid/equipmentId, расчёт длительности и стоимости, запись доплаты, завершение аренды,
   публикация RentalCompleted; POST /api/rentals/return; RentalReturnResponse с CostBreakdown; WebMvc + component
   тесты rental-return.feature с 5 сценариями; единый метод TariffFacade.calculateRentalCost())
+- [US-RN-010] Поддержка аренды нескольких единиц оборудования - Completed on 2026-03-17 (Marked complete by request;
+  subtask 7.1 `UpdateRentalServiceTest` remains In Progress and must be recreated to restore unit test coverage; known
+  issues recorded in task file)
 
 ## In Progress
 
-<!-- No tasks currently in progress -->
+<!-- no tasks in progress -->
 
 ## Pending - Technical Improvements
 
+- [TECH-015] Fix Partial Equipment Return Calculation Logic - Pending - `ReturnEquipmentService.toPay` formula ignores
+  remaining active equipment costs; `additionalPayment` shows wrong values in partial-return scenario; feature file has
+  incorrect expected values (-200 / -100 instead of 0 / 100)
 - [TECH-001] Custom UUID Generator for Hibernate Entity IDs - Medium priority, shared module, performance improvement
 - [TECH-002] Integrate specification-arg-resolver for equipment filtering - Add advanced query param-based
   Specifications for equipment search (2026-02-02)

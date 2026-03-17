@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="rental-equipments.create-table" author="bikerental">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="rental_equipments"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="rental_equipments">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="rental_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="equipment_id" type="BIGINT"/>
+            <column name="equipment_uid" type="VARCHAR(100)"/>
+            <column name="tariff_id" type="BIGINT"/>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="started_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="expected_return_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="actual_return_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="estimated_cost" type="DECIMAL(10,2)"/>
+            <column name="final_cost" type="DECIMAL(10,2)"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <createIndex tableName="rental_equipments" indexName="idx_rent_equip_rental_id">
+            <column name="rental_id"/>
+        </createIndex>
+
+        <createIndex tableName="rental_equipments" indexName="idx_rent_equip_equipment_uid">
+            <column name="equipment_uid"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="rental_equipments" baseColumnNames="rental_id"
+                                 referencedTableName="rentals" referencedColumnNames="id"
+                                 constraintName="fk_rent_equip_rental_id"/>
+
+    </changeSet>
+
+</databaseChangeLog>
+

@@ -39,7 +39,7 @@ Feature: Payment acceptance endpoints
   Scenario Outline: Get payments by rental id
     Given the following payment records exist in db
       | id           | rentalId   | amount | type               | method     | createdAt            | operator   | receipt |
-      | <paymentId1> | <rentalId> | 8.00   | ACCESSORY          | CASH       | 2026-02-02T09:00:00Z | <operator> | REC1    |
+      | <paymentId1> | <rentalId> | 8.00   | PREPAYMENT         | CASH       | 2026-02-02T09:00:00Z | <operator> | REC1    |
       | <paymentId2> | <rentalId> | 12.50  | ADDITIONAL_PAYMENT | ELECTRONIC | 2026-02-02T09:05:00Z | <operator> | REC2    |
       | <paymentId3> | 3002       | 13.50  | ADDITIONAL_PAYMENT | ELECTRONIC | 2026-02-02T09:06:00Z | <operator> | REC3    |
       | <paymentId4> |            | 14.50  | ADDITIONAL_PAYMENT | ELECTRONIC | 2026-02-02T09:07:00Z | <operator> | REC4    |
@@ -49,7 +49,7 @@ Feature: Payment acceptance endpoints
     Then the response status is 200
     And the payment response only contains list of
       | id           | rentalId   | amount | type               | method     | receipt | createdAt            | operator   |
-      | <paymentId1> | <rentalId> | 8.00   | ACCESSORY          | CASH       | REC1    | 2026-02-02T09:00:00Z | <operator> |
+      | <paymentId1> | <rentalId> | 8.00   | PREPAYMENT         | CASH       | REC1    | 2026-02-02T09:00:00Z | <operator> |
       | <paymentId2> | <rentalId> | 12.50  | ADDITIONAL_PAYMENT | ELECTRONIC | REC2    | 2026-02-02T09:05:00Z | <operator> |
     Examples:
       | paymentId1 | paymentId2 | paymentId3 | paymentId4 | rentalId | operator |

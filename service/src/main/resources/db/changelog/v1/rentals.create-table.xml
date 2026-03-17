@@ -17,9 +17,6 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="customer_id" type="UUID"/>
-            <column name="equipment_id" type="BIGINT"/>
-            <column name="equipment_uid" type="VARCHAR(100)"/>
-            <column name="tariff_id" type="BIGINT"/>
             <column name="status" type="VARCHAR(20)">
                 <constraints nullable="false"/>
             </column>
@@ -35,11 +32,6 @@
             </column>
             <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
-
-        <!-- Create index for equipment_uid for performance -->
-        <createIndex tableName="rentals" indexName="idx_rentals_equipment_uid">
-            <column name="equipment_uid"/>
-        </createIndex>
 
     </changeSet>
 

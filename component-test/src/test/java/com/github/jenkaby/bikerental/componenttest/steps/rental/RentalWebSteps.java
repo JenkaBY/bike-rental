@@ -1,7 +1,9 @@
 package com.github.jenkaby.bikerental.componenttest.steps.rental;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
+import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentItemResponseTransformer;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
+import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
 import io.cucumber.java.en.Given;
@@ -22,6 +24,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 @RequiredArgsConstructor
 public class RentalWebSteps {
 
+    private static final Comparator<EquipmentItemResponse> COMPARING_EQUIPMENT_ITEM_BY_ID = Comparator.comparing(EquipmentItemResponse::equipmentId);
     public static final Comparator<RentalSummaryResponse> COMPARING_BY_ID = Comparator.comparing(RentalSummaryResponse::id);
     private final ScenarioContext scenarioContext;
 
@@ -44,7 +47,7 @@ public class RentalWebSteps {
         scenarioContext.setRequestBody(request);
     }
 
-    @Then("the rental response only contains page of")
+    @Then("the rental summary response only contains page of")
     public void theRentalResponseOnlyContainsPageOf(List<RentalSummaryResponse> expectedRentals) {
         var actualRentals = scenarioContext.getResponseAsPage(RentalSummaryResponse.class).items().stream().sorted(COMPARING_BY_ID).toList();
         log.info("Comparing rental response list actual: {} with expected: {}", actualRentals, expectedRentals);
@@ -63,9 +66,9 @@ public class RentalWebSteps {
         softly.assertThat(actual.customerId())
                 .as("Customer ID")
                 .isEqualTo(expected.customerId());
-        softly.assertThat(actual.equipmentId())
-                .as("Equipment ID")
-                .isEqualTo(expected.equipmentId());
+        softly.assertThat(actual.equipmentIds())
+                .as("Equipment IDs")
+                .isEqualTo(expected.equipmentIds());
         softly.assertThat(actual.status())
                 .as("Status")
                 .isEqualTo(expected.status());
@@ -97,7 +100,6 @@ public class RentalWebSteps {
             softly.assertThat(actual.createdAt()).as("Created at matches").isCloseTo(expected.createdAt(), within(5, ChronoUnit.SECONDS));
         });
 
-        // Save paymentId to context for event validation
         if (actual.paymentId() != null) {
             log.info("Saving paymentId {} to scenario context for later validation", actual.paymentId());
             scenarioContext.setRequestedObjectId(actual.paymentId().toString());
@@ -111,11 +113,66 @@ public class RentalWebSteps {
         scenarioContext.setRequestedObjectId(actualRental.id().toString());
     }
 
+    @Then("the rental response only contains rental equipments")
+    public void theRentalResponseOnlyContains(List<EquipmentItemResponseTransformer.EquipmentItemResponseTransformerHolder> holders) {
+        var expected = holders.stream()
+                .map(EquipmentItemResponseTransformer.EquipmentItemResponseTransformerHolder::equipmentItemResponse)
+                .toList();
+        rentalResponseContainsEquipments(expected);
+    }
+
+    public void rentalResponseContainsEquipments(List<EquipmentItemResponse> expected) {
+        var actualRental = scenarioContext.getResponseBody(RentalResponse.class);
+        assertRentalEquipmentItemResponse(actualRental.equipmentItems(), expected);
+        scenarioContext.setRequestedObjectId(actualRental.id().toString());
+    }
+
+    private void assertRentalEquipmentItemResponse(List<EquipmentItemResponse> actual, List<EquipmentItemResponse> expected) {
+        log.info("Comparing equipment items actual: {} with expected: {}", actual, expected);
+        assertThat(actual)
+                .as("Equipment items in rental response")
+                .isNotNull()
+                .hasSize(expected.size());
+        var sortedActual = actual.stream().sorted(COMPARING_EQUIPMENT_ITEM_BY_ID).toList();
+        var sortedExpected = expected.stream().sorted(COMPARING_EQUIPMENT_ITEM_BY_ID).toList();
+        assertThat(sortedActual).zipSatisfy(sortedExpected, (item, expectedItem) ->
+                assertSoftly(softly -> {
+                    softly.assertThat(item.equipmentId())
+                            .as("Equipment ID")
+                            .isEqualTo(expectedItem.equipmentId());
+                    if (expectedItem.equipmentUid() != null) {
+                        softly.assertThat(item.equipmentUid())
+                                .as("Equipment UID")
+                                .isEqualTo(expectedItem.equipmentUid());
+                    }
+                    if (expectedItem.tariffId() != null) {
+                        softly.assertThat(item.tariffId())
+                                .as("Tariff ID")
+                                .isEqualTo(expectedItem.tariffId());
+                    }
+                    if (expectedItem.status() != null) {
+                        softly.assertThat(item.status())
+                                .as("Equipment item status")
+                                .isEqualTo(expectedItem.status());
+                    }
+                    if (expectedItem.estimatedCost() != null) {
+                        softly.assertThat(item.estimatedCost())
+                                .as("Estimated cost")
+                                .isEqualByComparingTo(expectedItem.estimatedCost());
+                    }
+                    if (expectedItem.finalCost() != null) {
+                        softly.assertThat(item.finalCost())
+                                .as("Final cost")
+                                .isEqualByComparingTo(expectedItem.finalCost());
+                    }
+                })
+        );
+    }
+
     private void assertRentalResponse(RentalResponse actual, RentalResponse expected) {
         log.info("Comparing rental response actual: {} with expected: {}", actual, expected);
         var softly = new SoftAssertions();
 
-        // ID: if expected is null, actual should not be null (it's generated)
         if (expected.id() != null) {
             softly.assertThat(actual.id())
                     .as("Rental ID")
@@ -129,19 +186,13 @@ public class RentalWebSteps {
         softly.assertThat(actual.customerId())
                 .as("Customer ID")
                 .isEqualTo(expected.customerId());
-        softly.assertThat(actual.equipmentId())
-                .as("Equipment ID")
-                .isEqualTo(expected.equipmentId());
-        softly.assertThat(actual.tariffId())
-                .as("Tariff ID")
-                .isEqualTo(expected.tariffId());
         softly.assertThat(actual.status())
                 .as("Status")
                 .isEqualTo(expected.status());
         if (expected.startedAt() != null) {
             softly.assertThat(actual.startedAt())
                     .as("Started at")
-                    .isCloseTo(expected.startedAt(), within(5, ChronoUnit.SECONDS)); // Allow small time difference
+                    .isCloseTo(expected.startedAt(), within(5, ChronoUnit.SECONDS));
         }
         if (expected.expectedReturnAt() != null) {
             softly.assertThat(actual.expectedReturnAt())

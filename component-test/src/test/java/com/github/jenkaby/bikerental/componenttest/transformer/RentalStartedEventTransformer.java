@@ -22,7 +22,7 @@ public class RentalStartedEventTransformer {
             customerId = Aliases.getCustomerId(customerIdString);
         }
 
-        Long equipmentId = DataTableHelper.toLong(entry, "equipmentId");
+        var equipmentIds = DataTableHelper.toLongList(entry, "eqIds");
 
         LocalDateTime startedAt = null;
         String startedAtString = DataTableHelper.getStringOrNull(entry, "startedAt");
@@ -36,6 +36,6 @@ public class RentalStartedEventTransformer {
 
         LocalDateTime expectedReturnAt = DataTableHelper.toLocalDateTime(entry, "expectedReturnAt");
 
-        return new RentalStarted(rentalId, customerId, equipmentId, startedAt, expectedReturnAt);
+        return new RentalStarted(rentalId, customerId, equipmentIds, startedAt, expectedReturnAt);
     }
 }

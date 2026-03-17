@@ -18,80 +18,148 @@ This file should contain:
 
 ## Current Focus
 
-**Status:** 🚀 Active Implementation - Phase 4 Return & Calculations  
-**Date:** March 11, 2026  
-**Phase:** Phase 4 - Return & Calculations + Technical Improvements
+**Status:** 🚀 Active Implementation - US-RN-010 Почти завершён (~85%)  
+**Date:** March 17, 2026  
+**Phase:** Phase 4 - Return & Calculations + Technical Improvements  
+**Branch:** `feature/support-rental-of-equipment-group`
 
 ### Primary Objective
 
-TECH-013 (Unified Error Codes, CorrelationId Filter & i18n-Ready Problem Details) завершён. Все 5 ControllerAdvice
-классов унифицированы: `correlationId` вместо `errorId`, `errorCode` на всех ответах, структурированный массив
-`errors` для валидационных ошибок. Следующий приоритет: US-TR-004 (Cost Estimate Endpoint).
+US-RN-010 (Поддержка аренды нескольких единиц оборудования) — основная реализация **завершена** на ветке
+`feature/support-rental-of-equipment-group`. Все 7 ключевых subtask'ов выполнены кроме пересоздания
+`UpdateRentalServiceTest`. После закрытия тестового долга — следующий приоритет: TECH-015 (исправление
+формулы частичного возврата), затем US-TR-004.
 
 ### Current Activities
 
-1. **TECH-013: Unified Error Codes, CorrelationId Filter & i18n-Ready Problem Details** ✅ COMPLETED (March 11, 2026)
+1. **US-RN-010: Поддержка аренды нескольких единиц оборудования** 🔄 IN PROGRESS ~85% (March 12–17, 2026)
+
+   **Реализовано:**
+    - DB: таблица `rental_equipments` создана; `equipment_id`/`equipment_uid` удалены из `rentals`; FK + индексы
+    - Domain: `RentalEquipment` child entity + `RentalEquipmentStatus` (ASSIGNED/ACTIVE/RETURNED); `Rental` переработан
+    - JPA: `RentalEquipmentJpaEntity` + `@OneToMany(cascade=ALL)` в `RentalJpaEntity`; computed cost methods
+    - Services: `CreateRentalService` — per-equipment tariff+cost; `UpdateRentalService` — валидация новых equipment;
+      `ReturnEquipmentService` — частичный возврат, per-equipment cost, завершение при `allEquipmentReturned()`
+    - Events: `RentalCreated`/`RentalStarted`/`RentalCompleted` расширены списками IDs; новый `RentalUpdated` для draft
+    - Equipment module: `RentalEventListener` поддерживает списки; `EquipmentFacade.findByIds()`
+    - Finance module: `FinanceFacade.getPayments()`; `PaymentType.ADDITIONAL_PAYMENT`
+    - Web DTOs: `CreateRentalRequest.equipmentIds: List<Long>`, `ReturnEquipmentRequest` списки, `RentalResponse` с
+      `List<EquipmentItemResponse>`; новые `PaymentInfoResponse`, `CostBreakdown` list в `RentalReturnResponse`
+    - WebMvc tests: `RentalCommandControllerTest` обновлён (219 изменений)
+    - Component tests: `rental.feature`, `rental-return.feature`, `rental-query.feature`, `rental-validation.feature`
+
+   **Открытые проблемы:**
+    - ⚠️ TECH-015: формула `toPay` некорректна при частичном возврате
+
+2. **TECH-013: Unified Error Codes, CorrelationId Filter & i18n-Ready Problem Details** ✅ COMPLETED (March 11, 2026)
     - `BikeRentalException` — поле `errorCode` + `getErrorCode()`, новый protected конструктор
-    - `ResourceConflictException` — threading constructor для переопределения кода в подклассах
-    - 14 domain exceptions — каждый получил `ERROR_CODE` константу и передаёт её через super()
-    - `CorrelationIdFilter` — `@Component OncePerRequestFilter`, читает/генерирует `X-Correlation-ID`,
-      хранит в MDC, добавляет в response header
-    - Все 5 ControllerAdvice классов — `correlationId` из MDC, `errorCode` из исключения/хардкода,
-      `errors` List<Map<String,String>> на 3 валидационных handler'ах
+   - `CorrelationIdFilter` — `@Component OncePerRequestFilter`, X-Correlation-ID в MDC
+   - Все 5 ControllerAdvice классов унифицированы
     - 11 новых тестов: `CorrelationIdFilterTest` (4) + `CoreExceptionHandlerAdviceTest` (7)
 
-1. **TECH-010: CORS Filter** ✅ COMPLETED (February 28, 2026)
-    - `CorsProperties` — `@ConfigurationProperties(prefix = "app.cors")` с `@DefaultValue` для всех полей кроме
-      `allowedOrigins`
-    - `CorsConfig` — `WebMvcConfigurer.addCorsMappings()` + `CorsConfigurationSource` бин для `/**`
-    - `app.cors` секция в `application.yaml` (dev: localhost:3000, localhost:5173)
-    - `app.cors` секция в `application-test.yaml`
-    - 4 unit-теста (`CorsConfigTest`) + 2 WebMvc preflight-теста (`CorsPreflightTest`), все 6 прошли
-
-2. **TECH-009: Swagger / OpenAPI Annotations** ✅ COMPLETED (February 28, 2026)
-    - `OpenApiConfig` с глобальной конфигурацией
-    - `@Tag` на всех 14 контроллерах по модулям
-    - `@Operation` + `@ApiResponses` на всех 28 эндпоинтах
-    - `@Schema` на 25 DTO
-
-3. **TECH-008: Continuous Deploy** ✅ COMPLETED (February 28, 2026)
-    - Dockerfile, docker-compose app service
-    - `deploy.yml` force-push CD на render-deploy branch
-    - `docs/deployment.md` setup guide
-
-4. **US-RN-006: Equipment Return** ✅ COMPLETED (February 26, 2026)
-    - `ReturnEquipmentService` с 10-шаговым flow
-    - POST /api/rentals/return эндпоинт
-    - `RentalReturnResponse` с `CostBreakdown`
-    - `TariffFacade.calculateRentalCost()` — единый метод
-    - WebMvc + component тесты (5 сценариев)
-
-5. **TECH-007: Equipment UID in Rental** ✅ COMPLETED (February 25, 2026)
-    - Поле `equipment_uid` в таблице `rentals`
-    - Фильтрация по `equipmentUid` в GET /api/rentals
-
-6. **US-TR-003: Forgiveness Rule Localization** ✅ COMPLETED (February 25, 2026)
-    - `MessageSource` с `AcceptHeaderLocaleResolver`
-    - `messages.properties` (EN) и `messages_ru.properties` (RU)
+3. **TECH-010: CORS Filter** ✅ COMPLETED (February 28, 2026)
+4. **TECH-009: Swagger / OpenAPI Annotations** ✅ COMPLETED (February 28, 2026)
+5. **TECH-008: Continuous Deploy** ✅ COMPLETED (February 28, 2026)
 
 ### Next Priority Tasks
 
-1. **US-TR-004: Cost Estimate Endpoint** — HIGH PRIORITY
+1. **TECH-015: Fix Partial Equipment Return Calculation** — URGENT
+    - Исправить формулу `toPay` в `ReturnEquipmentService`
+    - Исправить ожидаемые значения в feature file
+
+2. **US-TR-004: Cost Estimate Endpoint** — HIGH PRIORITY
     - GET /api/tariffs/cost-estimate
     - Разрешение по `equipmentType` / `equipmentUid` / `tariffId`
     - Depends on US-TR-002 ✅, US-RN-002 ✅
 
-2. **US-RN-008: Early Return / Equipment Swap** — URGENT
+3. **US-RN-008: Early Return / Equipment Swap** — URGENT
     - Depends on US-RN-005 ✅
 
-3. **US-TR-005: Refund on Cancellation** — URGENT
-    - Depends on US-RN-008, US-FN-002
 
 ## Recent Changes
 
-### Completed (February 28, 2026)
+### In Progress (March 12–17, 2026)
 
-**1. TECH-010: CORS Filter with Configurable Allowed Origins** ✅ COMPLETED
+**US-RN-010: Поддержка аренды нескольких единиц оборудования** 🔄 ~85%
+
+101 файл изменён, 2811 добавлено / 1397 удалено в 20 коммитах на ветке
+`feature/support-rental-of-equipment-group`.
+
+**DB & Infrastructure:**
+
+- `rental-equipments` таблица создана (`rental-equipments.create-table.xml`)
+- `equipment_id` и `equipment_uid` удалены из таблицы `rentals` (были в `TECH-007`, теперь перенесены)
+- `RentalEquipmentJpaEntity` — новый JPA entity, `@ManyToOne(fetch=LAZY)` к `RentalJpaEntity`
+- `RentalJpaEntity` — `@OneToMany(cascade=ALL, orphanRemoval=true)`, `@Fetch(SUBSELECT)`; computed
+  `getEstimatedCost()` / `getFinalCost()`
+- `RentalEquipmentJpaMapper`, `RentalEquipmentMapper`, `RentalEquipmentStatusMapper`, `RentalEquipmentWebMapper` — новые
+  MapStruct маперы
+- `PatchValueParser` — утилита парсинга JSON Patch значений
+
+**Domain:**
+
+- `RentalEquipment` — child entity: equipmentId, equipmentUid, tariffId, status, startedAt, expectedReturnAt,
+  actualReturnAt, estimatedCost, finalCost; методы `activateForRental()`, `markReturned()`, `assigned()`
+- `RentalEquipmentStatus` — enum: ASSIGNED / ACTIVE / RETURNED
+- `Rental` — заменён единый equipmentId на `List<RentalEquipment> equipments`; новые методы: `addEquipment()`,
+  `clearEquipmentRentals()`, `allEquipmentReturned()`, `equipmentsToReturn()`; `getEstimatedCost()` суммирует по
+  оборудованию
+
+**Application Services:**
+
+- `CreateRentalService` — per-equipment tariff selection + cost;
+  `RequestedEquipmentValidator.validateSize() / validateAvailability()`
+- `UpdateRentalService` — `equipmentIds: List<Long>`; валидация только НОВЫХ (не уже зарезервированных) equipment; новая
+  зависимость `PatchValueParser`
+- `ReturnEquipmentService` — частичный возврат по спискам equipmentIds/equipmentUids; per-equipment стоимость; доплата =
+  previouslyReturnedCost + currentCost + remainingEstimated - allPayments; завершение аренды только при
+  `allEquipmentReturned()`
+
+**Events:**
+
+- `RentalCreated` — теперь `List<Long> equipmentIds`
+- `RentalStarted` — теперь `List<Long> equipmentIds`
+- `RentalCompleted` — теперь `List<Long> equipmentIds` + `List<Long> returnedEquipmentIds`
+- `RentalUpdated` (новый) — `RentalState(rentalStatus, equipmentIds)` для `previousState` и `currentState`;
+  синхронизация статусов при изменении draft-аренды
+
+**Equipment Module:**
+
+- `RentalEventListener` — обработчик для всех событий переведён на списки IDs; новый `onRentalUpdated()` для управления
+  статусами при черновике
+- `GetEquipmentByIdsUseCase` + `GetEquipmentByIdsService` — новый use case
+- `EquipmentFacade.findByIds()`, `EquipmentRepository.findByIds()`, `EquipmentRepositoryAdapter`,
+  `EquipmentJpaRepository` — обновлены
+
+**Finance Module:**
+
+- `FinanceFacade.getPayments(Long rentalId)` + `FinanceFacadeImpl` — метод для получения всех платежей по аренде
+- `PaymentType.ADDITIONAL_PAYMENT` — новый тип платежа
+
+**Web Layer:**
+
+- `CreateRentalRequest` — `List<Long> equipmentIds` вместо единственного `equipmentId`
+- `ReturnEquipmentRequest` — `List<Long> equipmentIds`, `List<String> equipmentUids`; валидация через `@AssertTrue`
+- `RentalResponse` — `List<EquipmentItemResponse> equipmentItems` вместо единственных equipment полей
+- `EquipmentItemResponse` (новый) — equipmentId, equipmentUid, estimatedCost, finalCost, tariffId, status
+- `PaymentInfoResponse` (новый) — DTO для платёжной информации
+- `RentalReturnResponse` — `List<CostBreakdown> costs`; `PaymentInfoResponse paymentInfo`
+- `RentalRestControllerAdvice` — обработчик `InvalidRentalPlannedDurationException`
+
+**Tests:**
+
+- `RentalCommandControllerTest` — переработан (219 изменений): новые сценарии POST/PATCH с массивами
+- `rental.feature`, `rental-return.feature`, `rental-query.feature`, `rental-validation.feature` — полностью обновлены
+- Новая инфраструктура component tests: `RentalDbSteps`, `RentalEquipmentJpaEntityTransformer`,
+  `EquipmentItemResponseTransformer`, `RentalReturnCostBreakdownTransformer`, `RentalReturnExpectationTransformer`
+- `RecordPrepaymentServiceTest`, `FindRentalsServiceTest`, `RentalTest` — обновлены
+- ⚠️ `UpdateRentalServiceTest` **удалён** (493 строки) — нужно пересоздать
+
+---
+
+### Completed (March 11, 2026)
+
+**TECH-013: Unified Error Codes, CorrelationId Filter & i18n-Ready Problem Details** ✅ COMPLETED
 
 **Implementation:**
 

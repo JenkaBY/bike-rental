@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.rental;
 
 import com.github.jenkaby.bikerental.componenttest.context.MessageStore;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.rental.event.RentalCreated;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
@@ -132,10 +132,10 @@ public class RentalEventSteps {
                     .isEqualTo(expected.customerId());
         }
 
-        if (expected.equipmentId() != null) {
-            softly.assertThat(actual.equipmentId())
+        if (expected.equipmentIds() != null) {
+            softly.assertThat(actual.equipmentIds())
                     .as("Equipment ID")
-                    .isEqualTo(expected.equipmentId());
+                    .isEqualTo(expected.equipmentIds());
         }
 
         if (expected.startedAt() != null) {
