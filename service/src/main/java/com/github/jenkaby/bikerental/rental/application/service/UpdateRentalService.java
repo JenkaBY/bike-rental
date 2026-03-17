@@ -101,7 +101,11 @@ class UpdateRentalService implements UpdateRentalUseCase {
             List<Long> equipmentIds = valueParser.parseListOfLong(patch.get("equipmentIds"));
             List<EquipmentInfo> foundEquipments = equipmentFacade.findByIds(equipmentIds);
             validator.validateSize(equipmentIds, foundEquipments);
-            validator.validateAvailability(foundEquipments);
+            var alreadyReservedOrRented = previousState.equipmentIds();
+            var beingReserved = foundEquipments.stream()
+                    .filter(e -> !alreadyReservedOrRented.contains(e.id()))
+                    .toList();
+            validator.validateAvailability(beingReserved);
             equipments.addAll(foundEquipments);
 
             rental.clearEquipmentRentals();
