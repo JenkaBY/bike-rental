@@ -47,7 +47,7 @@ public class RentalWebSteps {
         scenarioContext.setRequestBody(request);
     }
 
-    @Then("the rental response only contains page of")
+    @Then("the rental summary response only contains page of")
     public void theRentalResponseOnlyContainsPageOf(List<RentalSummaryResponse> expectedRentals) {
         var actualRentals = scenarioContext.getResponseAsPage(RentalSummaryResponse.class).items().stream().sorted(COMPARING_BY_ID).toList();
         log.info("Comparing rental response list actual: {} with expected: {}", actualRentals, expectedRentals);
