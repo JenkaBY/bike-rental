@@ -6,12 +6,12 @@ import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalcula
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationResult;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -104,14 +104,13 @@ public class Rental {
     }
 
     public boolean canBeActivated() {
-        boolean hasEquipment = !CollectionUtils.isEmpty(equipments);
+        boolean hasEquipment = !isEmpty(equipments);
         return status == RentalStatus.DRAFT
                 && customerId != null
                 && hasEquipment
                 && plannedDuration != null
                 && estimatedCost != null;
     }
-
 
     public void activate(LocalDateTime actualStartTime) {
         // Validate status
@@ -163,7 +162,7 @@ public class Rental {
 
     public List<RentalEquipment> equipmentsToReturn(List<Long> toReturnEquipmentIds, List<String> toReturnEquipmentUids, LocalDateTime returnedAt) {
 //         assume when no equipments are present in request, entire rental must be completed
-        var isEmptyRequest = CollectionUtils.isEmpty(toReturnEquipmentIds) && CollectionUtils.isEmpty(toReturnEquipmentUids);
+        var isEmptyRequest = isEmpty(toReturnEquipmentIds) && isEmpty(toReturnEquipmentUids);
         Predicate<RentalEquipment> filter = eq -> isEmptyRequest
                 || toReturnEquipmentIds.contains(eq.getEquipmentId())
                 || toReturnEquipmentUids.contains(eq.getEquipmentUid());
@@ -213,5 +212,9 @@ public class Rental {
             this.status = RentalStatus.COMPLETED;
         }
         this.updatedAt = Instant.now();
+    }
+
+    private static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
     }
 }

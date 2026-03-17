@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
-import com.github.jenkaby.bikerental.rental.event.RentalCreated;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
 import io.cucumber.java.DataTableType;
 
 import java.time.Instant;

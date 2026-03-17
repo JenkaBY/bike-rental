@@ -1,6 +1,4 @@
-package com.github.jenkaby.bikerental.rental.event;
-
-import com.github.jenkaby.bikerental.shared.domain.event.BikeRentalEvent;
+package com.github.jenkaby.bikerental.shared.domain.event;
 
 import java.time.Instant;
 import java.util.List;

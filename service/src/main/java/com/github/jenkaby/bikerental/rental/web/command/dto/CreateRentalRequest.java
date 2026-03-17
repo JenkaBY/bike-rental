@@ -11,7 +11,7 @@ import java.util.UUID;
 @Schema(description = "Request body for creating a rental via Fast Path")
 public record CreateRentalRequest(
         @Schema(description = "Customer UUID") @NotNull(message = "Customer ID is required") UUID customerId,
-        @Schema(description = "List of Equipment IDs to rent (preferred)") List<@Positive Long> equipmentIds,
+        @Schema(description = "List of Equipment IDs to rent (preferred)") List<@Positive @NotNull Long> equipmentIds,
         @Schema(description = "Planned rental duration (ISO-8601)", example = "PT2H") @NotNull(message = "Duration is required") Duration duration,
         @Schema(description = "Optional tariff ID; auto-selected if not provided", example = "5") Long tariffId
 ) {

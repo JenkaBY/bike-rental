@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
         displayName = "Equipment Module",
-        allowedDependencies = {"rental :: events", "shared"}
+        allowedDependencies = {"shared"}
 )
 package com.github.jenkaby.bikerental.equipment;

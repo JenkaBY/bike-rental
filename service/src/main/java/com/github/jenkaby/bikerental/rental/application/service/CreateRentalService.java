@@ -10,7 +10,7 @@ import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
-import com.github.jenkaby.bikerental.rental.event.RentalCreated;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
 import com.github.jenkaby.bikerental.tariff.TariffFacade;

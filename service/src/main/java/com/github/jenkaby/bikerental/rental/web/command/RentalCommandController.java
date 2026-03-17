@@ -72,7 +72,7 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<RentalResponse> createRental(@Valid @RequestBody CreateRentalRequest request) {
-        log.info("[POST] Creating rental with customerId: {}, equipmentId: {}",
+        log.info("[POST] Creating rental with customerId: {}, equipmentIds: {}",
                 request.customerId(), request.equipmentIds());
         var command = commandMapper.toCreateCommand(request);
         Rental rental = createRentalUseCase.execute(command);
