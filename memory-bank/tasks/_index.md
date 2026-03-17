@@ -82,6 +82,9 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 
 ## Pending - Technical Improvements
 
+- [TECH-015] Fix Partial Equipment Return Calculation Logic - Pending - `ReturnEquipmentService.toPay` formula ignores
+  remaining active equipment costs; `additionalPayment` shows wrong values in partial-return scenario; feature file has
+  incorrect expected values (-200 / -100 instead of 0 / 100)
 - [TECH-001] Custom UUID Generator for Hibernate Entity IDs - Medium priority, shared module, performance improvement
 - [TECH-002] Integrate specification-arg-resolver for equipment filtering - Add advanced query param-based
   Specifications for equipment search (2026-02-02)
