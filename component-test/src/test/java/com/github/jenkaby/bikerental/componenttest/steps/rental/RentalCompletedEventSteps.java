@@ -32,7 +32,7 @@ public class RentalCompletedEventSteps {
         Set<Object> ids = Set.of(Long.parseLong(scenarioContext.getRequestedObjectId()));
 
         await()
-                .atMost(Duration.ofSeconds(3))
+                .atMost(Duration.ofSeconds(2))
                 .pollInterval(Duration.ofMillis(100))
                 .untilAsserted(() -> {
                     List<RentalCompleted> actualEvents = messageStore
@@ -64,6 +64,12 @@ public class RentalCompletedEventSteps {
             softly.assertThat(actual.equipmentIds())
                     .as("Equipment IDs")
                     .isEqualTo(expected.equipmentIds());
+        }
+
+        if (expected.returnedEquipmentIds() != null) {
+            softly.assertThat(actual.returnedEquipmentIds())
+                    .as("Returned Equipment IDs")
+                    .isEqualTo(expected.returnedEquipmentIds());
         }
 
         softly.assertThat(actual.returnTime())

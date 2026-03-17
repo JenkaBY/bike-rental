@@ -115,10 +115,14 @@ public class RentalWebSteps {
 
     @Then("the rental response only contains rental equipments")
     public void theRentalResponseOnlyContains(List<EquipmentItemResponseTransformer.EquipmentItemResponseTransformerHolder> holders) {
-        var actualRental = scenarioContext.getResponseBody(RentalResponse.class);
         var expected = holders.stream()
                 .map(EquipmentItemResponseTransformer.EquipmentItemResponseTransformerHolder::equipmentItemResponse)
                 .toList();
+        rentalResponseContainsEquipments(expected);
+    }
+
+    public void rentalResponseContainsEquipments(List<EquipmentItemResponse> expected) {
+        var actualRental = scenarioContext.getResponseBody(RentalResponse.class);
         assertRentalEquipmentItemResponse(actualRental.equipmentItems(), expected);
         scenarioContext.setRequestedObjectId(actualRental.id().toString());
     }

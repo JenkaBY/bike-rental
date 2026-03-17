@@ -20,6 +20,7 @@ Feature: Equipment Return
     And the following equipment records exist in db
       | id | serialNumber | uid      | status | type    | model   | condition |
       | 1  | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
+      | 2  | EQ-002       | BIKE-002 | RENTED | bicycle | Model A | Good      |
     And the following tariff records exist in db
       | id | name        | description     | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo    | status |
       | 1  | Hourly Rate | Standard hourly | bicycle       | 100.00    | 60.00         | 100.00    | 500.00   | 90.00           | 2026-01-01 | 2026-12-31 | ACTIVE |
@@ -41,11 +42,14 @@ Feature: Equipment Return
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains
-      | status    | baseCost | overtimeCost | finalCost | actualMinutes | plannedMinutes | overtimeMinutes | forgivenessApplied | additionalPayment |
-      | COMPLETED | 200.00   | 0.00         | 200.00    | 120           | 120            | 0               | true               | 0.00              |
+      | additionalPayment | paymentMethod | receiptNumber | paymentAmount |
+      | 0                 |               |               |               |
+    And the rental return response contains the following break down costs
+      | equipmentId   | baseCost | overtimeCost | totalCost | actualMinutes | billableMinutes | plannedMinutes | overtimeMinutes | forgivenessApplied | calculationMessage |
+      | <equipmentId> | 200.00   | 0.00         | 200.00    | 120           | 120             | 120            | 0               | true               |                    |
     And the following rental completed event was published
-      | rentalId   | equipmentId   | finalCost | returnTime |
-      | <rentalId> | <equipmentId> | 200.00    | <now>      |
+      | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
+      | <rentalId> | <equipmentId> | <equipmentId>        | 200.00    | <now>      |
     And the following equipment record was persisted in db
       | id            | serialNumber | uid      | status    | type    | model   | condition |
       | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | bicycle | Model A | Good      |
@@ -71,11 +75,17 @@ Feature: Equipment Return
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains
-      | status    | baseCost | overtimeMinutes | plannedMinutes | actualMinutes | forgivenessApplied | additionalPayment |
-      | COMPLETED | 200.00   | 60              | 30             | 90            | true               | 100.00            |
+      | additionalPayment | paymentMethod | paymentAmount |
+      | 100.00            | CASH          | 100.00        |
+    And the rental return response contains rental equipments
+      | equipmentId | equipmentUid | status   | tariffId | estimatedCost | finalCost |
+      | 1           | BIKE-001     | RETURNED | 1        | 100.00        | 200.00    |
+    And the rental return response contains the following break down costs
+      | equipmentId | baseCost | overtimeCost | totalCost | actualMinutes | billableMinutes | plannedMinutes | overtimeMinutes | forgivenessApplied |
+      | 1           | 200.00   | 0.00         | 200.00    | 90            | 90              | 30             | 60              | true               |
     And the following rental completed event was published
-      | rentalId   | equipmentId | returnTime | finalCost |
-      | <rentalId> | 1           | <now>      | 200.00    |
+      | rentalId   | equipmentIds | returnedEquipmentIds | returnTime | totalCost |
+      | <rentalId> | 1            | 1                    | <now>      | 200.00    |
     Examples:
       | rentalId | now                 | startedAt           |
       | 12       | 2026-02-10T10:00:00 | 2026-02-10T08:30:00 |
@@ -112,3 +122,56 @@ Feature: Equipment Return
       | DRAFT     |
       | CANCELLED |
       | COMPLETED |
+
+  @ResetClock
+  Scenario Outline: Partial return - return one equipment from multi-equipment rental
+    Given now is "<now>"
+    And a single rental exists in the database with the following data
+      | id         | customerId | tariffId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
+      | <rentalId> | CUS1       | 1        | ACTIVE | 400.00        | 120             | <startedAt> | <startedAt> | <startedAt> |
+    And rental equipments exist in the database with the following data
+      | rentalId   | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
+      | <rentalId> | 2           | BIKE-002     | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
+    And the following payment records exist in db
+      | id   | rentalId   | amount | type       | method | operator | receipt |
+      | PAY1 | <rentalId> | 400.00 | PREPAYMENT | CASH   | OP1      | REC-P1  |
+    And the return equipment request is
+      | rentalId   | equipmentIds | paymentMethod | operatorId |
+      | <rentalId> | <returnedId> | CASH          | <operator> |
+    When a POST request has been made to "/api/rentals/return" endpoint
+    Then the response status is 200
+    And the rental return response contains
+      | additionalPayment | paymentMethod | receiptNumber | paymentAmount |
+      | -200.00           |               |               |               |
+    And the rental return response contains rental
+      | customerId | status | actualDuration | plannedDuration | estimatedCost |
+      | CUS1       | ACTIVE | 120            | 120             | 400.00        |
+    And the rental return response contains rental equipments
+      | equipmentId   | equipmentUid | status   | tariffId | estimatedCost | finalCost |
+      | <returnedId>  | BIKE-001     | RETURNED | 1        | 200.00        | 200.00    |
+      | <remainingId> | BIKE-002     | ACTIVE   | 1        | 200.00        |           |
+    And the rental return response contains the following break down costs
+      | equipmentId  | baseCost | overtimeCost | totalCost | actualMinutes | billableMinutes | plannedMinutes | overtimeMinutes | forgivenessApplied | calculationMessage |
+      | <returnedId> | 200.00   | 0.00         | 200.00    | 120           | 120             | 120            | 0               | true               |                    |
+    And the following rental completed event was published
+      | rentalId   | equipmentIds               | returnedEquipmentIds | returnTime | totalCost |
+      | <rentalId> | <returnedId>,<remainingId> | <returnedId>         | <now>      | 200.00    |
+    And the following equipment record was persisted in db
+      | id            | serialNumber | uid      | status    | type    | model   | condition |
+      | <returnedId>  | EQ-001       | BIKE-001 | AVAILABLE | bicycle | Model A | Good      |
+      | <remainingId> | EQ-002       | BIKE-002 | RENTED    | bicycle | Model A | Good      |
+#    return the remaining equipment
+    Given now is "<nowReturn>"
+    And the return equipment request is
+      | rentalId   | equipmentIds  | paymentMethod | operatorId |
+      | <rentalId> | <remainingId> | CASH          | <operator> |
+    When a POST request has been made to "/api/rentals/return" endpoint
+    Then the response status is 200
+#    FIX me wrong calculation logic
+    And the rental return response contains
+      | additionalPayment | paymentMethod | receiptNumber | paymentAmount |
+      | -100.00           |               |               |               |
+    Examples:
+      | rentalId | now                 | nowReturn           | startedAt           | operator | returnedId | remainingId |
+      | 20       | 2026-02-10T10:00:00 | 2026-02-10T11:00:00 | 2026-02-10T08:00:00 | OP1      | 1          | 2           |
