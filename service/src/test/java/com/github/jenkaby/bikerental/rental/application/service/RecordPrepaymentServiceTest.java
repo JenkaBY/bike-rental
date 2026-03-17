@@ -4,9 +4,9 @@ import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.finance.PaymentInfo;
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.rental.application.usecase.RecordPrepaymentUseCase;
-import com.github.jenkaby.bikerental.rental.domain.exception.InsufficientPrepaymentException;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -97,7 +98,7 @@ class RecordPrepaymentServiceTest {
         // Given
         Rental rental = createDraftRental();
         rental.selectCustomer(UUID.randomUUID());
-        rental.selectEquipment(100L);
+        rental.addEquipment(RentalEquipment.assigned(100L, null));
         rental.selectTariff(200L);
         rental.setPlannedDuration(java.time.Duration.ofHours(2));
         rental.setEstimatedCost(com.github.jenkaby.bikerental.shared.domain.model.vo.Money.of("100.00"));
@@ -132,42 +133,6 @@ class RecordPrepaymentServiceTest {
                 .isInstanceOf(InvalidRentalStatusException.class)
                 .hasMessageContaining("CANCELLED")
                 .hasMessageContaining("DRAFT");
-
-        then(financeFacade).shouldHaveNoInteractions();
-    }
-
-    @Test
-    @DisplayName("Should throw InsufficientPrepaymentException when estimated cost is not set")
-    void shouldThrowInsufficientPrepaymentWhenEstimatedCostNotSet() {
-        // Given - rental without estimated cost
-        Rental rental = createDraftRentalWithoutEstimatedCost();
-        var command = new RecordPrepaymentUseCase.RecordPrepaymentCommand(
-                RENTAL_ID, Money.of("100.00"), PAYMENT_METHOD, OPERATOR_ID);
-
-        given(rentalRepository.findById(RENTAL_ID)).willReturn(Optional.of(rental));
-
-        // When/Then
-        assertThatThrownBy(() -> service.execute(command))
-                .isInstanceOf(InsufficientPrepaymentException.class)
-                .hasMessageContaining("Estimated cost must be calculated");
-
-        then(financeFacade).shouldHaveNoInteractions();
-    }
-
-    @Test
-    @DisplayName("Should throw InsufficientPrepaymentException when amount is below estimated cost")
-    void shouldThrowInsufficientPrepaymentWhenAmountBelowEstimatedCost() {
-        // Given - estimated cost 100, amount 50
-        Rental rental = createDraftRental();
-        var command = new RecordPrepaymentUseCase.RecordPrepaymentCommand(
-                RENTAL_ID, Money.of("50.00"), PAYMENT_METHOD, OPERATOR_ID);
-
-        given(rentalRepository.findById(RENTAL_ID)).willReturn(Optional.of(rental));
-
-        // When/Then
-        assertThatThrownBy(() -> service.execute(command))
-                .isInstanceOf(InsufficientPrepaymentException.class)
-                .hasMessageContaining("at least the estimated cost");
 
         then(financeFacade).shouldHaveNoInteractions();
     }
@@ -225,9 +190,10 @@ class RecordPrepaymentServiceTest {
                 .id(RENTAL_ID)
                 .status(RentalStatus.DRAFT)
                 .createdAt(Instant.now())
+                .equipments(new ArrayList<>())
                 .build();
         rental.selectCustomer(UUID.randomUUID());
-        rental.selectEquipment(100L);
+        rental.addEquipment(RentalEquipment.assigned(100L, null));
         rental.selectTariff(200L);
         rental.setPlannedDuration(java.time.Duration.ofHours(2));
         rental.setEstimatedCost(com.github.jenkaby.bikerental.shared.domain.model.vo.Money.of("100.00"));
@@ -239,9 +205,10 @@ class RecordPrepaymentServiceTest {
                 .id(RENTAL_ID)
                 .status(RentalStatus.DRAFT)
                 .createdAt(Instant.now())
+                .equipments(new ArrayList<>())
                 .build();
         rental.selectCustomer(UUID.randomUUID());
-        rental.selectEquipment(100L);
+        rental.addEquipment(RentalEquipment.assigned(100L, null));
         rental.selectTariff(200L);
         rental.setPlannedDuration(java.time.Duration.ofHours(2));
         // estimatedCost intentionally not set

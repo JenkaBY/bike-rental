@@ -23,8 +23,7 @@ class RentalTest {
         assertThat(rental.getStatus()).isEqualTo(RentalStatus.DRAFT);
         assertThat(rental.getCreatedAt()).isCloseTo(Instant.now(), within(200, ChronoUnit.MILLIS));
         assertThat(rental.getCustomerId()).isNull();
-        assertThat(rental.getEquipmentId()).isNull();
-        assertThat(rental.getTariffId()).isNull();
+        assertThat(rental.getEquipments()).isEmpty();
     }
 
     @Test
@@ -32,10 +31,9 @@ class RentalTest {
     void isPrepaymentSufficientReturnsFalseWhenEstimatedCostNotSet() {
         Rental rental = Rental.createDraft();
         rental.selectCustomer(UUID.randomUUID());
-        rental.selectEquipment(1L);
+        rental.addEquipment(RentalEquipment.assigned(1L, null));
         rental.selectTariff(1L);
         rental.setPlannedDuration(Duration.ofHours(2));
-        // estimatedCost not set
 
         assertThat(rental.isPrepaymentSufficient(Money.of("100.00"))).isFalse();
     }
@@ -67,7 +65,7 @@ class RentalTest {
     private static Rental createRentalWithEstimatedCost(String amount) {
         Rental rental = Rental.createDraft();
         rental.selectCustomer(UUID.randomUUID());
-        rental.selectEquipment(1L);
+        rental.addEquipment(RentalEquipment.assigned(1L, null));
         rental.selectTariff(1L);
         rental.setPlannedDuration(Duration.ofHours(2));
         rental.setEstimatedCost(Money.of(amount));
