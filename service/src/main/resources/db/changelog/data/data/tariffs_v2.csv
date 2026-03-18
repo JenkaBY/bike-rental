@@ -1,0 +1,7 @@
+name,description,equipment_type_slug,pricing_type,valid_from,valid_to,status,version,created_at,updated_at,params
+Hourly Bicycle,Degressive hourly for bicycles,bicycle,DEGRESSIVE_HOURLY,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""firstHourPrice"":9.00,""hourlyDiscount"":2.00,""minimumHourlyPrice"":1.00,""minimumDurationMinutes"":30,""minimumDurationSurcharge"":1.00}"
+Hourly Scooter,Flat hourly for scooters,scooter,FLAT_HOURLY,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""hourlyPrice"":5.00,""minimumDurationMinutes"":30,""minimumDurationSurcharge"":1.00}"
+Daily Bicycle,Daily rate for bicycles,bicycle,DAILY,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""dailyPrice"":20.00,""overtimeHourlyPrice"":1.00}"
+Daily Scooter,Daily rate for scooters,scooter,DAILY,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""dailyPrice"":25.00,""overtimeHourlyPrice"":2.00}"
+Child Seat,Per-day issuance fee,child_seat,FLAT_FEE,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""issuanceFee"":1.00}"
+Special Rate,Operator-set price,bicycle,SPECIAL,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""price"":0}"
