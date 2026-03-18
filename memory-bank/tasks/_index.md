@@ -101,6 +101,11 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 - [TECH-014] Improve negative scenario responses and tests - Medium priority, standardize error responses, add
   validation/missing-parameter details, update WebMvc and component negative tests (2026-03-12)
 
+## Pending - Tariff V2
+
+- [US-TR-007] Tariff V2 — New Pricing Model - HIGH priority, tariff module, degressive hourly / flat hourly / daily /
+  flat fee / special pricing types, new tables + domain + endpoints (`/api/v2/tariffs`), no V1 changes
+
 ## Pending - Phase 1: Foundation (Core Stories)
 
 - [US-AD-001] Управление пользователями - MEDIUM, admin module
