@@ -1,8 +1,9 @@
 package com.github.jenkaby.bikerental.tariff.domain.model;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import com.github.jenkaby.bikerental.tariff.RentalCostV2;
-import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2Result;
+import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -27,10 +28,12 @@ public final class DailyTariffV2 extends TariffV2 {
     public RentalCostV2 calculateCost(Duration duration) {
         int durationMinutes = (int) duration.toMinutes();
         if (durationMinutes <= 0) {
-            return new BaseRentalCostV2Result(Money.zero(), "0 min: 0.00");
+            return new BaseRentalCostV2(Money.zero(), new BreakdownCostDetails.Zero());
         }
         if (durationMinutes <= MINUTES_PER_DAY) {
-            return new BaseRentalCostV2Result(dailyPrice, String.format("24h daily: %s", dailyPrice));
+            String message = String.format("24h daily: %s", dailyPrice);
+            return new BaseRentalCostV2(dailyPrice, new BreakdownCostDetails.DailyStandard(message,
+                    new BreakdownCostDetails.DailyStandard.Details(dailyPrice.toString())));
         }
         int overtimeMinutes = durationMinutes - MINUTES_PER_DAY;
         int fullOvertimeHours = overtimeMinutes / MINUTES_PER_HOUR;
@@ -41,8 +44,10 @@ public final class DailyTariffV2 extends TariffV2 {
             Money perInterval = overtimeHourlyPrice.divide(INTERVALS_PER_HOUR);
             totalCost = totalCost.add(perInterval.multiply(BigDecimal.valueOf(intervals)));
         }
-        String breakdown = String.format("Daily + %dh %dmin overtime: %s + overtime = %s",
+        String message = String.format("Daily + %dh %dmin overtime: %s + overtime = %s",
                 fullOvertimeHours, remainingOvertimeMin, dailyPrice, totalCost);
-        return new BaseRentalCostV2Result(totalCost, breakdown);
+        return new BaseRentalCostV2(totalCost, new BreakdownCostDetails.DailyOvertime(message,
+                new BreakdownCostDetails.DailyOvertime.Details(fullOvertimeHours, remainingOvertimeMin, dailyPrice.toString(), totalCost.toString()))
+        );
     }
 }

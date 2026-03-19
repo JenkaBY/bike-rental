@@ -1,8 +1,9 @@
 package com.github.jenkaby.bikerental.tariff.domain.model;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import com.github.jenkaby.bikerental.tariff.RentalCostV2;
-import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2Result;
+import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -26,7 +27,8 @@ public final class FlatFeeTariffV2 extends TariffV2 {
         int durationMinutes = (int) duration.toMinutes();
         int days = durationMinutes <= 0 ? 1 : (int) Math.ceil((double) durationMinutes / MINUTES_PER_DAY);
         Money cost = issuanceFee.multiply(BigDecimal.valueOf(days));
-        String breakdown = String.format("Flat fee: %s × %d day(s) = %s", issuanceFee, days, cost);
-        return new BaseRentalCostV2Result(cost, breakdown);
+        String message = String.format("Flat fee: %s × %d day(s) = %s", issuanceFee, days, cost);
+        return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatFee(message,
+                new BreakdownCostDetails.FlatFee.Details(issuanceFee.toString(), days, cost.toString())));
     }
 }

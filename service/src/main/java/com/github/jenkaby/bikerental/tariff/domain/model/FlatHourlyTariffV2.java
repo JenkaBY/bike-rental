@@ -1,8 +1,9 @@
 package com.github.jenkaby.bikerental.tariff.domain.model;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import com.github.jenkaby.bikerental.tariff.RentalCostV2;
-import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2Result;
+import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -29,16 +30,17 @@ public final class FlatHourlyTariffV2 extends TariffV2 {
     public RentalCostV2 calculateCost(Duration duration) {
         int durationMinutes = (int) duration.toMinutes();
         if (durationMinutes <= 0) {
-            return new BaseRentalCostV2Result(Money.zero(), "0 min: 0.00");
+            return new BaseRentalCostV2(Money.zero(), new BreakdownCostDetails.Zero());
         }
         int minDuration = minimumDurationMinutes != null ? minimumDurationMinutes : DEFAULT_MINIMUM_DURATION_MINUTES;
         Money surcharge = minimumDurationSurcharge != null ? minimumDurationSurcharge : Money.zero();
         if (durationMinutes <= minDuration) {
             Money halfHourly = hourlyPrice.divide(2);
             Money cost = halfHourly.add(surcharge);
-            String breakdown = String.format("%d min minimum: %s/2 + %s = %s",
-                    minDuration, hourlyPrice, surcharge, cost);
-            return new BaseRentalCostV2Result(cost, breakdown);
+            String message = String.format("%d min minimum: %s/2 + %s = %s", minDuration, hourlyPrice, surcharge, cost);
+            return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatHourlyMinCost(
+                    message,
+                    new BreakdownCostDetails.FlatHourlyMinCost.Details(minDuration, hourlyPrice.toString(), surcharge.toString(), cost.toString())));
         }
         int fullHours = durationMinutes / MINUTES_PER_HOUR;
         int remainingMinutes = durationMinutes % MINUTES_PER_HOUR;
@@ -48,9 +50,15 @@ public final class FlatHourlyTariffV2 extends TariffV2 {
             Money perInterval = hourlyPrice.divide(INTERVALS_PER_HOUR);
             totalCost = totalCost.add(perInterval.multiply(BigDecimal.valueOf(intervals)));
         }
-        String breakdown = fullHours > 0
-                ? String.format("%dh %dmin flat: %d×%s + partial = %s", fullHours, remainingMinutes, fullHours, hourlyPrice, totalCost)
-                : String.format("%dmin flat: %s", remainingMinutes, totalCost);
-        return new BaseRentalCostV2Result(totalCost, breakdown);
+        if (fullHours > 0) {
+            String message = String.format("%dh %dmin flat: %d×%s + partial = %s", fullHours, remainingMinutes, fullHours, hourlyPrice, totalCost);
+            return new BaseRentalCostV2(totalCost,  new BreakdownCostDetails.FlatHourlyStandard(message,
+                            new BreakdownCostDetails.FlatHourlyStandard.Details(fullHours, remainingMinutes, hourlyPrice.toString(), totalCost.toString()))
+            );
+        }
+        String message = String.format("%dmin flat: %s", remainingMinutes, totalCost);
+        return new BaseRentalCostV2(totalCost,
+                new BreakdownCostDetails.FlatHourlyMinsOnly(message,
+                        new BreakdownCostDetails.FlatHourlyMinsOnly.Details(remainingMinutes, totalCost.toString())));
     }
 }

@@ -1,8 +1,9 @@
 package com.github.jenkaby.bikerental.tariff.domain.model;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import com.github.jenkaby.bikerental.tariff.RentalCostV2;
-import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2Result;
+import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -34,15 +35,17 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
     public RentalCostV2 calculateCost(Duration duration) {
         int durationMinutes = (int) duration.toMinutes();
         if (durationMinutes <= 0) {
-            return new BaseRentalCostV2Result(Money.zero(), "0 min: 0.00");
+            return new BaseRentalCostV2(Money.zero(), new BreakdownCostDetails.Zero());
         }
         int minDuration = minimumDurationMinutes != null ? minimumDurationMinutes : DEFAULT_MINIMUM_DURATION_MINUTES;
         Money surcharge = minimumDurationSurcharge != null ? minimumDurationSurcharge : Money.zero();
         if (durationMinutes <= minDuration) {
             Money halfFirst = firstHourPrice.divide(2);
             Money cost = halfFirst.add(surcharge);
-            String breakdown = String.format("%d min minimum: %s/2 + %s = %s", minDuration, firstHourPrice, surcharge, cost);
-            return new BaseRentalCostV2Result(cost, breakdown);
+            String message = String.format("%d min minimum: %s/2 + %s = %s", minDuration, firstHourPrice, surcharge, cost);
+            return new BaseRentalCostV2(cost,
+                    new BreakdownCostDetails.DegressiveHourlyMin(message,
+                            new BreakdownCostDetails.DegressiveHourlyMin.Details(minDuration, firstHourPrice.toString(), surcharge.toString(), cost.toString())));
         }
         int fullHours = durationMinutes / MINUTES_PER_HOUR;
         int remainingMinutes = durationMinutes % MINUTES_PER_HOUR;
@@ -67,10 +70,18 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
             }
             breakdownBuilder.append(intervals).append("×(").append(nextHourRate).append("/12)");
         }
-        String desc = fullHours > 0
-                ? String.format("%dh %dmin degressive: %s = %s", fullHours, remainingMinutes, breakdownBuilder, totalCost)
-                : String.format("%dmin degressive: %s = %s", remainingMinutes, breakdownBuilder, totalCost);
-        return new BaseRentalCostV2Result(totalCost, desc);
+        if (fullHours > 0) {
+            String message = String.format("%dh %dmin degressive: %s = %s", fullHours, remainingMinutes, breakdownBuilder, totalCost);
+            return new BaseRentalCostV2(totalCost,
+                    new BreakdownCostDetails.DegressiveHourlyStandard(message,
+                            new BreakdownCostDetails.DegressiveHourlyStandard.Details(fullHours, remainingMinutes, breakdownBuilder.toString(), totalCost.toString()))
+            );
+        }
+        String message = String.format("%dmin degressive: %s = %s", remainingMinutes, breakdownBuilder, totalCost);
+        return new BaseRentalCostV2(totalCost,
+                new BreakdownCostDetails.DegressiveHourlyMinutesOnly(message,
+                        new BreakdownCostDetails.DegressiveHourlyMinutesOnly.Details(remainingMinutes, breakdownBuilder.toString(), totalCost.toString()))
+        );
     }
 
     private Money rateForHour(int hour) {
