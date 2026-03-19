@@ -9,6 +9,14 @@
 
 ---
 
+## Latest decisions summary
+
+- Pricing calculation implementation: moved into `TariffV2` subclasses. Each tariff implements `calculateCost(Duration)` and returns `RentalCostV2`.
+- Removed `PricingStrategyV2` and its implementations + factory. Calculation code was migrated into `domain/model/*TariffV2.java` classes.
+- `SelectTariffV2ForRentalUseCase` now returns a `TariffV2` (selection only). Callers should then obtain cost via `tariff.calculateCost(duration)`.
+- `BatchRentalCostCalculationService` handles SPECIAL mode as a group-level short-circuit (no per-item calculations) and uses `tariff.calculateCost(...)` for normal items.
+
+
 ## 1. Business Context
 
 The current tariff model (V1) uses a flat period-based pricing approach: a single price per period
@@ -450,17 +458,9 @@ tariff/
   │   │   ├── GetActiveTariffsV2ByEquipmentTypeService.java
   │   │   ├── ActivateTariffV2Service.java
   │   │   ├── DeactivateTariffV2Service.java
-  │   │   ├── GetPricingTypesService.java          ← iterates PricingType enum, resolves i18n via MessageService
-  │   │   ├── SelectTariffV2ForRentalService.java  ← auto-selects cheapest tariff per item
-  │   │   ├── CalculateRentalCostV2Service.java   ← single-item cost calculation
+  │   │   ├── GetPricingTypesService.java ← iterates PricingType enum, resolves i18n via MessageService
+  │   │   ├── SelectTariffV2Service.java  ← auto-selects cheapest tariff per item
   │   │   └── BatchRentalCostCalculationService.java ← multi-item + discount orchestrator
-  │   ├── strategy/
-  │   │   ├── PricingStrategyV2.java                ← interface
-  │   │   ├── DegressiveHourlyPricingStrategy.java
-  │   │   ├── FlatHourlyPricingStrategy.java
-  │   │   ├── DailyPricingStrategy.java
-  │   │   ├── FlatFeePricingStrategy.java
-  │   │   └── PricingStrategyV2Factory.java         ← resolves strategy by PricingType (4 strategies, no SPECIAL)
   │   ├── usecase/
   │   │   ├── CreateTariffV2UseCase.java
   │   │   ├── UpdateTariffV2UseCase.java
@@ -469,9 +469,8 @@ tariff/
   │   │   ├── GetActiveTariffsV2ByEquipmentTypeUseCase.java
   │   │   ├── ActivateTariffV2UseCase.java
   │   │   ├── DeactivateTariffV2UseCase.java
-  │   │   ├── GetPricingTypesUseCase.java           ← list pricing types with i18n
-  │   │   ├── SelectTariffV2ForRentalUseCase.java   ← auto-select by type + duration
-  │   │   ├── CalculateRentalCostV2UseCase.java    ← single-item cost
+  │   │   ├── GetPricingTypesUseCase.java  ← list pricing types with i18n
+  │   │   ├── SelectTariffV2UseCase.java   ← auto-select by type + duration
   │   │   └── BatchRentalCostCalculationUseCase.java ← multi-item + discount
   │   └── validator/
   │       └── TariffV2PricingValidator.java         ← validates fields per PricingType
@@ -674,16 +673,19 @@ This endpoint delegates to `TariffV2Facade.calculateRentalCost()`.
 
 ## 7. Cost Calculation Algorithms
 
-### 7.1 PricingStrategyV2 Interface
+### 7.1 Pricing calculation location
+
+- The per-tariff pricing calculation has been moved into the tariff model. Each concrete tariff
+  class implements the calculation via `TariffV2.calculateCost(Duration)` and returns a
+  `RentalCostV2` instance (amount + breakdown). This removes the previous indirection through
+  `PricingStrategyV2` and the factory. SPECIAL pricing remains a batch-level short-circuit (see §7.6).
+
+Example (conceptual):
 
 ```java
-public interface PricingStrategyV2 {
-    RentalCostV2 calculate(TariffV2 tariff, Duration duration);
-}
+TariffV2 tariff = // found active tariff
+RentalCostV2 cost = tariff.calculateCost(billedDuration);
 ```
-
-SPECIAL pricing is handled at the batch level (see §7.6), not via a per-item strategy.
-All duration parameters use `Duration` type internally.
 
 ### 7.0 Automatic Tariff Selection Algorithm (SelectTariffV2ForRentalService)
 
@@ -697,8 +699,7 @@ Output: TariffV2 + RentalCostV2 (selected tariff with its calculated cost)
 
 3. candidates = []
    for each tariff in activeTariffs:
-       strategy = PricingStrategyV2Factory.getStrategy(tariff.pricingType)
-       cost = strategy.calculate(tariff, durationMinutes)
+       cost = tariff.calculateCost(duration)
        candidates.add( {tariff, cost} )
 
 4. return candidates.minBy(cost.totalCost)
