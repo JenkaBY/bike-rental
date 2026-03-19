@@ -1,14 +1,22 @@
 package com.github.jenkaby.bikerental.tariff.domain.model;
 
+import com.github.jenkaby.bikerental.tariff.RentalCostV2;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.time.LocalDate;
 
 @Getter
 public sealed abstract class TariffV2
         permits DegressiveHourlyTariffV2, FlatHourlyTariffV2,
         DailyTariffV2, FlatFeeTariffV2, SpecialTariffV2 {
+
+    protected static final int MINUTES_PER_DAY = 1440;
+    protected static final int MINUTES_PER_HOUR = 60;
+    protected static final int INTERVAL_MINUTES = 5;
+    protected static final int INTERVALS_PER_HOUR = MINUTES_PER_HOUR / INTERVAL_MINUTES;
+    protected static final int DEFAULT_MINIMUM_DURATION_MINUTES = 30;
 
     @Setter
     private Long id;
@@ -52,4 +60,6 @@ public sealed abstract class TariffV2
         boolean beforeEnd = validTo == null || !date.isAfter(validTo);
         return afterStart && beforeEnd;
     }
+
+    public abstract RentalCostV2 calculateCost(Duration duration);
 }

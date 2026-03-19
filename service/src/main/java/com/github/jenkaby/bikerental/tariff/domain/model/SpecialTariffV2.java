@@ -1,8 +1,11 @@
 package com.github.jenkaby.bikerental.tariff.domain.model;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.tariff.RentalCostV2;
+import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2Result;
 import lombok.Getter;
 
+import java.time.Duration;
 import java.time.LocalDate;
 
 @Getter
@@ -15,5 +18,10 @@ public final class SpecialTariffV2 extends TariffV2 {
                            Money price) {
         super(id, name, description, equipmentTypeSlug, PricingType.SPECIAL, version, validFrom, validTo, status);
         this.price = price;
+    }
+
+    @Override
+    public RentalCostV2 calculateCost(Duration duration) {
+        return new BaseRentalCostV2Result(price, String.format("Special tariff: %s", price));
     }
 }
