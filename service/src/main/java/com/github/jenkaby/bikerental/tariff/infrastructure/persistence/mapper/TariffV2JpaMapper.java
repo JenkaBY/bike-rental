@@ -48,7 +48,7 @@ public class TariffV2JpaMapper {
         entity.setId(tariff.getId());
         entity.setName(tariff.getName());
         entity.setDescription(tariff.getDescription());
-        entity.setEquipmentType(tariff.getEquipmentTypeSlug());
+        entity.setEquipmentType(tariff.getEquipmentType());
         entity.setPricingType(tariff.getPricingType().name());
         entity.setVersion(tariff.getVersion() != null ? tariff.getVersion() : VERSION_DEFAULT);
         entity.setValidFrom(tariff.getValidFrom());

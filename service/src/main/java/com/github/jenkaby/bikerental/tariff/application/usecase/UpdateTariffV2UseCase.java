@@ -2,7 +2,6 @@ package com.github.jenkaby.bikerental.tariff.application.usecase;
 
 import com.github.jenkaby.bikerental.tariff.domain.model.PricingType;
 import com.github.jenkaby.bikerental.tariff.domain.model.TariffV2;
-import com.github.jenkaby.bikerental.tariff.domain.model.TariffV2Status;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -18,8 +17,7 @@ public interface UpdateTariffV2UseCase {
             PricingType pricingType,
             Map<String, Object> params,
             LocalDate validFrom,
-            LocalDate validTo,
-            TariffV2Status status
+            LocalDate validTo
     ) {
     }
 }

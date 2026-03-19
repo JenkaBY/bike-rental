@@ -69,6 +69,10 @@ public record Money(BigDecimal amount) implements Comparable<Money> {
         return Money.of(this.amount.multiply(multiplier));
     }
 
+    public Money divide(int divisor) {
+        return Money.of(amount.divide(BigDecimal.valueOf(divisor), MONEY_SCALE, MONEY_ROUNDING_MODE));
+    }
+
     @Override
     public String toString() {
         return amount.toPlainString();

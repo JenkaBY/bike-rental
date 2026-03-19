@@ -25,6 +25,12 @@ public abstract class BreakdownCostDetails {
         }
     }
 
+    public static class SpecialGroup extends BreakdownCostDetails {
+        public SpecialGroup() {
+            super(MessageCode.BREAKDOWN_SPECIAL_GROUP, "Special tariff applied to group", null);
+        }
+    }
+
     public static class Zero extends BreakdownCostDetails {
         public Zero() {
             super(MessageCode.BREAKDOWN_ZERO_COST, "0 min: 0.00", null);

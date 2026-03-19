@@ -9,8 +9,7 @@ import java.time.LocalDate;
 
 @Getter
 public sealed abstract class TariffV2
-        permits DegressiveHourlyTariffV2, FlatHourlyTariffV2,
-        DailyTariffV2, FlatFeeTariffV2, SpecialTariffV2 {
+        permits DegressiveHourlyTariffV2, FlatHourlyTariffV2, DailyTariffV2, FlatFeeTariffV2, SpecialTariffV2 {
 
     protected static final int MINUTES_PER_DAY = 1440;
     protected static final int MINUTES_PER_HOUR = 60;
@@ -22,20 +21,20 @@ public sealed abstract class TariffV2
     private Long id;
     private final String name;
     private final String description;
-    private final String equipmentTypeSlug;
+    private final String equipmentType;
     private final PricingType pricingType;
     private final String version;
     private final LocalDate validFrom;
     private final LocalDate validTo;
     private TariffV2Status status;
 
-    protected TariffV2(Long id, String name, String description, String equipmentTypeSlug,
+    protected TariffV2(Long id, String name, String description, String equipmentType,
                        PricingType pricingType, String version, LocalDate validFrom, LocalDate validTo,
                        TariffV2Status status) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.equipmentTypeSlug = equipmentTypeSlug;
+        this.equipmentType = equipmentType;
         this.pricingType = pricingType;
         this.version = version;
         this.validFrom = validFrom;
