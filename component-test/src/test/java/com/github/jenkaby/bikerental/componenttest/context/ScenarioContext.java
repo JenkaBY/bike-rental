@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.componenttest.context;
 
 import com.github.jenkaby.bikerental.componenttest.config.WebConfig;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.PricingParams;
 import io.cucumber.spring.ScenarioScope;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,6 +30,7 @@ public class ScenarioContext {
     private Object requestBody;
     private String requestedObjectId;
     private Set<UUID> persistedIds = new HashSet<>();
+    private PricingParams pricingParams;
 
     @SneakyThrows
     public <T> T getResponseBody(Class<T> clazz) {
