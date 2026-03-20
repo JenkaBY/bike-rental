@@ -15,7 +15,6 @@ import com.github.jenkaby.bikerental.tariff.domain.service.BaseEquipmentCostBrea
 import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostCalculationResult;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -52,17 +51,16 @@ class RentalCostCalculationService implements RentalCostCalculationUseCase {
         if (specialTariff.getPricingType() != PricingType.SPECIAL) {
             throw new InvalidSpecialTariffTypeException(command.specialTariffId(), specialTariff.getPricingType());
         }
-        BigDecimal priceAmount = command.specialPrice();
-        if (priceAmount == null || priceAmount.compareTo(BigDecimal.ZERO) < 0) {
+        Money totalCost = command.specialPrice();
+        if (totalCost.isNegative()) {
             throw new InvalidSpecialPriceException();
         }
 
-        Money totalCost = Money.of(priceAmount);
         List<EquipmentCostBreakdown> breakdowns = new ArrayList<>();
         Duration effective = command.effectiveDuration();
         for (EquipmentCostItem item : command.equipments()) {
             breakdowns.add(new BaseEquipmentCostBreakdown(
-                    item.equipmentTypeSlug(),
+                    item.equipmentType(),
                     command.specialTariffId(),
                     specialTariff.getName(),
                     PricingType.SPECIAL.name(),
@@ -123,12 +121,12 @@ class RentalCostCalculationService implements RentalCostCalculationUseCase {
         Money subtotal = Money.zero();
         Map<String, TariffV2> tariffCache = new HashMap<>();
         for (EquipmentCostItem item : command.equipments()) {
-            TariffV2 tariff = tariffCache.computeIfAbsent(item.equipmentTypeSlug(),
-                    type -> selectTariffUseCase.execute(new SelectTariffV2UseCase.SelectTariffCommand(item.equipmentTypeSlug(), billedDuration, rentalDate)));
+            TariffV2 tariff = tariffCache.computeIfAbsent(item.equipmentType(),
+                    type -> selectTariffUseCase.execute(new SelectTariffV2UseCase.SelectTariffCommand(item.equipmentType(), billedDuration, rentalDate)));
             RentalCostV2 cost = tariff.calculateCost(billedDuration);
 
             breakdowns.add(new BaseEquipmentCostBreakdown(
-                    item.equipmentTypeSlug(),
+                    item.equipmentType(),
                     tariff.getId(),
                     tariff.getName(),
                     tariff.getPricingType().name(),

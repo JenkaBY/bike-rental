@@ -6,7 +6,7 @@ import java.time.Duration;
 
 public interface EquipmentCostBreakdown {
 
-    String equipmentTypeSlug();
+    String equipmentType();
 
     Long tariffId();
 

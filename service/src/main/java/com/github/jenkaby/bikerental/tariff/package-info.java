@@ -7,9 +7,13 @@
  *
  * <p>Public API:
  * <ul>
- *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffFacade} - External module interface</li>
- *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffInfo} - Public tariff DTO</li>
- *   <li>{@link com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException} - Exception thrown by TariffFacade</li>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffFacade} - External module interface (V1)</li>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffInfo} - Public tariff DTO (V1)</li>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException} - Exception thrown by TariffFacade (V1)</li>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffV2Facade} - External module interface (V2)</li>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.TariffV2Info} - Public tariff DTO (V2)</li>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand} - V2 batch calculation input</li>
+ *   <li>{@link com.github.jenkaby.bikerental.tariff.RentalCostCalculationResult} - V2 batch calculation output</li>
  * </ul>
  *
  * @since 1.0

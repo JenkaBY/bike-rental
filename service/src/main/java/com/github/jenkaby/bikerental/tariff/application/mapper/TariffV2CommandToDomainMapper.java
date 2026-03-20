@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+// FIXME use mapper here
 @Component
 public class TariffV2CommandToDomainMapper {
 
@@ -47,7 +48,7 @@ public class TariffV2CommandToDomainMapper {
                 VERSION_DEFAULT,
                 command.validFrom(),
                 command.validTo(),
-                command.status(),
+                TariffV2Status.INACTIVE,
                 params
         );
     }

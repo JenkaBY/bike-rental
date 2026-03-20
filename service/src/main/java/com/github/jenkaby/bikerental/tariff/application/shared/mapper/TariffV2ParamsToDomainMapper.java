@@ -37,8 +37,7 @@ public class TariffV2ParamsToDomainMapper {
                     id, name, description, equipmentTypeSlug, version, validFrom, validTo, status,
                     toMoney(params, TariffV2FieldNames.ISSUANCE_FEE));
             case SPECIAL -> new SpecialTariffV2(
-                    id, name, description, equipmentTypeSlug, version, validFrom, validTo, status,
-                    toMoney(params, TariffV2FieldNames.PRICE));
+                    id, name, description, equipmentTypeSlug, version, validFrom, validTo, status);
         };
     }
 
@@ -57,7 +56,7 @@ public class TariffV2ParamsToDomainMapper {
         return switch (v) {
             case Integer i -> i;
             case Number n -> n.intValue();
-            case String s -> Integer.parseInt(s);
+            case String s -> Integer.valueOf(s);
             case null, default -> null;
         };
     }

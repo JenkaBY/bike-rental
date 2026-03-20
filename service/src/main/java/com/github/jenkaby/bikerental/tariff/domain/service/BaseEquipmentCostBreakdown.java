@@ -7,7 +7,7 @@ import com.github.jenkaby.bikerental.tariff.EquipmentCostBreakdown;
 import java.time.Duration;
 
 public record BaseEquipmentCostBreakdown(
-        String equipmentTypeSlug,
+        String equipmentType,
         Long tariffId,
         String tariffName,
         String pricingType,

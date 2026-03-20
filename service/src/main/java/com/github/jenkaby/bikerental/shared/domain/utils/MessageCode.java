@@ -16,4 +16,8 @@ public class MessageCode {
     public static final String BREAKDOWN_DEGRESSIVE_HOURLY_MIN = "breakdown.cost.degressive_hourly.minimum";
     public static final String BREAKDOWN_DEGRESSIVE_HOURLY_STANDARD = "breakdown.cost.degressive_hourly.standard";
     public static final String BREAKDOWN_DEGRESSIVE_HOURLY_MINUTES_ONLY = "breakdown.cost.degressive_hourly.minutes_only";
+    //
+    public static final String INAPPLICABLE_FIELD = "tariff.validation.inapplicable_field";
+    public static final String REQUIRED_FIELD_MISSING = "tariff.validation.required_field_missing";
+    public static final String CONSTRAINT_VIOLATION = "tariff.validation.constraint";
 }
