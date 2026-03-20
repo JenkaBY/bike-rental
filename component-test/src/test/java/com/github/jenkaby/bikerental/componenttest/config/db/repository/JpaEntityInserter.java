@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.componenttest.config.db.repository;
 
+import com.github.jenkaby.bikerental.componenttest.config.WebConfig;
 import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +8,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -21,6 +23,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class JpaEntityInserter {
 
+    private static final ObjectMapper OBJECT_MAPPER = WebConfig.DEFAULT_OBJECT_MAPPER;
+
     private final JdbcClient jdbcClient;
 
     public <T> T insert(T entity) {
@@ -29,7 +33,7 @@ public class JpaEntityInserter {
 
     public <T> T insert(T entity, boolean resetSequence) {
         Objects.requireNonNull(entity, "Entity cannot be null");
-
+        log.info("Inserted entity {}", entity);
         Class<?> entityClass = entity.getClass();
         validateEntityClass(entityClass);
 
@@ -39,7 +43,7 @@ public class JpaEntityInserter {
         Field idField = extractIdField(entityClass);
 
         String sql = buildInsertSql(tableName, fields);
-        log.debug("Generated SQL: {}", sql);
+        log.info("Generated SQL: {}", sql);
 
         Object entityId = null;
         if (idField != null) {
@@ -216,7 +220,7 @@ public class JpaEntityInserter {
             }
 
             String columnName = getColumnName(field);
-            fields.add(new FieldMetadata(field, columnName));
+            fields.add(new FieldMetadata(field, columnName, null, isJsonColumn(field)));
         }
         return fields;
     }
@@ -293,13 +297,22 @@ public class JpaEntityInserter {
         sql.append(") VALUES (");
 
         StringJoiner placeholders = new StringJoiner(", ");
-        for (int i = 0; i < fields.size(); i++) {
-            placeholders.add("?");
+        for (FieldMetadata field : fields) {
+            placeholders.add(field.isJson ? "?::jsonb" : "?");
         }
         sql.append(placeholders);
 
         sql.append(")");
         return sql.toString();
+    }
+
+    private boolean isJsonColumn(Field field) {
+        Column col = field.getAnnotation(Column.class);
+        if (col != null && col.columnDefinition() != null
+                && col.columnDefinition().toLowerCase().contains("json")) {
+            return true;
+        }
+        return false;
     }
 
     private List<Object> extractParameters(Object entity, List<FieldMetadata> fields) {
@@ -363,6 +376,14 @@ public class JpaEntityInserter {
                 || value instanceof BigDecimal
                 || value instanceof Boolean) {
             return value;
+        }
+
+        if (value instanceof Map<?, ?> mapValue) {
+            try {
+                return OBJECT_MAPPER.writeValueAsString(mapValue);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to serialize Map to JSON", e);
+            }
         }
 
         return value.toString();
@@ -506,15 +527,21 @@ public class JpaEntityInserter {
         final Field field;
         final String columnName;
         final Field referencedIdField; // non-null for ManyToOne fields: the id field on referenced entity
+        final boolean isJson;
 
         FieldMetadata(Field field, String columnName) {
-            this(field, columnName, null);
+            this(field, columnName, null, false);
         }
 
         FieldMetadata(Field field, String columnName, Field referencedIdField) {
+            this(field, columnName, referencedIdField, false);
+        }
+
+        FieldMetadata(Field field, String columnName, Field referencedIdField, boolean isJson) {
             this.field = field;
             this.columnName = columnName;
             this.referencedIdField = referencedIdField;
+            this.isJson = isJson;
         }
     }
 

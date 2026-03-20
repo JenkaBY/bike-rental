@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.tariff;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.componenttest.model.TariffV2RequestBuilder;
 import com.github.jenkaby.bikerental.componenttest.steps.common.WebRequestSteps;
+import com.github.jenkaby.bikerental.componenttest.transformer.PricingParamsRequestTransformer;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.PricingParams;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.TariffV2Response;
 import io.cucumber.java.en.Given;
@@ -23,13 +24,21 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 public class TariffV2WebSteps {
 
     private static final String API_V2_TARIFFS = "/api/v2/tariffs";
+    public static final Comparator<TariffV2Response> DEFAULT_COMPORATOR = Comparator.comparing(TariffV2Response::name)
+            .thenComparing(TariffV2Response::equipmentType)
+            .thenComparing(TariffV2Response::validFrom);
 
     private final ScenarioContext scenarioContext;
     private final WebRequestSteps webRequestSteps;
 
     @Given("the pricing params for tariff request are")
-    public void thePricingParamsForTariffRequestAre(PricingParams params) {
-        scenarioContext.setPricingParams(params);
+    public void thePricingParamsForTariffRequestAre(PricingParamsRequestTransformer.PricingParamsRequestHolder holder) {
+        scenarioContext.setPricingParams(holder.params());
+    }
+
+    @Given("the pricing params list for tariff request is")
+    public void thePricingParamsForTariffRequestAre(List<PricingParamsRequestTransformer.PricingParamsRequestHolder> holders) {
+        scenarioContext.setPricingParamsHolders(holders);
     }
 
     @Given("the tariff v2 request is prepared with the following data")
@@ -53,6 +62,26 @@ public class TariffV2WebSteps {
     public void theTariffV2ResponseContains(TariffV2Response expected) {
         var actual = scenarioContext.getResponseBody(TariffV2Response.class);
         log.info("Comparing tariff v2 response actual: {} with expected: {}", actual, expected);
+        assertSingleTariff(expected, actual);
+        scenarioContext.setRequestedObjectId(actual.id().toString());
+    }
+
+    @Then("the tariff v2 response contains list of")
+    public void theTariffV2ResponseContainsListOf(List<TariffV2Response> unsorted) {
+        var actual = scenarioContext.getResponseAsList(TariffV2Response.class).stream()
+                .sorted(DEFAULT_COMPORATOR)
+                .toList();
+        var expected = unsorted.stream()
+                .sorted(DEFAULT_COMPORATOR)
+                .toList();
+
+        log.info("Comparing tariff v2 response actual: {} with expected: {}", actual, expected);
+        assertThat(actual).size().isEqualTo(expected.size());
+
+        assertThat(actual).zipSatisfy(expected, (act, exp) -> assertSingleTariff(exp, act));
+    }
+
+    private void assertSingleTariff(TariffV2Response expected, TariffV2Response actual) {
         assertSoftly(softly -> {
             softly.assertThat(actual.id()).as("ID").isNotNull();
             softly.assertThat(actual.name()).as("Name").isEqualTo(expected.name());
@@ -69,7 +98,6 @@ public class TariffV2WebSteps {
                         .isEqualTo(pricingParams);
             }
         });
-        scenarioContext.setRequestedObjectId(actual.id().toString());
     }
 
     @Then("the tariff v2 selection response contains totalCost {string} and calculationBreakdown {string}")
@@ -78,27 +106,4 @@ public class TariffV2WebSteps {
         assertThat(actual.totalCost().toString()).as("totalCost").isEqualTo(expectedTotalCost);
         assertThat(actual.calculationBreakdown().getMessage()).as("calculationBreakdown").isEqualTo(expectedBreakdown);
     }
-
-    @Then("the tariff v2 response only contains list of")
-    public void theTariffV2ResponseContainsListOf(List<TariffV2Response> expectedList) {
-        var actual = scenarioContext.getResponseAsList(TariffV2Response.class);
-        assertThat(actual).hasSize(expectedList.size());
-        for (int i = 0; i < expectedList.size(); i++) {
-            var exp = expectedList.get(i);
-            var act = actual.get(i);
-            assertSoftly(softly -> {
-                softly.assertThat(act.name())
-//                        .as("Name at %d", i)
-                        .isEqualTo(exp.name());
-                softly.assertThat(act.equipmentType())
-//                        .as("Equipment type at %d", i)
-                        .isEqualTo(exp.equipmentType());
-                softly.assertThat(act.pricingType())
-//                        .as("Pricing type at %d", i)
-                        .isEqualTo(exp.pricingType());
-            });
-        }
-    }
-
-
 }

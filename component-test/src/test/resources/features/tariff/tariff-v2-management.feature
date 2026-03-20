@@ -5,10 +5,11 @@ Feature: Tariff V2 API
 
   Background:
     Given the following equipment types exist in the database
-      | slug    | name    | description |
-      | bicycle | Bicycle | Two-wheeled |
-      | scooter | Scooter | Electric    |
-      | helmet  | Helmet  | Accessory   |
+      | slug    | name    | description                  |
+      | bicycle | Bicycle | Two-wheeled                  |
+      | scooter | Scooter | Electric                     |
+      | helmet  | Helmet  | Accessory                    |
+      | special | Special | It's used for special tariff |
 
   Scenario Outline: Create a tariff v2 and get by id
     Given the pricing params for tariff request are
@@ -101,3 +102,22 @@ Feature: Tariff V2 API
     And the response contains
       | path     | value    |
       | $.status | INACTIVE |
+
+  Scenario: Fetch active tariffs
+    Given the pricing params list for tariff request is
+      | tariffId | issuanceFee | price |
+      | 1        | 1           |       |
+      | 2        | 2           |       |
+      | 3        |             | 0     |
+    And the following tariff v2 records exist in db
+      | id | name            | description       | equipmentType | pricingType | status   | validFrom  | validTo    |
+      | 1  | Hourly Bicycle  | Degressive hourly | bicycle       | FLAT_FEE    | ACTIVE   | 2026-01-01 | 2029-01-01 |
+      | 2  | Flat Fee Helmet | Flat fee          | helmet        | FLAT_FEE    | INACTIVE | 2026-01-01 | 2029-01-01 |
+      | 3  | Special Scooter | Special           | special       | SPECIAL     | ACTIVE   | 2025-01-31 | 2028-01-02 |
+    When a GET request has been made to "/api/v2/tariffs/active" endpoint with query parameters
+      | equipmentType |
+      | special       |
+    Then the response status is 200
+    And the tariff v2 response contains list of
+      | id | name            | description | equipmentType | pricingType | status | validFrom  | validTo    |
+      | 3  | Special Scooter | Special     | special       | SPECIAL     | ACTIVE | 2025-01-31 | 2028-01-02 |

@@ -8,7 +8,8 @@ import java.util.Map;
 public class PricingParamsRequestTransformer {
 
     @DataTableType
-    public PricingParams transform(Map<String, String> entry) {
+    public PricingParamsRequestHolder transform(Map<String, String> entry) {
+        var tariffId = DataTableHelper.toLong(entry, "tariffId");
         var firstHourPrice = DataTableHelper.toBigDecimal(entry, "firstHourPrice");
         var hourlyDiscount = DataTableHelper.toBigDecimal(entry, "hourlyDiscount");
         var minimumHourlyPrice = DataTableHelper.toBigDecimal(entry, "minimumHourlyPrice");
@@ -20,17 +21,21 @@ public class PricingParamsRequestTransformer {
         var minimumDurationSurcharge = DataTableHelper.toBigDecimal(entry, "minimumDurationSurcharge");
         var price = DataTableHelper.toBigDecimal(entry, "price");
 
-        return new PricingParams(
-                firstHourPrice,
-                hourlyDiscount,
-                minimumHourlyPrice,
-                hourlyPrice,
-                dailyPrice,
-                overtimeHourlyPrice,
-                issuanceFee,
-                minimumDurationMinutes,
-                minimumDurationSurcharge,
-                price
-        );
+        return new PricingParamsRequestHolder(tariffId,
+                new PricingParams(
+                        firstHourPrice,
+                        hourlyDiscount,
+                        minimumHourlyPrice,
+                        hourlyPrice,
+                        dailyPrice,
+                        overtimeHourlyPrice,
+                        issuanceFee,
+                        minimumDurationMinutes,
+                        minimumDurationSurcharge,
+                        price
+                ));
+    }
+
+    public record PricingParamsRequestHolder(Long tariffId, PricingParams params) {
     }
 }
