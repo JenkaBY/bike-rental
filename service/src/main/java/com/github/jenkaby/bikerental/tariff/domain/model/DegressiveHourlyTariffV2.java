@@ -68,7 +68,7 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
             if (!breakdownBuilder.isEmpty()) {
                 breakdownBuilder.append("+");
             }
-            breakdownBuilder.append(intervals).append("×(").append(nextHourRate).append("/12)");
+            breakdownBuilder.append(intervals).append("*(").append(nextHourRate).append("/12)");
         }
         if (fullHours > 0) {
             String message = String.format("%dh %dmin degressive: %s = %s", fullHours, remainingMinutes, breakdownBuilder, totalCost);

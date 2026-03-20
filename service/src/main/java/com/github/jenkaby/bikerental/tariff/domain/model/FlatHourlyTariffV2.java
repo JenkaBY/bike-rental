@@ -51,7 +51,7 @@ public final class FlatHourlyTariffV2 extends TariffV2 {
             totalCost = totalCost.add(perInterval.multiply(BigDecimal.valueOf(intervals)));
         }
         if (fullHours > 0) {
-            String message = String.format("%dh %dmin flat: %d×%s + partial = %s", fullHours, remainingMinutes, fullHours, hourlyPrice, totalCost);
+            String message = String.format("%dh %dmin flat: %d*%s + partial = %s", fullHours, remainingMinutes, fullHours, hourlyPrice, totalCost);
             return new BaseRentalCostV2(totalCost,  new BreakdownCostDetails.FlatHourlyStandard(message,
                             new BreakdownCostDetails.FlatHourlyStandard.Details(fullHours, remainingMinutes, hourlyPrice.toString(), totalCost.toString()))
             );

@@ -27,7 +27,7 @@ public final class FlatFeeTariffV2 extends TariffV2 {
         int durationMinutes = (int) duration.toMinutes();
         int days = durationMinutes <= 0 ? 1 : (int) Math.ceil((double) durationMinutes / MINUTES_PER_DAY);
         Money cost = issuanceFee.multiply(BigDecimal.valueOf(days));
-        String message = String.format("Flat fee: %s × %d day(s) = %s", issuanceFee, days, cost);
+        String message = String.format("Flat fee: %s * %d day(s) = %s", issuanceFee, days, cost);
         return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatFee(message,
                 new BreakdownCostDetails.FlatFee.Details(issuanceFee.toString(), days, cost.toString())));
     }

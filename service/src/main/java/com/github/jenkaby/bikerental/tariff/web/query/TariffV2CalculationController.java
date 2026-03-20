@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +36,7 @@ public class TariffV2CalculationController {
         this.requestMapper = requestMapper;
     }
 
-    @PutMapping("/calculate")
+    @PostMapping("/calculate")
     @Operation(summary = "Calculate rental cost for multiple equipment items",
             description = "Supports normal mode (auto-select tariffs, apply discount) and SPECIAL mode (fixed group price)")
     @ApiResponses({

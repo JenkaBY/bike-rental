@@ -11,9 +11,9 @@ public abstract class BreakdownCostDetails {
     protected String message;
     protected Object params;
 
-    protected BreakdownCostDetails(@NonNull String breakdownPatternCode,
-                                   @NonNull String message,
-                                   @Nullable Object params) {
+    public BreakdownCostDetails(@NonNull String breakdownPatternCode,
+                                @NonNull String message,
+                                @Nullable Object params) {
         this.breakdownPatternCode = breakdownPatternCode;
         this.message = message;
         this.params = params;
@@ -108,6 +108,7 @@ public abstract class BreakdownCostDetails {
         public record Details(int hours, int minutes, String rateBreakdown, String total) {
         }
     }
+
     public static class DegressiveHourlyMinutesOnly extends BreakdownCostDetails {
         public DegressiveHourlyMinutesOnly(String message, Details details) {
             super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MINUTES_ONLY, message, details);

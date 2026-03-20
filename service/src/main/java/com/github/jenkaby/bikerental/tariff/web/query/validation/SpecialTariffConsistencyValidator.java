@@ -13,7 +13,7 @@ public class SpecialTariffConsistencyValidator implements ConstraintValidator<Sp
         }
         boolean isTariffIdProvided = value.specialTariffId() != null;
         boolean isPriceProvided = value.specialPrice() != null;
-        return isTariffIdProvided != isPriceProvided;
+        return isTariffIdProvided == isPriceProvided;
     }
 }
 

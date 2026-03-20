@@ -1,6 +1,5 @@
 package com.github.jenkaby.bikerental.tariff.web.query.dto;
 
-import com.github.jenkaby.bikerental.shared.web.support.Id;
 import com.github.jenkaby.bikerental.tariff.web.query.validation.SpecialTariffConsistency;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -17,7 +16,7 @@ public record CostCalculationRequest(
         @NotNull @Positive Integer plannedDurationMinutes,
         @Min(0) Integer actualDurationMinutes,
         @Min(0) @Max(100) Integer discountPercent,
-        @Id Long specialTariffId,
+        @Positive Long specialTariffId,
         @DecimalMin("0") BigDecimal specialPrice,
         LocalDate rentalDate
 ) {
