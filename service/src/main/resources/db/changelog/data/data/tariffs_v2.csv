@@ -4,4 +4,4 @@ Hourly Scooter,Flat hourly for scooters,scooter,FLAT_HOURLY,2026-01-01,,ACTIVE,v
 Daily Bicycle,Daily rate for bicycles,bicycle,DAILY,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""dailyPrice"":20.00,""overtimeHourlyPrice"":1.00}"
 Daily Scooter,Daily rate for scooters,scooter,DAILY,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""dailyPrice"":25.00,""overtimeHourlyPrice"":2.00}"
 Child Seat,Per-day issuance fee,child_seat,FLAT_FEE,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""issuanceFee"":1.00}"
-Special Rate,Operator-set price,bicycle,SPECIAL,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""price"":0}"
+Special Rate,Operator-set price,special,SPECIAL,2026-01-01,,ACTIVE,v2,2026-01-01 00:00:00+00,2026-01-01 00:00:00+00,"{""price"":0}"
