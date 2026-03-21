@@ -42,7 +42,7 @@ Feature: Tariff V2 API
       | pricingType       | equipmentType | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | specialTariffId | specialPrice | rentalDate | tariffId | tariffName          | overtime | forgiven | message                           | pattern                                   | special | estimate |
       | DEGRESSIVE_HOURLY | bicycle       | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |                 |              |            | 1        | Hourly Bicycle      |          |          | 1h 0min degressive: 9 = 9         | breakdown.cost.degressive_hourly.standard | false   | false    |
       | FLAT_HOURLY       | scooter       | 60              | 60             | 15.00 | 15.00    | 15.00 | 0               | 0              |                 |              |            | 2        | Flat Hourly Scooter |          |          | 1h 0min flat: 1*15 + partial = 15 | breakdown.cost.flat_hourly.standard       | false   | false    |
-      | DAILY             | bicycle       | 480             | 480            | 25.00 | 25.00    | 25.00 | 0               | 0              |                 |              |            | 3        | Daily Bicycle       |          |          | 24h daily: 25                     | breakdown.cost.daily.standard             | false   | false    |
+      | DAILY             | bicycle       | 480             | 480            | 25.00 | 25.00    | 25.00 | 0               | 0              |                 |              |            | 3        | Daily Bicycle       |          |          | 1d = 25                           | breakdown.cost.daily.standard             | false   | false    |
       | FLAT_FEE          | helmet        | 60              | 60             | 1     | 1        | 1     | 0               | 0              |                 |              |            | 4        | Flat Fee Helmet     |          |          | Flat fee: 1 * 1 day(s) = 1        | breakdown.cost.flat_fee                   | false   | false    |
       | SPECIAL           | any           | 60              | 60             | 0     | 666      | 666   | 0               | 0              | 5               | 666          |            | 5        | Special Tariff      |          |          | Special tariff applied to group   | breakdown.cost.special.group              | true    | false    |
 
@@ -134,15 +134,15 @@ Feature: Tariff V2 API
       | equipmentType | tariffId | tariffName    | pricingType | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
       | bicycle       | 3        | Daily Bicycle | DAILY       | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
-      | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                                           | pattern                       |
-      | 305             | 305            | 25    | 25       | 25    | 0               | 0              | 0        |          | 24h daily: 25                                     | breakdown.cost.daily.standard |
-      | 315             | 310            | 25.0  | 25.0     | 25.0  | 0               | 0              | 5        | 5        | 24h daily: 25                                     | breakdown.cost.daily.standard |
-      | 1440            | 1440           | 25.0  | 25.0     | 25.0  | 0               | 0              | 1130     | 0        | 24h daily: 25                                     | breakdown.cost.daily.standard |
-      | 1500            | 1500           | 26.0  | 26.0     | 26.0  | 0               | 0              | 1190     | 0        | Daily + 1h 0min overtime: 25 + overtime = 26      | breakdown.cost.daily.overtime |
-      | 1535            | 1535           | 26.56 | 26.56    | 26.56 | 0               | 0              | 1225     | 0        | Daily + 1h 35min overtime: 25 + overtime = 26.56  | breakdown.cost.daily.overtime |
-      | 2880            | 2880           | 49    | 49       | 49    | 0               | 0              | 2570     | 0        | Daily + 24h 0min overtime: 25 + overtime = 49     | breakdown.cost.daily.overtime |
-      | 2890            | 2890           | 49.16 | 49.16    | 49.16 | 0               | 0              | 2580     | 0        | Daily + 24h 10min overtime: 25 + overtime = 49.16 | breakdown.cost.daily.overtime |
+      | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message               | pattern                       |
+      | 305             | 305            | 25    | 25       | 25    | 0               | 0              | 0        |          | 1d = 25               | breakdown.cost.daily.standard |
+      | 315             | 310            | 25.0  | 25.0     | 25.0  | 0               | 0              | 5        | 5        | 1d = 25               | breakdown.cost.daily.standard |
+      | 1440            | 1440           | 25.0  | 25.0     | 25.0  | 0               | 0              | 1130     | 0        | 1d = 25               | breakdown.cost.daily.standard |
+      | 1500            | 1500           | 26.0  | 26.0     | 26.0  | 0               | 0              | 1190     | 0        | 1d + 1h 0min = 26     | breakdown.cost.daily.overtime |
+      | 1535            | 1535           | 26.56 | 26.56    | 26.56 | 0               | 0              | 1225     | 0        | 1d + 1h 35min = 26.56 | breakdown.cost.daily.overtime |
+      | 2880            | 2880           | 50    | 50       | 50    | 0               | 0              | 2570     | 0        | 2d = 50               | breakdown.cost.daily.standard |
+      | 2890            | 2890           | 50.16 | 50.16    | 50.16 | 0               | 0              | 2580     | 0        | 2d + 0h 10min = 50.16 | breakdown.cost.daily.overtime |
       #     Discount applied
-      | 305             | 305            | 25    | 25       | 22.5  | 10              | 2.5            | 0        | 0        | 24h daily: 25                                     | breakdown.cost.daily.standard |
+      | 305             | 305            | 25    | 25       | 22.5  | 10              | 2.5            | 0        | 0        | 1d = 25               | breakdown.cost.daily.standard |
 
 

@@ -71,7 +71,7 @@ public abstract class BreakdownCostDetails {
             super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);
         }
 
-        public record Details(String dailyPrice) {
+        public record Details(int days, String total) {
         }
     }
 
@@ -80,7 +80,7 @@ public abstract class BreakdownCostDetails {
             super(MessageCode.BREAKDOWN_DAILY_OVERTIME, message, details);
         }
 
-        public record Details(int hours, int minutes, String dailyPrice, String total) {
+        public record Details(int days, int hours, int minutes, String total) {
         }
     }
 
@@ -119,5 +119,31 @@ public abstract class BreakdownCostDetails {
         public record Details(int minutes, String rateBreakdown, String total) {
         }
     }
-}
 
+    public static class Daily extends BreakdownCostDetails {
+        public Daily(String message, Details details) {
+            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);
+        }
+
+        public record Details(int days, int hours, int minutes, String total) {
+        }
+    }
+
+    public static class DailyDaysOnly extends BreakdownCostDetails {
+        public DailyDaysOnly(String message, Details details) {
+            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);
+        }
+
+        public record Details(int days, String total) {
+        }
+    }
+
+    public static class DailyWithOvertime extends BreakdownCostDetails {
+        public DailyWithOvertime(String message, Details details) {
+            super(MessageCode.BREAKDOWN_DAILY_OVERTIME, message, details);
+        }
+
+        public record Details(int days, int hours, int minutes, String total) {
+        }
+    }
+}

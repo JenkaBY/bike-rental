@@ -30,24 +30,42 @@ public final class DailyTariffV2 extends TariffV2 {
         if (durationMinutes <= 0) {
             return new BaseRentalCostV2(Money.zero(), new BreakdownCostDetails.Zero());
         }
-        if (durationMinutes <= MINUTES_PER_DAY) {
-            String message = String.format("24h daily: %s", dailyPrice);
-            return new BaseRentalCostV2(dailyPrice, new BreakdownCostDetails.DailyStandard(message,
-                    new BreakdownCostDetails.DailyStandard.Details(dailyPrice.toString())));
+        if (durationMinutes < MINUTES_PER_DAY) {
+            Money total = dailyPrice;
+            String message = String.format("1d = %s", total);
+            return new BaseRentalCostV2(total,
+                    new BreakdownCostDetails.DailyStandard(message,
+                            new BreakdownCostDetails.DailyStandard.Details(1, total.toString())
+                    )
+            );
         }
-        int overtimeMinutes = durationMinutes - MINUTES_PER_DAY;
-        int fullOvertimeHours = overtimeMinutes / MINUTES_PER_HOUR;
-        int remainingOvertimeMin = overtimeMinutes % MINUTES_PER_HOUR;
-        Money totalCost = dailyPrice.add(overtimeHourlyPrice.multiply(BigDecimal.valueOf(fullOvertimeHours)));
-        if (remainingOvertimeMin > 0) {
-            int intervals = remainingOvertimeMin / INTERVAL_MINUTES;
+        int days = durationMinutes / MINUTES_PER_DAY;
+        int remainder = durationMinutes % MINUTES_PER_DAY;
+        int hours = remainder / MINUTES_PER_HOUR;
+        int minutes = remainder % MINUTES_PER_HOUR;
+        Money total = dailyPrice.multiply(BigDecimal.valueOf(days));
+        if (hours > 0) {
+            total = total.add(overtimeHourlyPrice.multiply(BigDecimal.valueOf(hours)));
+        }
+        if (minutes > 0) {
+            int intervals = minutes / INTERVAL_MINUTES;
             Money perInterval = overtimeHourlyPrice.divide(INTERVALS_PER_HOUR);
-            totalCost = totalCost.add(perInterval.multiply(BigDecimal.valueOf(intervals)));
+            total = total.add(perInterval.multiply(BigDecimal.valueOf(intervals)));
         }
-        String message = String.format("Daily + %dh %dmin overtime: %s + overtime = %s",
-                fullOvertimeHours, remainingOvertimeMin, dailyPrice, totalCost);
-        return new BaseRentalCostV2(totalCost, new BreakdownCostDetails.DailyOvertime(message,
-                new BreakdownCostDetails.DailyOvertime.Details(fullOvertimeHours, remainingOvertimeMin, dailyPrice.toString(), totalCost.toString()))
-        );
+        if (hours == 0 && minutes == 0) {
+            String message = String.format("%dd = %s", days, total);
+            return new BaseRentalCostV2(total,
+                    new BreakdownCostDetails.DailyStandard(message,
+                            new BreakdownCostDetails.DailyStandard.Details(days, total.toString())
+                    )
+            );
+        } else {
+            String message = String.format("%dd + %dh %dmin = %s", days, hours, minutes, total);
+            return new BaseRentalCostV2(total,
+                    new BreakdownCostDetails.DailyOvertime(message,
+                            new BreakdownCostDetails.DailyOvertime.Details(days, hours, minutes, total.toString())
+                    )
+            );
+        }
     }
 }
