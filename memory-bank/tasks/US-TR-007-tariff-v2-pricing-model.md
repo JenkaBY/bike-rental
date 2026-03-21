@@ -56,7 +56,7 @@ and new endpoints (`/api/v2/tariffs`). No changes to existing V1 implementation.
 | Pricing Type          | Equipment Example | Description                                                                                                           |
 |-----------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------|
 | **DEGRESSIVE_HOURLY** | Bicycle           | First hour at base rate, each subsequent hour discounted by a fixed step. Floor price applies after reaching minimum. |
-| **FLAT_HOURLY**       | Scooter           | Constant hourly rate, no discounts. Cost = hours × rate.                                                              |
+| **FLAT_HOURLY**       | Scooter           | Constant hourly rate, no discounts. Cost = hours * rate.                                                              |
 | **DAILY**             | Bicycle, Scooter  | Fixed 24-hour rate. Overtime charged at a per-hour rate.                                                              |
 | **FLAT_FEE**          | Child seat        | Per-day issuance fee. Constant within one 24h period, multiplied by number of days.                                   |
 | **SPECIAL**           | Any               | Operator-set fixed price (can be zero). All other pricing rules are bypassed.                                         |
@@ -65,7 +65,7 @@ and new endpoints (`/api/v2/tariffs`). No changes to existing V1 implementation.
 
 **Parameters:** `firstHourPrice`, `hourlyDiscount`, `minimumHourlyPrice`
 
-**Formula for hour N:** `max(firstHourPrice − (N−1) × hourlyDiscount, minimumHourlyPrice)`
+**Formula for hour N:** `max(firstHourPrice − (N−1) * hourlyDiscount, minimumHourlyPrice)`
 
 **Examples** (firstHourPrice=9, hourlyDiscount=2, minimumHourlyPrice=1):
 
@@ -77,7 +77,7 @@ and new endpoints (`/api/v2/tariffs`). No changes to existing V1 implementation.
 | 4 hours  | 9 + 7 + 5 + 3         | 24    |
 | 5 hours  | 9 + 7 + 5 + 3 + 1     | 25    |
 | 6 hours  | 9 + 7 + 5 + 3 + 1 + 1 | 26    |
-| 10 hours | 9 + 7 + 5 + 3 + 1×6   | 30    |
+| 10 hours | 9 + 7 + 5 + 3 + 1*6   | 30    |
 
 After reaching the minimum hourly price, all subsequent hours are charged at that minimum.
 
@@ -89,13 +89,13 @@ When the last hour is not fully used, charge proportionally per 5-minute interva
 2. For the remaining minutes (already rounded down to 5 min by rental module):
     - Determine the rate for the next hour
     - Per 5-minute rate = `hourRate / 12` (since 60 min / 5 min = 12 intervals)
-    - Remaining cost = `intervals × perFiveMinRate`
+   - Remaining cost = `intervals * perFiveMinRate`
 
 **Example** (bicycle, 1h 20min):
 
 - Hour 1: 9 BYN
 - Remaining 20 min = 4 intervals, hour 2 rate = 7 BYN, per 5-min = 7/12 ≈ 0.58
-- Remaining cost: 4 × 0.58 = 2.33 BYN
+- Remaining cost: 4 * 0.58 = 2.33 BYN
 - **Total: 11.33 BYN**
 
 ### 2.4 Minimum Duration Tariff (30 Minutes)
@@ -121,7 +121,7 @@ For hourly pricing types (DEGRESSIVE_HOURLY, FLAT_HOURLY), a minimum rental dura
 
 - 24 hours: 20 BYN
 - 25 hours: 20 + 1 = 21 BYN
-- 26h 30min: 20 + 2 + 6×(1/12) = 22.50 BYN
+- 26h 30min: 20 + 2 + 6*(1/12) = 22.50 BYN
 
 ### 2.6 Flat Fee (Child Seats)
 
@@ -130,7 +130,7 @@ For hourly pricing types (DEGRESSIVE_HOURLY, FLAT_HOURLY), a minimum rental dura
 Per-day charge for the fact of issuance. Within a single 24-hour period, the price is
 constant. If the rental spans multiple days, the fee is multiplied.
 
-**Formula:** `cost = issuanceFee × ceil(durationMinutes / 1440)`
+**Formula:** `cost = issuanceFee * ceil(durationMinutes / 1440)`
 
 **Examples** (issuanceFee=1):
 | Duration | Days (ceil) | Cost |
@@ -204,7 +204,7 @@ can see what happened.
 
 1. Calculate cost for each equipment item individually (via pricing strategy)
 2. Sum all item costs → `subtotal`
-3. Apply discount: `discountAmount = subtotal × discountPercent / 100`
+3. Apply discount: `discountAmount = subtotal * discountPercent / 100`
 4. Final cost: `totalCost = subtotal − discountAmount`
 
 **SPECIAL mode** (`specialTariffId` is set):
@@ -763,14 +763,14 @@ remainingMinutes = durationMinutes % 60
 totalCost = 0
 
 for hour = 1..fullHours:
-    rate = max(firstHourPrice − (hour−1) × hourlyDiscount, minimumHourlyPrice)
+    rate = max(firstHourPrice − (hour−1) * hourlyDiscount, minimumHourlyPrice)
     totalCost += rate
 
 if remainingMinutes > 0:
-    nextHourRate = max(firstHourPrice − fullHours × hourlyDiscount, minimumHourlyPrice)
+    nextHourRate = max(firstHourPrice − fullHours * hourlyDiscount, minimumHourlyPrice)
     intervals = remainingMinutes / 5
     perInterval = nextHourRate / 12
-    totalCost += intervals × perInterval
+    totalCost += intervals * perInterval
 
 return totalCost
 ```
@@ -784,12 +784,12 @@ if durationMinutes <= minimumDurationMinutes →
 
 fullHours = durationMinutes / 60
 remainingMinutes = durationMinutes % 60
-totalCost = fullHours × hourlyPrice
+totalCost = fullHours * hourlyPrice
 
 if remainingMinutes > 0:
     intervals = remainingMinutes / 5
     perInterval = hourlyPrice / 12
-    totalCost += intervals × perInterval
+    totalCost += intervals * perInterval
 
 return totalCost
 ```
@@ -803,12 +803,12 @@ if durationMinutes <= 1440 (24h) → dailyPrice
 overtimeMinutes = durationMinutes − 1440
 fullOvertimeHours = overtimeMinutes / 60
 remainingOvertimeMin = overtimeMinutes % 60
-totalCost = dailyPrice + fullOvertimeHours × overtimeHourlyPrice
+totalCost = dailyPrice + fullOvertimeHours * overtimeHourlyPrice
 
 if remainingOvertimeMin > 0:
     intervals = remainingOvertimeMin / 5
     perInterval = overtimeHourlyPrice / 12
-    totalCost += intervals × perInterval
+    totalCost += intervals * perInterval
 
 return totalCost
 ```
@@ -819,7 +819,7 @@ return totalCost
 if durationMinutes <= 0 → return issuanceFee  (minimum 1 day)
 
 days = ceil(durationMinutes / 1440)
-return issuanceFee × days
+return issuanceFee * days
 ```
 
 ### 7.6 Special Pricing (group-level, handled in BatchRentalCostCalculationService)
@@ -1063,9 +1063,9 @@ public interface EquipmentCostBreakdown {
      * Human-readable calculation breakdown.
      * Examples:
      *   "5h degressive: 9+7+5+3+1 = 25.00"
-     *   "2h 20min flat: 2×5 + 4×(5/12) = 11.67"
+     *   "2h 20min flat: 2*5 + 4*(5/12) = 11.67"
      *   "Flat fee: 1.00"
-     *   "Daily + 2h overtime: 20 + 2×1 = 22.00"
+     *   "Daily + 2h overtime: 20 + 2*1 = 22.00"
      *   "Special tariff applied to group"
      *   "1h degressive: 9.00 (7 min overtime forgiven)"
      */
@@ -1272,14 +1272,14 @@ specialTariffId=6, specialPrice=15.00):
 - [ ] 5 hours bicycle (firstHour=9, discount=2, min=1) → 25 BYN
 - [ ] 6 hours → 26 BYN
 - [ ] 10 hours → 30 BYN
-- [ ] 1h 20min → 11.33 BYN (9 + 4×7/12)
+- [ ] 1h 20min → 11.33 BYN (9 + 4*7/12)
 - [ ] 25 min → 5.50 BYN (minimum duration: 9/2 + 1)
 
 ### AC-3: Flat Hourly Pricing
 
 - [ ] 3 hours scooter (hourlyPrice=5) → 15 BYN
 - [ ] 30 min → 3.50 BYN (minimum duration: 5/2 + 1)
-- [ ] 1h 30min → 5 + 6×(5/12) = 7.50 BYN
+- [ ] 1h 30min → 5 + 6*(5/12) = 7.50 BYN
 
 ### AC-4: Daily Pricing
 

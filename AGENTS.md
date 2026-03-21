@@ -57,7 +57,7 @@ docker compose -f ./docker/docker-compose.yaml up -d
 ### Run all tests
 
 ```bash
-./gradlew test -Dspring.profiles.active=test
+./gradlew test "-Dspring.profiles.active=test"
 ```
 
 `test` profile **disables** Liquibase by default. Add `docker` profile in CI to enable it. For local runs against a
@@ -66,13 +66,13 @@ pre-migrated DB, leave `spring.liquibase.enabled=false` in `application-test.yam
 ### Run unit tests locally
 
 ```bash
-./gradlew :service:test -Dspring.profiles.active=test
+./gradlew :service:test "-Dspring.profiles.active=test"
 ```
 
 ### Run component tests locally
 
 ```bash
-./gradlew :component-test:test -Dspring.profiles.active=test
+./gradlew :component-test:test "-Dspring.profiles.active=test"
 ```
 
 Assume that DB is spun up already and accepts connections.
