@@ -98,7 +98,7 @@ public abstract class BreakdownCostDetails {
             super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MIN, message, details);
         }
 
-        public record Details(int durationMinutes, String rate, String surcharge, String total) {
+        public record Details(long durationMinutes, String rate, String surcharge, String total) {
         }
     }
 
@@ -107,7 +107,7 @@ public abstract class BreakdownCostDetails {
             super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_STANDARD, message, details);
         }
 
-        public record Details(int hours, int minutes, String rateBreakdown, String total) {
+        public record Details(long hours, long minutes, String rateBreakdown, String total) {
         }
     }
 
@@ -116,7 +116,7 @@ public abstract class BreakdownCostDetails {
             super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MINUTES_ONLY, message, details);
         }
 
-        public record Details(int minutes, String rateBreakdown, String total) {
+        public record Details(long minutes, String rateBreakdown, String total) {
         }
     }
 

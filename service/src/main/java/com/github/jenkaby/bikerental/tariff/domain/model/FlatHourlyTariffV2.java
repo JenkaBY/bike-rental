@@ -14,51 +14,53 @@ import java.time.LocalDate;
 public final class FlatHourlyTariffV2 extends TariffV2 {
 
     private final Money hourlyPrice;
-    private final Integer minimumDurationMinutes;
+    private final Duration minimumDuration;
     private final Money minimumDurationSurcharge;
 
     public FlatHourlyTariffV2(Long id, String name, String description, String equipmentTypeSlug,
                               String version, LocalDate validFrom, LocalDate validTo, TariffV2Status status,
-                              Money hourlyPrice, Integer minimumDurationMinutes, Money minimumDurationSurcharge) {
+                              Money hourlyPrice, Integer minimumDuration, Money minimumDurationSurcharge) {
         super(id, name, description, equipmentTypeSlug, PricingType.FLAT_HOURLY, version, validFrom, validTo, status);
         this.hourlyPrice = hourlyPrice;
-        this.minimumDurationMinutes = minimumDurationMinutes;
+        this.minimumDuration = Duration.ofMinutes(minimumDuration);
         this.minimumDurationSurcharge = minimumDurationSurcharge;
     }
 
     @Override
     public RentalCostV2 calculateCost(Duration duration) {
-        int durationMinutes = (int) duration.toMinutes();
-        if (durationMinutes <= 0) {
+        if (isNegative(duration)) {
             return new BaseRentalCostV2(Money.zero(), new BreakdownCostDetails.Zero());
         }
-        int minDuration = minimumDurationMinutes != null ? minimumDurationMinutes : DEFAULT_MINIMUM_DURATION_MINUTES;
-        Money surcharge = minimumDurationSurcharge != null ? minimumDurationSurcharge : Money.zero();
-        if (durationMinutes <= minDuration) {
+        int minDuration = minimumDuration.toMinutesPart();
+        Money surcharge = minimumDurationSurcharge;
+        if (!isMoreThenMinimumDuration(duration)) {
             Money halfHourly = hourlyPrice.divide(2);
             Money cost = halfHourly.add(surcharge);
             String message = String.format("%dmin minimum: %s/2 + %s = %s", minDuration, hourlyPrice, surcharge, cost);
-            return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatHourlyMinCost(
-                    message,
+            return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatHourlyMinCost(message,
                     new BreakdownCostDetails.FlatHourlyMinCost.Details(minDuration, hourlyPrice.toString(), surcharge.toString(), cost.toString())));
         }
-        int fullHours = durationMinutes / MINUTES_PER_HOUR;
-        int remainingMinutes = durationMinutes % MINUTES_PER_HOUR;
-        Money totalCost = hourlyPrice.multiply(BigDecimal.valueOf(fullHours));
-        if (remainingMinutes > 0) {
-            int intervals = remainingMinutes / INTERVAL_MINUTES;
-            Money perInterval = hourlyPrice.divide(INTERVALS_PER_HOUR);
+        long hours = duration.toHours();
+        long minutes = duration.minusHours(hours).toMinutes();
+        Money totalCost = hourlyPrice.multiply(BigDecimal.valueOf(hours));
+        if (minutes > 0) {
+            int intervals = getIntervalMinutes(minutes);
+            Money perInterval = getRatePerMinInterval(hourlyPrice);
             totalCost = totalCost.add(perInterval.multiply(BigDecimal.valueOf(intervals)));
         }
-        if (fullHours > 0) {
-            String message = String.format("%dh %dmin flat: %d*%s + partial = %s", fullHours, remainingMinutes, fullHours, hourlyPrice, totalCost);
+        if (hours > 0) {
+            String message = String.format("%dh %dmin flat: %d*%s + partial = %s", hours, minutes, hours, hourlyPrice, totalCost);
             return new BaseRentalCostV2(totalCost,  new BreakdownCostDetails.FlatHourlyStandard(message,
-                            new BreakdownCostDetails.FlatHourlyStandard.Details(fullHours, remainingMinutes, hourlyPrice.toString(), totalCost.toString()))
+                    new BreakdownCostDetails.FlatHourlyStandard.Details((int) hours, (int) minutes, hourlyPrice.toString(), totalCost.toString()))
             );
         }
-        String message = String.format("%dmin flat: %s", remainingMinutes, totalCost);
+        String message = String.format("%dmin flat: %s", minutes, totalCost);
         return new BaseRentalCostV2(totalCost,
                 new BreakdownCostDetails.FlatHourlyMinsOnly(message,
-                        new BreakdownCostDetails.FlatHourlyMinsOnly.Details(remainingMinutes, totalCost.toString())));
+                        new BreakdownCostDetails.FlatHourlyMinsOnly.Details((int) minutes, totalCost.toString())));
+    }
+
+    private boolean isMoreThenMinimumDuration(Duration toBeVerified) {
+        return toBeVerified.compareTo(minimumDuration) > 0;
     }
 }

@@ -65,14 +65,14 @@ public class TariffV2JpaMapper {
                 putMoney(m, TariffV2FieldNames.FIRST_HOUR_PRICE, t.getFirstHourPrice());
                 putMoney(m, TariffV2FieldNames.HOURLY_DISCOUNT, t.getHourlyDiscount());
                 putMoney(m, TariffV2FieldNames.MINIMUM_HOURLY_PRICE, t.getMinimumHourlyPrice());
-                putInt(m, TariffV2FieldNames.MINIMUM_DURATION_MINUTES, t.getMinimumDurationMinutes());
+                putInt(m, TariffV2FieldNames.MINIMUM_DURATION_MINUTES, t.getMinimumDuration().toMinutesPart());
                 putMoney(m, TariffV2FieldNames.MINIMUM_DURATION_SURCHARGE, t.getMinimumDurationSurcharge());
                 yield m;
             }
             case FlatHourlyTariffV2 t -> {
                 Map<String, Object> m = new HashMap<>();
                 putMoney(m, TariffV2FieldNames.HOURLY_PRICE, t.getHourlyPrice());
-                putInt(m, TariffV2FieldNames.MINIMUM_DURATION_MINUTES, t.getMinimumDurationMinutes());
+                putInt(m, TariffV2FieldNames.MINIMUM_DURATION_MINUTES, t.getMinimumDuration().toMinutesPart());
                 putMoney(m, TariffV2FieldNames.MINIMUM_DURATION_SURCHARGE, t.getMinimumDurationSurcharge());
                 yield m;
             }

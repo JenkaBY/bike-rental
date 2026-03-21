@@ -16,30 +16,29 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
     private final Money firstHourPrice;
     private final Money hourlyDiscount;
     private final Money minimumHourlyPrice;
-    private final Integer minimumDurationMinutes;
+    private final Duration minimumDuration;
     private final Money minimumDurationSurcharge;
 
     public DegressiveHourlyTariffV2(Long id, String name, String description, String equipmentTypeSlug,
                                     String version, LocalDate validFrom, LocalDate validTo, TariffV2Status status,
                                     Money firstHourPrice, Money hourlyDiscount, Money minimumHourlyPrice,
-                                    Integer minimumDurationMinutes, Money minimumDurationSurcharge) {
+                                    Integer minimumDuration, Money minimumDurationSurcharge) {
         super(id, name, description, equipmentTypeSlug, PricingType.DEGRESSIVE_HOURLY, version, validFrom, validTo, status);
         this.firstHourPrice = firstHourPrice;
         this.hourlyDiscount = hourlyDiscount;
         this.minimumHourlyPrice = minimumHourlyPrice;
-        this.minimumDurationMinutes = minimumDurationMinutes;
+        this.minimumDuration = Duration.ofMinutes(minimumDuration);
         this.minimumDurationSurcharge = minimumDurationSurcharge;
     }
 
     @Override
     public RentalCostV2 calculateCost(Duration duration) {
-        int durationMinutes = (int) duration.toMinutes();
-        if (durationMinutes <= 0) {
+        if (isNegative(duration)) {
             return new BaseRentalCostV2(Money.zero(), new BreakdownCostDetails.Zero());
         }
-        int minDuration = minimumDurationMinutes != null ? minimumDurationMinutes : DEFAULT_MINIMUM_DURATION_MINUTES;
-        Money surcharge = minimumDurationSurcharge != null ? minimumDurationSurcharge : Money.zero();
-        if (durationMinutes <= minDuration) {
+        if (!isMoreThenMinimumDuration(duration)) {
+            Money surcharge = minimumDurationSurcharge;
+            long minDuration = minimumDuration.toMinutes();
             Money halfFirst = firstHourPrice.divide(2);
             Money cost = halfFirst.add(surcharge);
             String message = String.format("%dmin minimum: %s/2 + %s = %s", minDuration, firstHourPrice, surcharge, cost);
@@ -47,11 +46,11 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
                     new BreakdownCostDetails.DegressiveHourlyMin(message,
                             new BreakdownCostDetails.DegressiveHourlyMin.Details(minDuration, firstHourPrice.toString(), surcharge.toString(), cost.toString())));
         }
-        int fullHours = durationMinutes / MINUTES_PER_HOUR;
-        int remainingMinutes = durationMinutes % MINUTES_PER_HOUR;
+        long hours = duration.toHours();
+        long minutes = duration.minusHours(hours).toMinutes();
         Money totalCost = Money.zero();
         StringBuilder breakdownBuilder = new StringBuilder();
-        for (int hour = 1; hour <= fullHours; hour++) {
+        for (int hour = 1; hour <= hours; hour++) {
             Money rate = rateForHour(hour);
             totalCost = totalCost.add(rate);
             if (hour > 1) {
@@ -59,10 +58,10 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
             }
             breakdownBuilder.append(rate);
         }
-        if (remainingMinutes > 0) {
-            Money nextHourRate = rateForHour(fullHours + 1);
-            int intervals = remainingMinutes / INTERVAL_MINUTES;
-            Money perInterval = nextHourRate.divide(INTERVALS_PER_HOUR);
+        if (minutes > 0) {
+            Money nextHourRate = rateForHour((int) hours + 1);
+            int intervals = getIntervalMinutes(minutes);
+            Money perInterval = getRatePerMinInterval(nextHourRate);
             Money remainingCost = perInterval.multiply(BigDecimal.valueOf(intervals));
             totalCost = totalCost.add(remainingCost);
             if (!breakdownBuilder.isEmpty()) {
@@ -70,17 +69,17 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
             }
             breakdownBuilder.append(intervals).append("*(").append(nextHourRate).append("/12)");
         }
-        if (fullHours > 0) {
-            String message = String.format("%dh %dmin degressive: %s = %s", fullHours, remainingMinutes, breakdownBuilder, totalCost);
+        if (hours > 0) {
+            String message = String.format("%dh %dmin degressive: %s = %s", hours, minutes, breakdownBuilder, totalCost);
             return new BaseRentalCostV2(totalCost,
                     new BreakdownCostDetails.DegressiveHourlyStandard(message,
-                            new BreakdownCostDetails.DegressiveHourlyStandard.Details(fullHours, remainingMinutes, breakdownBuilder.toString(), totalCost.toString()))
+                            new BreakdownCostDetails.DegressiveHourlyStandard.Details(hours, minutes, breakdownBuilder.toString(), totalCost.toString()))
             );
         }
-        String message = String.format("%dmin degressive: %s = %s", remainingMinutes, breakdownBuilder, totalCost);
+        String message = String.format("%dmin degressive: %s = %s", minutes, breakdownBuilder, totalCost);
         return new BaseRentalCostV2(totalCost,
                 new BreakdownCostDetails.DegressiveHourlyMinutesOnly(message,
-                        new BreakdownCostDetails.DegressiveHourlyMinutesOnly.Details(remainingMinutes, breakdownBuilder.toString(), totalCost.toString()))
+                        new BreakdownCostDetails.DegressiveHourlyMinutesOnly.Details(minutes, breakdownBuilder.toString(), totalCost.toString()))
         );
     }
 
@@ -90,5 +89,9 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
             return minimumHourlyPrice;
         }
         return base;
+    }
+
+    private boolean isMoreThenMinimumDuration(Duration toBeVerified) {
+        return toBeVerified.compareTo(minimumDuration) > 0;
     }
 }

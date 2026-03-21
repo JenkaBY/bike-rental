@@ -35,7 +35,7 @@ public interface TariffV2QueryMapper {
                     t.getHourlyDiscount().amount(),
                     t.getMinimumHourlyPrice().amount(),
                     null, null, null, null,
-                    t.getMinimumDurationMinutes(),
+                    t.getMinimumDuration().toMinutesPart(),
                     t.getMinimumDurationSurcharge().amount(),
                     null
             );
@@ -43,7 +43,7 @@ public interface TariffV2QueryMapper {
                     null, null, null,
                     t.getHourlyPrice().amount(),
                     null, null, null,
-                    t.getMinimumDurationMinutes(),
+                    t.getMinimumDuration().toMinutesPart(),
                     t.getMinimumDurationSurcharge().amount(),
                     null
             );

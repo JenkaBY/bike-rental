@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.tariff.domain.model;
 
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.tariff.RentalCostV2;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,11 +12,9 @@ import java.time.LocalDate;
 public sealed abstract class TariffV2
         permits DegressiveHourlyTariffV2, FlatHourlyTariffV2, DailyTariffV2, FlatFeeTariffV2, SpecialTariffV2 {
 
-    protected static final int MINUTES_PER_DAY = 1440;
-    protected static final int MINUTES_PER_HOUR = 60;
-    protected static final int INTERVAL_MINUTES = 5;
-    protected static final int INTERVALS_PER_HOUR = MINUTES_PER_HOUR / INTERVAL_MINUTES;
-    protected static final int DEFAULT_MINIMUM_DURATION_MINUTES = 30;
+
+    private static final int INTERVAL_MINUTES = 5;
+    private static final int INTERVALS_PER_HOUR = (int) Duration.ofHours(1).toMinutes() / INTERVAL_MINUTES;
 
     @Setter
     private Long id;
@@ -61,4 +60,20 @@ public sealed abstract class TariffV2
     }
 
     public abstract RentalCostV2 calculateCost(Duration duration);
+
+    protected static boolean isNegative(Duration duration) {
+        return duration == null || duration.isZero() || duration.isNegative();
+    }
+
+    protected static int getNumberOfDays(Duration duration) {
+        return (int) Math.ceil((double) duration.toMinutes() / Duration.ofDays(1).toMinutes());
+    }
+
+    protected static int getIntervalMinutes(long minutes) {
+        return (int) (minutes / INTERVAL_MINUTES);
+    }
+
+    protected static Money getRatePerMinInterval(Money ratePerHour) {
+        return ratePerHour.divide(INTERVALS_PER_HOUR);
+    }
 }
