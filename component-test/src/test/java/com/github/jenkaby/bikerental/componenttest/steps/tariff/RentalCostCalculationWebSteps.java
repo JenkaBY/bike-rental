@@ -58,65 +58,70 @@ public class RentalCostCalculationWebSteps {
         assertSoftly(softly -> {
 
             if (expected.equipmentType() != null) {
-                softly.assertThat(actual.equipmentType()).isEqualTo(expected.equipmentType());
+                softly.assertThat(actual.equipmentType()).as("equipmentType").isEqualTo(expected.equipmentType());
             } else {
-                softly.assertThat(actual.equipmentType()).isNotNull();
+                softly.assertThat(actual.equipmentType()).as("equipmentType").isNotNull();
             }
 
             if (expected.tariffId() != null) {
-                softly.assertThat(actual.tariffId()).isEqualTo(expected.tariffId());
+                softly.assertThat(actual.tariffId()).as("tariffId").isEqualTo(expected.tariffId());
             } else {
-                softly.assertThat(actual.tariffId()).isNotNull();
+                softly.assertThat(actual.tariffId()).as("tariffId").isNotNull();
             }
 
             if (expected.tariffName() != null) {
-                softly.assertThat(actual.tariffName()).isEqualTo(expected.tariffName());
+                softly.assertThat(actual.tariffName()).as("tariffName").isEqualTo(expected.tariffName());
             } else {
-                softly.assertThat(actual.tariffName()).isNotNull();
+                softly.assertThat(actual.tariffName()).as("tariffName").isNotNull();
             }
 
             if (expected.pricingType() != null) {
-                softly.assertThat(actual.pricingType()).isEqualTo(expected.pricingType());
+                softly.assertThat(actual.pricingType()).as("pricingType").isEqualTo(expected.pricingType());
             } else {
-                softly.assertThat(actual.pricingType()).isNotNull();
+                softly.assertThat(actual.pricingType()).as("pricingType").isNotNull();
             }
 
             if (expected.itemCost() != null) {
-                softly.assertThat(actual.itemCost()).isEqualByComparingTo(expected.itemCost());
+                softly.assertThat(actual.itemCost()).as("itemCost").isEqualByComparingTo(expected.itemCost());
             } else {
-                softly.assertThat(actual.itemCost()).isNotNull();
+                softly.assertThat(actual.itemCost()).as("itemCost").isNotNull();
             }
 
             if (expected.billedDurationMinutes() != null) {
-                softly.assertThat(actual.billedDurationMinutes()).isEqualTo(expected.billedDurationMinutes());
+                softly.assertThat(actual.billedDurationMinutes())
+                        .as("billedDurationMinutes").isEqualTo(expected.billedDurationMinutes());
             } else {
-                softly.assertThat(actual.billedDurationMinutes()).isNotNull();
+                softly.assertThat(actual.billedDurationMinutes()).as("billedDurationMinutes").isNotNull();
             }
             if (expected.overtimeMinutes() != null) {
-                softly.assertThat(actual.overtimeMinutes()).isEqualTo(expected.overtimeMinutes());
+                softly.assertThat(actual.overtimeMinutes())
+                        .as("overtimeMinutes")
+                        .isEqualTo(expected.overtimeMinutes());
             } else {
-                softly.assertThat(actual.overtimeMinutes()).isNotNull();
+                softly.assertThat(actual.overtimeMinutes()).as("overtimeMinutes").isNotNull();
             }
 
             if (expected.forgivenMinutes() != null) {
-                softly.assertThat(actual.forgivenMinutes()).isEqualTo(expected.forgivenMinutes());
+                softly.assertThat(actual.forgivenMinutes()).as("forgivenMinutes").isEqualTo(expected.forgivenMinutes());
             } else {
-                softly.assertThat(actual.forgivenMinutes()).isNotNull();
+                softly.assertThat(actual.forgivenMinutes()).as("forgivenMinutes").isNotNull();
             }
 
             if (expected.calculationBreakdown() != null) {
                 if (expected.calculationBreakdown().getMessage() != null) {
                     softly.assertThat(actual.calculationBreakdown().getMessage())
+                            .as("calculationBreakdown.message")
                             .isEqualTo(expected.calculationBreakdown().getMessage());
                 } else {
-                    softly.assertThat(actual.calculationBreakdown().getMessage()).isNotNull();
+                    softly.assertThat(actual.calculationBreakdown().getMessage()).as("calculationBreakdown.message").isNotNull();
                 }
 
                 if (expected.calculationBreakdown().getBreakdownPatternCode() != null) {
                     softly.assertThat(actual.calculationBreakdown().getBreakdownPatternCode())
+                            .as("calculationBreakdown.breakdownPatternCode")
                             .isEqualTo(expected.calculationBreakdown().getBreakdownPatternCode());
                 } else {
-                    softly.assertThat(actual.calculationBreakdown().getBreakdownPatternCode()).isNotNull();
+                    softly.assertThat(actual.calculationBreakdown().getBreakdownPatternCode()).as("calculationBreakdown.breakdownPatternCode").isNotNull();
                 }
             }
         });

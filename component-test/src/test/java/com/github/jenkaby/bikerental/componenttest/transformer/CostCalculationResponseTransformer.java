@@ -5,6 +5,7 @@ import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
 import io.cucumber.java.DataTableType;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ public class CostCalculationResponseTransformer {
         var discountAmount = toBigDecimal(entry, "discountAmount");
         CostCalculationResponse.DiscountDetailResponse discount = discountPercent != null || discountAmount != null
                 ? new CostCalculationResponse.DiscountDetailResponse(discountPercent, discountAmount)
-                : null;
+                : new CostCalculationResponse.DiscountDetailResponse(BigDecimal.ZERO, BigDecimal.ZERO);
 
         return new CostCalculationResponse(
                 null,

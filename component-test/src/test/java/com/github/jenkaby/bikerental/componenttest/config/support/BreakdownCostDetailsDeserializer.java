@@ -38,7 +38,7 @@ public class BreakdownCostDetailsDeserializer extends StdDeserializer<BreakdownC
     }
 
     @EqualsAndHashCode(callSuper = true)
-    @ToString
+    @ToString(callSuper = true)
     public static class TestBreakdownCostDetails extends BreakdownCostDetails {
         public TestBreakdownCostDetails(String breakdownPatternCode, String message, Object params) {
             super(breakdownPatternCode, message, params);
