@@ -9,8 +9,10 @@ import java.util.List;
 @Schema(description = "Rental cost calculation result")
 public record CostCalculationResponse(
         List<EquipmentCostBreakdownResponse> equipmentBreakdowns,
+        @Schema(description = "cost without discount applied")
         BigDecimal subtotal,
         DiscountDetailResponse discount,
+        @Schema(description = "cost with discount applied")
         BigDecimal totalCost,
         Integer effectiveDurationMinutes,
         boolean estimate,

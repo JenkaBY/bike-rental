@@ -2,10 +2,12 @@ package com.github.jenkaby.bikerental.tariff;
 
 import com.github.jenkaby.bikerental.shared.domain.utils.MessageCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 @Getter
+@ToString
 public abstract class BreakdownCostDetails {
     protected String breakdownPatternCode;
     protected String message;

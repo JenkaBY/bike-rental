@@ -4,10 +4,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public record Money(BigDecimal amount) implements Comparable<Money> {
-
     private static final int MONEY_SCALE = 2;
-    private static final RoundingMode MONEY_ROUNDING_MODE = RoundingMode.HALF_UP;
 
+    private static final RoundingMode MONEY_ROUNDING_MODE = RoundingMode.HALF_UP;
     public Money {
         if (amount == null) {
             throw new IllegalArgumentException("Amount cannot be null");
@@ -75,7 +74,7 @@ public record Money(BigDecimal amount) implements Comparable<Money> {
 
     @Override
     public String toString() {
-        return amount.toPlainString();
+        return amount.stripTrailingZeros().toPlainString();
     }
 
     @Override

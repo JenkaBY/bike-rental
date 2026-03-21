@@ -37,7 +37,7 @@ public final class FlatHourlyTariffV2 extends TariffV2 {
         if (durationMinutes <= minDuration) {
             Money halfHourly = hourlyPrice.divide(2);
             Money cost = halfHourly.add(surcharge);
-            String message = String.format("%d min minimum: %s/2 + %s = %s", minDuration, hourlyPrice, surcharge, cost);
+            String message = String.format("%dmin minimum: %s/2 + %s = %s", minDuration, hourlyPrice, surcharge, cost);
             return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatHourlyMinCost(
                     message,
                     new BreakdownCostDetails.FlatHourlyMinCost.Details(minDuration, hourlyPrice.toString(), surcharge.toString(), cost.toString())));

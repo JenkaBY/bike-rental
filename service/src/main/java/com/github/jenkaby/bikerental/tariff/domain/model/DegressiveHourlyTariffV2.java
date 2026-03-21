@@ -42,7 +42,7 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
         if (durationMinutes <= minDuration) {
             Money halfFirst = firstHourPrice.divide(2);
             Money cost = halfFirst.add(surcharge);
-            String message = String.format("%d min minimum: %s/2 + %s = %s", minDuration, firstHourPrice, surcharge, cost);
+            String message = String.format("%dmin minimum: %s/2 + %s = %s", minDuration, firstHourPrice, surcharge, cost);
             return new BaseRentalCostV2(cost,
                     new BreakdownCostDetails.DegressiveHourlyMin(message,
                             new BreakdownCostDetails.DegressiveHourlyMin.Details(minDuration, firstHourPrice.toString(), surcharge.toString(), cost.toString())));
