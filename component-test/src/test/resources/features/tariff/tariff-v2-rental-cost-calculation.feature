@@ -43,7 +43,7 @@ Feature: Tariff V2 API
       | DEGRESSIVE_HOURLY | bicycle       | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |                 |              |            | 1        | Hourly Bicycle      |          |          | 1h 0min degressive: 9 = 9         | breakdown.cost.degressive_hourly.standard | false   | false    |
       | FLAT_HOURLY       | scooter       | 60              | 60             | 15.00 | 15.00    | 15.00 | 0               | 0              |                 |              |            | 2        | Flat Hourly Scooter |          |          | 1h 0min flat: 1*15 + partial = 15 | breakdown.cost.flat_hourly.standard       | false   | false    |
       | DAILY             | bicycle       | 480             | 480            | 25.00 | 25.00    | 25.00 | 0               | 0              |                 |              |            | 3        | Daily Bicycle       |          |          | 1d = 25                           | breakdown.cost.daily.standard             | false   | false    |
-      | FLAT_FEE          | helmet        | 60              | 60             | 1     | 1        | 1     | 0               | 0              |                 |              |            | 4        | Flat Fee Helmet     |          |          | Flat fee: 1 * 1 day(s) = 1        | breakdown.cost.flat_fee                   | false   | false    |
+      | FLAT_FEE          | helmet        | 60              | 60             | 1     | 1        | 1     | 0               | 0              |                 |              |            | 4        | Flat Fee Helmet     |          |          | Flat fee: 1*1d = 1                | breakdown.cost.flat_fee                   | false   | false    |
       | SPECIAL           | any           | 60              | 60             | 0     | 666      | 666   | 0               | 0              | 5               | 666          |            | 5        | Special Tariff      |          |          | Special tariff applied to group   | breakdown.cost.special.group              | true    | false    |
 
 
@@ -61,6 +61,7 @@ Feature: Tariff V2 API
       | bicycle       | 1        | Hourly Bicycle | DEGRESSIVE_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
       | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                                     | pattern                                   | estimate |
+      | 5               | 5              | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  | false    |
       | 20              | 20             | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  | false    |
       | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |          |          | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard | false    |
       | 65              | 60             | 9.00  | 9.00     | 9.0   | 0               | 0              | 5        | 5        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard | false    |
@@ -109,6 +110,7 @@ Feature: Tariff V2 API
       | scooter       | 2        | Flat Hourly Scooter | FLAT_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
       | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                               | pattern                             |
+      | 5               | 5              | 8.5   | 8.5      | 8.5   | 0               | 0              |          |          | 30min minimum: 15/2 + 1 = 8.5         | breakdown.cost.flat_hourly.minimum  |
       | 20              | 20             | 8.5   | 8.5      | 8.5   | 0               | 0              |          |          | 30min minimum: 15/2 + 1 = 8.5         | breakdown.cost.flat_hourly.minimum  |
       | 60              | 60             | 15    | 15       | 15    | 0               | 0              |          |          | 1h 0min flat: 1*15 + partial = 15     | breakdown.cost.flat_hourly.standard |
       | 65              | 60             | 15    | 15       | 15    | 0               | 0              | 5        | 5        | 1h 0min flat: 1*15 + partial = 15     | breakdown.cost.flat_hourly.standard |
@@ -145,4 +147,26 @@ Feature: Tariff V2 API
       #     Discount applied
       | 305             | 305            | 25    | 25       | 22.5  | 10              | 2.5            | 0        | 0        | 1d = 25               | breakdown.cost.daily.standard |
 
+  Scenario Outline: Get rental cost calculation for a single rental - FLAT_FEE:<durationMinutes>min
+    Given the rental request is prepared with the following data
+      | equipmentTypes | plannedDurationMinutes | actualDurationMinutes | discountPercent   |
+      | helmet         | 60                     | <durationMinutes>     | <discountPercent> |
+    When a POST request has been made to "/api/v2/tariffs/calculate" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate |
+      | <total>   | <subtotal> | <discountAmount> | <discountPercent> | <durationMinutes>        | false    |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentType | tariffId | tariffName      | pricingType | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
+      | helmet        | 4        | Flat Fee Helmet | FLAT_FEE    | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
+    Examples:
+      | durationMinutes | billedDuration | cost | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message            | pattern                 |
+      | 5               | 5              | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
+      | 10              | 10             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
+      | 60              | 60             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
+      | 67              | 60             | 1    | 1        | 1     | 0               | 0              | 7        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
+      | 1440            | 1440           | 1    | 1        | 1     | 0               | 0              | 1380     |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
+      | 1441            | 1441           | 2    | 2        | 2     | 0               | 0              | 1381     |          | Flat fee: 1*2d = 2 | breakdown.cost.flat_fee |
+      #     Discount applied
+      | 305             | 305            | 1    | 1        | 0.9   | 10              | 0.1            | 245      | 0        | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
 

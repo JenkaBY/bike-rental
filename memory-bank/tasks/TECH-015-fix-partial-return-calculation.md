@@ -164,7 +164,7 @@ Both the incorrect expected values and missing/incomplete verification steps mus
 - `Rental.complete()` already handles the partial-return guard (only sets status `COMPLETED` when
   `allEquipmentReturned()` returns true) — no change needed there
 - Period-multiplier pricing confirmed: `overtimeCost` is always `0.00`, base cost covers all periods using
-  `ceil(billableMinutes / periodMinutes)` — BIKE-002 at 180 min = 3 × 100 = 300.00
+  `ceil(billableMinutes / periodMinutes)` — BIKE-002 at 180 min = 3 * 100 = 300.00
 - Forgiveness threshold is 7 minutes — does NOT apply to 60-min overtime in this scenario
 - Correct expected values determined: first partial return `additionalPayment=0`, final return
   `additionalPayment=100.00`
