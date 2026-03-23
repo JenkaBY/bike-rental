@@ -69,10 +69,13 @@ pre-migrated DB, leave `spring.liquibase.enabled=false` in `application-test.yam
 ./gradlew :service:test "-Dspring.profiles.active=test"
 ```
 
+Prefer to run individual test class by adding `--tests {testClassName}` for faster feedback.
+Eg. `./gradlew :service:test "-Dspring.profiles.active=test" --tests BikeRentalApplicationTest`
+
 ### Run component tests locally
 
 ```bash
-./gradlew :component-test:test "-Dspring.profiles.active=test"
+./gradlew :component-test:test "-Dspring.profiles.active=test" 
 ```
 
 Assume that DB is spun up already and accepts connections.
@@ -80,7 +83,7 @@ Assume that DB is spun up already and accepts connections.
 ### Run application locally
 
 ```bash
-./gradlew :service:bootRun --args='--spring.profiles.active=local'
+./gradlew :service:bootRun "-spring.profiles.active=local"
 ```
 
 Requires `service/src/main/resources/application-local.properties` (not committed) with `DATASOURCE_URL`,
