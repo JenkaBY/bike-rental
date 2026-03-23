@@ -59,6 +59,12 @@ service/src/main/resources/db/changelog/
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <changeSet id="{table}.{action:create|update|delete-table}_{specific-action}" author="{author_name}">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="{table_name}"/>
+            </not>
+        </preConditions>
+        
         <createTable tableName="{table_name}">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
@@ -98,6 +104,12 @@ service/src/main/resources/db/changelog/
 ```xml
 
 <changeSet id="{table}.update-table_add-column-{column}" author="{author_name}">
+    <preConditions onFail="MARK_RAN">
+        <not>
+            <tableExists tableName="{table_name}"/>
+        </not>
+    </preConditions>
+    
     <addColumn tableName="{table_name}">
         <column name="{column_name}" type="{data_type}">
             <constraints nullable="{true|false}"/>
@@ -113,6 +125,11 @@ service/src/main/resources/db/changelog/
 ```xml
 
 <changeSet id="{source_table}.update-table_add_fk_{target_table}" author="{author_name}">
+    <preConditions onFail="MARK_RAN">
+        <not>
+            <tableExists tableName="{table_name}"/>
+        </not>
+    </preConditions>
     <addForeignKeyConstraint
             baseTableName="{source_table}"
             baseColumnNames="{source_column}"
@@ -129,6 +146,11 @@ service/src/main/resources/db/changelog/
 ```xml
 
 <changeSet id="{table_name}.update-table_create-idx-{column_name}" author="{author_name}">
+    <preConditions onFail="MARK_RAN">
+        <not>
+            <tableExists tableName="{table_name}"/>
+        </not>
+    </preConditions>
     <createIndex tableName="{table_name}" indexName="idx_{table_name}_{column}">
         <column name="{column}"/>
     </createIndex>
@@ -142,10 +164,10 @@ service/src/main/resources/db/changelog/
 <changeSet author="copilot_agent" id="message_logs.create-table">
     <preConditions onFail="MARK_RAN">
         <not>
-            <tableExists tableName="message_log"/>
+            <tableExists tableName="{table_name}"/>
         </not>
     </preConditions>
-    <createTable tableName="message_log">
+    <createTable tableName="{table_name}">
         <!--  omitted for brevity-->
     </createTable>
 </changeSet>
