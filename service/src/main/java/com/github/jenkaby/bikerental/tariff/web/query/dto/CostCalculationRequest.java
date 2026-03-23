@@ -2,7 +2,6 @@ package com.github.jenkaby.bikerental.tariff.web.query.dto;
 
 import com.github.jenkaby.bikerental.tariff.web.query.validation.SpecialTariffConsistency;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -12,7 +11,7 @@ import java.util.List;
 @Schema(description = "Request for rental cost calculation")
 @SpecialTariffConsistency
 public record CostCalculationRequest(
-        @NotEmpty List<@NotNull @Valid EquipmentItemRequest> equipments,
+        @NotEmpty List<@NotNull EquipmentItemRequest> equipments,
         @NotNull @Positive Integer plannedDurationMinutes,
         @Min(0) Integer actualDurationMinutes,
         @Min(0) @Max(100) Integer discountPercent,

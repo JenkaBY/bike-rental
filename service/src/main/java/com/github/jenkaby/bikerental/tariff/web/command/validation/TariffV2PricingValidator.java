@@ -29,7 +29,6 @@ public class TariffV2PricingValidator {
         var issuanceFee = dto.issuanceFee();
         var minimumDurationMinutes = dto.minimumDurationMinutes();
         var minimumDurationSurcharge = dto.minimumDurationSurcharge();
-        var price = dto.price();
 
         switch (pricingType) {
             case DEGRESSIVE_HOURLY -> {
@@ -42,62 +41,22 @@ public class TariffV2PricingValidator {
                 }
                 requirePositive(TariffV2FieldNames.MINIMUM_DURATION_MINUTES, minimumDurationMinutes);
                 requirePositive(TariffV2FieldNames.MINIMUM_DURATION_SURCHARGE, minimumDurationSurcharge);
-//                ignore
-                requireNull(TariffV2FieldNames.HOURLY_PRICE, hourlyPrice);
-                requireNull(TariffV2FieldNames.DAILY_PRICE, dailyPrice);
-                requireNull(TariffV2FieldNames.OVERTIME_HOURLY_PRICE, overtimeHourlyPrice);
-                requireNull(TariffV2FieldNames.ISSUANCE_FEE, issuanceFee);
-                requireNull(TariffV2FieldNames.PRICE, price);
             }
             case FLAT_HOURLY -> {
                 requirePositive(TariffV2FieldNames.HOURLY_PRICE, hourlyPrice);
                 requirePositive(TariffV2FieldNames.MINIMUM_DURATION_MINUTES, minimumDurationMinutes);
                 requirePositive(TariffV2FieldNames.MINIMUM_DURATION_SURCHARGE, minimumDurationSurcharge);
-//                ignore others
-                requireNull(TariffV2FieldNames.FIRST_HOUR_PRICE, firstHourPrice);
-                requireNull(TariffV2FieldNames.HOURLY_DISCOUNT, hourlyDiscount);
-                requireNull(TariffV2FieldNames.MINIMUM_HOURLY_PRICE, minimumHourlyPrice);
-                requireNull(TariffV2FieldNames.DAILY_PRICE, dailyPrice);
-                requireNull(TariffV2FieldNames.OVERTIME_HOURLY_PRICE, overtimeHourlyPrice);
-                requireNull(TariffV2FieldNames.ISSUANCE_FEE, issuanceFee);
-                requireNull(TariffV2FieldNames.PRICE, price);
+
             }
             case DAILY -> {
                 requirePositive(TariffV2FieldNames.DAILY_PRICE, dailyPrice);
                 requirePositive(TariffV2FieldNames.OVERTIME_HOURLY_PRICE, overtimeHourlyPrice);
-//                ignore others
-                requireNull(TariffV2FieldNames.FIRST_HOUR_PRICE, firstHourPrice);
-                requireNull(TariffV2FieldNames.HOURLY_DISCOUNT, hourlyDiscount);
-                requireNull(TariffV2FieldNames.MINIMUM_HOURLY_PRICE, minimumHourlyPrice);
-                requireNull(TariffV2FieldNames.HOURLY_PRICE, hourlyPrice);
-                requireNull(TariffV2FieldNames.ISSUANCE_FEE, issuanceFee);
-                requireNull(TariffV2FieldNames.MINIMUM_DURATION_MINUTES, minimumDurationMinutes);
-                requireNull(TariffV2FieldNames.MINIMUM_DURATION_SURCHARGE, minimumDurationSurcharge);
-                requireNull(TariffV2FieldNames.PRICE, price);
             }
             case FLAT_FEE -> {
                 requireNonNegative(TariffV2FieldNames.ISSUANCE_FEE, issuanceFee);
-//                ignore others
-                requireNull(TariffV2FieldNames.FIRST_HOUR_PRICE, firstHourPrice);
-                requireNull(TariffV2FieldNames.HOURLY_DISCOUNT, hourlyDiscount);
-                requireNull(TariffV2FieldNames.MINIMUM_HOURLY_PRICE, minimumHourlyPrice);
-                requireNull(TariffV2FieldNames.HOURLY_PRICE, hourlyPrice);
-                requireNull(TariffV2FieldNames.DAILY_PRICE, dailyPrice);
-                requireNull(TariffV2FieldNames.OVERTIME_HOURLY_PRICE, overtimeHourlyPrice);
-                requireNull(TariffV2FieldNames.MINIMUM_DURATION_MINUTES, minimumDurationMinutes);
-                requireNull(TariffV2FieldNames.MINIMUM_DURATION_SURCHARGE, minimumDurationSurcharge);
-                requireNull(TariffV2FieldNames.PRICE, price);
             }
             case SPECIAL -> {
-                requireNull(TariffV2FieldNames.FIRST_HOUR_PRICE, firstHourPrice);
-                requireNull(TariffV2FieldNames.HOURLY_DISCOUNT, hourlyDiscount);
-                requireNull(TariffV2FieldNames.MINIMUM_HOURLY_PRICE, minimumHourlyPrice);
-                requireNull(TariffV2FieldNames.HOURLY_PRICE, hourlyPrice);
-                requireNull(TariffV2FieldNames.DAILY_PRICE, dailyPrice);
-                requireNull(TariffV2FieldNames.OVERTIME_HOURLY_PRICE, overtimeHourlyPrice);
-                requireNull(TariffV2FieldNames.ISSUANCE_FEE, issuanceFee);
-                requireNull(TariffV2FieldNames.MINIMUM_DURATION_MINUTES, minimumDurationMinutes);
-                requireNull(TariffV2FieldNames.MINIMUM_DURATION_SURCHARGE, minimumDurationSurcharge);
+//                ignore any fields
             }
         }
     }
