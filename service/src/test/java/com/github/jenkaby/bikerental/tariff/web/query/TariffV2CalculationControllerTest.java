@@ -14,6 +14,9 @@ import com.github.jenkaby.bikerental.tariff.web.query.mapper.BatchCalculationMap
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -23,6 +26,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -133,50 +137,36 @@ class TariffV2CalculationControllerTest {
 
     @Nested
     class ValidationFails {
-        @Test
-        @DisplayName("POST /api/v2/tariffs/calculate returns 400 when equipments list is empty")
-        void whenEquipmentsEmpty_returns400() throws Exception {
-            var request = new CostCalculationRequest(
-                    List.of(),
-                    60,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-            );
 
+        // --- equipments related tests (empty list, blank equipmentType) ---
+        public static Stream<Arguments> invalidEquipmentRequests() {
+            return Stream.of(
+                    Arguments.of(
+                            new CostCalculationRequest(List.of(), 60, null, null, null, null, null),
+                            "equipments",
+                            "validation.not_empty"
+                    ),
+                    Arguments.of(
+                            new CostCalculationRequest(List.of(new CostCalculationRequest.EquipmentItemRequest(" ")), 60, null, null, null, null, null),
+                            "equipments[0].equipmentType",
+                            "validation.not_blank"
+                    )
+            );
+        }
+
+        @MethodSource("invalidEquipmentRequests")
+        @ParameterizedTest
+        void whenEquipmentRequestInvalid_returns400(CostCalculationRequest request, String expectedField, String expectedCode) throws Exception {
             mockMvc.perform(post(API_V2_CALCULATE)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.detail").value("Validation error"))
-                    .andExpect(jsonPath("$.errors[0].field").value("equipments"))
-                    .andExpect(jsonPath("$.errors[0].code").value("validation.not_empty"));
+                    .andExpect(jsonPath("$.errors[0].field").value(expectedField))
+                    .andExpect(jsonPath("$.errors[0].code").value(expectedCode));
         }
 
-        @Test
-        @DisplayName("POST /api/v2/tariffs/calculate returns 400 when equipmentType is blank")
-        void whenEquipmentTypeBlank_returns400() throws Exception {
-            var request = new CostCalculationRequest(
-                    List.of(new CostCalculationRequest.EquipmentItemRequest(" ")),
-                    60,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-            );
-
-            mockMvc.perform(post(API_V2_CALCULATE)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.detail").value("Validation error"))
-                    .andExpect(jsonPath("$.errors[0].field").value("equipments[0].equipmentType"))
-                    .andExpect(jsonPath("$.errors[0].code").value("validation.not_blank"));
-        }
-
+        // --- plannedDuration null (unique) ---
         @Test
         @DisplayName("POST /api/v2/tariffs/calculate returns 400 when plannedDurationMinutes is null")
         void whenPlannedDurationNull_returns400() throws Exception {
@@ -199,14 +189,22 @@ class TariffV2CalculationControllerTest {
                     .andExpect(jsonPath("$.errors[0].code").value("validation.not_null"));
         }
 
-        @Test
-        @DisplayName("POST /api/v2/tariffs/calculate returns 400 when discountPercent out of range")
-        void whenDiscountPercentOutOfRange_returns400() throws Exception {
+        // --- discountPercent boundary tests ---
+        public static Stream<Arguments> invalidDiscounts() {
+            return Stream.of(
+                    Arguments.of(-1, "validation.min"),
+                    Arguments.of(101, "validation.max")
+            );
+        }
+
+        @MethodSource("invalidDiscounts")
+        @ParameterizedTest
+        void whenDiscountPercentInvalid_returns400(Integer discountValue, String expectedCode) throws Exception {
             var request = new CostCalculationRequest(
                     List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
                     60,
                     null,
-                    101,
+                    discountValue,
                     null,
                     null,
                     null
@@ -217,61 +215,28 @@ class TariffV2CalculationControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.detail").value("Validation error"))
-                    .andExpect(jsonPath("$.errors[0].field").value("discountPercent"));
+                    .andExpect(jsonPath("$.errors[0].field").value("discountPercent"))
+                    .andExpect(jsonPath("$.errors[0].code").value(expectedCode));
         }
 
-        @Test
-        @DisplayName("POST /api/v2/tariffs/calculate returns 400 when discountPercent is negative")
-        void whenDiscountPercentNegative_returns400() throws Exception {
-            var request = new CostCalculationRequest(
-                    List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
-                    60,
-                    null,
-                    -1,
-                    null,
-                    null,
-                    null
+        // --- special tariff consistency (object-level) ---
+        public static Stream<Arguments> invalidSpecialTariffConsistency() {
+            return Stream.of(
+                    Arguments.of(1L, null),
+                    Arguments.of(null, new BigDecimal("9.99"))
             );
-
-            mockMvc.perform(post(API_V2_CALCULATE)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.detail").value("Validation error"))
-                    .andExpect(jsonPath("$.errors[0].field").value("discountPercent"));
         }
 
-        @Test
-        @DisplayName("POST /api/v2/tariffs/calculate returns 400 when specialTariffId provided without specialPrice")
-        void whenSpecialTariffIdWithoutPrice_returns400() throws Exception {
+        @MethodSource("invalidSpecialTariffConsistency")
+        @ParameterizedTest
+        void whenSpecialTariffConsistencyInvalid_returns400(Long tariffId, BigDecimal price) throws Exception {
             var request = new CostCalculationRequest(
                     List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
                     60,
                     null,
                     null,
-                    1L,
-                    null,
-                    null
-            );
-
-            mockMvc.perform(post(API_V2_CALCULATE)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.detail").value("Validation error"))
-                    .andExpect(jsonPath("$.errors[0].code").value("validation.special_tariff_consistency"));
-        }
-
-        @Test
-        @DisplayName("POST /api/v2/tariffs/calculate returns 400 when specialPrice provided without specialTariffId")
-        void whenSpecialPriceWithoutTariffId_returns400() throws Exception {
-            var request = new CostCalculationRequest(
-                    List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
-                    60,
-                    null,
-                    null,
-                    null,
-                    new java.math.BigDecimal("9.99"),
+                    tariffId,
+                    price,
                     null
             );
 
