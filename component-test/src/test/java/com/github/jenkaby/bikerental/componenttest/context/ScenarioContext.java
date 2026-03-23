@@ -2,7 +2,9 @@ package com.github.jenkaby.bikerental.componenttest.context;
 
 
 import com.github.jenkaby.bikerental.componenttest.config.WebConfig;
+import com.github.jenkaby.bikerental.componenttest.transformer.PricingParamsRequestTransformer;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.PricingParams;
 import io.cucumber.spring.ScenarioScope;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.type.CollectionType;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -29,6 +32,8 @@ public class ScenarioContext {
     private Object requestBody;
     private String requestedObjectId;
     private Set<UUID> persistedIds = new HashSet<>();
+    private PricingParams pricingParams;
+    private List<PricingParamsRequestTransformer.PricingParamsRequestHolder> pricingParamsHolders;
 
     @SneakyThrows
     public <T> T getResponseBody(Class<T> clazz) {
@@ -77,5 +82,15 @@ public class ScenarioContext {
 
     public void addPersistedId(UUID id) {
         this.persistedIds.add(id);
+    }
+
+    public Map<Long, PricingParams> getPricingParamsContext() {
+        if (pricingParamsHolders == null) {
+            return Collections.emptyMap();
+        }
+        return pricingParamsHolders.stream()
+                .collect(Collectors.toMap(
+                        PricingParamsRequestTransformer.PricingParamsRequestHolder::tariffId,
+                        PricingParamsRequestTransformer.PricingParamsRequestHolder::params));
     }
 }

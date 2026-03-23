@@ -36,7 +36,7 @@ Additional documentation to read as context requires:
 2. **Verify Architecture**: Parse system architecture from `backend-architecture.md`
 3. **Review Task Context**: Check current task from `tasks/_index.md`
 4. **Follow Specifications**: Adhere to `technical-details.md` constraints
-5. **Plan Tests**: Design test strategy following TDD approach
+5. **Plan Tests**: Don't create unit tests until you is instructed to do so. Focus on component and WebMvc tests first
 
 ### After Completing Changes
 
@@ -104,8 +104,9 @@ Additional documentation to read as context requires:
 - **Mocking**:
    - **Mockito** for service mocks and behavior verification
    - **WireMock** for external HTTP services
-   - **@MockBean** for Spring-managed dependencies
-- **Spring Profile**: **MUST** use `test` profile for all test execution
+  - **@MockBean**,**@MockBean**  for Spring-managed dependencies
+- **Spring Profile**: **MUST** use `test` profile for all test execution. It should be passed as gradle argument and
+  wrapped in quotes: `"-Dspring.profiles.active=test"`
 - **Test Data**: Use builders or fixtures for consistent test data
 
 ## Code Quality Standards

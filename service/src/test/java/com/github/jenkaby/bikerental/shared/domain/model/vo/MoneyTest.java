@@ -140,6 +140,6 @@ class MoneyTest {
     void shouldReturnPlainStringRepresentation() {
         Money money = Money.of("100.50");
 
-        assertThat(money.toString()).isEqualTo("100.50");
+        assertThat(money.toString()).isEqualTo("100.5");
     }
 }

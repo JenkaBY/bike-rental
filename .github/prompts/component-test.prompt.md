@@ -56,7 +56,7 @@ or
 
 Component tests module package structure:
 ```
-src/test/java/com/github/jenkaby/
+src/test/java/com/github/jenkaby/bikerental/componenttest/
 ├── config/ # configuration for tests
 ├── context/ # Manages test execution context and state between Cucumber steps.
 ├── infrastructure/ # Infrastructure components that integrate with external systems during testing.

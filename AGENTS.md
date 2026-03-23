@@ -2,6 +2,7 @@
 
 Equipment rental management system built as a **Spring Boot 4 / Spring Modulith modular monolith** with hexagonal
 architecture. Read `memory-bank/` files before starting any task (see `.github/copilot-instructions.md`).
+Follow [the instructions](.github/instructions/agent-skills.instructions.md) to use agents for specific tasks.
 
 ---
 
@@ -56,7 +57,7 @@ docker compose -f ./docker/docker-compose.yaml up -d
 ### Run all tests
 
 ```bash
-./gradlew test -Dspring.profiles.active=test
+./gradlew test "-Dspring.profiles.active=test"
 ```
 
 `test` profile **disables** Liquibase by default. Add `docker` profile in CI to enable it. For local runs against a
@@ -65,13 +66,16 @@ pre-migrated DB, leave `spring.liquibase.enabled=false` in `application-test.yam
 ### Run unit tests locally
 
 ```bash
-./gradlew :service:test -Dspring.profiles.active=test
+./gradlew :service:test "-Dspring.profiles.active=test"
 ```
+
+Prefer to run individual test class by adding `--tests {testClassName}` for faster feedback.
+Eg. `./gradlew :service:test "-Dspring.profiles.active=test" --tests BikeRentalApplicationTest`
 
 ### Run component tests locally
 
 ```bash
-./gradlew :component-test:test -Dspring.profiles.active=test
+./gradlew :component-test:test "-Dspring.profiles.active=test" 
 ```
 
 Assume that DB is spun up already and accepts connections.
@@ -79,7 +83,7 @@ Assume that DB is spun up already and accepts connections.
 ### Run application locally
 
 ```bash
-./gradlew :service:bootRun --args='--spring.profiles.active=local'
+./gradlew :service:bootRun "-spring.profiles.active=local"
 ```
 
 Requires `service/src/main/resources/application-local.properties` (not committed) with `DATASOURCE_URL`,

@@ -63,7 +63,8 @@ component-test/
 - If datatable becomes too large, split object creation into several steps and save intermediate state in scenario
   context. See [the example](./examples/datatable-transformers.md)
 - Use transformers to convert datatables directly into domain objects and avoid using JSON in steps.
-  See [the example](./examples/datatable-transformers.md)
+  See [the example](./examples/datatable-transformers.md) Public method in the transformer should be annotated with
+  `@DataTableType` and have the `transaform` name.
 - Use `Scenario Outline:` with `Examples:` for data repeated across multiple steps.
   See [the example](./examples/use-examples-as-variable.feature)
 

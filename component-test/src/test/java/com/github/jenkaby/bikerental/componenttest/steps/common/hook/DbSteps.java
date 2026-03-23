@@ -22,6 +22,7 @@ public class DbSteps {
             "equipment_statuses",
             "equipment_types",
             "tariffs",
+            "tariffs_v2",
             "payments",
             "rental_equipments",
             "rentals"

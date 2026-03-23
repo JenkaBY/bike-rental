@@ -18,6 +18,9 @@ while maintaining deployment simplicity.
     - Aggregate roots with clear boundaries
     - Domain events for cross-module communication
     - Ubiquitous language within each module
+   - Rich domain models encapsulating business logic
+   - Use custom value objects for domain concepts (e.g., Money, DiscountPercent or java classes representing value
+     objects)
 
 3. **Hexagonal Architecture (Ports & Adapters)**
     - Domain core isolated from infrastructure
@@ -67,8 +70,7 @@ The system is decomposed into 8 modules based on functional requirements (FR-*):
 
 **Module Dependencies:**
 
-- Rental → Customer, Equipment, Tariff
-- Finance → Rental
+- Rental → Customer, Equipment, Tariff, Finance
 - Maintenance → Equipment
 - Reporting → All data modules (read-only)
 - Admin → System-wide (configuration)
@@ -124,7 +126,7 @@ shared/
 
 **1. Aggregate Pattern**
 
-- Each module has aggregate roots (e.g., Rental, Customer, Equipment)
+- Each module has aggregate roots (e.g., Rental, Customer, Equipment, Tariff and so on)
 - Aggregate root controls all access to entities within
 - Transactions limited to single aggregate
 - Example: `Rental` aggregate contains rental status, times, costs
@@ -755,13 +757,8 @@ public Customer createCustomer(...) {
   `allowedOrigins`
 - `CorsConfig` — `WebMvcConfigurer.addCorsMappings("/**")` + `CorsConfigurationSource` бин
 - `allowedOrigins` — обязательный, задаётся в `application.yaml` для каждого окружения
-- Дефолты: methods = GET/POST/PUT/PATCH/DELETE/OPTIONS, headers = *, credentials = true, maxAge = 3600
-- Расположение: `shared/config/` (web infrastructure adapter layer)
-
-**Rate Limiting:**
-
-- Prevent abuse (future)
-- Per-user and per-IP limits
+- Defaults: methods = GET/POST/PUT/PATCH/DELETE/OPTIONS, headers = *, credentials = true, maxAge = 3600
+- Exists: `shared/config/` (web infrastructure adapter layer)
 
 **Input Validation:**
 

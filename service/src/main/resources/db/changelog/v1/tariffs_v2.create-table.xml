@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="tariffs_v2.create-table" author="bikerental">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tariffs_v2"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tariffs_v2">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)"/>
+            <column name="equipment_type_slug" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pricing_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="params" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="valid_from" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="valid_to" type="date"/>
+            <column name="status" type="varchar(50)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="varchar(10)" defaultValue="v2">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+            </column>
+        </createTable>
+
+
+    </changeSet>
+
+</databaseChangeLog>
