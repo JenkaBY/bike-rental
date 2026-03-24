@@ -10,6 +10,7 @@ Feature: Tariff V2 API
       | scooter | Scooter | Electric                     |
       | helmet  | Helmet  | Accessory                    |
       | special | Special | It's used for special tariff |
+      | any     | Any     | It's used for special tariff |
 
   Scenario Outline: Create a tariff v2 and get by id
     Given the pricing params for tariff request are
@@ -66,6 +67,29 @@ Feature: Tariff V2 API
     And the tariff v2 response only contains
       | name            | description | equipmentType | pricingType | status   | validFrom  | validTo    |
       | Special Bicycle | Special     | bicycle       | SPECIAL     | INACTIVE | 2025-01-31 | 2028-01-02 |
+
+  Scenario Outline: Update a tariff v2 should keep its <sourceStatus> status after update
+    Given the pricing params list for tariff request is
+      | tariffId | pricingType |
+      | 1        | SPECIAL     |
+    And the following tariff v2 records exist in db
+      | id | name           | description             | equipmentType | pricingType | status         | validFrom  | validTo |
+      | 1  | Special Tariff | Apply for any equipment | any           | SPECIAL     | <sourceStatus> | 2025-01-31 |         |
+    Given the pricing params for tariff request are
+      | price |
+      | 0     |
+    And the tariff v2 request is prepared with the following data
+      | name                        | description  | equipmentType | pricingType | validFrom  | validTo    |
+      | Special Tariff for any type | For any type | any           | SPECIAL     | 2026-01-01 | 2029-01-01 |
+    When a PUT request has been made to "/api/v2/tariffs/1" endpoint
+    Then the response status is 200
+    And the response contains
+      | path     | value          |
+      | $.status | <sourceStatus> |
+    Examples:
+      | sourceStatus |
+      | ACTIVE       |
+      | INACTIVE     |
 
   Scenario: Get all tariff v2 paginated
     When a GET request has been made to "/api/v2/tariffs" endpoint with query parameters

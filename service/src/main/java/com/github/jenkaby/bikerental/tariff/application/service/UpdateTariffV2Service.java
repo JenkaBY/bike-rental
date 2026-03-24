@@ -21,8 +21,8 @@ class UpdateTariffV2Service implements UpdateTariffV2UseCase {
     @Override
     @Transactional
     public TariffV2 execute(UpdateTariffV2Command command) {
-        repository.get(command.id());
-        TariffV2 tariff = mapper.toTariffV2(command);
+        var currentTariff = repository.get(command.id());
+        TariffV2 tariff = mapper.toTariffV2(command, currentTariff.getStatus());
         return repository.save(tariff);
     }
 }

@@ -37,7 +37,7 @@ public class TariffV2CommandToDomainMapper {
         );
     }
 
-    public TariffV2 toTariffV2(UpdateTariffV2UseCase.UpdateTariffV2Command command) {
+    public TariffV2 toTariffV2(UpdateTariffV2UseCase.UpdateTariffV2Command command, TariffV2Status status) {
         Map<String, Object> params = command.params() != null ? command.params() : Map.of();
         return paramsToDomainMapper.buildTariff(
                 command.id(),
@@ -48,7 +48,7 @@ public class TariffV2CommandToDomainMapper {
                 VERSION_DEFAULT,
                 command.validFrom(),
                 command.validTo(),
-                TariffV2Status.INACTIVE,
+                status,
                 params
         );
     }

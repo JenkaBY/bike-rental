@@ -2,4 +2,5 @@ slug,name,description
 bicycle,Bicycle,Standard bicycles for rental
 scooter,Scooter,Electric and manual scooters
 other,Other,Other equipment types
+child_seat,Child Seat,Child seats for bicycles and scooters
 any,Any,Only for special tariffs
