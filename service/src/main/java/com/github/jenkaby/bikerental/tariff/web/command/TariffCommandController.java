@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/tariffs")
 @Validated
 @Tag(name = OpenApiConfig.Tags.TARIFFS)
+@Deprecated(forRemoval = true)
 public class TariffCommandController {
 
     private final CreateTariffUseCase createUseCase;
