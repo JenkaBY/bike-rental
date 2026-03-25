@@ -39,7 +39,7 @@ There are 2 kinds of tests:
 
 To run tests, use the following command from the root directory:
 ```shell
-./gradlew test -Dspring.profiles.active=test,docker
+./gradlew test "-Dspring.profiles.active=test,docker"
 ```
 
 ## Dev Deployment

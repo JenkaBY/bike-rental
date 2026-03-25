@@ -541,7 +541,7 @@ void shouldUpdateEquipmentStatusAfterRentalCompleted() {
 **Run Specific Test Class:**
 
 ```bash
-./gradlew test --tests  '-Dspring.profiles.active=test'
+./gradlew test '-Dspring.profiles.active=test' --tests "TestClassName"
 ```
 
 ### Testing Best Practices
