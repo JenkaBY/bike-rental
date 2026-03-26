@@ -1,0 +1,46 @@
+# Task 005: Create TransactionRepository Domain Port
+
+> **Applied Skill:** `java.instructions.md` — domain port interface in `domain/repository/`, no Spring imports;
+> mirrors the existing `AccountRepository` and `PaymentRepository` contracts.
+
+## 1. Objective
+
+Define the `TransactionRepository` domain port interface. This is the only dependency that `RecordDepositService`
+will require for persisting the `Transaction` aggregate. No query methods are needed for this story.
+
+## 2. File to Create
+
+* **File Path:** `service/src/main/java/com/github/jenkaby/bikerental/finance/domain/repository/TransactionRepository.java`
+* **Action:** Create New File
+
+## 3. Code Implementation
+
+**Imports Required:**
+```java
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import java.util.Optional;
+import java.util.UUID;
+```
+
+```java
+package com.github.jenkaby.bikerental.finance.domain.repository;
+
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface TransactionRepository {
+
+    Transaction save(Transaction transaction);
+
+    Optional<Transaction> findByIdempotencyKey(UUID idempotencyKey);
+}
+```
+
+## 4. Validation Steps
+
+```bash
+./gradlew :service:compileJava
+```
+
+The interface must compile without errors.
