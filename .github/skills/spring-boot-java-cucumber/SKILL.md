@@ -113,6 +113,6 @@ component-test/
 - use ` assertThat(sortedActual).zipSatisfy(expectedList, (actual, expected) -> assertSingle(actual, expected))` for
   asserting list of objects.
 - use `Aliases`(`com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases`) utility class to hold short
-  human readable id of entities to use them on feature files and in the transformer and.
+  human-readable id of entities to use them on feature files and in the transformer and.
   See [alias-usage](references/alias-usage.md)
 - use `DataTableHelper` convert standard objects from map in transformers

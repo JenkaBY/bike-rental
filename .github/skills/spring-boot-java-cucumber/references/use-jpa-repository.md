@@ -67,7 +67,7 @@ public class FinancialAccountEntityTransformer {
 
 
     @DataTableType
-    public FinancialAccountEntity paymentJpaEntity(Map<String, String> entry) {
+    public FinancialAccountEntity transform(Map<String, String> entry) {
         var id = Optional.ofNullable(entry.get("id")).map(Aliases::getPaymentId).orElse(null);
         var rentalId = DataTableHelper.toLong(entry, "rentalId");
         var amount = DataTableHelper.toBigDecimal(entry, "amount");
@@ -93,7 +93,7 @@ public class FinancialAccountEntityTransformer {
 // Steps
 @RequiredArgsConstructor
 public class FinancialAccountDbSteps {
-
+    private static final Comparator<FinancialAccountEntity> COMPARATOR = Comparator.comparing(FinancialAccountEntity::getId);
     private final FinancialAccountJpaRepository repository;
     private final ScenarioContext scenarioContext;
 
@@ -103,11 +103,11 @@ public class FinancialAccountDbSteps {
 
         // sort before comparing
         var sortedActual = actualList.stream()
-                .sorted(RENTAL_COMPARATOR)
+                .sorted(COMPARATOR)
                 .toList();
 
         var sortedExpected = expected.stream()
-                .sorted(RENTAL_COMPARATOR)
+                .sorted(COMPARATOR)
                 .toList();
 
         assertThat(sortedActual)
@@ -120,10 +120,49 @@ public class FinancialAccountDbSteps {
 
             var softly = new SoftAssertions();
             softly.assertThat(actual.amount()).isEqualByComparingTo(expected.amount());
-            // other assertations ommited
+            // other assertations omitted
             softly.assertAll();
         }        
     }
 }
 
+```
+If entity has `OneToMany/ManyToMany/ManyToOne` relationship, we need to create a wrapper for JpaRepository like this
+```java
+@Entity
+class RentalEntity {
+
+// omitted
+    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RentalEquipmentJpaEntity> rentalEquipments = new ArrayList<>();
+}
+
+@RequiredArgsConstructor
+@Repository
+public class RentalJpaRepositoryWrapper {
+
+    private final RentalJpaRepository rentalJpaRepository;
+
+    @Transactional
+    public List<RentalJpaEntity> findAll() {
+        return rentalJpaRepository.findAll().stream()
+//                loads child entities to avoid LazyInitializationException
+                .peek(entity -> entity.getRentalEquipments().forEach(RentalEquipmentJpaEntity::getId))
+                .toList();
+    }
+}
+
+@RequiredArgsConstructor
+public class RentalDbSteps {
+
+    private final RentalJpaRepositoryWrapper repository;
+    private final ScenarioContext scenarioContext;
+
+    @Then("the rental record(s) were/was persisted in DB")
+    public void financialAccountMatchesExpected(List<RentalJpaEntity> expected) {
+        List<RentalJpaEntity> actualList = repository.findAll();
+//        as in the previous example
+    }
+}
 ```
