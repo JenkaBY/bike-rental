@@ -368,8 +368,13 @@ CONFIG_REF: `.github/workflows/build.yml`, `.github/workflows/deploy.yml`
   BASIS: The `TariffFacade.java` is deprecated. The `TariffV2Facade.java` exists at the tariff module root alongside
   matching `*Impl` classes and `TariffV2QueryController`;
 
+---
+
+## Constraints
+
 - CONSTRAINT: All monetary values are stored and processed with a maximum precision of 2 decimal places (e.g., cents).
   No sub-cent precision is required by any business rule. All money columns in the database schema must be declared as
   `NUMERIC(19, 2)` (or equivalent fixed-point type); application-layer money fields must be rounded to 2 decimal places
   before persistence or transmission.
+- CONSTRAINT: use uuid v7 for generated UUID, basically it's achieved by invoking `UuidGenerator.generate()`;
 

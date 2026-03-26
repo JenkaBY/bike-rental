@@ -70,7 +70,7 @@ Generate the system design for the current story and save it exactly next to its
 ### OUTPUT FORMAT: SYSTEM DESIGN (design.md)
 
 Save the architectural design strictly using this template. Do NOT use programming-language specific terms or refer to
-code files.
+code files. Don't create files outside the `./requirements/[requirements_id]/[fr_index]/` directory.
 
 ```markdown
 # System Design:[FR-Index] - [Short Title]
