@@ -5,5 +5,7 @@ public enum LedgerType {
     CARD_TERMINAL,
     BANK_TRANSFER,
     REVENUE,
-    ADJUSTMENT
+    ADJUSTMENT,
+    CUSTOMER_WALLET,
+    CUSTOMER_HOLD
 }

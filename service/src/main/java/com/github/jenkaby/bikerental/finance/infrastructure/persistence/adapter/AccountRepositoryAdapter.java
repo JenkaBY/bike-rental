@@ -5,9 +5,12 @@ import com.github.jenkaby.bikerental.finance.domain.model.AccountType;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.AccountJpaMapper;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.repository.AccountJpaRepository;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
@@ -34,5 +37,11 @@ class AccountRepositoryAdapter implements AccountRepository {
         return jpaRepository.findByAccountType(AccountType.SYSTEM.name())
                 .map(mapper::toDomain)
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, AccountType.SYSTEM.name()));
+    }
+
+    @Override
+    public Optional<Account> findByCustomerId(CustomerRef customerRef) {
+        return jpaRepository.findByCustomerId(customerRef.id())
+                .map(mapper::toDomain);
     }
 }
