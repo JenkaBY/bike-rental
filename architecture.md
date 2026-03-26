@@ -20,7 +20,7 @@
 ## Design Approach
 
 - **Domain-Driven Design (DDD):** The system is structured around explicit bounded contexts (customer, equipment,
-  tariff, rental, finance), each modelled as an independent Spring Modulith module. Each module owns its domain
+  tariff, rental, finance), each modeled as an independent Spring Modulith module. Each module owns its domain
   aggregates, repositories (ports), domain services, and application use-cases. Cross-context dependencies are resolved
   exclusively through published Facade interfaces — direct access to another module's domain model is forbidden.
 - **Hexagonal Architecture (Ports & Adapters):** Each module separates its domain and application layers from
@@ -367,4 +367,9 @@ CONFIG_REF: `.github/workflows/build.yml`, `.github/workflows/deploy.yml`
 - ASSUMPTION: The `TariffV2Facade` / `TariffV2FacadeImpl` represents a final solution of tariff API; v1 is deprecated.
   BASIS: The `TariffFacade.java` is deprecated. The `TariffV2Facade.java` exists at the tariff module root alongside
   matching `*Impl` classes and `TariffV2QueryController`;
+
+- CONSTRAINT: All monetary values are stored and processed with a maximum precision of 2 decimal places (e.g., cents).
+  No sub-cent precision is required by any business rule. All money columns in the database schema must be declared as
+  `NUMERIC(19, 2)` (or equivalent fixed-point type); application-layer money fields must be rounded to 2 decimal places
+  before persistence or transmission.
 

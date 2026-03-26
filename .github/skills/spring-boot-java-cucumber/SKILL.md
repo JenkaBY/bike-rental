@@ -53,21 +53,6 @@ component-test/
 
 ## Gherkin Best Practices
 
-- Use `Feature:` to describe the user story. Keep it short but descriptive. Don't use a ticket or user story reference
-- Use `Background:` for common setup across scenarios
-- Prefer to use `Scenario Outline:` with `Examples:` for data-driven tests.
-  See [the example](./examples/data-driven-scenario.feature)
-- Use descriptive scenario names that explain the expected outcome
-- Prefer datatables in horizontal format over to passing JSON in steps.
-  See [the example](./examples/datatable-transformers.md)
-- If datatable becomes too large, split object creation into several steps and save intermediate state in scenario
-  context. See [the example](./examples/datatable-transformers.md)
-- Use transformers to convert datatables directly into domain objects and avoid using JSON in steps.
-  See [the example](./examples/datatable-transformers.md) Public method in the transformer should be annotated with
-  `@DataTableType` and have the `transaform` name.
-- Use `Scenario Outline:` with `Examples:` for data repeated across multiple steps.
-  See [the example](./examples/use-examples-as-variable.feature)
-
 ## Naming Conventions
 
 - Create domain-specific steps for your features
@@ -81,7 +66,7 @@ component-test/
 
 ### Component Tests
 
-- Test happy paths
+- Test happy paths and business validations
 - Don't cover requests validation
 - Verify integration between components
 - Verify final state of components (e.g. DB state, Kafka topics, queues and so on) by reading from real infrastructure
@@ -91,17 +76,43 @@ component-test/
 - Test against real infrastructure (DB, messaging and so on)
 - Focus on business scenarios from user stories
 
-## Best Practices
+## Best Practices and project constraints
 
-1. **Isolation**: Each scenario should be independent
-2. **Reusability**: Keep common steps (like common Db steps, performing http requests, sending messages and so) in
+- **Isolation**: Each scenario should be independent
+- **Reusability**: Keep common steps (like common Db steps, performing http requests, sending messages and so) in
    `steps/common/`
-3. **Debugging**: Log request/response in hooks for failed scenarios
-4. **Organization**: Group features by domain module
-5. **Naming**: Use descriptive scenario names tied to user stories
-6. **Assertions**: Use AssertJ for fluent, readable assertions
-7. **Context**: Keep scenario context clean and minimal
-8. **Don't repeat yourself**: Don't duplicate already existing steps. Try to reuse them, refactor existing ones to be
-   reusable
-9. **No comments**: Avoid comments in the code and Gherkin files
-
+- **Debugging**: Log request/response in hooks for failed scenarios
+- **Organization**: Group features by domain module
+- **Naming**: Use descriptive scenario names tied to user stories
+- **Assertions**: Use AssertJ for fluent, readable assertions
+- **Context**: Keep scenario context clean and minimal
+- **Don't repeat yourself**: Don't duplicate already existing steps. Try to reuse them, refactor existing ones to be
+  reusable
+- **No comments**: Avoid comments in the code and Gherkin files
+- Use `Feature:` to describe the user story. Keep it short but descriptive. Don't use a ticket or user story reference
+- Use `Background:` for common setup across scenarios
+- Prefer to use `Scenario Outline:` with `Examples:` for data-driven tests.
+  See [the example](./examples/data-driven-scenario.feature)
+- Use descriptive scenario names that explain the expected outcome
+- Never use JSON to pass it as request. Split complex request into several steps and then merge in a final request.
+  See [the example](./examples/datatable-transformers.md)
+- If datatable becomes too large, split object creation into several steps and save intermediate state in scenario
+  context. See [the example](./examples/datatable-transformers.md)
+- Use transformers to convert datatables directly into domain objects and avoid using JSON in steps.
+  See [the example](./examples/datatable-transformers.md) Public method in the transformer should be annotated with
+  `@DataTableType` and have the `transform` name.
+- Use `Scenario Outline:` with `Examples:` for data repeated across multiple steps.
+  See [the example](./examples/use-examples-as-variable.feature)
+- Always validate that new DB tables are on the list of DB table names being truncated in after hook (see
+  `DbSteps.TABLE_TO_TRUNCATE`)
+- Use corresponding `jpaRepository` to retrieve an entity or entities list.
+  See [use-jpa-repository.md](./examples/use-jpa-repository.md)
+- use `isEqualByComparingTo` to compare `BigDecimal` objects
+- use `.isCloseTo(expectedTimestamp, within(1, ChronoUnit.SECONDS))` to compare timestamps
+- use `SoftAssertations` to assert several fields of a single object
+- use ` assertThat(sortedActual).zipSatisfy(expectedList, (actual, expected) -> assertSingle(actual, expected))` for
+  asserting list of objects.
+- use `Aliases`(`com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases`) utility class to hold short
+  human readable id of entities to use them on feature files and in the transformer and.
+  See [alias-usage](./examples/alias-usage.md)
+- use `DataTableHelper` convert standard objects from map in transformers

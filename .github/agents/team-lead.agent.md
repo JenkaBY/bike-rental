@@ -59,7 +59,8 @@ frameworks, and architectural standards for this project.
 
 Break the FR down into highly logical, sequential tasks. A Junior Dev must be able to execute them linearly.
 
-* *Standard Sequence:* Data Layer -> Interfaces/DTOs -> Core Logic/Services -> API/Controllers -> Component tests -> Web
+* *Standard Sequence:* Data Layer(Entities) -> DB modifications(changelogs) -> Interfaces/DTOs -> Core Logic/Services ->
+  API/Controllers -> Component tests -> Web
   Mvc Tests (if applicable).
 * **Dependency Check:** Ensure that any dependencies required by Task 3 are created in Task 1 or 2.
 
