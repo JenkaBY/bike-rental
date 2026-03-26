@@ -4,7 +4,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Optional;
 
-
+/**
+ * In favor of TariffV2Facade
+ */
+@Deprecated(forRemoval = true)
 public interface TariffFacade {
 
     Optional<TariffInfo> findById(Long tariffId);

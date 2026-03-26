@@ -8,6 +8,7 @@ import com.github.jenkaby.bikerental.customer.domain.model.vo.EmailAddress;
 import com.github.jenkaby.bikerental.customer.domain.model.vo.PhoneNumber;
 import com.github.jenkaby.bikerental.customer.domain.repository.CustomerRepository;
 import com.github.jenkaby.bikerental.customer.shared.mapper.PhoneNumberMapper;
+import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -34,6 +35,8 @@ class CreateCustomerServiceTest {
     private CustomerCommandToDomainMapper mapper;
     @Mock
     private PhoneNumberMapper phoneMapper;
+    @Mock
+    private EventPublisher eventPublisher;
     @InjectMocks
     private CreateCustomerService service;
 

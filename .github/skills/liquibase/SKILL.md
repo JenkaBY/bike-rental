@@ -185,7 +185,7 @@ service/src/main/resources/db/changelog/
 | Unique Constraint | `uq_{table}_{column}`                          | `uq_customers_email`                           |
 | File Name         | `{table}.{action}-table_{specific-action}.xml` | `customers.update-table_add-status-column.xml` |
 
-## Best Practices
+## Best Practices and Project Constraints
 
 1. **One Logical Change Per File**: Keep each changeset file focused on a single logical change
 2. **Use preconditions** Check existing structures before applying changes
@@ -193,11 +193,20 @@ service/src/main/resources/db/changelog/
    `{table}.{action}-table_{specific-action}`
 4. **Version Folders**: Organize changelogs by version (v1, v2, etc.) for better organization
 5. **Sequential Ordering**: Add new includes at the bottom of `db.changelog-master.xml`
-6. **Author Attribution**: Use consistent author name (e.g., "copilot", "ai_agent")
-7. **Rollback Support**: Consider adding rollback sections for complex changes
+6. **Author Attribution**: Use consistent author name (e.g., "copilot")
+7. **Rollback Support**: DO NOT add rollback sections
 8. **Index Creation**: Add indexes in the same changeset as table creation when possible
 9. **Constraints**: Define primary keys, unique constraints, and not null constraints during table creation
-10. **Time Column Types**: **ALWAYS** use `TIMESTAMP WITH TIME ZONE` for all time-related columns (both audit fields like `created_at`, `updated_at` and business fields like `started_at`, `expected_return_at`). This ensures proper timezone handling and prevents issues with data migration.
+10. **Time Column Types**: **ALWAYS** use `TIMESTAMP WITH TIME ZONE` for all time-related columns (both audit fields
+    like
+    `created_at`, `updated_at` and business fields like `started_at`, `expected_return_at`). This ensures proper
+    timezone handling
+    and prevents issues with data migration.
+11. **Monetary values**: Always use NUMERIC(19, 2) column type
+12. **Foreign Key**: Use foreign constraints only for tables within the same module. No direct references must exist in
+    DB if tables are from different domain.
+    E.g. the `rental` table has the `customer_id` column that refers to the `customer` record.
+    However, no foreign key constraint exists in DB because `customer` entity belongs another module.
 
 ## Testing with Liquibase
 

@@ -45,6 +45,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tariffs")
 @Tag(name = OpenApiConfig.Tags.TARIFFS)
+@Deprecated(forRemoval = true)
 public class TariffQueryController {
 
     private final GetTariffByIdUseCase getByIdUseCase;

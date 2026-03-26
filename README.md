@@ -39,7 +39,7 @@ There are 2 kinds of tests:
 
 To run tests, use the following command from the root directory:
 ```shell
-./gradlew test -Dspring.profiles.active=test,docker
+./gradlew test "-Dspring.profiles.active=test,docker"
 ```
 
 ## Dev Deployment
@@ -50,3 +50,7 @@ The application is deployed on Render.com as Docker container. See [deployment.m
 
 This project is proprietary software. All rights reserved by the author.
 See [LICENSE](LICENSE) for details.
+
+## Changelog
+
+- *2026-03-05* Migrate to spec-workflow. See [README](README-spec-flow.MD)

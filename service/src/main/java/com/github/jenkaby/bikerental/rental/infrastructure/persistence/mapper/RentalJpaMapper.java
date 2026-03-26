@@ -25,7 +25,6 @@ public interface RentalJpaMapper {
     @Mapping(target = "rentalEquipments", source = "rental.equipments")
     RentalJpaEntity toEntity(Rental rental);
 
-    //    TODO validate that it works?
     @AfterMapping
     default void setRelationships(Rental rental, @MappingTarget RentalJpaEntity result) {
         if (result.getRentalEquipments() != null) {
