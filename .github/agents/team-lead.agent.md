@@ -50,7 +50,7 @@ frameworks, and architectural standards for this project.
 #### Phase 2: Skill Application & Code Scanning (DO NOT SKIP)
 
 1. **Select Skills:** Identify which injected `<skills>` are relevant to the target scope (e.g., API standards, UI
-   patterns, Testing rules). Read those skill files using your tools.
+   patterns, Testing rules and so on). Read those skill files using your tools.
 2. **Scan Target Code:** Use the file paths from `architecture.md` and `overview.md` files and use `explore` agent via
    the #tool:agent/runSubagent to look at the actual source code. You must know the exact class names, existing method
    signatures, and imports currently in the files so your snippets fit perfectly.
@@ -70,7 +70,7 @@ For each task, draft explicit copy-paste instructions.
 
 * **Insertion Points:** You must specify exactly *where* code goes (e.g., "Add this new property below the `Id` property
   in `User.java`").
-* **Skill Citation:** Every generated task MUST contain a citation noting which `<skill>` file was applied.
+* **Skill Citation:** Every generated task MUST contain a citation noting which `<skill>` files were applied.
 * **Validation Step:** Every task MUST conclude with a strict verification command (e.g., `dotnet build`,
   `npm run build`, `./gradlew :service:test '-Dspring.profiles.active=test' --test <SpecificFile>`).
 * **BANNED ACTIONS:** Do NOT instruct the Junior Agent to start the server (`gradle bootRun`, `/gradlew bootRun`), run
