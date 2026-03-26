@@ -13,7 +13,7 @@ import java.util.List;
 public class DbSteps {
 
     private static final List<String> TABLE_TO_TRUNCATE = List.of(
-//            order is important due to foreign key constraints
+            // order is important due to foreign key constraints
             "event_publication", // from modulith event_api
             "event_publication_archive", // from modulith event_api
             "equipment_status_transition_rules",
@@ -25,8 +25,10 @@ public class DbSteps {
             "tariffs_v2",
             "payments",
             "rental_equipments",
-            "rentals"
-    );
+            "rentals",
+            "finance_sub_ledgers",
+            "finance_accounts"
+        );
 
     private final JdbcClient jdbcClient;
 
