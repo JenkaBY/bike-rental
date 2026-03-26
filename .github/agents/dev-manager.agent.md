@@ -17,7 +17,8 @@ status up to date.
 
 ### YOUR INPUT
 
-- **Checklist Path:** The exact path to the `checklist.md` file (e.g., `./requirements/REQ-001/01/checklist.md`).
+- **Checklist Path:** The exact path to the `checklist.md` file (e.g., `./requirements/REQ-001/01/checklist.md`) or try
+  to find a `checklist.md` file within the provided folder.
 
 ### YOUR AVAILABLE TOOLS
 
