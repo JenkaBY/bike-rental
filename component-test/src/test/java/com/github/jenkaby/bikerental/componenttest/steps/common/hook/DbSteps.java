@@ -26,9 +26,10 @@ public class DbSteps {
             "payments",
             "rental_equipments",
             "rentals",
-            "finance_sub_ledgers",
-            "finance_accounts"
+            "finance_transaction_records",
+            "finance_transactions"
         );
+
 
     private final JdbcClient jdbcClient;
 
@@ -36,5 +37,15 @@ public class DbSteps {
     public void truncateDb() {
         log.info("Deleting all records on tables {}", TABLE_TO_TRUNCATE);
         JdbcTestUtils.deleteFromTables(jdbcClient, TABLE_TO_TRUNCATE.toArray(new String[0]));
+
+        JdbcTestUtils.deleteFromTableWhere(jdbcClient,
+                "finance_sub_ledgers",
+                "ledger_type NOT IN ('CASH', 'BANK_TRANSFER','CARD_TERMINAL','REVENUE','ADJUSTMENT')"
+                );
+        JdbcTestUtils.deleteFromTableWhere(jdbcClient,
+                "finance_accounts",
+                "account_type != 'SYSTEM'"
+        );
+
     }
 }
