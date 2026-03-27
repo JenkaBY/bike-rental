@@ -4,12 +4,14 @@ import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.SubLedger;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.AccountJpaEntity;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.SubLedgerJpaEntity;
+import com.github.jenkaby.bikerental.shared.mapper.CustomerRefMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(uses = {com.github.jenkaby.bikerental.shared.mapper.CustomerRefMapper.class})
+@Mapper(uses = {MoneyMapper.class, CustomerRefMapper.class})
 public interface AccountJpaMapper {
 
     @Mapping(target = "customerRef", source = "customerId")

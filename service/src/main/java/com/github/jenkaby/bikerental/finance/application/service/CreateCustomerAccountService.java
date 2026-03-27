@@ -7,12 +7,12 @@ import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.SubLedger;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,13 +38,13 @@ class CreateCustomerAccountService implements CreateCustomerAccountUseCase {
         var wallet = SubLedger.builder()
                 .id(uuidGenerator.generate())
                 .ledgerType(LedgerType.CUSTOMER_WALLET)
-                .balance(BigDecimal.ZERO)
+            .balance(Money.zero())
                 .build();
 
         var hold = SubLedger.builder()
                 .id(uuidGenerator.generate())
                 .ledgerType(LedgerType.CUSTOMER_HOLD)
-                .balance(BigDecimal.ZERO)
+            .balance(Money.zero())
                 .build();
 
         var account = Account.builder()

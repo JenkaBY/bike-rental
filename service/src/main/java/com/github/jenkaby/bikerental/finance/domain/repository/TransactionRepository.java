@@ -1,0 +1,13 @@
+package com.github.jenkaby.bikerental.finance.domain.repository;
+
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
+
+import java.util.Optional;
+
+public interface TransactionRepository {
+
+    Transaction save(Transaction transaction);
+
+    Optional<Transaction> findByIdempotencyKey(IdempotencyKey idempotencyKey);
+}

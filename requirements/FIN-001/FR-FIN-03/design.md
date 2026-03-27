@@ -26,7 +26,9 @@ security layer noted in the current architecture.
 
 * **`RecordDepositUseCase` (new — finance module application use-case interface):** Port interface in
   `finance/application/usecase`. Declares a single `execute(RecordDepositCommand)` operation that returns a
-  `DepositResult`. Accepts `customerId`, `amount`, and `paymentMethod` as the command attributes.
+  `DepositResult`. Accepts `customerId`, `amount`, and `paymentMethod` as the command attributes. The command
+  also carries an `idempotencyKey` (client-provided UUID) to guarantee exactly-once semantics for repeated
+  submissions.
 
 * **`RecordDepositService` (new — finance module application service):** Implements `RecordDepositUseCase`.
   Orchestrates the full deposit flow: account lookup, balance mutation, journal construction, and persistence.
@@ -38,16 +40,24 @@ security layer noted in the current architecture.
   for the System Account. Both methods are already defined as of FR-FIN-01 and FR-FIN-02.
 
 * **`Account` / `SubLedger` (existing finance domain model — extended):** `SubLedger` gains two balance-mutation
-  methods — `credit(amount)` and `debit(amount)` — that update the in-memory balance value. `Account` gains a
+  methods — `credit(Money)` and `debit(Money)` — that update the in-memory balance value. `Account` gains a
   convenience method `getSubLedger(LedgerType)` that resolves a named sub-ledger or throws
   `ResourceNotFoundException` when the requested ledger type is absent on the account.
 
+  Important domain changes:
+  - Monetary values across the finance domain now use the shared `Money` value object (scale=2, HALF_UP rounding)
+    instead of raw `BigDecimal` primitives.
+  - The `credit(Money)` and `debit(Money)` domain methods return an id-less payload (`TransactionRecordWithoutId`)
+    describing the mutation (sub-ledger ref, ledger type, direction, amount). The application service assigns
+    UUIDs to those payloads when building persistent `TransactionRecord` instances before calling the repository.
+
 * **`Transaction` (new — finance module domain model):** Journal header entity carrying `id` (UUID), `type`
-  (`DEPOSIT`), `paymentMethod` (`CASH | CARD_TERMINAL | BANK_TRANSFER`), `amount`, `customerId`, `operatorId`
+  (`DEPOSIT`), `paymentMethod` (`CASH | CARD_TERMINAL | BANK_TRANSFER`), `amount` (domain `Money`), `customerId`, `operatorId`
   (the identifier of the staff member who recorded the operation), `sourceType` (nullable — discriminates the
   originating business context, e.g. `RENTAL`), `sourceId` (nullable UUID — the ID of the linked business
-  entity such as a rental; absent for standalone counter operations like deposits), and `recordedAt` (timestamp).
-  Owns a list of exactly two immutable `TransactionRecord` children formed at construction time.
+  entity such as a rental; absent for standalone counter operations like deposits), `recordedAt` (timestamp), and
+  `idempotencyKey` (domain `IdempotencyKey`) used to deduplicate client retries. Owns a list of exactly two
+  immutable `TransactionRecord` children formed at construction time.
 
 * **`TransactionSourceType` (new — finance module domain enum):** Discriminates the originating business
   context of a transaction. Initial value: `RENTAL`. Designed for extension (e.g. `SUBSCRIPTION`,
@@ -71,7 +81,10 @@ security layer noted in the current architecture.
   flows use the new constants exclusively.
 
 * **`TransactionRepository` (new — finance module domain port):** Interface in `finance/domain/repository`.
-  Declares `save(Transaction) : Transaction`. No query methods are required for this story.
+  Declares `save(Transaction) : Transaction` and `findByIdempotencyKey(...) : Optional<Transaction>` to
+  support deduplication of repeated client submissions. Implementation note: the JPA adapter marks `save(...)`
+  with `@Transactional(propagation = Propagation.MANDATORY)` so it must be invoked inside an existing service
+  transaction that is already persisting related account balance mutations.
 
 * **`TransactionRepositoryAdapter` (new — finance module infrastructure):** JPA adapter implementing
   `TransactionRepository`. Persists a `TransactionJpaEntity` with cascaded `TransactionRecordJpaEntity` children.
@@ -80,6 +93,11 @@ security layer noted in the current architecture.
 * **`TransactionJpaEntity` / `TransactionRecordJpaEntity` (new — finance module infrastructure):** JPA entities mapped
   to `finance_transactions` and `finance_transaction_records` tables respectively.
   `TransactionJpaEntity` owns a one-to-many cascade-all relationship to `TransactionRecordJpaEntity`.
+
+  Mapping notes: `TransactionJpaEntity` includes an `idempotency_key` UUID column (unique). MapStruct mappers
+  are used to convert domain ↔ JPA types. A dedicated `TransactionRecordMapper` handles `TransactionRecord`
+  conversions, and shared helper mappers (`MoneyMapper`, `IdempotencyKeyMapper`) convert `Money` and
+  `IdempotencyKey` to `BigDecimal`/`UUID` for persistence.
 
 * **`bike-rental-db` (data store):** Receives two new DDL tables via Liquibase changesets:
   `finance_transactions` and `finance_transaction_records`.
@@ -95,6 +113,7 @@ security layer noted in the current architecture.
         * `transaction_type` (Enum string: `DEPOSIT | ...`, not-null)
         * `payment_method` (Enum string: `CASH | CARD_TERMINAL | BANK_TRANSFER`, not-null)
         * `amount` (Decimal 19,2, not-null, check > 0)
+        * `idempotency_key` (UUID, not-null, unique) — client-provided key used to deduplicate repeated requests.
         * `customer_id` (UUID, not-null — references the customer identity for audit; no FK constraint to avoid
           cross-module coupling)
         * `operator_id` (Varchar, not-null — identifier of the staff member who recorded the transaction;
@@ -141,10 +160,11 @@ security layer noted in the current architecture.
     * **Request Payload:**
         ```
         {
-          customerId:    UUID       (not-null)
-          amount:        Decimal    (> 0)
-          paymentMethod: Enum       (CASH | CARD_TERMINAL | BANK_TRANSFER)
-          operatorId:    String     (not-null, not-blank)
+          idempotencyKey: UUID       (not-null) ← client-generated to ensure exactly-once
+          customerId:     UUID       (not-null)
+          amount:         Decimal    (> 0)
+          paymentMethod:  Enum       (CASH | CARD_TERMINAL | BANK_TRANSFER)
+          operatorId:     String     (not-null, not-blank)
         }
         ```
     * **Success Response:** `201 Created`
@@ -185,13 +205,15 @@ security layer noted in the current architecture.
 1. Staff submits `POST /api/finance/deposits` with `{ customerId, amount: 50, paymentMethod: CASH }`.
 2. `DepositCommandController` validates the request DTO (amount > 0, paymentMethod non-null, customerId non-null).
 3. `DepositCommandController` invokes `RecordDepositUseCase.execute(RecordDepositCommand)`.
-4. `RecordDepositService` opens a `@Transactional` boundary.
-5. `RecordDepositService` calls `AccountRepository.findByCustomerId(customerId)` — Customer Account found,
+4. `RecordDepositService` checks `TransactionRepository.findByIdempotencyKey(command.idempotencyKey())` — if
+  present, it returns the existing `transactionId` + `recordedAt` and short-circuits the rest of the flow.
+5. `RecordDepositService` opens a `@Transactional` boundary.
+6. `RecordDepositService` calls `AccountRepository.findByCustomerId(customerId)` — Customer Account found,
    including `CUSTOMER_WALLET` sub-ledger.
-6. `RecordDepositService` calls `AccountRepository.getSystemAccount()` — System Account found, including
+7. `RecordDepositService` calls `AccountRepository.getSystemAccount()` — System Account found, including
    `CASH` sub-ledger.
-7. `RecordDepositService` resolves the debit sub-ledger: `SystemAccount.getSubLedger(CASH)`.
-8. `RecordDepositService` resolves the credit sub-ledger: `CustomerAccount.getSubLedger(CUSTOMER_WALLET)`.
+8. `RecordDepositService` resolves the debit sub-ledger: `SystemAccount.getSubLedger(CASH)`.
+9. `RecordDepositService` resolves the credit sub-ledger: `CustomerAccount.getSubLedger(CUSTOMER_WALLET)`.
 9. `RecordDepositService` mutates balances in-memory:
     * `cashSubLedger.debit(50)` → `CASH.balance += 50`
     * `walletSubLedger.credit(50)` → `CUSTOMER_WALLET.balance += 50`
