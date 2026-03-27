@@ -37,10 +37,10 @@ public interface RecordDepositUseCase {
 
     record RecordDepositCommand(
             UUID customerId,
-            BigDecimal amount,
+            com.github.jenkaby.bikerental.shared.domain.model.vo.Money amount,
             PaymentMethod paymentMethod,
             String operatorId,
-            UUID idempotencyKey
+            com.github.jenkaby.bikerental.shared.domain.IdempotencyKey idempotencyKey
     ) {
     }
 
@@ -102,11 +102,9 @@ package com.github.jenkaby.bikerental.finance.application.service;
 
 import com.github.jenkaby.bikerental.finance.application.mapper.PaymentMethodLedgerTypeMapper;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
-import com.github.jenkaby.bikerental.finance.domain.model.EntryDirection;
+import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
-import com.github.jenkaby.bikerental.finance.domain.model.SubLedgerRef;
-import com.github.jenkaby.bikerental.finance.domain.model.TransactionRecord;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
@@ -142,19 +140,19 @@ public class RecordDepositService implements RecordDepositUseCase {
             return new DepositResult(t.getId(), t.getRecordedAt());
         }
 
-        Account customerAccount = accountRepository
+        var customerAccount = accountRepository
                 .findByCustomerId(new CustomerRef(command.customerId()))
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerId().toString()));
 
-        Account systemAccount = accountRepository.getSystemAccount();
+        var systemAccount = accountRepository.getSystemAccount();
 
         LedgerType debitLedgerType = paymentMethodMapper.toLedgerType(command.paymentMethod());
 
         var debitSubLedger = systemAccount.getSubLedger(debitLedgerType);
-        var creditSubLedger = customerAccount.getSubLedger(LedgerType.CUSTOMER_WALLET);
+        var creditSubLedger = customerAccount.getCustomerWallet();
 
-        debitSubLedger.debit(command.amount());
-        creditSubLedger.credit(command.amount());
+        var debitChange = debitSubLedger.debit(command.amount());
+        var creditChange = creditSubLedger.credit(command.amount());
 
         accountRepository.save(systemAccount);
         accountRepository.save(customerAccount);
@@ -162,7 +160,7 @@ public class RecordDepositService implements RecordDepositUseCase {
         Instant now = clock.instant();
         UUID transactionId = uuidGenerator.generate();
 
-        Transaction transaction = Transaction.builder()
+        var transaction = Transaction.builder()
                 .id(transactionId)
                 .type(TransactionType.DEPOSIT)
                 .paymentMethod(command.paymentMethod())
@@ -174,20 +172,8 @@ public class RecordDepositService implements RecordDepositUseCase {
                 .recordedAt(now)
                 .idempotencyKey(command.idempotencyKey())
                 .records(List.of(
-                        TransactionRecord.builder()
-                                .id(uuidGenerator.generate())
-                                .subLedgerRef(new SubLedgerRef(debitSubLedger.getId()))
-                                .ledgerType(debitLedgerType)
-                                .direction(EntryDirection.DEBIT)
-                                .amount(command.amount())
-                                .build(),
-                        TransactionRecord.builder()
-                                .id(uuidGenerator.generate())
-                                .subLedgerRef(new SubLedgerRef(creditSubLedger.getId()))
-                                .ledgerType(LedgerType.CUSTOMER_WALLET)
-                                .direction(EntryDirection.CREDIT)
-                                .amount(command.amount())
-                                .build()
+                        debitChange.toTransaction(uuidGenerator.generate()),
+                        creditChange.toTransaction(uuidGenerator.generate())
                 ))
                 .build();
 

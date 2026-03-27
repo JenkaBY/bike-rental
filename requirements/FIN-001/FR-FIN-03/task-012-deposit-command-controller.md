@@ -83,12 +83,13 @@ import com.github.jenkaby.bikerental.finance.web.command.dto.RecordDepositReques
 import com.github.jenkaby.bikerental.finance.web.command.dto.RecordDepositResponse;
 import org.mapstruct.Mapper;
 
-@Mapper
+@Mapper(uses = {com.github.jenkaby.bikerental.shared.infrastructure.persistence.mapper.MoneyMapper.class,
+                com.github.jenkaby.bikerental.shared.infrastructure.persistence.mapper.IdempotencyKeyMapper.class})
 public interface DepositCommandMapper {
 
-    RecordDepositCommand toCommand(RecordDepositRequest request);
+        RecordDepositCommand toCommand(RecordDepositRequest request);
 
-    RecordDepositResponse toResponse(DepositResult result);
+        RecordDepositResponse toResponse(DepositResult result);
 }
 ```
 

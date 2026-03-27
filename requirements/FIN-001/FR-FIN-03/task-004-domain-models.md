@@ -22,8 +22,8 @@ single debit/credit leg) and `Transaction` (aggregate root — the journal heade
 
 **Imports Required:**
 ```java
-import java.math.BigDecimal;
 import java.util.UUID;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 ```
 
 ```java
@@ -35,7 +35,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.math.BigDecimal;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import java.util.UUID;
 
 @Getter
@@ -48,7 +48,7 @@ public class TransactionRecord {
     private final SubLedgerRef subLedgerRef;
     private final LedgerType ledgerType;
     private final EntryDirection direction;
-    private final BigDecimal amount;
+    private final Money amount;
 }
 ```
 
@@ -58,7 +58,7 @@ public class TransactionRecord {
 ```java
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import org.jspecify.annotations.Nullable;
-import java.math.BigDecimal;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +89,7 @@ public class Transaction {
     private final UUID id;
     private final TransactionType type;
     private final PaymentMethod paymentMethod;
-    private final BigDecimal amount;
+    private final Money amount;
     private final UUID customerId;
     private final String operatorId;
     @Nullable
@@ -97,9 +97,14 @@ public class Transaction {
     @Nullable
     private final String sourceId;
     private final Instant recordedAt;
-    private final UUID idempotencyKey;
+    private final com.github.jenkaby.bikerental.shared.domain.IdempotencyKey idempotencyKey;
     private final List<TransactionRecord> records;
 }
+
+Note: `TransactionRecord` should support a `@ToBuilder`-style API and domain code uses a
+`TransactionRecordWithoutId` payload returned from `SubLedger.credit(Money)` / `debit(Money)`;
+the service assigns UUIDs to create persistent `TransactionRecord` instances before persisting the
+aggregate.
 ```
 
 > **Note:** `records` is named `records` (not `lines` or `entries`) to match the `TransactionRecord` type

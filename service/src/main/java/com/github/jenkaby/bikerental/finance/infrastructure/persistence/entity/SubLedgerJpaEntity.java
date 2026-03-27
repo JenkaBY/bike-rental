@@ -43,4 +43,8 @@ public class SubLedgerJpaEntity {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @Version
+    @Column(name = "version")
+    private Long version;
 }

@@ -5,6 +5,7 @@ import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException
 import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -230,6 +231,18 @@ public class CoreExceptionHandlerAdvice {
         body.setProperty(ERROR_CODE, ex.getErrorCode());
         body.setProperty(PARAMS, details);
         return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
+    }
+
+    @ExceptionHandler(OptimisticLockException.class)
+    public ResponseEntity<ProblemDetail> handleOptimisticLockException(OptimisticLockException ex) {
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Optimistic lock occurred: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("Optimistic lock");
+        problem.setDetail("Concurrent update — please retry");
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.RESOURCE_OPTIMISTIC_LOCK);
+        return ResponseEntity.of(problem).build();
     }
 
     private String resolveCorrelationId() {

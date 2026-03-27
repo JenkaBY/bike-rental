@@ -132,6 +132,11 @@ public class TransactionJpaEntity {
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TransactionRecordJpaEntity> records = new ArrayList<>();
+
+//    Note: The existing `SubLedgerJpaEntity` (defined in FR-FIN-01) must include an optimistic-locking
+//    version column to protect concurrent balance mutations. Add a `@Version private Long version` field
+//    to `service/src/main/java/com/github/jenkaby/bikerental/finance/infrastructure/persistence/entity/SubLedgerJpaEntity.java`.
+    @Version private Long version;
 }
 ```
 

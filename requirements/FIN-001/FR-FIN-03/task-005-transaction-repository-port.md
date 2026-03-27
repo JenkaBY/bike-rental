@@ -19,7 +19,7 @@ will require for persisting the `Transaction` aggregate. No query methods are ne
 ```java
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
 import java.util.Optional;
-import java.util.UUID;
+import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 ```
 
 ```java
@@ -33,7 +33,7 @@ public interface TransactionRepository {
 
     Transaction save(Transaction transaction);
 
-    Optional<Transaction> findByIdempotencyKey(UUID idempotencyKey);
+    Optional<Transaction> findByIdempotencyKey(IdempotencyKey idempotencyKey);
 }
 ```
 

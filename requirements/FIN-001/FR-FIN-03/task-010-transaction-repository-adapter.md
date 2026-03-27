@@ -49,7 +49,7 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
     public Transaction save(Transaction transaction) {
         var entity = mapper.toEntity(transaction);
         var saved = jpaRepository.save(entity);
@@ -57,10 +57,14 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
-    public Optional<Transaction> findByIdempotencyKey(UUID idempotencyKey) {
+    public Optional<Transaction> findByIdempotencyKey(java.util.UUID idempotencyKey) {
         return jpaRepository.findByIdempotencyKey(idempotencyKey)
                 .map(mapper::toDomain);
     }
+
+    // Note: The domain port now accepts an `IdempotencyKey` value object; the adapter converts
+    // `IdempotencyKey` ↔ `UUID` when delegating to the JPA repository. Ensure `IdempotencyKeyMapper`
+    // is available in `TransactionJpaMapper`.
 }
 ```
 

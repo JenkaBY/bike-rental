@@ -36,7 +36,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper
+@Mapper(uses = {com.github.jenkaby.bikerental.shared.infrastructure.persistence.mapper.MoneyMapper.class,
+    com.github.jenkaby.bikerental.shared.infrastructure.persistence.mapper.IdempotencyKeyMapper.class,
+    com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.TransactionRecordMapper.class})
 public interface TransactionJpaMapper {
 
     @Mapping(target = "records", source = "records")
