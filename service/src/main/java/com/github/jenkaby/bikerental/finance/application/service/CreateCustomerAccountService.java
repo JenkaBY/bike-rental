@@ -38,13 +38,13 @@ class CreateCustomerAccountService implements CreateCustomerAccountUseCase {
         var wallet = SubLedger.builder()
                 .id(uuidGenerator.generate())
                 .ledgerType(LedgerType.CUSTOMER_WALLET)
-            .balance(Money.zero())
+                .balance(Money.zero())
                 .build();
 
         var hold = SubLedger.builder()
                 .id(uuidGenerator.generate())
                 .ledgerType(LedgerType.CUSTOMER_HOLD)
-            .balance(Money.zero())
+                .balance(Money.zero())
                 .build();
 
         var account = Account.builder()

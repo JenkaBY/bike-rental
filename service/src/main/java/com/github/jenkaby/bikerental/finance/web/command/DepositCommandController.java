@@ -50,14 +50,14 @@ public class DepositCommandController {
     })
     @PostMapping
     public ResponseEntity<RecordDepositResponse> recordDeposit(@Valid @RequestBody RecordDepositRequest request) {
-                log.info("[POST] Record deposit request idempotencyKey={} customerId={} amount={}",
-                                request.idempotencyKey(), request.customerId(), request.amount());
+        log.info("[POST] Record deposit request idempotencyKey={} customerId={} amount={}",
+                request.idempotencyKey(), request.customerId(), request.amount());
 
-                var command = mapper.toCommand(request);
-                var result = recordDepositUseCase.execute(command);
+        var command = mapper.toCommand(request);
+        var result = recordDepositUseCase.execute(command);
 
-                log.info("[POST] Deposit recorded transactionId={} idempotencyKey={}", result.transactionId(), request.idempotencyKey());
+        log.info("[POST] Deposit recorded transactionId={} idempotencyKey={}", result.transactionId(), request.idempotencyKey());
 
-                return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(result));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(result));
     }
 }
