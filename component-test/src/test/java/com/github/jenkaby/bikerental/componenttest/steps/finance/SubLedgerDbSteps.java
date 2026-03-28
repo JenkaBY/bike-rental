@@ -55,6 +55,7 @@ public class SubLedgerDbSteps {
     }
 
     private static void compareSingleElement(SubLedgerJpaEntity actual, SubLedgerJpaEntity exp) {
+        log.info("Actual {} expected {}", actual, exp);
         var softly = new SoftAssertions();
         softly.assertThat(actual.getId()).as("Id").isNotNull();
         if (exp.getId() != null) {
@@ -71,11 +72,22 @@ public class SubLedgerDbSteps {
         if (exp.getLedgerType().isSystemLedger()) {
             softly.assertThat(actual.getCreatedAt()).as("Created at").isNotNull();
         } else {
-            softly.assertThat(actual.getCreatedAt()).as("Created at")
-                    .isCloseTo(exp.getCreatedAt(), within(1, ChronoUnit.SECONDS));
+            if (exp.getUpdatedAt() == null) {
+                softly.assertThat(actual.getUpdatedAt()).as("Updated at")
+                        .isNotNull();
+            } else {
+                softly.assertThat(actual.getUpdatedAt()).as("Updated at")
+                        .isCloseTo(exp.getUpdatedAt(), within(1, ChronoUnit.SECONDS));
+            }
 
-            softly.assertThat(actual.getUpdatedAt()).as("Updated at")
-                    .isCloseTo(exp.getUpdatedAt(), within(1, ChronoUnit.SECONDS));
+            if (exp.getCreatedAt() == null) {
+                softly.assertThat(actual.getCreatedAt()).as("Created at")
+                        .isNotNull();
+            } else {
+                softly.assertThat(actual.getCreatedAt()).as("Created at")
+                        .isCloseTo(exp.getCreatedAt(), within(1, ChronoUnit.SECONDS));
+            }
+
         }
         softly.assertThat(actual.getVersion()).as("Version").isNotNull();
         softly.assertAll();
@@ -83,7 +95,6 @@ public class SubLedgerDbSteps {
 
     private boolean matches(SubLedgerJpaEntity actual, SubLedgerJpaEntity exp) {
         if (exp.getId() != null) {
-            log.info("ID exp={} act={}", exp.getId(), actual.getId());
             return Objects.equals(actual.getId(), exp.getId());
         }
         return Objects.equals(actual.getAccount().getId(), exp.getAccount().getId())

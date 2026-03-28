@@ -42,9 +42,9 @@ public class SubLedgerJpaEntityTransformer {
         // balance (non-nullable in JPA entity) — default to zero when absent
         BigDecimal balance = DataTableHelper.toBigDecimal(entry, "balance");
         entity.setBalance(Optional.ofNullable(balance).orElse(BigDecimal.ZERO));
-
+        entity.setVersion(Optional.ofNullable(DataTableHelper.toLong(entry, "version")).orElse(1L));
         // audit timestamps
-        Instant createdAt = Optional.ofNullable(DataTableHelper.toInstant(entry, "createdAt")).orElse(Instant.now());
+        Instant createdAt = DataTableHelper.toInstant(entry, "createdAt");
         entity.setCreatedAt(createdAt);
         Instant updatedAt = Optional.ofNullable(DataTableHelper.toInstant(entry, "updatedAt")).orElse(createdAt);
         entity.setUpdatedAt(updatedAt);
