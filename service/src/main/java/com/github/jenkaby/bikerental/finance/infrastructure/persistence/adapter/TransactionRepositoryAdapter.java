@@ -31,8 +31,8 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
-    public Optional<Transaction> findByIdempotencyKey(IdempotencyKey idempotencyKey) {
-        return jpaRepository.findByIdempotencyKey(idempotencyKey.id())
+    public Optional<Transaction> findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, com.github.jenkaby.bikerental.shared.domain.CustomerRef customerId) {
+        return jpaRepository.findByIdempotencyKeyAndCustomerId(idempotencyKey.id(), customerId.id())
                 .map(mapper::toDomain);
     }
 }

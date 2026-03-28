@@ -34,7 +34,8 @@ public class RecordDepositService implements RecordDepositUseCase {
     @Override
     @Transactional
     public DepositResult execute(RecordDepositCommand command) {
-        Optional<Transaction> existing = transactionRepository.findByIdempotencyKey(command.idempotencyKey());
+        Optional<Transaction> existing = transactionRepository
+                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));
         if (existing.isPresent()) {
             Transaction t = existing.get();
             return new DepositResult(t.getId(), t.getRecordedAt());

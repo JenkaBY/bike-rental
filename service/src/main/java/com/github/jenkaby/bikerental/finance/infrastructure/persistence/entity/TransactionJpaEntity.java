@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "finance_transactions")
+@Table(name = "finance_transactions",
+        uniqueConstraints = @UniqueConstraint(name = "uq_finance_transactions_idempotency_key_customer_id",
+                columnNames = {"idempotency_key", "customer_id"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -55,7 +57,7 @@ public class TransactionJpaEntity {
     @Column(name = "recorded_at", nullable = false)
     private Instant recordedAt;
 
-    @Column(name = "idempotency_key", nullable = false, unique = true)
+    @Column(name = "idempotency_key", nullable = false)
     private UUID idempotencyKey;
 
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
