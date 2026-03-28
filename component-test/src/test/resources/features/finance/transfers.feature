@@ -20,36 +20,28 @@ Feature: Money movement between accounts
       | L_C_W3 | ACC3      | CUSTOMER_WALLET | 0.00    | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
       | L_C_H3 | ACC3      | CUSTOMER_HOLD   | 0.00    | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
 
-
-  Scenario: Successful cash deposit increases customer wallet balance
+  @ResetClock
+  Scenario Outline: Successful cash deposit increases customer wallet balance
+    Given now is "<now>"
     Given the deposit request is prepared with the following data
-      | idempotencyKey | customerId | amount | paymentMethod | operatorId |
-      | IDK1           | CUS2       | 50.00  | CASH          | OP1        |
+      | idempotencyKey   | customerId   | amount   | paymentMethod | operatorId   |
+      | <idempotencyKey> | <customerId> | <amount> | CASH          | <operatorId> |
     When a POST request has been made to "/api/finance/deposits" endpoint
     Then the response status is 201
     And the deposit response contains a transactionId
     And the following sub-ledger records were persisted in db
-      | id     | accountId | ledgerType      | version | balance |
-      | L_C_W2 | ACC2      | CUSTOMER_WALLET | 2       | 50.00   |
-      | L_C_H2 | ACC2      | CUSTOMER_HOLD   | 2       | 0.00    |
+      | id     | accountId | ledgerType      | version | balance  |
+      | L_C_W2 | ACC2      | CUSTOMER_WALLET | 2       | <amount> |
+      | L_C_H2 | ACC2      | CUSTOMER_HOLD   | 2       | 0.00     |
+    And the following transactions were persisted in db
+      | idempotencyKey   | customerId   | amount   | paymentMethod   | operatorId   | type    | recordedAt |
+      | <idempotencyKey> | <customerId> | <amount> | <paymentMethod> | <operatorId> | DEPOSIT | <now>      |
+    And the following transaction records were persisted in db
+      | subLedger | ledgerType      | direction | amount   |
+      | L_C_W2    | CUSTOMER_WALLET | CREDIT    | <amount> |
+      | L_S_CASH  | CASH            | DEBIT     | <amount> |
+    And there are only 2 transaction records in db
+    Examples:
+      | idempotencyKey | customerId | amount | paymentMethod | operatorId | now                 |
+      | IDK1           | CUS2       | 50.00  | CASH          | OP1        | 2026-03-28T10:00:00 |
 
-#    Given a customer is registered with phone "+79991234568" firstName "Anna" lastName "Ivanova"
-#    When staff records a cash deposit of 50.00 for the customer with operator "operator-1"
-#    Then the response status is 201
-#
-#  Scenario: Successful cash deposit increases customer wallet balance
-#    Given a customer is registered with phone "+79991234568" firstName "Anna" lastName "Ivanova"
-#    When staff records a cash deposit of 50.00 for the customer with operator "operator-1"
-#    Then the response status is 201
-#    And the deposit response contains a transactionId
-#    And the customer wallet balance is increased by 50.00 in db
-#    And a transaction record exists in db with type "DEPOSIT" and paymentMethod "CASH" and operatorId "operator-1"
-#
-#  Scenario: Deposit rejected for unknown customer
-#    When a deposit request is submitted for unknown customerId "00000000-0000-0000-0000-000000000000" with amount 50.00 and paymentMethod "CASH" and operator "operator-1"
-#    Then the response status is 404
-#
-#  Scenario: Deposit rejected for zero amount
-#    Given a customer is registered with phone "+79991234569" firstName "Boris" lastName "Sidorov"
-#    When a deposit request is submitted for the customer with amount 0.00 and paymentMethod "CASH" and operator "operator-1"
-#    Then the response status is 400

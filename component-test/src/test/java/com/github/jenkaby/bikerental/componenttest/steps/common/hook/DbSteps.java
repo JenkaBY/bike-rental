@@ -28,7 +28,7 @@ public class DbSteps {
             "rentals",
             "finance_transaction_records",
             "finance_transactions"
-        );
+    );
 
 
     private final JdbcClient jdbcClient;
@@ -41,7 +41,7 @@ public class DbSteps {
         JdbcTestUtils.deleteFromTableWhere(jdbcClient,
                 "finance_sub_ledgers",
                 "ledger_type NOT IN ('CASH', 'BANK_TRANSFER','CARD_TERMINAL','REVENUE','ADJUSTMENT')"
-                );
+        );
         JdbcTestUtils.deleteFromTableWhere(jdbcClient,
                 "finance_accounts",
                 "account_type != 'SYSTEM'"

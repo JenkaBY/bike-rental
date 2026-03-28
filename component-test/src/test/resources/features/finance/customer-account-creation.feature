@@ -8,7 +8,7 @@ Feature: Customer Finance Account Creation
 
   Scenario: New customer registration creates a finance account with zero-balance sub-ledgers
     Given a customer request with the following data
-      | phone        | firstName | lastName |
+      | phone       | firstName | lastName |
       | +3701234567 | Ivan      | Petrov   |
     When a POST request has been made to "/api/customers" endpoint
     Then the response status is 201

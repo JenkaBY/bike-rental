@@ -1,4 +1,3 @@
-
 package com.github.jenkaby.bikerental.componenttest.steps.equipment;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;

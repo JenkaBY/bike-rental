@@ -8,8 +8,8 @@ import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.within;
 public class DepositWebSteps {
 
     private final ScenarioContext scenarioContext;
-
+    private final Clock clock;
 
     @Given("the deposit request is prepared with the following data")
     public void theDepositRequestIsPreparedWithTheFollowingData(RecordDepositRequest request) {
@@ -33,7 +33,7 @@ public class DepositWebSteps {
 
         assertThat(body.transactionId())
                 .as("transactionId must be present in deposit response").isNotNull();
-        assertThat(body.recordedAt()).isCloseTo(Instant.now(), within(Duration.ofSeconds(2)));
+        assertThat(body.recordedAt()).isCloseTo(clock.instant(), within(Duration.ofSeconds(2)));
         scenarioContext.setRequestedObjectId(body.transactionId().toString());
     }
 }

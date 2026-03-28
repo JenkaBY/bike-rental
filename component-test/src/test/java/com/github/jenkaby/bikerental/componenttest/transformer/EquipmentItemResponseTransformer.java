@@ -1,4 +1,3 @@
-
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
