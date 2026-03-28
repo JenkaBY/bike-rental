@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Repository
@@ -20,5 +21,10 @@ public class WrapperAccountJpaRepository {
         return delegate.findAll().stream()
                 .peek(e -> e.getSubLedgers().forEach(SubLedgerJpaEntity::getId))
                 .toList();
+    }
+
+    public AccountJpaEntity findByCustomerId(UUID customerUuid) {
+        return this.delegate.findByCustomerId(customerUuid)
+                .orElse(null);
     }
 }
