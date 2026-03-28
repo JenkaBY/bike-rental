@@ -118,6 +118,25 @@ public class WebRequestSteps {
         scenarioContext.setResponse(response);
     }
 
+    public void parallelRequests(HttpMethod method, List<?> requestBodies,
+                                 String endpoint,
+                                 @Nullable @Transpose DataTable queryParams) {
+        var times = requestBodies.size();
+        var uriBuilder = UriComponentsBuilder.fromUriString("http://localhost:" + port + endpoint);
+        Optional.ofNullable(queryParams)
+                .map(DataTable::asMap)
+                .orElse(Map.of())
+                .forEach((key, value) -> uriBuilder.queryParam(key, Aliases.getValueOrDefault(value)));
+        var uri = uriBuilder.build().toUri();
+
+        var response = IntStream.range(0, times).parallel()
+                .mapToObj(i -> restClient.exchange(uri, method, new HttpEntity<>(requestBodies.get(i), HttpHeaders.readOnlyHttpHeaders(scenarioContext.getRequestHeaders())), String.class))
+                .peek(resp -> log.info("Response : {}", resp))
+                .toList().getLast();
+        log.debug("Last Response : {}", response);
+        scenarioContext.setResponse(response);
+    }
+
     @Then("the response status is {int}")
     public void theResponseStatusIs(int expectedStatus) {
         var actualStatusCode = scenarioContext.getResponse().getStatusCode();

@@ -26,6 +26,11 @@ public class TransactionDbSteps {
 
     private final WrapperTransactionJpaRepository transactionJpaRepository;
 
+    @Then("there are/is only {int} transactions in db")
+    public void thereAreOnlyNumberOfTransactionRecordsInDb(int expected) {
+        assertThat(transactionJpaRepository.findAllInitialized()).hasSize(expected);
+    }
+
     @Then("the following transaction(s) were/was persisted in db")
     public void transactionsWerePersistedInDb(List<TransactionJpaEntity> expected) {
         var all = transactionJpaRepository.findAllInitialized();
