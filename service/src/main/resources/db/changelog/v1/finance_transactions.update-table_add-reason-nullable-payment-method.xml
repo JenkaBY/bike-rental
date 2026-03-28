@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="finance_transactions.update-table_nullable-payment-method"
+               author="copilot">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="finance_transactions"/>
+        </preConditions>
+
+        <dropNotNullConstraint tableName="finance_transactions"
+                               columnName="payment_method"
+                               columnDataType="VARCHAR(30)"/>
+    </changeSet>
+
+    <changeSet id="finance_transactions.update-table_add-reason-column"
+               author="copilot">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="finance_transactions" columnName="reason"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="finance_transactions">
+            <column name="reason" type="VARCHAR(1000)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

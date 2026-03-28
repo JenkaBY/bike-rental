@@ -28,5 +28,7 @@ public class Transaction {
     private final String sourceId;
     private final Instant recordedAt;
     private final IdempotencyKey idempotencyKey;
+    @Nullable
+    private final String reason;
     private final List<TransactionRecord> records;
 }

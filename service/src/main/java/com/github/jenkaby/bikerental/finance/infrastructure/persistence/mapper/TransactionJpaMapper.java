@@ -12,6 +12,7 @@ public interface TransactionJpaMapper {
 
     @Mapping(target = "records", source = "records")
     @Mapping(target = "type", source = "transactionType")
+    @Mapping(target = "reason", ignore = true)
     Transaction toDomain(TransactionJpaEntity entity);
 
     @InheritInverseConfiguration

@@ -32,8 +32,9 @@ public class TransactionJpaEntity {
     @Column(name = "transaction_type", nullable = false, length = 30)
     private TransactionType transactionType;
 
+    @Nullable
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false, length = 30)
+    @Column(name = "payment_method", length = 30)
     private PaymentMethod paymentMethod;
 
     @Column(nullable = false, precision = 19, scale = 2)
@@ -59,6 +60,10 @@ public class TransactionJpaEntity {
 
     @Column(name = "idempotency_key", nullable = false)
     private UUID idempotencyKey;
+
+    @Nullable
+    @Column(name = "reason", length = 1000)
+    private String reason;
 
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
