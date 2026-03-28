@@ -34,7 +34,7 @@ class AccountRepositoryAdapter implements AccountRepository {
 
     @Override
     public Account getSystemAccount() {
-        return jpaRepository.findByAccountType(AccountType.SYSTEM.name())
+        return jpaRepository.findByAccountType(AccountType.SYSTEM)
                 .map(mapper::toDomain)
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, AccountType.SYSTEM.name()));
     }

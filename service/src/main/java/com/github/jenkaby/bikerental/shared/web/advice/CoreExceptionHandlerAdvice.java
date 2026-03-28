@@ -5,7 +5,6 @@ import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException
 import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
-import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.accept.InvalidApiVersionException;
@@ -233,8 +233,8 @@ public class CoreExceptionHandlerAdvice {
         return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 
-    @ExceptionHandler(OptimisticLockException.class)
-    public ResponseEntity<ProblemDetail> handleOptimisticLockException(OptimisticLockException ex) {
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ProblemDetail> handleOptimisticLockException(ObjectOptimisticLockingFailureException ex) {
         var correlationId = resolveCorrelationId();
         log.warn("[correlationId={}] Optimistic lock occurred: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);

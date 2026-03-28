@@ -15,6 +15,7 @@ public class SubLedger {
     private final LedgerType ledgerType;
     @Setter(AccessLevel.PRIVATE)
     private Money balance;
+    private final long version;
 
     public TransactionRecordWithoutId credit(Money amount) {
         this.balance = this.balance.add(amount);
