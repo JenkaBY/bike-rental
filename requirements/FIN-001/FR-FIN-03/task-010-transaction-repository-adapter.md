@@ -57,14 +57,16 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
-    public Optional<Transaction> findByIdempotencyKey(java.util.UUID idempotencyKey) {
-        return jpaRepository.findByIdempotencyKey(idempotencyKey)
+    public Optional<Transaction> findByIdempotencyKeyAndCustomerId(
+            com.github.jenkaby.bikerental.shared.domain.IdempotencyKey idempotencyKey,
+            java.util.UUID customerId) {
+        return jpaRepository.findByIdempotencyKeyAndCustomerId(idempotencyKey.id(), customerId)
                 .map(mapper::toDomain);
     }
 
-    // Note: The domain port now accepts an `IdempotencyKey` value object; the adapter converts
-    // `IdempotencyKey` ↔ `UUID` when delegating to the JPA repository. Ensure `IdempotencyKeyMapper`
-    // is available in `TransactionJpaMapper`.
+    // Note: `IdempotencyKey` is a record wrapping a UUID; `.id()` extracts the raw UUID value
+    // passed to the Spring Data query method. The lookup is scoped to both key and customerId
+    // to prevent cross-customer data leaks.
 }
 ```
 

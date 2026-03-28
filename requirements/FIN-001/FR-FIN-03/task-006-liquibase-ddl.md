@@ -61,10 +61,14 @@ Add two new DDL Liquibase changeset files that create the `finance_transactions`
                 <constraints nullable="false"/>
             </column>
             <column name="idempotency_key" type="UUID">
-                <constraints nullable="false" unique="true"
-                              uniqueConstraintName="uq_finance_transactions_idempotency_key"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <addUniqueConstraint
+                tableName="finance_transactions"
+                columnNames="idempotency_key, customer_id"
+                constraintName="uq_finance_transactions_idempotency_key_customer_id"/>
 
         <sql>
             ALTER TABLE finance_transactions

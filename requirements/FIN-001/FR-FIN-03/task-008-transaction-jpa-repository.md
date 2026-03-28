@@ -20,7 +20,7 @@ story; the interface inherits it from `JpaRepository`.
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.TransactionJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.UUID;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 ```
 
 ```java
@@ -31,12 +31,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 
 @Repository
 public interface TransactionJpaRepository extends JpaRepository<TransactionJpaEntity, UUID> {
 
-    Optional<TransactionJpaEntity> findByIdempotencyKey(UUID idempotencyKey);
+    Optional<TransactionJpaEntity> findByIdempotencyKeyAndCustomerId(UUID idempotencyKey, CustomerRef customerId);
 }
 ```
 

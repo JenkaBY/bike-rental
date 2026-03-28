@@ -81,8 +81,12 @@ security layer noted in the current architecture.
   flows use the new constants exclusively.
 
 * **`TransactionRepository` (new — finance module domain port):** Interface in `finance/domain/repository`.
-  Declares `save(Transaction) : Transaction` and `findByIdempotencyKey(...) : Optional<Transaction>` to
-  support deduplication of repeated client submissions. Implementation note: the JPA adapter marks `save(...)`
+  Declares `save(Transaction) : Transaction` and
+  `findByIdempotencyKeyAndCustomerId(IdempotencyKey, UUID) : Optional<Transaction>` to
+  support deduplication of repeated client submissions. The lookup is intentionally scoped to both key and
+  `customerId` to prevent cross-customer data leaks: a lookup by key alone could return a transaction belonging
+  to a different customer if a key were reused across customers, silently skipping the credit and disclosing
+  an internal transaction identifier. Implementation note: the JPA adapter marks `save(...)`
   with `@Transactional(propagation = Propagation.MANDATORY)` so it must be invoked inside an existing service
   transaction that is already persisting related account balance mutations.
 
@@ -113,7 +117,7 @@ security layer noted in the current architecture.
         * `transaction_type` (Enum string: `DEPOSIT | ...`, not-null)
         * `payment_method` (Enum string: `CASH | CARD_TERMINAL | BANK_TRANSFER`, not-null)
         * `amount` (Decimal 19,2, not-null, check > 0)
-        * `idempotency_key` (UUID, not-null, unique) — client-provided key used to deduplicate repeated requests.
+      * `idempotency_key` (UUID, not-null) — client-provided key used to deduplicate repeated requests.
         * `customer_id` (UUID, not-null — references the customer identity for audit; no FK constraint to avoid
           cross-module coupling)
         * `operator_id` (Varchar, not-null — identifier of the staff member who recorded the transaction;
@@ -123,6 +127,12 @@ security layer noted in the current architecture.
         * `source_id` (UUID, nullable — ID of the linked business entity, e.g. rental ID; null when
           `source_type` is null; no FK constraint to avoid cross-module coupling)
         * `recorded_at` (Timestamp with timezone, not-null)
+  * **Constraints:**
+      * Composite unique constraint on `(idempotency_key, customer_id)` — idempotency deduplication is
+        scoped per customer. A key may be reused across different customers without conflict, but the same
+        key submitted twice for the same customer is guaranteed to be idempotent. This prevents a
+        cross-customer information leak where a lookup by key alone could return a transaction belonging to
+        a different customer.
     * **Indices:**
         * Index on `customer_id` to support future audit queries by customer.
         * Index on `(source_type, source_id)` to support future lookups of all transactions for a given rental.
@@ -190,7 +200,12 @@ security layer noted in the current architecture.
 
 * **Interaction: `RecordDepositService` → `TransactionRepository`**
     * **Protocol:** In-process synchronous call (same transaction)
-    * **Payload Changes:** New `save(Transaction)` method. The `Transaction` object carries `type = DEPOSIT`,
+  * **Payload Changes:** New `save(Transaction)` method and new
+    `findByIdempotencyKeyAndCustomerId(IdempotencyKey, UUID)` method replacing the plain `findByIdempotencyKey` lookup.
+    Scoping the lookup to `(idempotencyKey, customerId)` ensures the idempotency short-circuit can never return a
+    transaction that belongs to a different customer — a globally-unique key lookup would allow a key reused for a
+    different customer to silently skip the credit and leak the original customer's transaction identifier. The
+    `Transaction` object carries `type = DEPOSIT`,
       the chosen `paymentMethod`, `amount`, `customerId`, `operatorId`, `recordedAt`, `sourceType = null`,
       `sourceId = null` (a counter deposit has no linked business entity), and exactly two `TransactionRecord`
       children: one `DEBIT` on the System Account's payment-method sub-ledger and one `CREDIT` on the customer's
@@ -205,8 +220,11 @@ security layer noted in the current architecture.
 1. Staff submits `POST /api/finance/deposits` with `{ customerId, amount: 50, paymentMethod: CASH }`.
 2. `DepositCommandController` validates the request DTO (amount > 0, paymentMethod non-null, customerId non-null).
 3. `DepositCommandController` invokes `RecordDepositUseCase.execute(RecordDepositCommand)`.
-4. `RecordDepositService` checks `TransactionRepository.findByIdempotencyKey(command.idempotencyKey())` — if
+4. `RecordDepositService` checks
+   `TransactionRepository.findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), command.customerId())` — if
   present, it returns the existing `transactionId` + `recordedAt` and short-circuits the rest of the flow.
+   The lookup is scoped to both the key **and** the customer to prevent a cross-customer data leak: a globally-keyed
+   lookup could return a transaction belonging to a different customer if the same key were reused across customers.
 5. `RecordDepositService` opens a `@Transactional` boundary.
 6. `RecordDepositService` calls `AccountRepository.findByCustomerId(customerId)` — Customer Account found,
    including `CUSTOMER_WALLET` sub-ledger.
