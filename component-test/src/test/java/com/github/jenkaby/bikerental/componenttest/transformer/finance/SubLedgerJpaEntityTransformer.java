@@ -19,14 +19,12 @@ public class SubLedgerJpaEntityTransformer {
     public SubLedgerJpaEntity transform(Map<String, String> entry) {
         SubLedgerJpaEntity entity = new SubLedgerJpaEntity();
 
-        // id: accept alias or raw UUID
         UUID id = Optional.ofNullable(entry.get("id"))
                 .map(Aliases::getValue)
                 .map(UUID::fromString)
                 .orElse(null);
         entity.setId(id);
 
-        // account reference: accept alias or raw UUID and set minimal AccountJpaEntity with id only
         String accountIdStr = DataTableHelper.getStringOrNull(entry, "accountId");
         if (accountIdStr != null && !accountIdStr.isBlank()) {
             String resolved = Optional.ofNullable(Aliases.getValue(accountIdStr)).orElse(accountIdStr);
@@ -39,11 +37,9 @@ public class SubLedgerJpaEntityTransformer {
         var ledgerType = LedgerType.valueOf(DataTableHelper.getStringOrNull(entry, "ledgerType"));
         entity.setLedgerType(ledgerType);
 
-        // balance (non-nullable in JPA entity) — default to zero when absent
         BigDecimal balance = DataTableHelper.toBigDecimal(entry, "balance");
         entity.setBalance(Optional.ofNullable(balance).orElse(BigDecimal.ZERO));
         entity.setVersion(Optional.ofNullable(DataTableHelper.toLong(entry, "version")).orElse(1L));
-        // audit timestamps
         Instant createdAt = DataTableHelper.toInstant(entry, "createdAt");
         entity.setCreatedAt(createdAt);
         Instant updatedAt = Optional.ofNullable(DataTableHelper.toInstant(entry, "updatedAt")).orElse(createdAt);
