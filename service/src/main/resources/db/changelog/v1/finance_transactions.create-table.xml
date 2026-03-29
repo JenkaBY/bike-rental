@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="finance_transactions.create-table" author="copilot">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="finance_transactions"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="finance_transactions">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="transaction_type" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_method" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="operator_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_type" type="varchar(30)"/>
+            <column name="source_id" type="varchar(255)"/>
+            <column name="recorded_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idempotency_key" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="finance_transactions"
+                columnNames="idempotency_key, customer_id"
+                constraintName="uq_finance_transactions_idempotency_key_customer_id"/>
+
+        <sql>
+            ALTER TABLE finance_transactions
+                ADD CONSTRAINT chk_finance_transactions_amount CHECK (amount > 0);
+        </sql>
+
+        <createIndex indexName="idx_finance_transactions_customer_id"
+                     tableName="finance_transactions">
+            <column name="customer_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

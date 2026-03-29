@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.accept.InvalidApiVersionException;
@@ -230,6 +231,18 @@ public class CoreExceptionHandlerAdvice {
         body.setProperty(ERROR_CODE, ex.getErrorCode());
         body.setProperty(PARAMS, details);
         return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ProblemDetail> handleOptimisticLockException(ObjectOptimisticLockingFailureException ex) {
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Optimistic lock occurred: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("Optimistic lock");
+        problem.setDetail("Concurrent update — please retry");
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.RESOURCE_OPTIMISTIC_LOCK);
+        return ResponseEntity.of(problem).build();
     }
 
     private String resolveCorrelationId() {

@@ -16,15 +16,16 @@
         </preConditions>
 
         <loadData tableName="finance_sub_ledgers"
-                  file="data/finance_sub_ledgers.csv"
-                  relativeToChangelogFile="true">
-            <column name="id" type="uuid"/>
-            <column name="account_id" type="uuid"/>
-            <column name="ledger_type" type="string"/>
-            <column name="balance" type="numeric"/>
-            <column name="created_at" type="datetime"/>
-            <column name="updated_at" type="datetime"/>
-        </loadData>
+            file="data/finance_sub_ledgers.csv"
+            relativeToChangelogFile="true">
+        <column name="id" type="uuid"/>
+        <column name="account_id" type="uuid"/>
+        <column name="ledger_type" type="string"/>
+        <column name="balance" type="numeric"/>
+        <column name="created_at" type="datetime"/>
+        <column name="updated_at" type="datetime"/>
+        <column name="version" type="numeric"/>
+      </loadData>
     </changeSet>
 
 </databaseChangeLog>

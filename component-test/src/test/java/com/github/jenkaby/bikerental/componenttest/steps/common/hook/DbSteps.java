@@ -1,16 +1,25 @@
 package com.github.jenkaby.bikerental.componenttest.steps.common.hook;
 
+import com.github.jenkaby.bikerental.finance.domain.model.AccountType;
+import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import io.cucumber.java.After;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 public class DbSteps {
+
+    private static final String SYSTEM_LEDGER_TYPES = joinEnumNames(LedgerType.class, LedgerType::isSystemLedger);
+    private static final String SYSTEM_ACCOUNTS = joinEnumNames(AccountType.class, AccountType::isSystem);
+
 
     private static final List<String> TABLE_TO_TRUNCATE = List.of(
             // order is important due to foreign key constraints
@@ -26,9 +35,10 @@ public class DbSteps {
             "payments",
             "rental_equipments",
             "rentals",
-            "finance_sub_ledgers",
-            "finance_accounts"
-        );
+            "finance_transaction_records",
+            "finance_transactions"
+    );
+
 
     private final JdbcClient jdbcClient;
 
@@ -36,5 +46,21 @@ public class DbSteps {
     public void truncateDb() {
         log.info("Deleting all records on tables {}", TABLE_TO_TRUNCATE);
         JdbcTestUtils.deleteFromTables(jdbcClient, TABLE_TO_TRUNCATE.toArray(new String[0]));
+        JdbcTestUtils.deleteFromTableWhere(jdbcClient,
+                "finance_sub_ledgers",
+                "ledger_type NOT IN (%s)".formatted(SYSTEM_LEDGER_TYPES)
+        );
+        JdbcTestUtils.deleteFromTableWhere(jdbcClient,
+                "finance_accounts",
+                "account_type != %s".formatted(SYSTEM_ACCOUNTS)
+        );
+
+    }
+
+    private static <E extends Enum<E>> String joinEnumNames(Class<E> enumClass, Predicate<E> filter) {
+        return Arrays.stream(enumClass.getEnumConstants())
+                .filter(filter)
+                .map(Enum::name)
+                .collect(Collectors.joining("','", "'", "'"));
     }
 }

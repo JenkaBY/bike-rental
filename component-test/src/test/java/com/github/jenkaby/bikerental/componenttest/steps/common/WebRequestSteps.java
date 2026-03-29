@@ -12,16 +12,19 @@ import io.cucumber.java.en.When;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +56,7 @@ public class WebRequestSteps {
     }
 
     @Given("the {string} header is removed")
-    public void theHeaderIsRemoved(String headerName, String headerValue) {
+    public void theHeaderIsRemoved(String headerName) {
         log.info("Removing header '{}'", headerName);
         scenarioContext.removeHeader(headerName);
     }
@@ -116,6 +119,46 @@ public class WebRequestSteps {
                 .toList().getLast();
         log.debug("Last Response : {}", response);
         scenarioContext.setResponse(response);
+    }
+
+    public void parallelRequests(HttpMethod method, List<?> requestBodies,
+                                 String endpoint,
+                                 @Nullable @Transpose DataTable queryParams) {
+        var times = requestBodies.size();
+        var uriBuilder = UriComponentsBuilder.fromUriString("http://localhost:" + port + endpoint);
+        Optional.ofNullable(queryParams)
+                .map(DataTable::asMap)
+                .orElse(Map.of())
+                .forEach((key, value) -> uriBuilder.queryParam(key, Aliases.getValueOrDefault(value)));
+        var uri = uriBuilder.build().toUri();
+
+        var headers = HttpHeaders.readOnlyHttpHeaders(scenarioContext.getRequestHeaders());
+        var response = IntStream.range(0, times).parallel()
+                .mapToObj(i -> exchangeWithRetry(method, requestBodies.get(i), uri, headers))
+                .peek(resp -> log.info("Response : {}", resp))
+                .toList().getLast();
+        log.debug("Last Response : {}", response);
+        scenarioContext.setResponse(response);
+    }
+
+    private @NonNull ResponseEntity<String> exchangeWithRetry(HttpMethod method, Object body, URI uri, HttpHeaders headers) {
+        int maxRetry = 10;
+        int attempt = 0;
+        ResponseEntity<String> response = null;
+        while (attempt < maxRetry) {
+            attempt++;
+            response = restClient.exchange(uri, method, new HttpEntity<>(body, headers), String.class);
+            if (response.getStatusCode().value() != HttpStatus.CONFLICT.value() || attempt == maxRetry) {
+                log.info("Retried[attempt={}] Response {}", attempt, response);
+                return response;
+            }
+            try {
+                Thread.sleep(ThreadLocalRandom.current().nextInt(50, 200));
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        return response;
     }
 
     @Then("the response status is {int}")
@@ -210,4 +253,6 @@ public class WebRequestSteps {
         java.util.List<String> actual = documentContext.read(jsonPath);
         assertThat(actual).containsAll(expectedValues);
     }
+
+
 }

@@ -35,18 +35,19 @@ component-test/
 │   ├── steps/                                # Step definitions
 │   │   ├── common/                           # Reusable steps (HTTP request/response, DB steps)
 │   │   │   └── hook/                         # Lifecycle hooks (clear scenario contexts, DB, message storage and etc.)
-│   │   └── {feature}/                        # Feature-specific steps
-│   │       └── {Feature}WebSteps.java        # Feature-specific web related steps
-│   │       └── {Feature}DbSteps.java         # Feature-specific db related steps
-│   │       └── {Feature}MessagingSteps.java  # Feature-specific messaging related steps
+│   │   └── {module}/                        # Feature-specific steps
+│   │       └── {Module}WebSteps.java        # Feature-specific web related steps
+│   │       └── {Module}DbSteps.java         # Feature-specific db related steps
+│   │       └── {Module}MessagingSteps.java  # Feature-specific messaging related steps
 │   └── transformer/                          # Data transformers(Parameter transformers, )
 │       └── ParameterTypes.java               # Custom parameter types
-│       └── {ModelOrEntity}Transformer.java   # Datatable transformers. Converts DataTable to domain objects
+│       └── {Module}/
+|          └── {ModelOrEntity}Transformer.java   # Datatable transformers. Converts DataTable to domain objects
 └── src/test/resources/       
     ├── features/                             # Gherkin feature files
     │   ├── application.feature               # Basic app tests
     │   └── {module}/                         # Organized by module
-    │       └── feature-name.feature          # Feature scenarios
+    │       └── {feature-name}.feature        # Feature scenarios
     ├── application-test.yaml                 # Test profile configuration
     └── junit-platform.properties             # Cucumber configuration
 ```

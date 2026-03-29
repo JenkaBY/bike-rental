@@ -687,7 +687,7 @@ class RentalCommandControllerTest {
                             "Bad Request"
                     ),
                     Arguments.of(
-                            new RecordPrepaymentRequest(new BigDecimal("-10.00"), PaymentMethod.CARD, "operator-1"),
+                            new RecordPrepaymentRequest(new BigDecimal("-10.00"), PaymentMethod.CASH, "operator-1"),
                             "Bad Request"
                     ),
                     Arguments.of(

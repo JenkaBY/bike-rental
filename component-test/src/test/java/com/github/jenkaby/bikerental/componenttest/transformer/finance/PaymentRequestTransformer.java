@@ -1,5 +1,6 @@
-package com.github.jenkaby.bikerental.componenttest.transformer;
+package com.github.jenkaby.bikerental.componenttest.transformer.finance;
 
+import com.github.jenkaby.bikerental.componenttest.transformer.DataTableHelper;
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
