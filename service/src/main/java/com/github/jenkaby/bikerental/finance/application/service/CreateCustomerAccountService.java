@@ -10,22 +10,21 @@ import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 class CreateCustomerAccountService implements CreateCustomerAccountUseCase {
 
     private final AccountRepository accountRepository;
     private final UuidGenerator uuidGenerator;
-
-    CreateCustomerAccountService(AccountRepository accountRepository, UuidGenerator uuidGenerator) {
-        this.accountRepository = accountRepository;
-        this.uuidGenerator = uuidGenerator;
-    }
 
     @Override
     @Transactional
@@ -34,6 +33,7 @@ class CreateCustomerAccountService implements CreateCustomerAccountUseCase {
                 .ifPresent(existing -> {
                     throw new ResourceConflictException(Account.class, customerId.toString());
                 });
+        log.info("Creating finance account for customer={}", customerId);
 
         var wallet = SubLedger.builder()
                 .id(uuidGenerator.generate())
