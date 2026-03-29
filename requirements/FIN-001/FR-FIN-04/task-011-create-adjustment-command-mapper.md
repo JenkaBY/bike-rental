@@ -49,9 +49,16 @@ public interface AdjustmentCommandMapper {
 ```
 
 > **MapStruct note:** `AdjustmentRequest.amount` is `BigDecimal`; `ApplyAdjustmentCommand.amount` is `Money`.
-> `MoneyMapper.toMoney(BigDecimal)` is matched automatically. For the response, `AdjustmentResult.newWalletBalance`
-> is `Money`; `AdjustmentResponse.newWalletBalance` is `BigDecimal`. `MoneyMapper.toBigDecimal(Money)` is matched
-> automatically. No explicit `@Mapping` annotations are needed.
+> `MoneyMapper.toMoney(BigDecimal)` is matched automatically. `AdjustmentRequest.idempotencyKey` is `UUID`;
+> `ApplyAdjustmentCommand.idempotencyKey` is `IdempotencyKey`. Add an explicit `@Mapping` to convert it:
+>
+> ```java
+> @Mapping(target = "idempotencyKey", expression = "java(com.github.jenkaby.bikerental.shared.domain.IdempotencyKey.of(request.idempotencyKey()))")
+> ApplyAdjustmentCommand toCommand(AdjustmentRequest request);
+> ```
+>
+> For the response, `AdjustmentResult.newWalletBalance` is `Money`; `AdjustmentResponse.newWalletBalance` is
+> `BigDecimal`. `MoneyMapper.toBigDecimal(Money)` is matched automatically.
 
 ## 4. Validation Steps
 

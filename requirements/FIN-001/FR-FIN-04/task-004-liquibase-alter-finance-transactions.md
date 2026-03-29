@@ -1,33 +1,37 @@
 # Task 004: Liquibase Changeset — Alter `finance_transactions` Table
 
-> **Applied Skill:** `liquibase` — `addColumn` workflow, `dropNotNullConstraint` for existing column, file naming
-> convention, master changelog include ordering rule.
+> **Applied Skill:** `liquibase` — `addColumn` workflow, modifying an existing changeset file.
 
 ## 1. Objective
 
-Apply two structural DDL changes to the `finance_transactions` table:
+Apply one structural DDL change to the `finance_transactions` table:
 
-1. Drop the `NOT NULL` constraint on `payment_method` so that `ADJUSTMENT` transaction rows can omit it.
-2. Add a new nullable `reason` column (VARCHAR 1000) that stores the mandatory adjustment explanation.
+1. Add a new nullable `reason` column (VARCHAR 1000) that stores the mandatory adjustment explanation.
 
-## 2. File to Modify / Create
+`payment_method` is stored as `varchar(30)` (not a PostgreSQL enum), so `INTERNAL_TRANSFER` is simply a new
+application-level string value. The column remains `NOT NULL`; no DDL change is required for it.
 
-**Create** the new changeset file:
+## 2. File to Modify
+
+**Modify** the existing changeset file to remove the stale `dropNotNullConstraint` changeSet and keep only
+the `addColumn` changeSet for `reason`:
 
 * **File Path:**
   `service/src/main/resources/db/changelog/v1/finance_transactions.update-table_add-reason-nullable-payment-method.xml`
-* **Action:** Create New File
-
-**Modify** the master changelog to include the new changeset last in the DDL section:
-
-* **File Path:** `service/src/main/resources/db/changelog/db.changelog-master.xml`
 * **Action:** Modify Existing File
+
+The master changelog (`service/src/main/resources/db/changelog/db.changelog-master.xml`) already includes
+this file — **no change required there**.
 
 ## 3. Code Implementation
 
-### 3a. New changeset file
+### 3a. Updated changeset file
 
-**Snippet** — full file content:
+The file currently contains two `<changeSet>` blocks. **Delete the first one** (id:
+`finance_transactions.update-table_nullable-payment-method`) entirely — it drops the NOT NULL constraint on
+`payment_method`, which is no longer required. **Keep the second one** unchanged.
+
+**Snippet** — full file content after edit:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -36,17 +40,6 @@ Apply two structural DDL changes to the `finance_transactions` table:
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
-
-    <changeSet id="finance_transactions.update-table_nullable-payment-method"
-               author="copilot">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="finance_transactions"/>
-        </preConditions>
-
-        <dropNotNullConstraint tableName="finance_transactions"
-                               columnName="payment_method"
-                               columnDataType="VARCHAR(30)"/>
-    </changeSet>
 
     <changeSet id="finance_transactions.update-table_add-reason-column"
                author="copilot">
@@ -66,26 +59,7 @@ Apply two structural DDL changes to the `finance_transactions` table:
 </databaseChangeLog>
 ```
 
-### 3b. Register in `db.changelog-master.xml`
-
-* **Location:** Inside `db.changelog-master.xml`, add the new include immediately after the existing
-  `finance_transaction_records.create-table.xml` include and before the `<!--  provisioning data -->` comment.
-
-Replace:
-
-```xml
-    <include relativeToChangelogFile="true" file="v1/finance_transaction_records.create-table.xml"/>
-    <!--    provisioning data -->
-```
-
-With:
-
-```xml
-    <include relativeToChangelogFile="true" file="v1/finance_transaction_records.create-table.xml"/>
-    <include relativeToChangelogFile="true"
-             file="v1/finance_transactions.update-table_add-reason-nullable-payment-method.xml"/>
-    <!--    provisioning data -->
-```
+> **Note:** `db.changelog-master.xml` already includes this file — no change needed there.
 
 ## 4. Validation Steps
 

@@ -28,6 +28,7 @@ negative = deduction) plus mandatory `reason` and `operatorId` audit fields.
 ```java
 package com.github.jenkaby.bikerental.finance.application.usecase;
 
+import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 
 import java.time.Instant;
@@ -41,7 +42,8 @@ public interface ApplyAdjustmentUseCase {
             UUID customerId,
             Money amount,
             String reason,
-            String operatorId
+            String operatorId,
+            IdempotencyKey idempotencyKey
     ) {}
 
     record AdjustmentResult(

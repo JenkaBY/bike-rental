@@ -12,8 +12,8 @@ Implement the adjustment application service that:
    `InsufficientBalanceException` with available vs. requested amounts if not.
 3. Mutates sub-ledger balances in-memory via the existing `credit()` / `debit()` domain methods.
 4. Saves both account aggregates to flush the balance changes.
-5. Builds a `Transaction` with `type=ADJUSTMENT`, `paymentMethod=null`, `reason` from command, and two
-   `TransactionRecord` children.
+5. Builds a `Transaction` with `type=ADJUSTMENT`, `paymentMethod=INTERNAL_TRANSFER`, `reason` from command,
+   and two `TransactionRecord` children.
 6. Saves the transaction journal entry.
 7. Returns `AdjustmentResult { transactionId, newWalletBalance, recordedAt }`.
 
@@ -41,10 +41,10 @@ import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
-import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
@@ -79,16 +79,14 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
         var adjustmentSubLedger = systemAccount.getSubLedger(LedgerType.ADJUSTMENT);
 
         boolean isDeduction = command.amount().isNegative();
-        Money absAmount = isDeduction
-                ? Money.of(command.amount().amount().negate())
-                : command.amount();
+        Money absAmount = command.amount().getAbs();
 
-        if (isDeduction && walletSubLedger.getBalance().compareTo(absAmount) < 0) {
+        if (isDeduction && !walletSubLedger.isSufficientBalance(absAmount)) {
             throw new InsufficientBalanceException(walletSubLedger.getBalance(), absAmount);
         }
 
-        final var debitChange;
-        final var creditChange;
+        TransactionRecordWithoutId debitChange;
+        TransactionRecordWithoutId creditChange;
 
         if (isDeduction) {
             debitChange = walletSubLedger.debit(absAmount);
@@ -101,20 +99,20 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
         accountRepository.save(systemAccount);
         accountRepository.save(customerAccount);
 
-        Instant now = clock.instant();
+        Instant recordedAt = clock.instant();
         UUID transactionId = uuidGenerator.generate();
 
         var transaction = Transaction.builder()
                 .id(transactionId)
                 .type(TransactionType.ADJUSTMENT)
-                .paymentMethod(null)
+                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
                 .amount(absAmount)
                 .customerId(command.customerId())
                 .operatorId(command.operatorId())
                 .sourceType(null)
                 .sourceId(null)
-                .recordedAt(now)
-                .idempotencyKey(IdempotencyKey.of(uuidGenerator.generate()))
+                .recordedAt(recordedAt)
+                .idempotencyKey(command.idempotencyKey())
                 .reason(command.reason())
                 .records(List.of(
                         debitChange.toTransaction(uuidGenerator.generate()),
@@ -124,29 +122,14 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
 
         transactionRepository.save(transaction);
 
-        return new AdjustmentResult(transactionId, walletSubLedger.getBalance(), now);
+        return new AdjustmentResult(transactionId, walletSubLedger.getBalance(), recordedAt);
     }
 }
 ```
 
-> **Implementation note on `var` with final:** Java does not allow `final var` together. Remove the `final` keyword
-> from the `debitChange` / `creditChange` declarations — use plain `var debitChange;` and `var creditChange;` but
-> declare them before the `if/else` block, which requires a type. Use the concrete type
-> `TransactionRecordWithoutId` from `com.github.jenkaby.bikerental.finance.domain.model.TransactionRecordWithoutId`
-> instead:
->
-> ```java
-> TransactionRecordWithoutId debitChange;
-> TransactionRecordWithoutId creditChange;
->
-> if (isDeduction) {
->     debitChange = walletSubLedger.debit(absAmount);
->     creditChange = adjustmentSubLedger.credit(absAmount);
-> } else {
->     debitChange = adjustmentSubLedger.debit(absAmount);
->     creditChange = walletSubLedger.credit(absAmount);
-> }
-> ```
+> **Implementation note on `var` with declaration before `if/else`:** Java requires the type to be explicit when
+> declaring a variable before an `if/else` block. Use the concrete type `TransactionRecordWithoutId` from
+> `com.github.jenkaby.bikerental.finance.domain.model.TransactionRecordWithoutId` as shown in the snippet above.
 
 ## 4. Validation Steps
 

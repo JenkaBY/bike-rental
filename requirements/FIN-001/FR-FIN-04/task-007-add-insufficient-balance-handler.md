@@ -7,7 +7,7 @@
 
 Register an `@ExceptionHandler` for `InsufficientBalanceException` in the finance module's scoped advice class.
 Because `FinanceRestControllerAdvice` has `@Order(Ordered.LOWEST_PRECEDENCE - 1)`, it fires before
-`CoreExceptionHandlerAdvice` and maps the balance failure to `422 Unprocessable Entity` with the
+`CoreExceptionHandlerAdvice` and maps the balance failure to `422 Unprocessable Content` with the
 `finance.insufficient_balance` error code and a `correlationId` for tracing.
 
 ## 2. File to Modify / Create
@@ -58,10 +58,10 @@ With:
     ResponseEntity<ProblemDetail> handleInsufficientBalance(InsufficientBalanceException ex) {
         var correlationId = resolveCorrelationId();
         log.warn("[correlationId={}] Insufficient balance: {}", correlationId, ex.getMessage());
-        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, ex.getErrorCode());
-        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 }
 ```

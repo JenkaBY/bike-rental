@@ -61,9 +61,16 @@ forming an immutable audit trail.
   `InsufficientBalanceException` thrown when a deduction would reduce `CUSTOMER_WALLET` below zero.
   Maps to `422 Unprocessable Entity` with `errorCode: INSUFFICIENT_BALANCE`.
 
+* **`PaymentMethod` (existing — finance module domain enum — extended):** Add `INTERNAL_TRANSFER` to the
+  existing set of values. This value is used exclusively by `ADJUSTMENT`-type transactions to signal an
+  internal ledger correction with no external payment instrument. Any existing exhaustive switch or MapStruct
+  mapper over `PaymentMethod` must be updated to handle this new variant; the
+  `mapstruct.unmappedTargetPolicy=ERROR` flag will produce a build failure until all mappers are aligned.
+
 * **`bike-rental-db` (data store — schema extended):** The `finance_transactions` table gains a new nullable
-  `reason` column. The `payment_method` column, currently non-null, must be made nullable to accommodate
-  `ADJUSTMENT` transactions that carry no payment method.
+  `reason` column. The `payment_method` column remains NOT NULL; no DDL change is required for that column.
+  The `payment_method` enum type is extended with the `INTERNAL_TRANSFER` value to accommodate `ADJUSTMENT`
+  transactions.
 
 ---
 
@@ -72,9 +79,9 @@ forming an immutable audit trail.
 * **Entity: `Transaction`**
     * **Attributes Added/Modified:**
         * `reason` (Varchar, nullable — non-null and non-blank for `ADJUSTMENT` type; null for all other types).
-        * `payment_method` (Enum string — relaxed from NOT NULL to nullable to accommodate `ADJUSTMENT`
-          transactions that have no associated payment method. Existing `DEPOSIT` and `WITHDRAWAL` rows always
-          carry a non-null value; no data migration is required).
+      * `payment_method` (Enum string — remains NOT NULL. The enum type is extended with the new
+        `INTERNAL_TRANSFER` value, which is assigned to all `ADJUSTMENT` transactions. Existing `DEPOSIT`
+        and `WITHDRAWAL` rows are unaffected; no data migration is required).
     * **Constraint note:** A check constraint (or application-layer invariant) must enforce:
       `IF transaction_type = 'ADJUSTMENT' THEN reason IS NOT NULL AND reason <> ''`.
 
@@ -124,7 +131,7 @@ forming an immutable audit trail.
     * **Protocol:** In-process synchronous call (within existing transaction)
     * **Payload Changes:** Existing `save(Transaction)` is called with a `Transaction` constructed as:
         * `type = ADJUSTMENT`
-        * `paymentMethod = null`
+      * `paymentMethod = INTERNAL_TRANSFER`
         * `amount = |adjustmentAmount|` (absolute value stored; direction is captured in `TransactionRecord.direction`)
         * `reason = <admin-provided reason>`
         * `customerId`, `operatorId`, `recordedAt = now`
@@ -151,7 +158,7 @@ forming an immutable audit trail.
 8. `ApplyAdjustmentService` mutates balances in-memory:
     * `adjustmentSubLedger.debit(10)` → `ADJUSTMENT.balance += 10`
     * `walletSubLedger.credit(10)` → `CUSTOMER_WALLET.balance += 10`
-9. `ApplyAdjustmentService` constructs a `Transaction(type=ADJUSTMENT, paymentMethod=null, amount=10, reason=…,
+9. `ApplyAdjustmentService` constructs a `Transaction(type=ADJUSTMENT, paymentMethod=INTERNAL_TRANSFER, amount=10, reason=…,
    customerId, operatorId, sourceType=null, sourceId=null, recordedAt=now)` with two `TransactionRecord` children:
     * `TransactionRecord(subLedgerId=adjustmentSubLedger.id, ledgerType=ADJUSTMENT, direction=DEBIT, amount=10)`
     * `TransactionRecord(subLedgerId=walletSubLedger.id, ledgerType=CUSTOMER_WALLET, direction=CREDIT,

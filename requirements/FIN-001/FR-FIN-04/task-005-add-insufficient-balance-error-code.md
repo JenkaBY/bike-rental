@@ -1,41 +1,47 @@
-# Task 005: Add `INSUFFICIENT_BALANCE` Error Code to `ErrorCodes`
+# Task 005: Centralize `INSUFFICIENT_BALANCE` Error Code
 
 > **Applied Skill:** N/A — follows the existing `@UtilityClass` constant pattern in `ErrorCodes`.
 
 ## 1. Objective
 
-Register a named error-code constant for the insufficient-balance failure so that the exception handler and any
-future callers reference the same string without duplication.
+`InsufficientBalanceException` already declares its own `ERROR_CODE = "finance.insufficient_balance"` string
+literal, and `ErrorCodes.INSUFFICIENT_BALANCE` already holds the same value. The two constants are duplicates.
 
-## 2. File to Modify / Create
+Centralize by making `InsufficientBalanceException.ERROR_CODE` reference `ErrorCodes.INSUFFICIENT_BALANCE`
+so the string literal exists in exactly one place. `ErrorCodes.java` requires no change.
+
+## 2. File to Modify
 
 * **File Path:**
-  `service/src/main/java/com/github/jenkaby/bikerental/shared/web/advice/ErrorCodes.java`
+  `service/src/main/java/com/github/jenkaby/bikerental/finance/domain/exception/InsufficientBalanceException.java`
 * **Action:** Modify Existing File
 
 ## 3. Code Implementation
 
-**Imports Required:** None.
+**Imports Required:**
+
+```java
+import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
+```
 
 **Code to Add/Replace:**
 
-* **Location:** Inside the `ErrorCodes` utility class, add the new constant after the last existing constant
-  (`RESOURCE_OPTIMISTIC_LOCK`).
+* **Location:** Replace the inline string literal in the `ERROR_CODE` field initializer.
 
 Replace:
 
 ```java
-    public static final String RESOURCE_OPTIMISTIC_LOCK = "shared.resource.optimistic_lock";
-}
+    public static final String ERROR_CODE = "finance.insufficient_balance";
 ```
 
 With:
 
 ```java
-    public static final String RESOURCE_OPTIMISTIC_LOCK = "shared.resource.optimistic_lock";
-    public static final String INSUFFICIENT_BALANCE = "finance.insufficient_balance";
-}
+    public static final String ERROR_CODE = ErrorCodes.INSUFFICIENT_BALANCE;
 ```
+
+No changes to `FinanceRestControllerAdvice` are needed — it already reads the code via `ex.getErrorCode()`
+which delegates to `BikeRentalException`, so it picks up the new value automatically.
 
 ## 4. Validation Steps
 
