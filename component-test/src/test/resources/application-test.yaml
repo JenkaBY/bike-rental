@@ -15,6 +15,8 @@ spring:
     #    enabled for initial development stage
     drop-first: true
     contexts: test
+  config:
+    import: optional:nocommit.properties
 logging:
   level:
     root: info

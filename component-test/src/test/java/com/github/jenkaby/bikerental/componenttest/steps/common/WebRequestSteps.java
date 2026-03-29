@@ -56,7 +56,7 @@ public class WebRequestSteps {
     }
 
     @Given("the {string} header is removed")
-    public void theHeaderIsRemoved(String headerName, String headerValue) {
+    public void theHeaderIsRemoved(String headerName) {
         log.info("Removing header '{}'", headerName);
         scenarioContext.removeHeader(headerName);
     }
@@ -134,15 +134,15 @@ public class WebRequestSteps {
 
         var headers = HttpHeaders.readOnlyHttpHeaders(scenarioContext.getRequestHeaders());
         var response = IntStream.range(0, times).parallel()
-                .mapToObj(i -> exchangeWitRetry(method, requestBodies.get(i), uri, headers))
+                .mapToObj(i -> exchangeWithRetry(method, requestBodies.get(i), uri, headers))
                 .peek(resp -> log.info("Response : {}", resp))
                 .toList().getLast();
         log.debug("Last Response : {}", response);
         scenarioContext.setResponse(response);
     }
 
-    private @NonNull ResponseEntity<String> exchangeWitRetry(HttpMethod method, Object body, URI uri, HttpHeaders headers) {
-        int maxRetry = 5;
+    private @NonNull ResponseEntity<String> exchangeWithRetry(HttpMethod method, Object body, URI uri, HttpHeaders headers) {
+        int maxRetry = 10;
         int attempt = 0;
         ResponseEntity<String> response = null;
         while (attempt < maxRetry) {
