@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 
 import java.util.UUID;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface CustomerRefMapper {
 
     default CustomerRef fromUUID(UUID id) {

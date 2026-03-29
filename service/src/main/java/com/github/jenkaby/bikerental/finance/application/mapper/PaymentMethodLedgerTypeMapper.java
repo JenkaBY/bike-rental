@@ -5,7 +5,7 @@ import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import org.mapstruct.Mapper;
 import org.mapstruct.ValueMapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface PaymentMethodLedgerTypeMapper {
 
     @ValueMapping(source = "CASH", target = "CASH")
