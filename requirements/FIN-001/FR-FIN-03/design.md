@@ -44,6 +44,13 @@ security layer noted in the current architecture.
   convenience method `getSubLedger(LedgerType)` that resolves a named sub-ledger or throws
   `ResourceNotFoundException` when the requested ledger type is absent on the account.
 
+  Important persistence note: `SubLedgerJpaEntity` uses optimistic locking via `@Version private Long version`.
+  Adapters that map domain→JPA must preserve this version on existing rows. The `AccountRepositoryAdapter`
+  implementation therefore merges in-memory `SubLedger` balance changes into the already-managed
+  `AccountJpaEntity`/`SubLedgerJpaEntity` instances (updating `balance` only) instead of replacing child
+  entities with freshly-mapped instances that lack `version`. This preserves optimistic-lock invariants and
+  prevents spurious `OptimisticLockingFailureException` during concurrent updates.
+
   Important domain changes:
   - Monetary values across the finance domain now use the shared `Money` value object (scale=2, HALF_UP rounding)
     instead of raw `BigDecimal` primitives.

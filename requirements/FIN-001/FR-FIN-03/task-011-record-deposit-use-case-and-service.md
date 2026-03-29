@@ -135,7 +135,7 @@ public class RecordDepositService implements RecordDepositUseCase {
     @Transactional
     public DepositResult execute(RecordDepositCommand command) {
         Optional<Transaction> existing = transactionRepository
-                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), command.customerId());
+                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));
         if (existing.isPresent()) {
             Transaction t = existing.get();
             return new DepositResult(t.getId(), t.getRecordedAt());
@@ -155,6 +155,10 @@ public class RecordDepositService implements RecordDepositUseCase {
         var debitChange = debitSubLedger.debit(command.amount());
         var creditChange = creditSubLedger.credit(command.amount());
 
+        // Note: `AccountRepositoryAdapter.save(...)` merges domain sub-ledger balance changes into the
+        // existing JPA-managed entities to preserve `@Version` on `SubLedgerJpaEntity`. This avoids
+        // overwriting the version field with a freshly-mapped entity, which would trigger optimistic-lock
+        // failures during concurrent updates.
         accountRepository.save(systemAccount);
         accountRepository.save(customerAccount);
 

@@ -28,14 +28,16 @@ package com.github.jenkaby.bikerental.finance.domain.repository;
 
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface TransactionRepository {
 
     Transaction save(Transaction transaction);
 
-    Optional<Transaction> findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, UUID customerId);
+    // Idempotency lookup is intentionally scoped to the customer to avoid returning a transaction
+    // that belongs to a different customer when the same idempotency key is reused across customers.
+    Optional<Transaction> findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, CustomerRef customerId);
 }
 ```
 
