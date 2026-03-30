@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.finance.web.command;
 
 import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase;
 import com.github.jenkaby.bikerental.finance.web.command.dto.AdjustmentRequest;
-import com.github.jenkaby.bikerental.finance.web.command.dto.AdjustmentResponse;
+import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.AdjustmentCommandMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +41,7 @@ public class AdjustmentCommandController {
     @Operation(summary = "Apply a manual balance adjustment to a customer wallet")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Adjustment applied",
-                    content = @Content(schema = @Schema(implementation = AdjustmentResponse.class))),
+                    content = @Content(schema = @Schema(implementation = TransactionResponse.class))),
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Customer finance account not found",
@@ -50,7 +50,7 @@ public class AdjustmentCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping
-    public ResponseEntity<AdjustmentResponse> applyAdjustment(@Valid @RequestBody AdjustmentRequest request) {
+    public ResponseEntity<TransactionResponse> applyAdjustment(@Valid @RequestBody AdjustmentRequest request) {
         log.info("[POST] Apply adjustment request customerId={} amount={}", request.customerId(), request.amount());
 
         var command = mapper.toCommand(request);

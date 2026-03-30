@@ -3,5 +3,6 @@ package com.github.jenkaby.bikerental.finance;
 public enum PaymentMethod {
     CASH,
     CARD_TERMINAL,
-    BANK_TRANSFER
+    BANK_TRANSFER,
+    INTERNAL_TRANSFER
 }

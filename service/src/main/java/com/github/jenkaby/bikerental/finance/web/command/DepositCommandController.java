@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.finance.web.command;
 
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
 import com.github.jenkaby.bikerental.finance.web.command.dto.RecordDepositRequest;
-import com.github.jenkaby.bikerental.finance.web.command.dto.RecordDepositResponse;
+import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.DepositCommandMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,14 +42,14 @@ public class DepositCommandController {
     @Operation(summary = "Record a fund deposit for a customer")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Deposit recorded",
-                    content = @Content(schema = @Schema(implementation = RecordDepositResponse.class))),
+                    content = @Content(schema = @Schema(implementation = TransactionResponse.class))),
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Customer finance account not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping
-    public ResponseEntity<RecordDepositResponse> recordDeposit(@Valid @RequestBody RecordDepositRequest request) {
+    public ResponseEntity<TransactionResponse> recordDeposit(@Valid @RequestBody RecordDepositRequest request) {
         log.info("[POST] Record deposit request idempotencyKey={} customerId={} amount={}",
                 request.idempotencyKey(), request.customerId(), request.amount());
 

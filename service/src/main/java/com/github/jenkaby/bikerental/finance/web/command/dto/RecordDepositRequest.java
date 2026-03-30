@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.finance.web.command.dto;
 
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
+import com.github.jenkaby.bikerental.shared.web.support.MoneyAmount;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +20,7 @@ public record RecordDepositRequest(
         @NotNull UUID customerId,
 
         @Schema(description = "Deposit amount", example = "50.00")
-        @NotNull @DecimalMin(value = "0.01") BigDecimal amount,
+        @NotNull @DecimalMin(value = "0.01") @MoneyAmount BigDecimal amount,
 
         @Schema(description = "Payment method (CASH, CARD_TERMINAL, BANK_TRANSFER)")
         @NotNull PaymentMethod paymentMethod,

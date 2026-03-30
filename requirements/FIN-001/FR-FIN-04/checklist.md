@@ -13,6 +13,7 @@
 - [x] `task-011-create-adjustment-command-mapper.md`
 - [x] `task-012-create-adjustment-command-controller.md`
 - [x] `task-013-write-adjustment-controller-test.md`
-- [ ] `task-014-component-test-adjustment.md`
+- [x] `task-014-component-test-adjustment.md`
+- [x] `task-015-unify-transaction-response.md`
 
-**Next Task:** `task-014-component-test-adjustment.md`
+**Next Task:** DONE

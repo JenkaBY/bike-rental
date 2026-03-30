@@ -1,12 +1,12 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase;
 import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.domain.model.*;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
-import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -31,6 +32,12 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
     @Override
     @Transactional
     public AdjustmentResult execute(ApplyAdjustmentCommand command) {
+        Optional<Transaction> existing = transactionRepository
+                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));
+        if (existing.isPresent()) {
+            Transaction t = existing.get();
+            return new AdjustmentResult(t.getId(), t.getRecordedAt());
+        }
         var customerAccount = accountRepository
                 .findByCustomerId(new CustomerRef(command.customerId()))
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerId().toString()));
@@ -41,11 +48,9 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
         var adjustmentSubLedger = systemAccount.getSubLedger(LedgerType.ADJUSTMENT);
 
         boolean isDeduction = command.amount().isNegative();
-        Money absAmount = isDeduction
-                ? Money.of(command.amount().amount().negate())
-                : command.amount();
+        Money absAmount = command.amount().abs();
 
-        if (isDeduction && customerWallet.getBalance().compareTo(absAmount) < 0) {
+        if (isDeduction && !customerWallet.isSufficientBalance(absAmount)) {
             throw new InsufficientBalanceException(customerWallet.getBalance(), absAmount);
         }
 
@@ -63,20 +68,20 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
         accountRepository.save(systemAccount);
         accountRepository.save(customerAccount);
 
-        Instant now = clock.instant();
+        Instant recordedAt = clock.instant();
         UUID transactionId = uuidGenerator.generate();
 
         var transaction = Transaction.builder()
                 .id(transactionId)
                 .type(TransactionType.ADJUSTMENT)
-                .paymentMethod(null)
+                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
                 .amount(absAmount)
                 .customerId(command.customerId())
                 .operatorId(command.operatorId())
                 .sourceType(null)
                 .sourceId(null)
-                .recordedAt(now)
-                .idempotencyKey(IdempotencyKey.of(uuidGenerator.generate()))
+                .recordedAt(recordedAt)
+                .idempotencyKey(command.idempotencyKey())
                 .reason(command.reason())
                 .records(List.of(
                         debitChange.toTransaction(uuidGenerator.generate()),
@@ -86,6 +91,6 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
 
         transactionRepository.save(transaction);
 
-        return new AdjustmentResult(transactionId, customerWallet.getBalance(), now);
+        return new AdjustmentResult(transactionId, recordedAt);
     }
 }

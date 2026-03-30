@@ -12,6 +12,7 @@ import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +82,12 @@ public class RecordDepositService implements RecordDepositUseCase {
         transactionRepository.save(transaction);
 
         return new DepositResult(transactionId, now);
+    }
+
+    private @NonNull Account getCustomerAccount(RecordDepositCommand command) {
+        return accountRepository
+                .findByCustomerId(new CustomerRef(command.customerId()))
+                .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerId().toString()));
     }
 
 }

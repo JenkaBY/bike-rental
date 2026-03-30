@@ -3,14 +3,16 @@ package com.github.jenkaby.bikerental.finance.web.command;
 import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase.AdjustmentResult;
 import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
-import com.github.jenkaby.bikerental.finance.web.command.dto.AdjustmentResponse;
+import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.AdjustmentCommandMapper;
+import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -54,9 +56,10 @@ class AdjustmentCommandControllerTest {
     private Map<String, Object> validRequest() {
         var req = new HashMap<String, Object>();
         req.put("customerId", CUSTOMER_ID.toString());
-        req.put("amount", "10.00");
+        req.put("amount", "12345678901234567.00");
         req.put("reason", "Compensation for system error");
         req.put("operatorId", "admin-1");
+        req.put("idempotencyKey", UUID.randomUUID().toString());
         return req;
     }
 
@@ -71,18 +74,17 @@ class AdjustmentCommandControllerTest {
             given(mapper.toCommand(any())).willReturn(
                     new ApplyAdjustmentUseCase.ApplyAdjustmentCommand(
                             CUSTOMER_ID, Money.of(new BigDecimal("10.00")),
-                            "Compensation for system error", "admin-1"));
-            given(applyAdjustmentUseCase.execute(any())).willReturn(
-                    new AdjustmentResult(TRANSACTION_ID, Money.of(new BigDecimal("50.00")), now));
-            given(mapper.toResponse(any())).willReturn(
-                    new AdjustmentResponse(TRANSACTION_ID, new BigDecimal("50.00"), now));
+                            "Compensation for system error", "admin-1",
+                            IdempotencyKey.of(UUID.randomUUID())));
+            given(applyAdjustmentUseCase.execute(any())).willReturn(new AdjustmentResult(TRANSACTION_ID, now));
+            given(mapper.toResponse(any())).willReturn(new TransactionResponse(TRANSACTION_ID, now));
 
             mockMvc.perform(post(ENDPOINT)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(validRequest())))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.transactionId").value(TRANSACTION_ID.toString()))
-                    .andExpect(jsonPath("$.newWalletBalance").value(50.00));
+                    .andExpect(jsonPath("$.recordedAt").exists());
         }
 
         @Nested
@@ -106,6 +108,19 @@ class AdjustmentCommandControllerTest {
             void whenAmountIsNull() throws Exception {
                 var request = validRequest();
                 request.remove("amount");
+                mockMvc.perform(post(ENDPOINT)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.errors[0].field").value("amount"));
+            }
+
+            @ParameterizedTest
+            @DisplayName("amount is {0}")
+            @CsvSource({"0.001", "-0.001", "123456789012345678.00", "-123456789012345678.00"})
+            void whenAmountIsOutOfMoneyDigitsRange(String amount) throws Exception {
+                var request = validRequest();
+                request.put("amount", amount);
                 mockMvc.perform(post(ENDPOINT)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
@@ -161,7 +176,8 @@ class AdjustmentCommandControllerTest {
                 given(mapper.toCommand(any())).willReturn(
                         new ApplyAdjustmentUseCase.ApplyAdjustmentCommand(
                                 CUSTOMER_ID, Money.of(new BigDecimal("-20.00")),
-                                "Overcharge correction", "admin-1"));
+                                "Overcharge correction", "admin-1",
+                                IdempotencyKey.of(UUID.randomUUID())));
                 willThrow(new InsufficientBalanceException(
                         Money.of(new BigDecimal("10.00")),
                         Money.of(new BigDecimal("20.00"))))
@@ -170,7 +186,7 @@ class AdjustmentCommandControllerTest {
                 mockMvc.perform(post(ENDPOINT)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isUnprocessableEntity())
+                        .andExpect(status().isUnprocessableContent())
                         .andExpect(jsonPath("$.errorCode").value("finance.insufficient_balance"));
             }
         }

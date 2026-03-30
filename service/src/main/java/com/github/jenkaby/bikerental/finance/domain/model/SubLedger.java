@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.finance.domain.model;
 
+import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
 
@@ -22,7 +23,14 @@ public class SubLedger {
         return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount);
     }
 
+    public boolean isSufficientBalance(Money amount) {
+        return !this.balance.isLessThan(amount);
+    }
+
     public TransactionRecordWithoutId debit(Money amount) {
+        if (!this.ledgerType.isSystemLedger() && !isSufficientBalance(amount)) {
+            throw new InsufficientBalanceException(this.balance, amount);
+        }
         this.balance = this.balance.subtract(amount);
         return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.DEBIT, amount);
     }

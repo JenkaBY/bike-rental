@@ -30,9 +30,9 @@ public class FinanceRestControllerAdvice {
     ResponseEntity<ProblemDetail> handleInsufficientBalance(InsufficientBalanceException ex) {
         var correlationId = resolveCorrelationId();
         log.warn("[correlationId={}] Insufficient balance: {}", correlationId, ex.getMessage());
-        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, ex.getErrorCode());
-        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 }

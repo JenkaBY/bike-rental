@@ -11,5 +11,6 @@ public interface PaymentMethodLedgerTypeMapper {
     @ValueMapping(source = "CASH", target = "CASH")
     @ValueMapping(source = "CARD_TERMINAL", target = "CARD_TERMINAL")
     @ValueMapping(source = "BANK_TRANSFER", target = "BANK_TRANSFER")
+    @ValueMapping(source = "INTERNAL_TRANSFER", target = "ADJUSTMENT")
     LedgerType toLedgerType(PaymentMethod paymentMethod);
 }

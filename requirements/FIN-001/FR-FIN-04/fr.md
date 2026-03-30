@@ -65,3 +65,109 @@
 * Adjustments targeting `CUSTOMER_HOLD` directly.
 * Bulk adjustments across multiple customers in a single operation.
 * Admin approval workflows or four-eyes checks before an adjustment is applied.
+
+## 6. Essential Sense & Accounting Impact (examples)
+
+Purpose — essential sense
+
+- Manual balance adjustment lets operators change a customer’s wallet (credit or debit) for business reasons (
+  compensation, correction, chargeback), and deposits let customers add funds. Both must produce a single, auditable
+  transaction record: `transactionId`, `walletBalance`, `recordedAt`.
+
+Step‑by‑step examples (real numbers, simplified double‑entry view)
+
+- Conventions used below:
+    - Customer wallet = liability on system books (we owe the customer these funds).
+    - Cash/Bank = asset.
+    - Adjustment offset = an accounting account used to keep entries balanced (could be company cash, expense, revenue,
+      or an internal reserve).
+
+Example 1 — Customer deposit (safe, real money):
+
+- Before:
+    - Customer wallet = 40.00
+    - Cash/Bank = 1,000.00
+- Action: POST /api/finance/deposits with amount = 50.00 (paymentMethod = CASH)
+- Double‑entry:
+    - Debit Cash/Bank +50.00
+    - Credit Customer wallet +50.00
+- After:
+    - Customer wallet = 90.00
+    - Cash/Bank = 1,050.00
+- Response: { transactionId: ..., walletBalance: 90.00, recordedAt: ... }
+- Notes: money came from an external source (cash/bank); total system assets increased accordingly.
+
+Example 2 — Manual credit adjustment (must be offset to avoid “creating money”):
+
+- Before:
+    - Customer wallet = 40.00
+    - Internal Adjustment Reserve = 0.00
+- Action: operator applies +10.00 adjustment
+- Unsafe (bad) implementation:
+    - Credit Customer wallet +10.00 (no offset) → Customer wallet = 50.00
+    - Problem: no asset was debited → money effectively created from nothing.
+- Safe implementation (recommended):
+    - Debit Internal Adjustment Expense (or Company Cash) -10.00
+    - Credit Customer wallet +10.00
+- After (safe):
+    - Customer wallet = 50.00
+    - Internal Adjustment Expense (P&L) or Company Cash decreased by 10.00 (depends on chosen offset)
+- Response: { transactionId: ..., walletBalance: 50.00, recordedAt: ... }
+
+Example 3 — Manual debit adjustment (deduction):
+
+- Before:
+    - Customer wallet = 50.00
+- Action: operator applies −20.00 adjustment
+- Validation: check `subLedger.isSufficientBalance(Money.of(20.00))` → allowed if wallet >= 20.00
+- Double‑entry:
+    - Debit Customer wallet −20.00
+    - Credit Revenue/Adjustment Offset +20.00 (or Company Cash if moving funds)
+- After:
+    - Customer wallet = 30.00
+- Response: { transactionId: ..., walletBalance: 30.00, recordedAt: ... }
+- If insufficient: service returns 422 Unprocessable Content with `finance.insufficient_balance`.
+
+Key mechanisms already in place (from codebase)
+
+- Idempotency key: prevents duplicate transactions from repeat requests.
+- `transactionId` + `recordedAt`: immutable audit trail entry per action.
+- `Money` value object + `isSufficientBalance()` checks: avoids negative balances unless allowed.
+- Validation annotations and controller tests: guard request fields (reason, operatorId, amounts).
+- Mapper & DTO changes to return unified `TransactionResponse` so both flows expose the same audit data.
+
+How to ensure money is NOT created from nothing (practical controls)
+
+- Require an offset account for every adjustment (enforce in service layer):
+    - For deposits: `paymentMethod` must be present and mapped to an asset (cash/bank) entry.
+    - For adjustments: require explicit offset account or force `operatorId` + `reason` + approval workflow; create a
+      double‑entry offset (company expense, reserve or cash).
+- Authorization & limits:
+    - Only allow adjustments for users with specific roles; require approvals above thresholds.
+- Audit + immutable records:
+    - Record operator, reason, idempotencyKey, transactionId, recordedAt; persist full before/after balances and ledger
+      entries.
+- Reconciliation:
+    - Daily job to reconcile cash/bank vs. sum of deposits/adjustments; flag discrepancies.
+- Monitoring & alerts:
+    - Alert on unusual patterns (many credits, large adjustments, sudden net increase in customer wallets).
+- Tests:
+    - Unit/component tests that assert accounting conservation: sum(assets) == sum(liabilities + equity) before and
+      after any transaction when offsets are applied.
+    - Negative tests: attempt an adjustment without an offset -> expect rejection or logged exception.
+
+Practical recommendations (next steps you can take)
+
+- Enforce offset requirement in `ApplyAdjustmentService`: require an `offsetAccount` or map adjustments to a predefined
+  internal account. Fail fast if no valid offset.
+- Add approval metadata (optional): `approvedBy`, `approvalTimestamp` for adjustments above threshold.
+- Add reconciliation test that simulates a sequence of deposits/adjustments and asserts global ledger balance
+  conservation.
+- Add monitoring rule for large or frequent manual credits.
+
+Short answer to your concern (“money can be spawned from nothing”)
+
+- It can happen only if adjustments simply credit customer wallets without a corresponding debit. Prevent it by
+  requiring an offset account (double‑entry), enforcing role/approval constraints, and running reconciliation checks.
+  With those controls, every adjustment is a traced movement of value in the books, not free creation.
+

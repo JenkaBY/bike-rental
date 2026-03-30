@@ -77,6 +77,9 @@ public class TransactionDbSteps {
                     .isCloseTo(exp.getRecordedAt(), within(1, ChronoUnit.SECONDS));
         }
         softly.assertThat(actual.getRecords()).as("Records").isNotEmpty();
+        if (exp.getReason() != null) {
+            softly.assertThat(actual.getReason()).as("Reason").isEqualTo(exp.getReason());
+        }
         // validate records is made in separate step
         softly.assertAll();
     }

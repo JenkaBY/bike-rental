@@ -56,6 +56,18 @@ public record Money(BigDecimal amount) implements Comparable<Money> {
         return amount.compareTo(BigDecimal.ZERO) <= 0;
     }
 
+    public Money abs() {
+        return new Money(amount.abs());
+    }
+
+    public boolean isMoreThan(Money other) {
+        return this.compareTo(other) > 0;
+    }
+
+    public boolean isLessThan(Money other) {
+        return this.compareTo(other) < 0;
+    }
+
     public Money add(Money other) {
         return new Money(this.amount.add(other.amount));
     }
