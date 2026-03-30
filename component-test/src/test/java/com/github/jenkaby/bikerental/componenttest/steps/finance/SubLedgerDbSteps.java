@@ -3,12 +3,14 @@ package com.github.jenkaby.bikerental.componenttest.steps.finance;
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.InsertableSubLedgerRepository;
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.SubLedgerJpaRepository;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.SubLedgerJpaEntity;
+import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 
+import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -99,6 +101,14 @@ public class SubLedgerDbSteps {
         }
         return Objects.equals(actual.getAccount().getId(), exp.getAccount().getId())
                 && Objects.equals(actual.getLedgerType(), exp.getLedgerType());
+    }
+
+    @After("@ReinitializeSystemLedgers")
+    public void theSystemLedgersHaveAmount() {
+        subLedgerJpaRepository.findAllInitialized().stream()
+                .filter(l -> l.getLedgerType().isSystemLedger())
+                .peek(l -> l.setBalance(BigDecimal.ZERO))
+                .forEach(subLedgerJpaRepository::save);
     }
 }
 

@@ -39,6 +39,7 @@
             <column name="idempotency_key" type="UUID">
                 <constraints nullable="false"/>
             </column>
+            <column name="reason" type="VARCHAR(1000)"/>
         </createTable>
 
         <addUniqueConstraint

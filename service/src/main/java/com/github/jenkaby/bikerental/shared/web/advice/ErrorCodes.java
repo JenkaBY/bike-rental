@@ -17,4 +17,5 @@ public class ErrorCodes {
     public static final String REFERENCE_NOT_FOUND = "shared.reference.not_found";
     public static final String RESOURCE_CONFLICT = "shared.resource.conflict";
     public static final String RESOURCE_OPTIMISTIC_LOCK = "shared.resource.optimistic_lock";
+    public static final String INSUFFICIENT_BALANCE = "finance.insufficient_balance";
 }

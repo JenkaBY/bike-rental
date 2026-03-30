@@ -1,18 +1,16 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
-import com.github.jenkaby.bikerental.finance.application.mapper.PaymentMethodLedgerTypeMapper;
-import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
-import com.github.jenkaby.bikerental.finance.domain.model.Account;
-import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
-import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
-import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
+import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase;
+import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.finance.domain.model.*;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,55 +22,67 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public class RecordDepositService implements RecordDepositUseCase {
+public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
-    private final PaymentMethodLedgerTypeMapper paymentMethodMapper;
 
     @Override
     @Transactional
-    public DepositResult execute(RecordDepositCommand command) {
+    public AdjustmentResult execute(ApplyAdjustmentCommand command) {
         Optional<Transaction> existing = transactionRepository
                 .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));
         if (existing.isPresent()) {
             Transaction t = existing.get();
-            return new DepositResult(t.getId(), t.getRecordedAt());
+            return new AdjustmentResult(t.getId(), t.getRecordedAt());
         }
-
         var customerAccount = accountRepository
                 .findByCustomerId(new CustomerRef(command.customerId()))
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerId().toString()));
 
         var systemAccount = accountRepository.getSystemAccount();
 
-        LedgerType debitLedgerType = paymentMethodMapper.toLedgerType(command.paymentMethod());
+        var customerWallet = customerAccount.getSubLedger(LedgerType.CUSTOMER_WALLET);
+        var adjustmentSubLedger = systemAccount.getSubLedger(LedgerType.ADJUSTMENT);
 
-        var debitSubLedger = systemAccount.getSubLedger(debitLedgerType);
-        var creditSubLedger = customerAccount.getCustomerWallet();
+        boolean isDeduction = command.amount().isNegative();
+        Money absAmount = command.amount().abs();
 
-        var debitChange = debitSubLedger.debit(command.amount());
-        var creditChange = creditSubLedger.credit(command.amount());
+        if (isDeduction && !customerWallet.isSufficientBalance(absAmount)) {
+            throw new InsufficientBalanceException(customerWallet.getBalance(), absAmount);
+        }
+
+        TransactionRecordWithoutId debitChange;
+        TransactionRecordWithoutId creditChange;
+
+        if (isDeduction) {
+            debitChange = customerWallet.debit(absAmount);
+            creditChange = adjustmentSubLedger.credit(absAmount);
+        } else {
+            debitChange = adjustmentSubLedger.debit(absAmount);
+            creditChange = customerWallet.credit(absAmount);
+        }
 
         accountRepository.save(systemAccount);
         accountRepository.save(customerAccount);
 
-        Instant now = clock.instant();
+        Instant recordedAt = clock.instant();
         UUID transactionId = uuidGenerator.generate();
 
         var transaction = Transaction.builder()
                 .id(transactionId)
-                .type(TransactionType.DEPOSIT)
-                .paymentMethod(command.paymentMethod())
-                .amount(command.amount())
+                .type(TransactionType.ADJUSTMENT)
+                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
+                .amount(absAmount)
                 .customerId(command.customerId())
                 .operatorId(command.operatorId())
                 .sourceType(null)
                 .sourceId(null)
-                .recordedAt(now)
+                .recordedAt(recordedAt)
                 .idempotencyKey(command.idempotencyKey())
+                .reason(command.reason())
                 .records(List.of(
                         debitChange.toTransaction(uuidGenerator.generate()),
                         creditChange.toTransaction(uuidGenerator.generate())
@@ -81,13 +91,6 @@ public class RecordDepositService implements RecordDepositUseCase {
 
         transactionRepository.save(transaction);
 
-        return new DepositResult(transactionId, now);
+        return new AdjustmentResult(transactionId, recordedAt);
     }
-
-    private @NonNull Account getCustomerAccount(RecordDepositCommand command) {
-        return accountRepository
-                .findByCustomerId(new CustomerRef(command.customerId()))
-                .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerId().toString()));
-    }
-
 }

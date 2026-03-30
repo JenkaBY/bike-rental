@@ -1,9 +1,9 @@
 package com.github.jenkaby.bikerental.finance.web.command;
 
-import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
-import com.github.jenkaby.bikerental.finance.web.command.dto.RecordDepositRequest;
+import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase;
+import com.github.jenkaby.bikerental.finance.web.command.dto.AdjustmentRequest;
 import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
-import com.github.jenkaby.bikerental.finance.web.command.mapper.DepositCommandMapper;
+import com.github.jenkaby.bikerental.finance.web.command.mapper.AdjustmentCommandMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -25,38 +24,39 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Validated
 @RestController
-@RequestMapping("/api/finance/deposits")
+@RequestMapping("/api/finance/adjustments")
 @Tag(name = OpenApiConfig.Tags.FINANCE)
 @Slf4j
-public class DepositCommandController {
+public class AdjustmentCommandController {
 
-    private final RecordDepositUseCase recordDepositUseCase;
-    private final DepositCommandMapper mapper;
+    private final ApplyAdjustmentUseCase applyAdjustmentUseCase;
+    private final AdjustmentCommandMapper mapper;
 
-    public DepositCommandController(RecordDepositUseCase recordDepositUseCase,
-                                    DepositCommandMapper mapper) {
-        this.recordDepositUseCase = recordDepositUseCase;
+    public AdjustmentCommandController(ApplyAdjustmentUseCase applyAdjustmentUseCase,
+                                       AdjustmentCommandMapper mapper) {
+        this.applyAdjustmentUseCase = applyAdjustmentUseCase;
         this.mapper = mapper;
     }
 
-    @Operation(summary = "Record a fund deposit for a customer")
+    @Operation(summary = "Apply a manual balance adjustment to a customer wallet")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Deposit recorded",
+            @ApiResponse(responseCode = "201", description = "Adjustment applied",
                     content = @Content(schema = @Schema(implementation = TransactionResponse.class))),
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Customer finance account not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Insufficient wallet balance",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping
-    public ResponseEntity<TransactionResponse> recordDeposit(@Valid @RequestBody RecordDepositRequest request) {
-        log.info("[POST] Record deposit request idempotencyKey={} customerId={} amount={}",
-                request.idempotencyKey(), request.customerId(), request.amount());
+    public ResponseEntity<TransactionResponse> applyAdjustment(@Valid @RequestBody AdjustmentRequest request) {
+        log.info("[POST] Apply adjustment request customerId={} amount={}", request.customerId(), request.amount());
 
         var command = mapper.toCommand(request);
-        var result = recordDepositUseCase.execute(command);
+        var result = applyAdjustmentUseCase.execute(command);
 
-        log.info("[POST] Deposit recorded transactionId={} idempotencyKey={}", result.transactionId(), request.idempotencyKey());
+        log.info("[POST] Adjustment applied transactionId={} customerId={}", result.transactionId(), request.customerId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(result));
     }

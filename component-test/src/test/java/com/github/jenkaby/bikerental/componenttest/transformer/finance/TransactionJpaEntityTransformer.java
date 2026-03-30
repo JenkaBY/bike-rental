@@ -38,6 +38,7 @@ public class TransactionJpaEntityTransformer {
 
         Instant recordedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "recordedAt");
         entity.setRecordedAt(recordedAt);
+        entity.setReason(DataTableHelper.getStringOrNull(entry, "reason"));
 
         UUID idempotencyKey = Aliases.getUuid(entry.get("idempotencyKey"));
         entity.setIdempotencyKey(idempotencyKey);

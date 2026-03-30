@@ -16,6 +16,8 @@ jobs:
   deploy:
     name: "Promote to dev-deploy branch"
     runs-on: ubuntu-latest
+    env:
+      POST_DEPLOY_HOOK_URL: ${{ secrets.POST_DEPLOY_HOOK_URL }}
     timeout-minutes: 10
     if: >
       github.event.workflow_run.conclusion == 'success' &&
@@ -47,3 +49,13 @@ jobs:
           git add service/Dockerfile
           git diff --staged --quiet || git commit -m "build: inject commit ${{ github.event.workflow_run.head_sha }} into Dockerfile"
           git push origin HEAD:refs/heads/dev-deploy --force
+
+      - name: Invoke post-deploy hook
+        if: ${{ env.POST_DEPLOY_HOOK_URL != '' }}
+        env:
+          POST_DEPLOY_HOOK_URL: ${{ env.POST_DEPLOY_HOOK_URL }}
+        run: |
+          echo "Invoking post-deploy hook..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$POST_DEPLOY_HOOK_URL")
+          echo "Post-deploy hook HTTP response: $HTTP_CODE"
+

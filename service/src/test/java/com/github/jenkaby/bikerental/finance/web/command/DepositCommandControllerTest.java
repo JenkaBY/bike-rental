@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.finance.web.command;
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase.DepositResult;
+import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.DepositCommandMapper;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
@@ -69,14 +70,14 @@ class DepositCommandControllerTest {
                     new RecordDepositUseCase.RecordDepositCommand(CUSTOMER_ID, Money.of(new BigDecimal("50.00")),
                             PaymentMethod.CASH, "operator-1", com.github.jenkaby.bikerental.shared.domain.IdempotencyKey.of(UUID.randomUUID())));
             given(recordDepositUseCase.execute(any())).willReturn(new DepositResult(TRANSACTION_ID, now));
-            given(mapper.toResponse(any())).willReturn(
-                    new com.github.jenkaby.bikerental.finance.web.command.dto.RecordDepositResponse(TRANSACTION_ID, now));
+            given(mapper.toResponse(any())).willReturn(new TransactionResponse(TRANSACTION_ID, now));
 
             mockMvc.perform(post(ENDPOINT)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.transactionId").value(TRANSACTION_ID.toString()));
+                    .andExpect(jsonPath("$.transactionId").value(TRANSACTION_ID.toString()))
+                    .andExpect(jsonPath("$.recordedAt").exists());
         }
 
         @Nested

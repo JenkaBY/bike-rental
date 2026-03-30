@@ -60,6 +60,10 @@ public class TransactionJpaEntity {
     @Column(name = "idempotency_key", nullable = false)
     private UUID idempotencyKey;
 
+    @Nullable
+    @Column(name = "reason", length = 1000)
+    private String reason;
+
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TransactionRecordJpaEntity> records = new ArrayList<>();
