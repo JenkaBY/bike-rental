@@ -45,6 +45,7 @@ public class PaymentCommandController {
             @ApiResponse(responseCode = "404", description = "Rental not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
+    @Deprecated
     public ResponseEntity<RecordPaymentResponse> recordPayment(@Valid @RequestBody RecordPaymentRequest request) {
         var command = mapper.toCommand(request);
         var payment = recordPaymentUseCase.execute(command);

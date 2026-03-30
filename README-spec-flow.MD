@@ -1,5 +1,7 @@
 # spec-workflow
 
+**[Reference to the origin project](https://github.com/arturhaikou/spec-workflow/)**
+
 A lightweight, **technology-agnostic** spec-first SDD toolkit for AI-assisted feature delivery. Requirements, system
 designs, and implementation tasks are written as documents before any code is touched. Each agent reads the outputs of
 the previous step — no context is passed manually between steps.
