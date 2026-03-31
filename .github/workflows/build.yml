@@ -116,3 +116,9 @@ jobs:
         with:
           jacoco-csv-file: component-test/build/reports/jacoco/test/jacocoTestReport.csv
           badges-directory: component-test/build/reports/jacoco/test/html/badges
+
+      - name: Publish coverage report to GitHub Pages
+        if: ${{ matrix.test-type == 'component' }}
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: component-test/build/reports/jacoco/test/html/
