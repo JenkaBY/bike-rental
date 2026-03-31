@@ -50,6 +50,9 @@ jobs:
     needs: [ build ]
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      pages: write
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -90,7 +93,7 @@ jobs:
           path: ${{ matrix.report-path }}
           retention-days: 7  # Keep test reports for 1 week
 
-      - name: Generate ${{ matrix.test-type }} test report
+      - name: Generate JaCoCo ${{ matrix.test-type }} test report
         if: ${{ matrix.test-type == 'component' }}
         run: ./gradlew :component-test:jacocoTestReport $GRADLE_ARGS
         env:
@@ -121,4 +124,4 @@ jobs:
         if: ${{ matrix.test-type == 'component' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: component-test/build/reports/jacoco/test/html/
+          folder: component-test/build/reports/jacoco/test/html
