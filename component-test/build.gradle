@@ -44,7 +44,7 @@ jacocoTestReport {
 //    dependsOn test
 //
 //    by unknown reason, jacoco plugin doesn't work with test task in the same project,
-//    so we need to specify execution data from test.exec file
+//    so we need to specify execution data from root/build/jacoco/test.exec file instead of project.layout.buildDirectory.file("jacoco/test.exec")
     def execFile = rootProject.layout.buildDirectory.file("jacoco/test.exec")
 
     executionData.setFrom(execFile)

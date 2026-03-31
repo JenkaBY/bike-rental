@@ -15,7 +15,9 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read  # Only need read access for checkout and test execution
+  contents: write  # Allow workflow to create commits / push (required for pages deploy)
+  pages: write     # Allow publishing to GitHub Pages
+  id-token: write
 
 env:
   #  optimized args for CI environment
@@ -90,7 +92,7 @@ jobs:
           path: ${{ matrix.report-path }}
           retention-days: 7  # Keep test reports for 1 week
 
-      - name: Generate ${{ matrix.test-type }} test report
+      - name: Generate JaCoCo ${{ matrix.test-type }} test report
         if: ${{ matrix.test-type == 'component' }}
         run: ./gradlew :component-test:jacocoTestReport $GRADLE_ARGS
         env:
@@ -101,18 +103,20 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: component-test-jacoco-report
-          path: component-test/build/reports/jacoco/html
+          path: component-test/build/reports/jacoco/test/html/
           retention-days: 7
 
-      - name: Upload coverage to Codecov
-        if: ${{ matrix.test-type == 'component' }}
-        uses: codecov/codecov-action@v6
-        with:
-          files: component-test/build/reports/jacoco/jacocoTestReport.xml
-
-      - name: Generate JaCoCo Badge
-        if: ${{ github.ref == 'refs/heads/master' && matrix.test-type == 'component' }}
+      - name: Generate JaCoCo Badge (main branch only)
+        if: ${{ matrix.test-type == 'component'  && github.event.workflow_run.head_branch == 'main'}}
         uses: cicirello/jacoco-badge-generator@v2
         with:
           jacoco-csv-file: component-test/build/reports/jacoco/test/jacocoTestReport.csv
           badges-directory: component-test/build/reports/jacoco/test/html/badges
+          generate-branches-badge: true
+
+      - name: Publish coverage report to GitHub Pages(main branch only)
+        if: ${{ matrix.test-type == 'component'  && github.event.workflow_run.head_branch == 'main'}}
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: component-test/build/reports/jacoco/test/html
+          token: ${{ secrets.GITHUB_TOKEN }}

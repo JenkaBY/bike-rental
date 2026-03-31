@@ -1,5 +1,9 @@
 # Bike Rental Application
 
+[![Java CI](https://github.com/jenkaby/bike-rental/actions/workflows/build.yml/badge.svg)](https://github.com/jenkaby/bike-rental/actions/workflows/build.yml)
+[![Component Test Coverage](https://jenkaby.github.io/bike-rental/badges/jacoco.svg?raw=true)](https://jenkaby.github.io/bike-rental/)
+[![Component Branch Coverage](https://jenkaby.github.io/bike-rental/badges/branches.svg?raw=true)](https://jenkaby.github.io/bike-rental/)
+
 The API is available at: [API](https://bike-rental-app-8pwz.onrender.com/swagger-ui/index.htm). Be patient; it loads
 slowly on the first request because of the free tier.
 
