@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffV2CommandMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.command.mapper</a> &gt; <span class="el_source">TariffV2CommandMapperImpl.java</span></div><h1>TariffV2CommandMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.command.mapper;
+
+import com.github.jenkaby.bikerental.tariff.application.usecase.CreateTariffV2UseCase;
+import com.github.jenkaby.bikerental.tariff.application.usecase.UpdateTariffV2UseCase;
+import com.github.jenkaby.bikerental.tariff.domain.model.PricingType;
+import com.github.jenkaby.bikerental.tariff.web.command.dto.TariffV2Request;
+import java.time.LocalDate;
+import java.util.Map;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L17">public class TariffV2CommandMapperImpl implements TariffV2CommandMapper {</span>
+
+    @Override
+    public CreateTariffV2UseCase.CreateTariffV2Command toCreateCommand(TariffV2Request request) {
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L22">            return null;</span>
+        }
+
+<span class="fc" id="L25">        Map&lt;String, Object&gt; params = null;</span>
+<span class="fc" id="L26">        String name = null;</span>
+<span class="fc" id="L27">        String description = null;</span>
+<span class="fc" id="L28">        String equipmentTypeSlug = null;</span>
+<span class="fc" id="L29">        PricingType pricingType = null;</span>
+<span class="fc" id="L30">        LocalDate validFrom = null;</span>
+<span class="fc" id="L31">        LocalDate validTo = null;</span>
+
+<span class="fc" id="L33">        params = paramsToMap( request.params() );</span>
+<span class="fc" id="L34">        name = request.name();</span>
+<span class="fc" id="L35">        description = request.description();</span>
+<span class="fc" id="L36">        equipmentTypeSlug = request.equipmentTypeSlug();</span>
+<span class="fc" id="L37">        pricingType = request.pricingType();</span>
+<span class="fc" id="L38">        validFrom = request.validFrom();</span>
+<span class="fc" id="L39">        validTo = request.validTo();</span>
+
+<span class="fc" id="L41">        CreateTariffV2UseCase.CreateTariffV2Command createTariffV2Command = new CreateTariffV2UseCase.CreateTariffV2Command( name, description, equipmentTypeSlug, pricingType, params, validFrom, validTo );</span>
+
+<span class="fc" id="L43">        return createTariffV2Command;</span>
+    }
+
+    @Override
+    public UpdateTariffV2UseCase.UpdateTariffV2Command toUpdateCommand(Long id, TariffV2Request request) {
+<span class="pc bpc" id="L48" title="3 of 4 branches missed.">        if ( id == null &amp;&amp; request == null ) {</span>
+<span class="nc" id="L49">            return null;</span>
+        }
+
+<span class="fc" id="L52">        Map&lt;String, Object&gt; params = null;</span>
+<span class="fc" id="L53">        String name = null;</span>
+<span class="fc" id="L54">        String description = null;</span>
+<span class="fc" id="L55">        String equipmentTypeSlug = null;</span>
+<span class="fc" id="L56">        PricingType pricingType = null;</span>
+<span class="fc" id="L57">        LocalDate validFrom = null;</span>
+<span class="fc" id="L58">        LocalDate validTo = null;</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if ( request != null ) {</span>
+<span class="fc" id="L60">            params = paramsToMap( request.params() );</span>
+<span class="fc" id="L61">            name = request.name();</span>
+<span class="fc" id="L62">            description = request.description();</span>
+<span class="fc" id="L63">            equipmentTypeSlug = request.equipmentTypeSlug();</span>
+<span class="fc" id="L64">            pricingType = request.pricingType();</span>
+<span class="fc" id="L65">            validFrom = request.validFrom();</span>
+<span class="fc" id="L66">            validTo = request.validTo();</span>
+        }
+<span class="fc" id="L68">        Long id1 = null;</span>
+<span class="fc" id="L69">        id1 = id;</span>
+
+<span class="fc" id="L71">        UpdateTariffV2UseCase.UpdateTariffV2Command updateTariffV2Command = new UpdateTariffV2UseCase.UpdateTariffV2Command( id1, name, description, equipmentTypeSlug, pricingType, params, validFrom, validTo );</span>
+
+<span class="fc" id="L73">        return updateTariffV2Command;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

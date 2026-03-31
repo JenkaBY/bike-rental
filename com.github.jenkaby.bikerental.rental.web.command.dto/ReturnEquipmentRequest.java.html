@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReturnEquipmentRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.web.command.dto</a> &gt; <span class="el_source">ReturnEquipmentRequest.java</span></div><h1>ReturnEquipmentRequest.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.web.command.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+
+@Schema(description = &quot;Request body for returning rented equipment&quot;)
+<span class="fc" id="L14">public record ReturnEquipmentRequest(</span>
+        @Schema(description = &quot;Rental ID&quot;, example = &quot;1&quot;) Long rentalId,
+        @Schema(description = &quot;List of equipment IDs to return&quot;) List&lt;@NotNull Long&gt; equipmentIds,
+        @Schema(description = &quot;List of equipment UIDs to return&quot;) List&lt;@NotBlank String&gt; equipmentUids,
+        @Schema(description = &quot;Payment method for any additional charge&quot;) PaymentMethod paymentMethod,
+        @Schema(description = &quot;Operator identifier&quot;, example = &quot;operator-1&quot;) @NotBlank String operatorId
+) {
+    @JsonIgnore
+    @AssertTrue(message = &quot;At least one of rentalId, equipmentId, or equipmentUid must be provided&quot;)
+    public boolean isValidIdentifiers() {
+<span class="fc" id="L24">        int count = 0;</span>
+<span class="pc bpc" id="L25" title="1 of 2 branches missed.">        if (rentalId != null) count++;</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (!CollectionUtils.isEmpty(equipmentIds)) count++;</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(equipmentUids)) count++;</span>
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        return count &gt; 0;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

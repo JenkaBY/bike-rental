@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionJpaMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper</a> &gt; <span class="el_source">TransactionJpaMapperImpl.java</span></div><h1>TransactionJpaMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper;
+
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionRecord;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.TransactionJpaEntity;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.TransactionRecordJpaEntity;
+import com.github.jenkaby.bikerental.shared.mapper.IdempotencyKeyMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class TransactionJpaMapperImpl implements TransactionJpaMapper {
+
+    private final MoneyMapper moneyMapper;
+    private final IdempotencyKeyMapper idempotencyKeyMapper;
+    private final TransactionRecordMapper transactionRecordMapper;
+
+    @Autowired
+<span class="fc" id="L27">    public TransactionJpaMapperImpl(MoneyMapper moneyMapper, IdempotencyKeyMapper idempotencyKeyMapper, TransactionRecordMapper transactionRecordMapper) {</span>
+
+<span class="fc" id="L29">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L30">        this.idempotencyKeyMapper = idempotencyKeyMapper;</span>
+<span class="fc" id="L31">        this.transactionRecordMapper = transactionRecordMapper;</span>
+<span class="fc" id="L32">    }</span>
+
+    @Override
+    public Transaction toDomain(TransactionJpaEntity entity) {
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L37">            return null;</span>
+        }
+
+<span class="fc" id="L40">        Transaction.TransactionBuilder transaction = Transaction.builder();</span>
+
+<span class="fc" id="L42">        transaction.records( transactionRecordJpaEntityListToTransactionRecordList( entity.getRecords() ) );</span>
+<span class="fc" id="L43">        transaction.type( entity.getTransactionType() );</span>
+<span class="fc" id="L44">        transaction.id( entity.getId() );</span>
+<span class="fc" id="L45">        transaction.paymentMethod( entity.getPaymentMethod() );</span>
+<span class="fc" id="L46">        transaction.amount( moneyMapper.toMoney( entity.getAmount() ) );</span>
+<span class="fc" id="L47">        transaction.customerId( entity.getCustomerId() );</span>
+<span class="fc" id="L48">        transaction.operatorId( entity.getOperatorId() );</span>
+<span class="fc" id="L49">        transaction.sourceType( entity.getSourceType() );</span>
+<span class="fc" id="L50">        transaction.sourceId( entity.getSourceId() );</span>
+<span class="fc" id="L51">        transaction.recordedAt( entity.getRecordedAt() );</span>
+<span class="fc" id="L52">        transaction.idempotencyKey( idempotencyKeyMapper.toIdempotencyKey( entity.getIdempotencyKey() ) );</span>
+<span class="fc" id="L53">        transaction.reason( entity.getReason() );</span>
+
+<span class="fc" id="L55">        return transaction.build();</span>
+    }
+
+    @Override
+    public TransactionJpaEntity toEntity(Transaction domain) {
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if ( domain == null ) {</span>
+<span class="nc" id="L61">            return null;</span>
+        }
+
+<span class="fc" id="L64">        TransactionJpaEntity.TransactionJpaEntityBuilder transactionJpaEntity = TransactionJpaEntity.builder();</span>
+
+<span class="fc" id="L66">        transactionJpaEntity.records( transactionRecordListToTransactionRecordJpaEntityList( domain.getRecords() ) );</span>
+<span class="fc" id="L67">        transactionJpaEntity.transactionType( domain.getType() );</span>
+<span class="fc" id="L68">        transactionJpaEntity.id( domain.getId() );</span>
+<span class="fc" id="L69">        transactionJpaEntity.paymentMethod( domain.getPaymentMethod() );</span>
+<span class="fc" id="L70">        transactionJpaEntity.amount( moneyMapper.toBigDecimal( domain.getAmount() ) );</span>
+<span class="fc" id="L71">        transactionJpaEntity.customerId( domain.getCustomerId() );</span>
+<span class="fc" id="L72">        transactionJpaEntity.operatorId( domain.getOperatorId() );</span>
+<span class="fc" id="L73">        transactionJpaEntity.sourceType( domain.getSourceType() );</span>
+<span class="fc" id="L74">        transactionJpaEntity.sourceId( domain.getSourceId() );</span>
+<span class="fc" id="L75">        transactionJpaEntity.recordedAt( domain.getRecordedAt() );</span>
+<span class="fc" id="L76">        transactionJpaEntity.idempotencyKey( idempotencyKeyMapper.toUuid( domain.getIdempotencyKey() ) );</span>
+<span class="fc" id="L77">        transactionJpaEntity.reason( domain.getReason() );</span>
+
+<span class="fc" id="L79">        TransactionJpaEntity transactionJpaEntityResult = transactionJpaEntity.build();</span>
+
+<span class="fc" id="L81">        setTransactionRelationships( domain, transactionJpaEntityResult );</span>
+
+<span class="fc" id="L83">        return transactionJpaEntityResult;</span>
+    }
+
+    protected List&lt;TransactionRecord&gt; transactionRecordJpaEntityListToTransactionRecordList(List&lt;TransactionRecordJpaEntity&gt; list) {
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L88">            return null;</span>
+        }
+
+<span class="fc" id="L91">        List&lt;TransactionRecord&gt; list1 = new ArrayList&lt;TransactionRecord&gt;( list.size() );</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        for ( TransactionRecordJpaEntity transactionRecordJpaEntity : list ) {</span>
+<span class="fc" id="L93">            list1.add( transactionRecordMapper.toDomain( transactionRecordJpaEntity ) );</span>
+<span class="fc" id="L94">        }</span>
+
+<span class="fc" id="L96">        return list1;</span>
+    }
+
+    protected List&lt;TransactionRecordJpaEntity&gt; transactionRecordListToTransactionRecordJpaEntityList(List&lt;TransactionRecord&gt; list) {
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L101">            return null;</span>
+        }
+
+<span class="fc" id="L104">        List&lt;TransactionRecordJpaEntity&gt; list1 = new ArrayList&lt;TransactionRecordJpaEntity&gt;( list.size() );</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        for ( TransactionRecord transactionRecord : list ) {</span>
+<span class="fc" id="L106">            list1.add( transactionRecordMapper.toEntity( transactionRecord ) );</span>
+<span class="fc" id="L107">        }</span>
+
+<span class="fc" id="L109">        return list1;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

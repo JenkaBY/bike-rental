@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffRestControllerAdvice.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.error</a> &gt; <span class="el_source">TariffRestControllerAdvice.java</span></div><h1>TariffRestControllerAdvice.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.error;
+
+import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
+import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
+import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialPriceException;
+import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialTariffTypeException;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.UUID;
+
+<span class="fc" id="L19">@Slf4j</span>
+@RestControllerAdvice(basePackages = &quot;com.github.jenkaby.bikerental.tariff&quot;)
+@Order(Ordered.LOWEST_PRECEDENCE - 1)
+<span class="fc" id="L22">public class TariffRestControllerAdvice {</span>
+
+    @ExceptionHandler(SuitableTariffNotFoundException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleSuitableTariffNotFound(SuitableTariffNotFoundException ex) {
+<span class="fc" id="L26">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L27">        log.warn(&quot;[correlationId={}] Suitable tariff not found: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L28">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
+<span class="fc" id="L29">        problem.setTitle(&quot;Resource not found&quot;);</span>
+<span class="fc" id="L30">        problem.setDetail(&quot;Suitable tariff not found&quot;);</span>
+<span class="fc" id="L31">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L32">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L33">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L34">        return ResponseEntity.of(problem).build();</span>
+    }
+
+    @ExceptionHandler(InvalidTariffPricingException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleInvalidTariffV2Pricing(InvalidTariffPricingException ex) {
+<span class="nc" id="L39">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L40">        log.warn(&quot;[correlationId={}] Invalid tariff V2 pricing: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L41">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L42">        problem.setTitle(&quot;Validation error&quot;);</span>
+<span class="nc" id="L43">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L44">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L45">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L46">        return ResponseEntity.badRequest().body(problem);</span>
+    }
+
+    @ExceptionHandler(InvalidSpecialTariffTypeException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleInvalidSpecialTariffType(InvalidSpecialTariffTypeException ex) {
+<span class="nc" id="L51">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L52">        log.warn(&quot;[correlationId={}] Invalid special tariff type: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L53">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L54">        problem.setTitle(&quot;Invalid special tariff&quot;);</span>
+<span class="nc" id="L55">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L56">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L57">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L58">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="nc" id="L59">        return ResponseEntity.badRequest().body(problem);</span>
+    }
+
+    @ExceptionHandler(InvalidSpecialPriceException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleInvalidSpecialPrice(InvalidSpecialPriceException ex) {
+<span class="nc" id="L64">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L65">        log.warn(&quot;[correlationId={}] Invalid special price: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L66">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L67">        problem.setTitle(&quot;Invalid special price&quot;);</span>
+<span class="nc" id="L68">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L69">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L70">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L71">        return ResponseEntity.badRequest().body(problem);</span>
+    }
+
+    private String resolveCorrelationId() {
+<span class="fc" id="L75">        String correlationId = MDC.get(&quot;correlationId&quot;);</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : UUID.randomUUID().toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

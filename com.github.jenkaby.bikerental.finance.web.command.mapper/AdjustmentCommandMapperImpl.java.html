@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdjustmentCommandMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.web.command.mapper</a> &gt; <span class="el_source">AdjustmentCommandMapperImpl.java</span></div><h1>AdjustmentCommandMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.web.command.mapper;
+
+import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase;
+import com.github.jenkaby.bikerental.finance.web.command.dto.AdjustmentRequest;
+import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
+import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import java.time.Instant;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class AdjustmentCommandMapperImpl implements AdjustmentCommandMapper {
+
+    private final MoneyMapper moneyMapper;
+
+    @Autowired
+<span class="fc" id="L25">    public AdjustmentCommandMapperImpl(MoneyMapper moneyMapper) {</span>
+
+<span class="fc" id="L27">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L28">    }</span>
+
+    @Override
+    public ApplyAdjustmentUseCase.ApplyAdjustmentCommand toCommand(AdjustmentRequest request) {
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L33">            return null;</span>
+        }
+
+<span class="fc" id="L36">        UUID customerId = null;</span>
+<span class="fc" id="L37">        Money amount = null;</span>
+<span class="fc" id="L38">        String reason = null;</span>
+<span class="fc" id="L39">        String operatorId = null;</span>
+
+<span class="fc" id="L41">        customerId = request.customerId();</span>
+<span class="fc" id="L42">        amount = moneyMapper.toMoney( request.amount() );</span>
+<span class="fc" id="L43">        reason = request.reason();</span>
+<span class="fc" id="L44">        operatorId = request.operatorId();</span>
+
+<span class="fc" id="L46">        IdempotencyKey idempotencyKey = IdempotencyKey.of(request.idempotencyKey());</span>
+
+<span class="fc" id="L48">        ApplyAdjustmentUseCase.ApplyAdjustmentCommand applyAdjustmentCommand = new ApplyAdjustmentUseCase.ApplyAdjustmentCommand( customerId, amount, reason, operatorId, idempotencyKey );</span>
+
+<span class="fc" id="L50">        return applyAdjustmentCommand;</span>
+    }
+
+    @Override
+    public TransactionResponse toResponse(ApplyAdjustmentUseCase.AdjustmentResult result) {
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if ( result == null ) {</span>
+<span class="nc" id="L56">            return null;</span>
+        }
+
+<span class="fc" id="L59">        UUID transactionId = null;</span>
+<span class="fc" id="L60">        Instant recordedAt = null;</span>
+
+<span class="fc" id="L62">        transactionId = result.transactionId();</span>
+<span class="fc" id="L63">        recordedAt = result.recordedAt();</span>
+
+<span class="fc" id="L65">        TransactionResponse transactionResponse = new TransactionResponse( transactionId, recordedAt );</span>
+
+<span class="fc" id="L67">        return transactionResponse;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

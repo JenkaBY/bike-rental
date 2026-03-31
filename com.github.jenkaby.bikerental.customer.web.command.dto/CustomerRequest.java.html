@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.customer.web.command.dto</a> &gt; <span class="el_source">CustomerRequest.java</span></div><h1>CustomerRequest.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.customer.web.command.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+
+import java.time.LocalDate;
+
+@Schema(description = &quot;Request body for creating or updating a customer profile&quot;)
+<span class="fc" id="L12">public record CustomerRequest(</span>
+        @Schema(description = &quot;Customer phone number&quot;, example = &quot;+79161234567&quot;)
+        @NotBlank(message = &quot;Phone is required&quot;)
+        @Pattern(regexp = &quot;^\\+?[0-9\\-\\s()]+$&quot;, message = &quot;Phone format is invalid&quot;)
+        String phone,
+
+        @Schema(description = &quot;First name&quot;, example = &quot;Ivan&quot;)
+        @NotBlank(message = &quot;First name is required&quot;)
+        String firstName,
+
+        @Schema(description = &quot;Last name&quot;, example = &quot;Ivanov&quot;)
+        @NotBlank(message = &quot;Last name is required&quot;)
+        String lastName,
+
+        @Schema(description = &quot;Email address&quot;, example = &quot;ivan@example.com&quot;)
+        @Email(message = &quot;Email format is invalid&quot;)
+        String email,
+
+        @Schema(description = &quot;Date of birth (must be in the past)&quot;, example = &quot;1990-05-15&quot;)
+        @Past(message = &quot;Birth date must be in the past&quot;)
+        LocalDate birthDate,
+
+        @Schema(description = &quot;Optional comments about the customer&quot;)
+        String comments
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

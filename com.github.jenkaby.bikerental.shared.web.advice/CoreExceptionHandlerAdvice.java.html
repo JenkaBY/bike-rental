@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CoreExceptionHandlerAdvice.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.shared.web.advice</a> &gt; <span class="el_source">CoreExceptionHandlerAdvice.java</span></div><h1>CoreExceptionHandlerAdvice.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.shared.web.advice;
+
+import com.github.jenkaby.bikerental.shared.exception.EquipmentNotAvailableException;
+import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
+import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
+import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.accept.InvalidApiVersionException;
+import org.springframework.web.accept.MissingApiVersionException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import static com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes.*;
+import static com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField.*;
+
+<span class="fc" id="L36">@Slf4j</span>
+@RestControllerAdvice
+@RequiredArgsConstructor
+public class CoreExceptionHandlerAdvice {
+
+    private final UuidGenerator uuidGenerator;
+    private final ValidationErrorMapper validationErrorMapper;
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity&lt;ProblemDetail&gt; handleError(MethodArgumentNotValidException ex) {
+<span class="fc" id="L46">        var fieldErrors = ex.getBindingResult().getFieldErrors().stream()</span>
+<span class="fc" id="L47">                .map(validationErrorMapper::mapFieldError)</span>
+<span class="fc" id="L48">                .toList();</span>
+
+<span class="fc" id="L50">        var globalErrors = ex.getBindingResult().getGlobalErrors().stream()</span>
+<span class="fc" id="L51">                .map(validationErrorMapper::mapObjectError)</span>
+<span class="fc" id="L52">                .toList();</span>
+
+<span class="fc" id="L54">        var errors = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L55">        errors.addAll(fieldErrors);</span>
+<span class="fc" id="L56">        errors.addAll(globalErrors);</span>
+
+<span class="fc" id="L58">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, &quot;Validation error&quot;);</span>
+<span class="fc" id="L59">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L60">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L61">        body.setProperty(ERROR_CODE, METHOD_ARGUMENTS_VALIDATION_FAILED);</span>
+<span class="fc" id="L62">        body.setProperty(ERRORS, errors);</span>
+<span class="fc" id="L63">        log.warn(&quot;[correlationId={}] Bad request for MethodArgumentNotValidException&quot;, correlationId, ex);</span>
+<span class="fc" id="L64">        return ResponseEntity.of(body).build();</span>
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity&lt;ProblemDetail&gt; handleError(MethodArgumentTypeMismatchException ex) {
+<span class="nc" id="L69">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());</span>
+<span class="nc" id="L70">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L71">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L72">        body.setProperty(ERROR_CODE, METHOD_ARGUMENT_TYPE_MISMATCH);</span>
+<span class="nc" id="L73">        log.warn(&quot;[correlationId={}] Bad request for MethodArgumentTypeMismatchException: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L74">        return ResponseEntity.of(body).build();</span>
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    ResponseEntity&lt;ProblemDetail&gt; handleError(MissingServletRequestParameterException ex) {
+<span class="fc" id="L79">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());</span>
+<span class="fc" id="L80">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L81">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L82">        body.setProperty(ERROR_CODE, REQUEST_PARAMS_MISSING);</span>
+<span class="fc" id="L83">        log.warn(&quot;[correlationId={}] Bad request for MissingServletRequestParameterException: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L84">        return ResponseEntity.of(body).build();</span>
+    }
+
+    //  Occurs when validation failed in annotated @RequestParam, @PathVariable, @RequestHeader, @CookieValue, @ModelAttribute
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    ResponseEntity&lt;ProblemDetail&gt; handleError(HandlerMethodValidationException ex) {
+<span class="nc" id="L90">        var results = ex.getValueResults();</span>
+<span class="nc" id="L91">        var errors = results.stream()</span>
+<span class="nc" id="L92">                .flatMap(r -&gt; r.getResolvableErrors().stream())</span>
+<span class="nc" id="L93">                .map(this.validationErrorMapper::mapResolvableError)</span>
+<span class="nc" id="L94">                .toList();</span>
+
+<span class="nc" id="L96">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, &quot;Validation error&quot;);</span>
+<span class="nc" id="L97">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L98">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L99">        body.setProperty(ERROR_CODE, HANDLER_METHOD_ERROR);</span>
+<span class="nc" id="L100">        body.setProperty(ERRORS, errors);</span>
+<span class="nc" id="L101">        log.warn(&quot;[correlationId={}] Bad request for HandlerMethodValidationException&quot;, correlationId, ex);</span>
+<span class="nc" id="L102">        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity&lt;ProblemDetail&gt; handleError(ConstraintViolationException ex) {
+<span class="fc" id="L107">        var logDetail = ex.getConstraintViolations().stream()</span>
+<span class="fc" id="L108">                .map(violation -&gt; &quot;%s: %s&quot;.formatted(violation.getPropertyPath(), violation.getMessage()))</span>
+<span class="fc" id="L109">                .collect(Collectors.joining(&quot;,&quot;));</span>
+
+<span class="fc" id="L111">        var errors = ex.getConstraintViolations().stream()</span>
+<span class="fc" id="L112">                .map(this.validationErrorMapper::toValidationError)</span>
+<span class="fc" id="L113">                .toList();</span>
+
+<span class="fc" id="L115">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase());</span>
+<span class="fc" id="L116">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L117">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L118">        body.setProperty(ERROR_CODE, CONSTRAINT_VIOLATION);</span>
+<span class="fc" id="L119">        body.setProperty(ERRORS, errors);</span>
+<span class="fc" id="L120">        log.warn(&quot;[correlationId={}] Bad request for ConstraintViolationException: {}&quot;, correlationId, logDetail);</span>
+<span class="fc" id="L121">        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ResponseEntity&lt;ProblemDetail&gt; handleError(HttpMessageNotReadableException ex) {
+<span class="nc" id="L126">        var safeMessage = &quot;Malformed or missing request body&quot;;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        var message = ex.getMessage() != null ? ex.getMessage() : safeMessage;</span>
+<span class="nc" id="L128">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, safeMessage);</span>
+<span class="nc" id="L129">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L130">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L131">        body.setProperty(ERROR_CODE, &quot;shared.request.not_readable&quot;);</span>
+<span class="nc" id="L132">        log.warn(&quot;[correlationId={}] Bad request for HttpMessageNotReadableException: {}&quot;, correlationId, message);</span>
+<span class="nc" id="L133">        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler({InvalidApiVersionException.class, MissingApiVersionException.class})
+    ResponseEntity&lt;ProblemDetail&gt; handleError(ResponseStatusException ex) {
+<span class="nc" id="L138">        var correlationId = resolveCorrelationId();</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        var errorCode = ex instanceof MissingApiVersionException ? API_VERSION_MISSING : API_VERSION_INVALID;</span>
+<span class="nc" id="L140">        log.warn(&quot;[correlationId={}] Invalid api version requested&quot;, correlationId, ex);</span>
+<span class="nc" id="L141">        var body = ex.getBody();</span>
+<span class="nc" id="L142">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L143">        body.setProperty(ERROR_CODE, errorCode);</span>
+<span class="nc" id="L144">        return new ResponseEntity&lt;&gt;(body, ex.getStatusCode());</span>
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    ResponseEntity&lt;ProblemDetail&gt; handleError(HttpRequestMethodNotSupportedException ex) {
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        var message = ex.getMessage() != null ? ex.getMessage() : &quot;HTTP method not supported&quot;;</span>
+<span class="nc" id="L150">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.METHOD_NOT_ALLOWED, message);</span>
+<span class="nc" id="L151">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L152">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L153">        body.setProperty(ERROR_CODE, &quot;shared.request.method_not_allowed&quot;);</span>
+<span class="nc" id="L154">        log.warn(&quot;[correlationId={}] Method not allowed for HttpRequestMethodNotSupportedException: {}&quot;, correlationId, message);</span>
+<span class="nc" id="L155">        return new ResponseEntity&lt;&gt;(body, HttpStatus.METHOD_NOT_ALLOWED);</span>
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    ResponseEntity&lt;ProblemDetail&gt; handleError(HttpMediaTypeNotSupportedException ex) {
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        var message = ex.getMessage() != null ? ex.getMessage() : &quot;Media type not supported&quot;;</span>
+<span class="nc" id="L161">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);</span>
+<span class="nc" id="L162">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L163">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L164">        body.setProperty(ERROR_CODE, &quot;shared.request.media_type_not_supported&quot;);</span>
+<span class="nc" id="L165">        log.warn(&quot;[correlationId={}] Unsupported media type for HttpMediaTypeNotSupportedException: {}&quot;, correlationId, message);</span>
+<span class="nc" id="L166">        return new ResponseEntity&lt;&gt;(body, HttpStatus.UNSUPPORTED_MEDIA_TYPE);</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    ResponseEntity&lt;ProblemDetail&gt; handleError(Exception ex) {
+<span class="nc" id="L171">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L172">        log.error(&quot;[correlationId={}] Unexpected {} was thrown: {}&quot;, correlationId, ex.getClass(), ex.getMessage());</span>
+<span class="nc" id="L173">        log.debug(&quot;[correlationId={}] Unexpected error&quot;, correlationId, ex);</span>
+<span class="nc" id="L174">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());</span>
+<span class="nc" id="L175">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L176">        body.setProperty(ERROR_CODE, INTERNAL_SERVER_ERROR);</span>
+<span class="nc" id="L177">        return ResponseEntity.of(body).build();</span>
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleNoResourceFound(NoResourceFoundException ex) {
+<span class="nc" id="L182">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L183">        var body = ex.getBody();</span>
+<span class="nc" id="L184">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L185">        body.setProperty(ERROR_CODE, RESOURCE_NOT_FOUND);</span>
+<span class="nc" id="L186">        log.warn(&quot;[correlationId={}] The resource '{}' not found by reason: {}&quot;, correlationId, ex.getResourcePath(), ex.getMessage());</span>
+<span class="nc" id="L187">        return ResponseEntity.of(body).build();</span>
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleResourceNotFoundException(ResourceNotFoundException ex) {
+<span class="fc" id="L192">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L193">        log.warn(&quot;[correlationId={}] The resource '{}[{}]' not found in DB&quot;, correlationId, ex.getResourceName(), ex.getIdentifier());</span>
+<span class="fc" id="L194">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());</span>
+<span class="fc" id="L195">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L196">        body.setProperty(ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L197">        return new ResponseEntity&lt;&gt;(body, HttpStatus.NOT_FOUND);</span>
+    }
+
+    @ExceptionHandler(ReferenceNotFoundException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleReferenceNotFoundException(ReferenceNotFoundException ex) {
+<span class="fc" id="L202">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L203">        var details = ex.getDetails();</span>
+<span class="fc" id="L204">        log.warn(&quot;[correlationId={}] The referenced resource '{}[{}]' not found in DB&quot;, correlationId, details.resourceName(), details.identifier());</span>
+<span class="fc" id="L205">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());</span>
+<span class="fc" id="L206">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L207">        body.setProperty(ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L208">        body.setProperty(PARAMS, details);</span>
+<span class="fc" id="L209">        return new ResponseEntity&lt;&gt;(body, HttpStatus.UNPROCESSABLE_CONTENT);</span>
+    }
+
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleResourceConflictException(ResourceConflictException ex) {
+<span class="fc" id="L214">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L215">        var details = ex.getDetails();</span>
+<span class="fc" id="L216">        log.warn(&quot;[correlationId={}] The resource '{}[{}]' conflicts with other entity in DB&quot;, correlationId, details.resourceName(), details.identifier());</span>
+<span class="fc" id="L217">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());</span>
+<span class="fc" id="L218">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L219">        body.setProperty(ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L220">        body.setProperty(PARAMS, details);</span>
+<span class="fc" id="L221">        return new ResponseEntity&lt;&gt;(body, HttpStatus.CONFLICT);</span>
+    }
+
+    @ExceptionHandler(EquipmentNotAvailableException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleEquipmentNotAvailableException(EquipmentNotAvailableException ex) {
+<span class="fc" id="L226">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L227">        var details = ex.getDetails();</span>
+<span class="fc" id="L228">        log.warn(&quot;[correlationId={}] Equipment {} is not available for operation. Current status: {}&quot;, correlationId, details.identifier(), details.status());</span>
+<span class="fc" id="L229">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());</span>
+<span class="fc" id="L230">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L231">        body.setProperty(ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L232">        body.setProperty(PARAMS, details);</span>
+<span class="fc" id="L233">        return new ResponseEntity&lt;&gt;(body, HttpStatus.UNPROCESSABLE_CONTENT);</span>
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleOptimisticLockException(ObjectOptimisticLockingFailureException ex) {
+<span class="fc" id="L238">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L239">        log.warn(&quot;[correlationId={}] Optimistic lock occurred: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L240">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
+<span class="fc" id="L241">        problem.setTitle(&quot;Optimistic lock&quot;);</span>
+<span class="fc" id="L242">        problem.setDetail(&quot;Concurrent update — please retry&quot;);</span>
+<span class="fc" id="L243">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L244">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.RESOURCE_OPTIMISTIC_LOCK);</span>
+<span class="fc" id="L245">        return ResponseEntity.of(problem).build();</span>
+    }
+
+    private String resolveCorrelationId() {
+<span class="fc" id="L249">        String correlationId = MDC.get(CORRELATION_ID);</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : uuidGenerator.generate().toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

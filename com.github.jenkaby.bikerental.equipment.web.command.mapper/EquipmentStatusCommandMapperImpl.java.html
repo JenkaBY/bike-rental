@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EquipmentStatusCommandMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.web.command.mapper</a> &gt; <span class="el_source">EquipmentStatusCommandMapperImpl.java</span></div><h1>EquipmentStatusCommandMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.web.command.mapper;
+
+import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentStatusUseCase;
+import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentStatusUseCase;
+import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentStatusRequest;
+import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentStatusUpdateRequest;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L17">public class EquipmentStatusCommandMapperImpl implements EquipmentStatusCommandMapper {</span>
+
+    @Override
+    public CreateEquipmentStatusUseCase.CreateEquipmentStatusCommand toCreateCommand(EquipmentStatusRequest request) {
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L22">            return null;</span>
+        }
+
+<span class="fc" id="L25">        String slug = null;</span>
+<span class="fc" id="L26">        String name = null;</span>
+<span class="fc" id="L27">        String description = null;</span>
+<span class="fc" id="L28">        Set&lt;String&gt; allowedTransitions = null;</span>
+
+<span class="fc" id="L30">        slug = request.slug();</span>
+<span class="fc" id="L31">        name = request.name();</span>
+<span class="fc" id="L32">        description = request.description();</span>
+<span class="fc" id="L33">        Set&lt;String&gt; set = request.allowedTransitions();</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if ( set != null ) {</span>
+<span class="fc" id="L35">            allowedTransitions = new LinkedHashSet&lt;String&gt;( set );</span>
+        }
+
+<span class="fc" id="L38">        CreateEquipmentStatusUseCase.CreateEquipmentStatusCommand createEquipmentStatusCommand = new CreateEquipmentStatusUseCase.CreateEquipmentStatusCommand( slug, name, description, allowedTransitions );</span>
+
+<span class="fc" id="L40">        return createEquipmentStatusCommand;</span>
+    }
+
+    @Override
+    public UpdateEquipmentStatusUseCase.UpdateEquipmentStatusCommand toUpdateCommand(String slug, EquipmentStatusUpdateRequest request) {
+<span class="pc bpc" id="L45" title="3 of 4 branches missed.">        if ( slug == null &amp;&amp; request == null ) {</span>
+<span class="nc" id="L46">            return null;</span>
+        }
+
+<span class="fc" id="L49">        String name = null;</span>
+<span class="fc" id="L50">        String description = null;</span>
+<span class="fc" id="L51">        Set&lt;String&gt; allowedTransitions = null;</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if ( request != null ) {</span>
+<span class="fc" id="L53">            name = request.name();</span>
+<span class="fc" id="L54">            description = request.description();</span>
+<span class="fc" id="L55">            Set&lt;String&gt; set = request.allowedTransitions();</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            if ( set != null ) {</span>
+<span class="fc" id="L57">                allowedTransitions = new LinkedHashSet&lt;String&gt;( set );</span>
+            }
+        }
+<span class="fc" id="L60">        String slug1 = null;</span>
+<span class="fc" id="L61">        slug1 = slug;</span>
+
+<span class="fc" id="L63">        UpdateEquipmentStatusUseCase.UpdateEquipmentStatusCommand updateEquipmentStatusCommand = new UpdateEquipmentStatusUseCase.UpdateEquipmentStatusCommand( slug1, name, description, allowedTransitions );</span>
+
+<span class="fc" id="L65">        return updateEquipmentStatusCommand;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

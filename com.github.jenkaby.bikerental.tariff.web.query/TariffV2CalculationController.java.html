@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffV2CalculationController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.query</a> &gt; <span class="el_source">TariffV2CalculationController.java</span></div><h1>TariffV2CalculationController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.query;
+
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
+import com.github.jenkaby.bikerental.tariff.web.query.mapper.BatchCalculationMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Validated
+<span class="fc" id="L25">@Slf4j</span>
+@RestController
+@RequestMapping(&quot;/api/v2/tariffs&quot;)
+@Tag(name = OpenApiConfig.Tags.TARIFFS, description = &quot;Tariff V2 API&quot;)
+public class TariffV2CalculationController {
+
+    private final TariffV2Facade tariffV2Facade;
+    private final BatchCalculationMapper requestMapper;
+
+<span class="fc" id="L34">    TariffV2CalculationController(TariffV2Facade tariffV2Facade, BatchCalculationMapper requestMapper) {</span>
+<span class="fc" id="L35">        this.tariffV2Facade = tariffV2Facade;</span>
+<span class="fc" id="L36">        this.requestMapper = requestMapper;</span>
+<span class="fc" id="L37">    }</span>
+
+    @PostMapping(&quot;/calculate&quot;)
+    @Operation(summary = &quot;Calculate rental cost for multiple equipment items&quot;,
+            description = &quot;Supports normal mode (auto-select tariffs, apply discount) and SPECIAL mode (fixed group price)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Cost calculation result&quot;,
+                    content = @Content(schema = @Schema(implementation = CostCalculationResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No suitable tariff found for an equipment type&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;CostCalculationResponse&gt; calculateCost(@Valid @RequestBody CostCalculationRequest request) {
+<span class="fc" id="L51">        log.info(&quot;[POST] Batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
+<span class="fc" id="L52">        var command = requestMapper.toCommand(request);</span>
+<span class="fc" id="L53">        var result = tariffV2Facade.calculateRentalCost(command);</span>
+<span class="fc" id="L54">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

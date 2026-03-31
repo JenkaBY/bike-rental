@@ -1,9 +1,0 @@
-# Default behavior
-* text=auto
-
-# Force LF for shell scripts — never convert to CRLF
-gradlew text eol=lf
-*.sh text eol=lf
-
-# Force LF for Dockerfile
-Dockerfile text eol=lf

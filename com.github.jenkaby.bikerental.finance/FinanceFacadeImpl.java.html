@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FinanceFacadeImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance</a> &gt; <span class="el_source">FinanceFacadeImpl.java</span></div><h1>FinanceFacadeImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance;
+
+import com.github.jenkaby.bikerental.finance.application.mapper.PaymentToInfoMapper;
+import com.github.jenkaby.bikerental.finance.application.usecase.GetPaymentsByRentalIdUseCase;
+import com.github.jenkaby.bikerental.finance.application.usecase.RecordPaymentUseCase;
+import com.github.jenkaby.bikerental.finance.domain.model.Payment;
+import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+
+@Service
+class FinanceFacadeImpl implements FinanceFacade {
+
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">    private static final Predicate&lt;Payment&gt; IS_PREPAYMENT = p -&gt; p.getPaymentType() == PaymentType.PREPAYMENT;</span>
+
+    private final RecordPaymentUseCase recordPaymentUseCase;
+    private final GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase;
+    private final PaymentToInfoMapper paymentToInfoMapper;
+
+    FinanceFacadeImpl(
+            RecordPaymentUseCase recordPaymentUseCase,
+            GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase,
+<span class="fc" id="L27">            PaymentToInfoMapper paymentToInfoMapper) {</span>
+<span class="fc" id="L28">        this.recordPaymentUseCase = recordPaymentUseCase;</span>
+<span class="fc" id="L29">        this.getPaymentsByRentalIdUseCase = getPaymentsByRentalIdUseCase;</span>
+<span class="fc" id="L30">        this.paymentToInfoMapper = paymentToInfoMapper;</span>
+<span class="fc" id="L31">    }</span>
+
+    @Override
+    public PaymentInfo recordPrepayment(Long rentalId, Money amount, PaymentMethod method, String operatorId) {
+<span class="fc" id="L35">        var command = new RecordPaymentUseCase.RecordPaymentCommand(</span>
+                rentalId,
+                amount,
+                PaymentType.PREPAYMENT,
+                method,
+                operatorId
+        );
+<span class="fc" id="L42">        Payment payment = recordPaymentUseCase.execute(command);</span>
+<span class="fc" id="L43">        return paymentToInfoMapper.toPaymentInfo(payment);</span>
+    }
+
+    @Override
+    public PaymentInfo recordAdditionalPayment(Long rentalId, Money amount, PaymentMethod method, String operatorId) {
+<span class="fc" id="L48">        var command = new RecordPaymentUseCase.RecordPaymentCommand(</span>
+                rentalId,
+                amount,
+                PaymentType.ADDITIONAL_PAYMENT,
+                method,
+                operatorId
+        );
+<span class="fc" id="L55">        Payment payment = recordPaymentUseCase.execute(command);</span>
+<span class="fc" id="L56">        return paymentToInfoMapper.toPaymentInfo(payment);</span>
+    }
+
+    @Override
+    public boolean hasPrepayment(Long rentalId) {
+<span class="fc" id="L61">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
+<span class="fc" id="L62">                .anyMatch(IS_PREPAYMENT);</span>
+    }
+
+    @Override
+    public Optional&lt;PaymentInfo&gt; getPrepayment(Long rentalId) {
+<span class="nc" id="L67">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
+<span class="nc" id="L68">                .filter(IS_PREPAYMENT)</span>
+<span class="nc" id="L69">                .findFirst()</span>
+<span class="nc" id="L70">                .map(paymentToInfoMapper::toPaymentInfo);</span>
+    }
+
+    @Override
+    public List&lt;PaymentInfo&gt; getPayments(Long rentalId) {
+<span class="fc" id="L75">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
+<span class="fc" id="L76">                .map(paymentToInfoMapper::toPaymentInfo)</span>
+<span class="fc" id="L77">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

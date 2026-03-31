@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateCustomerAccountService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.application.service</a> &gt; <span class="el_source">CreateCustomerAccountService.java</span></div><h1>CreateCustomerAccountService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.application.service;
+
+import com.github.jenkaby.bikerental.finance.application.usecase.CreateCustomerAccountUseCase;
+import com.github.jenkaby.bikerental.finance.domain.model.Account;
+import com.github.jenkaby.bikerental.finance.domain.model.AccountType;
+import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
+import com.github.jenkaby.bikerental.finance.domain.model.SubLedger;
+import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+<span class="fc" id="L21">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+class CreateCustomerAccountService implements CreateCustomerAccountUseCase {
+
+    private final AccountRepository accountRepository;
+    private final UuidGenerator uuidGenerator;
+
+    @Override
+    @Transactional
+    public void execute(UUID customerId) {
+<span class="fc" id="L32">        accountRepository.findByCustomerId(CustomerRef.of(customerId))</span>
+<span class="fc" id="L33">                .ifPresent(existing -&gt; {</span>
+<span class="nc" id="L34">                    throw new ResourceConflictException(Account.class, customerId.toString());</span>
+                });
+<span class="fc" id="L36">        log.info(&quot;Creating finance account for customer={}&quot;, customerId);</span>
+
+<span class="fc" id="L38">        var wallet = SubLedger.builder()</span>
+<span class="fc" id="L39">                .id(uuidGenerator.generate())</span>
+<span class="fc" id="L40">                .ledgerType(LedgerType.CUSTOMER_WALLET)</span>
+<span class="fc" id="L41">                .balance(Money.zero())</span>
+<span class="fc" id="L42">                .build();</span>
+
+<span class="fc" id="L44">        var hold = SubLedger.builder()</span>
+<span class="fc" id="L45">                .id(uuidGenerator.generate())</span>
+<span class="fc" id="L46">                .ledgerType(LedgerType.CUSTOMER_HOLD)</span>
+<span class="fc" id="L47">                .balance(Money.zero())</span>
+<span class="fc" id="L48">                .build();</span>
+
+<span class="fc" id="L50">        var account = Account.builder()</span>
+<span class="fc" id="L51">                .id(uuidGenerator.generate())</span>
+<span class="fc" id="L52">                .accountType(AccountType.CUSTOMER)</span>
+<span class="fc" id="L53">                .customerRef(CustomerRef.of(customerId))</span>
+<span class="fc" id="L54">                .subLedgers(List.of(wallet, hold))</span>
+<span class="fc" id="L55">                .build();</span>
+
+<span class="fc" id="L57">        accountRepository.save(account);</span>
+<span class="fc" id="L58">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

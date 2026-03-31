@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateTariffV2Service.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.application.service</a> &gt; <span class="el_source">CreateTariffV2Service.java</span></div><h1>CreateTariffV2Service.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.application.service;
+
+import com.github.jenkaby.bikerental.tariff.application.mapper.TariffV2CommandToDomainMapper;
+import com.github.jenkaby.bikerental.tariff.application.usecase.CreateTariffV2UseCase;
+import com.github.jenkaby.bikerental.tariff.domain.model.TariffV2;
+import com.github.jenkaby.bikerental.tariff.domain.repository.TariffV2Repository;
+import org.springframework.stereotype.Service;
+
+@Service
+class CreateTariffV2Service implements CreateTariffV2UseCase {
+
+    private final TariffV2Repository repository;
+    private final TariffV2CommandToDomainMapper mapper;
+
+<span class="fc" id="L15">    CreateTariffV2Service(TariffV2Repository repository, TariffV2CommandToDomainMapper mapper) {</span>
+<span class="fc" id="L16">        this.repository = repository;</span>
+<span class="fc" id="L17">        this.mapper = mapper;</span>
+<span class="fc" id="L18">    }</span>
+
+    @Override
+    public TariffV2 execute(CreateTariffV2Command command) {
+<span class="fc" id="L22">        TariffV2 tariff = mapper.toTariffV2(command);</span>
+<span class="fc" id="L23">        return repository.save(tariff);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

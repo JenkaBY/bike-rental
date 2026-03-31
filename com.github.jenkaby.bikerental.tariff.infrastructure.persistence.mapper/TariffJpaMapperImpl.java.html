@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffJpaMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.infrastructure.persistence.mapper</a> &gt; <span class="el_source">TariffJpaMapperImpl.java</span></div><h1>TariffJpaMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.infrastructure.persistence.mapper;
+
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import com.github.jenkaby.bikerental.tariff.domain.model.Tariff;
+import com.github.jenkaby.bikerental.tariff.domain.model.TariffStatus;
+import com.github.jenkaby.bikerental.tariff.infrastructure.persistence.entity.TariffJpaEntity;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class TariffJpaMapperImpl implements TariffJpaMapper {
+
+    private final MoneyMapper moneyMapper;
+
+    @Autowired
+<span class="fc" id="L21">    public TariffJpaMapperImpl(MoneyMapper moneyMapper) {</span>
+
+<span class="fc" id="L23">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L24">    }</span>
+
+    @Override
+    public Tariff toDomain(TariffJpaEntity entity) {
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L29">            return null;</span>
+        }
+
+<span class="fc" id="L32">        Tariff.TariffBuilder tariff = Tariff.builder();</span>
+
+<span class="fc" id="L34">        tariff.id( entity.getId() );</span>
+<span class="fc" id="L35">        tariff.name( entity.getName() );</span>
+<span class="fc" id="L36">        tariff.description( entity.getDescription() );</span>
+<span class="fc" id="L37">        tariff.equipmentTypeSlug( entity.getEquipmentTypeSlug() );</span>
+<span class="fc" id="L38">        tariff.basePrice( moneyMapper.toMoney( entity.getBasePrice() ) );</span>
+<span class="fc" id="L39">        tariff.halfHourPrice( moneyMapper.toMoney( entity.getHalfHourPrice() ) );</span>
+<span class="fc" id="L40">        tariff.hourPrice( moneyMapper.toMoney( entity.getHourPrice() ) );</span>
+<span class="fc" id="L41">        tariff.dayPrice( moneyMapper.toMoney( entity.getDayPrice() ) );</span>
+<span class="fc" id="L42">        tariff.hourDiscountedPrice( moneyMapper.toMoney( entity.getHourDiscountedPrice() ) );</span>
+<span class="fc" id="L43">        tariff.validFrom( entity.getValidFrom() );</span>
+<span class="fc" id="L44">        tariff.validTo( entity.getValidTo() );</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if ( entity.getStatus() != null ) {</span>
+<span class="fc" id="L46">            tariff.status( Enum.valueOf( TariffStatus.class, entity.getStatus() ) );</span>
+        }
+
+<span class="fc" id="L49">        return tariff.build();</span>
+    }
+
+    @Override
+    public TariffJpaEntity toEntity(Tariff tariff) {
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if ( tariff == null ) {</span>
+<span class="nc" id="L55">            return null;</span>
+        }
+
+<span class="fc" id="L58">        TariffJpaEntity.TariffJpaEntityBuilder tariffJpaEntity = TariffJpaEntity.builder();</span>
+
+<span class="fc" id="L60">        tariffJpaEntity.id( tariff.getId() );</span>
+<span class="fc" id="L61">        tariffJpaEntity.name( tariff.getName() );</span>
+<span class="fc" id="L62">        tariffJpaEntity.description( tariff.getDescription() );</span>
+<span class="fc" id="L63">        tariffJpaEntity.equipmentTypeSlug( tariff.getEquipmentTypeSlug() );</span>
+<span class="fc" id="L64">        tariffJpaEntity.basePrice( moneyMapper.toBigDecimal( tariff.getBasePrice() ) );</span>
+<span class="fc" id="L65">        tariffJpaEntity.halfHourPrice( moneyMapper.toBigDecimal( tariff.getHalfHourPrice() ) );</span>
+<span class="fc" id="L66">        tariffJpaEntity.hourPrice( moneyMapper.toBigDecimal( tariff.getHourPrice() ) );</span>
+<span class="fc" id="L67">        tariffJpaEntity.dayPrice( moneyMapper.toBigDecimal( tariff.getDayPrice() ) );</span>
+<span class="fc" id="L68">        tariffJpaEntity.hourDiscountedPrice( moneyMapper.toBigDecimal( tariff.getHourDiscountedPrice() ) );</span>
+<span class="fc" id="L69">        tariffJpaEntity.validFrom( tariff.getValidFrom() );</span>
+<span class="fc" id="L70">        tariffJpaEntity.validTo( tariff.getValidTo() );</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if ( tariff.getStatus() != null ) {</span>
+<span class="fc" id="L72">            tariffJpaEntity.status( tariff.getStatus().name() );</span>
+        }
+
+<span class="fc" id="L75">        return tariffJpaEntity.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

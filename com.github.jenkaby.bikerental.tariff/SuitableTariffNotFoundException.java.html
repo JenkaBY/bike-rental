@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SuitableTariffNotFoundException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff</a> &gt; <span class="el_source">SuitableTariffNotFoundException.java</span></div><h1>SuitableTariffNotFoundException.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff;
+
+import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
+import lombok.Getter;
+
+import java.time.Duration;
+import java.time.LocalDate;
+
+/**
+ * Exception thrown when no suitable tariff can be found for the given criteria.
+ * This is part of the public API of the tariff module and can be thrown by {@link TariffFacade}.
+ */
+@Getter
+public class SuitableTariffNotFoundException extends BikeRentalException {
+
+    public static final String ERROR_CODE = &quot;tariff.suitable.not_found&quot;;
+
+    private static final String MESSAGE_TEMPLATE = &quot;No suitable tariff found for equipment type '%s' on date %s&quot;;
+
+    public SuitableTariffNotFoundException(String equipmentTypeSlug, LocalDate rentalDate, Duration duration) {
+<span class="fc" id="L21">        super(MESSAGE_TEMPLATE.formatted(equipmentTypeSlug, rentalDate) +</span>
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">                        (duration != null ? &quot; for duration: &quot; + duration.toMinutes() + &quot; minutes&quot; : &quot;&quot;), ERROR_CODE,</span>
+                new Details(equipmentTypeSlug, rentalDate, duration));
+<span class="fc" id="L24">    }</span>
+
+    public Details getDetails() {
+<span class="fc" id="L27">        return getParams().map(params -&gt; (Details) params)</span>
+<span class="pc" id="L28">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected Details in exception parameters&quot;));</span>
+    }
+
+<span class="fc" id="L31">    public record Details(String equipmentType, LocalDate rentalDate, Duration duration) {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalQueryMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.web.query.mapper</a> &gt; <span class="el_source">RentalQueryMapperImpl.java</span></div><h1>RentalQueryMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.web.query.mapper;
+
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentMapper;
+import com.github.jenkaby.bikerental.rental.shared.mapper.RentalStatusMapper;
+import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
+import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
+import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
+import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class RentalQueryMapperImpl implements RentalQueryMapper {
+
+    private final MoneyMapper moneyMapper;
+    private final RentalStatusMapper rentalStatusMapper;
+    private final DurationMapper durationMapper;
+    private final RentalOverdueMapper rentalOverdueMapper;
+    private final RentalEquipmentWebMapper rentalEquipmentWebMapper;
+    private final RentalEquipmentMapper rentalEquipmentMapper;
+
+    @Autowired
+<span class="fc" id="L36">    public RentalQueryMapperImpl(MoneyMapper moneyMapper, RentalStatusMapper rentalStatusMapper, DurationMapper durationMapper, RentalOverdueMapper rentalOverdueMapper, RentalEquipmentWebMapper rentalEquipmentWebMapper, RentalEquipmentMapper rentalEquipmentMapper) {</span>
+
+<span class="fc" id="L38">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L39">        this.rentalStatusMapper = rentalStatusMapper;</span>
+<span class="fc" id="L40">        this.durationMapper = durationMapper;</span>
+<span class="fc" id="L41">        this.rentalOverdueMapper = rentalOverdueMapper;</span>
+<span class="fc" id="L42">        this.rentalEquipmentWebMapper = rentalEquipmentWebMapper;</span>
+<span class="fc" id="L43">        this.rentalEquipmentMapper = rentalEquipmentMapper;</span>
+<span class="fc" id="L44">    }</span>
+
+    @Override
+    public RentalResponse toResponse(Rental rental) {
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
+<span class="nc" id="L49">            return null;</span>
+        }
+
+<span class="fc" id="L52">        Integer actualDurationMinutes = null;</span>
+<span class="fc" id="L53">        Integer plannedDurationMinutes = null;</span>
+<span class="fc" id="L54">        List&lt;EquipmentItemResponse&gt; equipmentItems = null;</span>
+<span class="fc" id="L55">        Long id = null;</span>
+<span class="fc" id="L56">        UUID customerId = null;</span>
+<span class="fc" id="L57">        String status = null;</span>
+<span class="fc" id="L58">        LocalDateTime startedAt = null;</span>
+<span class="fc" id="L59">        LocalDateTime expectedReturnAt = null;</span>
+<span class="fc" id="L60">        LocalDateTime actualReturnAt = null;</span>
+<span class="fc" id="L61">        BigDecimal estimatedCost = null;</span>
+<span class="fc" id="L62">        BigDecimal finalCost = null;</span>
+
+<span class="fc" id="L64">        actualDurationMinutes = durationMapper.toMinutes( rental.getActualDuration() );</span>
+<span class="fc" id="L65">        plannedDurationMinutes = durationMapper.toMinutes( rental.getPlannedDuration() );</span>
+<span class="fc" id="L66">        equipmentItems = rentalEquipmentListToEquipmentItemResponseList( rental.getEquipments() );</span>
+<span class="fc" id="L67">        id = rental.getId();</span>
+<span class="fc" id="L68">        customerId = rental.getCustomerId();</span>
+<span class="fc" id="L69">        status = rentalStatusMapper.statusToString( rental.getStatus() );</span>
+<span class="fc" id="L70">        startedAt = rental.getStartedAt();</span>
+<span class="fc" id="L71">        expectedReturnAt = rental.getExpectedReturnAt();</span>
+<span class="fc" id="L72">        actualReturnAt = rental.getActualReturnAt();</span>
+<span class="fc" id="L73">        estimatedCost = moneyMapper.toBigDecimal( rental.getEstimatedCost() );</span>
+<span class="fc" id="L74">        finalCost = moneyMapper.toBigDecimal( rental.getFinalCost() );</span>
+
+<span class="fc" id="L76">        RentalResponse rentalResponse = new RentalResponse( id, customerId, equipmentItems, status, startedAt, expectedReturnAt, actualReturnAt, plannedDurationMinutes, actualDurationMinutes, estimatedCost, finalCost );</span>
+
+<span class="fc" id="L78">        return rentalResponse;</span>
+    }
+
+    @Override
+    public RentalSummaryResponse toRentalSummaryResponse(Rental rental) {
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
+<span class="nc" id="L84">            return null;</span>
+        }
+
+<span class="fc" id="L87">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L88">        Integer overdueMinutes = null;</span>
+<span class="fc" id="L89">        Long id = null;</span>
+<span class="fc" id="L90">        UUID customerId = null;</span>
+<span class="fc" id="L91">        String status = null;</span>
+<span class="fc" id="L92">        LocalDateTime startedAt = null;</span>
+<span class="fc" id="L93">        LocalDateTime expectedReturnAt = null;</span>
+
+<span class="fc" id="L95">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
+<span class="fc" id="L96">        overdueMinutes = rentalOverdueMapper.calculate( rental );</span>
+<span class="fc" id="L97">        id = rental.getId();</span>
+<span class="fc" id="L98">        customerId = rental.getCustomerId();</span>
+<span class="fc" id="L99">        status = rentalStatusMapper.statusToString( rental.getStatus() );</span>
+<span class="fc" id="L100">        startedAt = rental.getStartedAt();</span>
+<span class="fc" id="L101">        expectedReturnAt = rental.getExpectedReturnAt();</span>
+
+<span class="fc" id="L103">        RentalSummaryResponse rentalSummaryResponse = new RentalSummaryResponse( id, customerId, equipmentIds, status, startedAt, expectedReturnAt, overdueMinutes );</span>
+
+<span class="fc" id="L105">        return rentalSummaryResponse;</span>
+    }
+
+    protected List&lt;EquipmentItemResponse&gt; rentalEquipmentListToEquipmentItemResponseList(List&lt;RentalEquipment&gt; list) {
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L110">            return null;</span>
+        }
+
+<span class="fc" id="L113">        List&lt;EquipmentItemResponse&gt; list1 = new ArrayList&lt;EquipmentItemResponse&gt;( list.size() );</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        for ( RentalEquipment rentalEquipment : list ) {</span>
+<span class="fc" id="L115">            list1.add( rentalEquipmentWebMapper.toEquipmentItemResponse( rentalEquipment ) );</span>
+<span class="fc" id="L116">        }</span>
+
+<span class="fc" id="L118">        return list1;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

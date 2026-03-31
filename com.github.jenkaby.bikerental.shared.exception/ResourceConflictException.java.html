@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResourceConflictException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.shared.exception</a> &gt; <span class="el_source">ResourceConflictException.java</span></div><h1>ResourceConflictException.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.shared.exception;
+
+import lombok.Getter;
+
+import static com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes.RESOURCE_CONFLICT;
+
+@Getter
+public class ResourceConflictException extends BikeRentalException {
+
+    public static final String ERROR_CODE = RESOURCE_CONFLICT;
+
+    private static final String MESSAGE_TEMPLATE = &quot;%s with identifier '%s' already exists&quot;;
+
+    public ResourceConflictException(String resourceName, String identifier) {
+<span class="nc" id="L15">        this(resourceName, identifier, ERROR_CODE);</span>
+<span class="nc" id="L16">    }</span>
+
+    protected ResourceConflictException(String resourceName, String identifier, String errorCode) {
+<span class="fc" id="L19">        super(MESSAGE_TEMPLATE.formatted(resourceName, identifier), errorCode, new ResourceDetails(resourceName, identifier));</span>
+<span class="fc" id="L20">    }</span>
+
+    public ResourceConflictException(Class&lt;?&gt; cls, String identifier) {
+<span class="nc" id="L23">        this(cls.getSimpleName(), identifier);</span>
+<span class="nc" id="L24">    }</span>
+
+    public ResourceDetails getDetails() {
+<span class="fc" id="L27">        return getParams().map(params -&gt; (ResourceConflictException.ResourceDetails) params)</span>
+<span class="pc" id="L28">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected ResourceDetails in exception parameters&quot;));</span>
+    }
+
+<span class="fc" id="L31">    public record ResourceDetails(String resourceName, String identifier) {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

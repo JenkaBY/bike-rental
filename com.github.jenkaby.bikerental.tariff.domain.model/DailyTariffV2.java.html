@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DailyTariffV2.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.domain.model</a> &gt; <span class="el_source">DailyTariffV2.java</span></div><h1>DailyTariffV2.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.domain.model;
+
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
+import com.github.jenkaby.bikerental.tariff.RentalCostV2;
+import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2;
+import lombok.Getter;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+
+@Getter
+public final class DailyTariffV2 extends TariffV2 {
+
+    private final Money dailyPrice;
+    private final Money overtimeHourlyPrice;
+
+    public DailyTariffV2(Long id, String name, String description, String equipmentTypeSlug,
+                         String version, LocalDate validFrom, LocalDate validTo, TariffV2Status status,
+                         Money dailyPrice, Money overtimeHourlyPrice) {
+<span class="fc" id="L22">        super(id, name, description, equipmentTypeSlug, PricingType.DAILY, version, validFrom, validTo, status);</span>
+<span class="fc" id="L23">        this.dailyPrice = dailyPrice;</span>
+<span class="fc" id="L24">        this.overtimeHourlyPrice = overtimeHourlyPrice;</span>
+<span class="fc" id="L25">    }</span>
+
+    @Override
+    public RentalCostV2 calculateCost(Duration duration) {
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (isNegative(duration)) {</span>
+<span class="nc" id="L30">            return new BaseRentalCostV2(Money.zero(), new BreakdownCostDetails.Zero());</span>
+        }
+<span class="fc" id="L32">        long days = duration.toDays();</span>
+<span class="fc" id="L33">        Duration remainder = duration.minusDays(days);</span>
+<span class="fc" id="L34">        long hours = remainder.toHours();</span>
+<span class="fc" id="L35">        long minutes = remainder.minusHours(hours).toMinutes();</span>
+        Money total;
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (days == 0) {</span>
+<span class="fc" id="L38">            total = dailyPrice;</span>
+<span class="fc" id="L39">            String message = String.format(&quot;1d = %s&quot;, total);</span>
+<span class="fc" id="L40">            return new BaseRentalCostV2(total,</span>
+                    new BreakdownCostDetails.DailyStandard(message,
+<span class="fc" id="L42">                            new BreakdownCostDetails.DailyStandard.Details(1, total.toString())</span>
+                    )
+            );
+        }
+<span class="fc" id="L46">        total = dailyPrice.multiply(BigDecimal.valueOf(days));</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (hours &gt; 0) {</span>
+<span class="fc" id="L48">            total = total.add(overtimeHourlyPrice.multiply(BigDecimal.valueOf(hours)));</span>
+        }
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (minutes &gt; 0) {</span>
+<span class="fc" id="L51">            int intervals = getIntervalMinutes(minutes);</span>
+<span class="fc" id="L52">            Money perInterval = getRatePerMinInterval(overtimeHourlyPrice);</span>
+<span class="fc" id="L53">            total = total.add(perInterval.multiply(BigDecimal.valueOf(intervals)));</span>
+        }
+<span class="fc bfc" id="L55" title="All 4 branches covered.">        if (hours == 0 &amp;&amp; minutes == 0) {</span>
+<span class="fc" id="L56">            String message = String.format(&quot;%dd = %s&quot;, days, total);</span>
+<span class="fc" id="L57">            return new BaseRentalCostV2(total,</span>
+                    new BreakdownCostDetails.DailyStandard(message,
+<span class="fc" id="L59">                            new BreakdownCostDetails.DailyStandard.Details((int) days, total.toString())</span>
+                    )
+            );
+        } else {
+<span class="fc" id="L63">            String message = String.format(&quot;%dd + %dh %dmin = %s&quot;, days, hours, minutes, total);</span>
+<span class="fc" id="L64">            return new BaseRentalCostV2(total,</span>
+                    new BreakdownCostDetails.DailyOvertime(message,
+<span class="fc" id="L66">                            new BreakdownCostDetails.DailyOvertime.Details((int) days, (int) hours, (int) minutes, total.toString())</span>
+                    )
+            );
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

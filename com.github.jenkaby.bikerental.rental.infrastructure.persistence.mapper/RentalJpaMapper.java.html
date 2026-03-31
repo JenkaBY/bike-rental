@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalJpaMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper</a> &gt; <span class="el_source">RentalJpaMapper.java</span></div><h1>RentalJpaMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper;
+
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalJpaEntity;
+import com.github.jenkaby.bikerental.rental.shared.mapper.RentalStatusMapper;
+import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
+import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+@Mapper(uses = {MoneyMapper.class, InstantMapper.class, RentalStatusMapper.class, DurationMapper.class, RentalEquipmentJpaMapper.class})
+public interface RentalJpaMapper {
+
+    @Mapping(target = &quot;plannedDuration&quot;, source = &quot;entity.plannedDurationMinutes&quot;)
+    @Mapping(target = &quot;actualDuration&quot;, source = &quot;entity.actualDurationMinutes&quot;)
+    @Mapping(target = &quot;equipments&quot;, source = &quot;entity.rentalEquipments&quot;)
+    Rental toDomain(RentalJpaEntity entity);
+
+
+    @Mapping(target = &quot;actualDurationMinutes&quot;, source = &quot;rental.actualDuration&quot;)
+    @Mapping(target = &quot;plannedDurationMinutes&quot;, source = &quot;rental.plannedDuration&quot;)
+    @Mapping(target = &quot;rentalEquipments&quot;, source = &quot;rental.equipments&quot;)
+    RentalJpaEntity toEntity(Rental rental);
+
+    @AfterMapping
+    default void setRelationships(Rental rental, @MappingTarget RentalJpaEntity result) {
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if (result.getRentalEquipments() != null) {</span>
+<span class="fc" id="L31">            result.getRentalEquipments().forEach(equipment -&gt; equipment.setRental(result));</span>
+        }
+<span class="fc" id="L33">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

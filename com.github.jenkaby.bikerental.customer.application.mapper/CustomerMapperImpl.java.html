@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.customer.application.mapper</a> &gt; <span class="el_source">CustomerMapperImpl.java</span></div><h1>CustomerMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.customer.application.mapper;
+
+import com.github.jenkaby.bikerental.customer.CustomerInfo;
+import com.github.jenkaby.bikerental.customer.domain.model.Customer;
+import com.github.jenkaby.bikerental.customer.shared.mapper.EmailAddressMapper;
+import com.github.jenkaby.bikerental.customer.shared.mapper.PhoneNumberMapper;
+import java.time.LocalDate;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class CustomerMapperImpl implements CustomerMapper {
+
+    private final PhoneNumberMapper phoneNumberMapper;
+    private final EmailAddressMapper emailAddressMapper;
+
+    @Autowired
+<span class="fc" id="L24">    public CustomerMapperImpl(PhoneNumberMapper phoneNumberMapper, EmailAddressMapper emailAddressMapper) {</span>
+
+<span class="fc" id="L26">        this.phoneNumberMapper = phoneNumberMapper;</span>
+<span class="fc" id="L27">        this.emailAddressMapper = emailAddressMapper;</span>
+<span class="fc" id="L28">    }</span>
+
+    @Override
+    public CustomerInfo toInfo(Customer customer) {
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if ( customer == null ) {</span>
+<span class="nc" id="L33">            return null;</span>
+        }
+
+<span class="fc" id="L36">        UUID id = null;</span>
+<span class="fc" id="L37">        String phone = null;</span>
+<span class="fc" id="L38">        String firstName = null;</span>
+<span class="fc" id="L39">        String lastName = null;</span>
+<span class="fc" id="L40">        String email = null;</span>
+<span class="fc" id="L41">        LocalDate birthDate = null;</span>
+
+<span class="fc" id="L43">        id = customer.getId();</span>
+<span class="fc" id="L44">        phone = phoneNumberMapper.toString( customer.getPhone() );</span>
+<span class="fc" id="L45">        firstName = customer.getFirstName();</span>
+<span class="fc" id="L46">        lastName = customer.getLastName();</span>
+<span class="fc" id="L47">        email = emailAddressMapper.toString( customer.getEmail() );</span>
+<span class="fc" id="L48">        birthDate = customer.getBirthDate();</span>
+
+<span class="fc" id="L50">        CustomerInfo customerInfo = new CustomerInfo( id, phone, firstName, lastName, email, birthDate );</span>
+
+<span class="fc" id="L52">        return customerInfo;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

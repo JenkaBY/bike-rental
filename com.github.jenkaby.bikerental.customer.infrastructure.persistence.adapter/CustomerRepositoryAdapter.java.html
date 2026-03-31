@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.customer.infrastructure.persistence.adapter</a> &gt; <span class="el_source">CustomerRepositoryAdapter.java</span></div><h1>CustomerRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.customer.infrastructure.persistence.adapter;
+
+import com.github.jenkaby.bikerental.customer.domain.model.Customer;
+import com.github.jenkaby.bikerental.customer.domain.repository.CustomerRepository;
+import com.github.jenkaby.bikerental.customer.infrastructure.persistence.mapper.CustomerJpaMapper;
+import com.github.jenkaby.bikerental.customer.infrastructure.persistence.repository.CustomerJpaRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Component
+class CustomerRepositoryAdapter implements CustomerRepository {
+
+    private final CustomerJpaRepository repository;
+    private final CustomerJpaMapper mapper;
+
+<span class="fc" id="L20">    CustomerRepositoryAdapter(CustomerJpaRepository repository, CustomerJpaMapper mapper) {</span>
+<span class="fc" id="L21">        this.repository = repository;</span>
+<span class="fc" id="L22">        this.mapper = mapper;</span>
+<span class="fc" id="L23">    }</span>
+
+    @Override
+    public Customer save(Customer customer) {
+<span class="fc" id="L27">        var entity = mapper.toEntity(customer);</span>
+<span class="fc" id="L28">        var savedEntity = repository.save(entity);</span>
+<span class="fc" id="L29">        return mapper.toDomain(savedEntity);</span>
+    }
+
+    @Override
+    public Optional&lt;Customer&gt; findById(UUID id) {
+<span class="fc" id="L34">        return repository.findById(id).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public Optional&lt;Customer&gt; findByPhone(String phone) {
+<span class="fc" id="L39">        return repository.findByPhone(phone).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public boolean existsByPhone(String phone) {
+<span class="fc" id="L44">        return repository.existsByPhone(phone);</span>
+    }
+
+    @Override
+    public List&lt;Customer&gt; searchByPhone(String phone, int limit) {
+<span class="fc" id="L49">        var pageable = PageRequest.of(0, limit);</span>
+<span class="fc" id="L50">        return repository.findByPhoneContaining(phone, pageable).stream()</span>
+<span class="fc" id="L51">                .map(mapper::toDomain)</span>
+<span class="fc" id="L52">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

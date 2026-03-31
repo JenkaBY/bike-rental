@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.command.dto</a> &gt; <span class="el_source">TariffRequest.java</span></div><h1>TariffRequest.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.command.dto;
+
+import com.github.jenkaby.bikerental.shared.web.support.Slug;
+import com.github.jenkaby.bikerental.tariff.domain.model.TariffStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Schema(description = &quot;Request body for creating or updating a tariff&quot;)
+<span class="fc" id="L12">public record TariffRequest(</span>
+
+        @Schema(description = &quot;Tariff name&quot;, example = &quot;Standard Bike Rental&quot;)
+        @NotBlank(message = &quot;Tariff name is required&quot;)
+        @Size(max = 200, message = &quot;Name must not exceed 200 characters&quot;)
+        String name,
+
+        @Schema(description = &quot;Description&quot;)
+        @Size(max = 1000, message = &quot;Description must not exceed 1000 characters&quot;)
+        String description,
+
+        @Schema(description = &quot;Equipment type slug this tariff applies to&quot;, example = &quot;bike&quot;)
+        @Slug
+        String equipmentTypeSlug,
+
+        @Schema(description = &quot;Base price (entry fee)&quot;, example = &quot;50.00&quot;)
+        @NotNull(message = &quot;Base price is required&quot;)
+        @DecimalMin(value = &quot;0.0&quot;, inclusive = false, message = &quot;Base price must be positive&quot;)
+        @Digits(integer = 8, fraction = 2, message = &quot;Base price must have max 2 decimal places&quot;)
+        BigDecimal basePrice,
+
+        @Schema(description = &quot;Price per 30 minutes&quot;, example = &quot;100.00&quot;)
+        @NotNull(message = &quot;Half hour price is required&quot;)
+        @DecimalMin(value = &quot;0.0&quot;, inclusive = false, message = &quot;Half hour price must be positive&quot;)
+        @Digits(integer = 8, fraction = 2, message = &quot;Half hour price must have max 2 decimal places&quot;)
+        BigDecimal halfHourPrice,
+
+        @Schema(description = &quot;Price per hour&quot;, example = &quot;180.00&quot;)
+        @NotNull(message = &quot;Hour price is required&quot;)
+        @DecimalMin(value = &quot;0.0&quot;, inclusive = false, message = &quot;Hour price must be positive&quot;)
+        @Digits(integer = 8, fraction = 2, message = &quot;Hour price must have max 2 decimal places&quot;)
+        BigDecimal hourPrice,
+
+        @Schema(description = &quot;Price per day&quot;, example = &quot;900.00&quot;)
+        @NotNull(message = &quot;Day price is required&quot;)
+        @DecimalMin(value = &quot;0.0&quot;, inclusive = false, message = &quot;Day price must be positive&quot;)
+        @Digits(integer = 8, fraction = 2, message = &quot;Day price must have max 2 decimal places&quot;)
+        BigDecimal dayPrice,
+
+        @Schema(description = &quot;Discounted price per hour (e.g. for bulk hours)&quot;, example = &quot;150.00&quot;)
+        @NotNull(message = &quot;Hour discounted price is required&quot;)
+        @DecimalMin(value = &quot;0.0&quot;, inclusive = false, message = &quot;Hour discounted price must be positive&quot;)
+        @Digits(integer = 8, fraction = 2, message = &quot;Hour discounted price must have max 2 decimal places&quot;)
+        BigDecimal hourDiscountedPrice,
+
+        @Schema(description = &quot;Date from which the tariff is valid&quot;, example = &quot;2026-01-01&quot;)
+        @NotNull(message = &quot;Valid from date is required&quot;)
+        LocalDate validFrom,
+
+        @Schema(description = &quot;Date until which the tariff is valid (null = indefinite)&quot;, example = &quot;2026-12-31&quot;)
+        LocalDate validTo,
+
+        @Schema(description = &quot;Tariff status&quot;)
+        @NotNull(message = &quot;Status is required&quot;)
+        TariffStatus status
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

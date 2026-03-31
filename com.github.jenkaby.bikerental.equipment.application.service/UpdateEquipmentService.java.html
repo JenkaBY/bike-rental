@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UpdateEquipmentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.application.service</a> &gt; <span class="el_source">UpdateEquipmentService.java</span></div><h1>UpdateEquipmentService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.application.service;
+
+import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentCommandToDomainMapper;
+import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentUseCase;
+import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateSerialNumberException;
+import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateUidException;
+import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
+import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentType;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentTypeRepository;
+import com.github.jenkaby.bikerental.equipment.domain.service.StatusTransitionPolicy;
+import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
+import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
+import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+<span class="fc" id="L20">@Slf4j</span>
+@Service
+class UpdateEquipmentService implements UpdateEquipmentUseCase {
+
+    private final EquipmentRepository repository;
+    private final EquipmentCommandToDomainMapper mapper;
+    private final SerialNumberMapper serialNumberMapper;
+    private final UidMapper uidMapper;
+    private final EquipmentTypeRepository typeRepository;
+    private final StatusTransitionPolicy statusTransitionPolicy;
+
+    UpdateEquipmentService(
+            EquipmentRepository repository,
+            EquipmentCommandToDomainMapper mapper,
+            SerialNumberMapper serialNumberMapper,
+            UidMapper uidMapper,
+            EquipmentTypeRepository typeRepository,
+<span class="fc" id="L37">            StatusTransitionPolicy statusTransitionPolicy) {</span>
+<span class="fc" id="L38">        this.repository = repository;</span>
+<span class="fc" id="L39">        this.mapper = mapper;</span>
+<span class="fc" id="L40">        this.serialNumberMapper = serialNumberMapper;</span>
+<span class="fc" id="L41">        this.typeRepository = typeRepository;</span>
+<span class="fc" id="L42">        this.uidMapper = uidMapper;</span>
+<span class="fc" id="L43">        this.statusTransitionPolicy = statusTransitionPolicy;</span>
+<span class="fc" id="L44">    }</span>
+
+    @Override
+    @Transactional
+    public Equipment execute(UpdateEquipmentCommand command) {
+<span class="fc" id="L49">        var existing = repository.findById(command.id())</span>
+<span class="fc" id="L50">                .orElseThrow(() -&gt; new ResourceNotFoundException(Equipment.class.getSimpleName(), command.id().toString()));</span>
+
+<span class="fc" id="L52">        var newSerial = serialNumberMapper.toSerialNumber(command.serialNumber());</span>
+
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (!existing.getSerialNumber().equals(newSerial)) {</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if (repository.existsBySerialNumber(newSerial)) {</span>
+<span class="nc" id="L56">                throw new DuplicateSerialNumberException(Equipment.class, newSerial.value());</span>
+            }
+        }
+
+<span class="fc" id="L60">        var newUid = uidMapper.toUid(command.uid());</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (!existing.getUid().equals(newUid)) {</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">            if (repository.existsByUid(newUid)) {</span>
+<span class="nc" id="L63">                throw new DuplicateUidException(Equipment.class, newUid.value());</span>
+            }
+        }
+
+<span class="fc" id="L67">        String newType = command.typeSlug();</span>
+<span class="pc bpc" id="L68" title="1 of 4 branches missed.">        if (newType != null &amp;&amp; !newType.equals(existing.getTypeSlug())) {</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">            if (!typeRepository.existsBySlug(newType)) {</span>
+<span class="nc" id="L70">                throw new ReferenceNotFoundException(EquipmentType.class, newType);</span>
+            }
+        }
+
+        // validate status exists if changed
+<span class="fc" id="L75">        String newStatusSlug = command.statusSlug();</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (!newStatusSlug.equals(existing.getStatusSlug())) {</span>
+<span class="fc" id="L77">            log.info(&quot;Changing status of equipment with id {} from {} to {}&quot;, existing.getId(), existing.getStatusSlug(), newStatusSlug);</span>
+<span class="fc" id="L78">            existing.changeStatusTo(newStatusSlug, statusTransitionPolicy);</span>
+        }
+<span class="fc" id="L80">        var updated = mapper.toEquipment(existing, command);</span>
+
+<span class="fc" id="L82">        return repository.save(updated);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

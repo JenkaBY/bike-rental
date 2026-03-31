@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.infrastructure.persistence.adapter</a> &gt; <span class="el_source">TariffRepositoryAdapter.java</span></div><h1>TariffRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.infrastructure.persistence.adapter;
+
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
+import com.github.jenkaby.bikerental.tariff.domain.model.Tariff;
+import com.github.jenkaby.bikerental.tariff.domain.repository.TariffRepository;
+import com.github.jenkaby.bikerental.tariff.infrastructure.persistence.entity.TariffJpaEntity;
+import com.github.jenkaby.bikerental.tariff.infrastructure.persistence.mapper.TariffJpaMapper;
+import com.github.jenkaby.bikerental.tariff.infrastructure.persistence.repository.TariffJpaRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+class TariffRepositoryAdapter implements TariffRepository {
+
+    private final TariffJpaRepository jpaRepository;
+    private final TariffJpaMapper mapper;
+    private final PageMapper pageMapper;
+
+<span class="fc" id="L25">    TariffRepositoryAdapter(TariffJpaRepository jpaRepository, TariffJpaMapper mapper, PageMapper pageMapper) {</span>
+<span class="fc" id="L26">        this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L27">        this.mapper = mapper;</span>
+<span class="fc" id="L28">        this.pageMapper = pageMapper;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    public Tariff save(Tariff tariff) {
+<span class="fc" id="L33">        TariffJpaEntity entity = mapper.toEntity(tariff);</span>
+<span class="fc" id="L34">        var saved = jpaRepository.save(entity);</span>
+<span class="fc" id="L35">        return mapper.toDomain(saved);</span>
+    }
+
+    @Override
+    public Optional&lt;Tariff&gt; findById(Long id) {
+<span class="fc" id="L40">        return jpaRepository.findById(id).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public Page&lt;Tariff&gt; findAll(PageRequest pageRequest) {
+<span class="fc" id="L45">        Pageable pageable = pageMapper.toSpring(pageRequest);</span>
+<span class="fc" id="L46">        var page = jpaRepository.findAll(pageable);</span>
+<span class="fc" id="L47">        return pageMapper.toDomain(page).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public List&lt;Tariff&gt; findActiveForEquipmentType(String equipmentTypeSlug) {
+<span class="fc" id="L52">        return jpaRepository.findActiveByEquipmentType(equipmentTypeSlug).stream()</span>
+<span class="fc" id="L53">                .map(mapper::toDomain)</span>
+<span class="fc" id="L54">                .toList();</span>
+    }
+
+    @Override
+    public Tariff get(Long id) {
+<span class="fc" id="L59">        return jpaRepository.findById(id)</span>
+<span class="fc" id="L60">                .map(mapper::toDomain)</span>
+<span class="fc" id="L61">                .orElseThrow(() -&gt; new ResourceNotFoundException(Tariff.class, id.toString()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

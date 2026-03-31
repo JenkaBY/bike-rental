@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffV2JpaEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.infrastructure.persistence.entity</a> &gt; <span class="el_source">TariffV2JpaEntity.java</span></div><h1>TariffV2JpaEntity.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.infrastructure.persistence.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Map;
+
+@Entity
+@Table(name = &quot;tariffs_v2&quot;)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
+public class TariffV2JpaEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 200)
+    private String name;
+
+    @Column(length = 1000)
+    private String description;
+
+    @Column(name = &quot;equipment_type_slug&quot;, nullable = false, length = 50)
+    private String equipmentType;
+
+    @Column(name = &quot;pricing_type&quot;, nullable = false, length = 50)
+    private String pricingType;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = &quot;params&quot;, nullable = false, columnDefinition = &quot;jsonb&quot;)
+    private Map&lt;String, Object&gt; params;
+
+    @Column(name = &quot;valid_from&quot;, nullable = false)
+    private LocalDate validFrom;
+
+    @Column(name = &quot;valid_to&quot;)
+    private LocalDate validTo;
+
+    @Column(name = &quot;status&quot;, nullable = false, length = 50)
+    private String status;
+
+    @Column(name = &quot;version&quot;, nullable = false, length = 10)
+    private String version;
+
+    @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = &quot;updated_at&quot;, nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (createdAt == null) {</span>
+<span class="fc" id="L63">            createdAt = Instant.now();</span>
+<span class="fc" id="L64">            updatedAt = createdAt;</span>
+        }
+<span class="fc" id="L66">    }</span>
+
+    @PreUpdate
+    protected void onUpdate() {
+<span class="fc" id="L70">        updatedAt = Instant.now();</span>
+<span class="fc" id="L71">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Money.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.shared.domain.model.vo</a> &gt; <span class="el_source">Money.java</span></div><h1>Money.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.shared.domain.model.vo;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+public record Money(BigDecimal amount) implements Comparable&lt;Money&gt; {
+    private static final int MONEY_SCALE = 2;
+
+<span class="fc" id="L9">    private static final RoundingMode MONEY_ROUNDING_MODE = RoundingMode.HALF_UP;</span>
+<span class="fc" id="L10">    public Money {</span>
+<span class="pc bpc" id="L11" title="1 of 2 branches missed.">        if (amount == null) {</span>
+<span class="nc" id="L12">            throw new IllegalArgumentException(&quot;Amount cannot be null&quot;);</span>
+        }
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">        if (amount.scale() &gt; MONEY_SCALE) {</span>
+<span class="nc" id="L15">            throw new IllegalArgumentException(&quot;Amount cannot have more than &quot; + MONEY_SCALE + &quot; decimal places&quot;);</span>
+        }
+<span class="fc" id="L17">    }</span>
+
+    /**
+     * Creates Money from BigDecimal, automatically rounding to 2 decimal places if needed.
+     *
+     * @param amount amount to create Money from
+     * @return Money instance with rounded amount
+     */
+    public static Money of(BigDecimal amount) {
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (amount == null) {</span>
+<span class="nc" id="L27">            throw new IllegalArgumentException(&quot;Amount cannot be null&quot;);</span>
+        }
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        BigDecimal roundedAmount = amount.scale() &gt; MONEY_SCALE</span>
+<span class="fc" id="L30">                ? amount.setScale(MONEY_SCALE, MONEY_ROUNDING_MODE)</span>
+<span class="fc" id="L31">                : amount;</span>
+<span class="fc" id="L32">        return new Money(roundedAmount);</span>
+    }
+
+    public static Money of(String amount) {
+<span class="nc" id="L36">        return new Money(new BigDecimal(amount));</span>
+    }
+
+    public static Money zero() {
+<span class="fc" id="L40">        return new Money(BigDecimal.ZERO);</span>
+    }
+
+    public boolean isPositive() {
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        return amount.compareTo(BigDecimal.ZERO) &gt; 0;</span>
+    }
+
+    public boolean isNegative() {
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        return amount.compareTo(BigDecimal.ZERO) &lt; 0;</span>
+    }
+
+    public boolean isZero() {
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        return amount.compareTo(BigDecimal.ZERO) == 0;</span>
+    }
+
+    public boolean isNegativeOrZero() {
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        return amount.compareTo(BigDecimal.ZERO) &lt;= 0;</span>
+    }
+
+    public Money abs() {
+<span class="fc" id="L60">        return new Money(amount.abs());</span>
+    }
+
+    public boolean isMoreThan(Money other) {
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        return this.compareTo(other) &gt; 0;</span>
+    }
+
+    public boolean isLessThan(Money other) {
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        return this.compareTo(other) &lt; 0;</span>
+    }
+
+    public Money add(Money other) {
+<span class="fc" id="L72">        return new Money(this.amount.add(other.amount));</span>
+    }
+
+    public Money subtract(Money other) {
+<span class="fc" id="L76">        return new Money(this.amount.subtract(other.amount));</span>
+    }
+
+    public Money multiply(BigDecimal multiplier) {
+<span class="fc" id="L80">        return Money.of(this.amount.multiply(multiplier));</span>
+    }
+
+    public Money divide(int divisor) {
+<span class="fc" id="L84">        return Money.of(amount.divide(BigDecimal.valueOf(divisor), MONEY_SCALE, MONEY_ROUNDING_MODE));</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L89">        return amount.stripTrailingZeros().toPlainString();</span>
+    }
+
+    @Override
+    public int compareTo(Money o) {
+<span class="fc" id="L94">        return this.amount.compareTo(o.amount);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

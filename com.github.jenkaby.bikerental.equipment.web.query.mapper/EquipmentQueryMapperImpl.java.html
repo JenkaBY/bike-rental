@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EquipmentQueryMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.web.query.mapper</a> &gt; <span class="el_source">EquipmentQueryMapperImpl.java</span></div><h1>EquipmentQueryMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.web.query.mapper;
+
+import com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase;
+import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
+import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
+import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
+import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentResponse;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
+import java.time.LocalDate;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class EquipmentQueryMapperImpl implements EquipmentQueryMapper {
+
+    private final UidMapper uidMapper;
+    private final SerialNumberMapper serialNumberMapper;
+    private final PageMapper pageMapper;
+
+    @Autowired
+<span class="fc" id="L28">    public EquipmentQueryMapperImpl(UidMapper uidMapper, SerialNumberMapper serialNumberMapper, PageMapper pageMapper) {</span>
+
+<span class="fc" id="L30">        this.uidMapper = uidMapper;</span>
+<span class="fc" id="L31">        this.serialNumberMapper = serialNumberMapper;</span>
+<span class="fc" id="L32">        this.pageMapper = pageMapper;</span>
+<span class="fc" id="L33">    }</span>
+
+    @Override
+    public EquipmentResponse toResponse(Equipment equipment) {
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
+<span class="nc" id="L38">            return null;</span>
+        }
+
+<span class="fc" id="L41">        String status = null;</span>
+<span class="fc" id="L42">        String type = null;</span>
+<span class="fc" id="L43">        Long id = null;</span>
+<span class="fc" id="L44">        String serialNumber = null;</span>
+<span class="fc" id="L45">        String uid = null;</span>
+<span class="fc" id="L46">        String model = null;</span>
+<span class="fc" id="L47">        LocalDate commissionedAt = null;</span>
+<span class="fc" id="L48">        String condition = null;</span>
+
+<span class="fc" id="L50">        status = equipment.getStatusSlug();</span>
+<span class="fc" id="L51">        type = equipment.getTypeSlug();</span>
+<span class="fc" id="L52">        id = equipment.getId();</span>
+<span class="fc" id="L53">        serialNumber = serialNumberMapper.toString( equipment.getSerialNumber() );</span>
+<span class="fc" id="L54">        uid = uidMapper.toString( equipment.getUid() );</span>
+<span class="fc" id="L55">        model = equipment.getModel();</span>
+<span class="fc" id="L56">        commissionedAt = equipment.getCommissionedAt();</span>
+<span class="fc" id="L57">        condition = equipment.getCondition();</span>
+
+<span class="fc" id="L59">        EquipmentResponse equipmentResponse = new EquipmentResponse( id, serialNumber, uid, type, status, model, commissionedAt, condition );</span>
+
+<span class="fc" id="L61">        return equipmentResponse;</span>
+    }
+
+    @Override
+    public SearchEquipmentsUseCase.SearchEquipmentsQuery toSearchQuery(String status, String type, Pageable pageable) {
+<span class="pc bpc" id="L66" title="1 of 6 branches missed.">        if ( status == null &amp;&amp; type == null &amp;&amp; pageable == null ) {</span>
+<span class="nc" id="L67">            return null;</span>
+        }
+
+<span class="fc" id="L70">        String statusSlug = null;</span>
+<span class="fc" id="L71">        statusSlug = status;</span>
+<span class="fc" id="L72">        String typeSlug = null;</span>
+<span class="fc" id="L73">        typeSlug = type;</span>
+<span class="fc" id="L74">        PageRequest pageRequest = null;</span>
+<span class="fc" id="L75">        pageRequest = pageMapper.toPageRequest( pageable );</span>
+
+<span class="fc" id="L77">        SearchEquipmentsUseCase.SearchEquipmentsQuery searchEquipmentsQuery = new SearchEquipmentsUseCase.SearchEquipmentsQuery( statusSlug, typeSlug, pageRequest );</span>
+
+<span class="fc" id="L79">        return searchEquipmentsQuery;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

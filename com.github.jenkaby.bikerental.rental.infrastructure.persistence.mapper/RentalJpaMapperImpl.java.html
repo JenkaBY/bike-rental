@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalJpaMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper</a> &gt; <span class="el_source">RentalJpaMapperImpl.java</span></div><h1>RentalJpaMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper;
+
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalEquipmentJpaEntity;
+import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalJpaEntity;
+import com.github.jenkaby.bikerental.rental.shared.mapper.RentalStatusMapper;
+import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class RentalJpaMapperImpl implements RentalJpaMapper {
+
+    private final MoneyMapper moneyMapper;
+    private final RentalStatusMapper rentalStatusMapper;
+    private final DurationMapper durationMapper;
+    private final RentalEquipmentJpaMapper rentalEquipmentJpaMapper;
+
+    @Autowired
+<span class="fc" id="L29">    public RentalJpaMapperImpl(MoneyMapper moneyMapper, RentalStatusMapper rentalStatusMapper, DurationMapper durationMapper, RentalEquipmentJpaMapper rentalEquipmentJpaMapper) {</span>
+
+<span class="fc" id="L31">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L32">        this.rentalStatusMapper = rentalStatusMapper;</span>
+<span class="fc" id="L33">        this.durationMapper = durationMapper;</span>
+<span class="fc" id="L34">        this.rentalEquipmentJpaMapper = rentalEquipmentJpaMapper;</span>
+<span class="fc" id="L35">    }</span>
+
+    @Override
+    public Rental toDomain(RentalJpaEntity entity) {
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L40">            return null;</span>
+        }
+
+<span class="fc" id="L43">        Rental.RentalBuilder rental = Rental.builder();</span>
+
+<span class="fc" id="L45">        rental.plannedDuration( durationMapper.toDuration( entity.getPlannedDurationMinutes() ) );</span>
+<span class="fc" id="L46">        rental.actualDuration( durationMapper.toDuration( entity.getActualDurationMinutes() ) );</span>
+<span class="fc" id="L47">        rental.equipments( rentalEquipmentJpaEntityListToRentalEquipmentList( entity.getRentalEquipments() ) );</span>
+<span class="fc" id="L48">        rental.id( entity.getId() );</span>
+<span class="fc" id="L49">        rental.customerId( entity.getCustomerId() );</span>
+<span class="fc" id="L50">        rental.status( rentalStatusMapper.stringToStatus( entity.getStatus() ) );</span>
+<span class="fc" id="L51">        rental.startedAt( entity.getStartedAt() );</span>
+<span class="fc" id="L52">        rental.expectedReturnAt( entity.getExpectedReturnAt() );</span>
+<span class="fc" id="L53">        rental.actualReturnAt( entity.getActualReturnAt() );</span>
+<span class="fc" id="L54">        rental.estimatedCost( moneyMapper.toMoney( entity.getEstimatedCost() ) );</span>
+<span class="fc" id="L55">        rental.finalCost( moneyMapper.toMoney( entity.getFinalCost() ) );</span>
+<span class="fc" id="L56">        rental.createdAt( entity.getCreatedAt() );</span>
+<span class="fc" id="L57">        rental.updatedAt( entity.getUpdatedAt() );</span>
+
+<span class="fc" id="L59">        return rental.build();</span>
+    }
+
+    @Override
+    public RentalJpaEntity toEntity(Rental rental) {
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
+<span class="nc" id="L65">            return null;</span>
+        }
+
+<span class="fc" id="L68">        RentalJpaEntity.RentalJpaEntityBuilder rentalJpaEntity = RentalJpaEntity.builder();</span>
+
+<span class="fc" id="L70">        rentalJpaEntity.actualDurationMinutes( durationMapper.toMinutes( rental.getActualDuration() ) );</span>
+<span class="fc" id="L71">        rentalJpaEntity.plannedDurationMinutes( durationMapper.toMinutes( rental.getPlannedDuration() ) );</span>
+<span class="fc" id="L72">        rentalJpaEntity.rentalEquipments( rentalEquipmentListToRentalEquipmentJpaEntityList( rental.getEquipments() ) );</span>
+<span class="fc" id="L73">        rentalJpaEntity.id( rental.getId() );</span>
+<span class="fc" id="L74">        rentalJpaEntity.customerId( rental.getCustomerId() );</span>
+<span class="fc" id="L75">        rentalJpaEntity.status( rentalStatusMapper.statusToString( rental.getStatus() ) );</span>
+<span class="fc" id="L76">        rentalJpaEntity.startedAt( rental.getStartedAt() );</span>
+<span class="fc" id="L77">        rentalJpaEntity.expectedReturnAt( rental.getExpectedReturnAt() );</span>
+<span class="fc" id="L78">        rentalJpaEntity.actualReturnAt( rental.getActualReturnAt() );</span>
+<span class="fc" id="L79">        rentalJpaEntity.createdAt( rental.getCreatedAt() );</span>
+<span class="fc" id="L80">        rentalJpaEntity.updatedAt( rental.getUpdatedAt() );</span>
+
+<span class="fc" id="L82">        RentalJpaEntity rentalJpaEntityResult = rentalJpaEntity.build();</span>
+
+<span class="fc" id="L84">        setRelationships( rental, rentalJpaEntityResult );</span>
+
+<span class="fc" id="L86">        return rentalJpaEntityResult;</span>
+    }
+
+    protected List&lt;RentalEquipment&gt; rentalEquipmentJpaEntityListToRentalEquipmentList(List&lt;RentalEquipmentJpaEntity&gt; list) {
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L91">            return null;</span>
+        }
+
+<span class="fc" id="L94">        List&lt;RentalEquipment&gt; list1 = new ArrayList&lt;RentalEquipment&gt;( list.size() );</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        for ( RentalEquipmentJpaEntity rentalEquipmentJpaEntity : list ) {</span>
+<span class="fc" id="L96">            list1.add( rentalEquipmentJpaMapper.toDomain( rentalEquipmentJpaEntity ) );</span>
+<span class="fc" id="L97">        }</span>
+
+<span class="fc" id="L99">        return list1;</span>
+    }
+
+    protected List&lt;RentalEquipmentJpaEntity&gt; rentalEquipmentListToRentalEquipmentJpaEntityList(List&lt;RentalEquipment&gt; list) {
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L104">            return null;</span>
+        }
+
+<span class="fc" id="L107">        List&lt;RentalEquipmentJpaEntity&gt; list1 = new ArrayList&lt;RentalEquipmentJpaEntity&gt;( list.size() );</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        for ( RentalEquipment rentalEquipment : list ) {</span>
+<span class="fc" id="L109">            list1.add( rentalEquipmentJpaMapper.toEntity( rentalEquipment ) );</span>
+<span class="fc" id="L110">        }</span>
+
+<span class="fc" id="L112">        return list1;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

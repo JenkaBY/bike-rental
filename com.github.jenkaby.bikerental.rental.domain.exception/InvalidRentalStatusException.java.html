@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvalidRentalStatusException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.domain.exception</a> &gt; <span class="el_source">InvalidRentalStatusException.java</span></div><h1>InvalidRentalStatusException.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.domain.exception;
+
+import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
+import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
+import lombok.Getter;
+
+@Getter
+public class InvalidRentalStatusException extends BikeRentalException {
+
+    public static final String ERROR_CODE = &quot;rental.status.invalid&quot;;
+
+    private static final String MESSAGE_TEMPLATE = &quot;Cannot perform operation on rental with status %s. Expected status: %s&quot;;
+
+    public InvalidRentalStatusException(RentalStatus currentStatus, RentalStatus expectedStatus) {
+<span class="fc" id="L15">        super(MESSAGE_TEMPLATE.formatted(currentStatus, expectedStatus), ERROR_CODE, new RentalStatusDetails(currentStatus, expectedStatus));</span>
+<span class="fc" id="L16">    }</span>
+
+    public RentalStatusDetails getDetails() {
+<span class="fc" id="L19">        return getParams()</span>
+<span class="fc" id="L20">                .map(d -&gt; (RentalStatusDetails) d)</span>
+<span class="pc" id="L21">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected RentalStatusDetails in exception parameters&quot;));</span>
+    }
+
+<span class="fc" id="L24">    public record RentalStatusDetails(RentalStatus currentStatus, RentalStatus expectedStatus) {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

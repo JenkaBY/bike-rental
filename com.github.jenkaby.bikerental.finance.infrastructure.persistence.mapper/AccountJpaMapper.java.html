@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountJpaMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper</a> &gt; <span class="el_source">AccountJpaMapper.java</span></div><h1>AccountJpaMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper;
+
+import com.github.jenkaby.bikerental.finance.domain.model.Account;
+import com.github.jenkaby.bikerental.finance.domain.model.SubLedger;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.AccountJpaEntity;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.SubLedgerJpaEntity;
+import com.github.jenkaby.bikerental.shared.mapper.CustomerRefMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+@Mapper(uses = {MoneyMapper.class, CustomerRefMapper.class})
+public interface AccountJpaMapper {
+
+    @Mapping(target = &quot;customerRef&quot;, source = &quot;customerId&quot;)
+    Account toDomain(AccountJpaEntity entity);
+
+    @Mapping(target = &quot;customerId&quot;, source = &quot;customerRef&quot;)
+    @Mapping(target = &quot;createdAt&quot;, ignore = true)
+    AccountJpaEntity toEntity(Account domain);
+
+    @AfterMapping
+    default void setSubLedgerRelationships(Account domain, @MappingTarget AccountJpaEntity result) {
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (result.getSubLedgers() != null) {</span>
+<span class="fc" id="L27">            result.getSubLedgers().forEach(sl -&gt; sl.setAccount(result));</span>
+        }
+<span class="fc" id="L29">    }</span>
+
+    SubLedger toDomain(SubLedgerJpaEntity entity);
+
+    @Mapping(target = &quot;account&quot;, ignore = true)
+    @Mapping(target = &quot;createdAt&quot;, ignore = true)
+    @Mapping(target = &quot;updatedAt&quot;, ignore = true)
+    SubLedgerJpaEntity toEntity(SubLedger domain);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

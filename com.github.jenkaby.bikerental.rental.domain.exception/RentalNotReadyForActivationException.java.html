@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalNotReadyForActivationException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.domain.exception</a> &gt; <span class="el_source">RentalNotReadyForActivationException.java</span></div><h1>RentalNotReadyForActivationException.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.domain.exception;
+
+import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
+import lombok.Getter;
+
+import java.util.List;
+
+/**
+ * Exception thrown when rental cannot be activated because required fields are missing.
+ * &lt;p&gt;
+ * Rental must have all required fields filled before activation:
+ * - customerId
+ * - equipmentId
+ * - tariffId
+ * - plannedDuration
+ * - estimatedCost
+ */
+@Getter
+public class RentalNotReadyForActivationException extends BikeRentalException {
+
+    public static final String ERROR_CODE = &quot;rental.activation.not_ready&quot;;
+
+    private static final String MESSAGE_TEMPLATE = &quot;Rental cannot be activated. Missing required fields: %s&quot;;
+
+    private final List&lt;String&gt; missingFields;
+
+    public RentalNotReadyForActivationException(List&lt;String&gt; missingFields) {
+<span class="nc" id="L28">        super(MESSAGE_TEMPLATE.formatted(String.join(&quot;, &quot;, missingFields)), ERROR_CODE);</span>
+<span class="nc" id="L29">        this.missingFields = missingFields;</span>
+<span class="nc" id="L30">    }</span>
+
+    public MissingFields getDetails() {
+<span class="nc" id="L33">        return this.getParams().map(params -&gt; (MissingFields) params)</span>
+<span class="nc" id="L34">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected MissingFields in exception parameters&quot;));</span>
+    }
+
+<span class="nc" id="L37">    public record MissingFields(List&lt;String&gt; fields) {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

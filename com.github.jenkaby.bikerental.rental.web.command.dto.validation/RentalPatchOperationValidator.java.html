@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalPatchOperationValidator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.web.command.dto.validation</a> &gt; <span class="el_source">RentalPatchOperationValidator.java</span></div><h1>RentalPatchOperationValidator.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.web.command.dto.validation;
+
+import com.github.jenkaby.bikerental.rental.web.command.dto.RentalPatchOperation;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+import java.time.Duration;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+
+<span class="fc" id="L12">public class RentalPatchOperationValidator implements ConstraintValidator&lt;ValidRentalPatchOperation, RentalPatchOperation&gt; {</span>
+
+<span class="fc" id="L14">    private static final Set&lt;String&gt; ALLOWED_PATHS = Set.of(</span>
+            &quot;/customerId&quot;,
+            &quot;/equipmentIds&quot;,
+            &quot;/tariffId&quot;,
+            &quot;/duration&quot;,
+            &quot;/status&quot;
+    );
+
+<span class="fc" id="L22">    private static final Pattern IS_ARRAY_OF_NUMBERS = Pattern.compile(&quot;^\\s*\\[\\s*(?:\\d+\\s*(?:,\\s*\\d+\\s*)*)?\\]\\s*$&quot;);</span>
+
+    @Override
+    public boolean isValid(RentalPatchOperation operation, ConstraintValidatorContext context) {
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (operation == null) {</span>
+<span class="nc" id="L27">            return true;</span>
+        }
+
+<span class="fc" id="L30">        boolean isValid = true;</span>
+<span class="fc" id="L31">        context.disableDefaultConstraintViolation();</span>
+
+        // Validate operation type
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if (operation.getOp() == null) {</span>
+<span class="nc" id="L35">            context.buildConstraintViolationWithTemplate(&quot;Operation 'op' is required&quot;)</span>
+<span class="nc" id="L36">                    .addPropertyNode(&quot;op&quot;)</span>
+<span class="nc" id="L37">                    .addConstraintViolation();</span>
+<span class="nc" id="L38">            isValid = false;</span>
+        }
+
+        // Validate path
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">        if (operation.getPath() == null || operation.getPath().isBlank()) {</span>
+<span class="nc" id="L43">            context.buildConstraintViolationWithTemplate(&quot;Path is required&quot;)</span>
+<span class="nc" id="L44">                    .addPropertyNode(&quot;path&quot;)</span>
+<span class="nc" id="L45">                    .addConstraintViolation();</span>
+<span class="nc" id="L46">            isValid = false;</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        } else if (!operation.getPath().startsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L48">            context.buildConstraintViolationWithTemplate(&quot;Path must start with '/'&quot;)</span>
+<span class="nc" id="L49">                    .addPropertyNode(&quot;path&quot;)</span>
+<span class="nc" id="L50">                    .addConstraintViolation();</span>
+<span class="nc" id="L51">            isValid = false;</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        } else if (!ALLOWED_PATHS.contains(operation.getPath())) {</span>
+<span class="nc" id="L53">            context.buildConstraintViolationWithTemplate(</span>
+<span class="nc" id="L54">                            String.format(&quot;Path '%s' is not allowed. Allowed paths: %s&quot;,</span>
+<span class="nc" id="L55">                                    operation.getPath(), ALLOWED_PATHS))</span>
+<span class="nc" id="L56">                    .addPropertyNode(&quot;path&quot;)</span>
+<span class="nc" id="L57">                    .addConstraintViolation();</span>
+<span class="nc" id="L58">            isValid = false;</span>
+        }
+
+        // Validate value is provided (all supported operations require a value)
+<span class="pc bpc" id="L62" title="1 of 4 branches missed.">        if (operation.getOp() != null &amp;&amp; operation.getValue() == null) {</span>
+<span class="fc" id="L63">            context.buildConstraintViolationWithTemplate(</span>
+<span class="fc" id="L64">                            String.format(&quot;Value is required for operation '%s'&quot;, operation.getOp().getValue()))</span>
+<span class="fc" id="L65">                    .addPropertyNode(&quot;value&quot;)</span>
+<span class="fc" id="L66">                    .addConstraintViolation();</span>
+<span class="fc" id="L67">            isValid = false;</span>
+        }
+<span class="pc bpc" id="L69" title="1 of 6 branches missed.">        if (operation.getOp() != null &amp;&amp; &quot;/duration&quot;.equals(operation.getPath()) &amp;&amp; operation.getValue() != null) {</span>
+            // For duration, value must be a valid ISO-8601 duration string
+            try {
+<span class="fc" id="L72">                Duration.parse(operation.getValue().toString());</span>
+<span class="fc" id="L73">            } catch (Exception e) {</span>
+<span class="fc" id="L74">                context.buildConstraintViolationWithTemplate(</span>
+                                &quot;Value for path '/duration' must be a valid ISO-8601 duration string, e.g. 'PT1H30M'&quot;)
+<span class="fc" id="L76">                        .addPropertyNode(&quot;value&quot;)</span>
+<span class="fc" id="L77">                        .addConstraintViolation();</span>
+<span class="fc" id="L78">                isValid = false;</span>
+<span class="fc" id="L79">            }</span>
+        }
+<span class="pc bpc" id="L81" title="2 of 6 branches missed.">        if (operation.getOp() != null &amp;&amp; &quot;/equipmentIds&quot;.equals(operation.getPath()) &amp;&amp; operation.getValue() != null) {</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">            if (!IS_ARRAY_OF_NUMBERS.matcher(operation.getValue().toString()).matches()) {</span>
+<span class="nc" id="L83">                context.buildConstraintViolationWithTemplate(</span>
+                                &quot;Value for path '/equipmentIds' must be an array of int64&quot;)
+<span class="nc" id="L85">                        .addPropertyNode(&quot;value&quot;)</span>
+<span class="nc" id="L86">                        .addConstraintViolation();</span>
+<span class="nc" id="L87">                isValid = false;</span>
+            }
+        }
+<span class="fc" id="L90">        return isValid;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

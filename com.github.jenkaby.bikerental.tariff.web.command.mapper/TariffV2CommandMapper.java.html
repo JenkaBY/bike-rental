@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffV2CommandMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.command.mapper</a> &gt; <span class="el_source">TariffV2CommandMapper.java</span></div><h1>TariffV2CommandMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.command.mapper;
+
+import com.github.jenkaby.bikerental.tariff.application.usecase.CreateTariffV2UseCase;
+import com.github.jenkaby.bikerental.tariff.application.usecase.UpdateTariffV2UseCase;
+import com.github.jenkaby.bikerental.tariff.shared.utils.TariffV2FieldNames;
+import com.github.jenkaby.bikerental.tariff.web.command.dto.TariffV2Request;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.PricingParams;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Mapper
+public interface TariffV2CommandMapper {
+
+    @Mapping(target = &quot;params&quot;, source = &quot;params&quot;, qualifiedByName = &quot;paramsToMap&quot;)
+    CreateTariffV2UseCase.CreateTariffV2Command toCreateCommand(TariffV2Request request);
+
+    @Mapping(target = &quot;id&quot;, source = &quot;id&quot;)
+    @Mapping(target = &quot;params&quot;, source = &quot;request.params&quot;, qualifiedByName = &quot;paramsToMap&quot;)
+    UpdateTariffV2UseCase.UpdateTariffV2Command toUpdateCommand(Long id, TariffV2Request request);
+
+    @Named(&quot;paramsToMap&quot;)
+    default Map&lt;String, Object&gt; paramsToMap(PricingParams dto) {
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">        if (dto == null) {</span>
+<span class="nc" id="L28">            return Map.of();</span>
+        }
+<span class="fc" id="L30">        Map&lt;String, Object&gt; m = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (dto.firstHourPrice() != null) m.put(TariffV2FieldNames.FIRST_HOUR_PRICE, dto.firstHourPrice());</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (dto.hourlyDiscount() != null) m.put(TariffV2FieldNames.HOURLY_DISCOUNT, dto.hourlyDiscount());</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (dto.minimumHourlyPrice() != null) m.put(TariffV2FieldNames.MINIMUM_HOURLY_PRICE, dto.minimumHourlyPrice());</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (dto.hourlyPrice() != null) m.put(TariffV2FieldNames.HOURLY_PRICE, dto.hourlyPrice());</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (dto.dailyPrice() != null) m.put(TariffV2FieldNames.DAILY_PRICE, dto.dailyPrice());</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (dto.overtimeHourlyPrice() != null)</span>
+<span class="fc" id="L37">            m.put(TariffV2FieldNames.OVERTIME_HOURLY_PRICE, dto.overtimeHourlyPrice());</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (dto.issuanceFee() != null) m.put(TariffV2FieldNames.ISSUANCE_FEE, dto.issuanceFee());</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (dto.minimumDurationMinutes() != null)</span>
+<span class="fc" id="L40">            m.put(TariffV2FieldNames.MINIMUM_DURATION_MINUTES, dto.minimumDurationMinutes());</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (dto.minimumDurationSurcharge() != null)</span>
+<span class="fc" id="L42">            m.put(TariffV2FieldNames.MINIMUM_DURATION_SURCHARGE, dto.minimumDurationSurcharge());</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (dto.price() != null) m.put(TariffV2FieldNames.PRICE, dto.price());</span>
+<span class="fc" id="L44">        return m;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

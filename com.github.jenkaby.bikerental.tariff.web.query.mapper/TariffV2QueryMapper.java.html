@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffV2QueryMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.query.mapper</a> &gt; <span class="el_source">TariffV2QueryMapper.java</span></div><h1>TariffV2QueryMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.query.mapper;
+
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import com.github.jenkaby.bikerental.tariff.domain.model.*;
+import com.github.jenkaby.bikerental.tariff.domain.model.vo.PricingTypeInfo;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.PricingParams;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.PricingTypeResponse;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.TariffV2Response;
+import org.mapstruct.Mapper;
+
+import java.math.BigDecimal;
+
+@Mapper(uses = {MoneyMapper.class})
+public interface TariffV2QueryMapper {
+
+    default TariffV2Response toResponse(TariffV2 tariff) {
+<span class="fc" id="L17">        return new TariffV2Response(</span>
+<span class="fc" id="L18">                tariff.getId(),</span>
+<span class="fc" id="L19">                tariff.getName(),</span>
+<span class="fc" id="L20">                tariff.getDescription(),</span>
+<span class="fc" id="L21">                tariff.getEquipmentType(),</span>
+<span class="fc" id="L22">                tariff.getPricingType(),</span>
+<span class="fc" id="L23">                toParamsDto(tariff),</span>
+<span class="fc" id="L24">                tariff.getValidFrom(),</span>
+<span class="fc" id="L25">                tariff.getValidTo(),</span>
+<span class="fc" id="L26">                tariff.getVersion(),</span>
+<span class="fc" id="L27">                tariff.getStatus()</span>
+        );
+    }
+
+    private static PricingParams toParamsDto(TariffV2 tariff) {
+<span class="fc bfc" id="L32" title="All 5 branches covered.">        return switch (tariff) {</span>
+<span class="fc" id="L33">            case DegressiveHourlyTariffV2 t -&gt; new PricingParams(</span>
+<span class="fc" id="L34">                    t.getFirstHourPrice().amount(),</span>
+<span class="fc" id="L35">                    t.getHourlyDiscount().amount(),</span>
+<span class="fc" id="L36">                    t.getMinimumHourlyPrice().amount(),</span>
+                    null, null, null, null,
+<span class="fc" id="L38">                    t.getMinimumDuration().toMinutesPart(),</span>
+<span class="fc" id="L39">                    t.getMinimumDurationSurcharge().amount(),</span>
+                    null
+            );
+<span class="fc" id="L42">            case FlatHourlyTariffV2 t -&gt; new PricingParams(</span>
+                    null, null, null,
+<span class="fc" id="L44">                    t.getHourlyPrice().amount(),</span>
+                    null, null, null,
+<span class="fc" id="L46">                    t.getMinimumDuration().toMinutesPart(),</span>
+<span class="fc" id="L47">                    t.getMinimumDurationSurcharge().amount(),</span>
+                    null
+            );
+<span class="fc" id="L50">            case DailyTariffV2 t -&gt; new PricingParams(</span>
+                    null, null, null, null,
+<span class="fc" id="L52">                    t.getDailyPrice().amount(),</span>
+<span class="fc" id="L53">                    t.getOvertimeHourlyPrice().amount(),</span>
+                    null, null, null, null
+            );
+<span class="fc" id="L56">            case FlatFeeTariffV2 t -&gt; new PricingParams(</span>
+                    null, null, null, null, null, null,
+<span class="fc" id="L58">                    t.getIssuanceFee().amount(),</span>
+                    null, null, null
+            );
+<span class="fc" id="L61">            case SpecialTariffV2 t -&gt; new PricingParams(</span>
+                    null, null, null, null, null, null, null, null, null,
+                    BigDecimal.ZERO
+            );
+        };
+    }
+
+    PricingTypeResponse toResponse(PricingTypeInfo info);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

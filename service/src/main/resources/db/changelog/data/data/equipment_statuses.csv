@@ -1,7 +1,0 @@
-slug,name,description
-AVAILABLE,Available,Ready for rental
-RENTED,Rented,Equipment is currently in active rental
-MAINTENANCE,Under Maintenance,Equipment is being serviced or repaired
-DECOMMISSIONED,Decommissioned,Equipment has been removed from service
-RESERVED,Reserved,Reserved by a customer but not yet rented
-BROKEN,Broken,Broken by a customer

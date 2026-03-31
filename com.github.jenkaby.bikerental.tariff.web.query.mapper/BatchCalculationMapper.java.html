@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BatchCalculationMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.query.mapper</a> &gt; <span class="el_source">BatchCalculationMapper.java</span></div><h1>BatchCalculationMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.query.mapper;
+
+import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
+import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import com.github.jenkaby.bikerental.tariff.EquipmentCostItem;
+import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
+import com.github.jenkaby.bikerental.tariff.RentalCostCalculationResult;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Mapper(uses = {MoneyMapper.class, DurationMapper.class, DiscountMapper.class, CalculationBreakdownMapper.class})
+<span class="fc" id="L16">public abstract class BatchCalculationMapper {</span>
+
+    private MoneyMapper moneyMapper;
+    private DurationMapper durationMapper;
+    private DiscountDetailMapper discountMapper;
+    private CalculationBreakdownMapper breakdownMapper;
+
+    @Autowired
+    public void setDiscountMapper(DiscountDetailMapper discountMapper) {
+<span class="fc" id="L25">        this.discountMapper = discountMapper;</span>
+<span class="fc" id="L26">    }</span>
+
+    @Autowired
+    public void setBreakdownMapper(CalculationBreakdownMapper breakdownMapper) {
+<span class="fc" id="L30">        this.breakdownMapper = breakdownMapper;</span>
+<span class="fc" id="L31">    }</span>
+
+    @Autowired
+    public void setMoneyMapper(MoneyMapper moneyMapper) {
+<span class="fc" id="L35">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L36">    }</span>
+
+    @Autowired
+    public void setDurationMapper(DurationMapper durationMapper) {
+<span class="fc" id="L40">        this.durationMapper = durationMapper;</span>
+<span class="fc" id="L41">    }</span>
+
+    @Mapping(target = &quot;equipments&quot;, source = &quot;equipments&quot;)
+    @Mapping(target = &quot;plannedDuration&quot;, source = &quot;plannedDurationMinutes&quot;)
+    @Mapping(target = &quot;actualDuration&quot;, source = &quot;actualDurationMinutes&quot;)
+    @Mapping(target = &quot;discount&quot;, source = &quot;discountPercent&quot;)
+    public abstract RentalCostCalculationCommand toCommand(CostCalculationRequest request);
+
+    public abstract EquipmentCostItem toItem(CostCalculationRequest.EquipmentItemRequest item);
+
+    public CostCalculationResponse toResponse(RentalCostCalculationResult result) {
+<span class="fc" id="L52">        return new CostCalculationResponse(</span>
+<span class="fc" id="L53">                breakdownMapper.toBreakdownResponses(result.equipmentBreakdowns()),</span>
+<span class="fc" id="L54">                result.subtotal().amount(),</span>
+<span class="fc" id="L55">                discountMapper.toResponse(result.discount()),</span>
+<span class="fc" id="L56">                moneyMapper.toBigDecimal(result.totalCost()),</span>
+<span class="fc" id="L57">                durationMapper.toMinutes(result.effectiveDuration()),</span>
+<span class="fc" id="L58">                result.estimate(),</span>
+<span class="fc" id="L59">                result.specialPricingApplied()</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

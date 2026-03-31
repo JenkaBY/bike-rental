@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentJpaMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper</a> &gt; <span class="el_source">PaymentJpaMapperImpl.java</span></div><h1>PaymentJpaMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper;
+
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
+import com.github.jenkaby.bikerental.finance.domain.model.Payment;
+import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.PaymentJpaEntity;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class PaymentJpaMapperImpl implements PaymentJpaMapper {
+
+    private final MoneyMapper moneyMapper;
+
+    @Autowired
+<span class="fc" id="L22">    public PaymentJpaMapperImpl(MoneyMapper moneyMapper) {</span>
+
+<span class="fc" id="L24">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L25">    }</span>
+
+    @Override
+    public Payment toDomain(PaymentJpaEntity entity) {
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L30">            return null;</span>
+        }
+
+<span class="fc" id="L33">        Payment.PaymentBuilder payment = Payment.builder();</span>
+
+<span class="fc" id="L35">        payment.id( entity.getId() );</span>
+<span class="fc" id="L36">        payment.rentalId( entity.getRentalId() );</span>
+<span class="fc" id="L37">        payment.amount( moneyMapper.toMoney( entity.getAmount() ) );</span>
+<span class="fc" id="L38">        payment.createdAt( entity.getCreatedAt() );</span>
+<span class="fc" id="L39">        payment.operatorId( entity.getOperatorId() );</span>
+<span class="fc" id="L40">        payment.receiptNumber( entity.getReceiptNumber() );</span>
+
+<span class="fc" id="L42">        payment.paymentType( PaymentType.valueOf(entity.getPaymentType()) );</span>
+<span class="fc" id="L43">        payment.paymentMethod( PaymentMethod.valueOf(entity.getPaymentMethod()) );</span>
+
+<span class="fc" id="L45">        return payment.build();</span>
+    }
+
+    @Override
+    public PaymentJpaEntity toEntity(Payment domain) {
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if ( domain == null ) {</span>
+<span class="nc" id="L51">            return null;</span>
+        }
+
+<span class="fc" id="L54">        PaymentJpaEntity.PaymentJpaEntityBuilder paymentJpaEntity = PaymentJpaEntity.builder();</span>
+
+<span class="fc" id="L56">        paymentJpaEntity.id( domain.getId() );</span>
+<span class="fc" id="L57">        paymentJpaEntity.rentalId( domain.getRentalId() );</span>
+<span class="fc" id="L58">        paymentJpaEntity.amount( moneyMapper.toBigDecimal( domain.getAmount() ) );</span>
+<span class="fc" id="L59">        paymentJpaEntity.createdAt( domain.getCreatedAt() );</span>
+<span class="fc" id="L60">        paymentJpaEntity.operatorId( domain.getOperatorId() );</span>
+<span class="fc" id="L61">        paymentJpaEntity.receiptNumber( domain.getReceiptNumber() );</span>
+
+<span class="fc" id="L63">        paymentJpaEntity.paymentType( domain.getPaymentType().name() );</span>
+<span class="fc" id="L64">        paymentJpaEntity.paymentMethod( domain.getPaymentMethod().name() );</span>
+
+<span class="fc" id="L66">        return paymentJpaEntity.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

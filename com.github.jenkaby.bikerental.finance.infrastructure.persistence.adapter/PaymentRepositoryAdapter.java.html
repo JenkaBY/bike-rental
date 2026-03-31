@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.infrastructure.persistence.adapter</a> &gt; <span class="el_source">PaymentRepositoryAdapter.java</span></div><h1>PaymentRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.infrastructure.persistence.adapter;
+
+import com.github.jenkaby.bikerental.finance.domain.model.Payment;
+import com.github.jenkaby.bikerental.finance.domain.repository.PaymentRepository;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.PaymentJpaEntity;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.PaymentJpaMapper;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.repository.PaymentJpaRepository;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+class PaymentRepositoryAdapter implements PaymentRepository {
+
+    private final PaymentJpaRepository jpaRepository;
+    private final PaymentJpaMapper mapper;
+
+<span class="fc" id="L21">    PaymentRepositoryAdapter(PaymentJpaRepository jpaRepository, PaymentJpaMapper mapper) {</span>
+<span class="fc" id="L22">        this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L23">        this.mapper = mapper;</span>
+<span class="fc" id="L24">    }</span>
+
+    @Override
+    public Payment save(Payment payment) {
+<span class="fc" id="L28">        PaymentJpaEntity entity = mapper.toEntity(payment);</span>
+<span class="fc" id="L29">        var saved = jpaRepository.save(entity);</span>
+<span class="fc" id="L30">        return mapper.toDomain(saved);</span>
+    }
+
+    @Override
+    public Optional&lt;Payment&gt; findById(UUID id) {
+<span class="nc" id="L35">        return jpaRepository.findById(id).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public List&lt;Payment&gt; getForRental(Long rentalId) {
+<span class="fc" id="L40">        return jpaRepository.findByRentalId(rentalId).stream().map(mapper::toDomain).toList();</span>
+    }
+
+    @Override
+    public boolean existsByReceiptNumber(String receiptNumber) {
+<span class="nc" id="L45">        return jpaRepository.existsByReceiptNumber(receiptNumber);</span>
+    }
+
+    @Override
+    public Payment get(UUID id) {
+<span class="fc" id="L50">        return jpaRepository.findById(id).map(mapper::toDomain)</span>
+<span class="fc" id="L51">                .orElseThrow(() -&gt; new ResourceNotFoundException(Payment.class, id.toString()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

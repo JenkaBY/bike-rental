@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EquipmentTypeMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.web.query.mapper</a> &gt; <span class="el_source">EquipmentTypeMapperImpl.java</span></div><h1>EquipmentTypeMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.web.query.mapper;
+
+import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentType;
+import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentTypeResponse;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L13">public class EquipmentTypeMapperImpl implements EquipmentTypeMapper {</span>
+
+    @Override
+    public EquipmentTypeResponse toResponse(EquipmentType equipmentType) {
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if ( equipmentType == null ) {</span>
+<span class="nc" id="L18">            return null;</span>
+        }
+
+<span class="fc" id="L21">        String slug = null;</span>
+<span class="fc" id="L22">        String name = null;</span>
+<span class="fc" id="L23">        String description = null;</span>
+
+<span class="fc" id="L25">        slug = equipmentType.getSlug();</span>
+<span class="fc" id="L26">        name = equipmentType.getName();</span>
+<span class="fc" id="L27">        description = equipmentType.getDescription();</span>
+
+<span class="fc" id="L29">        EquipmentTypeResponse equipmentTypeResponse = new EquipmentTypeResponse( slug, name, description );</span>
+
+<span class="fc" id="L31">        return equipmentTypeResponse;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

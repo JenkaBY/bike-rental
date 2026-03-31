@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffV2.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.domain.model</a> &gt; <span class="el_source">TariffV2.java</span></div><h1>TariffV2.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.domain.model;
+
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.tariff.RentalCostV2;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.Duration;
+import java.time.LocalDate;
+
+@Getter
+public sealed abstract class TariffV2
+        permits DegressiveHourlyTariffV2, FlatHourlyTariffV2, DailyTariffV2, FlatFeeTariffV2, SpecialTariffV2 {
+
+
+    private static final int INTERVAL_MINUTES = 5;
+<span class="fc" id="L17">    private static final int INTERVALS_PER_HOUR = (int) Duration.ofHours(1).toMinutes() / INTERVAL_MINUTES;</span>
+
+    @Setter
+    private Long id;
+    private final String name;
+    private final String description;
+    private final String equipmentType;
+    private final PricingType pricingType;
+    private final String version;
+    private final LocalDate validFrom;
+    private final LocalDate validTo;
+    private TariffV2Status status;
+
+    protected TariffV2(Long id, String name, String description, String equipmentType,
+                       PricingType pricingType, String version, LocalDate validFrom, LocalDate validTo,
+<span class="fc" id="L32">                       TariffV2Status status) {</span>
+<span class="fc" id="L33">        this.id = id;</span>
+<span class="fc" id="L34">        this.name = name;</span>
+<span class="fc" id="L35">        this.description = description;</span>
+<span class="fc" id="L36">        this.equipmentType = equipmentType;</span>
+<span class="fc" id="L37">        this.pricingType = pricingType;</span>
+<span class="fc" id="L38">        this.version = version;</span>
+<span class="fc" id="L39">        this.validFrom = validFrom;</span>
+<span class="fc" id="L40">        this.validTo = validTo;</span>
+<span class="fc" id="L41">        this.status = status;</span>
+<span class="fc" id="L42">    }</span>
+
+    public boolean isActive() {
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        return TariffV2Status.ACTIVE == status;</span>
+    }
+
+    public void activate() {
+<span class="fc" id="L49">        this.status = TariffV2Status.ACTIVE;</span>
+<span class="fc" id="L50">    }</span>
+
+    public void deactivate() {
+<span class="fc" id="L53">        this.status = TariffV2Status.INACTIVE;</span>
+<span class="fc" id="L54">    }</span>
+
+    public boolean isValidOn(LocalDate date) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        boolean afterStart = !date.isBefore(validFrom);</span>
+<span class="nc bnc" id="L58" title="All 4 branches missed.">        boolean beforeEnd = validTo == null || !date.isAfter(validTo);</span>
+<span class="nc bnc" id="L59" title="All 4 branches missed.">        return afterStart &amp;&amp; beforeEnd;</span>
+    }
+
+    public abstract RentalCostV2 calculateCost(Duration duration);
+
+    protected static boolean isNegative(Duration duration) {
+<span class="pc bpc" id="L65" title="3 of 6 branches missed.">        return duration == null || duration.isZero() || duration.isNegative();</span>
+    }
+
+    protected static int getNumberOfDays(Duration duration) {
+<span class="fc" id="L69">        return (int) Math.ceil((double) duration.toMinutes() / Duration.ofDays(1).toMinutes());</span>
+    }
+
+    protected static int getIntervalMinutes(long minutes) {
+<span class="fc" id="L73">        return (int) (minutes / INTERVAL_MINUTES);</span>
+    }
+
+    protected static Money getRatePerMinInterval(Money ratePerHour) {
+<span class="fc" id="L77">        return ratePerHour.divide(INTERVALS_PER_HOUR);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerQueryService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.customer.application.service</a> &gt; <span class="el_source">CustomerQueryService.java</span></div><h1>CustomerQueryService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.customer.application.service;
+
+import com.github.jenkaby.bikerental.customer.CustomerInfo;
+import com.github.jenkaby.bikerental.customer.application.config.CustomerSearchProperties;
+import com.github.jenkaby.bikerental.customer.application.mapper.CustomerMapper;
+import com.github.jenkaby.bikerental.customer.application.usecase.CustomerQueryUseCase;
+import com.github.jenkaby.bikerental.customer.domain.repository.CustomerRepository;
+import com.github.jenkaby.bikerental.customer.domain.util.PhoneUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+class CustomerQueryService implements CustomerQueryUseCase {
+
+    private final CustomerRepository repository;
+    private final CustomerMapper mapper;
+    private final CustomerSearchProperties properties;
+
+    @Override
+    public Optional&lt;CustomerInfo&gt; findById(UUID id) {
+<span class="fc" id="L26">        return repository.findById(id).map(mapper::toInfo);</span>
+    }
+
+    @Override
+    public Optional&lt;CustomerInfo&gt; findByPhone(String phone) {
+<span class="nc" id="L31">        String normalized = PhoneUtil.normalize(phone);</span>
+<span class="nc" id="L32">        return repository.findByPhone(normalized).map(mapper::toInfo);</span>
+    }
+
+    @Override
+    public List&lt;CustomerInfo&gt; searchByPhone(String phone) {
+<span class="fc" id="L37">        var normalized = PhoneUtil.normalize(phone);</span>
+<span class="fc" id="L38">        return repository.searchByPhone(normalized, properties.searchLimitResult()).stream()</span>
+<span class="fc" id="L39">                .map(mapper::toInfo)</span>
+<span class="fc" id="L40">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

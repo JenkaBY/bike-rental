@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UpdateEquipmentTypeService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.application.service</a> &gt; <span class="el_source">UpdateEquipmentTypeService.java</span></div><h1>UpdateEquipmentTypeService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.application.service;
+
+import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentTypeCommandToDomainMapper;
+import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentTypeUseCase;
+import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentType;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentTypeRepository;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class UpdateEquipmentTypeService implements UpdateEquipmentTypeUseCase {
+
+    private final EquipmentTypeRepository repository;
+    private final EquipmentTypeCommandToDomainMapper mapper;
+
+<span class="fc" id="L17">    UpdateEquipmentTypeService(EquipmentTypeRepository repository, EquipmentTypeCommandToDomainMapper mapper) {</span>
+<span class="fc" id="L18">        this.repository = repository;</span>
+<span class="fc" id="L19">        this.mapper = mapper;</span>
+<span class="fc" id="L20">    }</span>
+
+    @Override
+    @Transactional
+    public EquipmentType execute(UpdateEquipmentTypeCommand command) {
+<span class="fc" id="L25">        EquipmentType loaded = repository.findBySlug(command.slug())</span>
+<span class="fc" id="L26">                .orElseThrow(() -&gt; new ResourceNotFoundException(EquipmentType.class.getSimpleName(), command.slug()));</span>
+
+<span class="fc" id="L28">        EquipmentType updated = mapper.toEquipmentType(loaded.getId(), command);</span>
+
+<span class="fc" id="L30">        return repository.save(updated);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

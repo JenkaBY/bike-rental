@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffV2CommandController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.command</a> &gt; <span class="el_source">TariffV2CommandController.java</span></div><h1>TariffV2CommandController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.command;
+
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import com.github.jenkaby.bikerental.shared.web.support.Id;
+import com.github.jenkaby.bikerental.tariff.application.usecase.ActivateTariffV2UseCase;
+import com.github.jenkaby.bikerental.tariff.application.usecase.CreateTariffV2UseCase;
+import com.github.jenkaby.bikerental.tariff.application.usecase.DeactivateTariffV2UseCase;
+import com.github.jenkaby.bikerental.tariff.application.usecase.UpdateTariffV2UseCase;
+import com.github.jenkaby.bikerental.tariff.web.command.dto.TariffV2Request;
+import com.github.jenkaby.bikerental.tariff.web.command.mapper.TariffV2CommandMapper;
+import com.github.jenkaby.bikerental.tariff.web.command.validation.ValidTariffV2Pricing;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.TariffV2Response;
+import com.github.jenkaby.bikerental.tariff.web.query.mapper.TariffV2QueryMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+<span class="fc" id="L29">@Slf4j</span>
+@RestController
+@RequestMapping(&quot;/api/v2/tariffs&quot;)
+@Validated
+@Tag(name = OpenApiConfig.Tags.TARIFFS, description = &quot;Tariff V2 API&quot;)
+public class TariffV2CommandController {
+
+    private final CreateTariffV2UseCase createUseCase;
+    private final UpdateTariffV2UseCase updateUseCase;
+    private final ActivateTariffV2UseCase activateUseCase;
+    private final DeactivateTariffV2UseCase deactivateUseCase;
+    private final TariffV2CommandMapper commandMapper;
+    private final TariffV2QueryMapper queryMapper;
+
+    TariffV2CommandController(CreateTariffV2UseCase createUseCase,
+                              UpdateTariffV2UseCase updateUseCase,
+                              ActivateTariffV2UseCase activateUseCase,
+                              DeactivateTariffV2UseCase deactivateUseCase,
+                              TariffV2CommandMapper commandMapper,
+<span class="fc" id="L48">                              TariffV2QueryMapper queryMapper) {</span>
+<span class="fc" id="L49">        this.createUseCase = createUseCase;</span>
+<span class="fc" id="L50">        this.updateUseCase = updateUseCase;</span>
+<span class="fc" id="L51">        this.activateUseCase = activateUseCase;</span>
+<span class="fc" id="L52">        this.deactivateUseCase = deactivateUseCase;</span>
+<span class="fc" id="L53">        this.commandMapper = commandMapper;</span>
+<span class="fc" id="L54">        this.queryMapper = queryMapper;</span>
+<span class="fc" id="L55">    }</span>
+
+    @PostMapping
+    @Operation(summary = &quot;Create V2 tariff&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Tariff created&quot;,
+                    content = @Content(schema = @Schema(implementation = TariffV2Response.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;TariffV2Response&gt; createTariff(@Valid @RequestBody @ValidTariffV2Pricing TariffV2Request request) {
+<span class="fc" id="L66">        log.info(&quot;[POST] Create V2 tariff with name {}&quot;, request.name());</span>
+<span class="fc" id="L67">        var command = commandMapper.toCreateCommand(request);</span>
+<span class="fc" id="L68">        var created = createUseCase.execute(command);</span>
+<span class="fc" id="L69">        return ResponseEntity.status(HttpStatus.CREATED).body(queryMapper.toResponse(created));</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Update V2 tariff&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Tariff updated&quot;,
+                    content = @Content(schema = @Schema(implementation = TariffV2Response.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Tariff not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;TariffV2Response&gt; updateTariff(
+            @Parameter(description = &quot;Tariff ID&quot;) @PathVariable(&quot;id&quot;) @Id Long id,
+            @Valid @RequestBody @ValidTariffV2Pricing TariffV2Request request) {
+<span class="fc" id="L85">        log.info(&quot;[PUT] Update V2 tariff with id {}&quot;, id);</span>
+<span class="fc" id="L86">        var command = commandMapper.toUpdateCommand(id, request);</span>
+<span class="fc" id="L87">        var updated = updateUseCase.execute(command);</span>
+<span class="fc" id="L88">        return ResponseEntity.ok(queryMapper.toResponse(updated));</span>
+    }
+
+    @PatchMapping(&quot;/{id}/activate&quot;)
+    @Operation(summary = &quot;Activate V2 tariff&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Tariff activated&quot;,
+                    content = @Content(schema = @Schema(implementation = TariffV2Response.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Tariff not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;TariffV2Response&gt; activateTariff(@Parameter(description = &quot;Tariff ID&quot;) @PathVariable(&quot;id&quot;) @Id Long id) {
+<span class="fc" id="L100">        log.info(&quot;[PATCH] Activate V2 tariff with id {}&quot;, id);</span>
+<span class="fc" id="L101">        var activated = activateUseCase.execute(id);</span>
+<span class="fc" id="L102">        return ResponseEntity.ok(queryMapper.toResponse(activated));</span>
+    }
+
+    @PatchMapping(&quot;/{id}/deactivate&quot;)
+    @Operation(summary = &quot;Deactivate V2 tariff&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Tariff deactivated&quot;,
+                    content = @Content(schema = @Schema(implementation = TariffV2Response.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Tariff not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;TariffV2Response&gt; deactivateTariff(@Parameter(description = &quot;Tariff ID&quot;) @PathVariable(&quot;id&quot;) @Id Long id) {
+<span class="fc" id="L114">        log.info(&quot;[PATCH] Deactivate V2 tariff with id {}&quot;, id);</span>
+<span class="fc" id="L115">        var deactivated = deactivateUseCase.execute(id);</span>
+<span class="fc" id="L116">        return ResponseEntity.ok(queryMapper.toResponse(deactivated));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

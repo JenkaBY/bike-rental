@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BreakdownCostDetails.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff</a> &gt; <span class="el_source">BreakdownCostDetails.java</span></div><h1>BreakdownCostDetails.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff;
+
+import com.github.jenkaby.bikerental.shared.domain.utils.MessageCode;
+import lombok.Getter;
+import lombok.ToString;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+@Getter
+@ToString
+public abstract class BreakdownCostDetails {
+    protected String breakdownPatternCode;
+    protected String message;
+    protected Object params;
+
+    public BreakdownCostDetails(@NonNull String breakdownPatternCode,
+                                @NonNull String message,
+<span class="fc" id="L18">                                @Nullable Object params) {</span>
+<span class="fc" id="L19">        this.breakdownPatternCode = breakdownPatternCode;</span>
+<span class="fc" id="L20">        this.message = message;</span>
+<span class="fc" id="L21">        this.params = params;</span>
+<span class="fc" id="L22">    }</span>
+
+    public static class Special extends BreakdownCostDetails {
+        public Special() {
+<span class="nc" id="L26">            super(MessageCode.BREAKDOWN_SPECIAL_PRICE, &quot;Special tariff&quot;, null);</span>
+<span class="nc" id="L27">        }</span>
+    }
+
+    public static class SpecialGroup extends BreakdownCostDetails {
+        public SpecialGroup() {
+<span class="fc" id="L32">            super(MessageCode.BREAKDOWN_SPECIAL_GROUP, &quot;Special tariff applied to group&quot;, null);</span>
+<span class="fc" id="L33">        }</span>
+    }
+
+    public static class Zero extends BreakdownCostDetails {
+        public Zero() {
+<span class="nc" id="L38">            super(MessageCode.BREAKDOWN_ZERO_COST, &quot;0 min: 0.00&quot;, null);</span>
+<span class="nc" id="L39">        }</span>
+    }
+
+    public static class FlatHourlyMinCost extends BreakdownCostDetails {
+        public FlatHourlyMinCost(String message, Details details) {
+<span class="fc" id="L44">            super(MessageCode.BREAKDOWN_FLAT_HOURLY_MIN, message, details);</span>
+<span class="fc" id="L45">        }</span>
+
+<span class="fc" id="L47">        public record Details(int durationMinutes, String rate, String surcharge, String total) {</span>
+        }
+    }
+
+    public static class FlatHourlyStandard extends BreakdownCostDetails {
+        public FlatHourlyStandard(String message, Details details) {
+<span class="fc" id="L53">            super(MessageCode.BREAKDOWN_FLAT_HOURLY_STANDARD, message, details);</span>
+<span class="fc" id="L54">        }</span>
+
+<span class="fc" id="L56">        public record Details(int hours, int minutes, String rate, String total) {</span>
+        }
+    }
+
+    public static class FlatHourlyMinsOnly extends BreakdownCostDetails {
+        public FlatHourlyMinsOnly(String message, Details details) {
+<span class="nc" id="L62">            super(MessageCode.BREAKDOWN_FLAT_HOURLY_MINUTES_ONLY, message, details);</span>
+<span class="nc" id="L63">        }</span>
+
+<span class="nc" id="L65">        public record Details(int minutes, String total) {</span>
+        }
+    }
+
+    public static class DailyStandard extends BreakdownCostDetails {
+        public DailyStandard(String message, Details details) {
+<span class="fc" id="L71">            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);</span>
+<span class="fc" id="L72">        }</span>
+
+<span class="fc" id="L74">        public record Details(int days, String total) {</span>
+        }
+    }
+
+    public static class DailyOvertime extends BreakdownCostDetails {
+        public DailyOvertime(String message, Details details) {
+<span class="fc" id="L80">            super(MessageCode.BREAKDOWN_DAILY_OVERTIME, message, details);</span>
+<span class="fc" id="L81">        }</span>
+
+<span class="fc" id="L83">        public record Details(int days, int hours, int minutes, String total) {</span>
+        }
+    }
+
+    public static class FlatFee extends BreakdownCostDetails {
+        public FlatFee(String message, Details details) {
+<span class="fc" id="L89">            super(MessageCode.BREAKDOWN_FLAT_FEE, message, details);</span>
+<span class="fc" id="L90">        }</span>
+
+<span class="fc" id="L92">        public record Details(String fee, int days, String total) {</span>
+        }
+    }
+
+    public static class DegressiveHourlyMin extends BreakdownCostDetails {
+        public DegressiveHourlyMin(String message, Details details) {
+<span class="fc" id="L98">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MIN, message, details);</span>
+<span class="fc" id="L99">        }</span>
+
+<span class="fc" id="L101">        public record Details(long durationMinutes, String rate, String surcharge, String total) {</span>
+        }
+    }
+
+    public static class DegressiveHourlyStandard extends BreakdownCostDetails {
+        public DegressiveHourlyStandard(String message, Details details) {
+<span class="fc" id="L107">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_STANDARD, message, details);</span>
+<span class="fc" id="L108">        }</span>
+
+<span class="fc" id="L110">        public record Details(long hours, long minutes, String rateBreakdown, String total) {</span>
+        }
+    }
+
+    public static class DegressiveHourlyMinutesOnly extends BreakdownCostDetails {
+        public DegressiveHourlyMinutesOnly(String message, Details details) {
+<span class="nc" id="L116">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MINUTES_ONLY, message, details);</span>
+<span class="nc" id="L117">        }</span>
+
+<span class="nc" id="L119">        public record Details(long minutes, String rateBreakdown, String total) {</span>
+        }
+    }
+
+    public static class Daily extends BreakdownCostDetails {
+        public Daily(String message, Details details) {
+<span class="nc" id="L125">            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);</span>
+<span class="nc" id="L126">        }</span>
+
+<span class="nc" id="L128">        public record Details(int days, int hours, int minutes, String total) {</span>
+        }
+    }
+
+    public static class DailyDaysOnly extends BreakdownCostDetails {
+        public DailyDaysOnly(String message, Details details) {
+<span class="nc" id="L134">            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);</span>
+<span class="nc" id="L135">        }</span>
+
+<span class="nc" id="L137">        public record Details(int days, String total) {</span>
+        }
+    }
+
+    public static class DailyWithOvertime extends BreakdownCostDetails {
+        public DailyWithOvertime(String message, Details details) {
+<span class="nc" id="L143">            super(MessageCode.BREAKDOWN_DAILY_OVERTIME, message, details);</span>
+<span class="nc" id="L144">        }</span>
+
+<span class="nc" id="L146">        public record Details(int days, int hours, int minutes, String total) {</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalEquipmentWebMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.web.query.mapper</a> &gt; <span class="el_source">RentalEquipmentWebMapperImpl.java</span></div><h1>RentalEquipmentWebMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.web.query.mapper;
+
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentStatusMapper;
+import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import java.math.BigDecimal;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class RentalEquipmentWebMapperImpl implements RentalEquipmentWebMapper {
+
+    private final MoneyMapper moneyMapper;
+    private final RentalEquipmentStatusMapper rentalEquipmentStatusMapper;
+
+    @Autowired
+<span class="fc" id="L23">    public RentalEquipmentWebMapperImpl(MoneyMapper moneyMapper, RentalEquipmentStatusMapper rentalEquipmentStatusMapper) {</span>
+
+<span class="fc" id="L25">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L26">        this.rentalEquipmentStatusMapper = rentalEquipmentStatusMapper;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+    public EquipmentItemResponse toEquipmentItemResponse(RentalEquipment equipment) {
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
+<span class="nc" id="L32">            return null;</span>
+        }
+
+<span class="fc" id="L35">        Long equipmentId = null;</span>
+<span class="fc" id="L36">        String equipmentUid = null;</span>
+<span class="fc" id="L37">        BigDecimal estimatedCost = null;</span>
+<span class="fc" id="L38">        BigDecimal finalCost = null;</span>
+<span class="fc" id="L39">        Long tariffId = null;</span>
+<span class="fc" id="L40">        String status = null;</span>
+
+<span class="fc" id="L42">        equipmentId = equipment.getEquipmentId();</span>
+<span class="fc" id="L43">        equipmentUid = equipment.getEquipmentUid();</span>
+<span class="fc" id="L44">        estimatedCost = moneyMapper.toBigDecimal( equipment.getEstimatedCost() );</span>
+<span class="fc" id="L45">        finalCost = moneyMapper.toBigDecimal( equipment.getFinalCost() );</span>
+<span class="fc" id="L46">        tariffId = equipment.getTariffId();</span>
+<span class="fc" id="L47">        status = rentalEquipmentStatusMapper.statusToString( equipment.getStatus() );</span>
+
+<span class="fc" id="L49">        EquipmentItemResponse equipmentItemResponse = new EquipmentItemResponse( equipmentId, equipmentUid, estimatedCost, finalCost, tariffId, status );</span>
+
+<span class="fc" id="L51">        return equipmentItemResponse;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

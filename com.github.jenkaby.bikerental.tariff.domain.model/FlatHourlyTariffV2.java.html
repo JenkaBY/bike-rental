@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FlatHourlyTariffV2.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.domain.model</a> &gt; <span class="el_source">FlatHourlyTariffV2.java</span></div><h1>FlatHourlyTariffV2.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.domain.model;
+
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
+import com.github.jenkaby.bikerental.tariff.RentalCostV2;
+import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2;
+import lombok.Getter;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+
+@Getter
+public final class FlatHourlyTariffV2 extends TariffV2 {
+
+    private final Money hourlyPrice;
+    private final Duration minimumDuration;
+    private final Money minimumDurationSurcharge;
+
+    public FlatHourlyTariffV2(Long id, String name, String description, String equipmentTypeSlug,
+                              String version, LocalDate validFrom, LocalDate validTo, TariffV2Status status,
+                              Money hourlyPrice, Integer minimumDuration, Money minimumDurationSurcharge) {
+<span class="fc" id="L23">        super(id, name, description, equipmentTypeSlug, PricingType.FLAT_HOURLY, version, validFrom, validTo, status);</span>
+<span class="fc" id="L24">        this.hourlyPrice = hourlyPrice;</span>
+<span class="fc" id="L25">        this.minimumDuration = Duration.ofMinutes(minimumDuration);</span>
+<span class="fc" id="L26">        this.minimumDurationSurcharge = minimumDurationSurcharge;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+    public RentalCostV2 calculateCost(Duration duration) {
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (isNegative(duration)) {</span>
+<span class="nc" id="L32">            return new BaseRentalCostV2(Money.zero(), new BreakdownCostDetails.Zero());</span>
+        }
+<span class="fc" id="L34">        int minDuration = minimumDuration.toMinutesPart();</span>
+<span class="fc" id="L35">        Money surcharge = minimumDurationSurcharge;</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (!isMoreThenMinimumDuration(duration)) {</span>
+<span class="fc" id="L37">            Money halfHourly = hourlyPrice.divide(2);</span>
+<span class="fc" id="L38">            Money cost = halfHourly.add(surcharge);</span>
+<span class="fc" id="L39">            String message = String.format(&quot;%dmin minimum: %s/2 + %s = %s&quot;, minDuration, hourlyPrice, surcharge, cost);</span>
+<span class="fc" id="L40">            return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatHourlyMinCost(message,</span>
+<span class="fc" id="L41">                    new BreakdownCostDetails.FlatHourlyMinCost.Details(minDuration, hourlyPrice.toString(), surcharge.toString(), cost.toString())));</span>
+        }
+<span class="fc" id="L43">        long hours = duration.toHours();</span>
+<span class="fc" id="L44">        long minutes = duration.minusHours(hours).toMinutes();</span>
+<span class="fc" id="L45">        Money totalCost = hourlyPrice.multiply(BigDecimal.valueOf(hours));</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (minutes &gt; 0) {</span>
+<span class="fc" id="L47">            int intervals = getIntervalMinutes(minutes);</span>
+<span class="fc" id="L48">            Money perInterval = getRatePerMinInterval(hourlyPrice);</span>
+<span class="fc" id="L49">            totalCost = totalCost.add(perInterval.multiply(BigDecimal.valueOf(intervals)));</span>
+        }
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (hours &gt; 0) {</span>
+<span class="fc" id="L52">            String message = String.format(&quot;%dh %dmin flat: %d*%s + partial = %s&quot;, hours, minutes, hours, hourlyPrice, totalCost);</span>
+<span class="fc" id="L53">            return new BaseRentalCostV2(totalCost,  new BreakdownCostDetails.FlatHourlyStandard(message,</span>
+<span class="fc" id="L54">                    new BreakdownCostDetails.FlatHourlyStandard.Details((int) hours, (int) minutes, hourlyPrice.toString(), totalCost.toString()))</span>
+            );
+        }
+<span class="nc" id="L57">        String message = String.format(&quot;%dmin flat: %s&quot;, minutes, totalCost);</span>
+<span class="nc" id="L58">        return new BaseRentalCostV2(totalCost,</span>
+                new BreakdownCostDetails.FlatHourlyMinsOnly(message,
+<span class="nc" id="L60">                        new BreakdownCostDetails.FlatHourlyMinsOnly.Details((int) minutes, totalCost.toString())));</span>
+    }
+
+    private boolean isMoreThenMinimumDuration(Duration toBeVerified) {
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        return toBeVerified.compareTo(minimumDuration) &gt; 0;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffQueryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.query</a> &gt; <span class="el_source">TariffQueryController.java</span></div><h1>TariffQueryController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.query;
+
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import com.github.jenkaby.bikerental.shared.web.support.Id;
+import com.github.jenkaby.bikerental.tariff.application.mapper.TariffToInfoMapper;
+import com.github.jenkaby.bikerental.tariff.application.usecase.GetActiveTariffsByEquipmentTypeUseCase;
+import com.github.jenkaby.bikerental.tariff.application.usecase.GetAllTariffsUseCase;
+import com.github.jenkaby.bikerental.tariff.application.usecase.GetTariffByIdUseCase;
+import com.github.jenkaby.bikerental.tariff.application.usecase.SelectTariffForRentalUseCase;
+import com.github.jenkaby.bikerental.tariff.application.util.TariffPeriodSelector;
+import com.github.jenkaby.bikerental.tariff.domain.model.Tariff;
+import com.github.jenkaby.bikerental.tariff.domain.model.TariffPeriod;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.TariffResponse;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.TariffSelectionResponse;
+import com.github.jenkaby.bikerental.tariff.web.query.mapper.TariffQueryMapper;
+import com.github.jenkaby.bikerental.tariff.web.query.mapper.TariffSelectionMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.List;
+
+@Validated
+<span class="fc" id="L44">@Slf4j</span>
+@RestController
+@RequestMapping(&quot;/api/tariffs&quot;)
+@Tag(name = OpenApiConfig.Tags.TARIFFS)
+@Deprecated(forRemoval = true)
+public class TariffQueryController {
+
+    private final GetTariffByIdUseCase getByIdUseCase;
+    private final GetAllTariffsUseCase getAllUseCase;
+    private final GetActiveTariffsByEquipmentTypeUseCase getActiveByTypeUseCase;
+    private final SelectTariffForRentalUseCase selectTariffForRentalUseCase;
+    private final TariffPeriodSelector tariffPeriodSelector;
+    private final TariffToInfoMapper tariffToInfoMapper;
+    private final TariffQueryMapper mapper;
+    private final TariffSelectionMapper selectionMapper;
+
+    TariffQueryController(GetTariffByIdUseCase getByIdUseCase,
+                          GetAllTariffsUseCase getAllUseCase,
+                          GetActiveTariffsByEquipmentTypeUseCase getActiveByTypeUseCase,
+                          SelectTariffForRentalUseCase selectTariffForRentalUseCase,
+                          TariffPeriodSelector tariffPeriodSelector,
+                          TariffToInfoMapper tariffToInfoMapper,
+                          TariffQueryMapper mapper,
+<span class="fc" id="L67">                          TariffSelectionMapper selectionMapper) {</span>
+<span class="fc" id="L68">        this.getByIdUseCase = getByIdUseCase;</span>
+<span class="fc" id="L69">        this.getAllUseCase = getAllUseCase;</span>
+<span class="fc" id="L70">        this.getActiveByTypeUseCase = getActiveByTypeUseCase;</span>
+<span class="fc" id="L71">        this.selectTariffForRentalUseCase = selectTariffForRentalUseCase;</span>
+<span class="fc" id="L72">        this.tariffPeriodSelector = tariffPeriodSelector;</span>
+<span class="fc" id="L73">        this.tariffToInfoMapper = tariffToInfoMapper;</span>
+<span class="fc" id="L74">        this.mapper = mapper;</span>
+<span class="fc" id="L75">        this.selectionMapper = selectionMapper;</span>
+<span class="fc" id="L76">    }</span>
+
+    @GetMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Get tariff by ID&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Tariff found&quot;,
+                    content = @Content(schema = @Schema(implementation = TariffResponse.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Tariff not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;TariffResponse&gt; getTariffById(
+            @Parameter(description = &quot;Tariff ID&quot;, example = &quot;1&quot;) @PathVariable(&quot;id&quot;) @Id Long id) {
+<span class="fc" id="L88">        log.info(&quot;[GET] Get tariff by id {}&quot;, id);</span>
+<span class="fc" id="L89">        Tariff tariff = getByIdUseCase.get(id);</span>
+<span class="fc" id="L90">        return ResponseEntity.ok(mapper.toResponse(tariff));</span>
+    }
+
+    @GetMapping
+    @Operation(summary = &quot;Get all tariffs&quot;, description = &quot;Returns a paginated list of all tariffs&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Tariff page returned&quot;)
+    })
+    public ResponseEntity&lt;Page&lt;TariffResponse&gt;&gt; getAllTariffs(
+            @PageableDefault(size = 20, sort = &quot;name&quot;, direction = Sort.Direction.ASC) Pageable pageable) {
+<span class="fc" id="L100">        log.info(&quot;[GET] Get all tariffs with pagination {}&quot;, pageable);</span>
+
+<span class="fc" id="L102">        PageRequest pageRequest = new PageRequest(</span>
+<span class="fc" id="L103">                pageable.getPageSize(),</span>
+<span class="fc" id="L104">                pageable.getPageNumber(),</span>
+<span class="fc" id="L105">                pageable.getSort().toString()</span>
+        );
+<span class="fc" id="L107">        Page&lt;Tariff&gt; tariffs = getAllUseCase.execute(pageRequest);</span>
+<span class="fc" id="L108">        Page&lt;TariffResponse&gt; response = tariffs.map(mapper::toResponse);</span>
+
+<span class="fc" id="L110">        return ResponseEntity.ok(response);</span>
+    }
+
+    @GetMapping(&quot;/active&quot;)
+    @Operation(summary = &quot;Get active tariffs by equipment type&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Active tariffs returned&quot;,
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = TariffResponse.class)))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid equipment type&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;List&lt;TariffResponse&gt;&gt; getActiveTariffsByEquipmentType(
+            @Parameter(description = &quot;Equipment type slug&quot;, example = &quot;bike&quot;) @RequestParam(&quot;equipmentType&quot;) String equipmentType) {
+<span class="fc" id="L123">        log.info(&quot;[GET] Get active tariffs for equipment type {}&quot;, equipmentType);</span>
+
+<span class="fc" id="L125">        List&lt;Tariff&gt; tariffs = getActiveByTypeUseCase.execute(equipmentType);</span>
+<span class="fc" id="L126">        List&lt;TariffResponse&gt; response = tariffs.stream()</span>
+<span class="fc" id="L127">                .map(mapper::toResponse)</span>
+<span class="fc" id="L128">                .toList();</span>
+
+<span class="fc" id="L130">        return ResponseEntity.ok(response);</span>
+    }
+
+    @GetMapping(&quot;/selection&quot;)
+    @Operation(summary = &quot;Select best tariff for rental&quot;,
+            description = &quot;Returns the most cost-effective tariff for the given equipment type, duration and date&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Tariff selected&quot;,
+                    content = @Content(schema = @Schema(implementation = TariffSelectionResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid parameters&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No suitable tariff found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;TariffSelectionResponse&gt; selectTariff(
+            @Parameter(description = &quot;Equipment type slug&quot;, example = &quot;bike&quot;) @RequestParam(&quot;equipmentType&quot;) @NotBlank String equipmentType,
+            @Parameter(description = &quot;Rental duration in minutes&quot;, example = &quot;120&quot;) @RequestParam(&quot;durationMinutes&quot;) @Positive int durationMinutes,
+            @Parameter(description = &quot;Rental date (ISO date, defaults to today)&quot;, example = &quot;2026-06-01&quot;)
+            @RequestParam(value = &quot;rentalDate&quot;, required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate rentalDate) {
+<span class="fc" id="L150">        log.info(&quot;[GET] Select tariff for equipmentType={}, durationMinutes={}, rentalDate={}&quot;,</span>
+<span class="fc" id="L151">                equipmentType, durationMinutes, rentalDate);</span>
+
+<span class="fc" id="L153">        var command = new SelectTariffForRentalUseCase.SelectTariffCommand(equipmentType, durationMinutes, rentalDate);</span>
+<span class="fc" id="L154">        Tariff selectedTariff = selectTariffForRentalUseCase.execute(command);</span>
+
+<span class="fc" id="L156">        Duration duration = Duration.ofMinutes(durationMinutes);</span>
+<span class="fc" id="L157">        TariffPeriod period = tariffPeriodSelector.selectPeriod(duration);</span>
+
+<span class="fc" id="L159">        TariffSelectionResponse response = selectionMapper.toSelectionResponse(</span>
+<span class="fc" id="L160">                tariffToInfoMapper.toTariffInfo(selectedTariff),</span>
+                period
+        );
+        
+<span class="fc" id="L164">        return ResponseEntity.ok(response);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

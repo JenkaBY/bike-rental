@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerCommandToDomainMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.customer.application.mapper</a> &gt; <span class="el_source">CustomerCommandToDomainMapperImpl.java</span></div><h1>CustomerCommandToDomainMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.customer.application.mapper;
+
+import com.github.jenkaby.bikerental.customer.application.usecase.CreateCustomerUseCase;
+import com.github.jenkaby.bikerental.customer.application.usecase.UpdateCustomerUseCase;
+import com.github.jenkaby.bikerental.customer.domain.model.Customer;
+import com.github.jenkaby.bikerental.customer.shared.mapper.EmailAddressMapper;
+import com.github.jenkaby.bikerental.customer.shared.mapper.PhoneNumberMapper;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class CustomerCommandToDomainMapperImpl implements CustomerCommandToDomainMapper {
+
+    private final PhoneNumberMapper phoneNumberMapper;
+    private final EmailAddressMapper emailAddressMapper;
+
+    @Autowired
+<span class="fc" id="L23">    public CustomerCommandToDomainMapperImpl(PhoneNumberMapper phoneNumberMapper, EmailAddressMapper emailAddressMapper) {</span>
+
+<span class="fc" id="L25">        this.phoneNumberMapper = phoneNumberMapper;</span>
+<span class="fc" id="L26">        this.emailAddressMapper = emailAddressMapper;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+    public Customer toCustomer(CreateCustomerUseCase.CreateCustomerCommand command) {
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if ( command == null ) {</span>
+<span class="nc" id="L32">            return null;</span>
+        }
+
+<span class="fc" id="L35">        Customer.CustomerBuilder customer = Customer.builder();</span>
+
+<span class="fc" id="L37">        customer.phone( phoneNumberMapper.toPhoneNumber( command.phone() ) );</span>
+<span class="fc" id="L38">        customer.firstName( command.firstName() );</span>
+<span class="fc" id="L39">        customer.lastName( command.lastName() );</span>
+<span class="fc" id="L40">        customer.email( emailAddressMapper.toEmailAddress( command.email() ) );</span>
+<span class="fc" id="L41">        customer.birthDate( command.birthDate() );</span>
+<span class="fc" id="L42">        customer.comments( command.comments() );</span>
+
+<span class="fc" id="L44">        return customer.build();</span>
+    }
+
+    @Override
+    public Customer toCustomer(UpdateCustomerUseCase.UpdateCustomerCommand command) {
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if ( command == null ) {</span>
+<span class="nc" id="L50">            return null;</span>
+        }
+
+<span class="fc" id="L53">        Customer.CustomerBuilder customer = Customer.builder();</span>
+
+<span class="fc" id="L55">        customer.id( command.customerId() );</span>
+<span class="fc" id="L56">        customer.phone( phoneNumberMapper.toPhoneNumber( command.phone() ) );</span>
+<span class="fc" id="L57">        customer.firstName( command.firstName() );</span>
+<span class="fc" id="L58">        customer.lastName( command.lastName() );</span>
+<span class="fc" id="L59">        customer.email( emailAddressMapper.toEmailAddress( command.email() ) );</span>
+<span class="fc" id="L60">        customer.birthDate( command.birthDate() );</span>
+<span class="fc" id="L61">        customer.comments( command.comments() );</span>
+
+<span class="fc" id="L63">        return customer.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

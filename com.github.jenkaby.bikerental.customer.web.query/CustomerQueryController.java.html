@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerQueryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.customer.web.query</a> &gt; <span class="el_source">CustomerQueryController.java</span></div><h1>CustomerQueryController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.customer.web.query;
+
+import com.github.jenkaby.bikerental.customer.application.usecase.CustomerQueryUseCase;
+import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerSearchResponse;
+import com.github.jenkaby.bikerental.customer.web.query.mapper.CustomerQueryMapper;
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Pattern;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/customers&quot;)
+@Validated
+<span class="fc" id="L30">@Slf4j</span>
+@Tag(name = OpenApiConfig.Tags.CUSTOMERS)
+class CustomerQueryController {
+
+    private final CustomerQueryUseCase customerQueryUseCase;
+    private final CustomerQueryMapper mapper;
+
+<span class="fc" id="L37">    CustomerQueryController(CustomerQueryUseCase customerQueryUseCase, CustomerQueryMapper mapper) {</span>
+<span class="fc" id="L38">        this.customerQueryUseCase = customerQueryUseCase;</span>
+<span class="fc" id="L39">        this.mapper = mapper;</span>
+<span class="fc" id="L40">    }</span>
+
+    @GetMapping
+    @Operation(summary = &quot;Search customers by phone&quot;, description = &quot;Returns customers whose phone number contains the given digit sequence&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Matching customers returned&quot;,
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = CustomerSearchResponse.class)))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid phone search pattern&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;List&lt;CustomerSearchResponse&gt;&gt; searchByPhone(
+            @Parameter(description = &quot;Phone digits to search (4–11 digits)&quot;, example = &quot;9161&quot;)
+            @RequestParam(&quot;phone&quot;)
+            @Pattern(regexp = &quot;^\\d{4,11}$&quot;, message = &quot;Phone search must be 4 to 11 digits&quot;)
+            String phone) {
+<span class="fc" id="L55">        log.info(&quot;[GET] Searching customers by phone: {}&quot;, phone);</span>
+<span class="fc" id="L56">        var results = customerQueryUseCase.searchByPhone(phone);</span>
+<span class="fc" id="L57">        log.info(&quot;[GET] Found {} customers matching phone: {}&quot;, results.size(), phone);</span>
+<span class="fc" id="L58">        return ResponseEntity.ok(mapper.toSearchResponses(results));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffToInfoMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.application.mapper</a> &gt; <span class="el_source">TariffToInfoMapperImpl.java</span></div><h1>TariffToInfoMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.application.mapper;
+
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import com.github.jenkaby.bikerental.tariff.TariffInfo;
+import com.github.jenkaby.bikerental.tariff.domain.model.Tariff;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class TariffToInfoMapperImpl implements TariffToInfoMapper {
+
+    private final MoneyMapper moneyMapper;
+
+    @Autowired
+<span class="fc" id="L22">    public TariffToInfoMapperImpl(MoneyMapper moneyMapper) {</span>
+
+<span class="fc" id="L24">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L25">    }</span>
+
+    @Override
+    public TariffInfo toTariffInfo(Tariff tariff) {
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if ( tariff == null ) {</span>
+<span class="nc" id="L30">            return null;</span>
+        }
+
+<span class="fc" id="L33">        Long id = null;</span>
+<span class="fc" id="L34">        String name = null;</span>
+<span class="fc" id="L35">        String equipmentTypeSlug = null;</span>
+<span class="fc" id="L36">        BigDecimal basePrice = null;</span>
+<span class="fc" id="L37">        BigDecimal halfHourPrice = null;</span>
+<span class="fc" id="L38">        BigDecimal hourPrice = null;</span>
+<span class="fc" id="L39">        BigDecimal dayPrice = null;</span>
+<span class="fc" id="L40">        LocalDate validFrom = null;</span>
+<span class="fc" id="L41">        LocalDate validTo = null;</span>
+
+<span class="fc" id="L43">        id = tariff.getId();</span>
+<span class="fc" id="L44">        name = tariff.getName();</span>
+<span class="fc" id="L45">        equipmentTypeSlug = tariff.getEquipmentTypeSlug();</span>
+<span class="fc" id="L46">        basePrice = moneyMapper.toBigDecimal( tariff.getBasePrice() );</span>
+<span class="fc" id="L47">        halfHourPrice = moneyMapper.toBigDecimal( tariff.getHalfHourPrice() );</span>
+<span class="fc" id="L48">        hourPrice = moneyMapper.toBigDecimal( tariff.getHourPrice() );</span>
+<span class="fc" id="L49">        dayPrice = moneyMapper.toBigDecimal( tariff.getDayPrice() );</span>
+<span class="fc" id="L50">        validFrom = tariff.getValidFrom();</span>
+<span class="fc" id="L51">        validTo = tariff.getValidTo();</span>
+
+<span class="fc" id="L53">        boolean active = tariff.isActive();</span>
+
+<span class="fc" id="L55">        TariffInfo tariffInfo = new TariffInfo( id, name, equipmentTypeSlug, basePrice, halfHourPrice, hourPrice, dayPrice, validFrom, validTo, active );</span>
+
+<span class="fc" id="L57">        return tariffInfo;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

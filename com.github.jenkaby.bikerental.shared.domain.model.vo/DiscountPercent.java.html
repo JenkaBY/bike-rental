@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DiscountPercent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.shared.domain.model.vo</a> &gt; <span class="el_source">DiscountPercent.java</span></div><h1>DiscountPercent.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.shared.domain.model.vo;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+/**
+ * Value object representing a discount percentage (0-100) as BigDecimal.
+ */
+public record DiscountPercent(BigDecimal percent) {
+
+<span class="fc" id="L11">    private static final DiscountPercent ZERO_DISCOUNT = new DiscountPercent(BigDecimal.ZERO);</span>
+<span class="fc" id="L12">    private static final BigDecimal ONE_HUNDRED = new BigDecimal(100);</span>
+
+<span class="fc" id="L14">    public DiscountPercent {</span>
+<span class="pc bpc" id="L15" title="1 of 2 branches missed.">        if (percent == null) {</span>
+<span class="nc" id="L16">            throw new IllegalArgumentException(&quot;Discount percent cannot be null&quot;);</span>
+        }
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">        if (percent.stripTrailingZeros().scale() &gt; 0) {</span>
+<span class="nc" id="L19">            throw new IllegalArgumentException(&quot;Discount percent must not contain fractional digits&quot;);</span>
+        }
+<span class="pc bpc" id="L21" title="2 of 4 branches missed.">        if (percent.compareTo(BigDecimal.ZERO) &lt; 0 || percent.compareTo(BigDecimal.valueOf(100)) &gt; 0) {</span>
+<span class="nc" id="L22">            throw new IllegalArgumentException(&quot;Discount percent must be between 0 and 100&quot;);</span>
+        }
+<span class="fc" id="L24">    }</span>
+
+    public static DiscountPercent of(Integer percent) {
+<span class="fc" id="L27">        return new DiscountPercent(new BigDecimal(percent));</span>
+    }
+
+    public static DiscountPercent zero() {
+<span class="fc" id="L31">        return ZERO_DISCOUNT;</span>
+    }
+
+    public Money multiply(Money amountToBeDiscounted) {
+<span class="fc" id="L35">        return amountToBeDiscounted.multiply(getDecimals());</span>
+    }
+
+    private BigDecimal getDecimals() {
+<span class="fc" id="L39">        return percent.divide(ONE_HUNDRED, 2, RoundingMode.HALF_UP);</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

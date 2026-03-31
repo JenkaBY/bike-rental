@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessageSourceConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.shared.config</a> &gt; <span class="el_source">MessageSourceConfig.java</span></div><h1>MessageSourceConfig.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.shared.config;
+
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+
+@Configuration
+<span class="fc" id="L16">public class MessageSourceConfig {</span>
+
+    @Bean
+    Locale defaultLocale(AppProperties appProperties) {
+<span class="fc" id="L20">        return Locale.forLanguageTag(appProperties.defaultLocale());</span>
+    }
+
+    @Bean
+    public MessageSource messageSource(Locale defaultLocale) {
+<span class="fc" id="L25">        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();</span>
+<span class="fc" id="L26">        messageSource.setBasename(&quot;messages&quot;);</span>
+<span class="fc" id="L27">        messageSource.setDefaultEncoding(&quot;UTF-8&quot;);</span>
+<span class="fc" id="L28">        messageSource.setDefaultLocale(defaultLocale);</span>
+<span class="fc" id="L29">        messageSource.setFallbackToSystemLocale(true);</span>
+<span class="fc" id="L30">        messageSource.setUseCodeAsDefaultMessage(true);</span>
+<span class="fc" id="L31">        return messageSource;</span>
+    }
+
+    @Bean
+    public LocaleResolver localeResolver(Locale defaultLocale) {
+<span class="fc" id="L36">        AcceptHeaderLocaleResolver localeResolver = new AcceptHeaderLocaleResolver();</span>
+<span class="fc" id="L37">        localeResolver.setDefaultLocale(defaultLocale);</span>
+<span class="fc" id="L38">        List&lt;Locale&gt; supportedLocales = Arrays.asList(</span>
+<span class="fc" id="L39">                Locale.forLanguageTag(&quot;ru&quot;),</span>
+                defaultLocale
+        );
+<span class="fc" id="L42">        localeResolver.setSupportedLocales(supportedLocales);</span>
+
+<span class="fc" id="L44">        return localeResolver;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

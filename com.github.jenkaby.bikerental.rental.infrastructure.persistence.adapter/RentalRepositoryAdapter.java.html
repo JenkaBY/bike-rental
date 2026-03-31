@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.infrastructure.persistence.adapter</a> &gt; <span class="el_source">RentalRepositoryAdapter.java</span></div><h1>RentalRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.infrastructure.persistence.adapter;
+
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
+import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
+import com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper.RentalJpaMapper;
+import com.github.jenkaby.bikerental.rental.infrastructure.persistence.repository.RentalJpaRepository;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+@Transactional(readOnly = true)
+class RentalRepositoryAdapter implements RentalRepository {
+
+    private final RentalJpaRepository repository;
+    private final RentalJpaMapper mapper;
+    private final PageMapper pageMapper;
+
+<span class="fc" id="L25">    RentalRepositoryAdapter(RentalJpaRepository repository, RentalJpaMapper mapper, PageMapper pageMapper) {</span>
+<span class="fc" id="L26">        this.repository = repository;</span>
+<span class="fc" id="L27">        this.mapper = mapper;</span>
+<span class="fc" id="L28">        this.pageMapper = pageMapper;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    @Transactional
+    public Rental save(Rental rental) {
+<span class="fc" id="L34">        var entity = mapper.toEntity(rental);</span>
+<span class="fc" id="L35">        var savedEntity = repository.save(entity);</span>
+<span class="fc" id="L36">        return mapper.toDomain(savedEntity);</span>
+    }
+
+    @Override
+    public Optional&lt;Rental&gt; findById(Long id) {
+<span class="fc" id="L41">        return repository.findById(id).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+<span class="nc" id="L46">        return repository.existsById(id);</span>
+    }
+
+    @Override
+    public Page&lt;Rental&gt; findByStatus(RentalStatus status, PageRequest pageRequest) {
+<span class="fc" id="L51">        var springPageRequest = pageMapper.toSpring(pageRequest);</span>
+<span class="fc" id="L52">        var page = repository.findByStatus(status.name(), springPageRequest);</span>
+<span class="fc" id="L53">        return pageMapper.toDomain(page)</span>
+<span class="fc" id="L54">                .map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public Page&lt;Rental&gt; findByStatusAndCustomerId(RentalStatus status, UUID customerId, PageRequest pageRequest) {
+<span class="fc" id="L59">        var springPageRequest = pageMapper.toSpring(pageRequest);</span>
+<span class="fc" id="L60">        var page = repository.findByStatusAndCustomerId(status.name(), customerId, springPageRequest);</span>
+<span class="fc" id="L61">        return pageMapper.toDomain(page)</span>
+<span class="fc" id="L62">                .map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public Page&lt;Rental&gt; findByCustomerId(UUID customerId, PageRequest pageRequest) {
+<span class="fc" id="L67">        var springPageRequest = pageMapper.toSpring(pageRequest);</span>
+<span class="fc" id="L68">        var page = repository.findByCustomerId(customerId, springPageRequest);</span>
+<span class="fc" id="L69">        return pageMapper.toDomain(page)</span>
+<span class="fc" id="L70">                .map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public Page&lt;Rental&gt; findByStatusAndEquipmentUid(RentalStatus status, String equipmentUid, PageRequest pageRequest) {
+<span class="fc" id="L75">        var springPageRequest = pageMapper.toSpring(pageRequest);</span>
+<span class="fc" id="L76">        var page = repository.findByStatusAndEquipmentUid(status.name(), equipmentUid, springPageRequest);</span>
+<span class="fc" id="L77">        return pageMapper.toDomain(page)</span>
+<span class="fc" id="L78">                .map(mapper::toDomain);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

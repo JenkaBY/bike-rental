@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecordDepositService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.application.service</a> &gt; <span class="el_source">RecordDepositService.java</span></div><h1>RecordDepositService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.application.service;
+
+import com.github.jenkaby.bikerental.finance.application.mapper.PaymentMethodLedgerTypeMapper;
+import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
+import com.github.jenkaby.bikerental.finance.domain.model.Account;
+import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
+import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
+import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@RequiredArgsConstructor
+@Service
+public class RecordDepositService implements RecordDepositUseCase {
+
+    private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
+    private final UuidGenerator uuidGenerator;
+    private final Clock clock;
+    private final PaymentMethodLedgerTypeMapper paymentMethodMapper;
+
+    @Override
+    @Transactional
+    public DepositResult execute(RecordDepositCommand command) {
+<span class="fc" id="L38">        Optional&lt;Transaction&gt; existing = transactionRepository</span>
+<span class="fc" id="L39">                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (existing.isPresent()) {</span>
+<span class="fc" id="L41">            Transaction t = existing.get();</span>
+<span class="fc" id="L42">            return new DepositResult(t.getId(), t.getRecordedAt());</span>
+        }
+
+<span class="fc" id="L45">        var customerAccount = accountRepository</span>
+<span class="fc" id="L46">                .findByCustomerId(new CustomerRef(command.customerId()))</span>
+<span class="fc" id="L47">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, command.customerId().toString()));</span>
+
+<span class="fc" id="L49">        var systemAccount = accountRepository.getSystemAccount();</span>
+
+<span class="fc" id="L51">        LedgerType debitLedgerType = paymentMethodMapper.toLedgerType(command.paymentMethod());</span>
+
+<span class="fc" id="L53">        var debitSubLedger = systemAccount.getSubLedger(debitLedgerType);</span>
+<span class="fc" id="L54">        var creditSubLedger = customerAccount.getCustomerWallet();</span>
+
+<span class="fc" id="L56">        var debitChange = debitSubLedger.debit(command.amount());</span>
+<span class="fc" id="L57">        var creditChange = creditSubLedger.credit(command.amount());</span>
+
+<span class="fc" id="L59">        accountRepository.save(systemAccount);</span>
+<span class="fc" id="L60">        accountRepository.save(customerAccount);</span>
+
+<span class="fc" id="L62">        Instant now = clock.instant();</span>
+<span class="fc" id="L63">        UUID transactionId = uuidGenerator.generate();</span>
+
+<span class="fc" id="L65">        var transaction = Transaction.builder()</span>
+<span class="fc" id="L66">                .id(transactionId)</span>
+<span class="fc" id="L67">                .type(TransactionType.DEPOSIT)</span>
+<span class="fc" id="L68">                .paymentMethod(command.paymentMethod())</span>
+<span class="fc" id="L69">                .amount(command.amount())</span>
+<span class="fc" id="L70">                .customerId(command.customerId())</span>
+<span class="fc" id="L71">                .operatorId(command.operatorId())</span>
+<span class="fc" id="L72">                .sourceType(null)</span>
+<span class="fc" id="L73">                .sourceId(null)</span>
+<span class="fc" id="L74">                .recordedAt(now)</span>
+<span class="fc" id="L75">                .idempotencyKey(command.idempotencyKey())</span>
+<span class="fc" id="L76">                .records(List.of(</span>
+<span class="fc" id="L77">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L78">                        creditChange.toTransaction(uuidGenerator.generate())</span>
+                ))
+<span class="fc" id="L80">                .build();</span>
+
+<span class="fc" id="L82">        transactionRepository.save(transaction);</span>
+
+<span class="fc" id="L84">        return new DepositResult(transactionId, now);</span>
+    }
+
+    private @NonNull Account getCustomerAccount(RecordDepositCommand command) {
+<span class="nc" id="L88">        return accountRepository</span>
+<span class="nc" id="L89">                .findByCustomerId(new CustomerRef(command.customerId()))</span>
+<span class="nc" id="L90">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, command.customerId().toString()));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

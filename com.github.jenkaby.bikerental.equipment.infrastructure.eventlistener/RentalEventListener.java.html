@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalEventListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.infrastructure.eventlistener</a> &gt; <span class="el_source">RentalEventListener.java</span></div><h1>RentalEventListener.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.infrastructure.eventlistener;
+
+import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentCommandToDomainMapper;
+import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentUseCase;
+import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalCompleted;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalUpdated;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.modulith.events.ApplicationModuleListener;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+<span class="fc" id="L20">@Slf4j</span>
+@Component
+public class RentalEventListener {
+
+    private final EquipmentRepository equipmentRepository;
+    private final UpdateEquipmentUseCase updateEquipmentUseCase;
+    private final EquipmentCommandToDomainMapper equipmentCommandToDomainMapper;
+
+    public RentalEventListener(
+            EquipmentRepository equipmentRepository,
+            UpdateEquipmentUseCase updateEquipmentUseCase,
+<span class="fc" id="L31">            EquipmentCommandToDomainMapper equipmentCommandToDomainMapper) {</span>
+<span class="fc" id="L32">        this.equipmentRepository = equipmentRepository;</span>
+<span class="fc" id="L33">        this.updateEquipmentUseCase = updateEquipmentUseCase;</span>
+<span class="fc" id="L34">        this.equipmentCommandToDomainMapper = equipmentCommandToDomainMapper;</span>
+<span class="fc" id="L35">    }</span>
+
+    @ApplicationModuleListener
+    public void onRentalStarted(RentalStarted event) {
+<span class="fc" id="L39">        log.info(&quot;Received RentalStarted event for equipments {}&quot;, event.equipmentIds());</span>
+<span class="fc" id="L40">        equipmentRepository.findByIds(event.equipmentIds())</span>
+<span class="fc" id="L41">                .forEach(equipment -&gt; setStatusForEquipment(equipment, EquipmentStatus.RENTED.name()));</span>
+<span class="fc" id="L42">    }</span>
+
+    @ApplicationModuleListener
+    public void onRentalStarted(RentalCreated event) {
+<span class="fc" id="L46">        log.info(&quot;Received RentalCreated event {}&quot;, event);</span>
+<span class="fc" id="L47">        equipmentRepository.findByIds(event.equipmentIds())</span>
+<span class="fc" id="L48">                .forEach(equipment -&gt; setStatusForEquipment(equipment, EquipmentStatus.RESERVED.name()));</span>
+<span class="fc" id="L49">    }</span>
+
+    @ApplicationModuleListener
+    public void onRentalCompleted(RentalCompleted event) {
+<span class="fc" id="L53">        log.info(&quot;Received RentalCompleted event for equipments {}&quot;, event.equipmentIds());</span>
+<span class="fc" id="L54">        equipmentRepository.findByIds(event.returnedEquipmentIds())</span>
+<span class="fc" id="L55">                .forEach(equipment -&gt; setStatusForEquipment(equipment, EquipmentStatus.AVAILABLE.name()));</span>
+<span class="fc" id="L56">    }</span>
+
+    @ApplicationModuleListener
+    public void onRentalUpdated(RentalUpdated event) {
+<span class="fc" id="L60">        log.info(&quot;Received RentalUpdated event {}&quot;, event);</span>
+<span class="pc bpc" id="L61" title="1 of 4 branches missed.">        if (CollectionUtils.isEmpty(event.currentState().equipmentIds()) &amp;&amp; CollectionUtils.isEmpty(event.previousState().equipmentIds())) {</span>
+<span class="fc" id="L62">            return;</span>
+        }
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (RentalStatus.isCancelled(event.currentState().rentalStatus())) {</span>
+<span class="nc" id="L65">            var ids = Stream.of(event.currentState().equipmentIds(), event.previousState().equipmentIds())</span>
+<span class="nc" id="L66">                    .flatMap(Collection::stream)</span>
+<span class="nc" id="L67">                    .collect(Collectors.toSet());</span>
+<span class="nc" id="L68">            equipmentRepository.findByIds(ids)</span>
+<span class="nc" id="L69">                    .forEach(equipment -&gt; setStatusForEquipment(equipment, EquipmentStatus.AVAILABLE.name()));</span>
+        }
+        // TODO Verify this
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if (RentalStatus.isDraft(event.currentState().rentalStatus())) {</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">            if (!CollectionUtils.isEmpty(event.previousState().equipmentIds())) {</span>
+<span class="fc" id="L74">                equipmentRepository.findByIds(event.previousState().equipmentIds())</span>
+<span class="fc" id="L75">                        .forEach(equipment -&gt; setStatusForEquipment(equipment, EquipmentStatus.AVAILABLE.name()));</span>
+            }
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">            if (!CollectionUtils.isEmpty(event.currentState().equipmentIds())) {</span>
+<span class="fc" id="L78">                equipmentRepository.findByIds(event.currentState().equipmentIds())</span>
+<span class="fc" id="L79">                        .forEach(equipment -&gt; setStatusForEquipment(equipment, EquipmentStatus.RESERVED.name()));</span>
+            }
+        }
+<span class="fc" id="L82">    }</span>
+
+    private void setStatusForEquipment(Equipment equipment, String targetStatus) {
+        try {
+<span class="fc bfc" id="L86" title="All 2 branches covered.">            if (targetStatus.equals(equipment.getStatusSlug())) {</span>
+<span class="fc" id="L87">                log.debug(&quot;Equipment {} already in {} status, skipping&quot;, equipment.getId(), targetStatus);</span>
+<span class="fc" id="L88">                return;</span>
+            }
+<span class="fc" id="L90">            var command = equipmentCommandToDomainMapper.toUpdateCommand(equipment, targetStatus);</span>
+<span class="fc" id="L91">            updateEquipmentUseCase.execute(command);</span>
+<span class="fc" id="L92">            log.info(&quot;Successfully changed equipment {} status to {}&quot;, equipment.getId(), targetStatus);</span>
+
+<span class="fc" id="L94">        } catch (Exception e) {</span>
+<span class="fc" id="L95">            log.error(&quot;Failed to update equipment {} status to {}: {}&quot;, equipment.getId(), targetStatus, e.getMessage(), e);</span>
+<span class="fc" id="L96">        }</span>
+<span class="fc" id="L97">    }</span>
+
+<span class="fc" id="L99">    enum RentalStatus {</span>
+<span class="fc" id="L100">        DRAFT,</span>
+<span class="fc" id="L101">        ACTIVE,</span>
+<span class="fc" id="L102">        CANCELLED;</span>
+
+        public static boolean isCancelled(String status) {
+<span class="fc" id="L105">            return CANCELLED.name().equals(status);</span>
+        }
+
+        public static boolean isDraft(String status) {
+<span class="fc" id="L109">            return DRAFT.name().equals(status);</span>
+        }
+    }
+
+<span class="fc" id="L113">    enum EquipmentStatus {</span>
+<span class="fc" id="L114">        AVAILABLE,</span>
+<span class="fc" id="L115">        RESERVED,</span>
+<span class="fc" id="L116">        RENTED</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

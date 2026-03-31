@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateCustomerService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.customer.application.service</a> &gt; <span class="el_source">CreateCustomerService.java</span></div><h1>CreateCustomerService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.customer.application.service;
+
+import com.github.jenkaby.bikerental.customer.application.mapper.CustomerCommandToDomainMapper;
+import com.github.jenkaby.bikerental.customer.application.usecase.CreateCustomerUseCase;
+import com.github.jenkaby.bikerental.customer.domain.exception.DuplicatePhoneException;
+import com.github.jenkaby.bikerental.customer.domain.model.Customer;
+import com.github.jenkaby.bikerental.customer.domain.repository.CustomerRepository;
+import com.github.jenkaby.bikerental.customer.shared.mapper.PhoneNumberMapper;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.domain.event.CustomerRegistered;
+import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+class CreateCustomerService implements CreateCustomerUseCase {
+
+    static final String CUSTOMER_EVENTS_DESTINATION = &quot;customer-events&quot;;
+
+    private final CustomerRepository repository;
+    private final CustomerCommandToDomainMapper mapper;
+    private final PhoneNumberMapper phoneMapper;
+    private final EventPublisher eventPublisher;
+
+    CreateCustomerService(
+            CustomerRepository repository,
+            CustomerCommandToDomainMapper mapper,
+            PhoneNumberMapper phoneMapper,
+<span class="fc" id="L29">            EventPublisher eventPublisher) {</span>
+<span class="fc" id="L30">        this.repository = repository;</span>
+<span class="fc" id="L31">        this.mapper = mapper;</span>
+<span class="fc" id="L32">        this.phoneMapper = phoneMapper;</span>
+<span class="fc" id="L33">        this.eventPublisher = eventPublisher;</span>
+<span class="fc" id="L34">    }</span>
+
+    @Override
+    @Transactional
+    public Customer execute(CreateCustomerCommand command) {
+<span class="fc" id="L39">        var phoneNumber = phoneMapper.toPhoneNumber(command.phone());</span>
+
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (repository.existsByPhone(phoneNumber.value())) {</span>
+<span class="fc" id="L42">            throw new DuplicatePhoneException(Customer.class.getSimpleName(), phoneNumber.value());</span>
+        }
+
+<span class="fc" id="L45">        Customer customer = mapper.toCustomer(command);</span>
+<span class="fc" id="L46">        Customer saved = repository.save(customer);</span>
+
+<span class="fc" id="L48">        eventPublisher.publish(CUSTOMER_EVENTS_DESTINATION, new CustomerRegistered(CustomerRef.of(saved.getId())));</span>
+
+<span class="fc" id="L50">        return saved;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

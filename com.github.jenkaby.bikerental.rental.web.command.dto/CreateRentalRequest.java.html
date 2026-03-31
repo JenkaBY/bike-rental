@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateRentalRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.web.command.dto</a> &gt; <span class="el_source">CreateRentalRequest.java</span></div><h1>CreateRentalRequest.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.web.command.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.UUID;
+
+@Schema(description = &quot;Request body for creating a rental via Fast Path&quot;)
+<span class="fc" id="L12">public record CreateRentalRequest(</span>
+        @Schema(description = &quot;Customer UUID&quot;) @NotNull(message = &quot;Customer ID is required&quot;) UUID customerId,
+        @Schema(description = &quot;List of Equipment IDs to rent (preferred)&quot;) List&lt;@Positive @NotNull Long&gt; equipmentIds,
+        @Schema(description = &quot;Planned rental duration (ISO-8601)&quot;, example = &quot;PT2H&quot;) @NotNull(message = &quot;Duration is required&quot;) Duration duration,
+        @Schema(description = &quot;Optional tariff ID; auto-selected if not provided&quot;, example = &quot;5&quot;) Long tariffId
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

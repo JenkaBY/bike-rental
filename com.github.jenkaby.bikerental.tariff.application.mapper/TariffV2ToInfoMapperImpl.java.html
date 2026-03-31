@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TariffV2ToInfoMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.application.mapper</a> &gt; <span class="el_source">TariffV2ToInfoMapperImpl.java</span></div><h1>TariffV2ToInfoMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.application.mapper;
+
+import com.github.jenkaby.bikerental.tariff.TariffV2Info;
+import com.github.jenkaby.bikerental.tariff.domain.model.PricingType;
+import com.github.jenkaby.bikerental.tariff.domain.model.TariffV2;
+import java.time.LocalDate;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L15">public class TariffV2ToInfoMapperImpl implements TariffV2ToInfoMapper {</span>
+
+    @Override
+    public TariffV2Info toTariffV2Info(TariffV2 tariffV2) {
+<span class="nc bnc" id="L19" title="All 2 branches missed.">        if ( tariffV2 == null ) {</span>
+<span class="nc" id="L20">            return null;</span>
+        }
+
+<span class="nc" id="L23">        Long id = null;</span>
+<span class="nc" id="L24">        String name = null;</span>
+<span class="nc" id="L25">        String description = null;</span>
+<span class="nc" id="L26">        String equipmentType = null;</span>
+<span class="nc" id="L27">        PricingType pricingType = null;</span>
+<span class="nc" id="L28">        String version = null;</span>
+<span class="nc" id="L29">        LocalDate validFrom = null;</span>
+<span class="nc" id="L30">        LocalDate validTo = null;</span>
+
+<span class="nc" id="L32">        id = tariffV2.getId();</span>
+<span class="nc" id="L33">        name = tariffV2.getName();</span>
+<span class="nc" id="L34">        description = tariffV2.getDescription();</span>
+<span class="nc" id="L35">        equipmentType = tariffV2.getEquipmentType();</span>
+<span class="nc" id="L36">        pricingType = tariffV2.getPricingType();</span>
+<span class="nc" id="L37">        version = tariffV2.getVersion();</span>
+<span class="nc" id="L38">        validFrom = tariffV2.getValidFrom();</span>
+<span class="nc" id="L39">        validTo = tariffV2.getValidTo();</span>
+
+<span class="nc" id="L41">        TariffV2Info tariffV2Info = new TariffV2Info( id, name, description, equipmentType, pricingType, version, validFrom, validTo );</span>
+
+<span class="nc" id="L43">        return tariffV2Info;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

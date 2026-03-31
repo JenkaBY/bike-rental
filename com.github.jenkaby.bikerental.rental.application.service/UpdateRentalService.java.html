@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UpdateRentalService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.application.service</a> &gt; <span class="el_source">UpdateRentalService.java</span></div><h1>UpdateRentalService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.application.service;
+
+import com.github.jenkaby.bikerental.customer.CustomerFacade;
+import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
+import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
+import com.github.jenkaby.bikerental.finance.FinanceFacade;
+import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
+import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
+import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalPlannedDurationException;
+import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
+import com.github.jenkaby.bikerental.rental.domain.exception.PrepaymentRequiredException;
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
+import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
+import com.github.jenkaby.bikerental.rental.infrastructure.util.PatchValueParser;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
+import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import com.github.jenkaby.bikerental.tariff.TariffFacade;
+import com.github.jenkaby.bikerental.tariff.TariffInfo;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+<span class="fc" id="L37">@Slf4j</span>
+@Service
+class UpdateRentalService implements UpdateRentalUseCase {
+
+    private static final String RENTAL_EVENTS_EXCHANGER = &quot;rental-events&quot;;
+
+    private final RentalRepository rentalRepository;
+    private final CustomerFacade customerFacade;
+    private final EquipmentFacade equipmentFacade;
+    private final TariffFacade tariffFacade;
+    private final FinanceFacade financeFacade;
+    private final EventPublisher eventPublisher;
+    private final Clock clock;
+    private final RentalEventMapper eventMapper;
+    private final PatchValueParser valueParser;
+    private final RequestedEquipmentValidator validator;
+
+    UpdateRentalService(
+            RentalRepository rentalRepository,
+            CustomerFacade customerFacade,
+            EquipmentFacade equipmentFacade,
+            TariffFacade tariffFacade,
+            FinanceFacade financeFacade,
+            EventPublisher eventPublisher,
+            Clock clock,
+            RentalEventMapper eventMapper,
+            PatchValueParser valueParser,
+<span class="fc" id="L64">            RequestedEquipmentValidator validator) {</span>
+<span class="fc" id="L65">        this.rentalRepository = rentalRepository;</span>
+<span class="fc" id="L66">        this.customerFacade = customerFacade;</span>
+<span class="fc" id="L67">        this.equipmentFacade = equipmentFacade;</span>
+<span class="fc" id="L68">        this.tariffFacade = tariffFacade;</span>
+<span class="fc" id="L69">        this.financeFacade = financeFacade;</span>
+<span class="fc" id="L70">        this.eventPublisher = eventPublisher;</span>
+<span class="fc" id="L71">        this.clock = clock;</span>
+<span class="fc" id="L72">        this.eventMapper = eventMapper;</span>
+<span class="fc" id="L73">        this.valueParser = valueParser;</span>
+<span class="fc" id="L74">        this.validator = validator;</span>
+<span class="fc" id="L75">    }</span>
+
+    @Override
+    @Transactional
+    public Rental execute(Long rentalId, Map&lt;String, Object&gt; patch) {
+<span class="fc" id="L80">        Rental rental = rentalRepository.findById(rentalId)</span>
+<span class="fc" id="L81">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, rentalId.toString()));</span>
+<span class="fc" id="L82">        var previousState = eventMapper.toRentalState(rental);</span>
+
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (patch.containsKey(&quot;customerId&quot;)) {</span>
+<span class="fc" id="L85">            UUID customerId = valueParser.parseUUID(patch.get(&quot;customerId&quot;));</span>
+<span class="fc" id="L86">            customerFacade.findById(customerId)</span>
+<span class="fc" id="L87">                    .orElseThrow(() -&gt; new ReferenceNotFoundException(&quot;Customer&quot;, customerId.toString()));</span>
+<span class="fc" id="L88">            rental.selectCustomer(customerId);</span>
+        }
+
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (patch.containsKey(&quot;duration&quot;)) {</span>
+<span class="fc" id="L92">            Duration duration = valueParser.parseDuration(patch.get(&quot;duration&quot;));</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">            if (duration == null) {</span>
+<span class="nc" id="L94">                throw new InvalidRentalUpdateException(&quot;Duration must be provided&quot;);</span>
+            }
+<span class="fc" id="L96">            rental.setPlannedDuration(duration);</span>
+        }
+
+<span class="fc" id="L99">        List&lt;EquipmentInfo&gt; equipments = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (patch.containsKey(&quot;equipmentIds&quot;)) {</span>
+<span class="fc" id="L101">            List&lt;Long&gt; equipmentIds = valueParser.parseListOfLong(patch.get(&quot;equipmentIds&quot;));</span>
+<span class="fc" id="L102">            List&lt;EquipmentInfo&gt; foundEquipments = equipmentFacade.findByIds(equipmentIds);</span>
+<span class="fc" id="L103">            validator.validateSize(equipmentIds, foundEquipments);</span>
+<span class="fc" id="L104">            var alreadyReservedOrRented = previousState.equipmentIds();</span>
+<span class="fc" id="L105">            var beingReserved = foundEquipments.stream()</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">                    .filter(e -&gt; !alreadyReservedOrRented.contains(e.id()))</span>
+<span class="fc" id="L107">                    .toList();</span>
+<span class="fc" id="L108">            validator.validateAvailability(beingReserved);</span>
+<span class="fc" id="L109">            equipments.addAll(foundEquipments);</span>
+
+<span class="fc" id="L111">            rental.clearEquipmentRentals();</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">            for (var equipment : equipments) {</span>
+<span class="fc" id="L113">                RentalEquipment rentalEquipment = RentalEquipment.assigned(equipment.id(), equipment.uid());</span>
+
+<span class="fc" id="L115">                TariffInfo tariff = selectTariff(rental, equipment);</span>
+<span class="fc" id="L116">                var cost = tariffFacade.calculateRentalCost(tariff.id(), rental.getPlannedDuration());</span>
+<span class="fc" id="L117">                rentalEquipment.setTariffId(tariff.id());</span>
+<span class="fc" id="L118">                rentalEquipment.setEstimatedCost(cost.totalCost());</span>
+<span class="fc" id="L119">                rental.addEquipment(rentalEquipment);</span>
+<span class="fc" id="L120">            }</span>
+        }
+
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        if (patch.containsKey(&quot;tariffId&quot;)) {</span>
+            // Handle tariffId update (manual override) for special cases. Have no idea how to implement this at the moment.
+<span class="fc" id="L125">            Long tariffId = valueParser.parseLong(patch.get(&quot;tariffId&quot;));</span>
+<span class="fc" id="L126">            tariffFacade.findById(tariffId)</span>
+<span class="pc" id="L127">                    .orElseThrow(() -&gt; new ReferenceNotFoundException(&quot;Tariff&quot;, tariffId.toString()));</span>
+<span class="nc" id="L128">            rental.selectTariff(tariffId);</span>
+        }
+
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (patch.containsKey(&quot;status&quot;)) {</span>
+<span class="fc" id="L132">            String newStatusStr = valueParser.parseString(patch.get(&quot;status&quot;));</span>
+<span class="fc" id="L133">            RentalStatus newStatus = RentalStatus.valueOf(newStatusStr);</span>
+<span class="fc" id="L134">            log.info(&quot;Updating rental {} status to {}&quot;, rental, newStatus);</span>
+
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">            if (RentalStatus.ACTIVE == newStatus) {</span>
+<span class="fc" id="L137">                startRental(rental);</span>
+            } else {
+<span class="nc" id="L139">                rental.setStatus(newStatus);</span>
+            }
+        }
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        if (rental.getStatus() != RentalStatus.ACTIVE) {</span>
+<span class="fc" id="L143">            var currentState = eventMapper.toRentalState(rental);</span>
+<span class="fc" id="L144">            eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalUpdated(rental, previousState, currentState));</span>
+        }
+
+<span class="fc" id="L147">        return rentalRepository.save(rental);</span>
+    }
+
+    private void startRental(Rental rental) {
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        if (!financeFacade.hasPrepayment(rental.getId())) {</span>
+<span class="fc" id="L152">            throw new PrepaymentRequiredException(rental.getId());</span>
+        }
+
+        // Activate rental (validations are performed in Rental.activate())
+<span class="fc" id="L156">        LocalDateTime actualStartTime = LocalDateTime.now(clock);</span>
+<span class="fc" id="L157">        rental.activate(actualStartTime);</span>
+
+        // Publish event (inter-module)
+<span class="fc" id="L160">        RentalStarted event = eventMapper.toRentalStarted(rental);</span>
+<span class="fc" id="L161">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
+<span class="fc" id="L162">    }</span>
+
+    private TariffInfo selectTariff(Rental rental, EquipmentInfo equipment) {
+<span class="fc" id="L165">        var plannedDuration = rental.getPlannedDuration();</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (plannedDuration == null) {</span>
+<span class="fc" id="L167">            throw new InvalidRentalPlannedDurationException(rental.getId());</span>
+        }
+<span class="fc" id="L169">        return tariffFacade.selectTariff(</span>
+<span class="fc" id="L170">                equipment.typeSlug(),</span>
+                plannedDuration,
+<span class="fc" id="L172">                LocalDate.now(clock));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

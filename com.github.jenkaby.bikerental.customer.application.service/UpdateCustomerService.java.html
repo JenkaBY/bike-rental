@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UpdateCustomerService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.customer.application.service</a> &gt; <span class="el_source">UpdateCustomerService.java</span></div><h1>UpdateCustomerService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.customer.application.service;
+
+import com.github.jenkaby.bikerental.customer.application.mapper.CustomerCommandToDomainMapper;
+import com.github.jenkaby.bikerental.customer.application.usecase.UpdateCustomerUseCase;
+import com.github.jenkaby.bikerental.customer.domain.exception.DuplicatePhoneException;
+import com.github.jenkaby.bikerental.customer.domain.model.Customer;
+import com.github.jenkaby.bikerental.customer.domain.repository.CustomerRepository;
+import com.github.jenkaby.bikerental.customer.shared.mapper.PhoneNumberMapper;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+class UpdateCustomerService implements UpdateCustomerUseCase {
+
+    private final CustomerRepository repository;
+    private final CustomerCommandToDomainMapper mapper;
+    private final PhoneNumberMapper phoneMapper;
+
+    UpdateCustomerService(
+            CustomerRepository repository,
+            CustomerCommandToDomainMapper mapper,
+<span class="fc" id="L23">            PhoneNumberMapper phoneMapper) {</span>
+<span class="fc" id="L24">        this.repository = repository;</span>
+<span class="fc" id="L25">        this.mapper = mapper;</span>
+<span class="fc" id="L26">        this.phoneMapper = phoneMapper;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+    @Transactional
+    public Customer execute(UpdateCustomerCommand command) {
+<span class="fc" id="L32">        var existingCustomer = repository.findById(command.customerId())</span>
+<span class="fc" id="L33">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer&quot;, command.customerId().toString()));</span>
+
+<span class="fc" id="L35">        var phoneNumber = phoneMapper.toPhoneNumber(command.phone());</span>
+
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (!existingCustomer.getPhone().value().equals(phoneNumber.value())) {</span>
+<span class="fc" id="L38">            var customerWithPhone = repository.findByPhone(phoneNumber.value());</span>
+<span class="pc bpc" id="L39" title="1 of 4 branches missed.">            if (customerWithPhone.isPresent() &amp;&amp; !customerWithPhone.get().getId().equals(command.customerId())) {</span>
+<span class="fc" id="L40">                throw new DuplicatePhoneException(Customer.class.getSimpleName(), phoneNumber.value());</span>
+            }
+        }
+
+<span class="fc" id="L44">        Customer updatedCustomer = mapper.toCustomer(command);</span>
+
+<span class="fc" id="L46">        return repository.save(updatedCustomer);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

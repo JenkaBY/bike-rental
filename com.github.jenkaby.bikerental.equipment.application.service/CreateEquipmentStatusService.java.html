@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateEquipmentStatusService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.application.service</a> &gt; <span class="el_source">CreateEquipmentStatusService.java</span></div><h1>CreateEquipmentStatusService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.application.service;
+
+import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentStatusCommandToDomainMapper;
+import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentStatusUseCase;
+import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
+import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
+import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class CreateEquipmentStatusService implements CreateEquipmentStatusUseCase {
+
+    private final EquipmentStatusRepository repository;
+    private final EquipmentStatusCommandToDomainMapper mapper;
+
+    CreateEquipmentStatusService(EquipmentStatusRepository repository,
+<span class="fc" id="L19">                                 EquipmentStatusCommandToDomainMapper mapper) {</span>
+<span class="fc" id="L20">        this.repository = repository;</span>
+<span class="fc" id="L21">        this.mapper = mapper;</span>
+<span class="fc" id="L22">    }</span>
+
+    @Override
+    @Transactional
+    public EquipmentStatus execute(CreateEquipmentStatusCommand command) {
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">        if (repository.existsBySlug(command.slug())) {</span>
+<span class="nc" id="L28">            throw new ResourceConflictException(EquipmentStatus.class, command.slug());</span>
+        }
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        for (String toSlug : command.allowedTransitions()) {</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">            if (!repository.existsBySlug(toSlug)) {</span>
+<span class="nc" id="L32">                throw new ReferenceNotFoundException(EquipmentStatus.class, toSlug);</span>
+            }
+<span class="fc" id="L34">        }</span>
+<span class="fc" id="L35">        EquipmentStatus entity = mapper.toEquipmentStatus(command);</span>
+<span class="fc" id="L36">        return repository.save(entity);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EquipmentTypeCommandMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.web.command.mapper</a> &gt; <span class="el_source">EquipmentTypeCommandMapperImpl.java</span></div><h1>EquipmentTypeCommandMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.web.command.mapper;
+
+import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentTypeUseCase;
+import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentTypeUseCase;
+import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentTypeRequest;
+import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentTypeUpdateRequest;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L15">public class EquipmentTypeCommandMapperImpl implements EquipmentTypeCommandMapper {</span>
+
+    @Override
+    public CreateEquipmentTypeUseCase.CreateEquipmentTypeCommand toCreateCommand(EquipmentTypeRequest request) {
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L20">            return null;</span>
+        }
+
+<span class="fc" id="L23">        String slug = null;</span>
+<span class="fc" id="L24">        String name = null;</span>
+<span class="fc" id="L25">        String description = null;</span>
+
+<span class="fc" id="L27">        slug = request.slug();</span>
+<span class="fc" id="L28">        name = request.name();</span>
+<span class="fc" id="L29">        description = request.description();</span>
+
+<span class="fc" id="L31">        CreateEquipmentTypeUseCase.CreateEquipmentTypeCommand createEquipmentTypeCommand = new CreateEquipmentTypeUseCase.CreateEquipmentTypeCommand( slug, name, description );</span>
+
+<span class="fc" id="L33">        return createEquipmentTypeCommand;</span>
+    }
+
+    @Override
+    public UpdateEquipmentTypeUseCase.UpdateEquipmentTypeCommand toUpdateCommand(String slug, EquipmentTypeUpdateRequest request) {
+<span class="pc bpc" id="L38" title="3 of 4 branches missed.">        if ( slug == null &amp;&amp; request == null ) {</span>
+<span class="nc" id="L39">            return null;</span>
+        }
+
+<span class="fc" id="L42">        String name = null;</span>
+<span class="fc" id="L43">        String description = null;</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if ( request != null ) {</span>
+<span class="fc" id="L45">            name = request.name();</span>
+<span class="fc" id="L46">            description = request.description();</span>
+        }
+<span class="fc" id="L48">        String slug1 = null;</span>
+<span class="fc" id="L49">        slug1 = slug;</span>
+
+<span class="fc" id="L51">        UpdateEquipmentTypeUseCase.UpdateEquipmentTypeCommand updateEquipmentTypeCommand = new UpdateEquipmentTypeUseCase.UpdateEquipmentTypeCommand( slug1, name, description );</span>
+
+<span class="fc" id="L53">        return updateEquipmentTypeCommand;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

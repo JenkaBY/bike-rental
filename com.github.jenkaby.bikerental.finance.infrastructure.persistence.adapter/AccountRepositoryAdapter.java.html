@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.infrastructure.persistence.adapter</a> &gt; <span class="el_source">AccountRepositoryAdapter.java</span></div><h1>AccountRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.infrastructure.persistence.adapter;
+
+import com.github.jenkaby.bikerental.finance.domain.model.Account;
+import com.github.jenkaby.bikerental.finance.domain.model.AccountType;
+import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.AccountJpaMapper;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.repository.AccountJpaRepository;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+@Repository
+@Transactional(readOnly = true)
+class AccountRepositoryAdapter implements AccountRepository {
+
+    private final AccountJpaRepository jpaRepository;
+    private final AccountJpaMapper mapper;
+
+<span class="fc" id="L22">    AccountRepositoryAdapter(AccountJpaRepository jpaRepository, AccountJpaMapper mapper) {</span>
+<span class="fc" id="L23">        this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L24">        this.mapper = mapper;</span>
+<span class="fc" id="L25">    }</span>
+
+    @Override
+    @Transactional
+    public Account save(Account account) {
+<span class="fc" id="L30">        var entity = mapper.toEntity(account);</span>
+<span class="fc" id="L31">        var saved = jpaRepository.save(entity);</span>
+<span class="fc" id="L32">        return mapper.toDomain(saved);</span>
+    }
+
+    @Override
+    public Account getSystemAccount() {
+<span class="fc" id="L37">        return jpaRepository.findByAccountType(AccountType.SYSTEM)</span>
+<span class="fc" id="L38">                .map(mapper::toDomain)</span>
+<span class="pc" id="L39">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, AccountType.SYSTEM.name()));</span>
+    }
+
+    @Override
+    public Optional&lt;Account&gt; findByCustomerId(CustomerRef customerRef) {
+<span class="fc" id="L44">        return jpaRepository.findByCustomerId(customerRef.id())</span>
+<span class="fc" id="L45">                .map(mapper::toDomain);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

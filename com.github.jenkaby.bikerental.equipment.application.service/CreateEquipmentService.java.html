@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateEquipmentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.application.service</a> &gt; <span class="el_source">CreateEquipmentService.java</span></div><h1>CreateEquipmentService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.application.service;
+
+import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentCommandToDomainMapper;
+import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentUseCase;
+import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateSerialNumberException;
+import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
+import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
+import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
+import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
+import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+class CreateEquipmentService implements CreateEquipmentUseCase {
+
+    private final EquipmentRepository repository;
+    private final EquipmentCommandToDomainMapper mapper;
+    private final SerialNumberMapper serialNumberMapper;
+    private final UidMapper uidMapper;
+    private final EquipmentStatusRepository statusRepository;
+
+    CreateEquipmentService(
+            EquipmentRepository repository,
+            EquipmentCommandToDomainMapper mapper,
+<span class="fc" id="L28">            SerialNumberMapper serialNumberMapper, UidMapper uidMapper, EquipmentStatusRepository statusRepository) {</span>
+<span class="fc" id="L29">        this.repository = repository;</span>
+<span class="fc" id="L30">        this.mapper = mapper;</span>
+<span class="fc" id="L31">        this.serialNumberMapper = serialNumberMapper;</span>
+<span class="fc" id="L32">        this.uidMapper = uidMapper;</span>
+<span class="fc" id="L33">        this.statusRepository = statusRepository;</span>
+<span class="fc" id="L34">    }</span>
+
+    @Override
+    @Transactional
+    public Equipment execute(CreateEquipmentCommand command) {
+<span class="fc" id="L39">        var serialNumber = serialNumberMapper.toSerialNumber(command.serialNumber());</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (repository.existsBySerialNumber(serialNumber)) {</span>
+<span class="fc" id="L41">            throw new DuplicateSerialNumberException(Equipment.class, serialNumber.value());</span>
+        }
+
+<span class="fc" id="L44">        var uid = uidMapper.toUid(command.uid());</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (repository.existsByUid(uid)) {</span>
+<span class="fc" id="L46">            throw new DuplicateSerialNumberException(Equipment.class, uid.value());</span>
+        }
+
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (!statusRepository.existsBySlug(command.statusSlug())) {</span>
+<span class="fc" id="L50">            throw new ReferenceNotFoundException(EquipmentStatus.class, command.statusSlug());</span>
+        }
+
+<span class="fc" id="L53">        Equipment equipment = mapper.toEquipment(command);</span>
+
+<span class="fc" id="L55">        return repository.save(equipment);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
