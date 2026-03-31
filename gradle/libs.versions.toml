@@ -10,6 +10,7 @@ springdoc = '3.0.2'
 archunit = '1.4.1'
 java = "21"
 uuidV7Generator = '6.1.1'
+jacoco = "0.8.14"
 
 [libraries]
 # BOMs

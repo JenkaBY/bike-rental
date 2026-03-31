@@ -89,3 +89,30 @@ jobs:
           name: ${{ matrix.test-type }}-test-report
           path: ${{ matrix.report-path }}
           retention-days: 7  # Keep test reports for 1 week
+
+      - name: Generate ${{ matrix.test-type }} test report
+        if: ${{ matrix.test-type == 'component' }}
+        run: ./gradlew :component-test:jacocoTestReport $GRADLE_ARGS
+        env:
+          SPRING_PROFILES_ACTIVE: ${{ matrix.spring-profiles-active }}
+
+      - name: Upload component-test JaCoCo HTML report
+        if: ${{ matrix.test-type == 'component' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: component-test-jacoco-report
+          path: component-test/build/reports/jacoco/html
+          retention-days: 7
+
+      - name: Upload coverage to Codecov
+        if: ${{ matrix.test-type == 'component' }}
+        uses: codecov/codecov-action@v6
+        with:
+          files: component-test/build/reports/jacoco/jacocoTestReport.xml
+
+      - name: Generate JaCoCo Badge
+        if: ${{ github.ref == 'refs/heads/master' && matrix.test-type == 'component' }}
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          jacoco-csv-file: component-test/build/reports/jacoco/test/jacocoTestReport.csv
+          badges-directory: component-test/build/reports/jacoco/test/html/badges

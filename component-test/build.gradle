@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'jacoco'
 }
 
 group = 'com.github.jenkaby.bikerental.componenttest'
@@ -25,7 +26,45 @@ dependencies {
     testRuntimeOnly libs.junit.platform.launcher
 }
 
-tasks.named('test') {
+tasks.named('test', Test) {
     useJUnitPlatform()
+    jacoco {
+        destinationFile = layout.buildDirectory.file("jacoco/test.exec").get().asFile
+    }
+//    disabled intentionally to speed up the build.
+//    finalizedBy jacocoTestReport
 }
+
+jacoco {
+    toolVersion = libs.versions.jacoco.get()
+}
+
+jacocoTestReport {
+//    disabled intentionally to speed up the build. Assume that we will run jacocoTestReport task manually when needed, e.g. CI/CD pipeline.
+//    dependsOn test
+//
+//    by unknown reason, jacoco plugin doesn't work with test task in the same project,
+//    so we need to specify execution data from test.exec file
+    def execFile = rootProject.layout.buildDirectory.file("jacoco/test.exec")
+
+    executionData.setFrom(execFile)
+
+    def mainProject = project(':service')
+
+    classDirectories.setFrom(
+            mainProject.tasks.named('compileJava').map { it.outputs.files }
+    )
+
+    additionalSourceDirs.from(files(
+            mainProject.layout.projectDirectory.dir("src/main/java"),
+            mainProject.layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main")
+    ))
+
+    reports {
+        html.required = true
+        xml.required = true
+        csv.required = true
+    }
+}
+
 
