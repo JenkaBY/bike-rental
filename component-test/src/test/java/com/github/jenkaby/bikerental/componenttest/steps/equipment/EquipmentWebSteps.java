@@ -1,8 +1,8 @@
 package com.github.jenkaby.bikerental.componenttest.steps.equipment;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.componenttest.model.VocabularyType;
-import com.github.jenkaby.bikerental.componenttest.model.VocabularyUnit;
+import com.github.jenkaby.bikerental.componenttest.model.DictionaryType;
+import com.github.jenkaby.bikerental.componenttest.model.DictionaryUnit;
 import com.github.jenkaby.bikerental.componenttest.steps.common.WebRequestSteps;
 import com.github.jenkaby.bikerental.equipment.web.command.dto.EquipmentRequest;
 import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentResponse;
@@ -24,30 +24,30 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 public class EquipmentWebSteps {
 
     public static final Comparator<EquipmentResponse> BY_SERIAL_NUMBER = Comparator.comparing(EquipmentResponse::serialNumber);
-    public static final Comparator<VocabularyUnit> DEFAULT_BY_SLUG = Comparator.comparing(VocabularyUnit::slug)
-            .thenComparing(VocabularyUnit::name);
+    public static final Comparator<DictionaryUnit> DEFAULT_BY_SLUG = Comparator.comparing(DictionaryUnit::slug)
+            .thenComparing(DictionaryUnit::name);
     private final ScenarioContext scenarioContext;
     private final WebRequestSteps webRequestSteps;
 
-    @Then("the '{vocabularyType}' response only contains")
-    public void theVocabResponseContains(VocabularyType vocabularyType, List<VocabularyUnit> expectedUnits) {
-        var actual = Stream.of(scenarioContext.getResponseBody(VocabularyUnit.class))
+    @Then("the '{dictionaryType}' response only contains")
+    public void theDictionaryResponseContains(DictionaryType dictionaryType, List<DictionaryUnit> expectedUnits) {
+        var actual = Stream.of(scenarioContext.getResponseBody(DictionaryUnit.class))
                 .toList();
 
-        assertResult(vocabularyType, expectedUnits, actual);
+        assertResult(dictionaryType, expectedUnits, actual);
     }
 
-    @Then("the '{vocabularyType}' response only contains list of")
-    public void theVocabResponseContainsListOf(VocabularyType vocabularyType, List<VocabularyUnit> expectedUnits) {
-        var actual = scenarioContext.getResponseAsList(VocabularyUnit.class).stream()
+    @Then("the '{dictionaryType}' response only contains list of")
+    public void theDictionaryResponseContainsListOf(DictionaryType dictionaryType, List<DictionaryUnit> expectedUnits) {
+        var actual = scenarioContext.getResponseAsList(DictionaryUnit.class).stream()
                 .sorted(DEFAULT_BY_SLUG)
                 .toList();
 
-        assertResult(vocabularyType, expectedUnits, actual);
+        assertResult(dictionaryType, expectedUnits, actual);
     }
 
-    @Given("the '{vocabularyType}' request is prepared with the following data")
-    public void theVocabRequestContains(VocabularyType type, VocabularyUnit request) {
+    @Given("the '{dictionaryType}' request is prepared with the following data")
+    public void theVocabRequestContains(DictionaryType type, DictionaryUnit request) {
         log.info("Preparing '{}' request with data: {}", type.getHumanReadableName(), request);
 
         scenarioContext.setRequestBody(request);
@@ -115,12 +115,12 @@ public class EquipmentWebSteps {
         });
     }
 
-    private static void assertResult(VocabularyType vocabularyType, List<VocabularyUnit> expectedUnits, List<VocabularyUnit> actual) {
+    private static void assertResult(DictionaryType dictionaryType, List<DictionaryUnit> expectedUnits, List<DictionaryUnit> actual) {
         assertThat(actual.size()).as("Sizes are matched").isEqualTo(expectedUnits.size());
 
         var expectedAndSorted = expectedUnits.stream().sorted(DEFAULT_BY_SLUG).toList();
         assertThat(actual).zipSatisfy(expectedAndSorted, (act, exp) -> {
-            log.info("Comparing '{}' actual: {} with expected: {}", vocabularyType.getHumanReadableName(), act, exp);
+            log.info("Comparing '{}' actual: {} with expected: {}", dictionaryType.getHumanReadableName(), act, exp);
             assertThat(act.slug()).isEqualTo(exp.slug());
             assertThat(act.name()).isEqualTo(exp.name());
             assertThat(act.description()).isEqualTo(exp.description());
