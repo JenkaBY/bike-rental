@@ -14,7 +14,7 @@ public interface RecordWithdrawalUseCase {
     record RecordWithdrawalCommand(
             UUID customerId,
             Money amount,
-            PaymentMethod payoutMethod,
+            PaymentMethod paymentMethod,
             String operatorId,
             IdempotencyKey idempotencyKey
     ) {

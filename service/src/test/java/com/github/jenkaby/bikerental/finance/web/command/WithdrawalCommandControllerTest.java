@@ -136,16 +136,16 @@ class WithdrawalCommandControllerTest {
             }
 
             @Test
-            @DisplayName("payoutMethod must not be null")
+            @DisplayName("paymentMethod must not be null")
             void whenPayoutMethodIsNull() throws Exception {
                 var request = validRequest();
-                request.remove("payoutMethod");
+                request.remove("paymentMethod");
 
                 mockMvc.perform(post(ENDPOINT)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.errors[0].field").value("payoutMethod"));
+                        .andExpect(jsonPath("$.errors[0].field").value("paymentMethod"));
             }
 
             @ParameterizedTest(name = "operatorId=\"{0}\" is blank")

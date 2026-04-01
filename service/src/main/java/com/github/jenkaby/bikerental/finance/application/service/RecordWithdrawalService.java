@@ -52,7 +52,7 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
             throw new InsufficientBalanceException(available, command.amount());
         }
 
-        var creditLedgerType = paymentMethodMapper.toLedgerType(command.payoutMethod());
+        var creditLedgerType = paymentMethodMapper.toLedgerType(command.paymentMethod());
         var creditSubLedger = systemAccount.getSubLedger(creditLedgerType);
 
         var debitChange = customerAccount.getWallet().debit(command.amount());
@@ -67,7 +67,7 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
         var transaction = Transaction.builder()
                 .id(transactionId)
                 .type(TransactionType.WITHDRAWAL)
-                .paymentMethod(command.payoutMethod())
+                .paymentMethod(command.paymentMethod())
                 .amount(command.amount())
                 .customerId(command.customerId())
                 .operatorId(command.operatorId())

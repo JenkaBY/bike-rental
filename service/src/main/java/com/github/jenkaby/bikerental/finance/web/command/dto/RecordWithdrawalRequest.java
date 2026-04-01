@@ -23,7 +23,7 @@ public record RecordWithdrawalRequest(
         @NotNull @DecimalMin(value = "0.01") @MoneyAmount BigDecimal amount,
 
         @Schema(description = "Payout method (CASH, CARD_TERMINAL, BANK_TRANSFER)")
-        @NotNull PaymentMethod payoutMethod,
+        @NotNull PaymentMethod paymentMethod,
 
         @Schema(description = "Operator identifier", example = "operator-1")
         @NotBlank String operatorId
