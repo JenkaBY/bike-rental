@@ -11,7 +11,7 @@ public record CustomerRef(UUID id) {
 <span class="fc" id="L11">    }</span>
 
     public static CustomerRef of(UUID id) {
-<span class="fc bfc" id="L14" title="All 2 branches covered.">        return id == null ? null : new CustomerRef(id);</span>
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">        return id == null ? null : new CustomerRef(id);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

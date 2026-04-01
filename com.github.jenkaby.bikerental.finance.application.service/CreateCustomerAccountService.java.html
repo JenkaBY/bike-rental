@@ -2,7 +2,7 @@
 
 import com.github.jenkaby.bikerental.finance.application.usecase.CreateCustomerAccountUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
-import com.github.jenkaby.bikerental.finance.domain.model.AccountType;
+import com.github.jenkaby.bikerental.finance.domain.model.CustomerAccount;
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.SubLedger;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
@@ -47,14 +47,13 @@ class CreateCustomerAccountService implements CreateCustomerAccountUseCase {
 <span class="fc" id="L47">                .balance(Money.zero())</span>
 <span class="fc" id="L48">                .build();</span>
 
-<span class="fc" id="L50">        var account = Account.builder()</span>
+<span class="fc" id="L50">        var account = CustomerAccount.builder()</span>
 <span class="fc" id="L51">                .id(uuidGenerator.generate())</span>
-<span class="fc" id="L52">                .accountType(AccountType.CUSTOMER)</span>
-<span class="fc" id="L53">                .customerRef(CustomerRef.of(customerId))</span>
-<span class="fc" id="L54">                .subLedgers(List.of(wallet, hold))</span>
-<span class="fc" id="L55">                .build();</span>
+<span class="fc" id="L52">                .customerRef(CustomerRef.of(customerId))</span>
+<span class="fc" id="L53">                .subLedgers(List.of(wallet, hold))</span>
+<span class="fc" id="L54">                .build();</span>
 
-<span class="fc" id="L57">        accountRepository.save(account);</span>
-<span class="fc" id="L58">    }</span>
+<span class="fc" id="L56">        accountRepository.save(account);</span>
+<span class="fc" id="L57">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

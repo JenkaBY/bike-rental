@@ -1,34 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Account.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.domain.model</a> &gt; <span class="el_source">Account.java</span></div><h1>Account.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.domain.model;
 
-import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
-import lombok.*;
-import org.jspecify.annotations.Nullable;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 import java.util.UUID;
 
 @Getter
-@Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@SuperBuilder
 @EqualsAndHashCode(of = &quot;id&quot;)
-public class Account {
+public abstract class Account {
 
     private final UUID id;
-    private final AccountType accountType;
-    @Nullable
-    private final CustomerRef customerRef;
     private final List&lt;SubLedger&gt; subLedgers;
 
-    public SubLedger getCustomerWallet() {
-<span class="fc" id="L24">        return getSubLedger(LedgerType.CUSTOMER_WALLET);</span>
+    public abstract AccountType getAccountType();
+
+
+    public SubLedger getSubLedger(PaymentMethod paymentMethod) {
+<span class="pc bpc" id="L24" title="2 of 5 branches missed.">        var type = switch (paymentMethod) {</span>
+<span class="fc" id="L25">            case CASH -&gt; LedgerType.CASH;</span>
+<span class="fc" id="L26">            case CARD_TERMINAL -&gt; LedgerType.CARD_TERMINAL;</span>
+<span class="fc" id="L27">            case BANK_TRANSFER -&gt; LedgerType.BANK_TRANSFER;</span>
+<span class="nc" id="L28">            case INTERNAL_TRANSFER -&gt; LedgerType.ADJUSTMENT;</span>
+<span class="pc" id="L29">            default -&gt; throw new IllegalArgumentException(&quot;Unsupported payment method: &quot; + paymentMethod);</span>
+        };
+<span class="fc" id="L31">        return getSubLedger(type);</span>
     }
 
-    public SubLedger getSubLedger(LedgerType type) {
-<span class="fc" id="L28">        return subLedgers.stream()</span>
-<span class="fc bfc" id="L29" title="All 2 branches covered.">                .filter(sl -&gt; sl.getLedgerType() == type)</span>
-<span class="fc" id="L30">                .findFirst()</span>
-<span class="pc" id="L31">                .orElseThrow(() -&gt; new ResourceNotFoundException(SubLedger.class, type.name()));</span>
+    protected SubLedger getSubLedger(LedgerType type) {
+<span class="fc" id="L35">        return subLedgers.stream()</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">                .filter(sl -&gt; sl.getLedgerType() == type)</span>
+<span class="fc" id="L37">                .findFirst()</span>
+<span class="pc" id="L38">                .orElseThrow(() -&gt; new ResourceNotFoundException(SubLedger.class, type.name()));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

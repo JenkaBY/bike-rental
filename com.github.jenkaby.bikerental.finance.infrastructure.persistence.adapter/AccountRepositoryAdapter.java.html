@@ -2,7 +2,10 @@
 
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.AccountType;
+import com.github.jenkaby.bikerental.finance.domain.model.CustomerAccount;
+import com.github.jenkaby.bikerental.finance.domain.model.SystemAccount;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.AccountJpaEntity;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.AccountJpaMapper;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.repository.AccountJpaRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
@@ -19,30 +22,40 @@ class AccountRepositoryAdapter implements AccountRepository {
     private final AccountJpaRepository jpaRepository;
     private final AccountJpaMapper mapper;
 
-<span class="fc" id="L22">    AccountRepositoryAdapter(AccountJpaRepository jpaRepository, AccountJpaMapper mapper) {</span>
-<span class="fc" id="L23">        this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L24">        this.mapper = mapper;</span>
-<span class="fc" id="L25">    }</span>
+<span class="fc" id="L25">    AccountRepositoryAdapter(AccountJpaRepository jpaRepository, AccountJpaMapper mapper) {</span>
+<span class="fc" id="L26">        this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L27">        this.mapper = mapper;</span>
+<span class="fc" id="L28">    }</span>
 
     @Override
     @Transactional
     public Account save(Account account) {
-<span class="fc" id="L30">        var entity = mapper.toEntity(account);</span>
-<span class="fc" id="L31">        var saved = jpaRepository.save(entity);</span>
-<span class="fc" id="L32">        return mapper.toDomain(saved);</span>
+<span class="pc bpc" id="L33" title="1 of 3 branches missed.">        AccountJpaEntity entity = switch (account) {</span>
+<span class="fc" id="L34">            case CustomerAccount ca -&gt; mapper.toEntity(ca);</span>
+<span class="fc" id="L35">            case SystemAccount sa -&gt; mapper.toEntity(sa);</span>
+<span class="pc" id="L36">            default -&gt; throw new IllegalStateException(&quot;Unknown account type: &quot; + account.getClass().getSimpleName());</span>
+        };
+<span class="fc" id="L38">        var saved = jpaRepository.save(entity);</span>
+<span class="fc" id="L39">        return toDomain(saved);</span>
     }
 
     @Override
-    public Account getSystemAccount() {
-<span class="fc" id="L37">        return jpaRepository.findByAccountType(AccountType.SYSTEM)</span>
-<span class="fc" id="L38">                .map(mapper::toDomain)</span>
-<span class="pc" id="L39">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, AccountType.SYSTEM.name()));</span>
+    public SystemAccount getSystemAccount() {
+<span class="fc" id="L44">        return jpaRepository.findByAccountType(AccountType.SYSTEM)</span>
+<span class="fc" id="L45">                .map(mapper::toSystemAccountDomain)</span>
+<span class="pc" id="L46">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, AccountType.SYSTEM.name()));</span>
     }
 
     @Override
-    public Optional&lt;Account&gt; findByCustomerId(CustomerRef customerRef) {
-<span class="fc" id="L44">        return jpaRepository.findByCustomerId(customerRef.id())</span>
-<span class="fc" id="L45">                .map(mapper::toDomain);</span>
+    public Optional&lt;CustomerAccount&gt; findByCustomerId(CustomerRef customerRef) {
+<span class="fc" id="L51">        return jpaRepository.findByCustomerId(customerRef.id())</span>
+<span class="fc" id="L52">                .map(mapper::toCustomerAccountDomain);</span>
+    }
+
+    private Account toDomain(AccountJpaEntity entity) {
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        return entity.getAccountType() == AccountType.CUSTOMER</span>
+<span class="fc" id="L57">                ? mapper.toCustomerAccountDomain(entity)</span>
+<span class="fc" id="L58">                : mapper.toSystemAccountDomain(entity);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
