@@ -1,9 +1,7 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
-import com.github.jenkaby.bikerental.finance.application.mapper.PaymentMethodLedgerTypeMapper;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
-import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
@@ -12,7 +10,6 @@ import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +27,6 @@ public class RecordDepositService implements RecordDepositUseCase {
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
-    private final PaymentMethodLedgerTypeMapper paymentMethodMapper;
 
     @Override
     @Transactional
@@ -48,10 +44,8 @@ public class RecordDepositService implements RecordDepositUseCase {
 
         var systemAccount = accountRepository.getSystemAccount();
 
-        LedgerType debitLedgerType = paymentMethodMapper.toLedgerType(command.paymentMethod());
-
-        var debitSubLedger = systemAccount.getSubLedger(debitLedgerType);
-        var creditSubLedger = customerAccount.getCustomerWallet();
+        var debitSubLedger = systemAccount.getSubLedger(command.paymentMethod());
+        var creditSubLedger = customerAccount.getWallet();
 
         var debitChange = debitSubLedger.debit(command.amount());
         var creditChange = creditSubLedger.credit(command.amount());
@@ -83,11 +77,4 @@ public class RecordDepositService implements RecordDepositUseCase {
 
         return new DepositResult(transactionId, now);
     }
-
-    private @NonNull Account getCustomerAccount(RecordDepositCommand command) {
-        return accountRepository
-                .findByCustomerId(new CustomerRef(command.customerId()))
-                .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerId().toString()));
-    }
-
 }

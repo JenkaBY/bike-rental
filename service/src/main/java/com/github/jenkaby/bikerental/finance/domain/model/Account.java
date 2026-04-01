@@ -1,30 +1,37 @@
 package com.github.jenkaby.bikerental.finance.domain.model;
 
-import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
-import lombok.*;
-import org.jspecify.annotations.Nullable;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 import java.util.UUID;
 
 @Getter
-@Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@SuperBuilder
 @EqualsAndHashCode(of = "id")
-public class Account {
+public abstract class Account {
 
     private final UUID id;
-    private final AccountType accountType;
-    @Nullable
-    private final CustomerRef customerRef;
     private final List<SubLedger> subLedgers;
 
-    public SubLedger getCustomerWallet() {
-        return getSubLedger(LedgerType.CUSTOMER_WALLET);
+    public abstract AccountType getAccountType();
+
+
+    public SubLedger getSubLedger(PaymentMethod paymentMethod) {
+        var type = switch (paymentMethod) {
+            case CASH -> LedgerType.CASH;
+            case CARD_TERMINAL -> LedgerType.CARD_TERMINAL;
+            case BANK_TRANSFER -> LedgerType.BANK_TRANSFER;
+            case INTERNAL_TRANSFER -> LedgerType.ADJUSTMENT;
+            default -> throw new IllegalArgumentException("Unsupported payment method: " + paymentMethod);
+        };
+        return getSubLedger(type);
     }
 
-    public SubLedger getSubLedger(LedgerType type) {
+    protected SubLedger getSubLedger(LedgerType type) {
         return subLedgers.stream()
                 .filter(sl -> sl.getLedgerType() == type)
                 .findFirst()

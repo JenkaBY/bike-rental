@@ -1,3 +1,4 @@
+@ReinitializeSystemLedgers
 Feature: Money movement between accounts
   As a staff member
   I want to record all money movements between accounts, including deposits, withdrawals, and transfers
@@ -25,26 +26,29 @@ Feature: Money movement between accounts
   Scenario Outline: Successful cash deposit increases customer wallet balance
     Given now is "<now>"
     Given the deposit request is prepared with the following data
-      | idempotencyKey   | customerId   | amount   | paymentMethod   | operatorId   |
-      | <idempotencyKey> | <customerId> | <amount> | <paymentMethod> | <operatorId> |
+      | idempotencyKey | customerId | amount | paymentMethod   | operatorId |
+      | IDK1           | CUS2       | 50     | <paymentMethod> | OP1        |
     When a POST request has been made to "/api/finance/deposits" endpoint
     Then the response status is 201
     And the deposit response contains a transactionId
     And the following sub-ledger records were persisted in db
-      | id     | accountId | ledgerType      | version | balance  |
-      | L_C_W2 | ACC2      | CUSTOMER_WALLET | 2       | <amount> |
-      | L_C_H2 | ACC2      | CUSTOMER_HOLD   | 2       | 0.00     |
+      | id          | accountId | ledgerType      | version | balance |
+      | L_C_W2      | ACC2      | CUSTOMER_WALLET | 2       | 50      |
+      | L_C_H2      | ACC2      | CUSTOMER_HOLD   | 2       | 0.00    |
+      | <subLedger> | ACC_S     | <ledgerType>    | 1       | -50     |
     And the following transactions were persisted in db
-      | idempotencyKey   | customerId   | amount   | paymentMethod   | operatorId   | type    | recordedAt |
-      | <idempotencyKey> | <customerId> | <amount> | <paymentMethod> | <operatorId> | DEPOSIT | <now>      |
+      | idempotencyKey | customerId | amount | paymentMethod   | operatorId | type    | recordedAt |
+      | IDK1           | CUS2       | 50     | <paymentMethod> | OP1        | DEPOSIT | <now>      |
     And the following transaction records were persisted in db
-      | subLedger | ledgerType      | direction | amount   |
-      | L_C_W2    | CUSTOMER_WALLET | CREDIT    | <amount> |
-      | L_S_CASH  | CASH            | DEBIT     | <amount> |
+      | subLedger   | ledgerType      | direction | amount |
+      | L_C_W2      | CUSTOMER_WALLET | CREDIT    | 50     |
+      | <subLedger> | <ledgerType>    | DEBIT     | 50     |
     And there are only 2 transaction records in db
     Examples:
-      | idempotencyKey | customerId | amount | paymentMethod | operatorId | now                 |
-      | IDK1           | CUS2       | 50.00  | CASH          | OP1        | 2026-03-28T10:00:00 |
+      | paymentMethod | ledgerType    | subLedger | now                 |
+      | CASH          | CASH          | L_S_CASH  | 2026-03-28T10:00:00 |
+      | CARD_TERMINAL | CARD_TERMINAL | L_S_CARD  | 2026-03-28T10:00:00 |
+      | BANK_TRANSFER | BANK_TRANSFER | L_S_TRAN  | 2026-03-28T10:00:00 |
 
   @ResetClock
   Scenario Outline: Successful cash deposit increases customer wallet balance twice if idempotency key is not reused
