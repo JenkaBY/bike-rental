@@ -107,7 +107,7 @@ jobs:
           retention-days: 7
 
       - name: Generate JaCoCo Badge (main branch only)
-        if: ${{ matrix.test-type == 'component'  && github.event.workflow_run.head_branch == 'main'}}
+        if: ${{ matrix.test-type == 'component' && github.ref == 'refs/heads/main' }}
         uses: cicirello/jacoco-badge-generator@v2
         with:
           jacoco-csv-file: component-test/build/reports/jacoco/test/jacocoTestReport.csv
@@ -115,7 +115,7 @@ jobs:
           generate-branches-badge: true
 
       - name: Publish coverage report to GitHub Pages(main branch only)
-        if: ${{ matrix.test-type == 'component'  && github.event.workflow_run.head_branch == 'main'}}
+        if: ${{ matrix.test-type == 'component'  && github.ref == 'refs/heads/main' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: component-test/build/reports/jacoco/test/html
