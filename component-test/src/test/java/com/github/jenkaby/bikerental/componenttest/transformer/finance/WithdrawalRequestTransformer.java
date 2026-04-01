@@ -16,7 +16,7 @@ public class WithdrawalRequestTransformer {
         UUID idempotencyKey = Aliases.getUuid(entry.get("idempotencyKey"));
         UUID customerId = Aliases.getCustomerId(entry.get("customerId"));
         BigDecimal amount = new BigDecimal(entry.get("amount"));
-        PaymentMethod payoutMethod = PaymentMethod.valueOf(entry.get("payoutMethod"));
+        PaymentMethod payoutMethod = PaymentMethod.valueOf(entry.get("paymentMethod"));
         String operatorId = Aliases.getOperatorId(entry.get("operatorId"));
         return new RecordWithdrawalRequest(idempotencyKey, customerId, amount, payoutMethod, operatorId);
     }

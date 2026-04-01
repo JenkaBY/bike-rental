@@ -18,12 +18,11 @@ public class SubLedgerJpaEntityTransformer {
     @DataTableType
     public SubLedgerJpaEntity transform(Map<String, String> entry) {
         SubLedgerJpaEntity entity = new SubLedgerJpaEntity();
-
-        UUID id = Optional.ofNullable(entry.get("id"))
+        var idValue = entry.get("id");
+        Optional<UUID> id = Optional.ofNullable(idValue)
                 .map(Aliases::getValue)
-                .map(UUID::fromString)
-                .orElse(null);
-        entity.setId(id);
+                .map(UUID::fromString);
+        entity.setId(idValue != null ? id.get() : null);
 
         String accountIdStr = DataTableHelper.getStringOrNull(entry, "accountId");
         if (accountIdStr != null && !accountIdStr.isBlank()) {
