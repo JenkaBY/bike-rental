@@ -1,7 +1,8 @@
 package com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper;
 
-import com.github.jenkaby.bikerental.finance.domain.model.Account;
+import com.github.jenkaby.bikerental.finance.domain.model.CustomerAccount;
 import com.github.jenkaby.bikerental.finance.domain.model.SubLedger;
+import com.github.jenkaby.bikerental.finance.domain.model.SystemAccount;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.AccountJpaEntity;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.SubLedgerJpaEntity;
 import com.github.jenkaby.bikerental.shared.mapper.CustomerRefMapper;
@@ -15,14 +16,20 @@ import org.mapstruct.MappingTarget;
 public interface AccountJpaMapper {
 
     @Mapping(target = "customerRef", source = "customerId")
-    Account toDomain(AccountJpaEntity entity);
+    CustomerAccount toCustomerAccountDomain(AccountJpaEntity entity);
+
+    SystemAccount toSystemAccountDomain(AccountJpaEntity entity);
 
     @Mapping(target = "customerId", source = "customerRef")
     @Mapping(target = "createdAt", ignore = true)
-    AccountJpaEntity toEntity(Account domain);
+    AccountJpaEntity toEntity(CustomerAccount domain);
+
+    @Mapping(target = "customerId", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    AccountJpaEntity toEntity(SystemAccount domain);
 
     @AfterMapping
-    default void setSubLedgerRelationships(Account domain, @MappingTarget AccountJpaEntity result) {
+    default void setSubLedgerRelationships(@MappingTarget AccountJpaEntity result) {
         if (result.getSubLedgers() != null) {
             result.getSubLedgers().forEach(sl -> sl.setAccount(result));
         }

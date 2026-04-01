@@ -34,6 +34,7 @@ Feature: Money movement between accounts
       | id     | accountId | ledgerType      | version | balance  |
       | L_C_W2 | ACC2      | CUSTOMER_WALLET | 2       | <amount> |
       | L_C_H2 | ACC2      | CUSTOMER_HOLD   | 2       | 0.00     |
+      | L_S_C  | ACC_S     | CASH            | 1       | -<amount> |
     And the following transactions were persisted in db
       | idempotencyKey   | customerId   | amount   | paymentMethod   | operatorId   | type    | recordedAt |
       | <idempotencyKey> | <customerId> | <amount> | <paymentMethod> | <operatorId> | DEPOSIT | <now>      |

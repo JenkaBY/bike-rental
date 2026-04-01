@@ -31,9 +31,10 @@ public class TransactionRecordDbSteps {
         var all = transactionRepository.findAllInitialized();
         log.info("All {}", all);
         var comparator = Comparator
-                .comparing((TransactionRecordJpaEntity e) -> e.getId() != null ? e.getId().toString() : "")
-                .thenComparing(e -> e.getTransaction() != null && e.getTransaction().getId() != null ? e.getTransaction().getId().toString() : "")
-                .thenComparing(e -> e.getLedgerType() != null ? e.getLedgerType().name() : "");
+                .comparing((TransactionRecordJpaEntity e) -> e.getLedgerType() != null ? e.getLedgerType().name() : "")
+                .thenComparing(e -> e.getDirection() != null ? e.getDirection().name() : "")
+                .thenComparing(e -> e.getAmount() != null ? e.getAmount().toPlainString() : "")
+                .thenComparing(e -> e.getId() != null ? e.getId().toString() : "");
 
         var actualList = all.stream()
                 .filter(actual -> expected.stream().anyMatch(exp -> matches(actual, exp)))

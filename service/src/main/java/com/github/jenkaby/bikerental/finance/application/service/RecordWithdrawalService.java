@@ -1,16 +1,14 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
-import com.github.jenkaby.bikerental.finance.PaymentMethod;
-import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase;
+import com.github.jenkaby.bikerental.finance.application.mapper.PaymentMethodLedgerTypeMapper;
+import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase;
 import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
-import com.github.jenkaby.bikerental.finance.domain.model.TransactionRecordWithoutId;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
-import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
@@ -25,67 +23,58 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
+public class RecordWithdrawalService implements RecordWithdrawalUseCase {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
+    private final PaymentMethodLedgerTypeMapper paymentMethodMapper;
 
     @Override
     @Transactional
-    public AdjustmentResult execute(ApplyAdjustmentCommand command) {
+    public WithdrawalResult execute(RecordWithdrawalCommand command) {
         Optional<Transaction> existing = transactionRepository
                 .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));
         if (existing.isPresent()) {
             Transaction t = existing.get();
-            return new AdjustmentResult(t.getId(), t.getRecordedAt());
+            return new WithdrawalResult(t.getId(), t.getRecordedAt());
         }
+
         var customerAccount = accountRepository
                 .findByCustomerId(new CustomerRef(command.customerId()))
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerId().toString()));
 
         var systemAccount = accountRepository.getSystemAccount();
 
-        var customerWallet = customerAccount.getWallet();
-        var adjustmentSubLedger = systemAccount.getAdjustment();
-
-        boolean isDeduction = command.amount().isNegative();
-        Money absAmount = command.amount().abs();
-
-        if (isDeduction && !customerWallet.isSufficientBalance(absAmount)) {
-            throw new InsufficientBalanceException(customerWallet.getBalance(), absAmount);
+        if (!customerAccount.isBalanceSufficient(command.amount())) {
+            var available = customerAccount.getWallet().getBalance().subtract(customerAccount.getOnHold().getBalance());
+            throw new InsufficientBalanceException(available, command.amount());
         }
 
-        TransactionRecordWithoutId debitChange;
-        TransactionRecordWithoutId creditChange;
+        var creditLedgerType = paymentMethodMapper.toLedgerType(command.payoutMethod());
+        var creditSubLedger = systemAccount.getSubLedger(creditLedgerType);
 
-        if (isDeduction) {
-            debitChange = customerWallet.debit(absAmount);
-            creditChange = adjustmentSubLedger.credit(absAmount);
-        } else {
-            debitChange = adjustmentSubLedger.debit(absAmount);
-            creditChange = customerWallet.credit(absAmount);
-        }
+        var debitChange = customerAccount.getWallet().debit(command.amount());
+        var creditChange = creditSubLedger.credit(command.amount());
 
         accountRepository.save(systemAccount);
         accountRepository.save(customerAccount);
 
-        Instant recordedAt = clock.instant();
+        Instant now = clock.instant();
         UUID transactionId = uuidGenerator.generate();
 
         var transaction = Transaction.builder()
                 .id(transactionId)
-                .type(TransactionType.ADJUSTMENT)
-                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
-                .amount(absAmount)
+                .type(TransactionType.WITHDRAWAL)
+                .paymentMethod(command.payoutMethod())
+                .amount(command.amount())
                 .customerId(command.customerId())
                 .operatorId(command.operatorId())
                 .sourceType(null)
                 .sourceId(null)
-                .recordedAt(recordedAt)
+                .recordedAt(now)
                 .idempotencyKey(command.idempotencyKey())
-                .reason(command.reason())
                 .records(List.of(
                         debitChange.toTransaction(uuidGenerator.generate()),
                         creditChange.toTransaction(uuidGenerator.generate())
@@ -94,6 +83,6 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
 
         transactionRepository.save(transaction);
 
-        return new AdjustmentResult(transactionId, recordedAt);
+        return new WithdrawalResult(transactionId, now);
     }
 }

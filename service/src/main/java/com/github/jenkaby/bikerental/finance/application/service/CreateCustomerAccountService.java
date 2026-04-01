@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.finance.application.service;
 
 import com.github.jenkaby.bikerental.finance.application.usecase.CreateCustomerAccountUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
-import com.github.jenkaby.bikerental.finance.domain.model.AccountType;
+import com.github.jenkaby.bikerental.finance.domain.model.CustomerAccount;
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.SubLedger;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
@@ -47,9 +47,8 @@ class CreateCustomerAccountService implements CreateCustomerAccountUseCase {
                 .balance(Money.zero())
                 .build();
 
-        var account = Account.builder()
+        var account = CustomerAccount.builder()
                 .id(uuidGenerator.generate())
-                .accountType(AccountType.CUSTOMER)
                 .customerRef(CustomerRef.of(customerId))
                 .subLedgers(List.of(wallet, hold))
                 .build();
