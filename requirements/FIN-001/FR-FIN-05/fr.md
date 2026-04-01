@@ -28,6 +28,10 @@
 * **Security/Compliance:** Only authenticated staff members may record withdrawals. Each withdrawal is persisted as a
   journal entry and available for audit querying.
 * **Usability/Other:** Staff must explicitly select the payout method; no default is assumed.
+* **Idempotency:** The withdrawal endpoint must be idempotent for staff-initiated requests. Clients must supply an
+  `idempotencyKey` (persisted by the server) with the request. Repeated requests with the same `idempotencyKey`
+  within the retention window MUST return the original successful response and MUST NOT create duplicate journal
+  entries.
 
 ## 4. Acceptance Criteria (BDD)
 
@@ -66,6 +70,14 @@
 * **Given** a valid customer account with a positive balance
 * **When** staff attempts to record a withdrawal with an amount of zero
 * **Then** the operation is rejected with a validation error
+
+**Scenario 6: Duplicate submission is idempotent**
+
+* **Given** the staff submits a withdrawal request with `idempotencyKey = "abc-123"` and it succeeds
+* **When** the staff (or client) re-sends the same withdrawal request with the same `idempotencyKey = "abc-123"`
+* **Then** the server returns the same successful response as for the original request (same status and body)
+* **And** no additional journal entry is created (only one journal entry exists for that logical withdrawal)
+* **And** the operation is auditable and traceable to the original request
 
 ## 5. Out of Scope
 

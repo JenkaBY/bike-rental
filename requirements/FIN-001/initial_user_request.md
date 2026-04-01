@@ -110,3 +110,15 @@ If the actual rental cost exceeds the held amount:
 - Includes: new Finance module (built from scratch), Rental module balance-check integration, and customer transaction
   history.
 - Supersedes: US-FN-001, US-FN-002, US-FN-003, US-FN-004.
+
+---
+
+## Additional change request (2026-04-01)
+
+Original short request: "requirements/FIN-001/FR-FIN-05/fr.md the endpoint must support idempotency"
+
+Action taken: `FR-FIN-05/fr.md` was updated to add an **Idempotency** Non-Functional Requirement and an
+acceptance scenario describing duplicate-submission handling using an `idempotencyKey` provided by the client.
+
+Planned follow-ups: add backend implementation story to persist and enforce `idempotencyKey`, add tests and API
+documentation updates.
