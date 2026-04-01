@@ -1,6 +1,5 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
-import com.github.jenkaby.bikerental.finance.application.mapper.PaymentMethodLedgerTypeMapper;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase;
 import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
@@ -29,7 +28,6 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
-    private final PaymentMethodLedgerTypeMapper paymentMethodMapper;
 
     @Override
     @Transactional
@@ -52,8 +50,7 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
             throw new InsufficientBalanceException(available, command.amount());
         }
 
-        var creditLedgerType = paymentMethodMapper.toLedgerType(command.paymentMethod());
-        var creditSubLedger = systemAccount.getSubLedger(creditLedgerType);
+        var creditSubLedger = systemAccount.getSubLedger(command.paymentMethod());
 
         var debitChange = customerAccount.getWallet().debit(command.amount());
         var creditChange = creditSubLedger.credit(command.amount());

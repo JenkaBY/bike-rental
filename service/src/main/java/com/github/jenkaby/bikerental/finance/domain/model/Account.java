@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.finance.domain.model;
 
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,7 +19,19 @@ public abstract class Account {
 
     public abstract AccountType getAccountType();
 
-    public SubLedger getSubLedger(LedgerType type) {
+
+    public SubLedger getSubLedger(PaymentMethod paymentMethod) {
+        var type = switch (paymentMethod) {
+            case CASH -> LedgerType.CASH;
+            case CARD_TERMINAL -> LedgerType.CARD_TERMINAL;
+            case BANK_TRANSFER -> LedgerType.BANK_TRANSFER;
+            case INTERNAL_TRANSFER -> LedgerType.ADJUSTMENT;
+            default -> throw new IllegalArgumentException("Unsupported payment method: " + paymentMethod);
+        };
+        return getSubLedger(type);
+    }
+
+    protected SubLedger getSubLedger(LedgerType type) {
         return subLedgers.stream()
                 .filter(sl -> sl.getLedgerType() == type)
                 .findFirst()

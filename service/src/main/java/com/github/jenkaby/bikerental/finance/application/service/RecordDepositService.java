@@ -1,8 +1,9 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
-import com.github.jenkaby.bikerental.finance.application.mapper.PaymentMethodLedgerTypeMapper;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
-import com.github.jenkaby.bikerental.finance.domain.model.*;
+import com.github.jenkaby.bikerental.finance.domain.model.Account;
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
@@ -26,7 +27,6 @@ public class RecordDepositService implements RecordDepositUseCase {
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
-    private final PaymentMethodLedgerTypeMapper paymentMethodMapper;
 
     @Override
     @Transactional
@@ -38,15 +38,13 @@ public class RecordDepositService implements RecordDepositUseCase {
             return new DepositResult(t.getId(), t.getRecordedAt());
         }
 
-        var customerAccount = (CustomerAccount) accountRepository
+        var customerAccount = accountRepository
                 .findByCustomerId(new CustomerRef(command.customerId()))
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerId().toString()));
 
         var systemAccount = accountRepository.getSystemAccount();
 
-        LedgerType debitLedgerType = paymentMethodMapper.toLedgerType(command.paymentMethod());
-
-        var debitSubLedger = systemAccount.getSubLedger(debitLedgerType);
+        var debitSubLedger = systemAccount.getSubLedger(command.paymentMethod());
         var creditSubLedger = customerAccount.getWallet();
 
         var debitChange = debitSubLedger.debit(command.amount());
