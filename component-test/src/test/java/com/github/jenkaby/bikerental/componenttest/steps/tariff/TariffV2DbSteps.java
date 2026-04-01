@@ -24,6 +24,7 @@ public class TariffV2DbSteps {
     private final ScenarioContext scenarioContext;
 
 
+    @SuppressWarnings("unchecked")
     @Given("the following tariff v2 record(s) exist(s) in db")
     public void theFollowingTariffsV2Exist(List<TariffV2JpaEntity> entities) {
         var paramsContext = scenarioContext.getPricingParamsContext();

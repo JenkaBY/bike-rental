@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/payments")
 @Tag(name = OpenApiConfig.Tags.FINANCE)
+@Deprecated
 public class PaymentQueryController {
 
     private final GetPaymentByIdUseCase getByIdUseCase;
