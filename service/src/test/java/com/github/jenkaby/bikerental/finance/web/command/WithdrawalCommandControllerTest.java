@@ -58,7 +58,7 @@ class WithdrawalCommandControllerTest {
         request.put("idempotencyKey", UUID.randomUUID().toString());
         request.put("customerId", CUSTOMER_ID.toString());
         request.put("amount", "30.00");
-        request.put("payoutMethod", "CASH");
+        request.put("paymentMethod", "CASH");
         request.put("operatorId", "operator-1");
         return request;
     }
