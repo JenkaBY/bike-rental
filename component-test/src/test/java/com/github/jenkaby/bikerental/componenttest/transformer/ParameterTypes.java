@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.componenttest.transformer;
 
 
 import com.github.jenkaby.bikerental.componenttest.config.WebConfig;
-import com.github.jenkaby.bikerental.componenttest.model.VocabularyType;
+import com.github.jenkaby.bikerental.componenttest.model.DictionaryType;
 import io.cucumber.java.DefaultDataTableCellTransformer;
 import io.cucumber.java.DefaultDataTableEntryTransformer;
 import io.cucumber.java.DefaultParameterTransformer;
@@ -29,7 +29,7 @@ public class ParameterTypes {
     }
 
     @ParameterType("equipment status|equipment type")
-    public VocabularyType vocabularyType(String type) {
-        return VocabularyType.of(type);
+    public DictionaryType dictionaryType(String type) {
+        return DictionaryType.of(type);
     }
 }
