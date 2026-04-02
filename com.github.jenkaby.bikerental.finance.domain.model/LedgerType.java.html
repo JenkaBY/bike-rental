@@ -15,5 +15,12 @@
 <span class="fc" id="L15">            default -&gt; false;</span>
         };
     }
+
+    public boolean isAssetLedger() {
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        return switch (this) {</span>
+<span class="fc" id="L21">            case CASH, CARD_TERMINAL, BANK_TRANSFER -&gt; true;</span>
+<span class="fc" id="L22">            default -&gt; false;</span>
+        };
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

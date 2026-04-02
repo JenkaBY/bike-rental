@@ -19,24 +19,28 @@ public class SubLedger {
     private Long version;
 
     public TransactionRecordWithoutId credit(Money amount) {
-<span class="fc" id="L22">        this.balance = this.balance.add(amount);</span>
-<span class="fc" id="L23">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount);</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        this.balance = this.ledgerType.isAssetLedger()</span>
+<span class="fc" id="L23">                ? this.balance.subtract(amount)</span>
+<span class="fc" id="L24">                : this.balance.add(amount);</span>
+<span class="fc" id="L25">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount);</span>
     }
 
     public boolean isSufficientBalance(Money amount) {
-<span class="fc bfc" id="L27" title="All 2 branches covered.">        return !this.balance.isLessThan(amount);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        return !this.balance.isLessThan(amount);</span>
     }
 
     public TransactionRecordWithoutId debit(Money amount) {
-<span class="pc bpc" id="L31" title="1 of 4 branches missed.">        if (!this.ledgerType.isSystemLedger() &amp;&amp; !isSufficientBalance(amount)) {</span>
-<span class="nc" id="L32">            throw new InsufficientBalanceException(this.balance, amount);</span>
+<span class="pc bpc" id="L33" title="1 of 4 branches missed.">        if (!this.ledgerType.isSystemLedger() &amp;&amp; !isSufficientBalance(amount)) {</span>
+<span class="nc" id="L34">            throw new InsufficientBalanceException(this.balance, amount);</span>
         }
-<span class="fc" id="L34">        this.balance = this.balance.subtract(amount);</span>
-<span class="fc" id="L35">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.DEBIT, amount);</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        this.balance = this.ledgerType.isAssetLedger()</span>
+<span class="fc" id="L37">                ? this.balance.add(amount)</span>
+<span class="fc" id="L38">                : this.balance.subtract(amount);</span>
+<span class="fc" id="L39">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.DEBIT, amount);</span>
     }
 
     private SubLedgerRef toRef() {
-<span class="fc" id="L39">        return new SubLedgerRef(this.id);</span>
+<span class="fc" id="L43">        return new SubLedgerRef(this.id);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -33,7 +33,7 @@ public record Money(BigDecimal amount) implements Comparable&lt;Money&gt; {
     }
 
     public static Money of(String amount) {
-<span class="nc" id="L36">        return new Money(new BigDecimal(amount));</span>
+<span class="nc" id="L36">        return Money.of(new BigDecimal(amount));</span>
     }
 
     public static Money zero() {
