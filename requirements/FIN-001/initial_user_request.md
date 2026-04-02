@@ -122,3 +122,23 @@ acceptance scenario describing duplicate-submission handling using an `idempoten
 
 Planned follow-ups: add backend implementation story to persist and enforce `idempotencyKey`, add tests and API
 documentation updates.
+
+---
+
+## Additional change request (2026-04-02)
+
+**Root cause identified:** During review of the FR-FIN-05 implementation, a discrepancy was found between the
+`double-entry-lifecycle.md` specification and the `SubLedger` domain model. The `SubLedger` class uses uniform
+arithmetic (`debit()` = subtract, `credit()` = add) for all account types. This is correct for liability accounts
+(`CUSTOMER_WALLET`, `CUSTOMER_HOLD`) but inverted for asset accounts (`CASH`, `CARD_TERMINAL`, `BANK_TRANSFER`):
+a deposit was producing a negative CASH balance (-50) instead of the correct positive value (+50).
+
+**Decision — Option B selected:** Make `SubLedger` account-type-aware. For **asset** sub-ledgers, `debit()`
+increases the balance and `credit()` decreases it (standard T-account rule). Liability and income sub-ledger
+arithmetic remains unchanged.
+
+**Impact:** `RecordDepositService` and `RecordWithdrawalService` service calls remain structurally unchanged;
+the correct balance direction is now enforced inside `SubLedger` based on `LedgerType` category. Component test
+assertions for system sub-ledger balances must be updated to reflect correct positive asset values.
+
+**Formalised as:** `FR-FIN-11`.
