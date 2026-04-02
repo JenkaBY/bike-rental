@@ -79,8 +79,10 @@ derived as `UuidCreator.getNameBasedMd5(String.valueOf(rentalRef.id()))`, making
     7. **Persist transaction:** `transactionRepository.save(transaction)`.
     8. **Return:** `HoldResult(new TransactionRef(transactionId), now)`.
 
-* **`CustomerAccount` (existing — no changes):** `getWallet()`, `getOnHold()`, and `isBalanceSufficient(Money)` are
-  already in place and reused without modification.
+* **`CustomerAccount` (existing — minor update):** `getWallet()`, `getOnHold()`, and `isBalanceSufficient(Money)`
+  are reused. `availableBalance()` is updated to return `getWallet().getBalance()` — the wallet sub-ledger already
+  carries a **net** balance because hold debits are applied directly to it; subtracting `CUSTOMER_HOLD.balance`
+  would double-count the deduction.
 
 * **`AccountRepository` (existing — no interface changes):** `findByCustomerId` is reused; `getSystemAccount` is
   not called — there is no system account side to this operation.
@@ -145,6 +147,10 @@ Rental Module
   permanent audit link between the rental and its hold entry — no foreign key is used (cross-module boundary).
 * **No HTTP surface:** No new REST controller, DTO, OpenAPI annotation, or `@WebMvcTest` is needed. Test coverage
   is provided by a unit test for `RecordRentalHoldService`.
-* **Available balance definition:** Follows the definition established in FR-FIN-05:
-  `available = CUSTOMER_WALLET.balance − CUSTOMER_HOLD.balance`. `CustomerAccount.isBalanceSufficient(Money)` already
-  encapsulates this calculation.
+* **Net-balance ledger invariant:** Every sub-ledger maintains a **net** running balance — each `debit()` or
+  `credit()` call updates the stored balance in place, so `SubLedger.getBalance()` always equals the net of all
+  transactions ever applied to that ledger. Consequently, once the hold debits `CUSTOMER_WALLET`, that sub-ledger
+  balance already equals the post-hold net-available amount. `CustomerAccount.availableBalance()` therefore returns
+  `getWallet().getBalance()` directly — subtracting `CUSTOMER_HOLD.balance` a second time would double-count the
+  deduction. `isBalanceSufficient(Money)` delegates to `availableBalance()` and correctly reflects the real
+  spendable balance before the mutation is applied.

@@ -25,7 +25,7 @@ public class SubLedger {
         return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount);
     }
 
-    public boolean isSufficientBalance(Money amount) {
+    private boolean isSufficientBalance(Money amount) {
         return !this.balance.isLessThan(amount);
     }
 
