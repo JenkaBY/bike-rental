@@ -19,7 +19,9 @@ public class SubLedger {
     private Long version;
 
     public TransactionRecordWithoutId credit(Money amount) {
-        this.balance = this.balance.add(amount);
+        this.balance = this.ledgerType.isAssetLedger()
+                ? this.balance.subtract(amount)
+                : this.balance.add(amount);
         return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount);
     }
 
@@ -31,7 +33,9 @@ public class SubLedger {
         if (!this.ledgerType.isSystemLedger() && !isSufficientBalance(amount)) {
             throw new InsufficientBalanceException(this.balance, amount);
         }
-        this.balance = this.balance.subtract(amount);
+        this.balance = this.ledgerType.isAssetLedger()
+                ? this.balance.add(amount)
+                : this.balance.subtract(amount);
         return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.DEBIT, amount);
     }
 
