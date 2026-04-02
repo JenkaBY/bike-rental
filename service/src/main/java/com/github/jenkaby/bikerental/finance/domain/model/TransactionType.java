@@ -4,4 +4,5 @@ public enum TransactionType {
     DEPOSIT,
     ADJUSTMENT,
     WITHDRAWAL,
+    HOLD,
 }

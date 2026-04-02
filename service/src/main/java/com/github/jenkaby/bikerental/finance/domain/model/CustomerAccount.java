@@ -25,7 +25,11 @@ public class CustomerAccount extends Account {
     }
 
     public boolean isBalanceSufficient(Money amount) {
-        var available = getWallet().getBalance().subtract(getOnHold().getBalance());
+        var available = availableBalance();
         return !available.isLessThan(amount);
+    }
+
+    public final Money availableBalance() {
+        return getWallet().getBalance();
     }
 }

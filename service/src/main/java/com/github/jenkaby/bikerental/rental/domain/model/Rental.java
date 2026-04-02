@@ -22,7 +22,7 @@ import java.util.function.Predicate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Rental {
 
-    public static final Predicate<RentalEquipment> RETURNED = e -> e.getStatus() == RentalEquipmentStatus.RETURNED;
+    private static final Predicate<RentalEquipment> RETURNED = e -> e.getStatus() == RentalEquipmentStatus.RETURNED;
     @Setter
     private Long id;
 

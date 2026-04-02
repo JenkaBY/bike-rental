@@ -15,7 +15,7 @@ Feature: Manual balance adjustments
     And the following sub-ledger records exist in db
       | id     | accountId | ledgerType      | balance | version | createdAt            | updatedAt            |
       | L_C_W2 | ACC2      | CUSTOMER_WALLET | 40.00   | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
-      | L_C_H2 | ACC2      | CUSTOMER_HOLD   | 0.00    | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
+      | L_C_H2 | ACC2      | CUSTOMER_HOLD   | 30.00   | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
 
   Scenario Outline: Successful top-up increases customer wallet balance
     Given the adjustment request is prepared with the following data

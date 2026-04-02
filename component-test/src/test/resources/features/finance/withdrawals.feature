@@ -78,4 +78,4 @@ Feature: Fund Withdrawal
     Then the response status is 422
     Examples:
       | idempotencyKey | customerId | amount | operatorId |
-      | IDK1           | CUS2       | 60.01  | OP1        |
+      | IDK1           | CUS2       | 80.01  | OP1        |

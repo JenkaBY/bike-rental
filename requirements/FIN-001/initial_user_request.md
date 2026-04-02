@@ -142,3 +142,22 @@ the correct balance direction is now enforced inside `SubLedger` based on `Ledge
 assertions for system sub-ledger balances must be updated to reflect correct positive asset values.
 
 **Formalised as:** `FR-FIN-11`.
+
+---
+
+## Additional change request (2026-04-02) — Net-balance ledger invariant
+
+**Finding:** During implementation review of `FR-FIN-06` (Rental Hold), a subtle accounting inconsistency was
+identified in `CustomerAccount.availableBalance()`. The original design computed available balance as
+`CUSTOMER_WALLET.balance − CUSTOMER_HOLD.balance`. However, because every `SubLedger.debit()` / `credit()` call
+mutates the sub-ledger's running balance **in place**, `getBalance()` always returns the **net** of all transactions
+ever applied to that ledger. When the hold operation debits `CUSTOMER_WALLET`, the wallet balance already reflects the
+post-hold net-available amount. Subtracting `CUSTOMER_HOLD.balance` a second time would double-count the deduction.
+
+**Decision:** `CustomerAccount.availableBalance()` returns `getWallet().getBalance()` directly. The wallet
+sub-ledger is the authoritative net-available balance; `CUSTOMER_HOLD` tracks the reserved amount in-place and is
+not subtracted again at query time.
+
+**Impact:** `isBalanceSufficient(Money)` continues to delegate to `availableBalance()` and correctly reflects
+the real spendable balance before applying any mutation. No structural change to `RecordRentalHoldService`; only
+the `availableBalance()` implementation is updated.

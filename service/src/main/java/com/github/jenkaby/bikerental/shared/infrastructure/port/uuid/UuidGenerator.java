@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.shared.infrastructure.port.uuid;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import java.util.UUID;
 
 /**
@@ -8,4 +9,8 @@ import java.util.UUID;
 public interface UuidGenerator {
 
     UUID generate();
+
+    default UUID generateNameBased(String name) {
+        return UuidCreator.getNameBasedMd5(name);
+    }
 }
