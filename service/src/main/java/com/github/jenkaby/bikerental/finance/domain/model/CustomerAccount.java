@@ -28,4 +28,8 @@ public class CustomerAccount extends Account {
         var available = getWallet().getBalance().subtract(getOnHold().getBalance());
         return !available.isLessThan(amount);
     }
+
+    public final Money availableBalance() {
+        return getWallet().getBalance();
+    }
 }

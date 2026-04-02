@@ -1,13 +1,16 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
-import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase;
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
+import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
 import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
-import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
+import com.github.jenkaby.bikerental.shared.domain.TransactionRef;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public class RecordWithdrawalService implements RecordWithdrawalUseCase {
+public class RecordRentalHoldService implements RentalHoldUseCase {
+
+    private static final String SYSTEM_OPERATOR = "SYSTEM";
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
@@ -31,30 +35,30 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
 
     @Override
     @Transactional
-    public WithdrawalResult execute(RecordWithdrawalCommand command) {
-        Optional<Transaction> existing = transactionRepository
-                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));
+    public HoldResult execute(RentalHoldCommand command) {
+        var idempotencyKey = new IdempotencyKey(
+                uuidGenerator.generateNameBased(String.valueOf(command.rentalRef().id()))
+        );
+
+        var existing = transactionRepository
+                .findByIdempotencyKeyAndCustomerId(idempotencyKey, command.customerRef());
         if (existing.isPresent()) {
-            Transaction t = existing.get();
-            return new WithdrawalResult(t.getId(), t.getRecordedAt());
+            var t = existing.get();
+            return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());
         }
 
         var customerAccount = accountRepository
-                .findByCustomerId(new CustomerRef(command.customerId()))
-                .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerId().toString()));
-
-        var systemAccount = accountRepository.getSystemAccount();
+                .findByCustomerId(command.customerRef())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        Account.class, command.customerRef().id().toString()));
 
         if (!customerAccount.isBalanceSufficient(command.amount())) {
             throw new InsufficientBalanceException(customerAccount.availableBalance(), command.amount());
         }
 
-        var creditSubLedger = systemAccount.getSubLedger(command.paymentMethod());
-
         var debitChange = customerAccount.getWallet().debit(command.amount());
-        var creditChange = creditSubLedger.credit(command.amount());
+        var creditChange = customerAccount.getOnHold().credit(command.amount());
 
-        accountRepository.save(systemAccount);
         accountRepository.save(customerAccount);
 
         Instant now = clock.instant();
@@ -62,15 +66,16 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
 
         var transaction = Transaction.builder()
                 .id(transactionId)
-                .type(TransactionType.WITHDRAWAL)
-                .paymentMethod(command.paymentMethod())
+                .type(TransactionType.HOLD)
+                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
                 .amount(command.amount())
-                .customerId(command.customerId())
-                .operatorId(command.operatorId())
-                .sourceType(null)
-                .sourceId(null)
+                .customerId(command.customerRef().id())
+                .operatorId(SYSTEM_OPERATOR)
+                .sourceType(TransactionSourceType.RENTAL)
+                .sourceId(String.valueOf(command.rentalRef().id()))
                 .recordedAt(now)
-                .idempotencyKey(command.idempotencyKey())
+                .idempotencyKey(idempotencyKey)
+                .reason(null)
                 .records(List.of(
                         debitChange.toTransaction(uuidGenerator.generate()),
                         creditChange.toTransaction(uuidGenerator.generate())
@@ -79,6 +84,6 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
 
         transactionRepository.save(transaction);
 
-        return new WithdrawalResult(transactionId, now);
+        return new HoldResult(new TransactionRef(transactionId), now);
     }
 }

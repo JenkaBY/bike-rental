@@ -3,8 +3,11 @@ package com.github.jenkaby.bikerental.finance;
 import com.github.jenkaby.bikerental.finance.application.mapper.PaymentToInfoMapper;
 import com.github.jenkaby.bikerental.finance.application.usecase.GetPaymentsByRentalIdUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordPaymentUseCase;
+import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.Payment;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +23,17 @@ class FinanceFacadeImpl implements FinanceFacade {
     private final RecordPaymentUseCase recordPaymentUseCase;
     private final GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase;
     private final PaymentToInfoMapper paymentToInfoMapper;
+    private final RentalHoldUseCase rentalHoldUseCase;
 
     FinanceFacadeImpl(
             RecordPaymentUseCase recordPaymentUseCase,
             GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase,
-            PaymentToInfoMapper paymentToInfoMapper) {
+            PaymentToInfoMapper paymentToInfoMapper,
+            RentalHoldUseCase rentalHoldUseCase) {
         this.recordPaymentUseCase = recordPaymentUseCase;
         this.getPaymentsByRentalIdUseCase = getPaymentsByRentalIdUseCase;
         this.paymentToInfoMapper = paymentToInfoMapper;
+        this.rentalHoldUseCase = rentalHoldUseCase;
     }
 
     @Override
@@ -75,5 +81,12 @@ class FinanceFacadeImpl implements FinanceFacade {
         return getPaymentsByRentalIdUseCase.execute(rentalId).stream()
                 .map(paymentToInfoMapper::toPaymentInfo)
                 .toList();
+    }
+
+    @Override
+    public HoldInfo holdFunds(CustomerRef customerRef, RentalRef rentalRef, Money plannedCost) {
+        var command = new RentalHoldUseCase.RentalHoldCommand(customerRef, rentalRef, plannedCost);
+        var result = rentalHoldUseCase.execute(command);
+        return new HoldInfo(result.transactionRef(), result.recordedAt());
     }
 }
