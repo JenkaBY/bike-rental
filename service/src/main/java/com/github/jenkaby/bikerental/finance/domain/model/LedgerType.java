@@ -15,4 +15,11 @@ public enum LedgerType {
             default -> false;
         };
     }
+
+    public boolean isAssetLedger() {
+        return switch (this) {
+            case CASH, CARD_TERMINAL, BANK_TRANSFER -> true;
+            default -> false;
+        };
+    }
 }

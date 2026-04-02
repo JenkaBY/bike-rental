@@ -30,7 +30,7 @@ Feature: Fund Withdrawal
       | id          | accountId | ledgerType      | version | balance |
       | L_C_W2      | ACC2      | CUSTOMER_WALLET | 2       | 50      |
       | L_C_H2      | ACC2      | CUSTOMER_HOLD   | 2       | 20      |
-      | <subLedger> | ACC_S     | <ledgerType>    | 1       | 30      |
+      | <subLedger> | ACC_S     | <ledgerType>    | 1       | -30     |
     And the following transactions were persisted in db
       | idempotencyKey | customerId | amount | paymentMethod   | operatorId | type       | recordedAt |
       | IDK1           | CUS2       | 30     | <paymentMethod> | OP1        | WITHDRAWAL | <now>      |

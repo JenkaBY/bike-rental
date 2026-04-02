@@ -13,7 +13,8 @@ push to main/master/develop
     → CI Test (build.yml)
         → on success: CD Deploy (deploy.yml)
             → force-push HEAD to dev-deploy
-                → Render detects change
+                → hook
+                → Invoke hook to redeploy
                     → builds Docker image from service/Dockerfile
                         → deploys bike-rental-api
 ```
@@ -29,7 +30,7 @@ push to main/master/develop
 | Field               | Value                  |
 |---------------------|------------------------|
 | **Name**            | `bike-rental-api`      |
-| **Branch**          | `render-deploy`        |
+| **Branch**          | `dev-deploy`           |
 | **Runtime**         | `Docker`               |
 | **Dockerfile Path** | `./service/Dockerfile` |
 | **Docker Context**  | `.` (repo root)        |
