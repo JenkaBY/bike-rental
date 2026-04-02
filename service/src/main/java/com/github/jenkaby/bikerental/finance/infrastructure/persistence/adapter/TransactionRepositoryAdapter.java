@@ -1,10 +1,13 @@
 package com.github.jenkaby.bikerental.finance.infrastructure.persistence.adapter;
 
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.TransactionJpaMapper;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.repository.TransactionJpaRepository;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
+import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +36,15 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     @Override
     public Optional<Transaction> findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, com.github.jenkaby.bikerental.shared.domain.CustomerRef customerId) {
         return jpaRepository.findByIdempotencyKeyAndCustomerId(idempotencyKey.id(), customerId.id())
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Transaction> findByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
+        return jpaRepository.findBySourceTypeAndSourceIdAndTransactionType(
+                        TransactionSourceType.RENTAL,
+                        String.valueOf(rentalRef.id()),
+                        type)
                 .map(mapper::toDomain);
     }
 }

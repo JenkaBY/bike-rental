@@ -18,4 +18,6 @@ public class ErrorCodes {
     public static final String RESOURCE_CONFLICT = "shared.resource.conflict";
     public static final String RESOURCE_OPTIMISTIC_LOCK = "shared.resource.optimistic_lock";
     public static final String INSUFFICIENT_BALANCE = "finance.insufficient_balance";
+    public static final String OVER_BUDGET_SETTLEMENT = "finance.over_budget_settlement";
+    public static final String INSUFFICIENT_HOLD = "finance.insufficient_hold";
 }

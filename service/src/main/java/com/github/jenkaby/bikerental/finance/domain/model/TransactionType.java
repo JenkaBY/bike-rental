@@ -5,4 +5,6 @@ public enum TransactionType {
     ADJUSTMENT,
     WITHDRAWAL,
     HOLD,
+    CAPTURE,
+    RELEASE
 }
