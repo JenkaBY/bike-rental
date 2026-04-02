@@ -25,8 +25,8 @@ public class SubLedger {
 <span class="fc" id="L25">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount);</span>
     }
 
-    public boolean isSufficientBalance(Money amount) {
-<span class="fc bfc" id="L29" title="All 2 branches covered.">        return !this.balance.isLessThan(amount);</span>
+    private boolean isSufficientBalance(Money amount) {
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        return !this.balance.isLessThan(amount);</span>
     }
 
     public TransactionRecordWithoutId debit(Money amount) {

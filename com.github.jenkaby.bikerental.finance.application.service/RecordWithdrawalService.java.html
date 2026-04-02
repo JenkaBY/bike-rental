@@ -46,41 +46,40 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
 <span class="fc" id="L46">        var systemAccount = accountRepository.getSystemAccount();</span>
 
 <span class="fc bfc" id="L48" title="All 2 branches covered.">        if (!customerAccount.isBalanceSufficient(command.amount())) {</span>
-<span class="fc" id="L49">            var available = customerAccount.getWallet().getBalance().subtract(customerAccount.getOnHold().getBalance());</span>
-<span class="fc" id="L50">            throw new InsufficientBalanceException(available, command.amount());</span>
+<span class="fc" id="L49">            throw new InsufficientBalanceException(customerAccount.availableBalance(), command.amount());</span>
         }
 
-<span class="fc" id="L53">        var creditSubLedger = systemAccount.getSubLedger(command.paymentMethod());</span>
+<span class="fc" id="L52">        var creditSubLedger = systemAccount.getSubLedger(command.paymentMethod());</span>
 
-<span class="fc" id="L55">        var debitChange = customerAccount.getWallet().debit(command.amount());</span>
-<span class="fc" id="L56">        var creditChange = creditSubLedger.credit(command.amount());</span>
+<span class="fc" id="L54">        var debitChange = customerAccount.getWallet().debit(command.amount());</span>
+<span class="fc" id="L55">        var creditChange = creditSubLedger.credit(command.amount());</span>
 
-<span class="fc" id="L58">        accountRepository.save(systemAccount);</span>
-<span class="fc" id="L59">        accountRepository.save(customerAccount);</span>
+<span class="fc" id="L57">        accountRepository.save(systemAccount);</span>
+<span class="fc" id="L58">        accountRepository.save(customerAccount);</span>
 
-<span class="fc" id="L61">        Instant now = clock.instant();</span>
-<span class="fc" id="L62">        UUID transactionId = uuidGenerator.generate();</span>
+<span class="fc" id="L60">        Instant now = clock.instant();</span>
+<span class="fc" id="L61">        UUID transactionId = uuidGenerator.generate();</span>
 
-<span class="fc" id="L64">        var transaction = Transaction.builder()</span>
-<span class="fc" id="L65">                .id(transactionId)</span>
-<span class="fc" id="L66">                .type(TransactionType.WITHDRAWAL)</span>
-<span class="fc" id="L67">                .paymentMethod(command.paymentMethod())</span>
-<span class="fc" id="L68">                .amount(command.amount())</span>
-<span class="fc" id="L69">                .customerId(command.customerId())</span>
-<span class="fc" id="L70">                .operatorId(command.operatorId())</span>
-<span class="fc" id="L71">                .sourceType(null)</span>
-<span class="fc" id="L72">                .sourceId(null)</span>
-<span class="fc" id="L73">                .recordedAt(now)</span>
-<span class="fc" id="L74">                .idempotencyKey(command.idempotencyKey())</span>
-<span class="fc" id="L75">                .records(List.of(</span>
-<span class="fc" id="L76">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
-<span class="fc" id="L77">                        creditChange.toTransaction(uuidGenerator.generate())</span>
+<span class="fc" id="L63">        var transaction = Transaction.builder()</span>
+<span class="fc" id="L64">                .id(transactionId)</span>
+<span class="fc" id="L65">                .type(TransactionType.WITHDRAWAL)</span>
+<span class="fc" id="L66">                .paymentMethod(command.paymentMethod())</span>
+<span class="fc" id="L67">                .amount(command.amount())</span>
+<span class="fc" id="L68">                .customerId(command.customerId())</span>
+<span class="fc" id="L69">                .operatorId(command.operatorId())</span>
+<span class="fc" id="L70">                .sourceType(null)</span>
+<span class="fc" id="L71">                .sourceId(null)</span>
+<span class="fc" id="L72">                .recordedAt(now)</span>
+<span class="fc" id="L73">                .idempotencyKey(command.idempotencyKey())</span>
+<span class="fc" id="L74">                .records(List.of(</span>
+<span class="fc" id="L75">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L76">                        creditChange.toTransaction(uuidGenerator.generate())</span>
                 ))
-<span class="fc" id="L79">                .build();</span>
+<span class="fc" id="L78">                .build();</span>
 
-<span class="fc" id="L81">        transactionRepository.save(transaction);</span>
+<span class="fc" id="L80">        transactionRepository.save(transaction);</span>
 
-<span class="fc" id="L83">        return new WithdrawalResult(transactionId, now);</span>
+<span class="fc" id="L82">        return new WithdrawalResult(transactionId, now);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

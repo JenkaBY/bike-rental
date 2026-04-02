@@ -22,7 +22,7 @@ import java.util.function.Predicate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Rental {
 
-<span class="fc bfc" id="L25" title="All 2 branches covered.">    public static final Predicate&lt;RentalEquipment&gt; RETURNED = e -&gt; e.getStatus() == RentalEquipmentStatus.RETURNED;</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">    private static final Predicate&lt;RentalEquipment&gt; RETURNED = e -&gt; e.getStatus() == RentalEquipmentStatus.RETURNED;</span>
     @Setter
     private Long id;
 

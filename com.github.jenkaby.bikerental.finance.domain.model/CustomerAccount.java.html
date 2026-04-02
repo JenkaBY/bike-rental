@@ -21,12 +21,16 @@ public class CustomerAccount extends Account {
     }
 
     public SubLedger getOnHold() {
-<span class="fc" id="L24">        return getSubLedger(LedgerType.CUSTOMER_HOLD);</span>
+<span class="nc" id="L24">        return getSubLedger(LedgerType.CUSTOMER_HOLD);</span>
     }
 
     public boolean isBalanceSufficient(Money amount) {
-<span class="fc" id="L28">        var available = getWallet().getBalance().subtract(getOnHold().getBalance());</span>
+<span class="fc" id="L28">        var available = availableBalance();</span>
 <span class="fc bfc" id="L29" title="All 2 branches covered.">        return !available.isLessThan(amount);</span>
+    }
+
+    public final Money availableBalance() {
+<span class="fc" id="L33">        return getWallet().getBalance();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

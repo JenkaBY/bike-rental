@@ -53,8 +53,8 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
 <span class="fc" id="L53">        boolean isDeduction = command.amount().isNegative();</span>
 <span class="fc" id="L54">        Money absAmount = command.amount().abs();</span>
 
-<span class="fc bfc" id="L56" title="All 4 branches covered.">        if (isDeduction &amp;&amp; !customerWallet.isSufficientBalance(absAmount)) {</span>
-<span class="fc" id="L57">            throw new InsufficientBalanceException(customerWallet.getBalance(), absAmount);</span>
+<span class="fc bfc" id="L56" title="All 4 branches covered.">        if (isDeduction &amp;&amp; !customerAccount.isBalanceSufficient(absAmount)) {</span>
+<span class="fc" id="L57">            throw new InsufficientBalanceException(customerAccount.availableBalance(), absAmount);</span>
         }
 
         TransactionRecordWithoutId debitChange;
