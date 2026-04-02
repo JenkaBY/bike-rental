@@ -57,8 +57,7 @@ created
 
 * **Given** a customer with a `CUSTOMER_WALLET` balance of €50 and `CUSTOMER_HOLD` balance of €40
 * **When** the Rental module requests a hold for €30
-* **Then** the hold is rejected because available balance is only €50 which is sufficient but if wallet is actually only
-  €20 then rejection
+* **Then** the hold is rejected because available balance is €10 (€50 wallet − €40 on-hold), which is less than €30
 * **And** balances are not modified
 
 **Scenario 4: Hold rejected for zero amount**
