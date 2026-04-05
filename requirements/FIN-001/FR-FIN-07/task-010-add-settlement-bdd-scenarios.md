@@ -7,7 +7,7 @@
 
 ## 1. Objective
 
-Add two new BDD scenarios to `rental-return.feature` that cover the two normal-settlement cases defined in
+Add three new BDD scenarios to `rental-return.feature` that cover the settlement cases defined in
 FR-FIN-07:
 
 - **Scenario A — capture + release:** `finalCost < heldAmount` → two transactions (`CAPTURE`, `RELEASE`)
@@ -15,13 +15,10 @@ FR-FIN-07:
   excess; `REVENUE` is credited with `finalCost`.
 - **Scenario B — capture only:** `finalCost == heldAmount` → one `CAPTURE` transaction and two
   `TransactionRecord` rows; `CUSTOMER_HOLD` reaches zero; `REVENUE` is credited with `finalCost`.
-
-Both scenarios set up a `HOLD` transaction and sub-ledger state in the `Background` extension (via a
-dedicated `Given` that inserts the account, sub-ledgers, and HOLD transaction), then assert the ledger and
-transaction state after the return call.
-
-The scenarios use the `@ReinitializeSystemLedgers` tag so the `REVENUE` sub-ledger is reset to zero after
-each scenario.
+- **Scenario C — hold-insufficient capture:** `finalCost > holdBalance`, wallet covers the shortfall →
+  two `CAPTURE` transactions (one from HOLD, one from WALLET) and four `TransactionRecord` rows;
+  `CUSTOMER_HOLD` and `CUSTOMER_WALLET` both reach zero; `REVENUE` is credited with `finalCost`. No
+  `RELEASE` transaction is created.
 
 ## 2. File to Modify / Create
 
@@ -129,6 +126,47 @@ each scenario.
       | CUSTOMER_HOLD | DEBIT     | 75.00  |
       | REVENUE       | CREDIT    | 75.00  |
     And there are only 2 transaction records in db
+
+  @ReinitializeSystemLedgers @ResetClock
+  Scenario: Hold-insufficient settlement — wallet covers the shortfall, two CAPTURE transactions
+    Given now is "2026-04-01T10:00:00"
+    And the following account records exist in db
+      | id   | accountType | customerId |
+      | ACC1 | CUSTOMER    | CUS1       |
+    And the following sub-ledger records exist in db
+      | id     | accountId | ledgerType      | balance | version | createdAt            | updatedAt            |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 30.00   | 1       | 2026-04-01T00:00:00Z | 2026-04-01T00:00:00Z |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 50.00   | 1       | 2026-04-01T00:00:00Z | 2026-04-01T00:00:00Z |
+    And a single rental exists in the database with the following data
+      | id | customerId | status | estimatedCost | plannedDuration | startedAt           | createdAt           | updatedAt           |
+      | 22 | CUS1       | ACTIVE | 50.00         | 90              | 2026-04-01T08:00:00 | 2026-04-01T08:00:00 | 2026-04-01T08:00:00 |
+    And rental equipments exist in the database with the following data
+      | rentalId | equipmentId | equipmentUid | tariffId | status | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
+      | 22       | 1           | BIKE-001     | 1        | ACTIVE | 2026-04-01T08:00:00 | 2026-04-01T10:00:00 | 50.00         | 2026-04-01T08:00:00 | 2026-04-01T08:00:00 |
+    And the return equipment request is
+      | rentalId | equipmentIds | operatorId |
+      | 22       | 1            | OP1        |
+    When a POST request has been made to "/api/rentals/return" endpoint
+    Then the response status is 200
+    And the rental return response contains
+      | settlementRecorded |
+      | true               |
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 0.00    |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 0.00    |
+      | L_S_REV | ACC_S    | REVENUE         | 80.00   |
+    And the following transactions were persisted in db
+      | customerId | amount | paymentMethod     | operatorId | type    | recordedAt          |
+      | CUS1       | 50.00  | INTERNAL_TRANSFER | OP1        | CAPTURE | 2026-04-01T10:00:00 |
+      | CUS1       | 30.00  | INTERNAL_TRANSFER | OP1        | CAPTURE | 2026-04-01T10:00:00 |
+    And the following transaction records were persisted in db
+      | ledgerType      | direction | amount |
+      | CUSTOMER_HOLD   | DEBIT     | 50.00  |
+      | REVENUE         | CREDIT    | 50.00  |
+      | CUSTOMER_WALLET | DEBIT     | 30.00  |
+      | REVENUE         | CREDIT    | 30.00  |
+    And there are only 4 transaction records in db
 ```
 
 > **Notes on setup data:**
@@ -152,9 +190,3 @@ each scenario.
 > existing `InsertableTransactionRepository` and `InsertableTransactionRecordRepository` beans — following
 > the same pattern as `@Given("the following payment record(s) exist(s) in db")` in the payment steps.
 
-## 4. Validation Steps
-
-```bash
-./gradlew :component-test:compileTestJava
-./gradlew :component-test:test "-Dspring.profiles.active=test"
-```

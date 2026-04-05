@@ -104,8 +104,7 @@ No new tables, columns, or indexes are required.
       `releaseTransactionRef` is `null` when `finalCost == heldAmount` (exact match, no release entry created).
     * **Failure — final cost exceeds hold:** throws `OverBudgetSettlementException` — caller defers to
       FR-FIN-08 flow.
-    * **Failure — hold not found:** throws `InsufficientHoldException` — treated as a fatal configuration error
-      by the Rental module.
+
 
 * **Interaction: `SettleRentalService` → `TransactionRepository`**
     * **Protocol:** In-process synchronous (same `@Transactional` context)
@@ -201,3 +200,52 @@ or transaction records are created. FR-FIN-08 catch block in `ReturnEquipmentSer
   coverage is provided by unit tests for `SettleRentalService` (covering both the capture-only scenario and
   the capture + release scenario) and a Cucumber scenario verifying end-to-end settlement via the Rental
   return endpoint.
+
+---
+
+## 7. Exception Handling — Rental Module
+
+This section defines how exceptions thrown by the `FinanceFacade` (or downstream finance services) are handled
+inside the Rental module. The goal is consistent error mapping, safe propagation for cross-feature flows
+(FR-FIN-08), and useful diagnostics for operators and tests.
+
+- **Exception Types from Finance module**
+    - `OverBudgetSettlementException` — thrown when `finalCost > heldAmount`. Semantically a business-level
+      rejection that requires Rental flow branching (handled by FR-FIN-08). It is an unchecked `BikeRentalException`
+      carrying an error code (`ErrorCodes.OVER_BUDGET_SETTLEMENT`) and a typed `Details` payload (final cost,
+      held amount).
+
+- **Service layer (`ReturnEquipmentService`) behaviour**
+    - For FR-FIN-07 the service must *not* swallow `OverBudgetSettlementException`. It should allow the exception
+      to propagate (so FR-FIN-08 can implement the alternate flow). A concise log line MUST be emitted before
+      propagation with `correlationId` from MDC and contextual identifiers (`rentalRef`, `customerRef`).
+    - Do not perform automated retries at the service level for these exceptions.
+
+- **Web/controller layer behaviour**
+    - Module-scoped `@RestControllerAdvice` (existing pattern) will convert `BikeRentalException` derivatives into
+      `ProblemDetail` responses. The handler must include two extra properties on every response:
+        - `correlationId` — taken from the MDC (fallback to a freshly generated UUID).
+        - `errorCode` — the string constant provided by the exception (e.g. `ErrorCodes.OVER_BUDGET_SETTLEMENT`).
+    - For `OverBudgetSettlementException` include the exception `Details` object serialized in the response body
+      under `errors` (or a `details` property) so callers and automated tests can assert on `finalCost` vs
+      `heldAmount` values.
+
+- **Cross-module signalling and tests**
+    - Unit and component tests should assert on the returned `ProblemDetail.errorCode` rather than raw exception
+      messages. Cucumber steps (component tests) should provide expected `errorCode` values when asserting failure
+      scenarios.
+    - Integration tests that exercise settlement idempotency should ensure that repeated `settleRental` calls either
+      return an existing `SettlementInfo` or raise no mutations; they must not be interpreted as `OverBudget` unless
+      the input `finalCost` genuinely exceeds the held amount.
+
+- **Operational concerns**
+    - Emit metrics for settlement failures: counters `finance.settlement.over_budget` and
+      `finance.settlement.insufficient_hold` with `rentalRef` and `customerRef` as labels (or as appropriate to your
+      metrics cardinality policy).
+    - Log at `WARN` for `OverBudgetSettlementException` including
+      `correlationId` so traces can be correlated across services and test runs.
+
+This section documents the runtime contract between Rental and Finance when exceptions occur. Implementation of
+the FR-FIN-08 over-budget flow will add a catch branch inside `ReturnEquipmentService` to handle
+`OverBudgetSettlementException` and transition into that feature's behaviour; until then the exceptions are left
+to propagate and be handled by the global error mapping described above.

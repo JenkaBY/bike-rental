@@ -64,7 +64,7 @@ the closing brace.
     public SettlementInfo settleRental(CustomerRef customerRef, RentalRef rentalRef, Money finalCost, String operatorId) {
         var command = new SettleRentalUseCase.SettleRentalCommand(customerRef, rentalRef, finalCost, operatorId);
         var result = settleRentalUseCase.execute(command);
-        return new SettlementInfo(result.captureTransactionRef(), result.releaseTransactionRef(), result.recordedAt());
+        return new SettlementInfo(result.captureTransactionRefs(), result.releaseTransactionRef(), result.recordedAt());
     }
 ```
 

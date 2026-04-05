@@ -7,9 +7,12 @@
 ## 1. Objective
 
 Add a new lookup method to the `TransactionRepository` domain port, the Spring Data JPA
-`TransactionJpaRepository`, and the `TransactionRepositoryAdapter`. This method is used by `SettleRentalService`
-both for idempotency checks (look up an existing `CAPTURE` or `RELEASE`) and to retrieve the original `HOLD`
-transaction to read `heldAmount`.
+`TransactionJpaRepository`, and the `TransactionRepositoryAdapter`. Two methods are needed:
+
+- `findByRentalRefAndType` — used by `SettleRentalService` for idempotency checks (look up an existing
+  `RELEASE`) and single-result lookups.
+- `findAllByRentalRefAndType` — used for idempotency check on `CAPTURE` (multiple captures possible in
+  the hold-insufficient path).
 
 ## 2. File to Modify / Create
 
@@ -61,6 +64,8 @@ import com.github.jenkaby.bikerental.shared.domain.RentalRef;
     Optional<Transaction> findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, CustomerRef customerId);
 
     Optional<Transaction> findByRentalRefAndType(RentalRef rentalRef, TransactionType type);
+
+    List<Transaction> findAllByRentalRefAndType(RentalRef rentalRef, TransactionType type);
 }
 ```
 
@@ -91,6 +96,9 @@ import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 
     Optional<TransactionJpaEntity> findBySourceTypeAndSourceIdAndTransactionType(
             TransactionSourceType sourceType, String sourceId, TransactionType transactionType);
+
+    List<TransactionJpaEntity> findAllBySourceTypeAndSourceIdAndTransactionType(
+            TransactionSourceType sourceType, String sourceId, TransactionType transactionType);
 }
 ```
 
@@ -105,9 +113,11 @@ import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
+import java.util.List;
 ```
 
-**Location:** Add `findByRentalRefAndType` after the existing `findByIdempotencyKeyAndCustomerId` method.
+**Location:** Add `findByRentalRefAndType` and `findAllByRentalRefAndType` after the existing
+`findByIdempotencyKeyAndCustomerId` method.
 
 * **Old code:**
 
@@ -136,6 +146,17 @@ import com.github.jenkaby.bikerental.shared.domain.RentalRef;
                         String.valueOf(rentalRef.id()),
                         type)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Transaction> findAllByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
+        return jpaRepository.findAllBySourceTypeAndSourceIdAndTransactionType(
+                        TransactionSourceType.RENTAL,
+                        String.valueOf(rentalRef.id()),
+                        type)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }
 ```
