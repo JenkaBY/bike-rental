@@ -47,7 +47,9 @@ public class RentalResponseTransformer {
 
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
         var finalCost = DataTableHelper.toBigDecimal(entry, "totalCost");
-
+        if (DataTableHelper.toBigDecimal(entry, "finalCost") != null) {
+            throw new IllegalArgumentException("finalCost must NOT be provided. It must be total cost for RentalResponse");
+        }
         return new RentalResponse(
                 id,
                 customerId,

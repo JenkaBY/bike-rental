@@ -1,8 +1,9 @@
 package com.github.jenkaby.bikerental.componenttest.steps.finance;
 
+import com.github.jenkaby.bikerental.componenttest.config.db.repository.InsertableTransactionRecordRepository;
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.TransactionRecordJpaRepository;
-// ...existing code...
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.TransactionRecordJpaEntity;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +15,14 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// ...existing code...
+
 @Slf4j
 @RequiredArgsConstructor
 public class TransactionRecordDbSteps {
 
     private final TransactionRecordJpaRepository transactionRepository;
+    private final InsertableTransactionRecordRepository insertable;
 
 
     @Then("there are/is only {int} transaction records in db")
@@ -90,5 +94,11 @@ public class TransactionRecordDbSteps {
         }
         return Objects.equals(actual.getLedgerType(), exp.getLedgerType())
                 && Objects.equals(actual.getSubLedgerRef(), exp.getSubLedgerRef());
+    }
+
+    @Given("the following transaction record entries exist in db")
+    public void theFollowingTransactionRecordEntriesExistInDb(List<TransactionRecordJpaEntity> entities) {
+        log.debug("Inserting transaction record entries: {}", entities);
+        insertable.insertAll(entities);
     }
 }

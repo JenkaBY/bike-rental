@@ -13,8 +13,10 @@ public class RentalReturnCostBreakdownTransformer {
         var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
         var baseCost = DataTableHelper.toBigDecimal(entry, "baseCost");
         var overtimeCost = DataTableHelper.toBigDecimal(entry, "overtimeCost");
-        var totalCost = DataTableHelper.toBigDecimal(entry, "totalCost");
-
+        var totalCost = DataTableHelper.toBigDecimal(entry, "finalCost");
+        if (DataTableHelper.toBigDecimal(entry, "totalCost") != null) {
+            throw new IllegalArgumentException("totalCost must NOT be provided. It must be finalCost for CostBreakdown");
+        }
         var actualMinutes = Optional.ofNullable(DataTableHelper.toInt(entry, "actualMinutes")).orElse(0);
         var billableMinutes = Optional.ofNullable(DataTableHelper.toInt(entry, "billableMinutes")).orElse(0);
         var plannedMinutes = Optional.ofNullable(DataTableHelper.toInt(entry, "plannedMinutes")).orElse(0);

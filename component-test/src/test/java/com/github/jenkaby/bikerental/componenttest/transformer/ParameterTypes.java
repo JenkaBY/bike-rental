@@ -32,4 +32,13 @@ public class ParameterTypes {
     public DictionaryType dictionaryType(String type) {
         return DictionaryType.of(type);
     }
+
+    @ParameterType("does|does not|do|do not")
+    public boolean booleanDo(String type) {
+        return switch (type) {
+            case "does", "do" -> true;
+            case "does not", "do not" -> false;
+            default -> throw new IllegalArgumentException("Unsupported type: " + type);
+        };
+    }
 }

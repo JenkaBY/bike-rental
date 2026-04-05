@@ -1,7 +1,9 @@
 package com.github.jenkaby.bikerental.componenttest.steps.finance;
 
+import com.github.jenkaby.bikerental.componenttest.config.db.repository.InsertableTransactionRepository;
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.WrapperTransactionJpaRepository;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.TransactionJpaEntity;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class TransactionDbSteps {
             .thenComparing(e -> e.getTransactionType() != null ? e.getTransactionType().name() : "");
 
     private final WrapperTransactionJpaRepository transactionJpaRepository;
+    private final InsertableTransactionRepository insertable;
 
     @Then("there are/is only {int} transactions in db")
     public void thereAreOnlyNumberOfTransactionRecordsInDb(int expected) {
@@ -93,5 +96,11 @@ public class TransactionDbSteps {
                     && Objects.equals(actual.getTransactionType(), exp.getTransactionType());
         }
         return Objects.equals(actual.getTransactionType(), exp.getTransactionType());
+    }
+
+    @Given("the following transaction records exist in db")
+    public void theFollowingTransactionRecordsExistInDb(List<TransactionJpaEntity> entities) {
+        log.debug("Inserting transactions: {}", entities);
+        insertable.insertAll(entities);
     }
 }
