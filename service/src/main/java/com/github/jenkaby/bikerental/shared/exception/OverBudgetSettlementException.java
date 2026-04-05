@@ -1,7 +1,6 @@
-package com.github.jenkaby.bikerental.finance.domain.exception;
+package com.github.jenkaby.bikerental.shared.exception;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
-import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
 import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 import lombok.Getter;
 
@@ -10,13 +9,13 @@ public class OverBudgetSettlementException extends BikeRentalException {
 
     public static final String ERROR_CODE = ErrorCodes.OVER_BUDGET_SETTLEMENT;
 
-    private static final String MESSAGE_TEMPLATE = "Settlement rejected: final cost %s exceeds held amount %s";
+    private static final String MESSAGE_TEMPLATE = "Settlement rejected: final cost %s exceeds available balance %s";
 
-    public OverBudgetSettlementException(Money finalCost, Money heldAmount) {
+    public OverBudgetSettlementException(Money finalCost, Money availableAmount) {
         super(
-                MESSAGE_TEMPLATE.formatted(finalCost, heldAmount),
+                MESSAGE_TEMPLATE.formatted(finalCost, availableAmount),
                 ERROR_CODE,
-                new Details(finalCost, heldAmount)
+                new Details(finalCost, availableAmount)
         );
     }
 
@@ -25,6 +24,6 @@ public class OverBudgetSettlementException extends BikeRentalException {
                 .orElseThrow(() -> new IllegalArgumentException("Expected Details in exception parameters"));
     }
 
-    public record Details(Money finalCost, Money heldAmount) {
+    public record Details(Money finalCost, Money availableAmount) {
     }
 }

@@ -6,6 +6,7 @@ import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository {
@@ -15,4 +16,6 @@ public interface TransactionRepository {
     Optional<Transaction> findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, CustomerRef customerId);
 
     Optional<Transaction> findByRentalRefAndType(RentalRef rentalRef, TransactionType type);
+
+    List<Transaction> findAllByRentalRefAndType(RentalRef rentalRef, TransactionType type);
 }

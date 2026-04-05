@@ -2,14 +2,13 @@ package com.github.jenkaby.bikerental.finance.application.service;
 
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.SettleRentalUseCase;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientHoldException;
-import com.github.jenkaby.bikerental.finance.domain.exception.OverBudgetSettlementException;
 import com.github.jenkaby.bikerental.finance.domain.model.*;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.TransactionRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.exception.OverBudgetSettlementException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,67 +32,121 @@ public class SettleRentalService implements SettleRentalUseCase {
     private final Clock clock;
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = {OverBudgetSettlementException.class})
     public SettlementResult execute(SettleRentalCommand command) {
-        var existingCapture = transactionRepository.findByRentalRefAndType(command.rentalRef(), TransactionType.CAPTURE);
-        if (existingCapture.isPresent()) {
-            var capture = existingCapture.get();
+        var existingCaptures = transactionRepository.findAllByRentalRefAndType(command.rentalRef(), TransactionType.CAPTURE);
+        if (!existingCaptures.isEmpty()) {
+            var captureRefs = existingCaptures.stream().map(t -> new TransactionRef(t.getId())).toList();
             var releaseRef = transactionRepository
                     .findByRentalRefAndType(command.rentalRef(), TransactionType.RELEASE)
                     .map(t -> new TransactionRef(t.getId()))
                     .orElse(null);
-            return new SettlementResult(new TransactionRef(capture.getId()), releaseRef, capture.getRecordedAt());
-        }
-
-        var holdTransaction = transactionRepository
-                .findByRentalRefAndType(command.rentalRef(), TransactionType.HOLD)
-                .orElseThrow(() -> new InsufficientHoldException(command.rentalRef().id()));
-
-        var heldAmount = holdTransaction.getAmount();
-        if (command.finalCost().isMoreThan(heldAmount)) {
-            throw new OverBudgetSettlementException(command.finalCost(), heldAmount);
+            return new SettlementResult(captureRefs, releaseRef, existingCaptures.getFirst().getRecordedAt());
         }
 
         var customerAccount = accountRepository.findByCustomerId(command.customerRef())
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerRef().id().toString()));
         var systemAccount = accountRepository.getSystemAccount();
 
-        var captureHoldDebit = customerAccount.getOnHold().debit(command.finalCost());
-        var captureRevenueCredit = systemAccount.getRevenue().credit(command.finalCost());
-
-
-        accountRepository.save(customerAccount);
-        accountRepository.save(systemAccount);
-
+        var holdBalance = customerAccount.getOnHold().getBalance();
         Instant now = clock.instant();
-        UUID captureId = uuidGenerator.generate();
+        var finalCost = command.finalCost();
 
-        var captureTransaction = Transaction.builder()
-                .id(captureId)
+        String sourceId = String.valueOf(command.rentalRef().id());
+        if (!finalCost.isMoreThan(holdBalance)) {
+            var captureHoldDebit = customerAccount.getOnHold().debit(finalCost);
+            var captureRevenueCredit = systemAccount.getRevenue().credit(finalCost);
+
+            UUID captureId = uuidGenerator.generate();
+            var captureTransaction = Transaction.builder()
+                    .id(captureId)
+                    .type(TransactionType.CAPTURE)
+                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
+                    .amount(finalCost)
+                    .customerId(command.customerRef().id())
+                    .operatorId(command.operatorId())
+                    .sourceType(TransactionSourceType.RENTAL)
+                    .sourceId(sourceId)
+                    .recordedAt(now)
+                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))
+                    .reason(null)
+                    .records(List.of(
+                            captureHoldDebit.toTransaction(uuidGenerator.generate()),
+                            captureRevenueCredit.toTransaction(uuidGenerator.generate())
+                    ))
+                    .build();
+            transactionRepository.save(captureTransaction);
+
+            var excess = customerAccount.getOnHold().getBalance();
+            var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, now)
+                    .map(t -> new TransactionRef(t.getId()))
+                    .orElse(null);
+
+            accountRepository.save(customerAccount);
+            accountRepository.save(systemAccount);
+
+            return new SettlementResult(List.of(new TransactionRef(captureId)), releaseTransactionRef, now);
+        }
+
+        var shortfall = finalCost.subtract(holdBalance);
+        if (customerAccount.getWallet().getBalance().isLessThan(shortfall)) {
+            throw new OverBudgetSettlementException(finalCost,
+                    holdBalance.add(customerAccount.getWallet().getBalance()));
+        }
+
+        var holdDebit = customerAccount.getOnHold().debit(holdBalance);
+        var holdRevenueCredit = systemAccount.getRevenue().credit(holdBalance);
+
+        var captureRefs = new ArrayList<TransactionRef>();
+
+        UUID holdCaptureId = uuidGenerator.generate();
+        transactionRepository.save(Transaction.builder()
+                .id(holdCaptureId)
                 .type(TransactionType.CAPTURE)
                 .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
-                .amount(command.finalCost())
+                .amount(holdBalance)
                 .customerId(command.customerRef().id())
                 .operatorId(command.operatorId())
                 .sourceType(TransactionSourceType.RENTAL)
-                .sourceId(String.valueOf(command.rentalRef().id()))
+                .sourceId(sourceId)
                 .recordedAt(now)
                 .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))
                 .reason(null)
                 .records(List.of(
-                        captureHoldDebit.toTransaction(uuidGenerator.generate()),
-                        captureRevenueCredit.toTransaction(uuidGenerator.generate())
+                        holdDebit.toTransaction(uuidGenerator.generate()),
+                        holdRevenueCredit.toTransaction(uuidGenerator.generate())
                 ))
-                .build();
+                .build());
+        captureRefs.add(new TransactionRef(holdCaptureId));
 
-        transactionRepository.save(captureTransaction);
+        if (shortfall.isPositive()) {
+            var walletDebit = customerAccount.getWallet().debit(shortfall);
+            var walletRevenueCredit = systemAccount.getRevenue().credit(shortfall);
+            UUID walletCaptureId = uuidGenerator.generate();
+            transactionRepository.save(Transaction.builder()
+                    .id(walletCaptureId)
+                    .type(TransactionType.CAPTURE)
+                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
+                    .amount(shortfall)
+                    .customerId(command.customerRef().id())
+                    .operatorId(command.operatorId())
+                    .sourceType(TransactionSourceType.RENTAL)
+                    .sourceId(sourceId)
+                    .recordedAt(now)
+                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))
+                    .reason(null)
+                    .records(List.of(
+                            walletDebit.toTransaction(uuidGenerator.generate()),
+                            walletRevenueCredit.toTransaction(uuidGenerator.generate())
+                    ))
+                    .build());
+            captureRefs.add(new TransactionRef(walletCaptureId));
+        }
 
-        var excess = heldAmount.subtract(command.finalCost());
-        var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, now)
-                .map(t -> new TransactionRef(t.getId()))
-                .orElse(null);
+        accountRepository.save(customerAccount);
+        accountRepository.save(systemAccount);
 
-        return new SettlementResult(new TransactionRef(captureId), releaseTransactionRef, now);
+        return new SettlementResult(captureRefs, null, now);
     }
 
     private Optional<Transaction> commitReleaseTransaction(CustomerAccount account, SettleRentalCommand command, Money excess, Instant now) {

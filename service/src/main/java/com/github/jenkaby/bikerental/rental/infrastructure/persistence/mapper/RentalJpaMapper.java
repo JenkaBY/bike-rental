@@ -26,7 +26,7 @@ public interface RentalJpaMapper {
     RentalJpaEntity toEntity(Rental rental);
 
     @AfterMapping
-    default void setRelationships(Rental rental, @MappingTarget RentalJpaEntity result) {
+    default void setRelationships(@MappingTarget RentalJpaEntity result) {
         if (result.getRentalEquipments() != null) {
             result.getRentalEquipments().forEach(equipment -> equipment.setRental(result));
         }

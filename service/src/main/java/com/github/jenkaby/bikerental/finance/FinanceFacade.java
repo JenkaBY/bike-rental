@@ -1,7 +1,4 @@
 package com.github.jenkaby.bikerental.finance;
-
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientHoldException;
-import com.github.jenkaby.bikerental.finance.domain.exception.OverBudgetSettlementException;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
@@ -30,5 +27,5 @@ public interface FinanceFacade {
     HoldInfo holdFunds(CustomerRef customerRef, RentalRef rentalRef, Money plannedCost);
 
     SettlementInfo settleRental(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef,
-                                @NonNull Money finalCost, @NonNull String operatorId) throws InsufficientHoldException, OverBudgetSettlementException;
+                                @NonNull Money finalCost, @NonNull String operatorId);
 }

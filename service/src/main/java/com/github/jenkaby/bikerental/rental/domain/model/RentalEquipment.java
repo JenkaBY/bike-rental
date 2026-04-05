@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class RentalEquipment {
 
+    private Long id;
     private Long equipmentId;
     private String equipmentUid;
     private RentalEquipmentStatus status;

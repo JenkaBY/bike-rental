@@ -189,8 +189,18 @@ public class Rental {
         return result;
     }
 
-    public void complete(Money finalCost) {
+    public void completeWithStatus(Money finalCost, RentalStatus status) {
         // Validate status
+        validateCompletion(finalCost);
+
+        this.finalCost = finalCost;
+        if (allEquipmentReturned()) {
+            this.status = status;
+        }
+        this.updatedAt = Instant.now();
+    }
+
+    private void validateCompletion(Money finalCost) {
         if (this.status != RentalStatus.ACTIVE) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);
         }
@@ -206,12 +216,6 @@ public class Rental {
         if (this.actualReturnAt == null || this.actualDuration == null) {
             throw new IllegalStateException("Cannot complete rental: actual return time and duration must be set before completing");
         }
-
-        this.finalCost = finalCost;
-        if (allEquipmentReturned()) {
-            this.status = RentalStatus.COMPLETED;
-        }
-        this.updatedAt = Instant.now();
     }
 
     private static boolean isEmpty(Collection<?> collection) {

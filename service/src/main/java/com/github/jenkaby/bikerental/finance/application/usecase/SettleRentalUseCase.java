@@ -7,6 +7,7 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
+import java.util.List;
 
 public interface SettleRentalUseCase {
 
@@ -16,7 +17,7 @@ public interface SettleRentalUseCase {
     }
 
     record SettlementResult(
-            TransactionRef captureTransactionRef,
+            List<TransactionRef> captureTransactionRefs,
             @Nullable TransactionRef releaseTransactionRef,
             Instant recordedAt) {
     }

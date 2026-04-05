@@ -6,6 +6,7 @@ import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.T
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,5 +16,8 @@ public interface TransactionJpaRepository extends JpaRepository<TransactionJpaEn
     Optional<TransactionJpaEntity> findByIdempotencyKeyAndCustomerId(UUID idempotencyKey, UUID customerId);
 
     Optional<TransactionJpaEntity> findBySourceTypeAndSourceIdAndTransactionType(
+            TransactionSourceType sourceType, String sourceId, TransactionType transactionType);
+
+    List<TransactionJpaEntity> findAllBySourceTypeAndSourceIdAndTransactionType(
             TransactionSourceType sourceType, String sourceId, TransactionType transactionType);
 }

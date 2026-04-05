@@ -1,4 +1,6 @@
 - [] Integrate Tariff v2 into rental system
 - [] Integrate hold funds (FinanceFacade) into rental module
+- [] Remove Tariff v1
+- [] Remove Finance Facade v1
 - [] Close rental debt. Possible solution is to fire events customer debit wallet and handle it in the rental module
 - [] Remove 'expectedReturnAt', 'actualReturnedAt' (RentalReturnResponse, other places). Use startedAt + durationMinutes 
