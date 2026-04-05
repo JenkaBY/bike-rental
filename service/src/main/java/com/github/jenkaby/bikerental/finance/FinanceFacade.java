@@ -1,8 +1,8 @@
 package com.github.jenkaby.bikerental.finance;
-
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +25,7 @@ public interface FinanceFacade {
     List<PaymentInfo> getPayments(Long rentalId);
 
     HoldInfo holdFunds(CustomerRef customerRef, RentalRef rentalRef, Money plannedCost);
+
+    SettlementInfo settleRental(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef,
+                                @NonNull Money finalCost, @NonNull String operatorId);
 }

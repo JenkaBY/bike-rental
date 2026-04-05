@@ -21,7 +21,7 @@ public class EquipmentItemResponseTransformer {
         var status = DataTableHelper.getStringOrNull(entry, "status");
 
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
-        var finalCost = DataTableHelper.toBigDecimal(entry, "totalCost");
+        var finalCost = DataTableHelper.toBigDecimal(entry, "finalCost");
 
         return new EquipmentItemResponseTransformerHolder(
                 rentalId, new EquipmentItemResponse(

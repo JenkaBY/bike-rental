@@ -1,7 +1,6 @@
 package com.github.jenkaby.bikerental.componenttest.steps.rental;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.componenttest.model.RentalReturnExpectation;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalReturnResponse;
 import com.github.jenkaby.bikerental.rental.web.command.dto.ReturnEquipmentRequest;
 import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
@@ -10,6 +9,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Condition;
 import org.assertj.core.api.SoftAssertions;
 import org.springframework.http.ResponseEntity;
 import tools.jackson.databind.ObjectMapper;
@@ -19,12 +19,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 
 @Slf4j
 @RequiredArgsConstructor
 public class RentalReturnWebSteps {
 
+    public static final Comparator<RentalReturnResponse.CostBreakdown> DEFAULT_COMPARING_COST_BREAKDOWN = Comparator.comparing(RentalReturnResponse.CostBreakdown::equipmentId);
     private final ScenarioContext scenarioContext;
     private final RentalWebSteps rentalWebSteps;
     private final ObjectMapper objectMapper;
@@ -61,7 +62,6 @@ public class RentalReturnWebSteps {
         scenarioContext.setResponse(temp);
     }
 
-
     @Then("the rental return response contains rental equipments")
     public void theRentalReturnResponseContains(List<EquipmentItemResponse> expected) {
         var actual = scenarioContext.getResponseBody(RentalReturnResponse.class);
@@ -75,40 +75,15 @@ public class RentalReturnWebSteps {
         scenarioContext.setResponse(temp);
     }
 
-    @Then("the rental return response contains")
-    public void theRentalReturnResponseContains(RentalReturnExpectation expected) {
+    @Then("the rental return response {booleanDo} contain settlement info")
+    public void theRentalReturnResponseContainsSettleInfo(Boolean shouldContain) {
         var actual = scenarioContext.getResponseBody(RentalReturnResponse.class);
         log.info("Validating rental return response: {}", actual);
-        assertSoftly(softly -> {
-            if (expected.additionalPayment() != null) {
-                softly.assertThat(actual.additionalPayment())
-                        .as("Additional payment")
-                        .isEqualByComparingTo(expected.additionalPayment());
-            }
+        assertThat(actual.settlement()).is(new Condition<>(
+                settlement -> shouldContain == (settlement != null),
+                shouldContain ? "contains settlement info" : "does not contain settlement info"
+        ));
 
-            softly.assertThat(actual.costs()).isNotEmpty();
-
-            if (expected.paymentAmount() != null) {
-                softly.assertThat(actual.paymentInfo().amount())
-                        .as("Payment amount")
-                        .isEqualByComparingTo(expected.paymentAmount());
-            }
-            if (expected.paymentMethod() != null) {
-                softly.assertThat(actual.paymentInfo().paymentMethod())
-                        .as("Payment method")
-                        .isEqualTo(expected.paymentMethod());
-            }
-            if (expected.receiptNumber() != null) {
-                softly.assertThat(actual.paymentInfo().receiptNumber())
-                        .as("Receipt number")
-                        .isEqualTo(expected.receiptNumber());
-            }
-
-        });
-
-        if (actual.rental() != null && actual.rental().id() != null) {
-            scenarioContext.setRequestedObjectId(actual.rental().id().toString());
-        }
     }
 
     @Then("the rental return response contains the following break down costs")
@@ -121,8 +96,8 @@ public class RentalReturnWebSteps {
                 .as("Cost breakdown list size")
                 .hasSize(expected.size());
 
-        actualCosts.sort(Comparator.comparing(RentalReturnResponse.CostBreakdown::equipmentId));
-        expected.sort(Comparator.comparing(RentalReturnResponse.CostBreakdown::equipmentId));
+        actualCosts.sort(DEFAULT_COMPARING_COST_BREAKDOWN);
+        expected.sort(DEFAULT_COMPARING_COST_BREAKDOWN);
 
         assertThat(actualCosts).zipSatisfy(expected, this::assertCostBreakdown);
     }
@@ -160,6 +135,15 @@ public class RentalReturnWebSteps {
         softly.assertThat(actual.forgivenessApplied())
                 .as("Forgiveness applied")
                 .isEqualTo(expected.forgivenessApplied());
+        if (expected.calculationMessage() != null) {
+            softly.assertThat(actual.forgivenessApplied())
+                    .as("Forgiveness applied")
+                    .isEqualTo(expected.forgivenessApplied());
+        } else {
+            softly.assertThat(actual.calculationMessage())
+                    .as("Calculation message")
+                    .isNotBlank();
+        }
 
         softly.assertAll();
     }

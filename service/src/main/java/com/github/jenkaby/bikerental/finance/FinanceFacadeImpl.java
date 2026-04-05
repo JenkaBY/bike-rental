@@ -4,11 +4,13 @@ import com.github.jenkaby.bikerental.finance.application.mapper.PaymentToInfoMap
 import com.github.jenkaby.bikerental.finance.application.usecase.GetPaymentsByRentalIdUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordPaymentUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
+import com.github.jenkaby.bikerental.finance.application.usecase.SettleRentalUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.Payment;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,16 +26,19 @@ class FinanceFacadeImpl implements FinanceFacade {
     private final GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase;
     private final PaymentToInfoMapper paymentToInfoMapper;
     private final RentalHoldUseCase rentalHoldUseCase;
+    private final SettleRentalUseCase settleRentalUseCase;
 
     FinanceFacadeImpl(
             RecordPaymentUseCase recordPaymentUseCase,
             GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase,
             PaymentToInfoMapper paymentToInfoMapper,
-            RentalHoldUseCase rentalHoldUseCase) {
+            RentalHoldUseCase rentalHoldUseCase,
+            SettleRentalUseCase settleRentalUseCase) {
         this.recordPaymentUseCase = recordPaymentUseCase;
         this.getPaymentsByRentalIdUseCase = getPaymentsByRentalIdUseCase;
         this.paymentToInfoMapper = paymentToInfoMapper;
         this.rentalHoldUseCase = rentalHoldUseCase;
+        this.settleRentalUseCase = settleRentalUseCase;
     }
 
     @Override
@@ -88,5 +93,13 @@ class FinanceFacadeImpl implements FinanceFacade {
         var command = new RentalHoldUseCase.RentalHoldCommand(customerRef, rentalRef, plannedCost);
         var result = rentalHoldUseCase.execute(command);
         return new HoldInfo(result.transactionRef(), result.recordedAt());
+    }
+
+    @Override
+    public SettlementInfo settleRental(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef,
+                                       @NonNull Money finalCost, @NonNull String operatorId) {
+        var command = new SettleRentalUseCase.SettleRentalCommand(customerRef, rentalRef, finalCost, operatorId);
+        var result = settleRentalUseCase.execute(command);
+        return new SettlementInfo(result.captureTransactionRefs(), result.releaseTransactionRef(), result.recordedAt());
     }
 }

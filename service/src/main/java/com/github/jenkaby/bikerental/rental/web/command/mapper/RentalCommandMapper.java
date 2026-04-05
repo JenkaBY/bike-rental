@@ -14,7 +14,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +22,12 @@ public abstract class RentalCommandMapper {
 
     protected RentalQueryMapper rentalQueryMapper;
     protected PaymentInfoMapper paymentInfoMapper;
+    protected SettlementMapper settlementMapper;
+
+    @Autowired
+    public void setSettlementMapper(SettlementMapper settlementMapper) {
+        this.settlementMapper = settlementMapper;
+    }
 
     @Autowired
     public void setPaymentInfoMapper(PaymentInfoMapper paymentInfoMapper) {
@@ -53,8 +58,8 @@ public abstract class RentalCommandMapper {
         var costsBreakdown = result.breakDownCosts().entrySet().stream()
                 .map(entry -> toCostBreakdown(entry.getKey(), entry.getValue()))
                 .toList();
-        BigDecimal additionalPayment = result.additionalPayment() != null ? result.additionalPayment().amount() : null;
-        return new RentalReturnResponse(rentalResponse, costsBreakdown, additionalPayment, paymentInfoMapper.toResponse(result.paymentInfo()));
+        var settlementResponse = settlementMapper.toResponse(result.settlementInfo());
+        return new RentalReturnResponse(rentalResponse, costsBreakdown, settlementResponse);
     }
 
     RentalReturnResponse.CostBreakdown toCostBreakdown(Long equipmentId, RentalCost cost) {

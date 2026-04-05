@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.rental.application.service;
 
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
-import com.github.jenkaby.bikerental.finance.PaymentInfo;
+import com.github.jenkaby.bikerental.finance.SettlementInfo;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentResult;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
@@ -12,8 +12,11 @@ import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipmentStatus;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalCompleted;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.exception.OverBudgetSettlementException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
 import com.github.jenkaby.bikerental.tariff.RentalCost;
@@ -26,9 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -63,8 +64,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
 
     @Override
     @Transactional
-    @NonNull
-    public ReturnEquipmentResult execute(@NonNull ReturnEquipmentCommand command) {
+    public @NonNull ReturnEquipmentResult execute(@NonNull ReturnEquipmentCommand command) {
         log.info("Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}",
                 command.rentalId(), command.equipmentIds(), command.equipmentUids());
 
@@ -73,8 +73,10 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
         if (!rental.hasActiveStatus()) {
             throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);
         }
+
         var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);
         var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);
+
         Money totalCost = Money.zero();
         Map<Long, RentalCost> rentalCostMapToEquipment = new HashMap<>();
         for (var equipment : equipmentsToReturn) {
@@ -88,56 +90,42 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
             rentalCostMapToEquipment.put(equipment.getEquipmentId(), cost);
             totalCost = totalCost.add(cost.totalCost());
         }
-// 1. Sum final costs of equipment returned in PREVIOUS partial returns
+
+        if (!rental.allEquipmentReturned()) {
+            Rental saved = rentalRepository.save(rental);
+            log.info("Partial return recorded for rental {}", saved.getId());
+            RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalCost);
+            eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);
+            return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, null);
+        }
+
+        // TODO Move to rental class
         Money previouslyReturnedCost = rental.getEquipments().stream()
                 .filter(e -> e.getStatus() == RentalEquipmentStatus.RETURNED)
                 .filter(e -> !equipmentsToReturn.contains(e))
                 .map(RentalEquipment::getFinalCost)
                 .reduce(Money.zero(), Money::add);
 
-// 2. Estimated cost of equipment STILL ACTIVE after this return
-        Money remainingEstimatedCost = rental.getEquipments().stream()
-                .filter(e -> e.getStatus() != RentalEquipmentStatus.RETURNED)
-                .map(RentalEquipment::getEstimatedCost)
-                .reduce(Money.zero(), Money::add);
-
-
-        List<PaymentInfo> paymentsMade = financeFacade.getPayments(rental.getId());
-        Money paymentsTotalAmount = paymentsMade.stream()
-                .map(PaymentInfo::amount)
-                .reduce(Money.zero(), Money::add);
-
-// 3. Correct balance:
-// toPay = previouslyReturned + currentReturned + remainingEstimated - allPayments
-        Money toPay = previouslyReturnedCost
-                .add(totalCost)
-                .add(remainingEstimatedCost)
-                .subtract(paymentsTotalAmount);
-//        Money toPay = totalCost.subtract(paymentsTotalAmount);
-
-        PaymentInfo paymentInfo = null;
-        if (toPay.isPositive()) {
-            if (command.paymentMethod() == null) {
-                throw new IllegalArgumentException("Payment method is required when additional payment is needed");
-            }
-            paymentInfo = financeFacade.recordAdditionalPayment(
-                    rental.getId(),
-                    toPay,
-                    command.paymentMethod(),
+        var totalFinalCost = previouslyReturnedCost.add(totalCost);
+        SettlementInfo settlementInfo = null;
+        try {
+            settlementInfo = financeFacade.settleRental(
+                    CustomerRef.of(rental.getCustomerId()),
+                    RentalRef.of(rental.getId()),
+                    totalFinalCost,
                     command.operatorId()
             );
-            log.info("Recorded additional payment {} for rental {}", toPay, rental.getId());
+            rental.completeWithStatus(totalFinalCost, RentalStatus.COMPLETED);
+        } catch (OverBudgetSettlementException obe) {
+            rental.completeWithStatus(totalFinalCost, RentalStatus.DEBT);
         }
-
-        rental.complete(paymentsTotalAmount.add(Optional.ofNullable(paymentInfo).map(PaymentInfo::amount).orElse(Money.zero())));
 
         Rental saved = rentalRepository.save(rental);
 
-        RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalCost);
+        RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalFinalCost);
         eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);
-        log.info("Published RentalCompleted event for rental {}", saved.getId());
 
-        return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, toPay, paymentInfo);
+        return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, settlementInfo);
     }
 
     private Rental findRental(ReturnEquipmentCommand command) {

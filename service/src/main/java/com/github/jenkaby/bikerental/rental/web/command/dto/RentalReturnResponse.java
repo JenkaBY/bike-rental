@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.rental.web.command.dto;
 
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -10,8 +11,7 @@ import java.util.List;
 public record RentalReturnResponse(
         @Schema(description = "Updated rental details") RentalResponse rental,
         @Schema(description = "Cost breakdown for the rental") List<CostBreakdown> costs,
-        @Schema(description = "Additional payment charged at return (0 if prepayment covered all)", example = "50.00") BigDecimal additionalPayment,
-        @Schema(description = "Payment info for the additional charge") PaymentInfoResponse paymentInfo
+        @Schema(description = "Transactions of related to rental return") @Nullable SettlementResponse settlement
 ) {
     @Schema(description = "Detailed cost breakdown")
     public record CostBreakdown(
