@@ -2,16 +2,16 @@
 
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Schema(description = &quot;Result of equipment return operation&quot;)
-<span class="fc" id="L10">public record RentalReturnResponse(</span>
+<span class="fc" id="L11">public record RentalReturnResponse(</span>
         @Schema(description = &quot;Updated rental details&quot;) RentalResponse rental,
         @Schema(description = &quot;Cost breakdown for the rental&quot;) List&lt;CostBreakdown&gt; costs,
-        @Schema(description = &quot;Additional payment charged at return (0 if prepayment covered all)&quot;, example = &quot;50.00&quot;) BigDecimal additionalPayment,
-        @Schema(description = &quot;Payment info for the additional charge&quot;) PaymentInfoResponse paymentInfo
+        @Schema(description = &quot;Transactions of related to rental return&quot;) @Nullable SettlementResponse settlement
 ) {
     @Schema(description = &quot;Detailed cost breakdown&quot;)
 <span class="fc" id="L17">    public record CostBreakdown(</span>

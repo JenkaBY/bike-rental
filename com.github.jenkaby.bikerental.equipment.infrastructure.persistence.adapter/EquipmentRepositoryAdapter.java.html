@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@Transactional(readOnly = true)
 class EquipmentRepositoryAdapter implements EquipmentRepository {
 
     private final EquipmentJpaRepository jpaRepository;
@@ -28,13 +27,14 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
 
     EquipmentRepositoryAdapter(
             EquipmentJpaRepository jpaRepository,
-<span class="fc" id="L31">            EquipmentJpaMapper mapper, PageMapper pageMapper) {</span>
-<span class="fc" id="L32">        this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L33">        this.mapper = mapper;</span>
-<span class="fc" id="L34">        this.pageMapper = pageMapper;</span>
-<span class="fc" id="L35">    }</span>
+<span class="fc" id="L30">            EquipmentJpaMapper mapper, PageMapper pageMapper) {</span>
+<span class="fc" id="L31">        this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L32">        this.mapper = mapper;</span>
+<span class="fc" id="L33">        this.pageMapper = pageMapper;</span>
+<span class="fc" id="L34">    }</span>
 
     @Override
+    @Transactional
     public Equipment save(Equipment equipment) {
 <span class="fc" id="L39">        var jpaEntity = mapper.toEntity(equipment);</span>
 <span class="fc" id="L40">        var savedEntity = jpaRepository.save(jpaEntity);</span>

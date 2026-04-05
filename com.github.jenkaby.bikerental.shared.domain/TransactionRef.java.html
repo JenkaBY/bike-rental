@@ -4,11 +4,11 @@ import java.util.UUID;
 
 public record TransactionRef(UUID id) {
 
-<span class="nc" id="L7">    public TransactionRef {</span>
-<span class="nc bnc" id="L8" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="fc" id="L7">    public TransactionRef {</span>
+<span class="pc bpc" id="L8" title="1 of 2 branches missed.">        if (id == null) {</span>
 <span class="nc" id="L9">            throw new IllegalArgumentException(&quot;Transaction id must not be null&quot;);</span>
         }
-<span class="nc" id="L11">    }</span>
+<span class="fc" id="L11">    }</span>
 
     public static TransactionRef of(UUID id) {
 <span class="nc" id="L14">        return new TransactionRef(id);</span>

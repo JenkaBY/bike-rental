@@ -33,38 +33,40 @@ public class RentalEquipmentJpaMapperImpl implements RentalEquipmentJpaMapper {
 
 <span class="fc" id="L34">        RentalEquipment.RentalEquipmentBuilder rentalEquipment = RentalEquipment.builder();</span>
 
-<span class="fc" id="L36">        rentalEquipment.equipmentId( entity.getEquipmentId() );</span>
-<span class="fc" id="L37">        rentalEquipment.equipmentUid( entity.getEquipmentUid() );</span>
-<span class="fc" id="L38">        rentalEquipment.status( rentalEquipmentStatusMapper.stringToStatus( entity.getStatus() ) );</span>
-<span class="fc" id="L39">        rentalEquipment.tariffId( entity.getTariffId() );</span>
-<span class="fc" id="L40">        rentalEquipment.startedAt( entity.getStartedAt() );</span>
-<span class="fc" id="L41">        rentalEquipment.expectedReturnAt( entity.getExpectedReturnAt() );</span>
-<span class="fc" id="L42">        rentalEquipment.actualReturnAt( entity.getActualReturnAt() );</span>
-<span class="fc" id="L43">        rentalEquipment.estimatedCost( moneyMapper.toMoney( entity.getEstimatedCost() ) );</span>
-<span class="fc" id="L44">        rentalEquipment.finalCost( moneyMapper.toMoney( entity.getFinalCost() ) );</span>
+<span class="fc" id="L36">        rentalEquipment.id( entity.getId() );</span>
+<span class="fc" id="L37">        rentalEquipment.equipmentId( entity.getEquipmentId() );</span>
+<span class="fc" id="L38">        rentalEquipment.equipmentUid( entity.getEquipmentUid() );</span>
+<span class="fc" id="L39">        rentalEquipment.status( rentalEquipmentStatusMapper.stringToStatus( entity.getStatus() ) );</span>
+<span class="fc" id="L40">        rentalEquipment.tariffId( entity.getTariffId() );</span>
+<span class="fc" id="L41">        rentalEquipment.startedAt( entity.getStartedAt() );</span>
+<span class="fc" id="L42">        rentalEquipment.expectedReturnAt( entity.getExpectedReturnAt() );</span>
+<span class="fc" id="L43">        rentalEquipment.actualReturnAt( entity.getActualReturnAt() );</span>
+<span class="fc" id="L44">        rentalEquipment.estimatedCost( moneyMapper.toMoney( entity.getEstimatedCost() ) );</span>
+<span class="fc" id="L45">        rentalEquipment.finalCost( moneyMapper.toMoney( entity.getFinalCost() ) );</span>
 
-<span class="fc" id="L46">        return rentalEquipment.build();</span>
+<span class="fc" id="L47">        return rentalEquipment.build();</span>
     }
 
     @Override
     public RentalEquipmentJpaEntity toEntity(RentalEquipment equipment) {
-<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
-<span class="nc" id="L52">            return null;</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
+<span class="nc" id="L53">            return null;</span>
         }
 
-<span class="fc" id="L55">        RentalEquipmentJpaEntity.RentalEquipmentJpaEntityBuilder rentalEquipmentJpaEntity = RentalEquipmentJpaEntity.builder();</span>
+<span class="fc" id="L56">        RentalEquipmentJpaEntity.RentalEquipmentJpaEntityBuilder rentalEquipmentJpaEntity = RentalEquipmentJpaEntity.builder();</span>
 
-<span class="fc" id="L57">        rentalEquipmentJpaEntity.equipmentId( equipment.getEquipmentId() );</span>
-<span class="fc" id="L58">        rentalEquipmentJpaEntity.equipmentUid( equipment.getEquipmentUid() );</span>
-<span class="fc" id="L59">        rentalEquipmentJpaEntity.status( rentalEquipmentStatusMapper.statusToString( equipment.getStatus() ) );</span>
-<span class="fc" id="L60">        rentalEquipmentJpaEntity.startedAt( equipment.getStartedAt() );</span>
-<span class="fc" id="L61">        rentalEquipmentJpaEntity.expectedReturnAt( equipment.getExpectedReturnAt() );</span>
-<span class="fc" id="L62">        rentalEquipmentJpaEntity.actualReturnAt( equipment.getActualReturnAt() );</span>
-<span class="fc" id="L63">        rentalEquipmentJpaEntity.estimatedCost( moneyMapper.toBigDecimal( equipment.getEstimatedCost() ) );</span>
-<span class="fc" id="L64">        rentalEquipmentJpaEntity.finalCost( moneyMapper.toBigDecimal( equipment.getFinalCost() ) );</span>
-<span class="fc" id="L65">        rentalEquipmentJpaEntity.tariffId( equipment.getTariffId() );</span>
+<span class="fc" id="L58">        rentalEquipmentJpaEntity.id( equipment.getId() );</span>
+<span class="fc" id="L59">        rentalEquipmentJpaEntity.equipmentId( equipment.getEquipmentId() );</span>
+<span class="fc" id="L60">        rentalEquipmentJpaEntity.equipmentUid( equipment.getEquipmentUid() );</span>
+<span class="fc" id="L61">        rentalEquipmentJpaEntity.status( rentalEquipmentStatusMapper.statusToString( equipment.getStatus() ) );</span>
+<span class="fc" id="L62">        rentalEquipmentJpaEntity.startedAt( equipment.getStartedAt() );</span>
+<span class="fc" id="L63">        rentalEquipmentJpaEntity.expectedReturnAt( equipment.getExpectedReturnAt() );</span>
+<span class="fc" id="L64">        rentalEquipmentJpaEntity.actualReturnAt( equipment.getActualReturnAt() );</span>
+<span class="fc" id="L65">        rentalEquipmentJpaEntity.estimatedCost( moneyMapper.toBigDecimal( equipment.getEstimatedCost() ) );</span>
+<span class="fc" id="L66">        rentalEquipmentJpaEntity.finalCost( moneyMapper.toBigDecimal( equipment.getFinalCost() ) );</span>
+<span class="fc" id="L67">        rentalEquipmentJpaEntity.tariffId( equipment.getTariffId() );</span>
 
-<span class="fc" id="L67">        return rentalEquipmentJpaEntity.build();</span>
+<span class="fc" id="L69">        return rentalEquipmentJpaEntity.build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

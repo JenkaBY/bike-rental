@@ -26,7 +26,7 @@ public interface RentalJpaMapper {
     RentalJpaEntity toEntity(Rental rental);
 
     @AfterMapping
-    default void setRelationships(Rental rental, @MappingTarget RentalJpaEntity result) {
+    default void setRelationships(@MappingTarget RentalJpaEntity result) {
 <span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if (result.getRentalEquipments() != null) {</span>
 <span class="fc" id="L31">            result.getRentalEquipments().forEach(equipment -&gt; equipment.setRental(result));</span>
         }

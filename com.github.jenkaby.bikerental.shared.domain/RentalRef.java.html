@@ -2,14 +2,14 @@
 
 public record RentalRef(Long id) {
 
-<span class="nc" id="L5">    public RentalRef {</span>
-<span class="nc bnc" id="L6" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="fc" id="L5">    public RentalRef {</span>
+<span class="pc bpc" id="L6" title="1 of 2 branches missed.">        if (id == null) {</span>
 <span class="nc" id="L7">            throw new IllegalArgumentException(&quot;Rental id must not be null&quot;);</span>
         }
-<span class="nc" id="L9">    }</span>
+<span class="fc" id="L9">    }</span>
 
     public static RentalRef of(Long id) {
-<span class="nc" id="L12">        return new RentalRef(id);</span>
+<span class="fc" id="L12">        return new RentalRef(id);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

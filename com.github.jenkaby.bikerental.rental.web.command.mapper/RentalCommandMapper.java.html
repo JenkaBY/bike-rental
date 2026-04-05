@@ -14,25 +14,30 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 @Mapper(uses = {MoneyMapper.class, RentalQueryMapper.class})
-<span class="fc" id="L22">public abstract class RentalCommandMapper {</span>
+<span class="fc" id="L21">public abstract class RentalCommandMapper {</span>
 
     protected RentalQueryMapper rentalQueryMapper;
     protected PaymentInfoMapper paymentInfoMapper;
+    protected SettlementMapper settlementMapper;
 
     @Autowired
-    public void setPaymentInfoMapper(PaymentInfoMapper paymentInfoMapper) {
-<span class="fc" id="L29">        this.paymentInfoMapper = paymentInfoMapper;</span>
+    public void setSettlementMapper(SettlementMapper settlementMapper) {
+<span class="fc" id="L29">        this.settlementMapper = settlementMapper;</span>
 <span class="fc" id="L30">    }</span>
 
     @Autowired
-    public void setQueryMapper(RentalQueryMapper queryMapper) {
-<span class="fc" id="L34">        this.rentalQueryMapper = queryMapper;</span>
+    public void setPaymentInfoMapper(PaymentInfoMapper paymentInfoMapper) {
+<span class="fc" id="L34">        this.paymentInfoMapper = paymentInfoMapper;</span>
 <span class="fc" id="L35">    }</span>
+
+    @Autowired
+    public void setQueryMapper(RentalQueryMapper queryMapper) {
+<span class="fc" id="L39">        this.rentalQueryMapper = queryMapper;</span>
+<span class="fc" id="L40">    }</span>
 
     public abstract CreateRentalUseCase.CreateRentalCommand toCreateCommand(CreateRentalRequest request);
 
@@ -49,39 +54,39 @@ import java.util.Map;
     public abstract ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request);
 
     public RentalReturnResponse toReturnResponse(ReturnEquipmentResult result) {
-<span class="fc" id="L52">        RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());</span>
-<span class="fc" id="L53">        var costsBreakdown = result.breakDownCosts().entrySet().stream()</span>
-<span class="fc" id="L54">                .map(entry -&gt; toCostBreakdown(entry.getKey(), entry.getValue()))</span>
-<span class="fc" id="L55">                .toList();</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        BigDecimal additionalPayment = result.additionalPayment() != null ? result.additionalPayment().amount() : null;</span>
-<span class="fc" id="L57">        return new RentalReturnResponse(rentalResponse, costsBreakdown, additionalPayment, paymentInfoMapper.toResponse(result.paymentInfo()));</span>
+<span class="fc" id="L57">        RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());</span>
+<span class="fc" id="L58">        var costsBreakdown = result.breakDownCosts().entrySet().stream()</span>
+<span class="fc" id="L59">                .map(entry -&gt; toCostBreakdown(entry.getKey(), entry.getValue()))</span>
+<span class="fc" id="L60">                .toList();</span>
+<span class="fc" id="L61">        var settlementResponse = settlementMapper.toResponse(result.settlementInfo());</span>
+<span class="fc" id="L62">        return new RentalReturnResponse(rentalResponse, costsBreakdown, settlementResponse);</span>
     }
 
     RentalReturnResponse.CostBreakdown toCostBreakdown(Long equipmentId, RentalCost cost) {
-<span class="fc" id="L61">        return new RentalReturnResponse.CostBreakdown(</span>
+<span class="fc" id="L66">        return new RentalReturnResponse.CostBreakdown(</span>
                 equipmentId,
-<span class="fc" id="L63">                cost.baseCost().amount(),</span>
-<span class="fc" id="L64">                cost.overtimeCost().amount(),</span>
-<span class="fc" id="L65">                cost.totalCost().amount(),</span>
-<span class="fc" id="L66">                cost.actualMinutes(),</span>
-<span class="fc" id="L67">                cost.billableMinutes(),</span>
-<span class="fc" id="L68">                cost.plannedMinutes(),</span>
-<span class="fc" id="L69">                cost.overtimeMinutes(),</span>
-<span class="fc" id="L70">                cost.forgivenessApplied(),</span>
-<span class="fc" id="L71">                cost.calculationMessage()</span>
+<span class="fc" id="L68">                cost.baseCost().amount(),</span>
+<span class="fc" id="L69">                cost.overtimeCost().amount(),</span>
+<span class="fc" id="L70">                cost.totalCost().amount(),</span>
+<span class="fc" id="L71">                cost.actualMinutes(),</span>
+<span class="fc" id="L72">                cost.billableMinutes(),</span>
+<span class="fc" id="L73">                cost.plannedMinutes(),</span>
+<span class="fc" id="L74">                cost.overtimeMinutes(),</span>
+<span class="fc" id="L75">                cost.forgivenessApplied(),</span>
+<span class="fc" id="L76">                cost.calculationMessage()</span>
         );
     }
 
     public Map&lt;String, Object&gt; toPatchMap(RentalUpdateJsonPatchRequest request) {
-<span class="fc" id="L76">        Map&lt;String, Object&gt; patch = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L77" title="All 2 branches covered.">        for (RentalPatchOperation operation : request.getOperations()) {</span>
-<span class="fc" id="L78">            String path = operation.getPath();</span>
-<span class="pc bpc" id="L79" title="1 of 2 branches missed.">            String fieldName = path.startsWith(&quot;/&quot;) ? path.substring(1) : path;</span>
-<span class="pc bpc" id="L80" title="1 of 2 branches missed.">            if (operation.getOp() != null) {</span>
-<span class="fc" id="L81">                patch.put(fieldName, operation.getValue());</span>
+<span class="fc" id="L81">        Map&lt;String, Object&gt; patch = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        for (RentalPatchOperation operation : request.getOperations()) {</span>
+<span class="fc" id="L83">            String path = operation.getPath();</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            String fieldName = path.startsWith(&quot;/&quot;) ? path.substring(1) : path;</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">            if (operation.getOp() != null) {</span>
+<span class="fc" id="L86">                patch.put(fieldName, operation.getValue());</span>
             }
-<span class="fc" id="L83">        }</span>
-<span class="fc" id="L84">        return patch;</span>
+<span class="fc" id="L88">        }</span>
+<span class="fc" id="L89">        return patch;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

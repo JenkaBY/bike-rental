@@ -4,11 +4,13 @@ import com.github.jenkaby.bikerental.finance.application.mapper.PaymentToInfoMap
 import com.github.jenkaby.bikerental.finance.application.usecase.GetPaymentsByRentalIdUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordPaymentUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
+import com.github.jenkaby.bikerental.finance.application.usecase.SettleRentalUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.Payment;
 import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,76 +20,87 @@ import java.util.function.Predicate;
 @Service
 class FinanceFacadeImpl implements FinanceFacade {
 
-<span class="pc bpc" id="L21" title="1 of 2 branches missed.">    private static final Predicate&lt;Payment&gt; IS_PREPAYMENT = p -&gt; p.getPaymentType() == PaymentType.PREPAYMENT;</span>
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">    private static final Predicate&lt;Payment&gt; IS_PREPAYMENT = p -&gt; p.getPaymentType() == PaymentType.PREPAYMENT;</span>
 
     private final RecordPaymentUseCase recordPaymentUseCase;
     private final GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase;
     private final PaymentToInfoMapper paymentToInfoMapper;
     private final RentalHoldUseCase rentalHoldUseCase;
+    private final SettleRentalUseCase settleRentalUseCase;
 
     FinanceFacadeImpl(
             RecordPaymentUseCase recordPaymentUseCase,
             GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase,
             PaymentToInfoMapper paymentToInfoMapper,
-<span class="fc" id="L32">            RentalHoldUseCase rentalHoldUseCase) {</span>
-<span class="fc" id="L33">        this.recordPaymentUseCase = recordPaymentUseCase;</span>
-<span class="fc" id="L34">        this.getPaymentsByRentalIdUseCase = getPaymentsByRentalIdUseCase;</span>
-<span class="fc" id="L35">        this.paymentToInfoMapper = paymentToInfoMapper;</span>
-<span class="fc" id="L36">        this.rentalHoldUseCase = rentalHoldUseCase;</span>
-<span class="fc" id="L37">    }</span>
+            RentalHoldUseCase rentalHoldUseCase,
+<span class="fc" id="L36">            SettleRentalUseCase settleRentalUseCase) {</span>
+<span class="fc" id="L37">        this.recordPaymentUseCase = recordPaymentUseCase;</span>
+<span class="fc" id="L38">        this.getPaymentsByRentalIdUseCase = getPaymentsByRentalIdUseCase;</span>
+<span class="fc" id="L39">        this.paymentToInfoMapper = paymentToInfoMapper;</span>
+<span class="fc" id="L40">        this.rentalHoldUseCase = rentalHoldUseCase;</span>
+<span class="fc" id="L41">        this.settleRentalUseCase = settleRentalUseCase;</span>
+<span class="fc" id="L42">    }</span>
 
     @Override
     public PaymentInfo recordPrepayment(Long rentalId, Money amount, PaymentMethod method, String operatorId) {
-<span class="fc" id="L41">        var command = new RecordPaymentUseCase.RecordPaymentCommand(</span>
+<span class="fc" id="L46">        var command = new RecordPaymentUseCase.RecordPaymentCommand(</span>
                 rentalId,
                 amount,
                 PaymentType.PREPAYMENT,
                 method,
                 operatorId
         );
-<span class="fc" id="L48">        Payment payment = recordPaymentUseCase.execute(command);</span>
-<span class="fc" id="L49">        return paymentToInfoMapper.toPaymentInfo(payment);</span>
+<span class="fc" id="L53">        Payment payment = recordPaymentUseCase.execute(command);</span>
+<span class="fc" id="L54">        return paymentToInfoMapper.toPaymentInfo(payment);</span>
     }
 
     @Override
     public PaymentInfo recordAdditionalPayment(Long rentalId, Money amount, PaymentMethod method, String operatorId) {
-<span class="fc" id="L54">        var command = new RecordPaymentUseCase.RecordPaymentCommand(</span>
+<span class="nc" id="L59">        var command = new RecordPaymentUseCase.RecordPaymentCommand(</span>
                 rentalId,
                 amount,
                 PaymentType.ADDITIONAL_PAYMENT,
                 method,
                 operatorId
         );
-<span class="fc" id="L61">        Payment payment = recordPaymentUseCase.execute(command);</span>
-<span class="fc" id="L62">        return paymentToInfoMapper.toPaymentInfo(payment);</span>
+<span class="nc" id="L66">        Payment payment = recordPaymentUseCase.execute(command);</span>
+<span class="nc" id="L67">        return paymentToInfoMapper.toPaymentInfo(payment);</span>
     }
 
     @Override
     public boolean hasPrepayment(Long rentalId) {
-<span class="fc" id="L67">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
-<span class="fc" id="L68">                .anyMatch(IS_PREPAYMENT);</span>
+<span class="fc" id="L72">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
+<span class="fc" id="L73">                .anyMatch(IS_PREPAYMENT);</span>
     }
 
     @Override
     public Optional&lt;PaymentInfo&gt; getPrepayment(Long rentalId) {
-<span class="nc" id="L73">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
-<span class="nc" id="L74">                .filter(IS_PREPAYMENT)</span>
-<span class="nc" id="L75">                .findFirst()</span>
-<span class="nc" id="L76">                .map(paymentToInfoMapper::toPaymentInfo);</span>
+<span class="nc" id="L78">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
+<span class="nc" id="L79">                .filter(IS_PREPAYMENT)</span>
+<span class="nc" id="L80">                .findFirst()</span>
+<span class="nc" id="L81">                .map(paymentToInfoMapper::toPaymentInfo);</span>
     }
 
     @Override
     public List&lt;PaymentInfo&gt; getPayments(Long rentalId) {
-<span class="fc" id="L81">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
-<span class="fc" id="L82">                .map(paymentToInfoMapper::toPaymentInfo)</span>
-<span class="fc" id="L83">                .toList();</span>
+<span class="nc" id="L86">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
+<span class="nc" id="L87">                .map(paymentToInfoMapper::toPaymentInfo)</span>
+<span class="nc" id="L88">                .toList();</span>
     }
 
     @Override
     public HoldInfo holdFunds(CustomerRef customerRef, RentalRef rentalRef, Money plannedCost) {
-<span class="nc" id="L88">        var command = new RentalHoldUseCase.RentalHoldCommand(customerRef, rentalRef, plannedCost);</span>
-<span class="nc" id="L89">        var result = rentalHoldUseCase.execute(command);</span>
-<span class="nc" id="L90">        return new HoldInfo(result.transactionRef(), result.recordedAt());</span>
+<span class="nc" id="L93">        var command = new RentalHoldUseCase.RentalHoldCommand(customerRef, rentalRef, plannedCost);</span>
+<span class="nc" id="L94">        var result = rentalHoldUseCase.execute(command);</span>
+<span class="nc" id="L95">        return new HoldInfo(result.transactionRef(), result.recordedAt());</span>
+    }
+
+    @Override
+    public SettlementInfo settleRental(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef,
+                                       @NonNull Money finalCost, @NonNull String operatorId) {
+<span class="fc" id="L101">        var command = new SettleRentalUseCase.SettleRentalCommand(customerRef, rentalRef, finalCost, operatorId);</span>
+<span class="fc" id="L102">        var result = settleRentalUseCase.execute(command);</span>
+<span class="fc" id="L103">        return new SettlementInfo(result.captureTransactionRefs(), result.releaseTransactionRef(), result.recordedAt());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

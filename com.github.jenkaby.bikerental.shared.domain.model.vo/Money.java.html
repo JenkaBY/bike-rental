@@ -61,7 +61,7 @@ public record Money(BigDecimal amount) implements Comparable&lt;Money&gt; {
     }
 
     public boolean isMoreThan(Money other) {
-<span class="nc bnc" id="L64" title="All 2 branches missed.">        return this.compareTo(other) &gt; 0;</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        return this.compareTo(other) &gt; 0;</span>
     }
 
     public boolean isLessThan(Money other) {

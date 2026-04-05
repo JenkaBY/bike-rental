@@ -189,33 +189,37 @@ public class Rental {
 <span class="fc" id="L189">        return result;</span>
     }
 
-    public void complete(Money finalCost) {
+    public void completeWithStatus(Money finalCost, RentalStatus status) {
         // Validate status
-<span class="pc bpc" id="L194" title="1 of 2 branches missed.">        if (this.status != RentalStatus.ACTIVE) {</span>
-<span class="nc" id="L195">            throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);</span>
+<span class="fc" id="L194">        validateCompletion(finalCost);</span>
+
+<span class="fc" id="L196">        this.finalCost = finalCost;</span>
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">        if (allEquipmentReturned()) {</span>
+<span class="fc" id="L198">            this.status = status;</span>
+        }
+<span class="fc" id="L200">        this.updatedAt = Instant.now();</span>
+<span class="fc" id="L201">    }</span>
+
+    private void validateCompletion(Money finalCost) {
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">        if (this.status != RentalStatus.ACTIVE) {</span>
+<span class="nc" id="L205">            throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);</span>
         }
 
-<span class="pc bpc" id="L198" title="1 of 2 branches missed.">        if (this.startedAt == null) {</span>
-<span class="nc" id="L199">            throw new IllegalStateException(&quot;Cannot complete rental: rental start time is not set&quot;);</span>
+<span class="pc bpc" id="L208" title="1 of 2 branches missed.">        if (this.startedAt == null) {</span>
+<span class="nc" id="L209">            throw new IllegalStateException(&quot;Cannot complete rental: rental start time is not set&quot;);</span>
         }
 
-<span class="pc bpc" id="L202" title="1 of 2 branches missed.">        if (finalCost == null) {</span>
-<span class="nc" id="L203">            throw new IllegalArgumentException(&quot;Final cost cannot be null&quot;);</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">        if (finalCost == null) {</span>
+<span class="nc" id="L213">            throw new IllegalArgumentException(&quot;Final cost cannot be null&quot;);</span>
         }
 
-<span class="pc bpc" id="L206" title="2 of 4 branches missed.">        if (this.actualReturnAt == null || this.actualDuration == null) {</span>
-<span class="nc" id="L207">            throw new IllegalStateException(&quot;Cannot complete rental: actual return time and duration must be set before completing&quot;);</span>
+<span class="pc bpc" id="L216" title="2 of 4 branches missed.">        if (this.actualReturnAt == null || this.actualDuration == null) {</span>
+<span class="nc" id="L217">            throw new IllegalStateException(&quot;Cannot complete rental: actual return time and duration must be set before completing&quot;);</span>
         }
-
-<span class="fc" id="L210">        this.finalCost = finalCost;</span>
-<span class="fc bfc" id="L211" title="All 2 branches covered.">        if (allEquipmentReturned()) {</span>
-<span class="fc" id="L212">            this.status = RentalStatus.COMPLETED;</span>
-        }
-<span class="fc" id="L214">        this.updatedAt = Instant.now();</span>
-<span class="fc" id="L215">    }</span>
+<span class="fc" id="L219">    }</span>
 
     private static boolean isEmpty(Collection&lt;?&gt; collection) {
-<span class="pc bpc" id="L218" title="1 of 4 branches missed.">        return collection == null || collection.isEmpty();</span>
+<span class="pc bpc" id="L222" title="1 of 4 branches missed.">        return collection == null || collection.isEmpty();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
