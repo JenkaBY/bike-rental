@@ -99,6 +99,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
             return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, null);
         }
 
+        // TODO Move to rental class
         Money previouslyReturnedCost = rental.getEquipments().stream()
                 .filter(e -> e.getStatus() == RentalEquipmentStatus.RETURNED)
                 .filter(e -> !equipmentsToReturn.contains(e))

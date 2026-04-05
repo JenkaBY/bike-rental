@@ -8,7 +8,6 @@
 - [x] `task-006-create-settle-rental-service.md`
 - [x] `task-007-implement-facade-settle-rental.md`
 - [x] `task-008-refactor-return-equipment-service.md`
-- [x] `task-009-fix-rental-return-component-test-compilation.md`
 - [x] `task-010-add-settlement-bdd-scenarios.md`
 
 - [x] `task-007-implement-facade-settle-rental.md`

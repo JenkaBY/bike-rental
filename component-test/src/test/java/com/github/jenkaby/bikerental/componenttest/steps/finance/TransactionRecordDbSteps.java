@@ -15,8 +15,6 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// ...existing code...
-
 @Slf4j
 @RequiredArgsConstructor
 public class TransactionRecordDbSteps {
