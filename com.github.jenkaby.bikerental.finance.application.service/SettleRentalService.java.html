@@ -94,30 +94,30 @@ public class SettleRentalService implements SettleRentalUseCase {
 <span class="fc" id="L94">                    holdBalance.add(customerAccount.getWallet().getBalance()));</span>
         }
 
-<span class="fc" id="L97">        var holdDebit = customerAccount.getOnHold().debit(holdBalance);</span>
-<span class="fc" id="L98">        var holdRevenueCredit = systemAccount.getRevenue().credit(holdBalance);</span>
-
-<span class="fc" id="L100">        var captureRefs = new ArrayList&lt;TransactionRef&gt;();</span>
-
-<span class="fc" id="L102">        UUID holdCaptureId = uuidGenerator.generate();</span>
-<span class="fc" id="L103">        transactionRepository.save(Transaction.builder()</span>
-<span class="fc" id="L104">                .id(holdCaptureId)</span>
-<span class="fc" id="L105">                .type(TransactionType.CAPTURE)</span>
-<span class="fc" id="L106">                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
-<span class="fc" id="L107">                .amount(holdBalance)</span>
-<span class="fc" id="L108">                .customerId(command.customerRef().id())</span>
-<span class="fc" id="L109">                .operatorId(command.operatorId())</span>
-<span class="fc" id="L110">                .sourceType(TransactionSourceType.RENTAL)</span>
-<span class="fc" id="L111">                .sourceId(sourceId)</span>
-<span class="fc" id="L112">                .recordedAt(now)</span>
-<span class="fc" id="L113">                .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
-<span class="fc" id="L114">                .reason(null)</span>
-<span class="fc" id="L115">                .records(List.of(</span>
-<span class="fc" id="L116">                        holdDebit.toTransaction(uuidGenerator.generate()),</span>
-<span class="fc" id="L117">                        holdRevenueCredit.toTransaction(uuidGenerator.generate())</span>
-                ))
-<span class="fc" id="L119">                .build());</span>
-<span class="fc" id="L120">        captureRefs.add(new TransactionRef(holdCaptureId));</span>
+<span class="fc" id="L97">        var captureRefs = new ArrayList&lt;TransactionRef&gt;();</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (holdBalance.isPositive()) {</span>
+<span class="fc" id="L99">            var holdDebit = customerAccount.getOnHold().debit(holdBalance);</span>
+<span class="fc" id="L100">            var holdRevenueCredit = systemAccount.getRevenue().credit(holdBalance);</span>
+<span class="fc" id="L101">            UUID holdCaptureId = uuidGenerator.generate();</span>
+<span class="fc" id="L102">            transactionRepository.save(Transaction.builder()</span>
+<span class="fc" id="L103">                    .id(holdCaptureId)</span>
+<span class="fc" id="L104">                    .type(TransactionType.CAPTURE)</span>
+<span class="fc" id="L105">                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
+<span class="fc" id="L106">                    .amount(holdBalance)</span>
+<span class="fc" id="L107">                    .customerId(command.customerRef().id())</span>
+<span class="fc" id="L108">                    .operatorId(command.operatorId())</span>
+<span class="fc" id="L109">                    .sourceType(TransactionSourceType.RENTAL)</span>
+<span class="fc" id="L110">                    .sourceId(sourceId)</span>
+<span class="fc" id="L111">                    .recordedAt(now)</span>
+<span class="fc" id="L112">                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
+<span class="fc" id="L113">                    .reason(null)</span>
+<span class="fc" id="L114">                    .records(List.of(</span>
+<span class="fc" id="L115">                            holdDebit.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L116">                            holdRevenueCredit.toTransaction(uuidGenerator.generate())</span>
+                    ))
+<span class="fc" id="L118">                    .build());</span>
+<span class="fc" id="L119">            captureRefs.add(new TransactionRef(holdCaptureId));</span>
+        }
 
 <span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (shortfall.isPositive()) {</span>
 <span class="fc" id="L123">            var walletDebit = customerAccount.getWallet().debit(shortfall);</span>

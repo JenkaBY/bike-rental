@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalJpaEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity</a> &gt; <span class="el_source">RentalJpaEntity.java</span></div><h1>RentalJpaEntity.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity;
 
+import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Fetch;
@@ -34,8 +35,9 @@ public class RentalJpaEntity {
     @OneToMany(mappedBy = &quot;rental&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
     private List&lt;RentalEquipmentJpaEntity&gt; rentalEquipments = new ArrayList&lt;&gt;();
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String status;
+    private RentalStatus status;
 
     @Column(name = &quot;started_at&quot;)
     private LocalDateTime startedAt;
@@ -59,40 +61,40 @@ public class RentalJpaEntity {
     private Instant updatedAt;
 
     public BigDecimal getEstimatedCost() {
-<span class="fc" id="L62">        return this.rentalEquipments.stream()</span>
-<span class="fc" id="L63">                .map(RentalEquipmentJpaEntity::getEstimatedCost)</span>
-<span class="fc" id="L64">                .filter(Objects::nonNull)</span>
-<span class="fc" id="L65">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+<span class="fc" id="L64">        return this.rentalEquipments.stream()</span>
+<span class="fc" id="L65">                .map(RentalEquipmentJpaEntity::getEstimatedCost)</span>
+<span class="fc" id="L66">                .filter(Objects::nonNull)</span>
+<span class="fc" id="L67">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
     }
 
     public BigDecimal getFinalCost() {
-<span class="fc" id="L69">        return this.rentalEquipments.stream()</span>
-<span class="fc" id="L70">                .map(RentalEquipmentJpaEntity::getFinalCost)</span>
-<span class="fc" id="L71">                .filter(Objects::nonNull)</span>
-<span class="fc" id="L72">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+<span class="fc" id="L71">        return this.rentalEquipments.stream()</span>
+<span class="fc" id="L72">                .map(RentalEquipmentJpaEntity::getFinalCost)</span>
+<span class="fc" id="L73">                .filter(Objects::nonNull)</span>
+<span class="fc" id="L74">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
     }
 
     public void addRentalEquipment(RentalEquipmentJpaEntity equipment) {
-<span class="nc" id="L76">        equipment.setRental(this);</span>
-<span class="nc" id="L77">        this.rentalEquipments.add(equipment);</span>
-<span class="nc" id="L78">    }</span>
+<span class="nc" id="L78">        equipment.setRental(this);</span>
+<span class="nc" id="L79">        this.rentalEquipments.add(equipment);</span>
+<span class="nc" id="L80">    }</span>
 
     public void removeRentalEquipment(RentalEquipmentJpaEntity equipment) {
-<span class="nc" id="L81">        equipment.setRental(null);</span>
-<span class="nc" id="L82">        this.rentalEquipments.remove(equipment);</span>
-<span class="nc" id="L83">    }</span>
+<span class="nc" id="L83">        equipment.setRental(null);</span>
+<span class="nc" id="L84">        this.rentalEquipments.remove(equipment);</span>
+<span class="nc" id="L85">    }</span>
 
     @PrePersist
     protected void onCreate() {
-<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if (createdAt == null) {</span>
-<span class="nc" id="L88">            createdAt = Instant.now();</span>
-<span class="nc" id="L89">            updatedAt = createdAt;</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (createdAt == null) {</span>
+<span class="nc" id="L90">            createdAt = Instant.now();</span>
+<span class="nc" id="L91">            updatedAt = createdAt;</span>
         }
-<span class="fc" id="L91">    }</span>
+<span class="fc" id="L93">    }</span>
 
     @PreUpdate
     protected void onUpdate() {
-<span class="fc" id="L95">        updatedAt = Instant.now();</span>
-<span class="fc" id="L96">    }</span>
+<span class="fc" id="L97">        updatedAt = Instant.now();</span>
+<span class="fc" id="L98">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
