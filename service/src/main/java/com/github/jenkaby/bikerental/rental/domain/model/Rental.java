@@ -189,6 +189,14 @@ public class Rental {
         return result;
     }
 
+    public void completeForDebt() {
+        if (this.finalCost == null) {
+            throw new IllegalArgumentException("Final cost cannot be null");
+        }
+        this.updatedAt = Instant.now();
+        this.status = RentalStatus.COMPLETED;
+    }
+
     public void completeWithStatus(Money finalCost, RentalStatus status) {
         // Validate status
         validateCompletion(finalCost);
@@ -201,7 +209,7 @@ public class Rental {
     }
 
     private void validateCompletion(Money finalCost) {
-        if (this.status != RentalStatus.ACTIVE) {
+        if (this.status != RentalStatus.ACTIVE && this.status != RentalStatus.DEBT) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);
         }
 

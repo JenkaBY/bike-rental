@@ -94,30 +94,30 @@ public class SettleRentalService implements SettleRentalUseCase {
                     holdBalance.add(customerAccount.getWallet().getBalance()));
         }
 
-        var holdDebit = customerAccount.getOnHold().debit(holdBalance);
-        var holdRevenueCredit = systemAccount.getRevenue().credit(holdBalance);
-
         var captureRefs = new ArrayList<TransactionRef>();
-
-        UUID holdCaptureId = uuidGenerator.generate();
-        transactionRepository.save(Transaction.builder()
-                .id(holdCaptureId)
-                .type(TransactionType.CAPTURE)
-                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
-                .amount(holdBalance)
-                .customerId(command.customerRef().id())
-                .operatorId(command.operatorId())
-                .sourceType(TransactionSourceType.RENTAL)
-                .sourceId(sourceId)
-                .recordedAt(now)
-                .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))
-                .reason(null)
-                .records(List.of(
-                        holdDebit.toTransaction(uuidGenerator.generate()),
-                        holdRevenueCredit.toTransaction(uuidGenerator.generate())
-                ))
-                .build());
-        captureRefs.add(new TransactionRef(holdCaptureId));
+        if (holdBalance.isPositive()) {
+            var holdDebit = customerAccount.getOnHold().debit(holdBalance);
+            var holdRevenueCredit = systemAccount.getRevenue().credit(holdBalance);
+            UUID holdCaptureId = uuidGenerator.generate();
+            transactionRepository.save(Transaction.builder()
+                    .id(holdCaptureId)
+                    .type(TransactionType.CAPTURE)
+                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
+                    .amount(holdBalance)
+                    .customerId(command.customerRef().id())
+                    .operatorId(command.operatorId())
+                    .sourceType(TransactionSourceType.RENTAL)
+                    .sourceId(sourceId)
+                    .recordedAt(now)
+                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))
+                    .reason(null)
+                    .records(List.of(
+                            holdDebit.toTransaction(uuidGenerator.generate()),
+                            holdRevenueCredit.toTransaction(uuidGenerator.generate())
+                    ))
+                    .build());
+            captureRefs.add(new TransactionRef(holdCaptureId));
+        }
 
         if (shortfall.isPositive()) {
             var walletDebit = customerAccount.getWallet().debit(shortfall);

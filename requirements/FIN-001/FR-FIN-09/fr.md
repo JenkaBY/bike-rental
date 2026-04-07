@@ -18,7 +18,7 @@ by the Tariff module
     * The Tariff module computes each item's actual cost as: `tariff rate × (item return time − rental start time)`. The
       **total actual cost** = sum of all individual item costs. Finance consumes this pre-computed total and must not
       calculate it.
-    * Finance receives a settlement request containing: rental ID, held amount, and total actual cost.
+  * Finance receives a settlement request containing: rental ID, and total actual cost.
     * Settlement applies the total actual cost against the held amount following the rules of FR-FIN-07 (normal, final
       cost ≤ held) or FR-FIN-08 (overtime, final cost > held), as applicable.
     * The same settlement path applies regardless of whether the rental had one item or many.

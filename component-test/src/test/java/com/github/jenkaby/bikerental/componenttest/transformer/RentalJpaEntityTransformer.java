@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalJpaEntity;
 import io.cucumber.java.DataTableType;
 
@@ -17,7 +18,8 @@ public class RentalJpaEntityTransformer {
                 .map(Aliases::getCustomerId)
                 .orElse(null);
 
-        var status = DataTableHelper.getStringOrNull(entry, "status");
+        var statusString = DataTableHelper.getStringOrNull(entry, "status");
+        var status = statusString != null ? RentalStatus.valueOf(statusString) : null;
         var startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
         var expectedReturnAt = DataTableHelper.toLocalDateTime(entry, "expectedReturnAt");
         var actualReturnAt = DataTableHelper.toLocalDateTime(entry, "actualReturnAt");

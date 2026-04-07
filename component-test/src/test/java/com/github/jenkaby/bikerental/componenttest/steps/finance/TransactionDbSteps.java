@@ -22,8 +22,7 @@ import static org.assertj.core.api.Assertions.within;
 public class TransactionDbSteps {
 
     private static final Comparator<TransactionJpaEntity> COMPARATOR = Comparator
-            .comparing((TransactionJpaEntity e) -> e.getId() != null ? e.getId().toString() : "")
-            .thenComparing(e -> e.getCustomerId() != null ? e.getCustomerId().toString() : "")
+            .comparing((TransactionJpaEntity e) -> e.getCustomerId() != null ? e.getCustomerId().toString() : "")
             .thenComparing(e -> e.getTransactionType() != null ? e.getTransactionType().name() : "");
 
     private final WrapperTransactionJpaRepository transactionJpaRepository;
@@ -37,7 +36,7 @@ public class TransactionDbSteps {
     @Then("the following transaction(s) were/was persisted in db")
     public void transactionsWerePersistedInDb(List<TransactionJpaEntity> expected) {
         var all = transactionJpaRepository.findAllInitialized();
-
+        log.info("Actual {}", all);
         var actualList = all.stream()
                 .filter(actual -> expected.stream().anyMatch(exp -> matches(actual, exp)))
                 .sorted(COMPARATOR)

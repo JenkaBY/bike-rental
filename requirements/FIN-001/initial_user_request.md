@@ -84,14 +84,14 @@ customer, created on registration) or the **System Account** (a single, shop-own
   - `CUSTOMER_WALLET` (debit) → `BANK_TRANSFER` (credit)
 - Transaction type: `WITHDRAWAL`.
 
-### Overtime Edge Case (FR-FIN-06)
+### Overtime Edge Case (FR-FIN-08)
 
 If the actual rental cost exceeds the held amount:
 
-1. Capture the entire hold.
-2. Attempt to debit the remainder from the customer's available balance.
-3. If the available balance is also insufficient, capture what is available and flag the rental with a `DEBT` status for
-   manual resolution by staff.
+1. Check whether `CUSTOMER_HOLD` + `CUSTOMER_WALLET` ≥ final cost.
+2. If sufficient: capture the entire hold (`CAPTURE`), then debit the gap from the wallet (`CAPTURE`).
+3. If insufficient: create no journal entries, raise a settlement exception, and flag the rental with `DEBT` status.
+   Automatic recovery is attempted when the customer next deposits funds (see FR-FIN-12).
 
 ### Partial Equipment Return
 
@@ -161,3 +161,24 @@ not subtracted again at query time.
 **Impact:** `isBalanceSufficient(Money)` continues to delegate to `availableBalance()` and correctly reflects
 the real spendable balance before applying any mutation. No structural change to `RecordRentalHoldService`; only
 the `availableBalance()` implementation is updated.
+---
+
+## Additional change request (2026-04-07) — Overtime settlement and DEBT auto-recovery
+
+**Clarification on FR-FIN-08 (Overtime Settlement):** The originally described behaviour — partial wallet debit
+before flagging `DEBT` — was revised. The agreed design is all-or-nothing:
+
+- If `CUSTOMER_HOLD` + `CUSTOMER_WALLET` ≥ final cost: settle fully (hold capture + wallet gap debit), both as
+  `CAPTURE` transactions.
+- If insufficient: no journal entries are created; the Finance module raises `OverBudgetSettlementException`
+  without marking the shared database transaction as rollback-only. The Rental module catches the exception and
+  commits the rental with status `DEBT`.
+- The `OVERTIME_DEBIT` transaction type is removed as unnecessary — both settlement entries use `CAPTURE`.
+
+**New FR-FIN-12 — Automatic DEBT recovery on deposit:** When a customer makes a deposit (FR-FIN-03), the Finance
+module publishes a `CustomerFundDeposited` event. The Rental module listens for this event, fetches all `DEBT`
+rentals for that customer (oldest first), and attempts to settle each one in an isolated transaction. If settlement
+is again rejected due to insufficient funds, the rental remains `DEBT` and processing continues. No changes are
+required in the Finance module beyond publishing the new event.
+
+**Formalised as:** `FR-FIN-08` (updated), `FR-FIN-12` (new).
