@@ -33,10 +33,9 @@ public class TransactionRecordDbSteps {
         var all = transactionRepository.findAllInitialized();
         log.info("All {}", all);
         var comparator = Comparator
-                .comparing((TransactionRecordJpaEntity e) -> e.getLedgerType() != null ? e.getLedgerType().name() : "")
-                .thenComparing(e -> e.getDirection() != null ? e.getDirection().name() : "")
-                .thenComparing(e -> e.getAmount() != null ? e.getAmount().toPlainString() : "")
-                .thenComparing(e -> e.getId() != null ? e.getId().toString() : "");
+                .comparing(TransactionRecordJpaEntity::getLedgerType)
+                .thenComparing(TransactionRecordJpaEntity::getDirection)
+                .thenComparing(TransactionRecordJpaEntity::getAmount);
 
         var actualList = all.stream()
                 .filter(actual -> expected.stream().anyMatch(exp -> matches(actual, exp)))
@@ -82,16 +81,9 @@ public class TransactionRecordDbSteps {
     }
 
     private static boolean matches(TransactionRecordJpaEntity actual, TransactionRecordJpaEntity exp) {
-        if (exp.getId() != null) {
-            return Objects.equals(actual.getId(), exp.getId());
-        }
-        if (exp.getTransaction() != null && exp.getTransaction().getId() != null) {
-            return Objects.equals(actual.getTransaction().getId(), exp.getTransaction().getId())
-                    && Objects.equals(actual.getLedgerType(), exp.getLedgerType())
-                    && Objects.equals(actual.getSubLedgerRef(), exp.getSubLedgerRef());
-        }
-        return Objects.equals(actual.getLedgerType(), exp.getLedgerType())
-                && Objects.equals(actual.getSubLedgerRef(), exp.getSubLedgerRef());
+        return Objects.equals(actual.getSubLedgerRef(), exp.getSubLedgerRef())
+                && Objects.equals(actual.getDirection(), exp.getDirection())
+                && actual.getAmount().compareTo(exp.getAmount()) == 0;
     }
 
     @Given("the following transaction record entries exist in db")

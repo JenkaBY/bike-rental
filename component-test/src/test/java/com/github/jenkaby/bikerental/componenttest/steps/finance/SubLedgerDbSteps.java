@@ -40,7 +40,7 @@ public class SubLedgerDbSteps {
     @Then("the following sub-ledger record(s) were/was persisted in db")
     public void theFollowingSubLedgerRecordsWerePersistedInDb(List<SubLedgerJpaEntity> expectedEntities) {
         var all = subLedgerJpaRepository.findAllInitialized();
-
+        log.info("Actual {}", all);
         var actualList = all.stream()
                 .filter(actual -> expectedEntities.stream()
                         .anyMatch(exp -> matches(actual, exp)))
@@ -96,11 +96,9 @@ public class SubLedgerDbSteps {
     }
 
     private boolean matches(SubLedgerJpaEntity actual, SubLedgerJpaEntity exp) {
-        if (exp.getId() != null) {
-            return Objects.equals(actual.getId(), exp.getId());
-        }
-        return Objects.equals(actual.getAccount().getId(), exp.getAccount().getId())
-                && Objects.equals(actual.getLedgerType(), exp.getLedgerType());
+
+        return Objects.equals(exp.getLedgerType(), actual.getLedgerType())
+                && Objects.equals(actual.getId(), exp.getId());
     }
 
     @After("@ReinitializeSystemLedgers")
