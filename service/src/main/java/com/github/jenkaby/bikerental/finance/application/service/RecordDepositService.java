@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
+import com.github.jenkaby.bikerental.finance.CustomerFundDeposited;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
@@ -8,6 +9,7 @@ import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,11 +24,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Service
 public class RecordDepositService implements RecordDepositUseCase {
+    private static final String FINANCE_EVENTS_EXCHANGER = "finance-events";
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
+    private final EventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -74,6 +78,13 @@ public class RecordDepositService implements RecordDepositUseCase {
                 .build();
 
         transactionRepository.save(transaction);
+
+        eventPublisher.publish(FINANCE_EVENTS_EXCHANGER, new CustomerFundDeposited(
+                command.customerId(),
+                transactionId,
+                command.operatorId(),
+                now
+        ));
 
         return new DepositResult(transactionId, now);
     }

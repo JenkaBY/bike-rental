@@ -5,12 +5,14 @@ import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper.RentalJpaMapper;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.repository.RentalJpaRepository;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,7 +51,7 @@ class RentalRepositoryAdapter implements RentalRepository {
     @Override
     public Page<Rental> findByStatus(RentalStatus status, PageRequest pageRequest) {
         var springPageRequest = pageMapper.toSpring(pageRequest);
-        var page = repository.findByStatus(status.name(), springPageRequest);
+        var page = repository.findByStatus(status, springPageRequest);
         return pageMapper.toDomain(page)
                 .map(mapper::toDomain);
     }
@@ -57,7 +59,7 @@ class RentalRepositoryAdapter implements RentalRepository {
     @Override
     public Page<Rental> findByStatusAndCustomerId(RentalStatus status, UUID customerId, PageRequest pageRequest) {
         var springPageRequest = pageMapper.toSpring(pageRequest);
-        var page = repository.findByStatusAndCustomerId(status.name(), customerId, springPageRequest);
+        var page = repository.findByStatusAndCustomerId(status, customerId, springPageRequest);
         return pageMapper.toDomain(page)
                 .map(mapper::toDomain);
     }
@@ -73,8 +75,17 @@ class RentalRepositoryAdapter implements RentalRepository {
     @Override
     public Page<Rental> findByStatusAndEquipmentUid(RentalStatus status, String equipmentUid, PageRequest pageRequest) {
         var springPageRequest = pageMapper.toSpring(pageRequest);
-        var page = repository.findByStatusAndEquipmentUid(status.name(), equipmentUid, springPageRequest);
+        var page = repository.findByStatusAndEquipmentUid(status, equipmentUid, springPageRequest);
         return pageMapper.toDomain(page)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Rental> getCustomerDebtRentals(CustomerRef customerRef) {
+        return repository
+                .findAllByCustomerIdAndStatusOrderByCreatedAtAsc(customerRef.id(), RentalStatus.DEBT)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }

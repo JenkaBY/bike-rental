@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity;
 
+import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Fetch;
@@ -34,8 +35,9 @@ public class RentalJpaEntity {
     @OneToMany(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RentalEquipmentJpaEntity> rentalEquipments = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String status;
+    private RentalStatus status;
 
     @Column(name = "started_at")
     private LocalDateTime startedAt;
