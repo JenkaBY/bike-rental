@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanc
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -17,30 +18,31 @@ public class SubLedger {
     @Setter(AccessLevel.PRIVATE)
     private Money balance;
     private Long version;
+    private Instant updatedAt;
 
     public TransactionRecordWithoutId credit(Money amount) {
-<span class="fc bfc" id="L22" title="All 2 branches covered.">        this.balance = this.ledgerType.isAssetLedger()</span>
-<span class="fc" id="L23">                ? this.balance.subtract(amount)</span>
-<span class="fc" id="L24">                : this.balance.add(amount);</span>
-<span class="fc" id="L25">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount);</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        this.balance = this.ledgerType.isAssetLedger()</span>
+<span class="fc" id="L25">                ? this.balance.subtract(amount)</span>
+<span class="fc" id="L26">                : this.balance.add(amount);</span>
+<span class="fc" id="L27">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount);</span>
     }
 
     private boolean isSufficientBalance(Money amount) {
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        return !this.balance.isLessThan(amount);</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        return !this.balance.isLessThan(amount);</span>
     }
 
     public TransactionRecordWithoutId debit(Money amount) {
-<span class="pc bpc" id="L33" title="1 of 4 branches missed.">        if (!this.ledgerType.isSystemLedger() &amp;&amp; !isSufficientBalance(amount)) {</span>
-<span class="nc" id="L34">            throw new InsufficientBalanceException(this.balance, amount);</span>
+<span class="pc bpc" id="L35" title="1 of 4 branches missed.">        if (!this.ledgerType.isSystemLedger() &amp;&amp; !isSufficientBalance(amount)) {</span>
+<span class="nc" id="L36">            throw new InsufficientBalanceException(this.balance, amount);</span>
         }
-<span class="fc bfc" id="L36" title="All 2 branches covered.">        this.balance = this.ledgerType.isAssetLedger()</span>
-<span class="fc" id="L37">                ? this.balance.add(amount)</span>
-<span class="fc" id="L38">                : this.balance.subtract(amount);</span>
-<span class="fc" id="L39">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.DEBIT, amount);</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        this.balance = this.ledgerType.isAssetLedger()</span>
+<span class="fc" id="L39">                ? this.balance.add(amount)</span>
+<span class="fc" id="L40">                : this.balance.subtract(amount);</span>
+<span class="fc" id="L41">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.DEBIT, amount);</span>
     }
 
     private SubLedgerRef toRef() {
-<span class="fc" id="L43">        return new SubLedgerRef(this.id);</span>
+<span class="fc" id="L45">        return new SubLedgerRef(this.id);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

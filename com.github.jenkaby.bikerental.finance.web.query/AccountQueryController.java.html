@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountQueryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.web.query</a> &gt; <span class="el_source">AccountQueryController.java</span></div><h1>AccountQueryController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.web.query;
+
+import com.github.jenkaby.bikerental.finance.application.usecase.GetCustomerAccountBalancesUseCase;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerAccountBalancesResponse;
+import com.github.jenkaby.bikerental.finance.web.query.mapper.AccountQueryMapper;
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
+
+@Validated
+@RestController
+@RequestMapping(&quot;/api/finance/customers&quot;)
+@Tag(name = OpenApiConfig.Tags.FINANCE)
+<span class="fc" id="L29">@Slf4j</span>
+public class AccountQueryController {
+
+    private final GetCustomerAccountBalancesUseCase getCustomerAccountBalancesUseCase;
+    private final AccountQueryMapper mapper;
+
+    public AccountQueryController(GetCustomerAccountBalancesUseCase getCustomerAccountBalancesUseCase,
+<span class="fc" id="L36">                                  AccountQueryMapper mapper) {</span>
+<span class="fc" id="L37">        this.getCustomerAccountBalancesUseCase = getCustomerAccountBalancesUseCase;</span>
+<span class="fc" id="L38">        this.mapper = mapper;</span>
+<span class="fc" id="L39">    }</span>
+
+    @GetMapping(&quot;/{customerId}/balances&quot;)
+    @Operation(summary = &quot;Retrieve customer account balances&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Account balances retrieved&quot;,
+                    content = @Content(schema = @Schema(implementation = CustomerAccountBalancesResponse.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Customer finance account not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid customer UUID format&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;CustomerAccountBalancesResponse&gt; getBalances(
+            @Parameter(description = &quot;Customer UUID&quot;) @PathVariable(&quot;customerId&quot;) UUID customerId) {
+<span class="fc" id="L53">        log.info(&quot;[GET] Retrieve balances for customerId={}&quot;, customerId);</span>
+<span class="fc" id="L54">        var result = getCustomerAccountBalancesUseCase.execute(customerId);</span>
+<span class="fc" id="L55">        return ResponseEntity.ok(mapper.toResponse(result));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

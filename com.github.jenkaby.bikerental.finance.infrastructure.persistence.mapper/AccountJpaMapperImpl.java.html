@@ -110,50 +110,51 @@ public class AccountJpaMapperImpl implements AccountJpaMapper {
 <span class="fc" id="L110">        subLedger.ledgerType( entity.getLedgerType() );</span>
 <span class="fc" id="L111">        subLedger.balance( moneyMapper.toMoney( entity.getBalance() ) );</span>
 <span class="fc" id="L112">        subLedger.version( entity.getVersion() );</span>
+<span class="fc" id="L113">        subLedger.updatedAt( entity.getUpdatedAt() );</span>
 
-<span class="fc" id="L114">        return subLedger.build();</span>
+<span class="fc" id="L115">        return subLedger.build();</span>
     }
 
     @Override
     public SubLedgerJpaEntity toEntity(SubLedger domain) {
-<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if ( domain == null ) {</span>
-<span class="nc" id="L120">            return null;</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if ( domain == null ) {</span>
+<span class="nc" id="L121">            return null;</span>
         }
 
-<span class="fc" id="L123">        SubLedgerJpaEntity.SubLedgerJpaEntityBuilder subLedgerJpaEntity = SubLedgerJpaEntity.builder();</span>
+<span class="fc" id="L124">        SubLedgerJpaEntity.SubLedgerJpaEntityBuilder subLedgerJpaEntity = SubLedgerJpaEntity.builder();</span>
 
-<span class="fc" id="L125">        subLedgerJpaEntity.id( domain.getId() );</span>
-<span class="fc" id="L126">        subLedgerJpaEntity.ledgerType( domain.getLedgerType() );</span>
-<span class="fc" id="L127">        subLedgerJpaEntity.balance( moneyMapper.toBigDecimal( domain.getBalance() ) );</span>
-<span class="fc" id="L128">        subLedgerJpaEntity.version( domain.getVersion() );</span>
+<span class="fc" id="L126">        subLedgerJpaEntity.id( domain.getId() );</span>
+<span class="fc" id="L127">        subLedgerJpaEntity.ledgerType( domain.getLedgerType() );</span>
+<span class="fc" id="L128">        subLedgerJpaEntity.balance( moneyMapper.toBigDecimal( domain.getBalance() ) );</span>
+<span class="fc" id="L129">        subLedgerJpaEntity.version( domain.getVersion() );</span>
 
-<span class="fc" id="L130">        return subLedgerJpaEntity.build();</span>
+<span class="fc" id="L131">        return subLedgerJpaEntity.build();</span>
     }
 
     protected List&lt;SubLedger&gt; subLedgerJpaEntityListToSubLedgerList(List&lt;SubLedgerJpaEntity&gt; list) {
-<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L135">            return null;</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L136">            return null;</span>
         }
 
-<span class="fc" id="L138">        List&lt;SubLedger&gt; list1 = new ArrayList&lt;SubLedger&gt;( list.size() );</span>
-<span class="fc bfc" id="L139" title="All 2 branches covered.">        for ( SubLedgerJpaEntity subLedgerJpaEntity : list ) {</span>
-<span class="fc" id="L140">            list1.add( toDomain( subLedgerJpaEntity ) );</span>
-<span class="fc" id="L141">        }</span>
+<span class="fc" id="L139">        List&lt;SubLedger&gt; list1 = new ArrayList&lt;SubLedger&gt;( list.size() );</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        for ( SubLedgerJpaEntity subLedgerJpaEntity : list ) {</span>
+<span class="fc" id="L141">            list1.add( toDomain( subLedgerJpaEntity ) );</span>
+<span class="fc" id="L142">        }</span>
 
-<span class="fc" id="L143">        return list1;</span>
+<span class="fc" id="L144">        return list1;</span>
     }
 
     protected List&lt;SubLedgerJpaEntity&gt; subLedgerListToSubLedgerJpaEntityList(List&lt;SubLedger&gt; list) {
-<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L148">            return null;</span>
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L149">            return null;</span>
         }
 
-<span class="fc" id="L151">        List&lt;SubLedgerJpaEntity&gt; list1 = new ArrayList&lt;SubLedgerJpaEntity&gt;( list.size() );</span>
-<span class="fc bfc" id="L152" title="All 2 branches covered.">        for ( SubLedger subLedger : list ) {</span>
-<span class="fc" id="L153">            list1.add( toEntity( subLedger ) );</span>
-<span class="fc" id="L154">        }</span>
+<span class="fc" id="L152">        List&lt;SubLedgerJpaEntity&gt; list1 = new ArrayList&lt;SubLedgerJpaEntity&gt;( list.size() );</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        for ( SubLedger subLedger : list ) {</span>
+<span class="fc" id="L154">            list1.add( toEntity( subLedger ) );</span>
+<span class="fc" id="L155">        }</span>
 
-<span class="fc" id="L156">        return list1;</span>
+<span class="fc" id="L157">        return list1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
