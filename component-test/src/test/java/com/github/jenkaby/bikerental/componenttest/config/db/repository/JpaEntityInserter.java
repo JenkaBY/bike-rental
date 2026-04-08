@@ -33,7 +33,7 @@ public class JpaEntityInserter {
 
     public <T> T insert(T entity, boolean resetSequence) {
         Objects.requireNonNull(entity, "Entity cannot be null");
-        log.info("Inserted entity {}", entity);
+        log.debug("Inserted entity {}", entity);
         Class<?> entityClass = entity.getClass();
         validateEntityClass(entityClass);
 
@@ -43,7 +43,7 @@ public class JpaEntityInserter {
         Field idField = extractIdField(entityClass);
 
         String sql = buildInsertSql(tableName, fields);
-        log.info("Generated SQL: {}", sql);
+        log.debug("Generated SQL: {}", sql);
 
         Object entityId = null;
         if (idField != null) {

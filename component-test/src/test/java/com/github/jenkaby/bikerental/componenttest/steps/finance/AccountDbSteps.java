@@ -41,7 +41,6 @@ public class AccountDbSteps {
     @Then("a customer finance account is created in db for the registered customer")
     public void aCustomerFinanceAccountIsCreatedInDbForTheRegisteredCustomer() {
         var actualCustomer = scenarioContext.getResponseBody(CustomerResponse.class);
-        ;
 
         assertThat(actualCustomer.id()).as("Customer ID in response must not be null").isNotNull();
 

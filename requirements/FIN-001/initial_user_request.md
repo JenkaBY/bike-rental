@@ -182,3 +182,19 @@ is again rejected due to insufficient funds, the rental remains `DEBT` and proce
 required in the Finance module beyond publishing the new event.
 
 **Formalised as:** `FR-FIN-08` (updated), `FR-FIN-12` (new).
+
+---
+
+## Additional change request (2026-04-07) — Retrieve customer account balances
+
+**Request:** Staff need an API endpoint to view a customer's wallet and hold balances before performing a deposit,
+withdrawal, or rental.
+
+**Decision:** A new read-only query endpoint `GET /api/finance/customers/{customerId}/balances` is added to the
+Finance module. The response exposes ledger-scoped fields: `walletBalance` (from `CUSTOMER_WALLET`),
+`holdBalance` (from `CUSTOMER_HOLD`), and `lastUpdatedAt` (timestamp of the most recent ledger mutation, `null`
+if no transactions). No `totalBalance` is returned. A customer with no transactions returns zero balances and
+`null` timestamp. Unknown customer UUID returns `404`. Invalid UUID format returns `400`. No ledger entries are
+created or mutated.
+
+**Formalised as:** `FR-FIN-13` (new).
