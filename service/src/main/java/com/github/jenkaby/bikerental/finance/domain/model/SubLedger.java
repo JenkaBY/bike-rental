@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanc
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -17,6 +18,7 @@ public class SubLedger {
     @Setter(AccessLevel.PRIVATE)
     private Money balance;
     private Long version;
+    private Instant updatedAt;
 
     public TransactionRecordWithoutId credit(Money amount) {
         this.balance = this.ledgerType.isAssetLedger()
