@@ -5,6 +5,8 @@ import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentB
 import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentByUidUseCase;
 import com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
+import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
+import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
 import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentResponse;
 import com.github.jenkaby.bikerental.equipment.web.query.mapper.EquipmentQueryMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
@@ -27,7 +29,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Validated
-<span class="fc" id="L30">@Slf4j</span>
+<span class="fc" id="L32">@Slf4j</span>
 @RestController
 @RequestMapping(&quot;/api/equipments&quot;)
 @Tag(name = OpenApiConfig.Tags.EQUIPMENT)
@@ -44,13 +46,13 @@ public class EquipmentQueryController {
                              GetEquipmentByUidUseCase getByUid,
                              GetEquipmentBySerialNumberUseCase getBySerial,
                              SearchEquipmentsUseCase searchUseCase,
-<span class="fc" id="L47">                             EquipmentQueryMapper mapper) {</span>
-<span class="fc" id="L48">        this.getById = getById;</span>
-<span class="fc" id="L49">        this.getByUid = getByUid;</span>
-<span class="fc" id="L50">        this.getBySerial = getBySerial;</span>
-<span class="fc" id="L51">        this.searchUseCase = searchUseCase;</span>
-<span class="fc" id="L52">        this.mapper = mapper;</span>
-<span class="fc" id="L53">    }</span>
+<span class="fc" id="L49">                             EquipmentQueryMapper mapper) {</span>
+<span class="fc" id="L50">        this.getById = getById;</span>
+<span class="fc" id="L51">        this.getByUid = getByUid;</span>
+<span class="fc" id="L52">        this.getBySerial = getBySerial;</span>
+<span class="fc" id="L53">        this.searchUseCase = searchUseCase;</span>
+<span class="fc" id="L54">        this.mapper = mapper;</span>
+<span class="fc" id="L55">    }</span>
 
     @GetMapping(&quot;/{id}&quot;)
     @Operation(summary = &quot;Get equipment by ID&quot;)
@@ -62,11 +64,11 @@ public class EquipmentQueryController {
     })
     public ResponseEntity&lt;EquipmentResponse&gt; getEquipmentById(
             @Parameter(description = &quot;Equipment ID&quot;, example = &quot;1&quot;) @PathVariable(&quot;id&quot;) Long id) {
-<span class="fc" id="L65">        log.info(&quot;[GET] Get equipment by id {}&quot;, id);</span>
-<span class="fc" id="L66">        return getById.execute(id)</span>
-<span class="fc" id="L67">                .map(mapper::toResponse)</span>
-<span class="fc" id="L68">                .map(ResponseEntity::ok)</span>
-<span class="fc" id="L69">                .orElseThrow(() -&gt; new ResourceNotFoundException(Equipment.class, id));</span>
+<span class="fc" id="L67">        log.info(&quot;[GET] Get equipment by id {}&quot;, id);</span>
+<span class="fc" id="L68">        return getById.execute(id)</span>
+<span class="fc" id="L69">                .map(mapper::toResponse)</span>
+<span class="fc" id="L70">                .map(ResponseEntity::ok)</span>
+<span class="fc" id="L71">                .orElseThrow(() -&gt; new ResourceNotFoundException(Equipment.class, id));</span>
     }
 
     @GetMapping(&quot;/by-uid/{uid}&quot;)
@@ -79,11 +81,11 @@ public class EquipmentQueryController {
     })
     public ResponseEntity&lt;EquipmentResponse&gt; getEquipmentByUid(
             @Parameter(description = &quot;Equipment UID&quot;, example = &quot;BIKE-001&quot;) @PathVariable(&quot;uid&quot;) String uid) {
-<span class="fc" id="L82">        log.info(&quot;[GET] Get equipment by uid {}&quot;, uid);</span>
-<span class="fc" id="L83">        var result = getByUid.execute(new com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid(uid));</span>
-<span class="fc" id="L84">        return result.map(mapper::toResponse)</span>
-<span class="fc" id="L85">                .map(ResponseEntity::ok)</span>
-<span class="fc" id="L86">                .orElseThrow(() -&gt; new ResourceNotFoundException(Equipment.class, uid));</span>
+<span class="fc" id="L84">        log.info(&quot;[GET] Get equipment by uid {}&quot;, uid);</span>
+<span class="fc" id="L85">        var result = getByUid.execute(new Uid(uid));</span>
+<span class="fc" id="L86">        return result.map(mapper::toResponse)</span>
+<span class="fc" id="L87">                .map(ResponseEntity::ok)</span>
+<span class="fc" id="L88">                .orElseThrow(() -&gt; new ResourceNotFoundException(Equipment.class, uid));</span>
     }
 
     @GetMapping(&quot;/by-serial/{serialNumber}&quot;)
@@ -96,11 +98,11 @@ public class EquipmentQueryController {
     })
     public ResponseEntity&lt;EquipmentResponse&gt; getEquipmentBySerial(
             @Parameter(description = &quot;Serial number&quot;, example = &quot;SN-123456&quot;) @PathVariable(&quot;serialNumber&quot;) String serialNumber) {
-<span class="fc" id="L99">        log.info(&quot;[GET] Get equipment by serial number{}&quot;, serialNumber);</span>
-<span class="fc" id="L100">        var result = getBySerial.execute(new com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber(serialNumber));</span>
-<span class="fc" id="L101">        return result.map(mapper::toResponse)</span>
-<span class="fc" id="L102">                .map(ResponseEntity::ok)</span>
-<span class="fc" id="L103">                .orElseThrow(() -&gt; new ResourceNotFoundException(Equipment.class, serialNumber));</span>
+<span class="fc" id="L101">        log.info(&quot;[GET] Get equipment by serial number{}&quot;, serialNumber);</span>
+<span class="fc" id="L102">        var result = getBySerial.execute(new SerialNumber(serialNumber));</span>
+<span class="fc" id="L103">        return result.map(mapper::toResponse)</span>
+<span class="fc" id="L104">                .map(ResponseEntity::ok)</span>
+<span class="fc" id="L105">                .orElseThrow(() -&gt; new ResourceNotFoundException(Equipment.class, serialNumber));</span>
     }
 
     @GetMapping
@@ -115,10 +117,10 @@ public class EquipmentQueryController {
             @Parameter(description = &quot;Type slug filter&quot;, example = &quot;bike&quot;) @RequestParam(name = &quot;type&quot;, required = false) String type,
             @PageableDefault(size = 20, sort = &quot;serialNumber&quot;, direction = Sort.Direction.ASC) Pageable pageable) {
 
-<span class="fc" id="L118">        log.info(&quot;[GET] Search equipments filters status={} type={}&quot;, status, type);</span>
-<span class="fc" id="L119">        var query = mapper.toSearchQuery(status, type, pageable);</span>
-<span class="fc" id="L120">        var page = searchUseCase.execute(query).map(mapper::toResponse);</span>
-<span class="fc" id="L121">        return ResponseEntity.ok(page);</span>
+<span class="fc" id="L120">        log.info(&quot;[GET] Search equipments filters status={} type={}&quot;, status, type);</span>
+<span class="fc" id="L121">        var query = mapper.toSearchQuery(status, type, pageable);</span>
+<span class="fc" id="L122">        var page = searchUseCase.execute(query).map(mapper::toResponse);</span>
+<span class="fc" id="L123">        return ResponseEntity.ok(page);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

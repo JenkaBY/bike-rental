@@ -18,7 +18,7 @@ public interface TransactionJpaMapper {
     TransactionJpaEntity toEntity(Transaction domain);
 
     @AfterMapping
-    default void setTransactionRelationships(Transaction domain, @MappingTarget TransactionJpaEntity result) {
+    default void setTransactionRelationships(@MappingTarget TransactionJpaEntity result) {
 <span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (result.getRecords() != null) {</span>
 <span class="fc" id="L23">            result.getRecords().forEach(rec -&gt; rec.setTransaction(result));</span>
         }

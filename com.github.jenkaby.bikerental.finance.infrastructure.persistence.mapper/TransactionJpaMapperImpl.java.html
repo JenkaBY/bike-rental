@@ -78,7 +78,7 @@ public class TransactionJpaMapperImpl implements TransactionJpaMapper {
 
 <span class="fc" id="L79">        TransactionJpaEntity transactionJpaEntityResult = transactionJpaEntity.build();</span>
 
-<span class="fc" id="L81">        setTransactionRelationships( domain, transactionJpaEntityResult );</span>
+<span class="fc" id="L81">        setTransactionRelationships( transactionJpaEntityResult );</span>
 
 <span class="fc" id="L83">        return transactionJpaEntityResult;</span>
     }

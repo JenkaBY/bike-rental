@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.infrastructure.persistence.adapter</a> &gt; <span class="el_source">TransactionRepositoryAdapter.java</span></div><h1>TransactionRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.infrastructure.persistence.adapter;
 
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.TransactionJpaMapper;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.repository.TransactionJpaRepository;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification.CustomerTransactionsSpec;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification.SpecConstant;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import lombok.extern.slf4j.Slf4j;
+import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,46 +24,65 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+<span class="fc" id="L27">@Slf4j</span>
 @Repository
 class TransactionRepositoryAdapter implements TransactionRepository {
 
     private final TransactionJpaRepository jpaRepository;
     private final TransactionJpaMapper mapper;
 
-<span class="fc" id="L25">    TransactionRepositoryAdapter(TransactionJpaRepository jpaRepository, TransactionJpaMapper mapper) {</span>
-<span class="fc" id="L26">        this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L27">        this.mapper = mapper;</span>
-<span class="fc" id="L28">    }</span>
+<span class="fc" id="L34">    TransactionRepositoryAdapter(TransactionJpaRepository jpaRepository, TransactionJpaMapper mapper) {</span>
+<span class="fc" id="L35">        this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L36">        this.mapper = mapper;</span>
+<span class="fc" id="L37">    }</span>
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public Transaction save(Transaction transaction) {
-<span class="fc" id="L33">        var entity = mapper.toEntity(transaction);</span>
-<span class="fc" id="L34">        var saved = jpaRepository.save(entity);</span>
-<span class="fc" id="L35">        return mapper.toDomain(saved);</span>
+<span class="fc" id="L42">        var entity = mapper.toEntity(transaction);</span>
+<span class="fc" id="L43">        var saved = jpaRepository.save(entity);</span>
+<span class="fc" id="L44">        return mapper.toDomain(saved);</span>
     }
 
     @Override
     public Optional&lt;Transaction&gt; findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, CustomerRef customerId) {
-<span class="fc" id="L40">        return jpaRepository.findByIdempotencyKeyAndCustomerId(idempotencyKey.id(), customerId.id())</span>
-<span class="fc" id="L41">                .map(mapper::toDomain);</span>
+<span class="fc" id="L49">        return jpaRepository.findByIdempotencyKeyAndCustomerId(idempotencyKey.id(), customerId.id())</span>
+<span class="fc" id="L50">                .map(mapper::toDomain);</span>
     }
 
     @Override
     public Optional&lt;Transaction&gt; findByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
-<span class="nc" id="L46">        return findAllByRentalRefAndType(rentalRef, type).stream()</span>
-<span class="nc" id="L47">                .findFirst();</span>
+<span class="nc" id="L55">        return findAllByRentalRefAndType(rentalRef, type).stream()</span>
+<span class="nc" id="L56">                .findFirst();</span>
     }
 
     @Override
     public List&lt;Transaction&gt; findAllByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
-<span class="fc" id="L52">        return jpaRepository.findAllBySourceTypeAndSourceIdAndTransactionType(</span>
+<span class="fc" id="L61">        return jpaRepository.findAllBySourceTypeAndSourceIdAndTransactionType(</span>
                         TransactionSourceType.RENTAL,
-<span class="fc" id="L54">                        String.valueOf(rentalRef.id()),</span>
+<span class="fc" id="L63">                        String.valueOf(rentalRef.id()),</span>
                         type)
-<span class="fc" id="L56">                .stream()</span>
-<span class="fc" id="L57">                .map(mapper::toDomain)</span>
-<span class="fc" id="L58">                .toList();</span>
+<span class="fc" id="L65">                .stream()</span>
+<span class="fc" id="L66">                .map(mapper::toDomain)</span>
+<span class="fc" id="L67">                .toList();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page&lt;Transaction&gt; findTransactionHistory(CustomerRef customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
+<span class="fc" id="L73">        var pageable = org.springframework.data.domain.PageRequest.of(pageRequest.page(), pageRequest.size(),</span>
+<span class="fc" id="L74">                Sort.by(Sort.Direction.DESC, SpecConstant.TransactionField.RECORDED_AT));</span>
+
+<span class="fc" id="L76">        var txnSpec = SpecificationBuilder.specification(CustomerTransactionsSpec.class)</span>
+<span class="fc" id="L77">                .withParam(SpecConstant.TransactionField.CUSTOMER_ID, customerId.id().toString());</span>
+<span class="fc" id="L78">        filter.toMap().forEach(txnSpec::withParam);</span>
+<span class="fc" id="L79">        var spec = txnSpec.build();</span>
+
+<span class="fc" id="L81">        var springPage = jpaRepository.findAll(spec, pageable);</span>
+<span class="fc" id="L82">        var items = springPage.getContent().stream()</span>
+<span class="fc" id="L83">                .map(mapper::toDomain)</span>
+<span class="fc" id="L84">                .toList();</span>
+<span class="fc" id="L85">        return new Page&lt;&gt;(items, springPage.getTotalElements(), pageRequest);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

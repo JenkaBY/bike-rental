@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GetTransactionHistoryService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.application.service</a> &gt; <span class="el_source">GetTransactionHistoryService.java</span></div><h1>GetTransactionHistoryService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.application.service;
+
+import com.github.jenkaby.bikerental.finance.application.mapper.TransactionMapper;
+import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionHistoryUseCase;
+import com.github.jenkaby.bikerental.finance.domain.model.CustomerAccount;
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
+import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
+import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+class GetTransactionHistoryService implements GetTransactionHistoryUseCase {
+
+    private final TransactionRepository transactionRepository;
+    private final AccountRepository accountRepository;
+    private final TransactionMapper transactionMapper;
+
+    @Override
+    public Page&lt;TransactionDto&gt; execute(UUID customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
+<span class="fc" id="L30">        var customerRef = CustomerRef.of(customerId);</span>
+<span class="fc" id="L31">        accountRepository.findByCustomerId(customerRef)</span>
+<span class="fc" id="L32">                .orElseThrow(() -&gt; new ResourceNotFoundException(CustomerAccount.class, customerId));</span>
+
+<span class="fc" id="L34">        Page&lt;Transaction&gt; page = transactionRepository.findTransactionHistory(customerRef, filter, pageRequest);</span>
+
+<span class="fc" id="L36">        List&lt;TransactionDto&gt; entries = page.items().stream()</span>
+<span class="fc" id="L37">                .map(transactionMapper::toEntry)</span>
+<span class="fc" id="L38">                .toList();</span>
+
+<span class="fc" id="L40">        return new Page&lt;&gt;(entries, page.totalItems(), pageRequest);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

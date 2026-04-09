@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.application.mapper</a> &gt; <span class="el_source">TransactionMapperImpl.java</span></div><h1>TransactionMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.application.mapper;
+
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
+import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionHistoryUseCase;
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
+)
+@Component
+public class TransactionMapperImpl implements TransactionMapper {
+
+    private final MoneyMapper moneyMapper;
+
+    @Autowired
+<span class="fc" id="L26">    public TransactionMapperImpl(MoneyMapper moneyMapper) {</span>
+
+<span class="fc" id="L28">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    public GetTransactionHistoryUseCase.TransactionDto toEntry(Transaction tx) {
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if ( tx == null ) {</span>
+<span class="nc" id="L34">            return null;</span>
+        }
+
+<span class="fc" id="L37">        UUID customerId = null;</span>
+<span class="fc" id="L38">        BigDecimal amount = null;</span>
+<span class="fc" id="L39">        TransactionType type = null;</span>
+<span class="fc" id="L40">        Instant recordedAt = null;</span>
+<span class="fc" id="L41">        PaymentMethod paymentMethod = null;</span>
+<span class="fc" id="L42">        String reason = null;</span>
+<span class="fc" id="L43">        TransactionSourceType sourceType = null;</span>
+<span class="fc" id="L44">        String sourceId = null;</span>
+
+<span class="fc" id="L46">        customerId = tx.getCustomerId();</span>
+<span class="fc" id="L47">        amount = moneyMapper.toBigDecimal( tx.getAmount() );</span>
+<span class="fc" id="L48">        type = tx.getType();</span>
+<span class="fc" id="L49">        recordedAt = tx.getRecordedAt();</span>
+<span class="fc" id="L50">        paymentMethod = tx.getPaymentMethod();</span>
+<span class="fc" id="L51">        reason = tx.getReason();</span>
+<span class="fc" id="L52">        sourceType = tx.getSourceType();</span>
+<span class="fc" id="L53">        sourceId = tx.getSourceId();</span>
+
+<span class="fc" id="L55">        GetTransactionHistoryUseCase.TransactionDto transactionDto = new GetTransactionHistoryUseCase.TransactionDto( customerId, amount, type, recordedAt, paymentMethod, reason, sourceType, sourceId );</span>
+
+<span class="fc" id="L57">        return transactionDto;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
