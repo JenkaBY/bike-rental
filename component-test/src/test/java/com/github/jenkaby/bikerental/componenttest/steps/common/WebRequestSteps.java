@@ -63,8 +63,16 @@ public class WebRequestSteps {
 
     @When("a {httpMethod} request has been made to {string} endpoint with")
     public void requestHasBeenMadeToEndpointWith(HttpMethod method, String endpoint, @Transpose DataTable dataTable) {
+        endpoint = normalizeEndpoint(endpoint, dataTable);
+        requestHasBeenMadeToEndpointTimes(method, 1, endpoint, null);
+    }
+
+    private static String normalizeEndpoint(String endpoint, DataTable dataTable) {
         Map<String, String> pathParams = dataTable.asMap();
         for (String token : pathParams.keySet()) {
+            if (!token.startsWith("{")) {
+                continue;
+            }
             if (!endpoint.contains(token)) {
                 throw new IllegalArgumentException("Endpoint " + endpoint + " must contain token " + token + " to be replaced. Whether remove token from table or add it to endpoint.");
             }
@@ -72,7 +80,7 @@ public class WebRequestSteps {
             var partialPath = Optional.ofNullable(Aliases.getValue(alias)).orElse(alias);
             endpoint = endpoint.replace(token, partialPath);
         }
-        requestHasBeenMadeToEndpointTimes(method, 1, endpoint, null);
+        return endpoint;
     }
 
     @When("a {httpMethod} request has been made to {string} endpoint with context")
@@ -97,6 +105,7 @@ public class WebRequestSteps {
     public void requestHasBeenMadeToEndpointWithQueryParams(HttpMethod method,
                                                             String endpoint,
                                                             @Transpose DataTable queryParams) {
+        endpoint = normalizeEndpoint(endpoint, queryParams);
         requestHasBeenMadeToEndpointTimes(method, 1, endpoint, queryParams);
     }
 
@@ -111,7 +120,12 @@ public class WebRequestSteps {
         Optional.ofNullable(queryParams)
                 .map(DataTable::asMap)
                 .orElse(Map.of())
-                .forEach((key, value) -> uriBuilder.queryParam(key, Aliases.getValueOrDefault(value)));
+                .forEach((key, value) -> {
+                    if (key.startsWith("{") && key.endsWith("}")) {
+                        return;
+                    }
+                    uriBuilder.queryParam(key, Aliases.getValueOrDefault(value));
+                });
         var uri = uriBuilder.build().toUri();
 
         var response = IntStream.range(0, times).mapToObj(i -> restClient.exchange(uri, method, request, String.class))
