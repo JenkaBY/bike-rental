@@ -18,7 +18,7 @@ public interface TransactionJpaMapper {
     TransactionJpaEntity toEntity(Transaction domain);
 
     @AfterMapping
-    default void setTransactionRelationships(Transaction domain, @MappingTarget TransactionJpaEntity result) {
+    default void setTransactionRelationships(@MappingTarget TransactionJpaEntity result) {
         if (result.getRecords() != null) {
             result.getRecords().forEach(rec -> rec.setTransaction(result));
         }

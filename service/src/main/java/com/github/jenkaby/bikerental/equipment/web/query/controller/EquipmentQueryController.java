@@ -5,6 +5,8 @@ import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentB
 import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentByUidUseCase;
 import com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
+import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
+import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
 import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentResponse;
 import com.github.jenkaby.bikerental.equipment.web.query.mapper.EquipmentQueryMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
@@ -80,7 +82,7 @@ public class EquipmentQueryController {
     public ResponseEntity<EquipmentResponse> getEquipmentByUid(
             @Parameter(description = "Equipment UID", example = "BIKE-001") @PathVariable("uid") String uid) {
         log.info("[GET] Get equipment by uid {}", uid);
-        var result = getByUid.execute(new com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid(uid));
+        var result = getByUid.execute(new Uid(uid));
         return result.map(mapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException(Equipment.class, uid));
@@ -97,7 +99,7 @@ public class EquipmentQueryController {
     public ResponseEntity<EquipmentResponse> getEquipmentBySerial(
             @Parameter(description = "Serial number", example = "SN-123456") @PathVariable("serialNumber") String serialNumber) {
         log.info("[GET] Get equipment by serial number{}", serialNumber);
-        var result = getBySerial.execute(new com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber(serialNumber));
+        var result = getBySerial.execute(new SerialNumber(serialNumber));
         return result.map(mapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException(Equipment.class, serialNumber));

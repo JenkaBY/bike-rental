@@ -10,6 +10,7 @@ springdoc = '3.0.2'
 archunit = '1.4.1'
 java = "21"
 uuidV7Generator = '6.1.1'
+specification-arg-resolver = '4.0.0'
 jacoco = "0.8.14"
 
 [libraries]
@@ -47,6 +48,7 @@ spring-boot-configuration-processor = { module = "org.springframework.boot:sprin
 postgresql = { module = "org.postgresql:postgresql" }
 
 uuid-v7-generator = { module = "com.github.f4b6a3:uuid-creator", version.ref = 'uuidV7Generator' }
+specification-arg-resolver = { module = "net.kaczmarzyk:specification-arg-resolver", version.ref = "specification-arg-resolver" }
 
 # Test libs
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
