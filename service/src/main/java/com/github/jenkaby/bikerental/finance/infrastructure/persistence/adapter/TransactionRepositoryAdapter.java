@@ -1,24 +1,30 @@
 package com.github.jenkaby.bikerental.finance.infrastructure.persistence.adapter;
 
-import com.github.jenkaby.bikerental.finance.domain.model.*;
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
-import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.TransactionJpaEntity;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.TransactionJpaMapper;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.repository.TransactionJpaRepository;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification.CustomerTransactionsSpec;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification.SpecConstant;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
-import jakarta.persistence.criteria.JoinType;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import lombok.extern.slf4j.Slf4j;
+import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Repository
 class TransactionRepositoryAdapter implements TransactionRepository {
 
@@ -63,50 +69,19 @@ class TransactionRepositoryAdapter implements TransactionRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public com.github.jenkaby.bikerental.shared.domain.model.vo.Page<Transaction> findTransactionHistory(
-            CustomerRef customerId,
-            TransactionHistoryFilter filter,
-            com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest pageRequest) {
-        var pageable = org.springframework.data.domain.PageRequest.of(
-                pageRequest.page(),
-                pageRequest.size(),
-                Sort.by(Sort.Direction.DESC, "recordedAt"));
+    public Page<Transaction> findTransactionHistory(CustomerRef customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
+        var pageable = org.springframework.data.domain.PageRequest.of(pageRequest.page(), pageRequest.size(),
+                Sort.by(Sort.Direction.DESC, SpecConstant.TransactionField.RECORDED_AT));
 
-        Specification<TransactionJpaEntity> spec =
-                customerSubLedgerScope(customerId).and(filterSpec(filter));
+        var txnSpec = SpecificationBuilder.specification(CustomerTransactionsSpec.class)
+                .withParam(SpecConstant.TransactionField.CUSTOMER_ID, customerId.id().toString());
+        filter.toMap().forEach(txnSpec::withParam);
+        var spec = txnSpec.build();
 
         var springPage = jpaRepository.findAll(spec, pageable);
-        var items = springPage.getContent().stream().map(mapper::toDomain).toList();
-        return new com.github.jenkaby.bikerental.shared.domain.model.vo.Page<>(items, springPage.getTotalElements(), pageRequest);
-    }
-
-    private static Specification<TransactionJpaEntity> customerSubLedgerScope(CustomerRef customerId) {
-        return (root, query, cb) -> {
-            var customerPredicate = cb.equal(root.get("customerId"), customerId.id());
-
-            var recordsJoin = root.join("records", JoinType.INNER);
-            var customerLedgerTypes = List.of(LedgerType.CUSTOMER_WALLET, LedgerType.CUSTOMER_HOLD);
-            var ledgerPredicate = recordsJoin.get("ledgerType").in(customerLedgerTypes);
-            return cb.and(customerPredicate, ledgerPredicate);
-        };
-    }
-
-    private static Specification<TransactionJpaEntity> filterSpec(TransactionHistoryFilter filter) {
-        Specification<TransactionJpaEntity> spec = (root, query, cb) -> null;
-        if (filter.fromDate() != null) {
-            var from = filter.fromDate().atStartOfDay().toInstant(ZoneOffset.UTC);
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("recordedAt"), from));
-        }
-        if (filter.toDate() != null) {
-            var to = filter.toDate().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-            spec = spec.and((root, query, cb) -> cb.lessThan(root.get("recordedAt"), to));
-        }
-        if (filter.sourceId() != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("sourceId"), filter.sourceId()));
-        }
-        if (filter.sourceType() != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("sourceType"), filter.sourceType()));
-        }
-        return spec;
+        var items = springPage.getContent().stream()
+                .map(mapper::toDomain)
+                .toList();
+        return new Page<>(items, springPage.getTotalElements(), pageRequest);
     }
 }
