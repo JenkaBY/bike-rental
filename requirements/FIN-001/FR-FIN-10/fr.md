@@ -20,6 +20,13 @@
       of entries.
     * The customer's finance account must exist; querying for an unknown customer returns a "not found" error.
     * Access to another customer's history is not permitted; access control is enforced at the API level.
+* **Optional Filters:** The caller may supply any combination of the following filter parameters. When multiple filters
+  are provided they combine with AND logic. Omitting a filter does not restrict results for that dimension.
+    * `fromDate` — include only entries whose recorded date is on or after this date (date only, inclusive).
+    * `toDate` — include only entries whose recorded date is on or before this date (date only, inclusive).
+    * `sourceId` — include only entries whose source identifier matches this value exactly.
+    * `sourceType` — include only entries whose source type matches this value. Supplying an unrecognised source type
+      value is rejected with a validation error. Currently the only supported value is `RENTAL`.
 
 ## 3. Non-Functional Requirements (NFRs)
 
@@ -64,8 +71,45 @@
 * **Then** the entry includes: sub-ledger name, amount, direction, transaction type, timestamp, and payment method
   metadata
 
+**Scenario 6: Filter by date range returns only entries within the range**
+
+* **Given** a customer with journal entries recorded across multiple dates
+* **When** an authorized user queries the history with `fromDate` = D1 and `toDate` = D2
+* **Then** only entries whose recorded date falls within [D1, D2] inclusive are returned
+* **And** entries outside that date range are excluded
+
+**Scenario 7: Filter by sourceType returns only matching entries**
+
+* **Given** a customer with journal entries of different source types
+* **When** an authorized user queries the history with `sourceType` = `RENTAL`
+* **Then** only entries with source type `RENTAL` are returned
+
+**Scenario 8: Filter by sourceId returns only entries linked to that source**
+
+* **Given** a customer with journal entries linked to different source identifiers
+* **When** an authorized user queries the history with a specific `sourceId`
+* **Then** only entries whose source identifier matches that value are returned
+
+**Scenario 9: Combined filters apply AND logic**
+
+* **Given** a customer with journal entries covering various dates and source types
+* **When** an authorized user queries with `fromDate`, `toDate`, and `sourceType` = `RENTAL`
+* **Then** only entries that satisfy all three conditions simultaneously are returned
+
+**Scenario 10: Invalid sourceType value is rejected**
+
+* **Given** an authorized user supplies an unrecognised value for `sourceType`
+* **When** the history is queried
+* **Then** the request is rejected with a validation error identifying `sourceType` as the invalid field
+
+**Scenario 11: No filters provided — full history returned**
+
+* **Given** a customer with existing journal entries and no filter parameters supplied
+* **When** an authorized user queries the transaction history
+* **Then** all entries are returned paginated in reverse-chronological order, matching prior behaviour
+
 ## 5. Out of Scope
 
 * Querying System Account ledger entries (admin-only capability, not in this story).
-* Filtering or searching by transaction type, date range, or amount (may be added in a future story).
+* Filtering by transaction type or amount (may be added in a future story).
 * CSV/export functionality for the transaction history.
