@@ -56,6 +56,12 @@
                      tableName="finance_transactions">
             <column name="customer_id"/>
         </createIndex>
+
+        <createIndex indexName="idx_finance_transactions_customer_id_recorded_at"
+                     tableName="finance_transactions">
+            <column name="customer_id"/>
+            <column name="recorded_at" descending="true"/>
+        </createIndex>
     </changeSet>
 
 </databaseChangeLog>

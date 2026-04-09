@@ -65,9 +65,9 @@ public class TransactionRecordDbSteps {
             softly.assertThat(actual.getTransaction().getId()).as("Transaction id").isNotNull();
         }
 
-        if (exp.getSubLedgerRef() != null) {
-            softly.assertThat(actual.getSubLedgerRef()).as("SubLedgerRef")
-                    .isEqualTo(exp.getSubLedgerRef());
+        if (exp.getSubLedgerId() != null) {
+            softly.assertThat(actual.getSubLedgerId()).as("SubLedgerRef")
+                    .isEqualTo(exp.getSubLedgerId());
         }
 
         softly.assertThat(actual.getLedgerType()).as("Ledger type")
@@ -81,7 +81,7 @@ public class TransactionRecordDbSteps {
     }
 
     private static boolean matches(TransactionRecordJpaEntity actual, TransactionRecordJpaEntity exp) {
-        return Objects.equals(actual.getSubLedgerRef(), exp.getSubLedgerRef())
+        return Objects.equals(actual.getSubLedgerId(), exp.getSubLedgerId())
                 && Objects.equals(actual.getDirection(), exp.getDirection())
                 && actual.getAmount().compareTo(exp.getAmount()) == 0;
     }

@@ -2,8 +2,6 @@ package com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity;
 
 import com.github.jenkaby.bikerental.finance.domain.model.EntryDirection;
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
-import com.github.jenkaby.bikerental.finance.domain.model.SubLedgerRef;
-import com.github.jenkaby.bikerental.finance.infrastructure.persistence.converter.SubLedgerRefConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,9 +25,8 @@ public class TransactionRecordJpaEntity {
     @JoinColumn(name = "transaction_id", nullable = false)
     private TransactionJpaEntity transaction;
 
-    @Convert(converter = SubLedgerRefConverter.class)
     @Column(name = "sub_ledger_id", nullable = false)
-    private SubLedgerRef subLedgerRef;
+    private UUID subLedgerId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ledger_type", nullable = false, length = 30)

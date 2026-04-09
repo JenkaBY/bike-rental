@@ -19,7 +19,7 @@ public class TransactionJpaEntityTransformer {
         TransactionJpaEntity entity = new TransactionJpaEntity();
 
         var idString = DataTableHelper.getStringOrNull(entry, "id");
-        entity.setId(idString == null ? null : UUID.fromString(idString));
+        entity.setId(idString == null ? null : Aliases.getUuid(idString));
 
         entity.setTransactionType(TransactionType.valueOf(DataTableHelper.getStringOrNull(entry, "type")));
 
@@ -34,7 +34,8 @@ public class TransactionJpaEntityTransformer {
             entity.setSourceType(TransactionSourceType.valueOf(sourceType));
         }
 
-        entity.setSourceId(DataTableHelper.getStringOrNull(entry, "sourceId"));
+        String sourceIdStr = DataTableHelper.getStringOrNull(entry, "sourceId");
+        entity.setSourceId(sourceIdStr != null ? Aliases.getValueOrDefault(sourceIdStr) : null);
 
         Instant recordedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "recordedAt");
         entity.setRecordedAt(recordedAt);
