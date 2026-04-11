@@ -18,4 +18,7 @@ public interface TransactionJpaRepository extends JpaRepository<TransactionJpaEn
 
     List<TransactionJpaEntity> findAllBySourceTypeAndSourceIdAndTransactionType(
             TransactionSourceType sourceType, String sourceId, TransactionType transactionType);
+
+    boolean existsBySourceTypeAndSourceIdAndTransactionType(
+            TransactionSourceType sourceType, String sourceId, TransactionType transactionType);
 }

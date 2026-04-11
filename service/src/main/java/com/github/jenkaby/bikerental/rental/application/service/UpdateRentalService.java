@@ -7,9 +7,9 @@ import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.domain.exception.HoldRequiredException;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalPlannedDurationException;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
-import com.github.jenkaby.bikerental.rental.domain.exception.PrepaymentRequiredException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
@@ -148,8 +148,8 @@ class UpdateRentalService implements UpdateRentalUseCase {
     }
 
     private void startRental(Rental rental) {
-        if (!financeFacade.hasPrepayment(rental.getId())) {
-            throw new PrepaymentRequiredException(rental.getId());
+        if (rental.getEstimatedCost().isPositive() && !financeFacade.hasHold(rental.toRentalRef())) {
+            throw new HoldRequiredException(rental.getId());
         }
 
         // Activate rental (validations are performed in Rental.activate())

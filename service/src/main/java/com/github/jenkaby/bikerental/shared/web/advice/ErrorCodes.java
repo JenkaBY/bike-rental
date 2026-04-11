@@ -20,4 +20,6 @@ public class ErrorCodes {
     public static final String INSUFFICIENT_BALANCE = "finance.insufficient_balance";
     public static final String OVER_BUDGET_SETTLEMENT = "finance.over_budget_settlement";
     public static final String INSUFFICIENT_HOLD = "finance.insufficient_hold";
+    public static final String INSUFFICIENT_FUNDS = "rental.insufficient_funds";
+    public static final String HOLD_REQUIRED = "rental.hold.required";
 }

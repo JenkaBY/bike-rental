@@ -17,6 +17,7 @@ public interface CreateRentalUseCase {
             UUID customerId,
             List<Long> equipmentIds,
             Duration duration,
+            String operatorId,
             Long tariffId  // Optional - Left it for special cases when need to apply custom tariff
     ) {
     }

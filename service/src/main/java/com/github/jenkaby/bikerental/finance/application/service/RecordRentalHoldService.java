@@ -26,8 +26,6 @@ import java.util.UUID;
 @Service
 public class RecordRentalHoldService implements RentalHoldUseCase {
 
-    private static final String SYSTEM_OPERATOR = "SYSTEM";
-
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
@@ -70,7 +68,7 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
                 .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
                 .amount(command.amount())
                 .customerId(command.customerRef().id())
-                .operatorId(SYSTEM_OPERATOR)
+                .operatorId(command.operatorId())
                 .sourceType(TransactionSourceType.RENTAL)
                 .sourceId(String.valueOf(command.rentalRef().id()))
                 .recordedAt(now)

@@ -1,6 +1,8 @@
 package com.github.jenkaby.bikerental.rental.web.error;
 
+import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.rental.domain.exception.*;
+import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +69,30 @@ public class RentalRestControllerAdvice {
         problem.setDetail(ex.getMessage());
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<ProblemDetail> handleInsufficientBalance(InsufficientBalanceException ex) {
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Insufficient balance for rental creation: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
+        problem.setTitle("Insufficient funds");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.INSUFFICIENT_FUNDS);
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(HoldRequiredException.class)
+    public ResponseEntity<ProblemDetail> handleHoldRequired(HoldRequiredException ex) {
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Hold required for rental {}: {}", correlationId, ex.getDetails().rentalId(), ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("Hold required");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.HOLD_REQUIRED);
         return ResponseEntity.of(problem).build();
     }
 
