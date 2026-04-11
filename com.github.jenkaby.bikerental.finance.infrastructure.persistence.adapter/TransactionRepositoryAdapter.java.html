@@ -68,21 +68,29 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
+    public boolean existsByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
+<span class="fc" id="L72">        return jpaRepository.existsBySourceTypeAndSourceIdAndTransactionType(</span>
+                TransactionSourceType.RENTAL,
+<span class="fc" id="L74">                String.valueOf(rentalRef.id()),</span>
+                type);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Page&lt;Transaction&gt; findTransactionHistory(CustomerRef customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
-<span class="fc" id="L73">        var pageable = org.springframework.data.domain.PageRequest.of(pageRequest.page(), pageRequest.size(),</span>
-<span class="fc" id="L74">                Sort.by(Sort.Direction.DESC, SpecConstant.TransactionField.RECORDED_AT));</span>
+<span class="fc" id="L81">        var pageable = org.springframework.data.domain.PageRequest.of(pageRequest.page(), pageRequest.size(),</span>
+<span class="fc" id="L82">                Sort.by(Sort.Direction.DESC, SpecConstant.TransactionField.RECORDED_AT));</span>
 
-<span class="fc" id="L76">        var txnSpec = SpecificationBuilder.specification(CustomerTransactionsSpec.class)</span>
-<span class="fc" id="L77">                .withParam(SpecConstant.TransactionField.CUSTOMER_ID, customerId.id().toString());</span>
-<span class="fc" id="L78">        filter.toMap().forEach(txnSpec::withParam);</span>
-<span class="fc" id="L79">        var spec = txnSpec.build();</span>
+<span class="fc" id="L84">        var txnSpec = SpecificationBuilder.specification(CustomerTransactionsSpec.class)</span>
+<span class="fc" id="L85">                .withParam(SpecConstant.TransactionField.CUSTOMER_ID, customerId.id().toString());</span>
+<span class="fc" id="L86">        filter.toMap().forEach(txnSpec::withParam);</span>
+<span class="fc" id="L87">        var spec = txnSpec.build();</span>
 
-<span class="fc" id="L81">        var springPage = jpaRepository.findAll(spec, pageable);</span>
-<span class="fc" id="L82">        var items = springPage.getContent().stream()</span>
-<span class="fc" id="L83">                .map(mapper::toDomain)</span>
-<span class="fc" id="L84">                .toList();</span>
-<span class="fc" id="L85">        return new Page&lt;&gt;(items, springPage.getTotalElements(), pageRequest);</span>
+<span class="fc" id="L89">        var springPage = jpaRepository.findAll(spec, pageable);</span>
+<span class="fc" id="L90">        var items = springPage.getContent().stream()</span>
+<span class="fc" id="L91">                .map(mapper::toDomain)</span>
+<span class="fc" id="L92">                .toList();</span>
+<span class="fc" id="L93">        return new Page&lt;&gt;(items, springPage.getTotalElements(), pageRequest);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

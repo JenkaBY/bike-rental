@@ -45,93 +45,95 @@ public class RentalCommandMapperImpl extends RentalCommandMapper {
 <span class="fc" id="L45">        UUID customerId = null;</span>
 <span class="fc" id="L46">        List&lt;Long&gt; equipmentIds = null;</span>
 <span class="fc" id="L47">        Duration duration = null;</span>
-<span class="fc" id="L48">        Long tariffId = null;</span>
+<span class="fc" id="L48">        String operatorId = null;</span>
+<span class="fc" id="L49">        Long tariffId = null;</span>
 
-<span class="fc" id="L50">        customerId = request.customerId();</span>
-<span class="fc" id="L51">        List&lt;Long&gt; list = request.equipmentIds();</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if ( list != null ) {</span>
-<span class="fc" id="L53">            equipmentIds = new ArrayList&lt;Long&gt;( list );</span>
+<span class="fc" id="L51">        customerId = request.customerId();</span>
+<span class="fc" id="L52">        List&lt;Long&gt; list = request.equipmentIds();</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if ( list != null ) {</span>
+<span class="fc" id="L54">            equipmentIds = new ArrayList&lt;Long&gt;( list );</span>
         }
-<span class="fc" id="L55">        duration = request.duration();</span>
-<span class="fc" id="L56">        tariffId = request.tariffId();</span>
+<span class="fc" id="L56">        duration = request.duration();</span>
+<span class="fc" id="L57">        operatorId = request.operatorId();</span>
+<span class="fc" id="L58">        tariffId = request.tariffId();</span>
 
-<span class="fc" id="L58">        CreateRentalUseCase.CreateRentalCommand createRentalCommand = new CreateRentalUseCase.CreateRentalCommand( customerId, equipmentIds, duration, tariffId );</span>
+<span class="fc" id="L60">        CreateRentalUseCase.CreateRentalCommand createRentalCommand = new CreateRentalUseCase.CreateRentalCommand( customerId, equipmentIds, duration, operatorId, tariffId );</span>
 
-<span class="fc" id="L60">        return createRentalCommand;</span>
+<span class="fc" id="L62">        return createRentalCommand;</span>
     }
 
     @Override
     public RecordPrepaymentUseCase.RecordPrepaymentCommand toRecordPrepaymentCommand(Long rentalId, RecordPrepaymentRequest request) {
-<span class="pc bpc" id="L65" title="3 of 4 branches missed.">        if ( rentalId == null &amp;&amp; request == null ) {</span>
-<span class="nc" id="L66">            return null;</span>
+<span class="pc bpc" id="L67" title="3 of 4 branches missed.">        if ( rentalId == null &amp;&amp; request == null ) {</span>
+<span class="nc" id="L68">            return null;</span>
         }
 
-<span class="fc" id="L69">        Money amount = null;</span>
-<span class="fc" id="L70">        PaymentMethod paymentMethod = null;</span>
-<span class="fc" id="L71">        String operatorId = null;</span>
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if ( request != null ) {</span>
-<span class="fc" id="L73">            amount = moneyMapper.toMoney( request.amount() );</span>
-<span class="fc" id="L74">            paymentMethod = request.paymentMethod();</span>
-<span class="fc" id="L75">            operatorId = request.operatorId();</span>
+<span class="fc" id="L71">        Money amount = null;</span>
+<span class="fc" id="L72">        PaymentMethod paymentMethod = null;</span>
+<span class="fc" id="L73">        String operatorId = null;</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if ( request != null ) {</span>
+<span class="fc" id="L75">            amount = moneyMapper.toMoney( request.amount() );</span>
+<span class="fc" id="L76">            paymentMethod = request.paymentMethod();</span>
+<span class="fc" id="L77">            operatorId = request.operatorId();</span>
         }
 
-<span class="fc" id="L78">        Long rentalId1 = rentalId;</span>
+<span class="fc" id="L80">        Long rentalId1 = rentalId;</span>
 
-<span class="fc" id="L80">        RecordPrepaymentUseCase.RecordPrepaymentCommand recordPrepaymentCommand = new RecordPrepaymentUseCase.RecordPrepaymentCommand( rentalId1, amount, paymentMethod, operatorId );</span>
+<span class="fc" id="L82">        RecordPrepaymentUseCase.RecordPrepaymentCommand recordPrepaymentCommand = new RecordPrepaymentUseCase.RecordPrepaymentCommand( rentalId1, amount, paymentMethod, operatorId );</span>
 
-<span class="fc" id="L82">        return recordPrepaymentCommand;</span>
+<span class="fc" id="L84">        return recordPrepaymentCommand;</span>
     }
 
     @Override
     public PrepaymentResponse toPrepaymentResponse(PaymentInfo paymentInfo) {
-<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if ( paymentInfo == null ) {</span>
-<span class="nc" id="L88">            return null;</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if ( paymentInfo == null ) {</span>
+<span class="nc" id="L90">            return null;</span>
         }
 
-<span class="fc" id="L91">        UUID paymentId = null;</span>
-<span class="fc" id="L92">        BigDecimal amount = null;</span>
-<span class="fc" id="L93">        PaymentMethod paymentMethod = null;</span>
-<span class="fc" id="L94">        String receiptNumber = null;</span>
-<span class="fc" id="L95">        Instant createdAt = null;</span>
+<span class="fc" id="L93">        UUID paymentId = null;</span>
+<span class="fc" id="L94">        BigDecimal amount = null;</span>
+<span class="fc" id="L95">        PaymentMethod paymentMethod = null;</span>
+<span class="fc" id="L96">        String receiptNumber = null;</span>
+<span class="fc" id="L97">        Instant createdAt = null;</span>
 
-<span class="fc" id="L97">        paymentId = paymentInfo.id();</span>
-<span class="fc" id="L98">        amount = moneyMapper.toBigDecimal( paymentInfo.amount() );</span>
-<span class="fc" id="L99">        paymentMethod = paymentInfo.paymentMethod();</span>
-<span class="fc" id="L100">        receiptNumber = paymentInfo.receiptNumber();</span>
-<span class="fc" id="L101">        createdAt = paymentInfo.createdAt();</span>
+<span class="fc" id="L99">        paymentId = paymentInfo.id();</span>
+<span class="fc" id="L100">        amount = moneyMapper.toBigDecimal( paymentInfo.amount() );</span>
+<span class="fc" id="L101">        paymentMethod = paymentInfo.paymentMethod();</span>
+<span class="fc" id="L102">        receiptNumber = paymentInfo.receiptNumber();</span>
+<span class="fc" id="L103">        createdAt = paymentInfo.createdAt();</span>
 
-<span class="fc" id="L103">        PrepaymentResponse prepaymentResponse = new PrepaymentResponse( paymentId, amount, paymentMethod, receiptNumber, createdAt );</span>
+<span class="fc" id="L105">        PrepaymentResponse prepaymentResponse = new PrepaymentResponse( paymentId, amount, paymentMethod, receiptNumber, createdAt );</span>
 
-<span class="fc" id="L105">        return prepaymentResponse;</span>
+<span class="fc" id="L107">        return prepaymentResponse;</span>
     }
 
     @Override
     public ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request) {
-<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        if ( request == null ) {</span>
-<span class="nc" id="L111">            return null;</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L113">            return null;</span>
         }
 
-<span class="fc" id="L114">        Long rentalId = null;</span>
-<span class="fc" id="L115">        List&lt;Long&gt; equipmentIds = null;</span>
-<span class="fc" id="L116">        List&lt;String&gt; equipmentUids = null;</span>
-<span class="fc" id="L117">        PaymentMethod paymentMethod = null;</span>
-<span class="fc" id="L118">        String operatorId = null;</span>
+<span class="fc" id="L116">        Long rentalId = null;</span>
+<span class="fc" id="L117">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L118">        List&lt;String&gt; equipmentUids = null;</span>
+<span class="fc" id="L119">        PaymentMethod paymentMethod = null;</span>
+<span class="fc" id="L120">        String operatorId = null;</span>
 
-<span class="fc" id="L120">        rentalId = request.rentalId();</span>
-<span class="fc" id="L121">        List&lt;Long&gt; list = request.equipmentIds();</span>
-<span class="fc bfc" id="L122" title="All 2 branches covered.">        if ( list != null ) {</span>
-<span class="fc" id="L123">            equipmentIds = new ArrayList&lt;Long&gt;( list );</span>
+<span class="fc" id="L122">        rentalId = request.rentalId();</span>
+<span class="fc" id="L123">        List&lt;Long&gt; list = request.equipmentIds();</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if ( list != null ) {</span>
+<span class="fc" id="L125">            equipmentIds = new ArrayList&lt;Long&gt;( list );</span>
         }
-<span class="fc" id="L125">        List&lt;String&gt; list1 = request.equipmentUids();</span>
-<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        if ( list1 != null ) {</span>
-<span class="nc" id="L127">            equipmentUids = new ArrayList&lt;String&gt;( list1 );</span>
+<span class="fc" id="L127">        List&lt;String&gt; list1 = request.equipmentUids();</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        if ( list1 != null ) {</span>
+<span class="nc" id="L129">            equipmentUids = new ArrayList&lt;String&gt;( list1 );</span>
         }
-<span class="fc" id="L129">        paymentMethod = request.paymentMethod();</span>
-<span class="fc" id="L130">        operatorId = request.operatorId();</span>
+<span class="fc" id="L131">        paymentMethod = request.paymentMethod();</span>
+<span class="fc" id="L132">        operatorId = request.operatorId();</span>
 
-<span class="fc" id="L132">        ReturnEquipmentUseCase.ReturnEquipmentCommand returnEquipmentCommand = new ReturnEquipmentUseCase.ReturnEquipmentCommand( rentalId, equipmentIds, equipmentUids, paymentMethod, operatorId );</span>
+<span class="fc" id="L134">        ReturnEquipmentUseCase.ReturnEquipmentCommand returnEquipmentCommand = new ReturnEquipmentUseCase.ReturnEquipmentCommand( rentalId, equipmentIds, equipmentUids, paymentMethod, operatorId );</span>
 
-<span class="fc" id="L134">        return returnEquipmentCommand;</span>
+<span class="fc" id="L136">        return returnEquipmentCommand;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

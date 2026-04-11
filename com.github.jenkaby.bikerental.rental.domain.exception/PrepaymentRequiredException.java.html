@@ -11,16 +11,16 @@ public class PrepaymentRequiredException extends BikeRentalException {
     private static final String MESSAGE = &quot;Prepayment must be received before starting rental&quot;;
 
     public PrepaymentRequiredException(Long rentalId) {
-<span class="fc" id="L14">        super(MESSAGE, ERROR_CODE, new PrepaymentRequiredDetails(rentalId));</span>
-<span class="fc" id="L15">    }</span>
+<span class="nc" id="L14">        super(MESSAGE, ERROR_CODE, new PrepaymentRequiredDetails(rentalId));</span>
+<span class="nc" id="L15">    }</span>
 
     public PrepaymentRequiredDetails getDetails() {
-<span class="fc" id="L18">        return getParams()</span>
-<span class="fc" id="L19">                .map(d -&gt; (PrepaymentRequiredDetails) d)</span>
-<span class="pc" id="L20">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected PrepaymentRequiredDetails in exception parameters&quot;));</span>
+<span class="nc" id="L18">        return getParams()</span>
+<span class="nc" id="L19">                .map(d -&gt; (PrepaymentRequiredDetails) d)</span>
+<span class="nc" id="L20">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected PrepaymentRequiredDetails in exception parameters&quot;));</span>
     }
 
-<span class="fc" id="L23">    public record PrepaymentRequiredDetails(Long rentalId) {</span>
+<span class="nc" id="L23">    public record PrepaymentRequiredDetails(Long rentalId) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

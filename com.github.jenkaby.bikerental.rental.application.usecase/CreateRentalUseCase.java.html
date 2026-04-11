@@ -17,11 +17,12 @@ public interface CreateRentalUseCase {
             UUID customerId,
             List&lt;Long&gt; equipmentIds,
             Duration duration,
+            String operatorId,
             Long tariffId  // Optional - Left it for special cases when need to apply custom tariff
     ) {
     }
 
-<span class="fc" id="L24">    record CreateDraftCommand() {</span>
+<span class="fc" id="L25">    record CreateDraftCommand() {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

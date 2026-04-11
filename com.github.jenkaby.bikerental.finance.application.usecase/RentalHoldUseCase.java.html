@@ -11,10 +11,10 @@ public interface RentalHoldUseCase {
 
     HoldResult execute(RentalHoldCommand command);
 
-<span class="nc" id="L14">    record RentalHoldCommand(CustomerRef customerRef, RentalRef rentalRef, Money amount) {</span>
+<span class="fc" id="L14">    record RentalHoldCommand(CustomerRef customerRef, RentalRef rentalRef, Money amount, String operatorId) {</span>
     }
 
-<span class="nc" id="L17">    record HoldResult(TransactionRef transactionRef, Instant recordedAt) {</span>
+<span class="fc" id="L17">    record HoldResult(TransactionRef transactionRef, Instant recordedAt) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
