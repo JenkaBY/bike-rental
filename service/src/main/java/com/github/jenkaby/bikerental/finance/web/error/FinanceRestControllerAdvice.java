@@ -1,6 +1,6 @@
 package com.github.jenkaby.bikerental.finance.web.error;
 
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;

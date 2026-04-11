@@ -1,7 +1,6 @@
-package com.github.jenkaby.bikerental.finance.domain.exception;
+package com.github.jenkaby.bikerental.shared.exception;
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
-import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
 import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 
 public class InsufficientBalanceException extends BikeRentalException {
