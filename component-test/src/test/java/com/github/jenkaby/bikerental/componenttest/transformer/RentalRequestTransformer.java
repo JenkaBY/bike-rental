@@ -14,12 +14,14 @@ public class RentalRequestTransformer {
         var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
         var duration = DataTableHelper.toDuration(entry, "duration");
         var tariffId = DataTableHelper.toLong(entry, "tariffId");
+        var operator = Aliases.getValueOrDefault(entry.get("operatorId"));
 
         return new CreateRentalRequest(
                 customerId,
                 equipmentIds,
                 duration,
-                tariffId
+                tariffId,
+                operator
         );
     }
 }

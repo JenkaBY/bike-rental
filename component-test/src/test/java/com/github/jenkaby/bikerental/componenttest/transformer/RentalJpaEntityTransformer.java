@@ -12,7 +12,7 @@ public class RentalJpaEntityTransformer {
 
     @DataTableType
     public RentalJpaEntity transform(Map<String, String> entry) {
-        var id = DataTableHelper.toLong(entry, "id");
+        var id = entry.get("id") != null ? Long.valueOf(Aliases.getValueOrDefault(entry.get("id"))) : null;
         var customerIdString = DataTableHelper.getStringOrNull(entry, "customerId");
         var customerId = Optional.ofNullable(customerIdString)
                 .map(Aliases::getCustomerId)
