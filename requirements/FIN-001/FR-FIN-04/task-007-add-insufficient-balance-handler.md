@@ -21,7 +21,7 @@ Because `FinanceRestControllerAdvice` has `@Order(Ordered.LOWEST_PRECEDENCE - 1)
 **Imports Required:**
 
 ```java
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;

@@ -79,7 +79,7 @@ matching standard T-account rules. Liability and income sub-ledgers retain their
 ```java
 package com.github.jenkaby.bikerental.finance.domain.model;
 
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
 

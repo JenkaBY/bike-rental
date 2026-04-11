@@ -24,7 +24,7 @@ Add two new `@ExceptionHandler` methods to `RentalRestControllerAdvice`:
 Add the following imports at the top of the file, after the existing imports:
 
 ```java
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.rental.domain.exception.HoldRequiredException;
 import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 ```

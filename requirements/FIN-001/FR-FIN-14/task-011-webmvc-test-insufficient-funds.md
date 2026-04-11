@@ -22,7 +22,7 @@ Add a test case to `RentalCommandControllerTest` to verify that when `CreateRent
 Add the following imports at the top of the test file, after the existing imports:
 
 ```java
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 ```
