@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatus
 import com.github.jenkaby.bikerental.rental.domain.exception.RentalNotReadyForActivationException;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationResult;
+import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
 
@@ -90,6 +91,10 @@ public class Rental {
         return this.equipments.stream()
                 .map(RentalEquipment::getEstimatedCost)
                 .reduce(Money.zero(), Money::add);
+    }
+
+    public RentalRef toRentalRef() {
+        return new RentalRef(id);
     }
 
     public boolean isPrepaymentSufficient(Money amount) {

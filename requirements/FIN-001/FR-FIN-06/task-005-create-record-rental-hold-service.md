@@ -122,7 +122,7 @@ Add `availableBalance()` below the existing `isBalanceSufficient(Money amount)` 
 
 ```java
 import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
@@ -151,7 +151,7 @@ package com.github.jenkaby.bikerental.finance.application.service;
 
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;

@@ -27,7 +27,7 @@ public class TransactionJpaEntityTransformer {
         entity.setAmount(DataTableHelper.toBigDecimal(entry, "amount"));
 
         entity.setCustomerId(Aliases.getCustomerId(entry.get("customerId")));
-        entity.setOperatorId(Aliases.getOperatorId(DataTableHelper.getStringOrNull(entry, "operatorId")));
+        entity.setOperatorId(Aliases.getValueOrDefault(entry.get("operatorId")));
 
         var sourceType = DataTableHelper.getStringOrNull(entry, "sourceType");
         if (sourceType != null) {

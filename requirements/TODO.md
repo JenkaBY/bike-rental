@@ -4,4 +4,6 @@
 - [] Remove Finance Facade v1
 - [x] Close rental debt. Possible solution is to fire events customer debit wallet and handle it in the rental module
 - [] Remove 'expectedReturnAt', 'actualReturnedAt' (RentalReturnResponse, other places). Use startedAt + durationMinutes 
-- [] Refactor EventListeners and move the logic to outside the listners.
+- [] Refactor EventListeners and move the logic to outside the listeners.
+- [] Rental request should accept duration in min, not Java duration
+- [] PATCH Rental request. Replace by several individual endpoints 

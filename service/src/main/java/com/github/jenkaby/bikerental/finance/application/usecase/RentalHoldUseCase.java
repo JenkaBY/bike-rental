@@ -11,7 +11,7 @@ public interface RentalHoldUseCase {
 
     HoldResult execute(RentalHoldCommand command);
 
-    record RentalHoldCommand(CustomerRef customerRef, RentalRef rentalRef, Money amount) {
+    record RentalHoldCommand(CustomerRef customerRef, RentalRef rentalRef, Money amount, String operatorId) {
     }
 
     record HoldResult(TransactionRef transactionRef, Instant recordedAt) {

@@ -32,7 +32,7 @@ package com.github.jenkaby.bikerental.finance.web.command;
 
 import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase.AdjustmentResult;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.web.command.dto.AdjustmentResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.AdjustmentCommandMapper;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;

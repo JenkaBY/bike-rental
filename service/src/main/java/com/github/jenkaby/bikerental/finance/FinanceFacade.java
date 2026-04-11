@@ -1,4 +1,5 @@
 package com.github.jenkaby.bikerental.finance;
+
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
@@ -24,7 +25,10 @@ public interface FinanceFacade {
     @Deprecated(forRemoval = true)
     List<PaymentInfo> getPayments(Long rentalId);
 
-    HoldInfo holdFunds(CustomerRef customerRef, RentalRef rentalRef, Money plannedCost);
+    HoldInfo holdFunds(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef,
+                       @NonNull Money plannedCost, @NonNull String operatorId);
+
+    boolean hasHold(RentalRef rentalRef);
 
     SettlementInfo settleRental(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef,
                                 @NonNull Money finalCost, @NonNull String operatorId);

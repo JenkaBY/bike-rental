@@ -2,7 +2,6 @@ package com.github.jenkaby.bikerental.finance.application.service;
 
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
@@ -11,6 +10,7 @@ import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.TransactionRef;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Service
 public class RecordRentalHoldService implements RentalHoldUseCase {
-
-    private static final String SYSTEM_OPERATOR = "SYSTEM";
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
@@ -70,7 +68,7 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
                 .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
                 .amount(command.amount())
                 .customerId(command.customerRef().id())
-                .operatorId(SYSTEM_OPERATOR)
+                .operatorId(command.operatorId())
                 .sourceType(TransactionSourceType.RENTAL)
                 .sourceId(String.valueOf(command.rentalRef().id()))
                 .recordedAt(now)

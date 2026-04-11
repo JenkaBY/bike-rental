@@ -2,11 +2,11 @@ package com.github.jenkaby.bikerental.finance.web.command;
 
 import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.ApplyAdjustmentUseCase.AdjustmentResult;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.AdjustmentCommandMapper;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

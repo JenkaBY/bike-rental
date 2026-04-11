@@ -22,6 +22,8 @@ public interface TransactionRepository {
 
     List<Transaction> findAllByRentalRefAndType(RentalRef rentalRef, TransactionType type);
 
+    boolean existsByRentalRefAndType(RentalRef rentalRef, TransactionType type);
+
     Page<Transaction> findTransactionHistory(CustomerRef customerId,
                                              TransactionHistoryFilter filter,
                                              PageRequest pageRequest);

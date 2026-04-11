@@ -68,6 +68,14 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
+    public boolean existsByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
+        return jpaRepository.existsBySourceTypeAndSourceIdAndTransactionType(
+                TransactionSourceType.RENTAL,
+                String.valueOf(rentalRef.id()),
+                type);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Page<Transaction> findTransactionHistory(CustomerRef customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
         var pageable = org.springframework.data.domain.PageRequest.of(pageRequest.page(), pageRequest.size(),

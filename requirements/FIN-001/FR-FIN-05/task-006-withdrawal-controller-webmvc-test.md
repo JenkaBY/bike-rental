@@ -28,7 +28,7 @@ Cover `WithdrawalCommandController` with WebMVC-layer tests verifying:
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase.WithdrawalResult;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.WithdrawalCommandMapper;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
@@ -70,7 +70,7 @@ package com.github.jenkaby.bikerental.finance.web.command;
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase.WithdrawalResult;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.WithdrawalCommandMapper;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;

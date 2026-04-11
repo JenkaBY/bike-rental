@@ -1,3 +1,4 @@
+@ReinitializeSystemLedgers
 Feature: Rental Management
   As an operator
   I want to create and manage rentals
@@ -31,6 +32,22 @@ Feature: Rental Management
       | 2  | Daily Rate     | Standard daily          | bicycle       | 200.00    | 70.00         | 110.00    | 600.00   | 95.00           | 2026-01-01 | 2036-12-31 | ACTIVE |
       | 3  | Helmet Hourly  | Helmet Standard hourly  | helmet        | 10.00     | 5.00          | 10.00     | 80.00    | 10.00           | 2026-01-01 | 2036-12-31 | ACTIVE |
       | 4  | Scooter Hourly | Scooter Standard hourly | scooter       | 300.00    | 150.00        | 300.00    | 80.00    | 10.00           | 2026-01-01 | 2036-12-31 | ACTIVE |
+    And the following account records exist in db
+      | id   | accountType | customerId |
+      | ACC1 | CUSTOMER    | CUS1       |
+      | ACC2 | CUSTOMER    | CUS2       |
+    And the following sub-ledger records exist in db
+      | id     | accountId | ledgerType      | balance | version | createdAt            | updatedAt            |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 300.00  | 2       | 2026-03-27T00:00:00Z | 2026-04-07T10:31:02Z |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 0.00    | 2       | 2026-03-27T00:00:00Z | 2026-04-07T10:30:00Z |
+      | L_C_W2 | ACC2      | CUSTOMER_WALLET | 10.00   | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
+      | L_C_H2 | ACC2      | CUSTOMER_HOLD   | 0.00    | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
+    And the following transaction records exist in db
+      | id  | type    | paymentMethod | amount | customerId | operatorId | sourceType | sourceId | recordedAt          | idempotencyKey |
+      | TX1 | DEPOSIT | CASH          | 300.00 | CUS1       | OP1        |            |          | 2026-01-10T10:00:00 | IDK1           |
+#      | TX2 | HOLD    | CASH          | 60.00  | CUS1       | OP1        | RENTAL     | RENT3    | 2026-02-15T10:00:00 | IDK2           |
+#      | TX3 | HOLD    | CASH          | 70.00  | CUS2       | OP1        | RENTAL     | RENT1    | 2026-03-20T10:00:00 | IDK3           |
+      | TX4 | DEPOSIT | CASH          | 10.00  | CUS2       | OP1        | RENTAL     | RENT2    | 2026-03-21T10:00:00 | IDK4           |
 
   # Rental Creation Scenarios
 
@@ -46,8 +63,8 @@ Feature: Rental Management
 
   Scenario Outline: Create rental with all required fields (tariff autoselect)
     Given a rental request with the following data
-      | customerId   | equipmentIds                 | duration   |
-      | <customerId> | <equipmentId>,<equipmentId2> | <duration> |
+      | customerId   | equipmentIds                 | duration   | operatorId |
+      | <customerId> | <equipmentId>,<equipmentId2> | <duration> | OP1        |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
     And the rental response only contains
@@ -81,8 +98,8 @@ Feature: Rental Management
       | id | serialNumber | uid       | status    | type  | model   | condition |
       | 4  | EQ-005       | OTHER-004 | AVAILABLE | other | Other X | Good      |
     And a rental request with the following data
-      | customerId | equipmentIds | duration | tariffId |
-      | CUS1       | 4            | PT2H     |          |
+      | customerId | equipmentIds | duration | tariffId | operatorId |
+      | CUS1       | 4            | PT2H     |          | OP1        |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 404
     And the response contains
@@ -256,37 +273,31 @@ Feature: Rental Management
       | id         | customerId | status | plannedDuration | createdAt | updatedAt |
       | <rentalId> | <customer> | DRAFT  | 120             | <now>     | <now>     |
     And rental equipment exists in the database with the following data
-      | rentalId   | equipmentId   | equipmentUid | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           |
-      | <rentalId> | <equipmentId> | BIKE-001     | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
-    And the prepayment request is
-      | amount | method | operator |
-      | 200.00 | CASH   | OP1      |
-    When a POST request has been made to "/api/rentals/<rentalId>/prepayments" endpoint
-    Then the response status is 201
-    And the prepayment response contains
-      | amount             | paymentMethod | createdAt |
-      | <prepaymentAmount> | CASH          | <now>     |
-    And the following payment received event was published
-      | rentalId   | amount             | type       | receivedAt |
-      | <rentalId> | <prepaymentAmount> | PREPAYMENT | <now>      |
+      | rentalId   | equipmentId   | equipmentUid | tariffId   | status   | startedAt           | expectedReturnAt    | estimatedCost   | createdAt           |
+      | <rentalId> | <equipmentId> | BIKE-001     | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | <estimatedCost> | 2026-02-10T08:00:00 |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount          | customerId | operatorId | sourceType | sourceId   | recordedAt          | idempotencyKey |
+      | TX2 | HOLD | CASH          | <estimatedCost> | <customer> | OP1        | RENTAL     | <rentalId> | 2026-02-10T08:00:00 | IDK2           |
     And the rental update request is
       | op      | path    | value  |
       | replace | /status | ACTIVE |
-    When a PATCH request has been made to "/api/rentals/<rentalId>" endpoint
+    When a PATCH request has been made to "/api/rentals/{rentalId}" endpoint with
+      | {rentalId} |
+      | <rentalId> |
     Then the response status is 200
     And the rental response only contains
-      | customerId | status | estimatedCost | plannedDuration   | startedAt |
-      | <customer> | ACTIVE | 200.00        | <plannedDuration> | <now>     |
+      | customerId | status | estimatedCost   | plannedDuration   | startedAt |
+      | <customer> | ACTIVE | <estimatedCost> | <plannedDuration> | <now>     |
     And the rental response only contains rental equipments
-      | equipmentId   | equipmentUid | status | tariffId   | estimatedCost | finalCost |
-      | <equipmentId> | BIKE-001     | ACTIVE | <tariffId> | 200.00        |           |
+      | equipmentId   | equipmentUid | status | tariffId   | estimatedCost   | finalCost |
+      | <equipmentId> | BIKE-001     | ACTIVE | <tariffId> | <estimatedCost> |           |
 #    rental module
     And rental was persisted in database
       | customerId | status | createdAt | plannedDuration   |
       | <customer> | ACTIVE | <now>     | <plannedDuration> |
     And rental equipment was persisted in database
-      | rentalId   | equipmentId   | equipmentUid | status | estimatedCost | tariffId |
-      | <rentalId> | <equipmentId> | BIKE-001     | ACTIVE | 200.00        | 1        |
+      | rentalId   | equipmentId   | equipmentUid | status | estimatedCost   | tariffId   |
+      | <rentalId> | <equipmentId> | BIKE-001     | ACTIVE | <estimatedCost> | <tariffId> |
 #    equipment module
     And the following rental started event was published
       | customerId | equipmentId   | startedAt |
@@ -295,8 +306,8 @@ Feature: Rental Management
       | id            | serialNumber | uid      | status | type    | model   | condition |
       | <equipmentId> | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
     Examples:
-      | rentalId | equipmentId | tariffId | customer | now                 | prepaymentAmount | plannedDuration |
-      | 5        | 1           | 1        | CUS1     | 2026-02-10T10:30:00 | 200.00           | 120             |
+      | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
+      | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |
 
   Scenario: Attempt to activate rental without prepayment
     Given a single rental exists in the database with the following data
@@ -309,11 +320,11 @@ Feature: Rental Management
       | op      | path    | value  |
       | replace | /status | ACTIVE |
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
-    Then the response status is 422
+    Then the response status is 409
     And the response contains
-      | path     | value                                              |
-      | $.title  | Prepayment required                                |
-      | $.detail | Prepayment must be received before starting rental |
+      | path     | value                                                     |
+      | $.title  | Hold required                                             |
+      | $.detail | A fund hold must exist before the rental can be activated |
 
   Scenario: Update rental without duration. Duration must present
     Given a single rental exists in the database with the following data
@@ -385,3 +396,28 @@ Feature: Rental Management
       | path     | value                                  |
       | $.title  | Not Found                              |
       | $.detail | Rental with identifier '999' not found |
+
+  Scenario: Create rental holds funds from customer wallet — sufficient balance
+    Given a rental request with the following data
+      | customerId | equipmentIds | duration | operatorId |
+      | CUS1       | 1,3          | PT2H     | OP1        |
+    When a POST request has been made to "/api/rentals" endpoint
+    Then the response status is 201
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 80.00   |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 220.00  |
+    And the following transactions were persisted in db
+      | customerId | amount | type | paymentMethod     | operatorId |
+      | CUS1       | 220.00 | HOLD | INTERNAL_TRANSFER | OP1        |
+
+  Scenario: Create rental rejected when customer wallet has insufficient balance
+    Given a rental request with the following data
+      | customerId | equipmentIds | duration | operatorId |
+      | CUS2       | 1,3          | PT2H     | OP1        |
+    When a POST request has been made to "/api/rentals" endpoint
+    Then the response status is 422
+    And there are only 2 transactions in db
+    And the response contains
+      | path        | value                     |
+      | $.errorCode | rental.insufficient_funds |

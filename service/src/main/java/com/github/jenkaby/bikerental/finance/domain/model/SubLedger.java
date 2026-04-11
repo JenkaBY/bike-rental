@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.finance.domain.model;
 
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import lombok.*;
 
 import java.time.Instant;

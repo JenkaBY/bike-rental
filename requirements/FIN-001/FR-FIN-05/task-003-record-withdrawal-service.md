@@ -33,7 +33,7 @@ Implement `RecordWithdrawalService`, which:
 ```java
 import com.github.jenkaby.bikerental.finance.application.mapper.PaymentMethodLedgerTypeMapper;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.CustomerAccount;
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
@@ -64,7 +64,7 @@ package com.github.jenkaby.bikerental.finance.application.service;
 
 import com.github.jenkaby.bikerental.finance.application.mapper.PaymentMethodLedgerTypeMapper;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase;
-import com.github.jenkaby.bikerental.finance.domain.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.finance.domain.model.Account;
 import com.github.jenkaby.bikerental.finance.domain.model.CustomerAccount;
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;

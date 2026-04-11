@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
+import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipmentStatus;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalEquipmentJpaEntity;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalJpaEntity;
@@ -12,7 +13,7 @@ public class RentalEquipmentJpaEntityTransformer {
     @DataTableType
     public RentalEquipmentJpaEntity transform(Map<String, String> entry) {
         var id = DataTableHelper.toLong(entry, "id");
-        var rentalId = DataTableHelper.toLong(entry, "rentalId");
+        var rentalId = entry.get("rentalId") != null ? Long.valueOf(Aliases.getValueOrDefault(entry.get("rentalId"))) : null;
 
         var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
         var equipmentUid = DataTableHelper.getStringOrNull(entry, "equipmentUid");
