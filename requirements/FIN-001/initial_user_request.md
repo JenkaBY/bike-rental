@@ -198,3 +198,29 @@ if no transactions). No `totalBalance` is returned. A customer with no transacti
 created or mutated.
 
 **Formalised as:** `FR-FIN-13` (new).
+
+---
+
+## Additional change request (2026-04-11) — Integrate holdFunds into Rental Creation and Remove Deprecated Prepayment APIs
+
+**Request:** Wire `FinanceFacade.holdFunds()` into the rental creation flow, replacing the legacy two-step
+prepayment process. The existing deprecated prepayment APIs (`hasPrepayment`, `recordPrepayment`,
+`recordAdditionalPayment`, `getPrepayment`, `getPayments`) and their dependants shall be removed once the new
+integration is live.
+
+**Decision — Option A (Hold at Rental Creation) selected:**
+`CreateRentalService` calls `financeFacade.holdFunds(customerRef, rentalRef, totalPlannedCost)` within the same
+database transaction as the rental `save()`. The total planned cost is the sum of `estimatedCost` across all
+`RentalEquipment` items after tariff calculation. If `InsufficientBalanceException` is thrown, the entire
+transaction rolls back and the API returns `422` with `errorCode = INSUFFICIENT_FUNDS`.
+
+`FinanceFacade` gains a new query method `hasHold(Long rentalId)`. `UpdateRentalService.startRental()` replaces
+the `hasPrepayment()` guard with `hasHold()`. Activation fails with `409` and `errorCode = HOLD_REQUIRED` when
+no hold exists (e.g., a legacy draft record).
+
+**Deprecation scope:** After FR-FIN-14 is complete, FR-FIN-15 removes all deprecated prepayment artefacts:
+`FinanceFacade` deprecated methods, `PaymentCommandController` (`POST /api/payments`),
+`PrepaymentRequiredException`, `InsufficientPrepaymentException`, `RecordPrepaymentService`,
+`RecordPrepaymentUseCase`, and all related Cucumber steps and test transformers.
+
+**Formalised as:** `FR-FIN-14` (integration, new), `FR-FIN-15` (cleanup, new).

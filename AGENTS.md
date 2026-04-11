@@ -168,13 +168,12 @@ The project convention is **zero inline comments**. Use expressive naming and se
 
 ## Key Files
 
-| File                                                      | Purpose                                      |
-|-----------------------------------------------------------|----------------------------------------------|
-| `memory-bank/activeContext.md`                            | Current sprint focus and next priority tasks |
-| `memory-bank/tasks/_index.md`                             | All task statuses                            |
-| `memory-bank/systemPatterns.md`                           | Full pattern catalogue with code examples    |
-| `docs/backend-architecture.md`                            | Module diagram and data flow                 |
-| `service/src/test/java/.../support/web/ApiTest.java`      | WebMvc test base annotation                  |
-| `shared/web/advice/CoreExceptionHandlerAdvice.java`       | Global exception handler reference           |
-| `component-test/src/test/java/.../RunComponentTests.java` | Cucumber suite runner                        |
+| File                                                      | Purpose                                                                                                |
+|-----------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| `overview.md`                                             | a structured component overview document for this project                                              |
+| `architecture.md`                                         | Machine parsable an architecture of the solution                                                       |
+| `requirements/`                                           | A folder containing requirements folders/files with functional requirements and detailed implemntation |
+| `service/src/test/java/.../support/web/ApiTest.java`      | WebMvc test base annotation                                                                            |
+| `shared/web/advice/CoreExceptionHandlerAdvice.java`       | Global exception handler reference                                                                     |
+| `component-test/src/test/java/.../RunComponentTests.java` | Cucumber suite runner                                                                                  |
 

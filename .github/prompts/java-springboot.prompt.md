@@ -1,6 +1,6 @@
 ---
 agent: 'agent'
-tools: [ 'changes', 'search/codebase', 'edit/editFiles', 'problems', 'search' ]
+tools: [ 'search/changes', 'search/codebase', 'edit/editFiles', 'read/problems', 'search' ]
 description: 'Get best practices for developing applications with Spring Boot.'
 ---
 
