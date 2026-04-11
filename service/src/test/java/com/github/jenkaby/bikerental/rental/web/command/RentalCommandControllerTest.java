@@ -89,7 +89,8 @@ class RentalCommandControllerTest {
                         VALID_CUSTOMER_ID,
                         List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
-                        null
+                        null,
+                        "Operator"
                 );
 
                 Rental rental = mock(Rental.class);
@@ -116,7 +117,8 @@ class RentalCommandControllerTest {
                         VALID_CUSTOMER_ID,
                         List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
-                        123L
+                        123L,
+                        "Op"
                 );
 
                 Rental rental = mock(Rental.class);
@@ -149,7 +151,8 @@ class RentalCommandControllerTest {
                         customerId,
                         List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
-                        null
+                        null,
+                        "Operator"
                 );
 
                 mockMvc.perform(post(API_RENTALS)
@@ -172,7 +175,8 @@ class RentalCommandControllerTest {
                         VALID_CUSTOMER_ID,
                         eqIds,
                         VALID_DURATION,
-                        null
+                        null,
+                        "Operator"
                 );
 
                 mockMvc.perform(post(API_RENTALS)
@@ -193,7 +197,8 @@ class RentalCommandControllerTest {
                         VALID_CUSTOMER_ID,
                         List.of(VALID_EQUIPMENT_ID),
                         duration,
-                        null
+                        null,
+                        "Op"
                 );
 
                 mockMvc.perform(post(API_RENTALS)
