@@ -96,45 +96,21 @@ import java.util.UUID;
 <span class="fc" id="L96">        return ResponseEntity.of(problem).build();</span>
     }
 
-    @ExceptionHandler(PrepaymentRequiredException.class)
-    public ResponseEntity&lt;ProblemDetail&gt; handlePrepaymentRequired(PrepaymentRequiredException ex) {
-<span class="nc" id="L101">        var correlationId = resolveCorrelationId();</span>
-<span class="nc" id="L102">        log.warn(&quot;[correlationId={}] Prepayment required for rental {}: {}&quot;, correlationId, ex.getDetails().rentalId(), ex.getMessage());</span>
-<span class="nc" id="L103">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="nc" id="L104">        problem.setTitle(&quot;Prepayment required&quot;);</span>
-<span class="nc" id="L105">        problem.setDetail(ex.getMessage());</span>
-<span class="nc" id="L106">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L107">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="nc" id="L108">        return ResponseEntity.of(problem).build();</span>
-    }
-
-    @ExceptionHandler(InsufficientPrepaymentException.class)
-    public ResponseEntity&lt;ProblemDetail&gt; handleInsufficientPrepayment(InsufficientPrepaymentException ex) {
-<span class="fc" id="L113">        var correlationId = resolveCorrelationId();</span>
-<span class="fc" id="L114">        log.warn(&quot;[correlationId={}] Insufficient prepayment for rental {}: {}&quot;, correlationId, ex.getDetails().rentalId(), ex.getMessage());</span>
-<span class="fc" id="L115">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="fc" id="L116">        problem.setTitle(&quot;Insufficient prepayment&quot;);</span>
-<span class="fc" id="L117">        problem.setDetail(ex.getMessage());</span>
-<span class="fc" id="L118">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L119">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="fc" id="L120">        return ResponseEntity.of(problem).build();</span>
-    }
-
     @ExceptionHandler(InvalidRentalPlannedDurationException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInsufficientPrepayment(InvalidRentalPlannedDurationException ex) {
-<span class="fc" id="L125">        var correlationId = resolveCorrelationId();</span>
-<span class="fc" id="L126">        log.warn(&quot;[correlationId={}] Planned duration is missing for rental {}: {}&quot;, correlationId, ex.getDetails().rentalId(), ex.getMessage());</span>
-<span class="fc" id="L127">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="fc" id="L128">        problem.setTitle(&quot;Invalid rental planned duration&quot;);</span>
-<span class="fc" id="L129">        problem.setDetail(ex.getMessage());</span>
-<span class="fc" id="L130">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L131">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="fc" id="L132">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L101">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L102">        log.warn(&quot;[correlationId={}] Planned duration is missing for rental {}: {}&quot;, correlationId, ex.getDetails().rentalId(), ex.getMessage());</span>
+<span class="fc" id="L103">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="fc" id="L104">        problem.setTitle(&quot;Invalid rental planned duration&quot;);</span>
+<span class="fc" id="L105">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L106">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L107">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L108">        return ResponseEntity.of(problem).build();</span>
     }
 
     private String resolveCorrelationId() {
-<span class="fc" id="L136">        String correlationId = MDC.get(&quot;correlationId&quot;);</span>
-<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : UUID.randomUUID().toString();</span>
+<span class="fc" id="L112">        String correlationId = MDC.get(&quot;correlationId&quot;);</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : UUID.randomUUID().toString();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

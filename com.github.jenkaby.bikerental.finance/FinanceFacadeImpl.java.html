@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FinanceFacadeImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance</a> &gt; <span class="el_source">FinanceFacadeImpl.java</span></div><h1>FinanceFacadeImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance;
 
-import com.github.jenkaby.bikerental.finance.application.mapper.PaymentToInfoMapper;
-import com.github.jenkaby.bikerental.finance.application.usecase.GetPaymentsByRentalIdUseCase;
-import com.github.jenkaby.bikerental.finance.application.usecase.RecordPaymentUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.SettleRentalUseCase;
-import com.github.jenkaby.bikerental.finance.domain.model.Payment;
-import com.github.jenkaby.bikerental.finance.domain.model.PaymentType;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
@@ -15,102 +10,40 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
-
 @Service
 class FinanceFacadeImpl implements FinanceFacade {
 
-<span class="pc bnc" id="L25" title="All 2 branches missed.">    private static final Predicate&lt;Payment&gt; IS_PREPAYMENT = p -&gt; p.getPaymentType() == PaymentType.PREPAYMENT;</span>
-
-    private final RecordPaymentUseCase recordPaymentUseCase;
-    private final GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase;
-    private final PaymentToInfoMapper paymentToInfoMapper;
     private final RentalHoldUseCase rentalHoldUseCase;
     private final SettleRentalUseCase settleRentalUseCase;
     private final TransactionRepository transactionRepository;
 
     FinanceFacadeImpl(
-            RecordPaymentUseCase recordPaymentUseCase,
-            GetPaymentsByRentalIdUseCase getPaymentsByRentalIdUseCase,
-            PaymentToInfoMapper paymentToInfoMapper,
             RentalHoldUseCase rentalHoldUseCase,
             SettleRentalUseCase settleRentalUseCase,
-<span class="fc" id="L40">            TransactionRepository transactionRepository) {</span>
-<span class="fc" id="L41">        this.recordPaymentUseCase = recordPaymentUseCase;</span>
-<span class="fc" id="L42">        this.getPaymentsByRentalIdUseCase = getPaymentsByRentalIdUseCase;</span>
-<span class="fc" id="L43">        this.paymentToInfoMapper = paymentToInfoMapper;</span>
-<span class="fc" id="L44">        this.rentalHoldUseCase = rentalHoldUseCase;</span>
-<span class="fc" id="L45">        this.settleRentalUseCase = settleRentalUseCase;</span>
-<span class="fc" id="L46">        this.transactionRepository = transactionRepository;</span>
-<span class="fc" id="L47">    }</span>
-
-    @Override
-    public PaymentInfo recordPrepayment(Long rentalId, Money amount, PaymentMethod method, String operatorId) {
-<span class="fc" id="L51">        var command = new RecordPaymentUseCase.RecordPaymentCommand(</span>
-                rentalId,
-                amount,
-                PaymentType.PREPAYMENT,
-                method,
-                operatorId
-        );
-<span class="fc" id="L58">        Payment payment = recordPaymentUseCase.execute(command);</span>
-<span class="fc" id="L59">        return paymentToInfoMapper.toPaymentInfo(payment);</span>
-    }
-
-    @Override
-    public PaymentInfo recordAdditionalPayment(Long rentalId, Money amount, PaymentMethod method, String operatorId) {
-<span class="nc" id="L64">        var command = new RecordPaymentUseCase.RecordPaymentCommand(</span>
-                rentalId,
-                amount,
-                PaymentType.ADDITIONAL_PAYMENT,
-                method,
-                operatorId
-        );
-<span class="nc" id="L71">        Payment payment = recordPaymentUseCase.execute(command);</span>
-<span class="nc" id="L72">        return paymentToInfoMapper.toPaymentInfo(payment);</span>
-    }
-
-    @Override
-    public boolean hasPrepayment(Long rentalId) {
-<span class="nc" id="L77">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
-<span class="nc" id="L78">                .anyMatch(IS_PREPAYMENT);</span>
-    }
-
-    @Override
-    public Optional&lt;PaymentInfo&gt; getPrepayment(Long rentalId) {
-<span class="nc" id="L83">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
-<span class="nc" id="L84">                .filter(IS_PREPAYMENT)</span>
-<span class="nc" id="L85">                .findFirst()</span>
-<span class="nc" id="L86">                .map(paymentToInfoMapper::toPaymentInfo);</span>
-    }
-
-    @Override
-    public List&lt;PaymentInfo&gt; getPayments(Long rentalId) {
-<span class="nc" id="L91">        return getPaymentsByRentalIdUseCase.execute(rentalId).stream()</span>
-<span class="nc" id="L92">                .map(paymentToInfoMapper::toPaymentInfo)</span>
-<span class="nc" id="L93">                .toList();</span>
-    }
+<span class="fc" id="L23">            TransactionRepository transactionRepository) {</span>
+<span class="fc" id="L24">        this.rentalHoldUseCase = rentalHoldUseCase;</span>
+<span class="fc" id="L25">        this.settleRentalUseCase = settleRentalUseCase;</span>
+<span class="fc" id="L26">        this.transactionRepository = transactionRepository;</span>
+<span class="fc" id="L27">    }</span>
 
     @Override
     public HoldInfo holdFunds(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef, @NonNull Money plannedCost, @NonNull String operatorId) {
-<span class="fc" id="L98">        var command = new RentalHoldUseCase.RentalHoldCommand(customerRef, rentalRef, plannedCost, operatorId);</span>
-<span class="fc" id="L99">        var result = rentalHoldUseCase.execute(command);</span>
-<span class="fc" id="L100">        return new HoldInfo(result.transactionRef(), result.recordedAt());</span>
+<span class="fc" id="L31">        var command = new RentalHoldUseCase.RentalHoldCommand(customerRef, rentalRef, plannedCost, operatorId);</span>
+<span class="fc" id="L32">        var result = rentalHoldUseCase.execute(command);</span>
+<span class="fc" id="L33">        return new HoldInfo(result.transactionRef(), result.recordedAt());</span>
     }
 
     @Override
     public SettlementInfo settleRental(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef,
                                        @NonNull Money finalCost, @NonNull String operatorId) {
-<span class="fc" id="L106">        var command = new SettleRentalUseCase.SettleRentalCommand(customerRef, rentalRef, finalCost, operatorId);</span>
-<span class="fc" id="L107">        var result = settleRentalUseCase.execute(command);</span>
-<span class="fc" id="L108">        return new SettlementInfo(result.captureTransactionRefs(), result.releaseTransactionRef(), result.recordedAt());</span>
+<span class="fc" id="L39">        var command = new SettleRentalUseCase.SettleRentalCommand(customerRef, rentalRef, finalCost, operatorId);</span>
+<span class="fc" id="L40">        var result = settleRentalUseCase.execute(command);</span>
+<span class="fc" id="L41">        return new SettlementInfo(result.captureTransactionRefs(), result.releaseTransactionRef(), result.recordedAt());</span>
     }
 
     @Override
     public boolean hasHold(RentalRef rentalRef) {
-<span class="fc" id="L113">        return transactionRepository.existsByRentalRefAndType(rentalRef, TransactionType.HOLD);</span>
+<span class="fc" id="L46">        return transactionRepository.existsByRentalRefAndType(rentalRef, TransactionType.HOLD);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

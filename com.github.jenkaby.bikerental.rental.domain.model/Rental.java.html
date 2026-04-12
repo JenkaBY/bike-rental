@@ -98,10 +98,10 @@ public class Rental {
     }
 
     public boolean isPrepaymentSufficient(Money amount) {
-<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (estimatedCost == null) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if (estimatedCost == null) {</span>
 <span class="nc" id="L102">            return false;</span>
         }
-<span class="fc bfc" id="L104" title="All 2 branches covered.">        return amount.compareTo(estimatedCost) &gt;= 0;</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        return amount.compareTo(estimatedCost) &gt;= 0;</span>
     }
 
     public boolean hasActiveStatus() {

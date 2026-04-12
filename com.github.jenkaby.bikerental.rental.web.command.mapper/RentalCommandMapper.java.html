@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalCommandMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.web.command.mapper</a> &gt; <span class="el_source">RentalCommandMapper.java</span></div><h1>RentalCommandMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.web.command.mapper;
 
-import com.github.jenkaby.bikerental.finance.PaymentInfo;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
-import com.github.jenkaby.bikerental.rental.application.usecase.RecordPrepaymentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentResult;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
@@ -11,82 +9,65 @@ import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import com.github.jenkaby.bikerental.tariff.RentalCost;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Mapper(uses = {MoneyMapper.class, RentalQueryMapper.class})
-<span class="fc" id="L21">public abstract class RentalCommandMapper {</span>
+<span class="fc" id="L18">public abstract class RentalCommandMapper {</span>
 
     protected RentalQueryMapper rentalQueryMapper;
-    protected PaymentInfoMapper paymentInfoMapper;
     protected SettlementMapper settlementMapper;
 
     @Autowired
     public void setSettlementMapper(SettlementMapper settlementMapper) {
-<span class="fc" id="L29">        this.settlementMapper = settlementMapper;</span>
-<span class="fc" id="L30">    }</span>
-
-    @Autowired
-    public void setPaymentInfoMapper(PaymentInfoMapper paymentInfoMapper) {
-<span class="fc" id="L34">        this.paymentInfoMapper = paymentInfoMapper;</span>
-<span class="fc" id="L35">    }</span>
+<span class="fc" id="L25">        this.settlementMapper = settlementMapper;</span>
+<span class="fc" id="L26">    }</span>
 
     @Autowired
     public void setQueryMapper(RentalQueryMapper queryMapper) {
-<span class="fc" id="L39">        this.rentalQueryMapper = queryMapper;</span>
-<span class="fc" id="L40">    }</span>
+<span class="fc" id="L30">        this.rentalQueryMapper = queryMapper;</span>
+<span class="fc" id="L31">    }</span>
 
     public abstract CreateRentalUseCase.CreateRentalCommand toCreateCommand(CreateRentalRequest request);
-
-    @Mapping(target = &quot;rentalId&quot;, expression = &quot;java(rentalId)&quot;)
-    @Mapping(target = &quot;amount&quot;, source = &quot;request.amount&quot;)
-    @Mapping(target = &quot;paymentMethod&quot;, source = &quot;request.paymentMethod&quot;)
-    @Mapping(target = &quot;operatorId&quot;, source = &quot;request.operatorId&quot;)
-    public abstract RecordPrepaymentUseCase.RecordPrepaymentCommand toRecordPrepaymentCommand(Long rentalId, RecordPrepaymentRequest request);
-
-    @Mapping(target = &quot;paymentId&quot;, source = &quot;id&quot;)
-    @Mapping(target = &quot;amount&quot;, source = &quot;amount&quot;)
-    public abstract PrepaymentResponse toPrepaymentResponse(PaymentInfo paymentInfo);
 
     public abstract ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request);
 
     public RentalReturnResponse toReturnResponse(ReturnEquipmentResult result) {
-<span class="fc" id="L57">        RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());</span>
-<span class="fc" id="L58">        var costsBreakdown = result.breakDownCosts().entrySet().stream()</span>
-<span class="fc" id="L59">                .map(entry -&gt; toCostBreakdown(entry.getKey(), entry.getValue()))</span>
-<span class="fc" id="L60">                .toList();</span>
-<span class="fc" id="L61">        var settlementResponse = settlementMapper.toResponse(result.settlementInfo());</span>
-<span class="fc" id="L62">        return new RentalReturnResponse(rentalResponse, costsBreakdown, settlementResponse);</span>
+<span class="fc" id="L38">        RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());</span>
+<span class="fc" id="L39">        var costsBreakdown = result.breakDownCosts().entrySet().stream()</span>
+<span class="fc" id="L40">                .map(entry -&gt; toCostBreakdown(entry.getKey(), entry.getValue()))</span>
+<span class="fc" id="L41">                .toList();</span>
+<span class="fc" id="L42">        var settlementResponse = settlementMapper.toResponse(result.settlementInfo());</span>
+<span class="fc" id="L43">        return new RentalReturnResponse(rentalResponse, costsBreakdown, settlementResponse);</span>
     }
 
     RentalReturnResponse.CostBreakdown toCostBreakdown(Long equipmentId, RentalCost cost) {
-<span class="fc" id="L66">        return new RentalReturnResponse.CostBreakdown(</span>
+<span class="fc" id="L47">        return new RentalReturnResponse.CostBreakdown(</span>
                 equipmentId,
-<span class="fc" id="L68">                cost.baseCost().amount(),</span>
-<span class="fc" id="L69">                cost.overtimeCost().amount(),</span>
-<span class="fc" id="L70">                cost.totalCost().amount(),</span>
-<span class="fc" id="L71">                cost.actualMinutes(),</span>
-<span class="fc" id="L72">                cost.billableMinutes(),</span>
-<span class="fc" id="L73">                cost.plannedMinutes(),</span>
-<span class="fc" id="L74">                cost.overtimeMinutes(),</span>
-<span class="fc" id="L75">                cost.forgivenessApplied(),</span>
-<span class="fc" id="L76">                cost.calculationMessage()</span>
+<span class="fc" id="L49">                cost.baseCost().amount(),</span>
+<span class="fc" id="L50">                cost.overtimeCost().amount(),</span>
+<span class="fc" id="L51">                cost.totalCost().amount(),</span>
+<span class="fc" id="L52">                cost.actualMinutes(),</span>
+<span class="fc" id="L53">                cost.billableMinutes(),</span>
+<span class="fc" id="L54">                cost.plannedMinutes(),</span>
+<span class="fc" id="L55">                cost.overtimeMinutes(),</span>
+<span class="fc" id="L56">                cost.forgivenessApplied(),</span>
+<span class="fc" id="L57">                cost.calculationMessage()</span>
         );
     }
 
     public Map&lt;String, Object&gt; toPatchMap(RentalUpdateJsonPatchRequest request) {
-<span class="fc" id="L81">        Map&lt;String, Object&gt; patch = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L82" title="All 2 branches covered.">        for (RentalPatchOperation operation : request.getOperations()) {</span>
-<span class="fc" id="L83">            String path = operation.getPath();</span>
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            String fieldName = path.startsWith(&quot;/&quot;) ? path.substring(1) : path;</span>
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">            if (operation.getOp() != null) {</span>
-<span class="fc" id="L86">                patch.put(fieldName, operation.getValue());</span>
+<span class="fc" id="L62">        Map&lt;String, Object&gt; patch = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        for (RentalPatchOperation operation : request.getOperations()) {</span>
+<span class="fc" id="L64">            String path = operation.getPath();</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">            String fieldName = path.startsWith(&quot;/&quot;) ? path.substring(1) : path;</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">            if (operation.getOp() != null) {</span>
+<span class="fc" id="L67">                patch.put(fieldName, operation.getValue());</span>
             }
-<span class="fc" id="L88">        }</span>
-<span class="fc" id="L89">        return patch;</span>
+<span class="fc" id="L69">        }</span>
+<span class="fc" id="L70">        return patch;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

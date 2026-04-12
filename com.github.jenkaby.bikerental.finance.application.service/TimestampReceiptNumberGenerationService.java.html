@@ -21,11 +21,11 @@ public class TimestampReceiptNumberGenerationService implements ReceiptNumberGen
 
     @Override
     public String generate() {
-<span class="fc" id="L24">        ZonedDateTime now = ZonedDateTime.now(clock);</span>
-<span class="fc" id="L25">        String ts = FORMATTER.format(now);</span>
-<span class="fc" id="L26">        int randomSuffix = random.nextInt(MAX_RANDOM_SUFFIX);</span>
-<span class="fc" id="L27">        String rand = Integer.toHexString(randomSuffix).toUpperCase();</span>
-<span class="fc" id="L28">        return RECEIPT_FORMAT.formatted(ts, rand);</span>
+<span class="nc" id="L24">        ZonedDateTime now = ZonedDateTime.now(clock);</span>
+<span class="nc" id="L25">        String ts = FORMATTER.format(now);</span>
+<span class="nc" id="L26">        int randomSuffix = random.nextInt(MAX_RANDOM_SUFFIX);</span>
+<span class="nc" id="L27">        String rand = Integer.toHexString(randomSuffix).toUpperCase();</span>
+<span class="nc" id="L28">        return RECEIPT_FORMAT.formatted(ts, rand);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
