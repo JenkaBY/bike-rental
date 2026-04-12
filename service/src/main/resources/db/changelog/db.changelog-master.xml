@@ -13,7 +13,6 @@
     <include relativeToChangelogFile="true" file="v1/equipment_statuses.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/equipments.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/tariffs.create-table.xml"/>
-    <include relativeToChangelogFile="true" file="v1/payments.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/equipment_status_transition_rules.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/rentals.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/rental-equipments.create-table.xml"/>

@@ -224,48 +224,47 @@ Feature: Rental Management
       | rentalId | equipmentId | customerId | plannedDuration |
       | 1        | 1           | CUS1       | 180             |
 
-  Scenario Outline: Record prepayment for draft rental
+  Scenario Outline: Update rental - activate rental
     Given now is "<now>"
     And a single rental exists in the database with the following data
       | id         | customerId | status | plannedDuration | createdAt | updatedAt |
-      | <rentalId> | CUS1       | DRAFT  | 120             | <now>     | <now>     |
+      | <rentalId> | <customer> | DRAFT  | 120             | <now>     | <now>     |
     And rental equipment exists in the database with the following data
-      | rentalId   | equipmentId   | equipmentUid | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | <rentalId> | <equipmentId> | BIKE-001     | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
-    And the prepayment request is
-      | amount   | method   | operator |
-      | <amount> | <method> | OP1      |
-    When a POST request has been made to "/api/rentals/<rentalId>/prepayments" endpoint
-    Then the response status is 201
-    And the prepayment response contains
-      | amount   | paymentMethod | createdAt |
-      | <amount> | <method>      | <now>     |
-    And the following payment received event was published
-      | rentalId   | amount   | type       | receivedAt |
-      | <rentalId> | <amount> | PREPAYMENT | <now>      |
+      | rentalId   | equipmentId   | equipmentUid | tariffId   | status   | startedAt           | expectedReturnAt    | estimatedCost   | createdAt           |
+      | <rentalId> | <equipmentId> | BIKE-001     | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | <estimatedCost> | 2026-02-10T08:00:00 |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount          | customerId | operatorId | sourceType | sourceId   | recordedAt          | idempotencyKey |
+      | TX2 | HOLD | CASH          | <estimatedCost> | <customer> | OP1        | RENTAL     | <rentalId> | 2026-02-10T08:00:00 | IDK2           |
+    And the rental update request is
+      | op      | path    | value  |
+      | replace | /status | ACTIVE |
+    When a PATCH request has been made to "/api/rentals/{rentalId}" endpoint with
+      | {rentalId} |
+      | <rentalId> |
+    Then the response status is 200
+    And the rental response only contains
+      | customerId | status | estimatedCost   | plannedDuration   | startedAt |
+      | <customer> | ACTIVE | <estimatedCost> | <plannedDuration> | <now>     |
+    And the rental response only contains rental equipments
+      | equipmentId   | equipmentUid | status | tariffId   | estimatedCost   | finalCost |
+      | <equipmentId> | BIKE-001     | ACTIVE | <tariffId> | <estimatedCost> |           |
+#    rental module
+    And rental was persisted in database
+      | customerId | status | createdAt | plannedDuration   |
+      | <customer> | ACTIVE | <now>     | <plannedDuration> |
+    And rental equipment was persisted in database
+      | rentalId   | equipmentId   | equipmentUid | status | estimatedCost   | tariffId   |
+      | <rentalId> | <equipmentId> | BIKE-001     | ACTIVE | <estimatedCost> | <tariffId> |
+#    equipment module
+    And the following rental started event was published
+      | customerId | equipmentId   | startedAt |
+      | <customer> | <equipmentId> | <now>     |
+    And the following equipment record was persisted in db
+      | id            | serialNumber | uid      | status | type    | model   | condition |
+      | <equipmentId> | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
     Examples:
-      | rentalId | equipmentId | amount | method | now                 |
-      | 10       | 1           | 200.00 | CASH   | 2026-02-10T10:15:30 |
-
-  Scenario Outline: Reject prepayment when amount is below estimated cost
-    Given a single rental exists in the database with the following data
-      | id         | customerId | status | plannedDuration | createdAt           | updatedAt           |
-      | <rentalId> | CUS1       | DRAFT  | 120             | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
-    And rental equipment exists in the database with the following data
-      | rentalId   | equipmentId   | equipmentUid | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | <rentalId> | <equipmentId> | BIKE-001     | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
-    And the prepayment request is
-      | amount | method | operator |
-      | 50.00  | CASH   | OP1      |
-    When a POST request has been made to "/api/rentals/{requestedObjectId}/prepayments" endpoint with context
-    Then the response status is 422
-    And the response contains
-      | path     | value                                                               |
-      | $.title  | Insufficient prepayment                                             |
-      | $.detail | Prepayment amount must be at least the estimated cost of the rental |
-    Examples:
-      | rentalId | equipmentId |
-      | 10       | 1           |
+      | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
+      | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |
 
   Scenario Outline: Update rental - activate rental
     Given now is "<now>"
@@ -309,7 +308,7 @@ Feature: Rental Management
       | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
       | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |
 
-  Scenario: Attempt to activate rental without prepayment
+  Scenario: Attempt to activate rental without hold
     Given a single rental exists in the database with the following data
       | id | customerId | status | plannedDuration | createdAt           | updatedAt           |
       | 1  | CUS1       | DRAFT  | 120             | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |

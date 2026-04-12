@@ -1,8 +1,10 @@
 package com.github.jenkaby.bikerental.finance;
 
 public enum PaymentMethod {
+    CARD,
     CASH,
-    CARD_TERMINAL,
     BANK_TRANSFER,
-    INTERNAL_TRANSFER
+    WALLET,
+    INTERNAL_TRANSFER,
+    CARD_TERMINAL
 }
