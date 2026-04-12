@@ -32,7 +32,6 @@ public class DbSteps {
             "equipment_types",
             "tariffs",
             "tariffs_v2",
-            "payments",
             "rental_equipments",
             "rentals",
             "finance_transaction_records",
