@@ -1,12 +1,14 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
-import com.github.jenkaby.bikerental.rental.application.usecase.RecordPrepaymentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
-import com.github.jenkaby.bikerental.rental.web.command.dto.*;
+import com.github.jenkaby.bikerental.rental.web.command.dto.CreateRentalRequest;
+import com.github.jenkaby.bikerental.rental.web.command.dto.RentalReturnResponse;
+import com.github.jenkaby.bikerental.rental.web.command.dto.RentalUpdateJsonPatchRequest;
+import com.github.jenkaby.bikerental.rental.web.command.dto.ReturnEquipmentRequest;
 import com.github.jenkaby.bikerental.rental.web.command.mapper.RentalCommandMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
@@ -38,7 +40,6 @@ class RentalCommandController {
 
     private final CreateRentalUseCase createRentalUseCase;
     private final UpdateRentalUseCase updateRentalUseCase;
-    private final RecordPrepaymentUseCase recordPrepaymentUseCase;
     private final ReturnEquipmentUseCase returnEquipmentUseCase;
     private final RentalCommandMapper commandMapper;
     private final RentalQueryMapper queryMapper;
@@ -46,13 +47,11 @@ class RentalCommandController {
     RentalCommandController(
             CreateRentalUseCase createRentalUseCase,
             UpdateRentalUseCase updateRentalUseCase,
-            RecordPrepaymentUseCase recordPrepaymentUseCase,
             ReturnEquipmentUseCase returnEquipmentUseCase,
             RentalCommandMapper commandMapper,
             RentalQueryMapper queryMapper) {
         this.createRentalUseCase = createRentalUseCase;
         this.updateRentalUseCase = updateRentalUseCase;
-        this.recordPrepaymentUseCase = recordPrepaymentUseCase;
         this.returnEquipmentUseCase = returnEquipmentUseCase;
         this.commandMapper = commandMapper;
         this.queryMapper = queryMapper;
@@ -143,26 +142,6 @@ class RentalCommandController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(value = "/{id}/prepayments")
-    @Operation(summary = "Record prepayment for rental")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Prepayment recorded",
-                    content = @Content(schema = @Schema(implementation = PrepaymentResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Validation error",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Rental not found",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    })
-    public ResponseEntity<PrepaymentResponse> recordPrepayment(
-            @Parameter(description = "Rental ID", example = "1") @PathVariable(name = "id") Long id,
-            @Valid @RequestBody RecordPrepaymentRequest request) {
-        log.info("[POST] Recording prepayment for rental {}", id);
-        var command = commandMapper.toRecordPrepaymentCommand(id, request);
-        var paymentInfo = recordPrepaymentUseCase.execute(command);
-        var response = commandMapper.toPrepaymentResponse(paymentInfo);
-        log.info("[POST] Prepayment recorded for rental {} with receipt {}", id, paymentInfo.receiptNumber());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
 
     @PostMapping("/return")
     @Operation(summary = "Return equipment", description = "Completes a rental by returning the rented equipment, calculates final cost and records additional payment if needed")

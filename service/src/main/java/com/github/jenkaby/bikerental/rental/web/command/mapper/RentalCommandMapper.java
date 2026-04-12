@@ -1,8 +1,6 @@
 package com.github.jenkaby.bikerental.rental.web.command.mapper;
 
-import com.github.jenkaby.bikerental.finance.PaymentInfo;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
-import com.github.jenkaby.bikerental.rental.application.usecase.RecordPrepaymentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentResult;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
@@ -11,7 +9,6 @@ import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import com.github.jenkaby.bikerental.tariff.RentalCost;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
@@ -21,7 +18,6 @@ import java.util.Map;
 public abstract class RentalCommandMapper {
 
     protected RentalQueryMapper rentalQueryMapper;
-    protected PaymentInfoMapper paymentInfoMapper;
     protected SettlementMapper settlementMapper;
 
     @Autowired
@@ -30,26 +26,11 @@ public abstract class RentalCommandMapper {
     }
 
     @Autowired
-    public void setPaymentInfoMapper(PaymentInfoMapper paymentInfoMapper) {
-        this.paymentInfoMapper = paymentInfoMapper;
-    }
-
-    @Autowired
     public void setQueryMapper(RentalQueryMapper queryMapper) {
         this.rentalQueryMapper = queryMapper;
     }
 
     public abstract CreateRentalUseCase.CreateRentalCommand toCreateCommand(CreateRentalRequest request);
-
-    @Mapping(target = "rentalId", expression = "java(rentalId)")
-    @Mapping(target = "amount", source = "request.amount")
-    @Mapping(target = "paymentMethod", source = "request.paymentMethod")
-    @Mapping(target = "operatorId", source = "request.operatorId")
-    public abstract RecordPrepaymentUseCase.RecordPrepaymentCommand toRecordPrepaymentCommand(Long rentalId, RecordPrepaymentRequest request);
-
-    @Mapping(target = "paymentId", source = "id")
-    @Mapping(target = "amount", source = "amount")
-    public abstract PrepaymentResponse toPrepaymentResponse(PaymentInfo paymentInfo);
 
     public abstract ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request);
 

@@ -1,11 +1,8 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
-import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
-import com.github.jenkaby.bikerental.rental.application.usecase.RecordPrepaymentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
-import com.github.jenkaby.bikerental.rental.domain.exception.InsufficientPrepaymentException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.command.mapper.RentalCommandMapper;
@@ -16,26 +13,26 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.*;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -61,10 +58,6 @@ class RentalCommandControllerTest {
 
     @MockitoBean
     private UpdateRentalUseCase updateRentalUseCase;
-
-    @MockitoBean
-    private RecordPrepaymentUseCase recordPrepaymentUseCase;
-
     @MockitoBean
     private ReturnEquipmentUseCase returnEquipmentUseCase;
 
@@ -636,80 +629,6 @@ class RentalCommandControllerTest {
         }
     }
 
-    @Nested
-    @DisplayName("POST /api/rentals/{id}/prepayments")
-    class PostRentalPrepayments {
-
-        @ParameterizedTest
-        @MethodSource("invalidPrepaymentRequestTestCases")
-        @DisplayName("Should return 400 Bad Request when request is invalid")
-        void shouldReturn400WhenRequestIsInvalid(
-                RecordPrepaymentRequest request,
-                String expectedTitle) throws Exception {
-            mockMvc.perform(post(API_RENTALS + "/1/prepayments")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.title").value(expectedTitle))
-                    .andExpect(jsonPath("$.detail").value("Validation error"))
-                    .andExpect(jsonPath("$.errors[0].code").exists());
-
-            verify(recordPrepaymentUseCase, never()).execute(any());
-        }
-
-        @Test
-        @DisplayName("Should return 422 when prepayment amount is below estimated cost")
-        void shouldReturn422WhenPrepaymentAmountBelowEstimatedCost() throws Exception {
-            RecordPrepaymentRequest request = new RecordPrepaymentRequest(
-                    new BigDecimal("50.00"),
-                    PaymentMethod.CASH,
-                    "operator-1"
-            );
-
-            var command = new RecordPrepaymentUseCase.RecordPrepaymentCommand(
-                    1L,
-                    com.github.jenkaby.bikerental.shared.domain.model.vo.Money.of("50.00"),
-                    PaymentMethod.CASH,
-                    "operator-1"
-            );
-            given(commandMapper.toRecordPrepaymentCommand(eq(1L), any(RecordPrepaymentRequest.class)))
-                    .willReturn(command);
-            doThrow(InsufficientPrepaymentException.amountBelowEstimatedCost(1L))
-                    .when(recordPrepaymentUseCase).execute(any(RecordPrepaymentUseCase.RecordPrepaymentCommand.class));
-
-            mockMvc.perform(post(API_RENTALS + "/1/prepayments")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().is(422))
-                    .andExpect(jsonPath("$.title").value("Insufficient prepayment"))
-                    .andExpect(jsonPath("$.detail").value(containsString("at least the estimated cost")));
-        }
-
-        private static Stream<Arguments> invalidPrepaymentRequestTestCases() {
-            return Stream.of(
-                    Arguments.of(
-                            new RecordPrepaymentRequest(BigDecimal.ZERO, PaymentMethod.CASH, "operator-1"),
-                            "Bad Request"
-                    ),
-                    Arguments.of(
-                            new RecordPrepaymentRequest(new BigDecimal("-10.00"), PaymentMethod.CASH, "operator-1"),
-                            "Bad Request"
-                    ),
-                    Arguments.of(
-                            new RecordPrepaymentRequest(new BigDecimal("100.00"), null, "op-1"),
-                            "Bad Request"
-                    ),
-                    Arguments.of(
-                            new RecordPrepaymentRequest(new BigDecimal("100.00"), PaymentMethod.CASH, null),
-                            "Bad Request"
-                    ),
-                    Arguments.of(
-                            new RecordPrepaymentRequest(new BigDecimal("100.00"), PaymentMethod.CASH, "   "),
-                            "Bad Request"
-                    )
-            );
-        }
-    }
 
     @Nested
     @DisplayName("POST /api/rentals/return")
