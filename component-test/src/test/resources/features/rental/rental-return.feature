@@ -44,8 +44,8 @@ Feature: Equipment Return
       | id         | customerId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 200.00        | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId   | equipmentUid   | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | <equipmentUid> | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId   | equipmentUid   | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | <equipmentId> | <equipmentUid> | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | equipmentIds  | paymentMethod | operatorId |
       | <rentalId> | <equipmentId> | CASH          | <operator> |
@@ -88,8 +88,8 @@ Feature: Equipment Return
       | id         | customerId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 200.00        | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | paymentMethod | operatorId |
       | <rentalId> | CASH          | OP1        |
@@ -134,8 +134,8 @@ Feature: Equipment Return
       | id         | customerId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 200.00        | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | paymentMethod | operatorId |
       | <rentalId> | CASH          | OP1        |
@@ -180,8 +180,8 @@ Feature: Equipment Return
       | id         | customerId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 200.00        | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | paymentMethod | operatorId |
       | <rentalId> | CASH          | OP1        |
@@ -226,8 +226,8 @@ Feature: Equipment Return
       | id | customerId | tariffId | status   | estimatedCost | plannedDuration | createdAt           | updatedAt           |
       | 1  | CUS1       | 1        | <status> | 100.00        | 120             | 2026-02-10T10:00:00 | 2026-02-10T10:00:00 |
     And rental equipments exist in the database with the following data
-      | rentalId | equipmentId | equipmentUid | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 1           | BIKE-001     | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 100.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
+      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 100.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the return equipment request is
       | rentalId | paymentMethod | operatorId |
       | 1        | CASH          | OP1        |
@@ -250,9 +250,9 @@ Feature: Equipment Return
       | id         | customerId | tariffId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS3       | 1        | ACTIVE | 400.00        | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
-      | <rentalId> | 2           | BIKE-002     | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
+      | <rentalId> | 2           | BIKE-002     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 200.00        | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | equipmentIds | paymentMethod | operatorId |
       | <rentalId> | <returnedId> | CASH          | <operator> |
