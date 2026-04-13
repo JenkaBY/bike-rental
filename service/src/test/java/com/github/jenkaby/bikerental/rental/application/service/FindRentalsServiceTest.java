@@ -44,7 +44,7 @@ class FindRentalsServiceTest {
         var rental = Rental.builder()
                 .id(1L)
                 .status(STATUS)
-                .equipments(List.of(RentalEquipment.assigned(1L, EQUIPMENT_UID)))
+                .equipments(List.of(RentalEquipment.assigned(1L, EQUIPMENT_UID, null)))
                 .build();
         var page = new Page<>(List.of(rental), 1L, PAGE_REQUEST);
 
@@ -94,7 +94,7 @@ class FindRentalsServiceTest {
         var rental = Rental.builder()
                 .id(1L)
                 .status(STATUS)
-                .equipments(List.of(RentalEquipment.assigned(1L, EQUIPMENT_UID)))
+                .equipments(List.of(RentalEquipment.assigned(1L, EQUIPMENT_UID, null)))
                 .build();
         var page = new Page<>(List.of(rental), 1L, PAGE_REQUEST);
 

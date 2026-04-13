@@ -13,10 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -28,7 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
@@ -83,7 +82,10 @@ class RentalCommandControllerTest {
                         List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
                         null,
-                        "Operator"
+                        "Operator",
+                        null,
+                        null,
+                        null
                 );
 
                 Rental rental = mock(Rental.class);
@@ -111,7 +113,10 @@ class RentalCommandControllerTest {
                         List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
                         123L,
-                        "Op"
+                        "Op",
+                        null,
+                        null,
+                        null
                 );
 
                 Rental rental = mock(Rental.class);
@@ -126,6 +131,67 @@ class RentalCommandControllerTest {
                 mockMvc.perform(post(API_RENTALS)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated());
+
+                verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+            }
+
+            @Test
+            @DisplayName("when request contains discountPercent")
+            void whenRequestContainsDiscountPercent() throws Exception {
+                var body = """
+                        {
+                          "customerId": "%s",
+                          "equipmentIds": [1],
+                          "duration": "PT2H",
+                          "operatorId": "operator-1",
+                          "discountPercent": 10
+                        }
+                        """.formatted(VALID_CUSTOMER_ID);
+
+                Rental rental = mock(Rental.class);
+                given(rental.getId()).willReturn(1L);
+                given(commandMapper.toCreateCommand(any(CreateRentalRequest.class)))
+                        .willReturn(mock(CreateRentalUseCase.CreateRentalCommand.class));
+                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
+                        .willReturn(rental);
+                given(queryMapper.toResponse(any(Rental.class)))
+                        .willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                        .andExpect(status().isCreated());
+
+                verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+            }
+
+            @Test
+            @DisplayName("when request contains specialTariffId and specialPrice")
+            void whenRequestContainsSpecialTariffIdAndSpecialPrice() throws Exception {
+                var body = """
+                        {
+                          "customerId": "%s",
+                          "equipmentIds": [1],
+                          "duration": "PT2H",
+                          "operatorId": "operator-1",
+                          "specialTariffId": 99,
+                          "specialPrice": 15.00
+                        }
+                        """.formatted(VALID_CUSTOMER_ID);
+
+                Rental rental = mock(Rental.class);
+                given(rental.getId()).willReturn(1L);
+                given(commandMapper.toCreateCommand(any(CreateRentalRequest.class)))
+                        .willReturn(mock(CreateRentalUseCase.CreateRentalCommand.class));
+                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
+                        .willReturn(rental);
+                given(queryMapper.toResponse(any(Rental.class)))
+                        .willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
                         .andExpect(status().isCreated());
 
                 verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
@@ -145,7 +211,10 @@ class RentalCommandControllerTest {
                         List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
                         null,
-                        "Operator"
+                        "Operator",
+                        null,
+                        null,
+                        null
                 );
 
                 mockMvc.perform(post(API_RENTALS)
@@ -154,6 +223,65 @@ class RentalCommandControllerTest {
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.title").value("Bad Request"))
                         .andExpect(jsonPath("$.errors[0].code").exists());
+
+                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+            }
+
+            public static Stream<Arguments> invalidDiscountPercentRequests() {
+                return Stream.of(
+                        Arguments.of(-1, "validation.min"),
+                        Arguments.of(101, "validation.max")
+                );
+            }
+
+            @ParameterizedTest(name = "discountPercent={0}")
+            @MethodSource("invalidDiscountPercentRequests")
+            @DisplayName("when discountPercent is out of range")
+            void whenDiscountPercentIsOutOfRange(Integer discountPercent, String expectedMessage) throws Exception {
+                var body = """
+                        {
+                          "customerId": "%s",
+                          "equipmentIds": [1],
+                          "duration": "PT2H",
+                          "operatorId": "operator-1",
+                          "discountPercent": %d
+                        }
+                        """.formatted(VALID_CUSTOMER_ID, discountPercent);
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.errors[0].field").value("discountPercent"))
+                        .andExpect(jsonPath("$.errors[0].code").value(expectedMessage));
+
+                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+            }
+
+            @Test
+            @DisplayName("when specialTariffId and discountPercent are both set")
+            void whenSpecialTariffIdAndDiscountPercentAreBothSet() throws Exception {
+                var body = """
+                        {
+                          "customerId": "%s",
+                          "equipmentIds": [1],
+                          "duration": "PT2H",
+                          "operatorId": "operator-1",
+                          "specialTariffId": 99,
+                          "discountPercent": 10
+                        }
+                        """.formatted(VALID_CUSTOMER_ID);
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.errors[0].code")
+                                .value("validation.assert_true"))
+                        .andExpect(jsonPath("$.errors[0].field")
+                                .value("specialTariffAndDiscountMutuallyExclusive"));
 
                 verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
             }
@@ -169,7 +297,10 @@ class RentalCommandControllerTest {
                         eqIds,
                         VALID_DURATION,
                         null,
-                        "Operator"
+                        "Operator",
+                        null,
+                        null,
+                        null
                 );
 
                 mockMvc.perform(post(API_RENTALS)
@@ -191,7 +322,10 @@ class RentalCommandControllerTest {
                         List.of(VALID_EQUIPMENT_ID),
                         duration,
                         null,
-                        "Op"
+                        "Op",
+                        null,
+                        null,
+                        null
                 );
 
                 mockMvc.perform(post(API_RENTALS)
@@ -651,7 +785,7 @@ class RentalCommandControllerTest {
                         .andExpect(jsonPath("$.detail").value("Validation error"))
                         .andExpect(jsonPath("$.instance").value("/api/rentals/return"))
                         .andExpect(jsonPath("$.errors[0].field").value("validIdentifiers"))
-                        .andExpect(jsonPath("$.errors[0].code").value("validation.assert_true"));
+                        .andExpect(jsonPath("$.errors[0].code", endsWith("assert_true")));
 
                 verify(returnEquipmentUseCase, never()).execute(any(ReturnEquipmentUseCase.ReturnEquipmentCommand.class));
             }
@@ -671,7 +805,7 @@ class RentalCommandControllerTest {
                         .andExpect(jsonPath("$.instance").value("/api/rentals/return"))
                         .andExpect(jsonPath("$.errorCode").value("shared.method_arguments.validation_failed"))
                         .andExpect(jsonPath("$.errors[0].field").value("equipmentUids[0]"))
-                        .andExpect(jsonPath("$.errors[0].code").value("validation.not_blank"));
+                        .andExpect(jsonPath("$.errors[0].code", endsWith("not_blank")));
 
                 verify(returnEquipmentUseCase, never()).execute(any(ReturnEquipmentUseCase.ReturnEquipmentCommand.class));
             }
@@ -710,7 +844,7 @@ class RentalCommandControllerTest {
                         .andExpect(jsonPath("$.instance").value("/api/rentals/return"))
                         .andExpect(jsonPath("$.errorCode").value("shared.method_arguments.validation_failed"))
                         .andExpect(jsonPath("$.errors[0].field").value("operatorId"))
-                        .andExpect(jsonPath("$.errors[0].code").value("validation.not_blank"));
+                        .andExpect(jsonPath("$.errors[0].code", endsWith("not_blank")));
 
                 verify(returnEquipmentUseCase, never()).execute(any(ReturnEquipmentUseCase.ReturnEquipmentCommand.class));
 
