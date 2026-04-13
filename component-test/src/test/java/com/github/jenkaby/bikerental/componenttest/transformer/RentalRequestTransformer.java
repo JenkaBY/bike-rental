@@ -16,12 +16,19 @@ public class RentalRequestTransformer {
         var tariffId = DataTableHelper.toLong(entry, "tariffId");
         var operator = Aliases.getValueOrDefault(entry.get("operatorId"));
 
+        var specialTariffId = DataTableHelper.toLong(entry, "specialTariffId");
+        var specialPrice = DataTableHelper.toBigDecimal(entry, "specialPrice");
+        var discountPercent = DataTableHelper.toInt(entry, "discountPercent");
+
         return new CreateRentalRequest(
                 customerId,
                 equipmentIds,
                 duration,
                 tariffId,
-                operator
+                operator,
+                specialTariffId,
+                specialPrice,
+                discountPercent
         );
     }
 }

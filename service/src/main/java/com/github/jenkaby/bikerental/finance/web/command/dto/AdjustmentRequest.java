@@ -9,8 +9,9 @@ import java.util.UUID;
 
 public record AdjustmentRequest(
         @NotNull UUID customerId,
-        @MoneyAmount BigDecimal amount,
+        @MoneyAmount @NotNull BigDecimal amount,
         @NotBlank String reason,
         @NotBlank String operatorId,
         @NotNull UUID idempotencyKey
-) {}
+) {
+}

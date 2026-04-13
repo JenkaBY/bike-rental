@@ -39,11 +39,11 @@ Feature: Rental Query
       | 3  | CUS1       | 1           | BIKE-001     | DRAFT     | null        | null                | <startedAt> | <startedAt> |
       | 4  | CUS2       | 2           | E-BIKE-001   | COMPLETED | <startedAt> | <expectedReturnAt>  | <startedAt> | <startedAt> |
     And rental equipment exists in the database with the following data
-      | rentalId | equipmentId | equipmentUid | tariffId | status   | startedAt   | expectedReturnAt   | estimatedCost | finalCost | createdAt   |
-      | 1        | 1           | BIKE-001     | 1        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
-      | 2        | 2           | E-BIKE-001   | 2        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
-      | 3        | 1           | BIKE-001     | 1        | ASSIGNED |             |                    |               |           | <startedAt> |
-      | 4        | 2           | E-BIKE-001   | 2        | RETURNED | <startedAt> | <expectedReturnAt> | 200.00        | 200.00    | <startedAt> |
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt   | expectedReturnAt   | estimatedCost | finalCost | createdAt   |
+      | 1        | 1           | BIKE-001     | bicycle       | 1        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
+      | 2        | 2           | E-BIKE-001   | scooter       | 2        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
+      | 3        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED |             |                    |               |           | <startedAt> |
+      | 4        | 2           | E-BIKE-001   | scooter       | 2        | RETURNED | <startedAt> | <expectedReturnAt> | 200.00        | 200.00    | <startedAt> |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | status |
       | ACTIVE |
@@ -70,10 +70,10 @@ Feature: Rental Query
       | 2  | CUS2       | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
       | 3  | CUS1       | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
     And rental equipment exists in the database with the following data
-      | rentalId | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt   | estimatedCost | finalCost | createdAt   |
-      | 1        | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
-      | 2        | 2           | E-BIKE-001   | 2        | ACTIVE | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
-      | 3        | 3           | E-BIKE-002   | 2        | ACTIVE | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt   | estimatedCost | finalCost | createdAt   |
+      | 1        | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
+      | 2        | 2           | E-BIKE-001   | scooter       | 2        | ACTIVE | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
+      | 3        | 3           | E-BIKE-002   | scooter       | 2        | ACTIVE | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | status | customerId |
       | ACTIVE | CUS1       |
@@ -99,9 +99,9 @@ Feature: Rental Query
       | 1  | CUS1       | ACTIVE | <startedAt> | <overdueExpectedAt>    | <startedAt> | <startedAt> |
       | 2  | CUS2       | ACTIVE | <startedAt> | <notOverdueExpectedAt> | <startedAt> | <startedAt> |
     And rental equipment exists in the database with the following data
-      | rentalId | equipmentId | equipmentUid | tariffId | status | startedAt   | expectedReturnAt       | estimatedCost | finalCost | createdAt   |
-      | 1        | 1           | BIKE-001     | 1        | ACTIVE | <startedAt> | <overdueExpectedAt>    | 200.00        |           | <startedAt> |
-      | 2        | 2           | E-BIKE-001   | 2        | ACTIVE | <startedAt> | <notOverdueExpectedAt> | 200.00        |           | <startedAt> |
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt       | estimatedCost | finalCost | createdAt   |
+      | 1        | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <overdueExpectedAt>    | 200.00        |           | <startedAt> |
+      | 2        | 2           | E-BIKE-001   | scooter       | 2        | ACTIVE | <startedAt> | <notOverdueExpectedAt> | 200.00        |           | <startedAt> |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | status |
       | ACTIVE |
@@ -152,11 +152,11 @@ Feature: Rental Query
       | 3  | CUS1       | COMPLETED | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
       | 4  | CUS1       | DRAFT     | null        | null               | <startedAt> | <startedAt> |
     And rental equipment exists in the database with the following data
-      | rentalId | equipmentId | equipmentUid | tariffId | status   | startedAt   | expectedReturnAt   | estimatedCost | finalCost | createdAt   |
-      | 1        | 1           | BIKE-001     | 1        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
-      | 2        | 2           | E-BIKE-001   | 2        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
-      | 3        | 3           | E-BIKE-002   | 2        | RETURNED | <startedAt> | <expectedReturnAt> | 200.00        | 200.00    | <startedAt> |
-      | 4        | 1           | BIKE-001     | 1        | ASSIGNED |             |                    |               |           | <startedAt> |
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt   | expectedReturnAt   | estimatedCost | finalCost | createdAt   |
+      | 1        | 1           | BIKE-001     | bicycle       | 1        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
+      | 2        | 2           | E-BIKE-001   | scooter       | 2        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
+      | 3        | 3           | E-BIKE-002   | scooter       | 2        | RETURNED | <startedAt> | <expectedReturnAt> | 200.00        | 200.00    | <startedAt> |
+      | 4        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED |             |                    |               |           | <startedAt> |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | customerId |
       | CUS1       |
@@ -184,10 +184,10 @@ Feature: Rental Query
       | 2  | CUS2       | 2           | E-BIKE-001   | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
       | 3  | CUS1       | 1           | BIKE-001     | 1        | DRAFT  | null        | null               | <startedAt> | <startedAt> |
     And rental equipment exists in the database with the following data
-      | rentalId | equipmentId | equipmentUid | tariffId | status   | startedAt   | expectedReturnAt   | estimatedCost | createdAt   |
-      | 1        | 1           | BIKE-001     | 1        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        | <startedAt> |
-      | 2        | 2           | E-BIKE-001   | 2        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        | <startedAt> |
-      | 3        | 1           | BIKE-001     | 1        | ASSIGNED |             |                    |               | <startedAt> |
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt   | expectedReturnAt   | estimatedCost | createdAt   |
+      | 1        | 1           | BIKE-001     | bicycle       | 1        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        | <startedAt> |
+      | 2        | 2           | E-BIKE-001   | scooter       | 2        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        | <startedAt> |
+      | 3        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED |             |                    |               | <startedAt> |
     When a GET request has been made to "/api/rentals" endpoint with query parameters
       | status | equipmentUid |
       | ACTIVE | E-BIKE-001   |

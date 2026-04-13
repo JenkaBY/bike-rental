@@ -134,6 +134,18 @@ public class RentalDbSteps {
                 softly.assertThat(actual.getUpdatedAt()).as("Updated at")
                         .isCloseTo(exp.getUpdatedAt(), within(1, ChronoUnit.SECONDS));
             }
+            if (exp.getSpecialTariffId() != null) {
+                softly.assertThat(actual.getSpecialTariffId()).as("Special tariff ID")
+                        .isEqualTo(exp.getSpecialTariffId());
+            }
+            if (exp.getSpecialPrice() != null) {
+                softly.assertThat(actual.getSpecialPrice()).as("Special price")
+                        .isEqualByComparingTo(exp.getSpecialPrice());
+            }
+            if (exp.getDiscountPercent() != null) {
+                softly.assertThat(actual.getDiscountPercent()).as("Discount percent")
+                        .isEqualTo(exp.getDiscountPercent());
+            }
             softly.assertAll();
         });
     }
@@ -194,7 +206,9 @@ public class RentalDbSteps {
 
             softly.assertThat(actual.getEquipmentId()).as("Equipment ID").isEqualTo(exp.getEquipmentId());
             softly.assertThat(actual.getEquipmentUid()).as("Equipment UID").isEqualTo(exp.getEquipmentUid());
-            softly.assertThat(actual.getTariffId()).as("Tariff ID").isEqualTo(exp.getTariffId());
+            if (exp.getTariffId() != null) {
+                softly.assertThat(actual.getTariffId()).as("Tariff ID").isEqualTo(exp.getTariffId());
+            }
             softly.assertThat(actual.getStatus()).as("Status").isEqualTo(exp.getStatus());
 
             if (exp.getStartedAt() != null) {

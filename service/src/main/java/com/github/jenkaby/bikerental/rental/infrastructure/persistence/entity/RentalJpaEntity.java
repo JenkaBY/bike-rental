@@ -54,6 +54,15 @@ public class RentalJpaEntity {
     @Column(name = "actual_duration_minutes")
     private Integer actualDurationMinutes;
 
+    @Column(name = "special_tariff_id")
+    private Long specialTariffId;
+
+    @Column(name = "special_price")
+    private BigDecimal specialPrice;
+
+    @Column(name = "discount_percent")
+    private Integer discountPercent;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 

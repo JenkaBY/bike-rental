@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.customer.CustomerFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
+import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
@@ -19,15 +20,13 @@ import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
-import com.github.jenkaby.bikerental.tariff.TariffFacade;
-import com.github.jenkaby.bikerental.tariff.TariffInfo;
+import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +42,12 @@ class UpdateRentalService implements UpdateRentalUseCase {
     private final RentalRepository rentalRepository;
     private final CustomerFacade customerFacade;
     private final EquipmentFacade equipmentFacade;
-    private final TariffFacade tariffFacade;
+    private final TariffV2Facade tariffV2Facade;
     private final FinanceFacade financeFacade;
     private final EventPublisher eventPublisher;
     private final Clock clock;
     private final RentalEventMapper eventMapper;
+    private final RentalCostCommandMapper costCommandMapper;
     private final PatchValueParser valueParser;
     private final RequestedEquipmentValidator validator;
 
@@ -55,21 +55,23 @@ class UpdateRentalService implements UpdateRentalUseCase {
             RentalRepository rentalRepository,
             CustomerFacade customerFacade,
             EquipmentFacade equipmentFacade,
-            TariffFacade tariffFacade,
+            TariffV2Facade tariffV2Facade,
             FinanceFacade financeFacade,
             EventPublisher eventPublisher,
             Clock clock,
             RentalEventMapper eventMapper,
+            RentalCostCommandMapper costCommandMapper,
             PatchValueParser valueParser,
             RequestedEquipmentValidator validator) {
         this.rentalRepository = rentalRepository;
         this.customerFacade = customerFacade;
         this.equipmentFacade = equipmentFacade;
-        this.tariffFacade = tariffFacade;
+        this.tariffV2Facade = tariffV2Facade;
         this.financeFacade = financeFacade;
         this.eventPublisher = eventPublisher;
         this.clock = clock;
         this.eventMapper = eventMapper;
+        this.costCommandMapper = costCommandMapper;
         this.valueParser = valueParser;
         this.validator = validator;
     }
@@ -108,25 +110,26 @@ class UpdateRentalService implements UpdateRentalUseCase {
             validator.validateAvailability(beingReserved);
             equipments.addAll(foundEquipments);
 
-            rental.clearEquipmentRentals();
-            for (var equipment : equipments) {
-                RentalEquipment rentalEquipment = RentalEquipment.assigned(equipment.id(), equipment.uid());
+            if (rental.getPlannedDuration() == null) {
+                throw new InvalidRentalPlannedDurationException(rental.getId());
+            }
 
-                TariffInfo tariff = selectTariff(rental, equipment);
-                var cost = tariffFacade.calculateRentalCost(tariff.id(), rental.getPlannedDuration());
-                rentalEquipment.setTariffId(tariff.id());
-                rentalEquipment.setEstimatedCost(cost.totalCost());
+            var costCommand = costCommandMapper.toCommand(rental, foundEquipments);
+            var costResult = tariffV2Facade.calculateRentalCost(costCommand);
+            var breakdowns = costResult.equipmentBreakdowns();
+
+            rental.clearEquipmentRentals();
+            for (int i = 0; i < foundEquipments.size(); i++) {
+                var equipment = foundEquipments.get(i);
+                RentalEquipment rentalEquipment = RentalEquipment.assigned(
+                        equipment.id(),
+                        equipment.uid(),
+                        equipment.typeSlug());
+                rentalEquipment.setEstimatedCost(breakdowns.get(i).itemCost());
                 rental.addEquipment(rentalEquipment);
             }
         }
 
-        if (patch.containsKey("tariffId")) {
-            // Handle tariffId update (manual override) for special cases. Have no idea how to implement this at the moment.
-            Long tariffId = valueParser.parseLong(patch.get("tariffId"));
-            tariffFacade.findById(tariffId)
-                    .orElseThrow(() -> new ReferenceNotFoundException("Tariff", tariffId.toString()));
-            rental.selectTariff(tariffId);
-        }
 
         if (patch.containsKey("status")) {
             String newStatusStr = valueParser.parseString(patch.get("status"));
@@ -161,14 +164,5 @@ class UpdateRentalService implements UpdateRentalUseCase {
         eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);
     }
 
-    private TariffInfo selectTariff(Rental rental, EquipmentInfo equipment) {
-        var plannedDuration = rental.getPlannedDuration();
-        if (plannedDuration == null) {
-            throw new InvalidRentalPlannedDurationException(rental.getId());
-        }
-        return tariffFacade.selectTariff(
-                equipment.typeSlug(),
-                plannedDuration,
-                LocalDate.now(clock));
-    }
+
 }

@@ -31,6 +31,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="special_tariff_id" type="BIGINT"/>
+            <column name="special_price" type="NUMERIC(19,4)"/>
+            <column name="discount_percent" type="SMALLINT"/>
         </createTable>
 
     </changeSet>

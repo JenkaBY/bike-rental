@@ -1,9 +1,9 @@
 package com.github.jenkaby.bikerental.tariff.web.error;
 
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
+import com.github.jenkaby.bikerental.tariff.InvalidSpecialTariffTypeException;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialPriceException;
-import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialTariffTypeException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;

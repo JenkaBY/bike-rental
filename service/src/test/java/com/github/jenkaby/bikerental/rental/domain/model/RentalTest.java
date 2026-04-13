@@ -31,7 +31,7 @@ class RentalTest {
     void isPrepaymentSufficientReturnsFalseWhenEstimatedCostNotSet() {
         Rental rental = Rental.createDraft();
         rental.selectCustomer(UUID.randomUUID());
-        rental.addEquipment(RentalEquipment.assigned(1L, null));
+        rental.addEquipment(RentalEquipment.assigned(1L, null, null));
         rental.selectTariff(1L);
         rental.setPlannedDuration(Duration.ofHours(2));
 
@@ -65,7 +65,7 @@ class RentalTest {
     private static Rental createRentalWithEstimatedCost(String amount) {
         Rental rental = Rental.createDraft();
         rental.selectCustomer(UUID.randomUUID());
-        rental.addEquipment(RentalEquipment.assigned(1L, null));
+        rental.addEquipment(RentalEquipment.assigned(1L, null, null));
         rental.selectTariff(1L);
         rental.setPlannedDuration(Duration.ofHours(2));
         rental.setEstimatedCost(Money.of(amount));

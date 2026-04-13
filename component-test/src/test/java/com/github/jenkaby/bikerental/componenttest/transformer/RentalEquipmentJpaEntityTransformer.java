@@ -17,6 +17,8 @@ public class RentalEquipmentJpaEntityTransformer {
 
         var equipmentId = DataTableHelper.toLong(entry, "equipmentId");
         var equipmentUid = DataTableHelper.getStringOrNull(entry, "equipmentUid");
+        var equipmentType = DataTableHelper.getStringOrNull(entry, "equipmentType");
+
         var tariffId = DataTableHelper.toLong(entry, "tariffId");
         var status = RentalEquipmentStatus.valueOf(DataTableHelper.getStringOrNull(entry, "status"));
         var startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
@@ -33,6 +35,7 @@ public class RentalEquipmentJpaEntityTransformer {
                 .rental(RentalJpaEntity.builder().id(rentalId).build())
                 .equipmentId(equipmentId)
                 .equipmentUid(equipmentUid)
+                .equipmentTypeSlug(equipmentType)
                 .tariffId(tariffId)
                 .status(status.name())
                 .startedAt(startedAt)

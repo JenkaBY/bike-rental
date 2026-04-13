@@ -1,4 +1,4 @@
-package com.github.jenkaby.bikerental.tariff.domain.exception;
+package com.github.jenkaby.bikerental.tariff;
 
 import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
 import com.github.jenkaby.bikerental.tariff.domain.model.PricingType;
@@ -23,4 +23,3 @@ public class InvalidSpecialTariffTypeException extends BikeRentalException {
     public record TariffTypeDetails(Long tariffId, String actualPricingType) {
     }
 }
-

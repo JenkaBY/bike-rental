@@ -7,7 +7,6 @@ import com.github.jenkaby.bikerental.tariff.*;
 import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostCalculationUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.SelectTariffV2UseCase;
 import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialPriceException;
-import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialTariffTypeException;
 import com.github.jenkaby.bikerental.tariff.domain.model.PricingType;
 import com.github.jenkaby.bikerental.tariff.domain.model.TariffV2;
 import com.github.jenkaby.bikerental.tariff.domain.repository.TariffV2Repository;

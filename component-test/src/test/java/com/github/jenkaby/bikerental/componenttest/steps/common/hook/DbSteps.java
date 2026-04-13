@@ -42,7 +42,18 @@ public class DbSteps {
     private final JdbcClient jdbcClient;
 
     @After
-    public void truncateDb() {
+    public void truncateDb() throws InterruptedException {
+        try {
+            truncateInternally();
+        } catch (Exception e) {
+            log.error("Error while truncating tables {}, error: {}", TABLE_TO_TRUNCATE, e.getMessage(), e);
+            log.info("Try truncate second time");
+            Thread.sleep(200);
+            truncateInternally();
+        }
+    }
+
+    private void truncateInternally() {
         log.info("Deleting all records on tables {}", TABLE_TO_TRUNCATE);
         JdbcTestUtils.deleteFromTables(jdbcClient, TABLE_TO_TRUNCATE.toArray(new String[0]));
         JdbcTestUtils.deleteFromTableWhere(jdbcClient,
@@ -53,7 +64,6 @@ public class DbSteps {
                 "finance_accounts",
                 "account_type != %s".formatted(SYSTEM_ACCOUNTS)
         );
-
     }
 
     private static <E extends Enum<E>> String joinEnumNames(Class<E> enumClass, Predicate<E> filter) {

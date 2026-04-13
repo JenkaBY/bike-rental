@@ -29,6 +29,9 @@ public class RentalJpaEntityTransformer {
         var createdAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "createdAt");
         var updatedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "updatedAt");
 
+        var specialTariffId = DataTableHelper.toLong(entry, "specialTariffId");
+        var specialPrice = DataTableHelper.toBigDecimal(entry, "specialPrice");
+        var discountPercent = DataTableHelper.toInt(entry, "discountPercent");
 
         return RentalJpaEntity.builder()
                 .id(id)
@@ -39,6 +42,9 @@ public class RentalJpaEntityTransformer {
                 .actualReturnAt(actualReturnAt)
                 .plannedDurationMinutes(plannedDurationMinutes)
                 .actualDurationMinutes(actualDurationMinutes)
+                .specialTariffId(specialTariffId)
+                .specialPrice(specialPrice)
+                .discountPercent(discountPercent)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)
                 .build();
