@@ -12,16 +12,16 @@ public class InvalidRentalStatusException extends BikeRentalException {
     private static final String MESSAGE_TEMPLATE = &quot;Cannot perform operation on rental with status %s. Expected status: %s&quot;;
 
     public InvalidRentalStatusException(RentalStatus currentStatus, RentalStatus expectedStatus) {
-<span class="fc" id="L15">        super(MESSAGE_TEMPLATE.formatted(currentStatus, expectedStatus), ERROR_CODE, new RentalStatusDetails(currentStatus, expectedStatus));</span>
-<span class="fc" id="L16">    }</span>
+<span class="nc" id="L15">        super(MESSAGE_TEMPLATE.formatted(currentStatus, expectedStatus), ERROR_CODE, new RentalStatusDetails(currentStatus, expectedStatus));</span>
+<span class="nc" id="L16">    }</span>
 
     public RentalStatusDetails getDetails() {
-<span class="fc" id="L19">        return getParams()</span>
-<span class="fc" id="L20">                .map(d -&gt; (RentalStatusDetails) d)</span>
-<span class="pc" id="L21">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected RentalStatusDetails in exception parameters&quot;));</span>
+<span class="nc" id="L19">        return getParams()</span>
+<span class="nc" id="L20">                .map(d -&gt; (RentalStatusDetails) d)</span>
+<span class="nc" id="L21">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected RentalStatusDetails in exception parameters&quot;));</span>
     }
 
-<span class="fc" id="L24">    public record RentalStatusDetails(RentalStatus currentStatus, RentalStatus expectedStatus) {</span>
+<span class="nc" id="L24">    public record RentalStatusDetails(RentalStatus currentStatus, RentalStatus expectedStatus) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

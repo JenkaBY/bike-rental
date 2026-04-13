@@ -10,7 +10,7 @@ public interface ReturnEquipmentUseCase {
     @NonNull
     ReturnEquipmentResult execute(@NonNull ReturnEquipmentCommand command);
 
-<span class="fc" id="L13">    record ReturnEquipmentCommand(</span>
+<span class="nc" id="L13">    record ReturnEquipmentCommand(</span>
             Long rentalId,
             List&lt;Long&gt; equipmentIds,
             List&lt;String&gt; equipmentUids,
@@ -18,11 +18,11 @@ public interface ReturnEquipmentUseCase {
             String operatorId
     ) {
         public List&lt;Long&gt; getEquipmentIds() {
-<span class="fc bfc" id="L21" title="All 2 branches covered.">            return equipmentIds != null ? equipmentIds : List.of();</span>
+<span class="nc bnc" id="L21" title="All 2 branches missed.">            return equipmentIds != null ? equipmentIds : List.of();</span>
         }
 
         public List&lt;String&gt; getEquipmentUids() {
-<span class="pc bpc" id="L25" title="1 of 2 branches missed.">            return equipmentUids != null ? equipmentUids : List.of();</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">            return equipmentUids != null ? equipmentUids : List.of();</span>
         }
     }
 }

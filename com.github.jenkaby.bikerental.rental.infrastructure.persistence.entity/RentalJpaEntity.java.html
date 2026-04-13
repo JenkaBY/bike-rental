@@ -54,6 +54,15 @@ public class RentalJpaEntity {
     @Column(name = &quot;actual_duration_minutes&quot;)
     private Integer actualDurationMinutes;
 
+    @Column(name = &quot;special_tariff_id&quot;)
+    private Long specialTariffId;
+
+    @Column(name = &quot;special_price&quot;)
+    private BigDecimal specialPrice;
+
+    @Column(name = &quot;discount_percent&quot;)
+    private Integer discountPercent;
+
     @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -61,40 +70,40 @@ public class RentalJpaEntity {
     private Instant updatedAt;
 
     public BigDecimal getEstimatedCost() {
-<span class="fc" id="L64">        return this.rentalEquipments.stream()</span>
-<span class="fc" id="L65">                .map(RentalEquipmentJpaEntity::getEstimatedCost)</span>
-<span class="fc" id="L66">                .filter(Objects::nonNull)</span>
-<span class="fc" id="L67">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+<span class="fc" id="L73">        return this.rentalEquipments.stream()</span>
+<span class="fc" id="L74">                .map(RentalEquipmentJpaEntity::getEstimatedCost)</span>
+<span class="fc" id="L75">                .filter(Objects::nonNull)</span>
+<span class="fc" id="L76">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
     }
 
     public BigDecimal getFinalCost() {
-<span class="fc" id="L71">        return this.rentalEquipments.stream()</span>
-<span class="fc" id="L72">                .map(RentalEquipmentJpaEntity::getFinalCost)</span>
-<span class="fc" id="L73">                .filter(Objects::nonNull)</span>
-<span class="fc" id="L74">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+<span class="fc" id="L80">        return this.rentalEquipments.stream()</span>
+<span class="fc" id="L81">                .map(RentalEquipmentJpaEntity::getFinalCost)</span>
+<span class="fc" id="L82">                .filter(Objects::nonNull)</span>
+<span class="fc" id="L83">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
     }
 
     public void addRentalEquipment(RentalEquipmentJpaEntity equipment) {
-<span class="nc" id="L78">        equipment.setRental(this);</span>
-<span class="nc" id="L79">        this.rentalEquipments.add(equipment);</span>
-<span class="nc" id="L80">    }</span>
+<span class="nc" id="L87">        equipment.setRental(this);</span>
+<span class="nc" id="L88">        this.rentalEquipments.add(equipment);</span>
+<span class="nc" id="L89">    }</span>
 
     public void removeRentalEquipment(RentalEquipmentJpaEntity equipment) {
-<span class="nc" id="L83">        equipment.setRental(null);</span>
-<span class="nc" id="L84">        this.rentalEquipments.remove(equipment);</span>
-<span class="nc" id="L85">    }</span>
+<span class="nc" id="L92">        equipment.setRental(null);</span>
+<span class="nc" id="L93">        this.rentalEquipments.remove(equipment);</span>
+<span class="nc" id="L94">    }</span>
 
     @PrePersist
     protected void onCreate() {
-<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (createdAt == null) {</span>
-<span class="nc" id="L90">            createdAt = Instant.now();</span>
-<span class="nc" id="L91">            updatedAt = createdAt;</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        if (createdAt == null) {</span>
+<span class="nc" id="L99">            createdAt = Instant.now();</span>
+<span class="nc" id="L100">            updatedAt = createdAt;</span>
         }
-<span class="fc" id="L93">    }</span>
+<span class="fc" id="L102">    }</span>
 
     @PreUpdate
     protected void onUpdate() {
-<span class="fc" id="L97">        updatedAt = Instant.now();</span>
-<span class="fc" id="L98">    }</span>
+<span class="fc" id="L106">        updatedAt = Instant.now();</span>
+<span class="fc" id="L107">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

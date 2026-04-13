@@ -9,9 +9,10 @@ import java.util.UUID;
 
 <span class="fc" id="L10">public record AdjustmentRequest(</span>
         @NotNull UUID customerId,
-        @MoneyAmount BigDecimal amount,
+        @MoneyAmount @NotNull BigDecimal amount,
         @NotBlank String reason,
         @NotBlank String operatorId,
         @NotNull UUID idempotencyKey
-) {}
+) {
+}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Schema(description = &quot;Settlement response containing capture transaction references, optional release transaction reference and the timestamp when the settlement was recorded&quot;)
-<span class="fc" id="L13">public record SettlementResponse(</span>
+<span class="nc" id="L13">public record SettlementResponse(</span>
         @NonNull
         @ArraySchema(schema = @Schema(type = &quot;string&quot;, format = &quot;uuid&quot;, description = &quot;Capture transaction reference (UUID)&quot;),
                 arraySchema = @Schema(description = &quot;List of capture transaction UUIDs&quot;))

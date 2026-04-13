@@ -5,11 +5,16 @@ import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseC
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.web.command.dto.CreateRentalRequest;
 import com.github.jenkaby.bikerental.rental.web.command.dto.ReturnEquipmentRequest;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.DiscountPercent;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Generated(
@@ -17,61 +22,77 @@ import org.springframework.stereotype.Component;
     comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.4.1.jar, environment: Java 21.0.10 (Amazon.com Inc.)&quot;
 )
 @Component
-<span class="fc" id="L20">public class RentalCommandMapperImpl extends RentalCommandMapper {</span>
+public class RentalCommandMapperImpl extends RentalCommandMapper {
+
+    private final MoneyMapper moneyMapper;
+    private final DiscountMapper discountMapper;
+
+    @Autowired
+<span class="fc" id="L31">    public RentalCommandMapperImpl(MoneyMapper moneyMapper, DiscountMapper discountMapper) {</span>
+
+<span class="fc" id="L33">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L34">        this.discountMapper = discountMapper;</span>
+<span class="fc" id="L35">    }</span>
 
     @Override
     public CreateRentalUseCase.CreateRentalCommand toCreateCommand(CreateRentalRequest request) {
-<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if ( request == null ) {</span>
-<span class="nc" id="L25">            return null;</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L40">            return null;</span>
         }
 
-<span class="fc" id="L28">        UUID customerId = null;</span>
-<span class="fc" id="L29">        List&lt;Long&gt; equipmentIds = null;</span>
-<span class="fc" id="L30">        Duration duration = null;</span>
-<span class="fc" id="L31">        String operatorId = null;</span>
-<span class="fc" id="L32">        Long tariffId = null;</span>
+<span class="fc" id="L43">        UUID customerId = null;</span>
+<span class="fc" id="L44">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L45">        Duration duration = null;</span>
+<span class="fc" id="L46">        String operatorId = null;</span>
+<span class="fc" id="L47">        Long tariffId = null;</span>
+<span class="fc" id="L48">        Long specialTariffId = null;</span>
+<span class="fc" id="L49">        Money specialPrice = null;</span>
+<span class="fc" id="L50">        DiscountPercent discountPercent = null;</span>
 
-<span class="fc" id="L34">        customerId = request.customerId();</span>
-<span class="fc" id="L35">        List&lt;Long&gt; list = request.equipmentIds();</span>
-<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if ( list != null ) {</span>
-<span class="fc" id="L37">            equipmentIds = new ArrayList&lt;Long&gt;( list );</span>
+<span class="fc" id="L52">        customerId = request.customerId();</span>
+<span class="fc" id="L53">        List&lt;Long&gt; list = request.equipmentIds();</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if ( list != null ) {</span>
+<span class="fc" id="L55">            equipmentIds = new ArrayList&lt;Long&gt;( list );</span>
         }
-<span class="fc" id="L39">        duration = request.duration();</span>
-<span class="fc" id="L40">        operatorId = request.operatorId();</span>
-<span class="fc" id="L41">        tariffId = request.tariffId();</span>
+<span class="fc" id="L57">        duration = request.duration();</span>
+<span class="fc" id="L58">        operatorId = request.operatorId();</span>
+<span class="fc" id="L59">        tariffId = request.tariffId();</span>
+<span class="fc" id="L60">        specialTariffId = request.specialTariffId();</span>
+<span class="fc" id="L61">        specialPrice = moneyMapper.toMoney( request.specialPrice() );</span>
+<span class="fc" id="L62">        discountPercent = discountMapper.toDiscount( request.discountPercent() );</span>
 
-<span class="fc" id="L43">        CreateRentalUseCase.CreateRentalCommand createRentalCommand = new CreateRentalUseCase.CreateRentalCommand( customerId, equipmentIds, duration, operatorId, tariffId );</span>
+<span class="fc" id="L64">        CreateRentalUseCase.CreateRentalCommand createRentalCommand = new CreateRentalUseCase.CreateRentalCommand( customerId, equipmentIds, duration, operatorId, tariffId, specialTariffId, specialPrice, discountPercent );</span>
 
-<span class="fc" id="L45">        return createRentalCommand;</span>
+<span class="fc" id="L66">        return createRentalCommand;</span>
     }
 
     @Override
     public ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request) {
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if ( request == null ) {</span>
-<span class="nc" id="L51">            return null;</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L72">            return null;</span>
         }
 
-<span class="fc" id="L54">        Long rentalId = null;</span>
-<span class="fc" id="L55">        List&lt;Long&gt; equipmentIds = null;</span>
-<span class="fc" id="L56">        List&lt;String&gt; equipmentUids = null;</span>
-<span class="fc" id="L57">        PaymentMethod paymentMethod = null;</span>
-<span class="fc" id="L58">        String operatorId = null;</span>
+<span class="nc" id="L75">        Long rentalId = null;</span>
+<span class="nc" id="L76">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="nc" id="L77">        List&lt;String&gt; equipmentUids = null;</span>
+<span class="nc" id="L78">        PaymentMethod paymentMethod = null;</span>
+<span class="nc" id="L79">        String operatorId = null;</span>
 
-<span class="fc" id="L60">        rentalId = request.rentalId();</span>
-<span class="fc" id="L61">        List&lt;Long&gt; list = request.equipmentIds();</span>
-<span class="fc bfc" id="L62" title="All 2 branches covered.">        if ( list != null ) {</span>
-<span class="fc" id="L63">            equipmentIds = new ArrayList&lt;Long&gt;( list );</span>
+<span class="nc" id="L81">        rentalId = request.rentalId();</span>
+<span class="nc" id="L82">        List&lt;Long&gt; list = request.equipmentIds();</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if ( list != null ) {</span>
+<span class="nc" id="L84">            equipmentIds = new ArrayList&lt;Long&gt;( list );</span>
         }
-<span class="fc" id="L65">        List&lt;String&gt; list1 = request.equipmentUids();</span>
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if ( list1 != null ) {</span>
-<span class="nc" id="L67">            equipmentUids = new ArrayList&lt;String&gt;( list1 );</span>
+<span class="nc" id="L86">        List&lt;String&gt; list1 = request.equipmentUids();</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if ( list1 != null ) {</span>
+<span class="nc" id="L88">            equipmentUids = new ArrayList&lt;String&gt;( list1 );</span>
         }
-<span class="fc" id="L69">        paymentMethod = request.paymentMethod();</span>
-<span class="fc" id="L70">        operatorId = request.operatorId();</span>
+<span class="nc" id="L90">        paymentMethod = request.paymentMethod();</span>
+<span class="nc" id="L91">        operatorId = request.operatorId();</span>
 
-<span class="fc" id="L72">        ReturnEquipmentUseCase.ReturnEquipmentCommand returnEquipmentCommand = new ReturnEquipmentUseCase.ReturnEquipmentCommand( rentalId, equipmentIds, equipmentUids, paymentMethod, operatorId );</span>
+<span class="nc" id="L93">        ReturnEquipmentUseCase.ReturnEquipmentCommand returnEquipmentCommand = new ReturnEquipmentUseCase.ReturnEquipmentCommand( rentalId, equipmentIds, equipmentUids, paymentMethod, operatorId );</span>
 
-<span class="fc" id="L74">        return returnEquipmentCommand;</span>
+<span class="nc" id="L95">        return returnEquipmentCommand;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

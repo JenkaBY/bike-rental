@@ -27,7 +27,7 @@ class SelectTariffV2Service implements SelectTariffV2UseCase {
 <span class="fc" id="L27">        var date = Optional.ofNullable(command.rentalDate()).orElse(LocalDate.now(clock));</span>
 <span class="fc" id="L28">        return repository.findActiveByEquipmentTypeAndValidOn(command.equipmentTypeSlug(), date).stream()</span>
 <span class="fc" id="L29">                .min(Comparator.comparing(tariff -&gt; tariff.calculateCost(command.duration()).totalCost()))</span>
-<span class="pc" id="L30">                .orElseThrow(() -&gt; new SuitableTariffNotFoundException(command.equipmentTypeSlug(), date, command.duration()));</span>
+<span class="fc" id="L30">                .orElseThrow(() -&gt; new SuitableTariffNotFoundException(command.equipmentTypeSlug(), date, command.duration()));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -34,32 +34,32 @@ class CalculateRentalCostService implements CalculateRentalCostUseCase {
     @Override
     public @NonNull RentalCost execute(@NonNull CalculateRentalCostCommand command) {
         // 1. Get tariff
-<span class="fc" id="L37">        Tariff tariff = getTariffByIdUseCase.get(command.tariffId());</span>
+<span class="nc" id="L37">        Tariff tariff = getTariffByIdUseCase.get(command.tariffId());</span>
 
         // 2. Determine base cost based on actual duration
-<span class="fc" id="L40">        TariffPeriod period = tariffPeriodSelector.selectPeriod(command.actualDuration());</span>
-<span class="fc" id="L41">        Money basePrice = tariff.getPriceForPeriod(period);</span>
+<span class="nc" id="L40">        TariffPeriod period = tariffPeriodSelector.selectPeriod(command.actualDuration());</span>
+<span class="nc" id="L41">        Money basePrice = tariff.getPriceForPeriod(period);</span>
 
-<span class="fc" id="L43">        long periodMinutes = period.getMinutes();</span>
-<span class="fc" id="L44">        int actualMinutes = (int) command.actualDuration().toMinutes();</span>
+<span class="nc" id="L43">        long periodMinutes = period.getMinutes();</span>
+<span class="nc" id="L44">        int actualMinutes = (int) command.actualDuration().toMinutes();</span>
 
-<span class="fc" id="L46">        long periods = (long) Math.ceil((double) actualMinutes / periodMinutes);</span>
-<span class="fc" id="L47">        Money baseCost = basePrice.multiply(BigDecimal.valueOf(periods));</span>
+<span class="nc" id="L46">        long periods = (long) Math.ceil((double) actualMinutes / periodMinutes);</span>
+<span class="nc" id="L47">        Money baseCost = basePrice.multiply(BigDecimal.valueOf(periods));</span>
 
-<span class="fc" id="L49">        int billableMinutes = command.billableMinutes();</span>
-<span class="fc" id="L50">        int plannedMinutes = (int) command.plannedDuration().toMinutes();</span>
-<span class="fc" id="L51">        int overtimeMinutes = actualMinutes - plannedMinutes;</span>
+<span class="nc" id="L49">        int billableMinutes = command.billableMinutes();</span>
+<span class="nc" id="L50">        int plannedMinutes = (int) command.plannedDuration().toMinutes();</span>
+<span class="nc" id="L51">        int overtimeMinutes = actualMinutes - plannedMinutes;</span>
 
         // With period-multiplier pricing, baseCost already covers all actual time
         // in full period increments (ceil), so there is never an additional overtime charge.
         // overtimeMinutes is kept for informational purposes only.
-<span class="fc bfc" id="L56" title="All 2 branches covered.">        boolean forgivenessApplied = overtimeMinutes &lt;= 0;</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">        String message = forgivenessApplied</span>
-<span class="fc" id="L58">                ? forgivenessStrategy.getForgivenessMessage(overtimeMinutes)</span>
-<span class="fc" id="L59">                : String.format(&quot;Overtime covered by period pricing (%d minute(s) over plan, %d period(s) charged)&quot;,</span>
-<span class="fc" id="L60">                overtimeMinutes, periods);</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        boolean forgivenessApplied = overtimeMinutes &lt;= 0;</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        String message = forgivenessApplied</span>
+<span class="nc" id="L58">                ? forgivenessStrategy.getForgivenessMessage(overtimeMinutes)</span>
+<span class="nc" id="L59">                : String.format(&quot;Overtime covered by period pricing (%d minute(s) over plan, %d period(s) charged)&quot;,</span>
+<span class="nc" id="L60">                overtimeMinutes, periods);</span>
 
-<span class="fc" id="L62">        return BaseRentalCostResult.withForgiveness(</span>
+<span class="nc" id="L62">        return BaseRentalCostResult.withForgiveness(</span>
                 baseCost,
                 actualMinutes,
                 billableMinutes,

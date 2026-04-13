@@ -43,8 +43,8 @@ public class ThresholdForgivenessStrategy implements ForgivenessStrategy {
 
     @Override
     public @NonNull String getForgivenessMessage(int overtimeMinutes) {
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if (overtimeMinutes &lt;= 0) {</span>
-<span class="fc" id="L47">            return messageService.getMessage(&quot;forgiveness.message.on-time&quot;);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (overtimeMinutes &lt;= 0) {</span>
+<span class="nc" id="L47">            return messageService.getMessage(&quot;forgiveness.message.on-time&quot;);</span>
         }
 <span class="nc" id="L49">        return messageService.getMessage(&quot;forgiveness.message.forgiven&quot;, overtimeMinutes);</span>
     }

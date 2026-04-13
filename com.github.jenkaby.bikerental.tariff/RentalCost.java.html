@@ -21,7 +21,7 @@ public interface RentalCost {
     Money overtimeCost();
 
     default Money totalCost() {
-<span class="fc" id="L24">        return baseCost().add(overtimeCost());</span>
+<span class="nc" id="L24">        return baseCost().add(overtimeCost());</span>
     }
 
     int actualMinutes();

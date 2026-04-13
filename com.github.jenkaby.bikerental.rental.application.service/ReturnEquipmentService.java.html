@@ -65,72 +65,72 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
     @Override
     @Transactional
     public @NonNull ReturnEquipmentResult execute(@NonNull ReturnEquipmentCommand command) {
-<span class="fc" id="L68">        log.info(&quot;Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
-<span class="fc" id="L69">                command.rentalId(), command.equipmentIds(), command.equipmentUids());</span>
+<span class="nc" id="L68">        log.info(&quot;Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
+<span class="nc" id="L69">                command.rentalId(), command.equipmentIds(), command.equipmentUids());</span>
 
-<span class="fc" id="L71">        LocalDateTime returnTime = LocalDateTime.now(clock);</span>
-<span class="fc" id="L72">        Rental rental = findRental(command);</span>
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (!rental.hasActiveStatus()) {</span>
-<span class="fc" id="L74">            throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);</span>
+<span class="nc" id="L71">        LocalDateTime returnTime = LocalDateTime.now(clock);</span>
+<span class="nc" id="L72">        Rental rental = findRental(command);</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (!rental.hasActiveStatus()) {</span>
+<span class="nc" id="L74">            throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);</span>
         }
 
-<span class="fc" id="L77">        var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);</span>
-<span class="fc" id="L78">        var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);</span>
+<span class="nc" id="L77">        var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);</span>
+<span class="nc" id="L78">        var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);</span>
 
-<span class="fc" id="L80">        Money totalCost = Money.zero();</span>
-<span class="fc" id="L81">        Map&lt;Long, RentalCost&gt; rentalCostMapToEquipment = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L82" title="All 2 branches covered.">        for (var equipment : equipmentsToReturn) {</span>
-<span class="fc" id="L83">            RentalCost cost = tariffFacade.calculateRentalCost(</span>
-<span class="fc" id="L84">                    equipment.getTariffId(),</span>
-<span class="fc" id="L85">                    rental.getActualDuration(),</span>
-<span class="fc" id="L86">                    durationResult.billableMinutes(),</span>
-<span class="fc" id="L87">                    rental.getPlannedDuration()</span>
+<span class="nc" id="L80">        Money totalCost = Money.zero();</span>
+<span class="nc" id="L81">        Map&lt;Long, RentalCost&gt; rentalCostMapToEquipment = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (var equipment : equipmentsToReturn) {</span>
+<span class="nc" id="L83">            RentalCost cost = tariffFacade.calculateRentalCost(</span>
+<span class="nc" id="L84">                    equipment.getTariffId(),</span>
+<span class="nc" id="L85">                    rental.getActualDuration(),</span>
+<span class="nc" id="L86">                    durationResult.billableMinutes(),</span>
+<span class="nc" id="L87">                    rental.getPlannedDuration()</span>
             );
-<span class="fc" id="L89">            equipment.setFinalCost(cost.totalCost());</span>
-<span class="fc" id="L90">            rentalCostMapToEquipment.put(equipment.getEquipmentId(), cost);</span>
-<span class="fc" id="L91">            totalCost = totalCost.add(cost.totalCost());</span>
-<span class="fc" id="L92">        }</span>
+<span class="nc" id="L89">            equipment.setFinalCost(cost.totalCost());</span>
+<span class="nc" id="L90">            rentalCostMapToEquipment.put(equipment.getEquipmentId(), cost);</span>
+<span class="nc" id="L91">            totalCost = totalCost.add(cost.totalCost());</span>
+<span class="nc" id="L92">        }</span>
 
-<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (!rental.allEquipmentReturned()) {</span>
-<span class="fc" id="L95">            Rental saved = rentalRepository.save(rental);</span>
-<span class="fc" id="L96">            log.info(&quot;Partial return recorded for rental {}&quot;, saved.getId());</span>
-<span class="fc" id="L97">            RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalCost);</span>
-<span class="fc" id="L98">            eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
-<span class="fc" id="L99">            return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, null);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (!rental.allEquipmentReturned()) {</span>
+<span class="nc" id="L95">            Rental saved = rentalRepository.save(rental);</span>
+<span class="nc" id="L96">            log.info(&quot;Partial return recorded for rental {}&quot;, saved.getId());</span>
+<span class="nc" id="L97">            RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalCost);</span>
+<span class="nc" id="L98">            eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
+<span class="nc" id="L99">            return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, null);</span>
         }
 
         // TODO Move to rental class
-<span class="fc" id="L103">        Money previouslyReturnedCost = rental.getEquipments().stream()</span>
-<span class="pc bpc" id="L104" title="1 of 2 branches missed.">                .filter(e -&gt; e.getStatus() == RentalEquipmentStatus.RETURNED)</span>
-<span class="fc bfc" id="L105" title="All 2 branches covered.">                .filter(e -&gt; !equipmentsToReturn.contains(e))</span>
-<span class="fc" id="L106">                .map(RentalEquipment::getFinalCost)</span>
-<span class="fc" id="L107">                .reduce(Money.zero(), Money::add);</span>
+<span class="nc" id="L103">        Money previouslyReturnedCost = rental.getEquipments().stream()</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                .filter(e -&gt; e.getStatus() == RentalEquipmentStatus.RETURNED)</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">                .filter(e -&gt; !equipmentsToReturn.contains(e))</span>
+<span class="nc" id="L106">                .map(RentalEquipment::getFinalCost)</span>
+<span class="nc" id="L107">                .reduce(Money.zero(), Money::add);</span>
 
-<span class="fc" id="L109">        var totalFinalCost = previouslyReturnedCost.add(totalCost);</span>
-<span class="fc" id="L110">        SettlementInfo settlementInfo = null;</span>
+<span class="nc" id="L109">        var totalFinalCost = previouslyReturnedCost.add(totalCost);</span>
+<span class="nc" id="L110">        SettlementInfo settlementInfo = null;</span>
         try {
-<span class="fc" id="L112">            settlementInfo = financeFacade.settleRental(</span>
-<span class="fc" id="L113">                    CustomerRef.of(rental.getCustomerId()),</span>
-<span class="fc" id="L114">                    RentalRef.of(rental.getId()),</span>
+<span class="nc" id="L112">            settlementInfo = financeFacade.settleRental(</span>
+<span class="nc" id="L113">                    CustomerRef.of(rental.getCustomerId()),</span>
+<span class="nc" id="L114">                    RentalRef.of(rental.getId()),</span>
                     totalFinalCost,
-<span class="fc" id="L116">                    command.operatorId()</span>
+<span class="nc" id="L116">                    command.operatorId()</span>
             );
-<span class="fc" id="L118">            rental.completeWithStatus(totalFinalCost, RentalStatus.COMPLETED);</span>
-<span class="fc" id="L119">        } catch (OverBudgetSettlementException obe) {</span>
-<span class="fc" id="L120">            rental.completeWithStatus(totalFinalCost, RentalStatus.DEBT);</span>
-<span class="fc" id="L121">        }</span>
+<span class="nc" id="L118">            rental.completeWithStatus(totalFinalCost, RentalStatus.COMPLETED);</span>
+<span class="nc" id="L119">        } catch (OverBudgetSettlementException obe) {</span>
+<span class="nc" id="L120">            rental.completeWithStatus(totalFinalCost, RentalStatus.DEBT);</span>
+<span class="nc" id="L121">        }</span>
 
-<span class="fc" id="L123">        Rental saved = rentalRepository.save(rental);</span>
+<span class="nc" id="L123">        Rental saved = rentalRepository.save(rental);</span>
 
-<span class="fc" id="L125">        RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalFinalCost);</span>
-<span class="fc" id="L126">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
+<span class="nc" id="L125">        RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalFinalCost);</span>
+<span class="nc" id="L126">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
 
-<span class="fc" id="L128">        return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, settlementInfo);</span>
+<span class="nc" id="L128">        return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, settlementInfo);</span>
     }
 
     private Rental findRental(ReturnEquipmentCommand command) {
-<span class="fc" id="L132">        return rentalRepository.findById(command.rentalId())</span>
-<span class="fc" id="L133">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
+<span class="nc" id="L132">        return rentalRepository.findById(command.rentalId())</span>
+<span class="nc" id="L133">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

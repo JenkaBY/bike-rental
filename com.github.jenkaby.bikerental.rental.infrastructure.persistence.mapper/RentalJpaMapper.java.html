@@ -2,6 +2,7 @@
 
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalJpaEntity;
+import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
@@ -10,7 +11,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(uses = {MoneyMapper.class, InstantMapper.class, DurationMapper.class, RentalEquipmentJpaMapper.class})
+@Mapper(uses = {MoneyMapper.class, InstantMapper.class, DurationMapper.class, RentalEquipmentJpaMapper.class, DiscountMapper.class})
 public interface RentalJpaMapper {
 
     @Mapping(target = &quot;plannedDuration&quot;, source = &quot;entity.plannedDurationMinutes&quot;)
@@ -26,9 +27,9 @@ public interface RentalJpaMapper {
 
     @AfterMapping
     default void setRelationships(@MappingTarget RentalJpaEntity result) {
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (result.getRentalEquipments() != null) {</span>
-<span class="fc" id="L30">            result.getRentalEquipments().forEach(equipment -&gt; equipment.setRental(result));</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if (result.getRentalEquipments() != null) {</span>
+<span class="fc" id="L31">            result.getRentalEquipments().forEach(equipment -&gt; equipment.setRental(result));</span>
         }
-<span class="fc" id="L32">    }</span>
+<span class="fc" id="L33">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

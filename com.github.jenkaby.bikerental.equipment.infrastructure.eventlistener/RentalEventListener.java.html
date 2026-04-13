@@ -50,10 +50,10 @@ public class RentalEventListener {
 
     @ApplicationModuleListener
     public void onRentalCompleted(RentalCompleted event) {
-<span class="fc" id="L53">        log.info(&quot;Received RentalCompleted event for equipments {}&quot;, event.equipmentIds());</span>
-<span class="fc" id="L54">        equipmentRepository.findByIds(event.returnedEquipmentIds())</span>
-<span class="fc" id="L55">                .forEach(equipment -&gt; setStatusForEquipment(equipment, EquipmentStatus.AVAILABLE.name()));</span>
-<span class="fc" id="L56">    }</span>
+<span class="nc" id="L53">        log.info(&quot;Received RentalCompleted event for equipments {}&quot;, event.equipmentIds());</span>
+<span class="nc" id="L54">        equipmentRepository.findByIds(event.returnedEquipmentIds())</span>
+<span class="nc" id="L55">                .forEach(equipment -&gt; setStatusForEquipment(equipment, EquipmentStatus.AVAILABLE.name()));</span>
+<span class="nc" id="L56">    }</span>
 
     @ApplicationModuleListener
     public void onRentalUpdated(RentalUpdated event) {

@@ -7,7 +7,6 @@ import com.github.jenkaby.bikerental.tariff.*;
 import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostCalculationUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.SelectTariffV2UseCase;
 import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialPriceException;
-import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialTariffTypeException;
 import com.github.jenkaby.bikerental.tariff.domain.model.PricingType;
 import com.github.jenkaby.bikerental.tariff.domain.model.TariffV2;
 import com.github.jenkaby.bikerental.tariff.domain.repository.TariffV2Repository;
@@ -31,119 +30,119 @@ class RentalCostCalculationService implements RentalCostCalculationUseCase {
     RentalCostCalculationService(RentalProperties rentalProperties,
                                  TariffV2Repository tariffRepository,
                                  SelectTariffV2UseCase selectTariffUseCase,
-<span class="fc" id="L34">                                 Clock clock) {</span>
-<span class="fc" id="L35">        this.rentalProperties = rentalProperties;</span>
-<span class="fc" id="L36">        this.tariffRepository = tariffRepository;</span>
-<span class="fc" id="L37">        this.selectTariffUseCase = selectTariffUseCase;</span>
-<span class="fc" id="L38">        this.clock = clock;</span>
-<span class="fc" id="L39">    }</span>
+<span class="fc" id="L33">                                 Clock clock) {</span>
+<span class="fc" id="L34">        this.rentalProperties = rentalProperties;</span>
+<span class="fc" id="L35">        this.tariffRepository = tariffRepository;</span>
+<span class="fc" id="L36">        this.selectTariffUseCase = selectTariffUseCase;</span>
+<span class="fc" id="L37">        this.clock = clock;</span>
+<span class="fc" id="L38">    }</span>
 
     @Override
     public RentalCostCalculationResult execute(RentalCostCalculationCommand command) {
-<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (command.specialTariffId() != null) {</span>
-<span class="fc" id="L44">            return executeSpecialMode(command);</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (command.specialTariffId() != null) {</span>
+<span class="fc" id="L43">            return executeSpecialMode(command);</span>
         }
-<span class="fc" id="L46">        return executeNormalMode(command);</span>
+<span class="fc" id="L45">        return executeNormalMode(command);</span>
     }
 
     private RentalCostCalculationResult executeSpecialMode(RentalCostCalculationCommand command) {
-<span class="fc" id="L50">        var specialTariff = tariffRepository.get(command.specialTariffId());</span>
-<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (specialTariff.getPricingType() != PricingType.SPECIAL) {</span>
-<span class="nc" id="L52">            throw new InvalidSpecialTariffTypeException(command.specialTariffId(), specialTariff.getPricingType());</span>
+<span class="fc" id="L49">        var specialTariff = tariffRepository.get(command.specialTariffId());</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (specialTariff.getPricingType() != PricingType.SPECIAL) {</span>
+<span class="fc" id="L51">            throw new InvalidSpecialTariffTypeException(command.specialTariffId(), specialTariff.getPricingType());</span>
         }
-<span class="fc" id="L54">        Money totalCost = command.specialPrice();</span>
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if (totalCost.isNegative()) {</span>
-<span class="nc" id="L56">            throw new InvalidSpecialPriceException();</span>
+<span class="fc" id="L53">        Money totalCost = command.specialPrice();</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if (totalCost.isNegative()) {</span>
+<span class="nc" id="L55">            throw new InvalidSpecialPriceException();</span>
         }
 
-<span class="fc" id="L59">        List&lt;EquipmentCostBreakdown&gt; breakdowns = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L60">        Duration effective = command.effectiveDuration();</span>
-<span class="fc bfc" id="L61" title="All 2 branches covered.">        for (EquipmentCostItem item : command.equipments()) {</span>
-<span class="fc" id="L62">            breakdowns.add(new BaseEquipmentCostBreakdown(</span>
-<span class="fc" id="L63">                    item.equipmentType(),</span>
-<span class="fc" id="L64">                    command.specialTariffId(),</span>
-<span class="fc" id="L65">                    specialTariff.getName(),</span>
-<span class="fc" id="L66">                    PricingType.SPECIAL.name(),</span>
-<span class="fc" id="L67">                    Money.zero(),</span>
+<span class="fc" id="L58">        List&lt;EquipmentCostBreakdown&gt; breakdowns = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L59">        Duration effective = command.effectiveDuration();</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        for (EquipmentCostItem item : command.equipments()) {</span>
+<span class="fc" id="L61">            breakdowns.add(new BaseEquipmentCostBreakdown(</span>
+<span class="fc" id="L62">                    item.equipmentType(),</span>
+<span class="fc" id="L63">                    command.specialTariffId(),</span>
+<span class="fc" id="L64">                    specialTariff.getName(),</span>
+<span class="fc" id="L65">                    PricingType.SPECIAL.name(),</span>
+<span class="fc" id="L66">                    Money.zero(),</span>
                     effective,
                     Duration.ZERO,
                     Duration.ZERO,
                     new BreakdownCostDetails.SpecialGroup()
             ));
-<span class="fc" id="L73">        }</span>
+<span class="fc" id="L72">        }</span>
 
-<span class="fc" id="L75">        return new BaseRentalCostCalculationResult(</span>
+<span class="fc" id="L74">        return new BaseRentalCostCalculationResult(</span>
                 breakdowns,
                 totalCost,
-<span class="fc" id="L78">                DiscountDetail.none(),</span>
+<span class="fc" id="L77">                DiscountDetail.none(),</span>
                 totalCost,
                 effective,
-<span class="pc bpc" id="L81" title="1 of 2 branches missed.">                command.actualDuration() == null,</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">                command.actualDuration() == null,</span>
                 true
         );
     }
 
     private RentalCostCalculationResult executeNormalMode(RentalCostCalculationCommand command) {
-<span class="fc" id="L87">        LocalDate rentalDate = Optional.ofNullable(command.rentalDate()).orElse(LocalDate.now(clock));</span>
-<span class="fc" id="L88">        Duration planned = command.plannedDuration();</span>
-<span class="fc" id="L89">        Duration actual = command.actualDuration();</span>
-<span class="fc bfc" id="L90" title="All 2 branches covered.">        boolean estimate = actual == null;</span>
-<span class="fc" id="L91">        Duration effective = command.effectiveDuration();</span>
+<span class="fc" id="L86">        LocalDate rentalDate = Optional.ofNullable(command.rentalDate()).orElse(LocalDate.now(clock));</span>
+<span class="fc" id="L87">        Duration planned = command.plannedDuration();</span>
+<span class="fc" id="L88">        Duration actual = command.actualDuration();</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        boolean estimate = actual == null;</span>
+<span class="fc" id="L90">        Duration effective = command.effectiveDuration();</span>
         Duration billedDuration;
         Duration overtime;
         Duration forgiven;
 
-<span class="fc bfc" id="L96" title="All 2 branches covered.">        if (estimate) {</span>
-<span class="fc" id="L97">            billedDuration = planned;</span>
-<span class="fc" id="L98">            overtime = Duration.ZERO;</span>
-<span class="fc" id="L99">            forgiven = Duration.ZERO;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (estimate) {</span>
+<span class="fc" id="L96">            billedDuration = planned;</span>
+<span class="fc" id="L97">            overtime = Duration.ZERO;</span>
+<span class="fc" id="L98">            forgiven = Duration.ZERO;</span>
         } else {
-<span class="fc" id="L101">            Duration overtimeDur = actual.minus(planned);</span>
-<span class="fc bfc" id="L102" title="All 4 branches covered.">            if (overtimeDur.isNegative() || overtimeDur.isZero()) {</span>
-<span class="fc" id="L103">                billedDuration = actual;</span>
-<span class="fc" id="L104">                overtime = Duration.ZERO;</span>
-<span class="fc" id="L105">                forgiven = Duration.ZERO;</span>
+<span class="fc" id="L100">            Duration overtimeDur = actual.minus(planned);</span>
+<span class="fc bfc" id="L101" title="All 4 branches covered.">            if (overtimeDur.isNegative() || overtimeDur.isZero()) {</span>
+<span class="fc" id="L102">                billedDuration = actual;</span>
+<span class="fc" id="L103">                overtime = Duration.ZERO;</span>
+<span class="fc" id="L104">                forgiven = Duration.ZERO;</span>
             } else {
-<span class="fc" id="L107">                overtime = overtimeDur;</span>
-<span class="fc" id="L108">                int thresholdMinutes = rentalProperties.getForgivenessThresholdMinutes();</span>
-<span class="fc" id="L109">                long overtimeMinutes = overtimeDur.toMinutes();</span>
-<span class="fc bfc" id="L110" title="All 2 branches covered.">                if (overtimeMinutes &lt;= thresholdMinutes) {</span>
-<span class="fc" id="L111">                    billedDuration = planned;</span>
-<span class="fc" id="L112">                    forgiven = overtimeDur;</span>
+<span class="fc" id="L106">                overtime = overtimeDur;</span>
+<span class="fc" id="L107">                int thresholdMinutes = rentalProperties.getForgivenessThresholdMinutes();</span>
+<span class="fc" id="L108">                long overtimeMinutes = overtimeDur.toMinutes();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">                if (overtimeMinutes &lt;= thresholdMinutes) {</span>
+<span class="fc" id="L110">                    billedDuration = planned;</span>
+<span class="fc" id="L111">                    forgiven = overtimeDur;</span>
                 } else {
-<span class="fc" id="L114">                    billedDuration = actual;</span>
-<span class="fc" id="L115">                    forgiven = Duration.ZERO;</span>
+<span class="fc" id="L113">                    billedDuration = actual;</span>
+<span class="fc" id="L114">                    forgiven = Duration.ZERO;</span>
                 }
             }
         }
 
-<span class="fc" id="L120">        List&lt;EquipmentCostBreakdown&gt; breakdowns = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L121">        Money subtotal = Money.zero();</span>
-<span class="fc" id="L122">        Map&lt;String, TariffV2&gt; tariffCache = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L123" title="All 2 branches covered.">        for (EquipmentCostItem item : command.equipments()) {</span>
-<span class="fc" id="L124">            TariffV2 tariff = tariffCache.computeIfAbsent(item.equipmentType(),</span>
-<span class="fc" id="L125">                    type -&gt; selectTariffUseCase.execute(new SelectTariffV2UseCase.SelectTariffCommand(item.equipmentType(), billedDuration, rentalDate)));</span>
-<span class="fc" id="L126">            RentalCostV2 cost = tariff.calculateCost(billedDuration);</span>
+<span class="fc" id="L119">        List&lt;EquipmentCostBreakdown&gt; breakdowns = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L120">        Money subtotal = Money.zero();</span>
+<span class="fc" id="L121">        Map&lt;String, TariffV2&gt; tariffCache = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        for (EquipmentCostItem item : command.equipments()) {</span>
+<span class="fc" id="L123">            TariffV2 tariff = tariffCache.computeIfAbsent(item.equipmentType(),</span>
+<span class="fc" id="L124">                    type -&gt; selectTariffUseCase.execute(new SelectTariffV2UseCase.SelectTariffCommand(item.equipmentType(), billedDuration, rentalDate)));</span>
+<span class="fc" id="L125">            RentalCostV2 cost = tariff.calculateCost(billedDuration);</span>
 
-<span class="fc" id="L128">            breakdowns.add(new BaseEquipmentCostBreakdown(</span>
-<span class="fc" id="L129">                    item.equipmentType(),</span>
-<span class="fc" id="L130">                    tariff.getId(),</span>
-<span class="fc" id="L131">                    tariff.getName(),</span>
-<span class="fc" id="L132">                    tariff.getPricingType().name(),</span>
-<span class="fc" id="L133">                    cost.totalCost(),</span>
+<span class="fc" id="L127">            breakdowns.add(new BaseEquipmentCostBreakdown(</span>
+<span class="fc" id="L128">                    item.equipmentType(),</span>
+<span class="fc" id="L129">                    tariff.getId(),</span>
+<span class="fc" id="L130">                    tariff.getName(),</span>
+<span class="fc" id="L131">                    tariff.getPricingType().name(),</span>
+<span class="fc" id="L132">                    cost.totalCost(),</span>
                     billedDuration,
                     overtime,
                     forgiven,
-<span class="fc" id="L137">                    cost.calculationBreakdown()</span>
+<span class="fc" id="L136">                    cost.calculationBreakdown()</span>
             ));
-<span class="fc" id="L139">            subtotal = subtotal.add(cost.totalCost());</span>
-<span class="fc" id="L140">        }</span>
+<span class="fc" id="L138">            subtotal = subtotal.add(cost.totalCost());</span>
+<span class="fc" id="L139">        }</span>
 
-<span class="fc" id="L142">        DiscountPercent discount = Optional.ofNullable(command.discount()).orElse(DiscountPercent.zero());</span>
-<span class="fc" id="L143">        Money discountAmount = discount.multiply(subtotal);</span>
-<span class="fc" id="L144">        Money totalCost = subtotal.subtract(discountAmount);</span>
+<span class="fc" id="L141">        DiscountPercent discount = Optional.ofNullable(command.discount()).orElse(DiscountPercent.zero());</span>
+<span class="fc" id="L142">        Money discountAmount = discount.multiply(subtotal);</span>
+<span class="fc" id="L143">        Money totalCost = subtotal.subtract(discountAmount);</span>
 
-<span class="fc" id="L146">        return new BaseRentalCostCalculationResult(</span>
+<span class="fc" id="L145">        return new BaseRentalCostCalculationResult(</span>
                 breakdowns,
                 subtotal,
                 new DiscountDetail(discount, discountAmount),

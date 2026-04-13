@@ -4,7 +4,7 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.tariff.RentalCost;
 
 
-<span class="fc" id="L7">public record BaseRentalCostResult(</span>
+<span class="nc" id="L7">public record BaseRentalCostResult(</span>
         Money baseCost,
         Money overtimeCost,
         int actualMinutes,
@@ -22,9 +22,9 @@ import com.github.jenkaby.bikerental.tariff.RentalCost;
             int plannedMinutes,
             int overtimeMinutes,
             String message) {
-<span class="fc" id="L25">        return new BaseRentalCostResult(</span>
+<span class="nc" id="L25">        return new BaseRentalCostResult(</span>
                 baseCost,
-<span class="fc" id="L27">                Money.zero(),</span>
+<span class="nc" id="L27">                Money.zero(),</span>
                 actualMinutes,
                 billableMinutes,
                 plannedMinutes,

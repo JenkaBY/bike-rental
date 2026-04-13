@@ -13,7 +13,7 @@ public interface MoneyMapper {
     }
 
     default BigDecimal toBigDecimal(Money money) {
-<span class="fc bfc" id="L16" title="All 2 branches covered.">        return money != null ? money.amount() : java.math.BigDecimal.ZERO;</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        return money != null ? money.amount() : null;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -61,17 +61,20 @@ public class RentalEquipmentJpaEntity {
     @Column(name = &quot;tariff_id&quot;)
     private Long tariffId;
 
+    @Column(name = &quot;equipment_type_slug&quot;, nullable = false, length = 100)
+    private String equipmentTypeSlug;
+
     @PrePersist
     protected void onCreate() {
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (createdAt == null) {</span>
-<span class="fc" id="L67">            createdAt = Instant.now();</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (createdAt == null) {</span>
+<span class="fc" id="L70">            createdAt = Instant.now();</span>
         }
-<span class="fc" id="L69">    }</span>
+<span class="fc" id="L72">    }</span>
 
     @PreUpdate
     protected void onUpdate() {
-<span class="fc" id="L73">        updatedAt = Instant.now();</span>
-<span class="fc" id="L74">    }</span>
+<span class="fc" id="L76">        updatedAt = Instant.now();</span>
+<span class="fc" id="L77">    }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

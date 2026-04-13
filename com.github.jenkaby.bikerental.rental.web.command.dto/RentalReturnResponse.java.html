@@ -8,13 +8,13 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Schema(description = &quot;Result of equipment return operation&quot;)
-<span class="fc" id="L11">public record RentalReturnResponse(</span>
+<span class="nc" id="L11">public record RentalReturnResponse(</span>
         @Schema(description = &quot;Updated rental details&quot;) RentalResponse rental,
         @Schema(description = &quot;Cost breakdown for the rental&quot;) List&lt;CostBreakdown&gt; costs,
         @Schema(description = &quot;Transactions of related to rental return&quot;) @Nullable SettlementResponse settlement
 ) {
     @Schema(description = &quot;Detailed cost breakdown&quot;)
-<span class="fc" id="L17">    public record CostBreakdown(</span>
+<span class="nc" id="L17">    public record CostBreakdown(</span>
             @Schema(description = &quot;Equipment ID&quot;, example = &quot;1&quot;) Long equipmentId,
             @Schema(description = &quot;Base cost for planned duration&quot;, example = &quot;200.00&quot;) BigDecimal baseCost,
             @Schema(description = &quot;Overtime cost&quot;, example = &quot;50.00&quot;) BigDecimal overtimeCost,

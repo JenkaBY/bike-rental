@@ -28,11 +28,11 @@ public class PatchValueParser {
     }
 
     public Long parseLong(Object value) {
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (value instanceof Number num) {</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (value instanceof Number num) {</span>
 <span class="nc" id="L32">            return num.longValue();</span>
         }
-<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if (value instanceof String str) {</span>
-<span class="fc" id="L35">            return Long.parseLong(str);</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (value instanceof String str) {</span>
+<span class="nc" id="L35">            return Long.parseLong(str);</span>
         }
 <span class="nc" id="L37">        return objectMapper.convertValue(value, Long.class);</span>
     }

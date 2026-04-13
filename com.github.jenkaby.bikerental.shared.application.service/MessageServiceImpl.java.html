@@ -20,8 +20,8 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public @NonNull String getMessage(@NonNull String code) {
-<span class="fc" id="L23">        Locale locale = getCurrentLocale();</span>
-<span class="fc" id="L24">        return messageSource.getMessage(code, null, locale);</span>
+<span class="nc" id="L23">        Locale locale = getCurrentLocale();</span>
+<span class="nc" id="L24">        return messageSource.getMessage(code, null, locale);</span>
     }
 
     @Override
@@ -41,7 +41,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private Locale getCurrentLocale() {
-<span class="fc" id="L44">        return LocaleContextHolder.getLocale();</span>
+<span class="nc" id="L44">        return LocaleContextHolder.getLocale();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

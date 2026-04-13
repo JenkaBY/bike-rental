@@ -21,20 +21,20 @@ public class RentalDurationCalculatorImpl implements RentalDurationCalculator {
 <span class="fc" id="L21">    }</span>
 
     public int getTimeIncrementMinutes() {
-<span class="fc" id="L24">        return (int) properties.timeIncrement().toMinutes();</span>
+<span class="nc" id="L24">        return (int) properties.timeIncrement().toMinutes();</span>
     }
 
 
     @Override
     public RentalDurationResult calculate(@NonNull LocalDateTime start, @NonNull LocalDateTime end) {
         // Calculate once
-<span class="fc" id="L31">        Duration actualDuration = Duration.between(start, end);</span>
-<span class="fc" id="L32">        long actualMinutes = actualDuration.toMinutes();</span>
+<span class="nc" id="L31">        Duration actualDuration = Duration.between(start, end);</span>
+<span class="nc" id="L32">        long actualMinutes = actualDuration.toMinutes();</span>
 
-<span class="fc" id="L34">        int increment = getTimeIncrementMinutes();</span>
-<span class="fc" id="L35">        int billableMinutes = (int) ((actualMinutes + increment - 1) / increment) * increment;</span>
+<span class="nc" id="L34">        int increment = getTimeIncrementMinutes();</span>
+<span class="nc" id="L35">        int billableMinutes = (int) ((actualMinutes + increment - 1) / increment) * increment;</span>
 
-<span class="fc" id="L37">        return new BaseRentalDurationResult(</span>
+<span class="nc" id="L37">        return new BaseRentalDurationResult(</span>
                 billableMinutes,
                 actualDuration
         );
