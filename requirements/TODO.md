@@ -1,5 +1,5 @@
 - [] Integrate Tariff v2 into rental system
-- [] Integrate hold funds (FinanceFacade) into rental module
+- [x] Integrate hold funds (FinanceFacade) into rental module
 - [] Remove Tariff v1
 - [] Remove Finance Facade v1
 - [x] Close rental debt. Possible solution is to fire events customer debit wallet and handle it in the rental module
@@ -7,3 +7,5 @@
 - [] Refactor EventListeners and move the logic to outside the listeners.
 - [] Rental request should accept duration in min, not Java duration
 - [] PATCH Rental request. Replace by several individual endpoints 
+- [] Update Rental model to get rid of the estimatedCost and final cost fields. They might be persisted and returned as
+  response but model must calculate them based on fields
