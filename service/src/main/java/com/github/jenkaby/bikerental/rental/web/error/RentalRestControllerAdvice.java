@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.rental.domain.exception.*;
 import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
+import com.github.jenkaby.bikerental.tariff.InvalidSpecialTariffTypeException;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -102,6 +103,18 @@ public class RentalRestControllerAdvice {
         log.warn("[correlationId={}] Planned duration is missing for rental {}: {}", correlationId, ex.getDetails().rentalId(), ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Invalid rental planned duration");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(InvalidSpecialTariffTypeException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidSpecialTariffType(InvalidSpecialTariffTypeException ex) {
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Invalid special tariff type: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
+        problem.setTitle("Invalid special tariff type");
         problem.setDetail(ex.getMessage());
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());

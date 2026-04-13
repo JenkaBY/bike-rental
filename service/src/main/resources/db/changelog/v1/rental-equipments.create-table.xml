@@ -21,6 +21,9 @@
             </column>
             <column name="equipment_id" type="BIGINT"/>
             <column name="equipment_uid" type="VARCHAR(100)"/>
+            <column name="equipment_type_slug" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
             <column name="tariff_id" type="BIGINT"/>
             <column name="status" type="VARCHAR(20)">
                 <constraints nullable="false"/>

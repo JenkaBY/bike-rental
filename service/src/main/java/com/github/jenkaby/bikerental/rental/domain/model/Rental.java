@@ -5,6 +5,7 @@ import com.github.jenkaby.bikerental.rental.domain.exception.RentalNotReadyForAc
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationResult;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.DiscountPercent;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 
@@ -42,6 +44,10 @@ public class Rental {
 
     private Money estimatedCost;
     private Money finalCost;
+
+    private Long specialTariffId;
+    private Money specialPrice;
+    private DiscountPercent discountPercent;
 
     private Instant createdAt;
     private Instant updatedAt;
@@ -79,6 +85,7 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
+    @Deprecated
     public void setEstimatedCost(Money estimatedCost) {
         if (this.status != RentalStatus.DRAFT) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
@@ -88,15 +95,27 @@ public class Rental {
     }
 
     public Money getEstimatedCost() {
-        return this.equipments.stream()
-                .map(RentalEquipment::getEstimatedCost)
+        return calculateCost(RentalEquipment::getEstimatedCost);
+    }
+
+    private Money calculateCost(Function<RentalEquipment, Money> costExtractor) {
+        if (specialPrice != null) {
+            return specialPrice;
+        }
+        var subtotal = this.equipments.stream()
+                .map(costExtractor)
                 .reduce(Money.zero(), Money::add);
+        if (discountPercent != null) {
+            return subtotal.subtract(discountPercent.multiply(subtotal));
+        }
+        return subtotal;
     }
 
     public RentalRef toRentalRef() {
         return new RentalRef(id);
     }
 
+    @Deprecated
     public boolean isPrepaymentSufficient(Money amount) {
         if (estimatedCost == null) {
             return false;
@@ -233,5 +252,21 @@ public class Rental {
 
     private static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
+    }
+
+    public static class RentalBuilder {
+        public Rental build() {
+            if (specialTariffId != null && discountPercent != null) {
+                throw new IllegalArgumentException(
+                        "specialTariffId and discountPercent are mutually exclusive");
+            }
+            if (specialTariffId != null && specialPrice == null) {
+                throw new IllegalArgumentException(
+                        "specialPrice is required when specialTariffId is set");
+            }
+            return new Rental(id, customerId, equipments, status, startedAt, expectedReturnAt,
+                    actualReturnAt, plannedDuration, actualDuration, estimatedCost, finalCost,
+                    specialTariffId, specialPrice, discountPercent, createdAt, updatedAt);
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentU
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
+import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import com.github.jenkaby.bikerental.tariff.RentalCost;
 import org.mapstruct.Mapper;
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.HashMap;
 import java.util.Map;
 
-@Mapper(uses = {MoneyMapper.class, RentalQueryMapper.class})
+@Mapper(uses = {MoneyMapper.class, RentalQueryMapper.class, DiscountMapper.class})
 public abstract class RentalCommandMapper {
 
     protected RentalQueryMapper rentalQueryMapper;

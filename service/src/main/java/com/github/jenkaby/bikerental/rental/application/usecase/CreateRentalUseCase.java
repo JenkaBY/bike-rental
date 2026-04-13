@@ -1,6 +1,8 @@
 package com.github.jenkaby.bikerental.rental.application.usecase;
 
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.DiscountPercent;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 
 import java.time.Duration;
 import java.util.List;
@@ -18,7 +20,10 @@ public interface CreateRentalUseCase {
             List<Long> equipmentIds,
             Duration duration,
             String operatorId,
-            Long tariffId  // Optional - Left it for special cases when need to apply custom tariff
+            Long tariffId,
+            Long specialTariffId,
+            Money specialPrice,
+            DiscountPercent discountPercent
     ) {
     }
 

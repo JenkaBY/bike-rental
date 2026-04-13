@@ -61,6 +61,9 @@ public class RentalEquipmentJpaEntity {
     @Column(name = "tariff_id")
     private Long tariffId;
 
+    @Column(name = "equipment_type_slug", nullable = false, length = 100)
+    private String equipmentTypeSlug;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {

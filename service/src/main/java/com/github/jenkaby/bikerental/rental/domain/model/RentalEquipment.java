@@ -22,6 +22,7 @@ public class RentalEquipment {
     private LocalDateTime actualReturnAt;
     private Money estimatedCost;
     private Money finalCost;
+    private String equipmentType;
 
     public RentalEquipment activateForRental(Rental rental) {
         if (rental.getStartedAt() == null) {
@@ -43,11 +44,12 @@ public class RentalEquipment {
     }
 
 
-    public static RentalEquipment assigned(Long equipmentId, String equipmentUid) {
+    public static RentalEquipment assigned(Long equipmentId, String equipmentUid, String equipmentType) {
         return RentalEquipment.builder()
                 .equipmentId(equipmentId)
                 .equipmentUid(equipmentUid)
                 .status(RentalEquipmentStatus.ASSIGNED)
+                .equipmentType(equipmentType)
                 .build();
     }
 }
