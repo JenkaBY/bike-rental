@@ -12,6 +12,7 @@ import com.github.jenkaby.bikerental.shared.exception.OverBudgetSettlementExcept
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class SettleRentalService implements SettleRentalUseCase {
@@ -43,7 +45,10 @@ public class SettleRentalService implements SettleRentalUseCase {
                     .orElse(null);
             return new SettlementResult(captureRefs, releaseRef, existingCaptures.getFirst().getRecordedAt());
         }
-
+        if (command.finalCost().isZero()) {
+            log.info("No settlement needed for rental {} as final cost is zero", command.rentalRef().id());
+            return new SettlementResult(List.of(), null, clock.instant());
+        }
         var customerAccount = accountRepository.findByCustomerId(command.customerRef())
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerRef().id().toString()));
         var systemAccount = accountRepository.getSystemAccount();

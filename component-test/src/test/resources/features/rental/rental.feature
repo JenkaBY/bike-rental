@@ -467,6 +467,25 @@ Feature: Rental Management
       | equipmentId | equipmentUid | status   | estimatedCost |
       | 1           | BIKE-001     | ASSIGNED | 0.00          |
 
+  Scenario: Create rental with SPECIAL tariff — ZERO specialPrice used as total
+    Given a rental request with the following data
+      | customerId | equipmentIds | duration | operatorId | specialTariffId | specialPrice |
+      | CUS1       | 1            | PT2H     | OP1        | 13              | 0.00         |
+    When a POST request has been made to "/api/rentals" endpoint
+    Then the response status is 201
+    And the rental response only contains
+      | customerId | status | plannedDuration | estimatedCost |
+      | CUS1       | DRAFT  | 120             | 0.00          |
+    And the rental response only contains rental equipments
+      | equipmentId | equipmentUid | status   | estimatedCost |
+      | 1           | BIKE-001     | ASSIGNED | 0.00          |
+    And rental was persisted in database
+      | specialTariffId | specialPrice |
+      | 13              | 0.00         |
+    And rental equipments were persisted in database
+      | equipmentId | equipmentUid | status   | estimatedCost |
+      | 1           | BIKE-001     | ASSIGNED | 0.00          |
+
   Scenario: Rejected — specialTariffId references a non-SPECIAL tariff type
     Given a rental request with the following data
       | customerId | equipmentIds | duration | operatorId | specialTariffId | specialPrice |

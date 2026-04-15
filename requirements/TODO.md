@@ -11,3 +11,7 @@
   response but model must calculate them based on fields
 - [] Review CalculationBreakdownMapper, BatchCalculationMapper and their location
 - [] Create a new RentalPartialReturnedEvent event.
+- [] Add discount and special tariff to Rental response
+- [] Handle case when special price is 0
+- [] [Optional] Add ability to set up special price and discount during return equipments. Now discount and special
+  tariff can be applied during creation rental only 
