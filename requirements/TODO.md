@@ -9,3 +9,5 @@
 - [] PATCH Rental request. Replace by several individual endpoints 
 - [] Update Rental model to get rid of the estimatedCost and final cost fields. They might be persisted and returned as
   response but model must calculate them based on fields
+- [] Review CalculationBreakdownMapper, BatchCalculationMapper and their location
+- [] Create a new RentalPartialReturnedEvent event.

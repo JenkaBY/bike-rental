@@ -33,6 +33,10 @@ and the Rental module no longer depends on the deprecated V1 TariffFacade
     * `RentalEquipment.tariffId` is not used in V2 settlement; existing nullable values are ignored.
     * After this story, `TariffFacade` (V1) has zero callers in the Rental module. Its `@Autowired` injections in
       `CreateRentalService`, `UpdateRentalService`, and `ReturnEquipmentService` are removed.
+  * `RentalReturnResponse` does **not** include a per-item cost breakdown. The response carries the updated
+    `Rental` object only, which contains sufficient information (e.g., `finalCost`, status) to initiate customer
+    charging. Callers requiring a detailed cost breakdown must invoke the idempotent
+    `POST /api/v2/tariffs/calculation` endpoint separately.
 
 * **Domain model change — `RentalEquipment.equipmentTypeSlug` (new field):**
     * Added as part of FR-TR-01 (or as a prerequisite task within this story if not already done).
@@ -47,8 +51,9 @@ and the Rental module no longer depends on the deprecated V1 TariffFacade
 * **Security/Compliance:** The Rental module must never re-derive pricing from tariff fields — all cost computation
   is delegated to `TariffV2Facade`. After this story, there must be zero import references to `TariffFacade` (V1)
   in the rental module.
-* **Usability/Other:** `RentalReturnResponse` per-item breakdown should reflect V2 cost details (total per item)
-  unchanged in structure; no breaking API change.
+* **Usability/Other:** `RentalReturnResponse` must **not** include a per-item cost breakdown. The response
+  contains the updated `Rental` object only. Callers needing itemised cost details must use the idempotent
+  `POST /api/v2/tariffs/calculation` endpoint.
 
 ## 4. Acceptance Criteria (BDD)
 
@@ -97,6 +102,5 @@ and the Rental module no longer depends on the deprecated V1 TariffFacade
 ## 5. Out of Scope
 
 * Removal of `TariffFacade` and V1 classes from the tariff module itself (covered by FR-TR-03).
-* Changing the `ReturnEquipmentRequest` or `RentalReturnResponse` API contract — settlement endpoint signature
-  is unchanged.
+* Implementing the `POST /api/v2/tariffs/calculation` endpoint (assumed to exist; covered by a separate story).
 * Debt auto-recovery on subsequent deposit (covered by FR-FIN-12).

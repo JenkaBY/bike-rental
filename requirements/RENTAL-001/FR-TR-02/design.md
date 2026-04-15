@@ -42,8 +42,9 @@ in FR-TR-03.
 
 * **`RentalCommandMapper` / `ReturnEquipmentResult`** *(rental web layer)*: Any reference to V1 `RentalCost`
   interface in these types must be migrated to use V2 equivalents (`EquipmentCostBreakdown` /
-  `RentalCostCalculationResult`) before the V1 types are deleted in FR-TR-03. No breaking change to the
-  `RentalReturnResponse` API shape.
+  `RentalCostCalculationResult`) before the V1 types are deleted in FR-TR-03. The `RentalReturnResponse` shape
+  **changes**: per-item cost breakdown fields are removed. The response carries the updated `Rental` object only
+  (status, `finalCost` aggregate). This is a **breaking API change**.
 
 ---
 
@@ -59,9 +60,11 @@ column is nullable (set in FR-TR-01) and is ignored by settlement.
 
 * **Interaction: External Client → `RentalCommandController` (POST /api/rentals/return)**
     * **Protocol:** REST / HTTP
-    * **Payload Changes:** No change to the `ReturnEquipmentRequest` or `RentalReturnResponse` API contract.
-      Per-item cost in the response continues to reflect the final cost for each returned item (now sourced from
-      V2 breakdown instead of V1).
+  * **Payload Changes (Request):** `ReturnEquipmentRequest` is unchanged.
+  * **Payload Changes (Response — Breaking):** `RentalReturnResponse` no longer contains a per-item cost
+    breakdown. The response body is the updated `Rental` object only (including status and aggregate
+    `finalCost`). Callers requiring itemised cost details must invoke the idempotent
+    `POST /api/v2/tariffs/calculation` endpoint separately.
 
 * **Interaction: `ReturnEquipmentService` → `TariffV2Facade`**
     * **Protocol:** In-process synchronous call (Spring Modulith Facade)
@@ -152,3 +155,7 @@ column is nullable (set in FR-TR-01) and is ignored by settlement.
 * **Scale & Performance:** The single batch `TariffV2Facade.calculateRentalCost` call for all returned items
   replaces the prior N individual V1 calls (one per returned item). Settlement (including the `settleRental` call)
   must complete within the existing 2-second transaction time budget for final return.
+
+* **Idempotency:** Callers needing a cost breakdown after return must use `POST /api/v2/tariffs/calculation`.
+  That endpoint is idempotent — repeated calls with the same inputs produce the same result without side effects
+  on the rental or finance state.
