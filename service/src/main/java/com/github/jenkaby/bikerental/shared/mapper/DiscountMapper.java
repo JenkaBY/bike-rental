@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Mapper
 public interface DiscountMapper {
-
+    // TODO delete unused code
     default DiscountPercent toDiscount(BigDecimal percent) {
         return percent == null ? null : new DiscountPercent(percent);
     }
