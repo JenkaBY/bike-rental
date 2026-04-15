@@ -98,12 +98,17 @@ public class Rental {
         return calculateCost(RentalEquipment::getEstimatedCost);
     }
 
+    public Money getFinalCost() {
+        return calculateCost(RentalEquipment::getFinalCost);
+    }
+
     private Money calculateCost(Function<RentalEquipment, Money> costExtractor) {
         if (specialPrice != null) {
             return specialPrice;
         }
         var subtotal = this.equipments.stream()
                 .map(costExtractor)
+                .filter(java.util.Objects::nonNull)
                 .reduce(Money.zero(), Money::add);
         if (discountPercent != null) {
             return subtotal.subtract(discountPercent.multiply(subtotal));
@@ -222,7 +227,6 @@ public class Rental {
     }
 
     public void completeWithStatus(Money finalCost, RentalStatus status) {
-        // Validate status
         validateCompletion(finalCost);
 
         this.finalCost = finalCost;

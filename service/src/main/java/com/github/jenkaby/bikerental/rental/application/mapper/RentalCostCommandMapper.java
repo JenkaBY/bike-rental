@@ -3,11 +3,14 @@ package com.github.jenkaby.bikerental.rental.application.mapper;
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.tariff.EquipmentCostItem;
 import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -27,6 +30,7 @@ public abstract class RentalCostCommandMapper {
         this.equipmentCostItemMapper = equipmentCostItemMapper;
     }
 
+    // TODO fix these 3 methods. Seems we can replace only by one
     public RentalCostCalculationCommand toCommand(
             CreateRentalUseCase.CreateRentalCommand command,
             List<EquipmentInfo> equipments) {
@@ -73,5 +77,22 @@ public abstract class RentalCostCommandMapper {
                 null,
                 null,
                 LocalDate.now(clock));
+    }
+
+    public RentalCostCalculationCommand toReturnCommand(
+            Rental rental,
+            List<RentalEquipment> equipmentsToReturn,
+            Duration actualDuration) {
+        var costItems = equipmentsToReturn.stream()
+                .map(e -> new EquipmentCostItem(e.getEquipmentType()))
+                .toList();
+        return new RentalCostCalculationCommand(
+                costItems,
+                rental.getPlannedDuration(),
+                actualDuration,
+                rental.getDiscountPercent(),
+                rental.getSpecialTariffId(),
+                rental.getSpecialPrice(),
+                rental.getStartedAt().toLocalDate());
     }
 }

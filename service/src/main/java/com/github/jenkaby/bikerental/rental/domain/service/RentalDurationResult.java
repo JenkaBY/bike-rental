@@ -12,4 +12,8 @@ public interface RentalDurationResult {
     int billableMinutes();
 
     Duration actualDuration();
+
+    default Duration billableDuration() {
+        return Duration.ofMinutes(billableMinutes());
+    }
 }
