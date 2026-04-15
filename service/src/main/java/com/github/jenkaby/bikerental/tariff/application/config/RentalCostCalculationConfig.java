@@ -3,8 +3,6 @@ package com.github.jenkaby.bikerental.tariff.application.config;
 import com.github.jenkaby.bikerental.shared.application.service.MessageService;
 import com.github.jenkaby.bikerental.shared.config.RentalProperties;
 import com.github.jenkaby.bikerental.tariff.application.strategy.ForgivenessStrategy;
-import com.github.jenkaby.bikerental.tariff.application.strategy.OvertimeCalculationStrategy;
-import com.github.jenkaby.bikerental.tariff.application.strategy.ProportionalOvertimeCalculationStrategy;
 import com.github.jenkaby.bikerental.tariff.application.strategy.ThresholdForgivenessStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +19,5 @@ class RentalCostCalculationConfig {
                 rentalProperties.forgiveness(),
                 messageService
         );
-    }
-
-    @Bean
-    OvertimeCalculationStrategy overtimeCalculationStrategy(RentalProperties rentalProperties) {
-        int roundingIntervalMinutes = rentalProperties.getTimeIncrementMinutes();
-        return new ProportionalOvertimeCalculationStrategy(roundingIntervalMinutes);
     }
 }

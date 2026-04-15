@@ -26,12 +26,6 @@ Feature: Rental Management
       | 1  | EQ-001       | BIKE-001       | AVAILABLE | bicycle | Model A | Good      |
       | 2  | EQ-002       | E-BIKE-001     | AVAILABLE | scooter | Model B | Excellent |
       | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | helmet  | Model B | Excellent |
-    And the following tariff records exist in db
-      | id | name           | description             | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo    | status |
-      | 1  | Hourly Rate    | Standard hourly         | bicycle       | 100.00    | 60.00         | 100.00    | 500.00   | 90.00           | 2026-01-01 | 2036-12-31 | ACTIVE |
-      | 2  | Daily Rate     | Standard daily          | bicycle       | 200.00    | 70.00         | 110.00    | 600.00   | 95.00           | 2026-01-01 | 2036-12-31 | ACTIVE |
-      | 3  | Helmet Hourly  | Helmet Standard hourly  | helmet        | 10.00     | 5.00          | 10.00     | 80.00    | 10.00           | 2026-01-01 | 2036-12-31 | ACTIVE |
-      | 4  | Scooter Hourly | Scooter Standard hourly | scooter       | 300.00    | 150.00        | 300.00    | 80.00    | 10.00           | 2026-01-01 | 2036-12-31 | ACTIVE |
     And the following account records exist in db
       | id   | accountType | customerId |
       | ACC1 | CUSTOMER    | CUS1       |

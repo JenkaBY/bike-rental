@@ -24,9 +24,6 @@ Feature: Equipment Return
       | id | serialNumber | uid      | status | type    | model   | condition |
       | 1  | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
       | 2  | EQ-002       | BIKE-002 | RENTED | bicycle | Model A | Good      |
-    And the following tariff records exist in db
-      | id | name        | description     | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo    | status |
-      | 1  | Hourly Rate | Standard hourly | bicycle       | 100.00    | 60.00         | 100.00    | 500.00   | 90.00           | 2026-01-01 | 2026-12-31 | ACTIVE |
     And the pricing params list for tariff request is
       | tariffId | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | hourlyPrice | dailyPrice | overtimeHourlyPrice | issuanceFee | minimumDurationMinutes | minimumDurationSurcharge | price |
       | 1        | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               |             |            |                     |             | 30                     | 1.00                     |       |

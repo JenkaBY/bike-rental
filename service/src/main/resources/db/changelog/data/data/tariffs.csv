@@ -1,3 +1,0 @@
-name,description,equipment_type_slug,base_price,half_hour_price,hour_price,day_price,hour_discounted_price,valid_from,valid_to,status,created_at,updated_at
-Hourly Bicycle,Standard hourly rate for bicycles,bicycle,100.00,60.00,100.00,500.00,90.00,2026-02-01,,ACTIVE,'2026-02-02T00:00:00Z','2026-02-02T00:00:00Z'
-Hourly Scooter,Standard hourly rate for bicycles,scooter,200.00,100.00,200.00,700.00,180.00,2026-02-01,,ACTIVE,'2026-02-02T00:00:00Z','2026-02-02T00:00:00Z'
