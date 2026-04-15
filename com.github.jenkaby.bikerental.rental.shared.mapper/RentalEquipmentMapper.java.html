@@ -21,10 +21,10 @@ public interface RentalEquipmentMapper {
 
     @Named(&quot;RentalEquipment.returnedEquipmentIds&quot;)
     default List&lt;Long&gt; mapEquipmentsToIds(List&lt;RentalEquipment&gt; equipments) {
-<span class="nc" id="L24">        return equipments.stream()</span>
-<span class="nc bnc" id="L25" title="All 2 branches missed.">                .filter(re -&gt; re.getStatus() == RentalEquipmentStatus.RETURNED)</span>
-<span class="nc" id="L26">                .map(RentalEquipment::getEquipmentId)</span>
-<span class="nc" id="L27">                .toList();</span>
+<span class="fc" id="L24">        return equipments.stream()</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">                .filter(re -&gt; re.getStatus() == RentalEquipmentStatus.RETURNED)</span>
+<span class="fc" id="L26">                .map(RentalEquipment::getEquipmentId)</span>
+<span class="fc" id="L27">                .toList();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

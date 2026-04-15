@@ -38,10 +38,10 @@ public class RentalEquipmentJpaMapperImpl implements RentalEquipmentJpaMapper {
 <span class="fc" id="L38">        rentalEquipment.equipmentId( entity.getEquipmentId() );</span>
 <span class="fc" id="L39">        rentalEquipment.equipmentUid( entity.getEquipmentUid() );</span>
 <span class="fc" id="L40">        rentalEquipment.status( rentalEquipmentStatusMapper.stringToStatus( entity.getStatus() ) );</span>
-<span class="fc" id="L41">        rentalEquipment.tariffId( entity.getTariffId() );</span>
-<span class="fc" id="L42">        rentalEquipment.startedAt( entity.getStartedAt() );</span>
-<span class="fc" id="L43">        rentalEquipment.expectedReturnAt( entity.getExpectedReturnAt() );</span>
-<span class="fc" id="L44">        rentalEquipment.actualReturnAt( entity.getActualReturnAt() );</span>
+<span class="fc" id="L41">        rentalEquipment.startedAt( entity.getStartedAt() );</span>
+<span class="fc" id="L42">        rentalEquipment.expectedReturnAt( entity.getExpectedReturnAt() );</span>
+<span class="fc" id="L43">        rentalEquipment.actualReturnAt( entity.getActualReturnAt() );</span>
+<span class="fc" id="L44">        rentalEquipment.tariffId( entity.getTariffId() );</span>
 <span class="fc" id="L45">        rentalEquipment.estimatedCost( moneyMapper.toMoney( entity.getEstimatedCost() ) );</span>
 <span class="fc" id="L46">        rentalEquipment.finalCost( moneyMapper.toMoney( entity.getFinalCost() ) );</span>
 

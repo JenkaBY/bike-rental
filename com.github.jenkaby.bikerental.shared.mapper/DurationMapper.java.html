@@ -8,13 +8,12 @@ import java.time.Duration;
 @Mapper
 public interface DurationMapper {
 
-
     default Duration toDuration(Integer minutes) {
-<span class="fc bfc" id="L13" title="All 2 branches covered.">        return minutes != null ? Duration.ofMinutes(minutes) : null;</span>
+<span class="fc bfc" id="L12" title="All 2 branches covered.">        return minutes != null ? Duration.ofMinutes(minutes) : null;</span>
     }
 
     default Integer toMinutes(Duration duration) {
-<span class="fc bfc" id="L17" title="All 2 branches covered.">        return duration != null ? (int) duration.toMinutes() : null;</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        return duration != null ? (int) duration.toMinutes() : null;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

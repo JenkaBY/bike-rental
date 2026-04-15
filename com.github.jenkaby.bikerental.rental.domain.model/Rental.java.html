@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Rental {
 
-<span class="pc bnc" id="L28" title="All 2 branches missed.">    private static final Predicate&lt;RentalEquipment&gt; RETURNED = e -&gt; e.getStatus() == RentalEquipmentStatus.RETURNED;</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">    private static final Predicate&lt;RentalEquipment&gt; RETURNED = e -&gt; e.getStatus() == RentalEquipmentStatus.RETURNED;</span>
     @Setter
     private Long id;
 
@@ -98,38 +98,43 @@ public class Rental {
 <span class="fc" id="L98">        return calculateCost(RentalEquipment::getEstimatedCost);</span>
     }
 
+    public Money getFinalCost() {
+<span class="fc" id="L102">        return calculateCost(RentalEquipment::getFinalCost);</span>
+    }
+
     private Money calculateCost(Function&lt;RentalEquipment, Money&gt; costExtractor) {
-<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (specialPrice != null) {</span>
-<span class="fc" id="L103">            return specialPrice;</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        if (specialPrice != null) {</span>
+<span class="fc" id="L107">            return specialPrice;</span>
         }
-<span class="fc" id="L105">        var subtotal = this.equipments.stream()</span>
-<span class="fc" id="L106">                .map(costExtractor)</span>
-<span class="fc" id="L107">                .reduce(Money.zero(), Money::add);</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">        if (discountPercent != null) {</span>
-<span class="fc" id="L109">            return subtotal.subtract(discountPercent.multiply(subtotal));</span>
+<span class="fc" id="L109">        var subtotal = this.equipments.stream()</span>
+<span class="fc" id="L110">                .map(costExtractor)</span>
+<span class="fc" id="L111">                .filter(java.util.Objects::nonNull)</span>
+<span class="fc" id="L112">                .reduce(Money.zero(), Money::add);</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (discountPercent != null) {</span>
+<span class="fc" id="L114">            return subtotal.subtract(discountPercent.multiply(subtotal));</span>
         }
-<span class="fc" id="L111">        return subtotal;</span>
+<span class="fc" id="L116">        return subtotal;</span>
     }
 
     public RentalRef toRentalRef() {
-<span class="fc" id="L115">        return new RentalRef(id);</span>
+<span class="fc" id="L120">        return new RentalRef(id);</span>
     }
 
     @Deprecated
     public boolean isPrepaymentSufficient(Money amount) {
-<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (estimatedCost == null) {</span>
-<span class="nc" id="L121">            return false;</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (estimatedCost == null) {</span>
+<span class="nc" id="L126">            return false;</span>
         }
-<span class="nc bnc" id="L123" title="All 2 branches missed.">        return amount.compareTo(estimatedCost) &gt;= 0;</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        return amount.compareTo(estimatedCost) &gt;= 0;</span>
     }
 
     public boolean hasActiveStatus() {
-<span class="nc bnc" id="L127" title="All 2 branches missed.">        return status == RentalStatus.ACTIVE;</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        return status == RentalStatus.ACTIVE;</span>
     }
 
     public boolean canBeActivated() {
-<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        boolean hasEquipment = !isEmpty(equipments);</span>
-<span class="pc bpc" id="L132" title="5 of 10 branches missed.">        return status == RentalStatus.DRAFT</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        boolean hasEquipment = !isEmpty(equipments);</span>
+<span class="pc bpc" id="L137" title="5 of 10 branches missed.">        return status == RentalStatus.DRAFT</span>
                 &amp;&amp; customerId != null
                 &amp;&amp; hasEquipment
                 &amp;&amp; plannedDuration != null
@@ -138,133 +143,132 @@ public class Rental {
 
     public void activate(LocalDateTime actualStartTime) {
         // Validate status
-<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        if (this.status != RentalStatus.DRAFT) {</span>
-<span class="nc" id="L142">            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (this.status != RentalStatus.DRAFT) {</span>
+<span class="nc" id="L147">            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);</span>
         }
 
         // Validate required fields
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (!canBeActivated()) {</span>
-<span class="nc" id="L147">            List&lt;String&gt; missingFields = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L148" title="All 2 branches missed.">            if (customerId == null) missingFields.add(&quot;customerId&quot;);</span>
-<span class="nc bnc" id="L149" title="All 2 branches missed.">            if (plannedDuration == null) missingFields.add(&quot;plannedDuration&quot;);</span>
-<span class="nc bnc" id="L150" title="All 2 branches missed.">            if (estimatedCost == null) missingFields.add(&quot;estimatedCost&quot;);</span>
-<span class="nc bnc" id="L151" title="All 2 branches missed.">            if (equipments == null) missingFields.add(&quot;equipmentIds&quot;);</span>
-<span class="nc" id="L152">            throw new RentalNotReadyForActivationException(missingFields);</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (!canBeActivated()) {</span>
+<span class="nc" id="L152">            List&lt;String&gt; missingFields = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">            if (customerId == null) missingFields.add(&quot;customerId&quot;);</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            if (plannedDuration == null) missingFields.add(&quot;plannedDuration&quot;);</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">            if (estimatedCost == null) missingFields.add(&quot;estimatedCost&quot;);</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            if (equipments == null) missingFields.add(&quot;equipmentIds&quot;);</span>
+<span class="nc" id="L157">            throw new RentalNotReadyForActivationException(missingFields);</span>
         }
 
-<span class="fc" id="L155">        this.status = RentalStatus.ACTIVE;</span>
-<span class="fc" id="L156">        this.startedAt = actualStartTime; // Actual start time</span>
-<span class="fc" id="L157">        this.expectedReturnAt = actualStartTime.plus(this.plannedDuration);</span>
+<span class="fc" id="L160">        this.status = RentalStatus.ACTIVE;</span>
+<span class="fc" id="L161">        this.startedAt = actualStartTime; // Actual start time</span>
+<span class="fc" id="L162">        this.expectedReturnAt = actualStartTime.plus(this.plannedDuration);</span>
 
-<span class="fc" id="L159">        equipments.forEach(e -&gt; e.activateForRental(this));</span>
-<span class="fc" id="L160">        this.updatedAt = Instant.now();</span>
-<span class="fc" id="L161">    }</span>
+<span class="fc" id="L164">        equipments.forEach(e -&gt; e.activateForRental(this));</span>
+<span class="fc" id="L165">        this.updatedAt = Instant.now();</span>
+<span class="fc" id="L166">    }</span>
 
     // For cases update rental during patch
     public void clearEquipmentRentals() {
-<span class="fc" id="L165">        this.equipments.clear();</span>
-<span class="fc" id="L166">    }</span>
+<span class="fc" id="L170">        this.equipments.clear();</span>
+<span class="fc" id="L171">    }</span>
 
     public void addEquipment(RentalEquipment equipment) {
-<span class="pc bpc" id="L169" title="1 of 2 branches missed.">        if (this.status != RentalStatus.DRAFT) {</span>
-<span class="nc" id="L170">            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        if (this.status != RentalStatus.DRAFT) {</span>
+<span class="nc" id="L175">            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);</span>
         }
-<span class="fc" id="L172">        this.equipments.add(equipment);</span>
-<span class="fc" id="L173">        this.updatedAt = Instant.now();</span>
-<span class="fc" id="L174">    }</span>
+<span class="fc" id="L177">        this.equipments.add(equipment);</span>
+<span class="fc" id="L178">        this.updatedAt = Instant.now();</span>
+<span class="fc" id="L179">    }</span>
 
     public boolean allEquipmentReturned() {
-<span class="nc" id="L177">        return equipments.stream()</span>
-<span class="nc" id="L178">                .allMatch(RETURNED);</span>
+<span class="fc" id="L182">        return equipments.stream()</span>
+<span class="fc" id="L183">                .allMatch(RETURNED);</span>
     }
 
     private List&lt;RentalEquipment&gt; rentedEquipments() {
-<span class="nc" id="L182">        return equipments.stream()</span>
-<span class="nc" id="L183">                .filter(Predicate.not(RETURNED))</span>
-<span class="nc" id="L184">                .toList();</span>
+<span class="fc" id="L187">        return equipments.stream()</span>
+<span class="fc" id="L188">                .filter(Predicate.not(RETURNED))</span>
+<span class="fc" id="L189">                .toList();</span>
     }
 
     public List&lt;RentalEquipment&gt; equipmentsToReturn(List&lt;Long&gt; toReturnEquipmentIds, List&lt;String&gt; toReturnEquipmentUids, LocalDateTime returnedAt) {
 //         assume when no equipments are present in request, entire rental must be completed
-<span class="nc bnc" id="L189" title="All 4 branches missed.">        var isEmptyRequest = isEmpty(toReturnEquipmentIds) &amp;&amp; isEmpty(toReturnEquipmentUids);</span>
-<span class="nc bnc" id="L190" title="All 2 branches missed.">        Predicate&lt;RentalEquipment&gt; filter = eq -&gt; isEmptyRequest</span>
-<span class="nc bnc" id="L191" title="All 2 branches missed.">                || toReturnEquipmentIds.contains(eq.getEquipmentId())</span>
-<span class="nc bnc" id="L192" title="All 2 branches missed.">                || toReturnEquipmentUids.contains(eq.getEquipmentUid());</span>
-<span class="nc" id="L193">        return rentedEquipments().stream()</span>
-<span class="nc" id="L194">                .filter(filter)</span>
-<span class="nc" id="L195">                .map(eq -&gt; eq.markReturned(returnedAt))</span>
-<span class="nc" id="L196">                .toList();</span>
+<span class="pc bpc" id="L194" title="1 of 4 branches missed.">        var isEmptyRequest = isEmpty(toReturnEquipmentIds) &amp;&amp; isEmpty(toReturnEquipmentUids);</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        Predicate&lt;RentalEquipment&gt; filter = eq -&gt; isEmptyRequest</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">                || toReturnEquipmentIds.contains(eq.getEquipmentId())</span>
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">                || toReturnEquipmentUids.contains(eq.getEquipmentUid());</span>
+<span class="fc" id="L198">        return rentedEquipments().stream()</span>
+<span class="fc" id="L199">                .filter(filter)</span>
+<span class="fc" id="L200">                .map(eq -&gt; eq.markReturned(returnedAt))</span>
+<span class="fc" id="L201">                .toList();</span>
     }
 
     public RentalDurationResult calculateActualDuration(RentalDurationCalculator calculator, LocalDateTime returnTime) {
-<span class="nc bnc" id="L200" title="All 4 branches missed.">        if (this.status != RentalStatus.ACTIVE &amp;&amp; this.status != RentalStatus.COMPLETED) {</span>
-<span class="nc" id="L201">            throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);</span>
+<span class="pc bpc" id="L205" title="3 of 4 branches missed.">        if (this.status != RentalStatus.ACTIVE &amp;&amp; this.status != RentalStatus.COMPLETED) {</span>
+<span class="nc" id="L206">            throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);</span>
         }
 
-<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (this.startedAt == null) {</span>
-<span class="nc" id="L205">            throw new IllegalStateException(&quot;Cannot calculate duration: rental start time is not set&quot;);</span>
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        if (this.startedAt == null) {</span>
+<span class="nc" id="L210">            throw new IllegalStateException(&quot;Cannot calculate duration: rental start time is not set&quot;);</span>
         }
 
-<span class="nc" id="L208">        RentalDurationResult result = calculator.calculate(this.startedAt, returnTime);</span>
-<span class="nc" id="L209">        this.actualDuration = result.actualDuration();</span>
-<span class="nc" id="L210">        this.actualReturnAt = returnTime;</span>
-<span class="nc" id="L211">        this.updatedAt = Instant.now();</span>
+<span class="fc" id="L213">        RentalDurationResult result = calculator.calculate(this.startedAt, returnTime);</span>
+<span class="fc" id="L214">        this.actualDuration = result.actualDuration();</span>
+<span class="fc" id="L215">        this.actualReturnAt = returnTime;</span>
+<span class="fc" id="L216">        this.updatedAt = Instant.now();</span>
 
-<span class="nc" id="L213">        return result;</span>
+<span class="fc" id="L218">        return result;</span>
     }
 
     public void completeForDebt() {
-<span class="pc bpc" id="L217" title="1 of 2 branches missed.">        if (this.finalCost == null) {</span>
-<span class="nc" id="L218">            throw new IllegalArgumentException(&quot;Final cost cannot be null&quot;);</span>
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">        if (this.finalCost == null) {</span>
+<span class="nc" id="L223">            throw new IllegalArgumentException(&quot;Final cost cannot be null&quot;);</span>
         }
-<span class="fc" id="L220">        this.updatedAt = Instant.now();</span>
-<span class="fc" id="L221">        this.status = RentalStatus.COMPLETED;</span>
-<span class="fc" id="L222">    }</span>
+<span class="fc" id="L225">        this.updatedAt = Instant.now();</span>
+<span class="fc" id="L226">        this.status = RentalStatus.COMPLETED;</span>
+<span class="fc" id="L227">    }</span>
 
     public void completeWithStatus(Money finalCost, RentalStatus status) {
-        // Validate status
-<span class="nc" id="L226">        validateCompletion(finalCost);</span>
+<span class="fc" id="L230">        validateCompletion(finalCost);</span>
 
-<span class="nc" id="L228">        this.finalCost = finalCost;</span>
-<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (allEquipmentReturned()) {</span>
-<span class="nc" id="L230">            this.status = status;</span>
+<span class="fc" id="L232">        this.finalCost = finalCost;</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">        if (allEquipmentReturned()) {</span>
+<span class="fc" id="L234">            this.status = status;</span>
         }
-<span class="nc" id="L232">        this.updatedAt = Instant.now();</span>
-<span class="nc" id="L233">    }</span>
+<span class="fc" id="L236">        this.updatedAt = Instant.now();</span>
+<span class="fc" id="L237">    }</span>
 
     private void validateCompletion(Money finalCost) {
-<span class="nc bnc" id="L236" title="All 4 branches missed.">        if (this.status != RentalStatus.ACTIVE &amp;&amp; this.status != RentalStatus.DEBT) {</span>
-<span class="nc" id="L237">            throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);</span>
+<span class="pc bpc" id="L240" title="3 of 4 branches missed.">        if (this.status != RentalStatus.ACTIVE &amp;&amp; this.status != RentalStatus.DEBT) {</span>
+<span class="nc" id="L241">            throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);</span>
         }
 
-<span class="nc bnc" id="L240" title="All 2 branches missed.">        if (this.startedAt == null) {</span>
-<span class="nc" id="L241">            throw new IllegalStateException(&quot;Cannot complete rental: rental start time is not set&quot;);</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">        if (this.startedAt == null) {</span>
+<span class="nc" id="L245">            throw new IllegalStateException(&quot;Cannot complete rental: rental start time is not set&quot;);</span>
         }
 
-<span class="nc bnc" id="L244" title="All 2 branches missed.">        if (finalCost == null) {</span>
-<span class="nc" id="L245">            throw new IllegalArgumentException(&quot;Final cost cannot be null&quot;);</span>
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">        if (finalCost == null) {</span>
+<span class="nc" id="L249">            throw new IllegalArgumentException(&quot;Final cost cannot be null&quot;);</span>
         }
 
-<span class="nc bnc" id="L248" title="All 4 branches missed.">        if (this.actualReturnAt == null || this.actualDuration == null) {</span>
-<span class="nc" id="L249">            throw new IllegalStateException(&quot;Cannot complete rental: actual return time and duration must be set before completing&quot;);</span>
+<span class="pc bpc" id="L252" title="2 of 4 branches missed.">        if (this.actualReturnAt == null || this.actualDuration == null) {</span>
+<span class="nc" id="L253">            throw new IllegalStateException(&quot;Cannot complete rental: actual return time and duration must be set before completing&quot;);</span>
         }
-<span class="nc" id="L251">    }</span>
+<span class="fc" id="L255">    }</span>
 
     private static boolean isEmpty(Collection&lt;?&gt; collection) {
-<span class="pc bpc" id="L254" title="2 of 4 branches missed.">        return collection == null || collection.isEmpty();</span>
+<span class="pc bpc" id="L258" title="1 of 4 branches missed.">        return collection == null || collection.isEmpty();</span>
     }
 
     public static class RentalBuilder {
         public Rental build() {
-<span class="pc bpc" id="L259" title="1 of 4 branches missed.">            if (specialTariffId != null &amp;&amp; discountPercent != null) {</span>
-<span class="nc" id="L260">                throw new IllegalArgumentException(</span>
+<span class="pc bpc" id="L263" title="1 of 4 branches missed.">            if (specialTariffId != null &amp;&amp; discountPercent != null) {</span>
+<span class="nc" id="L264">                throw new IllegalArgumentException(</span>
                         &quot;specialTariffId and discountPercent are mutually exclusive&quot;);
             }
-<span class="pc bpc" id="L263" title="1 of 4 branches missed.">            if (specialTariffId != null &amp;&amp; specialPrice == null) {</span>
-<span class="nc" id="L264">                throw new IllegalArgumentException(</span>
+<span class="pc bpc" id="L267" title="1 of 4 branches missed.">            if (specialTariffId != null &amp;&amp; specialPrice == null) {</span>
+<span class="nc" id="L268">                throw new IllegalArgumentException(</span>
                         &quot;specialPrice is required when specialTariffId is set&quot;);
             }
-<span class="fc" id="L267">            return new Rental(id, customerId, equipments, status, startedAt, expectedReturnAt,</span>
+<span class="fc" id="L271">            return new Rental(id, customerId, equipments, status, startedAt, expectedReturnAt,</span>
                     actualReturnAt, plannedDuration, actualDuration, estimatedCost, finalCost,
                     specialTariffId, specialPrice, discountPercent, createdAt, updatedAt);
         }

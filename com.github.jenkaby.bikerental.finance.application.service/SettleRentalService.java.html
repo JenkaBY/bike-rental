@@ -12,6 +12,7 @@ import com.github.jenkaby.bikerental.shared.exception.OverBudgetSettlementExcept
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+<span class="fc" id="L26">@Slf4j</span>
 @RequiredArgsConstructor
 @Service
 public class SettleRentalService implements SettleRentalUseCase {
@@ -34,145 +36,148 @@ public class SettleRentalService implements SettleRentalUseCase {
     @Override
     @Transactional(noRollbackFor = {OverBudgetSettlementException.class})
     public SettlementResult execute(SettleRentalCommand command) {
-<span class="fc" id="L37">        var existingCaptures = transactionRepository.findAllByRentalRefAndType(command.rentalRef(), TransactionType.CAPTURE);</span>
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        if (!existingCaptures.isEmpty()) {</span>
-<span class="nc" id="L39">            var captureRefs = existingCaptures.stream().map(t -&gt; new TransactionRef(t.getId())).toList();</span>
-<span class="nc" id="L40">            var releaseRef = transactionRepository</span>
-<span class="nc" id="L41">                    .findByRentalRefAndType(command.rentalRef(), TransactionType.RELEASE)</span>
-<span class="nc" id="L42">                    .map(t -&gt; new TransactionRef(t.getId()))</span>
-<span class="nc" id="L43">                    .orElse(null);</span>
-<span class="nc" id="L44">            return new SettlementResult(captureRefs, releaseRef, existingCaptures.getFirst().getRecordedAt());</span>
+<span class="fc" id="L39">        var existingCaptures = transactionRepository.findAllByRentalRefAndType(command.rentalRef(), TransactionType.CAPTURE);</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (!existingCaptures.isEmpty()) {</span>
+<span class="nc" id="L41">            var captureRefs = existingCaptures.stream().map(t -&gt; new TransactionRef(t.getId())).toList();</span>
+<span class="nc" id="L42">            var releaseRef = transactionRepository</span>
+<span class="nc" id="L43">                    .findByRentalRefAndType(command.rentalRef(), TransactionType.RELEASE)</span>
+<span class="nc" id="L44">                    .map(t -&gt; new TransactionRef(t.getId()))</span>
+<span class="nc" id="L45">                    .orElse(null);</span>
+<span class="nc" id="L46">            return new SettlementResult(captureRefs, releaseRef, existingCaptures.getFirst().getRecordedAt());</span>
         }
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (command.finalCost().isZero()) {</span>
+<span class="fc" id="L49">            log.info(&quot;No settlement needed for rental {} as final cost is zero&quot;, command.rentalRef().id());</span>
+<span class="fc" id="L50">            return new SettlementResult(List.of(), null, clock.instant());</span>
+        }
+<span class="fc" id="L52">        var customerAccount = accountRepository.findByCustomerId(command.customerRef())</span>
+<span class="pc" id="L53">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, command.customerRef().id().toString()));</span>
+<span class="fc" id="L54">        var systemAccount = accountRepository.getSystemAccount();</span>
 
-<span class="fc" id="L47">        var customerAccount = accountRepository.findByCustomerId(command.customerRef())</span>
-<span class="pc" id="L48">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, command.customerRef().id().toString()));</span>
-<span class="fc" id="L49">        var systemAccount = accountRepository.getSystemAccount();</span>
+<span class="fc" id="L56">        var holdBalance = customerAccount.getOnHold().getBalance();</span>
+<span class="fc" id="L57">        Instant now = clock.instant();</span>
+<span class="fc" id="L58">        var finalCost = command.finalCost();</span>
 
-<span class="fc" id="L51">        var holdBalance = customerAccount.getOnHold().getBalance();</span>
-<span class="fc" id="L52">        Instant now = clock.instant();</span>
-<span class="fc" id="L53">        var finalCost = command.finalCost();</span>
+<span class="fc" id="L60">        String sourceId = String.valueOf(command.rentalRef().id());</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (!finalCost.isMoreThan(holdBalance)) {</span>
+<span class="fc" id="L62">            var captureHoldDebit = customerAccount.getOnHold().debit(finalCost);</span>
+<span class="fc" id="L63">            var captureRevenueCredit = systemAccount.getRevenue().credit(finalCost);</span>
 
-<span class="fc" id="L55">        String sourceId = String.valueOf(command.rentalRef().id());</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if (!finalCost.isMoreThan(holdBalance)) {</span>
-<span class="nc" id="L57">            var captureHoldDebit = customerAccount.getOnHold().debit(finalCost);</span>
-<span class="nc" id="L58">            var captureRevenueCredit = systemAccount.getRevenue().credit(finalCost);</span>
-
-<span class="nc" id="L60">            UUID captureId = uuidGenerator.generate();</span>
-<span class="nc" id="L61">            var captureTransaction = Transaction.builder()</span>
-<span class="nc" id="L62">                    .id(captureId)</span>
-<span class="nc" id="L63">                    .type(TransactionType.CAPTURE)</span>
-<span class="nc" id="L64">                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
-<span class="nc" id="L65">                    .amount(finalCost)</span>
-<span class="nc" id="L66">                    .customerId(command.customerRef().id())</span>
-<span class="nc" id="L67">                    .operatorId(command.operatorId())</span>
-<span class="nc" id="L68">                    .sourceType(TransactionSourceType.RENTAL)</span>
-<span class="nc" id="L69">                    .sourceId(sourceId)</span>
-<span class="nc" id="L70">                    .recordedAt(now)</span>
-<span class="nc" id="L71">                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
-<span class="nc" id="L72">                    .reason(null)</span>
-<span class="nc" id="L73">                    .records(List.of(</span>
-<span class="nc" id="L74">                            captureHoldDebit.toTransaction(uuidGenerator.generate()),</span>
-<span class="nc" id="L75">                            captureRevenueCredit.toTransaction(uuidGenerator.generate())</span>
+<span class="fc" id="L65">            UUID captureId = uuidGenerator.generate();</span>
+<span class="fc" id="L66">            var captureTransaction = Transaction.builder()</span>
+<span class="fc" id="L67">                    .id(captureId)</span>
+<span class="fc" id="L68">                    .type(TransactionType.CAPTURE)</span>
+<span class="fc" id="L69">                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
+<span class="fc" id="L70">                    .amount(finalCost)</span>
+<span class="fc" id="L71">                    .customerId(command.customerRef().id())</span>
+<span class="fc" id="L72">                    .operatorId(command.operatorId())</span>
+<span class="fc" id="L73">                    .sourceType(TransactionSourceType.RENTAL)</span>
+<span class="fc" id="L74">                    .sourceId(sourceId)</span>
+<span class="fc" id="L75">                    .recordedAt(now)</span>
+<span class="fc" id="L76">                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
+<span class="fc" id="L77">                    .reason(null)</span>
+<span class="fc" id="L78">                    .records(List.of(</span>
+<span class="fc" id="L79">                            captureHoldDebit.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L80">                            captureRevenueCredit.toTransaction(uuidGenerator.generate())</span>
                     ))
-<span class="nc" id="L77">                    .build();</span>
-<span class="nc" id="L78">            transactionRepository.save(captureTransaction);</span>
+<span class="fc" id="L82">                    .build();</span>
+<span class="fc" id="L83">            transactionRepository.save(captureTransaction);</span>
 
-<span class="nc" id="L80">            var excess = customerAccount.getOnHold().getBalance();</span>
-<span class="nc" id="L81">            var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, now)</span>
-<span class="nc" id="L82">                    .map(t -&gt; new TransactionRef(t.getId()))</span>
-<span class="nc" id="L83">                    .orElse(null);</span>
+<span class="fc" id="L85">            var excess = customerAccount.getOnHold().getBalance();</span>
+<span class="fc" id="L86">            var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, now)</span>
+<span class="fc" id="L87">                    .map(t -&gt; new TransactionRef(t.getId()))</span>
+<span class="fc" id="L88">                    .orElse(null);</span>
 
-<span class="nc" id="L85">            accountRepository.save(customerAccount);</span>
-<span class="nc" id="L86">            accountRepository.save(systemAccount);</span>
+<span class="fc" id="L90">            accountRepository.save(customerAccount);</span>
+<span class="fc" id="L91">            accountRepository.save(systemAccount);</span>
 
-<span class="nc" id="L88">            return new SettlementResult(List.of(new TransactionRef(captureId)), releaseTransactionRef, now);</span>
+<span class="fc" id="L93">            return new SettlementResult(List.of(new TransactionRef(captureId)), releaseTransactionRef, now);</span>
         }
 
-<span class="fc" id="L91">        var shortfall = finalCost.subtract(holdBalance);</span>
-<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (customerAccount.getWallet().getBalance().isLessThan(shortfall)) {</span>
-<span class="fc" id="L93">            throw new OverBudgetSettlementException(finalCost,</span>
-<span class="fc" id="L94">                    holdBalance.add(customerAccount.getWallet().getBalance()));</span>
+<span class="fc" id="L96">        var shortfall = finalCost.subtract(holdBalance);</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (customerAccount.getWallet().getBalance().isLessThan(shortfall)) {</span>
+<span class="fc" id="L98">            throw new OverBudgetSettlementException(finalCost,</span>
+<span class="fc" id="L99">                    holdBalance.add(customerAccount.getWallet().getBalance()));</span>
         }
 
-<span class="fc" id="L97">        var captureRefs = new ArrayList&lt;TransactionRef&gt;();</span>
-<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (holdBalance.isPositive()) {</span>
-<span class="fc" id="L99">            var holdDebit = customerAccount.getOnHold().debit(holdBalance);</span>
-<span class="fc" id="L100">            var holdRevenueCredit = systemAccount.getRevenue().credit(holdBalance);</span>
-<span class="fc" id="L101">            UUID holdCaptureId = uuidGenerator.generate();</span>
-<span class="fc" id="L102">            transactionRepository.save(Transaction.builder()</span>
-<span class="fc" id="L103">                    .id(holdCaptureId)</span>
-<span class="fc" id="L104">                    .type(TransactionType.CAPTURE)</span>
-<span class="fc" id="L105">                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
-<span class="fc" id="L106">                    .amount(holdBalance)</span>
-<span class="fc" id="L107">                    .customerId(command.customerRef().id())</span>
-<span class="fc" id="L108">                    .operatorId(command.operatorId())</span>
-<span class="fc" id="L109">                    .sourceType(TransactionSourceType.RENTAL)</span>
-<span class="fc" id="L110">                    .sourceId(sourceId)</span>
-<span class="fc" id="L111">                    .recordedAt(now)</span>
-<span class="fc" id="L112">                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
-<span class="fc" id="L113">                    .reason(null)</span>
-<span class="fc" id="L114">                    .records(List.of(</span>
-<span class="fc" id="L115">                            holdDebit.toTransaction(uuidGenerator.generate()),</span>
-<span class="fc" id="L116">                            holdRevenueCredit.toTransaction(uuidGenerator.generate())</span>
+<span class="fc" id="L102">        var captureRefs = new ArrayList&lt;TransactionRef&gt;();</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (holdBalance.isPositive()) {</span>
+<span class="fc" id="L104">            var holdDebit = customerAccount.getOnHold().debit(holdBalance);</span>
+<span class="fc" id="L105">            var holdRevenueCredit = systemAccount.getRevenue().credit(holdBalance);</span>
+<span class="fc" id="L106">            UUID holdCaptureId = uuidGenerator.generate();</span>
+<span class="fc" id="L107">            transactionRepository.save(Transaction.builder()</span>
+<span class="fc" id="L108">                    .id(holdCaptureId)</span>
+<span class="fc" id="L109">                    .type(TransactionType.CAPTURE)</span>
+<span class="fc" id="L110">                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
+<span class="fc" id="L111">                    .amount(holdBalance)</span>
+<span class="fc" id="L112">                    .customerId(command.customerRef().id())</span>
+<span class="fc" id="L113">                    .operatorId(command.operatorId())</span>
+<span class="fc" id="L114">                    .sourceType(TransactionSourceType.RENTAL)</span>
+<span class="fc" id="L115">                    .sourceId(sourceId)</span>
+<span class="fc" id="L116">                    .recordedAt(now)</span>
+<span class="fc" id="L117">                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
+<span class="fc" id="L118">                    .reason(null)</span>
+<span class="fc" id="L119">                    .records(List.of(</span>
+<span class="fc" id="L120">                            holdDebit.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L121">                            holdRevenueCredit.toTransaction(uuidGenerator.generate())</span>
                     ))
-<span class="fc" id="L118">                    .build());</span>
-<span class="fc" id="L119">            captureRefs.add(new TransactionRef(holdCaptureId));</span>
+<span class="fc" id="L123">                    .build());</span>
+<span class="fc" id="L124">            captureRefs.add(new TransactionRef(holdCaptureId));</span>
         }
 
-<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (shortfall.isPositive()) {</span>
-<span class="fc" id="L123">            var walletDebit = customerAccount.getWallet().debit(shortfall);</span>
-<span class="fc" id="L124">            var walletRevenueCredit = systemAccount.getRevenue().credit(shortfall);</span>
-<span class="fc" id="L125">            UUID walletCaptureId = uuidGenerator.generate();</span>
-<span class="fc" id="L126">            transactionRepository.save(Transaction.builder()</span>
-<span class="fc" id="L127">                    .id(walletCaptureId)</span>
-<span class="fc" id="L128">                    .type(TransactionType.CAPTURE)</span>
-<span class="fc" id="L129">                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
-<span class="fc" id="L130">                    .amount(shortfall)</span>
-<span class="fc" id="L131">                    .customerId(command.customerRef().id())</span>
-<span class="fc" id="L132">                    .operatorId(command.operatorId())</span>
-<span class="fc" id="L133">                    .sourceType(TransactionSourceType.RENTAL)</span>
-<span class="fc" id="L134">                    .sourceId(sourceId)</span>
-<span class="fc" id="L135">                    .recordedAt(now)</span>
-<span class="fc" id="L136">                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
-<span class="fc" id="L137">                    .reason(null)</span>
-<span class="fc" id="L138">                    .records(List.of(</span>
-<span class="fc" id="L139">                            walletDebit.toTransaction(uuidGenerator.generate()),</span>
-<span class="fc" id="L140">                            walletRevenueCredit.toTransaction(uuidGenerator.generate())</span>
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if (shortfall.isPositive()) {</span>
+<span class="fc" id="L128">            var walletDebit = customerAccount.getWallet().debit(shortfall);</span>
+<span class="fc" id="L129">            var walletRevenueCredit = systemAccount.getRevenue().credit(shortfall);</span>
+<span class="fc" id="L130">            UUID walletCaptureId = uuidGenerator.generate();</span>
+<span class="fc" id="L131">            transactionRepository.save(Transaction.builder()</span>
+<span class="fc" id="L132">                    .id(walletCaptureId)</span>
+<span class="fc" id="L133">                    .type(TransactionType.CAPTURE)</span>
+<span class="fc" id="L134">                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
+<span class="fc" id="L135">                    .amount(shortfall)</span>
+<span class="fc" id="L136">                    .customerId(command.customerRef().id())</span>
+<span class="fc" id="L137">                    .operatorId(command.operatorId())</span>
+<span class="fc" id="L138">                    .sourceType(TransactionSourceType.RENTAL)</span>
+<span class="fc" id="L139">                    .sourceId(sourceId)</span>
+<span class="fc" id="L140">                    .recordedAt(now)</span>
+<span class="fc" id="L141">                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
+<span class="fc" id="L142">                    .reason(null)</span>
+<span class="fc" id="L143">                    .records(List.of(</span>
+<span class="fc" id="L144">                            walletDebit.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L145">                            walletRevenueCredit.toTransaction(uuidGenerator.generate())</span>
                     ))
-<span class="fc" id="L142">                    .build());</span>
-<span class="fc" id="L143">            captureRefs.add(new TransactionRef(walletCaptureId));</span>
+<span class="fc" id="L147">                    .build());</span>
+<span class="fc" id="L148">            captureRefs.add(new TransactionRef(walletCaptureId));</span>
         }
 
-<span class="fc" id="L146">        accountRepository.save(customerAccount);</span>
-<span class="fc" id="L147">        accountRepository.save(systemAccount);</span>
+<span class="fc" id="L151">        accountRepository.save(customerAccount);</span>
+<span class="fc" id="L152">        accountRepository.save(systemAccount);</span>
 
-<span class="fc" id="L149">        return new SettlementResult(captureRefs, null, now);</span>
+<span class="fc" id="L154">        return new SettlementResult(captureRefs, null, now);</span>
     }
 
     private Optional&lt;Transaction&gt; commitReleaseTransaction(CustomerAccount account, SettleRentalCommand command, Money excess, Instant now) {
-<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (excess.isPositive()) {</span>
-<span class="nc" id="L154">            var releaseHoldDebit = account.getOnHold().debit(excess);</span>
-<span class="nc" id="L155">            var releaseWalletCredit = account.getWallet().credit(excess);</span>
-<span class="nc" id="L156">            var releaseTransaction = Transaction.builder()</span>
-<span class="nc" id="L157">                    .id(uuidGenerator.generate())</span>
-<span class="nc" id="L158">                    .type(TransactionType.RELEASE)</span>
-<span class="nc" id="L159">                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
-<span class="nc" id="L160">                    .amount(excess)</span>
-<span class="nc" id="L161">                    .customerId(command.customerRef().id())</span>
-<span class="nc" id="L162">                    .operatorId(command.operatorId())</span>
-<span class="nc" id="L163">                    .sourceType(TransactionSourceType.RENTAL)</span>
-<span class="nc" id="L164">                    .sourceId(String.valueOf(command.rentalRef().id()))</span>
-<span class="nc" id="L165">                    .recordedAt(now)</span>
-<span class="nc" id="L166">                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
-<span class="nc" id="L167">                    .reason(null)</span>
-<span class="nc" id="L168">                    .records(List.of(</span>
-<span class="nc" id="L169">                            releaseHoldDebit.toTransaction(uuidGenerator.generate()),</span>
-<span class="nc" id="L170">                            releaseWalletCredit.toTransaction(uuidGenerator.generate())</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">        if (excess.isPositive()) {</span>
+<span class="fc" id="L159">            var releaseHoldDebit = account.getOnHold().debit(excess);</span>
+<span class="fc" id="L160">            var releaseWalletCredit = account.getWallet().credit(excess);</span>
+<span class="fc" id="L161">            var releaseTransaction = Transaction.builder()</span>
+<span class="fc" id="L162">                    .id(uuidGenerator.generate())</span>
+<span class="fc" id="L163">                    .type(TransactionType.RELEASE)</span>
+<span class="fc" id="L164">                    .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
+<span class="fc" id="L165">                    .amount(excess)</span>
+<span class="fc" id="L166">                    .customerId(command.customerRef().id())</span>
+<span class="fc" id="L167">                    .operatorId(command.operatorId())</span>
+<span class="fc" id="L168">                    .sourceType(TransactionSourceType.RENTAL)</span>
+<span class="fc" id="L169">                    .sourceId(String.valueOf(command.rentalRef().id()))</span>
+<span class="fc" id="L170">                    .recordedAt(now)</span>
+<span class="fc" id="L171">                    .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))</span>
+<span class="fc" id="L172">                    .reason(null)</span>
+<span class="fc" id="L173">                    .records(List.of(</span>
+<span class="fc" id="L174">                            releaseHoldDebit.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L175">                            releaseWalletCredit.toTransaction(uuidGenerator.generate())</span>
                     ))
-<span class="nc" id="L172">                    .build();</span>
-<span class="nc" id="L173">            return Optional.of(transactionRepository.save(releaseTransaction));</span>
+<span class="fc" id="L177">                    .build();</span>
+<span class="fc" id="L178">            return Optional.of(transactionRepository.save(releaseTransaction));</span>
         }
-<span class="nc" id="L175">        return Optional.empty();</span>
+<span class="fc" id="L180">        return Optional.empty();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

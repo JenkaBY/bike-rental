@@ -17,21 +17,21 @@ import org.springframework.stereotype.Component;
 
     @Override
     public SettlementResponse toResponse(SettlementInfo source) {
-<span class="nc bnc" id="L20" title="All 2 branches missed.">        if ( source == null ) {</span>
-<span class="nc" id="L21">            return null;</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        if ( source == null ) {</span>
+<span class="fc" id="L21">            return null;</span>
         }
 
-<span class="nc" id="L24">        List&lt;UUID&gt; captureTransactionRefs = null;</span>
-<span class="nc" id="L25">        UUID releaseTransactionRef = null;</span>
-<span class="nc" id="L26">        Instant recordedAt = null;</span>
+<span class="fc" id="L24">        List&lt;UUID&gt; captureTransactionRefs = null;</span>
+<span class="fc" id="L25">        UUID releaseTransactionRef = null;</span>
+<span class="fc" id="L26">        Instant recordedAt = null;</span>
 
-<span class="nc" id="L28">        captureTransactionRefs = toUuidList( source.captureTransactionRefs() );</span>
-<span class="nc" id="L29">        releaseTransactionRef = SettlementMapper.toUuid( source.releaseTransactionRef() );</span>
-<span class="nc" id="L30">        recordedAt = source.recordedAt();</span>
+<span class="fc" id="L28">        captureTransactionRefs = toUuidList( source.captureTransactionRefs() );</span>
+<span class="fc" id="L29">        releaseTransactionRef = SettlementMapper.toUuid( source.releaseTransactionRef() );</span>
+<span class="fc" id="L30">        recordedAt = source.recordedAt();</span>
 
-<span class="nc" id="L32">        SettlementResponse settlementResponse = new SettlementResponse( captureTransactionRefs, releaseTransactionRef, recordedAt );</span>
+<span class="fc" id="L32">        SettlementResponse settlementResponse = new SettlementResponse( captureTransactionRefs, releaseTransactionRef, recordedAt );</span>
 
-<span class="nc" id="L34">        return settlementResponse;</span>
+<span class="fc" id="L34">        return settlementResponse;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

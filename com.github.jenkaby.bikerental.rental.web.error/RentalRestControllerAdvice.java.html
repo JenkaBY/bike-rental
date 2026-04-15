@@ -25,15 +25,15 @@ import java.util.UUID;
 
     @ExceptionHandler(InvalidRentalStatusException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInvalidRentalStatus(InvalidRentalStatusException ex) {
-<span class="nc" id="L28">        var correlationId = resolveCorrelationId();</span>
-<span class="nc" id="L29">        log.warn(&quot;[correlationId={}] Invalid rental status: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L30">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="nc" id="L31">        problem.setTitle(&quot;Invalid rental status&quot;);</span>
-<span class="nc" id="L32">        problem.setDetail(ex.getMessage());</span>
-<span class="nc" id="L33">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L34">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="nc" id="L35">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
-<span class="nc" id="L36">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L28">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L29">        log.warn(&quot;[correlationId={}] Invalid rental status: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L30">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="fc" id="L31">        problem.setTitle(&quot;Invalid rental status&quot;);</span>
+<span class="fc" id="L32">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L33">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L34">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L35">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L36">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(RentalNotReadyForActivationException.class)

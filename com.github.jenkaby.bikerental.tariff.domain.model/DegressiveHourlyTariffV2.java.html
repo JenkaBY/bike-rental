@@ -64,22 +64,22 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
 <span class="fc" id="L64">            Money perInterval = getRatePerMinInterval(nextHourRate);</span>
 <span class="fc" id="L65">            Money remainingCost = perInterval.multiply(BigDecimal.valueOf(intervals));</span>
 <span class="fc" id="L66">            totalCost = totalCost.add(remainingCost);</span>
-<span class="pc bpc" id="L67" title="1 of 2 branches missed.">            if (!breakdownBuilder.isEmpty()) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            if (!breakdownBuilder.isEmpty()) {</span>
 <span class="fc" id="L68">                breakdownBuilder.append(&quot;+&quot;);</span>
             }
 <span class="fc" id="L70">            breakdownBuilder.append(intervals).append(&quot;*(&quot;).append(nextHourRate).append(&quot;/12)&quot;);</span>
         }
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if (hours &gt; 0) {</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (hours &gt; 0) {</span>
 <span class="fc" id="L73">            String message = String.format(&quot;%dh %dmin degressive: %s = %s&quot;, hours, minutes, breakdownBuilder, totalCost);</span>
 <span class="fc" id="L74">            return new BaseRentalCostV2(totalCost,</span>
                     new BreakdownCostDetails.DegressiveHourlyStandard(message,
 <span class="fc" id="L76">                            new BreakdownCostDetails.DegressiveHourlyStandard.Details(hours, minutes, breakdownBuilder.toString(), totalCost.toString()))</span>
             );
         }
-<span class="nc" id="L79">        String message = String.format(&quot;%dmin degressive: %s = %s&quot;, minutes, breakdownBuilder, totalCost);</span>
-<span class="nc" id="L80">        return new BaseRentalCostV2(totalCost,</span>
+<span class="fc" id="L79">        String message = String.format(&quot;%dmin degressive: %s = %s&quot;, minutes, breakdownBuilder, totalCost);</span>
+<span class="fc" id="L80">        return new BaseRentalCostV2(totalCost,</span>
                 new BreakdownCostDetails.DegressiveHourlyMinutesOnly(message,
-<span class="nc" id="L82">                        new BreakdownCostDetails.DegressiveHourlyMinutesOnly.Details(minutes, breakdownBuilder.toString(), totalCost.toString()))</span>
+<span class="fc" id="L82">                        new BreakdownCostDetails.DegressiveHourlyMinutesOnly.Details(minutes, breakdownBuilder.toString(), totalCost.toString()))</span>
         );
     }
 

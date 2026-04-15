@@ -12,5 +12,9 @@ public interface RentalDurationResult {
     int billableMinutes();
 
     Duration actualDuration();
+
+    default Duration billableDuration() {
+<span class="fc" id="L17">        return Duration.ofMinutes(billableMinutes());</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

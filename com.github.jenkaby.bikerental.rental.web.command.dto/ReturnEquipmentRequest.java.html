@@ -11,7 +11,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 
 @Schema(description = &quot;Request body for returning rented equipment&quot;)
-<span class="nc" id="L14">public record ReturnEquipmentRequest(</span>
+<span class="fc" id="L14">public record ReturnEquipmentRequest(</span>
         @Schema(description = &quot;Rental ID&quot;, example = &quot;1&quot;) Long rentalId,
         @Schema(description = &quot;List of equipment IDs to return&quot;) List&lt;@NotNull Long&gt; equipmentIds,
         @Schema(description = &quot;List of equipment UIDs to return&quot;) List&lt;@NotBlank String&gt; equipmentUids,
@@ -21,11 +21,11 @@ import java.util.List;
     @JsonIgnore
     @AssertTrue(message = &quot;At least one of rentalId, equipmentId, or equipmentUid must be provided&quot;)
     public boolean isValidIdentifiers() {
-<span class="nc" id="L24">        int count = 0;</span>
-<span class="nc bnc" id="L25" title="All 2 branches missed.">        if (rentalId != null) count++;</span>
-<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (!CollectionUtils.isEmpty(equipmentIds)) count++;</span>
-<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (!CollectionUtils.isEmpty(equipmentUids)) count++;</span>
-<span class="nc bnc" id="L28" title="All 2 branches missed.">        return count &gt; 0;</span>
+<span class="fc" id="L24">        int count = 0;</span>
+<span class="pc bpc" id="L25" title="1 of 2 branches missed.">        if (rentalId != null) count++;</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (!CollectionUtils.isEmpty(equipmentIds)) count++;</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(equipmentUids)) count++;</span>
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        return count &gt; 0;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

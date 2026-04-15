@@ -14,16 +14,16 @@ public interface SettlementMapper {
     SettlementResponse toResponse(SettlementInfo source);
 
     default List&lt;UUID&gt; toUuidList(List&lt;TransactionRef&gt; source) {
-<span class="nc bnc" id="L17" title="All 2 branches missed.">        if (source == null) {</span>
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if (source == null) {</span>
 <span class="nc" id="L18">            return null;</span>
         }
-<span class="nc" id="L20">        return source.stream()</span>
-<span class="nc" id="L21">                .map(SettlementMapper::toUuid)</span>
-<span class="nc" id="L22">                .toList();</span>
+<span class="fc" id="L20">        return source.stream()</span>
+<span class="fc" id="L21">                .map(SettlementMapper::toUuid)</span>
+<span class="fc" id="L22">                .toList();</span>
     }
 
     static UUID toUuid(TransactionRef source) {
-<span class="nc bnc" id="L26" title="All 2 branches missed.">        return source != null ? source.id() : null;</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        return source != null ? source.id() : null;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

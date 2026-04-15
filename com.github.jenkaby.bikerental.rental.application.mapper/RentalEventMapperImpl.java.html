@@ -80,26 +80,26 @@ public class RentalEventMapperImpl implements RentalEventMapper {
 
     @Override
     public RentalCompleted toRentalCompleted(Rental rental, LocalDateTime returnTime, Money totalCost) {
-<span class="nc bnc" id="L83" title="All 6 branches missed.">        if ( rental == null &amp;&amp; returnTime == null &amp;&amp; totalCost == null ) {</span>
+<span class="pc bpc" id="L83" title="5 of 6 branches missed.">        if ( rental == null &amp;&amp; returnTime == null &amp;&amp; totalCost == null ) {</span>
 <span class="nc" id="L84">            return null;</span>
         }
 
-<span class="nc" id="L87">        Long rentalId = null;</span>
-<span class="nc" id="L88">        List&lt;Long&gt; equipmentIds = null;</span>
-<span class="nc" id="L89">        List&lt;Long&gt; returnedEquipmentIds = null;</span>
-<span class="nc bnc" id="L90" title="All 2 branches missed.">        if ( rental != null ) {</span>
-<span class="nc" id="L91">            rentalId = rental.getId();</span>
-<span class="nc" id="L92">            equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
-<span class="nc" id="L93">            returnedEquipmentIds = rentalEquipmentMapper.mapEquipmentsToIds( rental.getEquipments() );</span>
+<span class="fc" id="L87">        Long rentalId = null;</span>
+<span class="fc" id="L88">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L89">        List&lt;Long&gt; returnedEquipmentIds = null;</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if ( rental != null ) {</span>
+<span class="fc" id="L91">            rentalId = rental.getId();</span>
+<span class="fc" id="L92">            equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
+<span class="fc" id="L93">            returnedEquipmentIds = rentalEquipmentMapper.mapEquipmentsToIds( rental.getEquipments() );</span>
         }
-<span class="nc" id="L95">        LocalDateTime returnTime1 = null;</span>
-<span class="nc" id="L96">        returnTime1 = returnTime;</span>
-<span class="nc" id="L97">        Money totalCost1 = null;</span>
-<span class="nc" id="L98">        totalCost1 = totalCost;</span>
+<span class="fc" id="L95">        LocalDateTime returnTime1 = null;</span>
+<span class="fc" id="L96">        returnTime1 = returnTime;</span>
+<span class="fc" id="L97">        Money totalCost1 = null;</span>
+<span class="fc" id="L98">        totalCost1 = totalCost;</span>
 
-<span class="nc" id="L100">        RentalCompleted rentalCompleted = new RentalCompleted( rentalId, equipmentIds, returnedEquipmentIds, returnTime1, totalCost1 );</span>
+<span class="fc" id="L100">        RentalCompleted rentalCompleted = new RentalCompleted( rentalId, equipmentIds, returnedEquipmentIds, returnTime1, totalCost1 );</span>
 
-<span class="nc" id="L102">        return rentalCompleted;</span>
+<span class="fc" id="L102">        return rentalCompleted;</span>
     }
 
     @Override

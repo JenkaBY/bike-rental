@@ -113,10 +113,10 @@ public abstract class BreakdownCostDetails {
 
     public static class DegressiveHourlyMinutesOnly extends BreakdownCostDetails {
         public DegressiveHourlyMinutesOnly(String message, Details details) {
-<span class="nc" id="L116">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MINUTES_ONLY, message, details);</span>
-<span class="nc" id="L117">        }</span>
+<span class="fc" id="L116">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MINUTES_ONLY, message, details);</span>
+<span class="fc" id="L117">        }</span>
 
-<span class="nc" id="L119">        public record Details(long minutes, String rateBreakdown, String total) {</span>
+<span class="fc" id="L119">        public record Details(long minutes, String rateBreakdown, String total) {</span>
         }
     }
 

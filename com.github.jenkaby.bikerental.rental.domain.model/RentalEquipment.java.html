@@ -15,42 +15,43 @@ public class RentalEquipment {
     private Long id;
     private Long equipmentId;
     private String equipmentUid;
+    private String equipmentType;
+
     private RentalEquipmentStatus status;
-    private Long tariffId;
     private LocalDateTime startedAt;
     private LocalDateTime expectedReturnAt;
     private LocalDateTime actualReturnAt;
+
+    private Long tariffId;
     private Money estimatedCost;
     private Money finalCost;
-    private String equipmentType;
 
     public RentalEquipment activateForRental(Rental rental) {
-<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        if (rental.getStartedAt() == null) {</span>
-<span class="nc" id="L29">            throw new IllegalArgumentException(&quot;Rental must have a start date to activate equipment&quot;);</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if (rental.getStartedAt() == null) {</span>
+<span class="nc" id="L31">            throw new IllegalArgumentException(&quot;Rental must have a start date to activate equipment&quot;);</span>
         }
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (rental.getExpectedReturnAt() == null) {</span>
-<span class="nc" id="L32">            throw new IllegalArgumentException(&quot;Rental must have a Expected return at to activate equipment&quot;);</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if (rental.getExpectedReturnAt() == null) {</span>
+<span class="nc" id="L34">            throw new IllegalArgumentException(&quot;Rental must have a Expected return at to activate equipment&quot;);</span>
         }
-<span class="fc" id="L34">        this.setStatus(RentalEquipmentStatus.ACTIVE);</span>
-<span class="fc" id="L35">        this.setStartedAt(rental.getStartedAt());</span>
-<span class="fc" id="L36">        this.setExpectedReturnAt(rental.getExpectedReturnAt());</span>
-<span class="fc" id="L37">        return this;</span>
+<span class="fc" id="L36">        this.setStatus(RentalEquipmentStatus.ACTIVE);</span>
+<span class="fc" id="L37">        this.setStartedAt(rental.getStartedAt());</span>
+<span class="fc" id="L38">        this.setExpectedReturnAt(rental.getExpectedReturnAt());</span>
+<span class="fc" id="L39">        return this;</span>
     }
 
     public RentalEquipment markReturned(LocalDateTime returnAt) {
-<span class="nc" id="L41">        this.setStatus(RentalEquipmentStatus.RETURNED);</span>
-<span class="nc" id="L42">        this.setActualReturnAt(returnAt);</span>
-<span class="nc" id="L43">        return this;</span>
+<span class="fc" id="L43">        this.setStatus(RentalEquipmentStatus.RETURNED);</span>
+<span class="fc" id="L44">        this.setActualReturnAt(returnAt);</span>
+<span class="fc" id="L45">        return this;</span>
     }
 
-
     public static RentalEquipment assigned(Long equipmentId, String equipmentUid, String equipmentType) {
-<span class="fc" id="L48">        return RentalEquipment.builder()</span>
-<span class="fc" id="L49">                .equipmentId(equipmentId)</span>
-<span class="fc" id="L50">                .equipmentUid(equipmentUid)</span>
-<span class="fc" id="L51">                .status(RentalEquipmentStatus.ASSIGNED)</span>
-<span class="fc" id="L52">                .equipmentType(equipmentType)</span>
-<span class="fc" id="L53">                .build();</span>
+<span class="fc" id="L49">        return RentalEquipment.builder()</span>
+<span class="fc" id="L50">                .equipmentId(equipmentId)</span>
+<span class="fc" id="L51">                .equipmentUid(equipmentUid)</span>
+<span class="fc" id="L52">                .status(RentalEquipmentStatus.ASSIGNED)</span>
+<span class="fc" id="L53">                .equipmentType(equipmentType)</span>
+<span class="fc" id="L54">                .build();</span>
     }
 }
 

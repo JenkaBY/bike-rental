@@ -156,13 +156,13 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;RentalReturnResponse&gt; returnEquipment(@Valid @RequestBody ReturnEquipmentRequest request) {
-<span class="nc" id="L159">        log.info(&quot;[POST] Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
-<span class="nc" id="L160">                request.rentalId(), request.equipmentIds(), request.equipmentUids());</span>
-<span class="nc" id="L161">        var command = commandMapper.toReturnCommand(request);</span>
-<span class="nc" id="L162">        var result = returnEquipmentUseCase.execute(command);</span>
-<span class="nc" id="L163">        var response = commandMapper.toReturnResponse(result);</span>
-<span class="nc" id="L164">        log.info(&quot;[POST] Equipment return processed successfully for rental {}&quot;, result.rental().getId());</span>
-<span class="nc" id="L165">        return ResponseEntity.ok(response);</span>
+<span class="fc" id="L159">        log.info(&quot;[POST] Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
+<span class="fc" id="L160">                request.rentalId(), request.equipmentIds(), request.equipmentUids());</span>
+<span class="fc" id="L161">        var command = commandMapper.toReturnCommand(request);</span>
+<span class="fc" id="L162">        var result = returnEquipmentUseCase.execute(command);</span>
+<span class="fc" id="L163">        var response = commandMapper.toReturnResponse(result);</span>
+<span class="fc" id="L164">        log.info(&quot;[POST] Equipment return processed successfully for rental {}&quot;, result.rental().getId());</span>
+<span class="fc" id="L165">        return ResponseEntity.ok(response);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
