@@ -6,6 +6,6 @@
 - [x] `task-004-remove-cost-breakdown-from-return-response.md`
 - [x] `task-005-simplify-rental-command-mapper.md`
 - [x] `task-006-remove-breakdown-component-test-artifacts.md`
-- [ ] `task-007-add-return-component-test-scenarios.md`
+- [x] `task-007-add-return-component-test-scenarios.md`
 
-**Next Task:** `task-007-add-return-component-test-scenarios.md`
+**Next Task:** DONE
