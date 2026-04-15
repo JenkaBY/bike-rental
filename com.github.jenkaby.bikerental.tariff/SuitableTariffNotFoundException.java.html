@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 /**
  * Exception thrown when no suitable tariff can be found for the given criteria.
- * This is part of the public API of the tariff module and can be thrown by {@link TariffFacade}.
+ * This is part of the public API of the tariff module and can be thrown by {@link TariffV2Facade}.
  */
 @Getter
 public class SuitableTariffNotFoundException extends BikeRentalException {

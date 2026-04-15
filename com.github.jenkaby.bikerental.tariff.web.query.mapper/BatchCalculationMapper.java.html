@@ -48,15 +48,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 
     public abstract EquipmentCostItem toItem(CostCalculationRequest.EquipmentItemRequest item);
 
+    //    TODO use Mapstruct features
     public CostCalculationResponse toResponse(RentalCostCalculationResult result) {
-<span class="fc" id="L52">        return new CostCalculationResponse(</span>
-<span class="fc" id="L53">                breakdownMapper.toBreakdownResponses(result.equipmentBreakdowns()),</span>
-<span class="fc" id="L54">                result.subtotal().amount(),</span>
-<span class="fc" id="L55">                discountMapper.toResponse(result.discount()),</span>
-<span class="fc" id="L56">                moneyMapper.toBigDecimal(result.totalCost()),</span>
-<span class="fc" id="L57">                durationMapper.toMinutes(result.effectiveDuration()),</span>
-<span class="fc" id="L58">                result.estimate(),</span>
-<span class="fc" id="L59">                result.specialPricingApplied()</span>
+<span class="fc" id="L53">        return new CostCalculationResponse(</span>
+<span class="fc" id="L54">                breakdownMapper.toBreakdownResponses(result.equipmentBreakdowns()),</span>
+<span class="fc" id="L55">                moneyMapper.toBigDecimal(result.subtotal()),</span>
+<span class="fc" id="L56">                discountMapper.toResponse(result.discount()),</span>
+<span class="fc" id="L57">                moneyMapper.toBigDecimal(result.totalCost()),</span>
+<span class="fc" id="L58">                durationMapper.toMinutes(result.effectiveDuration()),</span>
+<span class="fc" id="L59">                result.estimate(),</span>
+<span class="fc" id="L60">                result.specialPricingApplied()</span>
         );
     }
 }

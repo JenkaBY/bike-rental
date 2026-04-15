@@ -23,15 +23,15 @@ import java.util.UUID;
 
     @ExceptionHandler(SuitableTariffNotFoundException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleSuitableTariffNotFound(SuitableTariffNotFoundException ex) {
-<span class="fc" id="L26">        var correlationId = resolveCorrelationId();</span>
-<span class="fc" id="L27">        log.warn(&quot;[correlationId={}] Suitable tariff not found: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="fc" id="L28">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
-<span class="fc" id="L29">        problem.setTitle(&quot;Resource not found&quot;);</span>
-<span class="fc" id="L30">        problem.setDetail(&quot;Suitable tariff not found&quot;);</span>
-<span class="fc" id="L31">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L32">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="fc" id="L33">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
-<span class="fc" id="L34">        return ResponseEntity.of(problem).build();</span>
+<span class="nc" id="L26">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L27">        log.warn(&quot;[correlationId={}] Suitable tariff not found: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L28">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L29">        problem.setTitle(&quot;Resource not found&quot;);</span>
+<span class="nc" id="L30">        problem.setDetail(&quot;Suitable tariff not found&quot;);</span>
+<span class="nc" id="L31">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L32">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L33">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="nc" id="L34">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(InvalidTariffPricingException.class)
@@ -72,8 +72,8 @@ import java.util.UUID;
     }
 
     private String resolveCorrelationId() {
-<span class="fc" id="L75">        String correlationId = MDC.get(&quot;correlationId&quot;);</span>
-<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : UUID.randomUUID().toString();</span>
+<span class="nc" id="L75">        String correlationId = MDC.get(&quot;correlationId&quot;);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        return correlationId != null ? correlationId : UUID.randomUUID().toString();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

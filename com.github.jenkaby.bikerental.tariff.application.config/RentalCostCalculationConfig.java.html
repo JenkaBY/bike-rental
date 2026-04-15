@@ -3,30 +3,22 @@
 import com.github.jenkaby.bikerental.shared.application.service.MessageService;
 import com.github.jenkaby.bikerental.shared.config.RentalProperties;
 import com.github.jenkaby.bikerental.tariff.application.strategy.ForgivenessStrategy;
-import com.github.jenkaby.bikerental.tariff.application.strategy.OvertimeCalculationStrategy;
-import com.github.jenkaby.bikerental.tariff.application.strategy.ProportionalOvertimeCalculationStrategy;
 import com.github.jenkaby.bikerental.tariff.application.strategy.ThresholdForgivenessStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
 @Configuration
-<span class="fc" id="L14">class RentalCostCalculationConfig {</span>
+<span class="fc" id="L12">class RentalCostCalculationConfig {</span>
 
     @Bean
     ForgivenessStrategy forgivenessStrategy(
             RentalProperties rentalProperties,
             MessageService messageService) {
-<span class="fc" id="L20">        return new ThresholdForgivenessStrategy(</span>
-<span class="fc" id="L21">                rentalProperties.forgiveness(),</span>
+<span class="fc" id="L18">        return new ThresholdForgivenessStrategy(</span>
+<span class="fc" id="L19">                rentalProperties.forgiveness(),</span>
                 messageService
         );
-    }
-
-    @Bean
-    OvertimeCalculationStrategy overtimeCalculationStrategy(RentalProperties rentalProperties) {
-<span class="fc" id="L28">        int roundingIntervalMinutes = rentalProperties.getTimeIncrementMinutes();</span>
-<span class="fc" id="L29">        return new ProportionalOvertimeCalculationStrategy(roundingIntervalMinutes);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

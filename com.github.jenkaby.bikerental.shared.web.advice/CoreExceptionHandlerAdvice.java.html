@@ -76,12 +76,12 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     ResponseEntity&lt;ProblemDetail&gt; handleError(MissingServletRequestParameterException ex) {
-<span class="fc" id="L79">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());</span>
-<span class="fc" id="L80">        var correlationId = resolveCorrelationId();</span>
-<span class="fc" id="L81">        body.setProperty(CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L82">        body.setProperty(ERROR_CODE, REQUEST_PARAMS_MISSING);</span>
-<span class="fc" id="L83">        log.warn(&quot;[correlationId={}] Bad request for MissingServletRequestParameterException: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="fc" id="L84">        return ResponseEntity.of(body).build();</span>
+<span class="nc" id="L79">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());</span>
+<span class="nc" id="L80">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L81">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L82">        body.setProperty(ERROR_CODE, REQUEST_PARAMS_MISSING);</span>
+<span class="nc" id="L83">        log.warn(&quot;[correlationId={}] Bad request for MissingServletRequestParameterException: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L84">        return ResponseEntity.of(body).build();</span>
     }
 
     //  Occurs when validation failed in annotated @RequestParam, @PathVariable, @RequestHeader, @CookieValue, @ModelAttribute
