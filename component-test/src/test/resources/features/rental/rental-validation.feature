@@ -24,10 +24,7 @@ Feature: Rental Update Validation
       | 1  | EQ-001       | BIKE-001   | AVAILABLE | bicycle | Model A | Good      |
       | 2  | EQ-002       | E-BIKE-001 | RENTED    | scooter | Model B | Excellent |
       | 3  | EQ-003       | BIKE-002   | BROKEN    | bicycle | Model C | Poor      |
-    And the following tariff records exist in db
-      | id | name        | description     | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo    | status |
-      | 1  | Hourly Rate | Standard hourly | bicycle       | 100.00    | 60.00         | 100.00    | 500.00   | 90.00           | 2026-01-01 | 2026-12-31 | ACTIVE |
-      | 2  | Daily Rate  | Standard daily  | bicycle       | 200.00    | 70.00         | 110.00    | 600.00   | 95.00           | 2026-01-01 | 2026-12-31 | ACTIVE |
+
 
   Scenario: Update non-existent rental
     Given the rental update request is

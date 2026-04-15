@@ -22,8 +22,6 @@ public record CostCalculationRequest(
         LocalDate rentalDate
 ) {
     @Schema(description = "Single equipment item for cost calculation")
-    public record EquipmentItemRequest(
-            @NotBlank String equipmentType
-    ) {
+    public record EquipmentItemRequest(@NotBlank String equipmentType) {
     }
 }

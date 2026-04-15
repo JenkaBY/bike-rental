@@ -5,7 +5,6 @@ import org.jspecify.annotations.NonNull;
 
 public interface ForgivenessStrategy {
 
-
     boolean shouldForgive(int overtimeMinutes);
 
     int getForgivenMinutes(int overtimeMinutes);

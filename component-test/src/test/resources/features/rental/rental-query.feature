@@ -25,10 +25,20 @@ Feature: Rental Query
       | 1  | EQ-001       | BIKE-001   | AVAILABLE | bicycle | Model A | Good      |
       | 2  | EQ-002       | E-BIKE-001 | AVAILABLE | scooter | Model B | Excellent |
       | 3  | EQ-003       | E-BIKE-002 | AVAILABLE | scooter | Model B | Excellent |
-    And the following tariff records exist in db
-      | id | name                | description     | equipmentType | basePrice | halfHourPrice | hourPrice | dayPrice | discountedPrice | validFrom  | validTo    | status |
-      | 1  | Hourly Rate         | Standard hourly | bicycle       | 100.00    | 60.00         | 100.00    | 500.00   | 90.00           | 2026-01-01 | 2026-12-31 | ACTIVE |
-      | 2  | Scooter Hourly Rate | Standard hourly | scooter       | 100.00    | 60.00         | 100.00    | 500.00   | 90.00           | 2026-01-01 | 2026-12-31 | ACTIVE |
+    And the pricing params list for tariff request is
+      | tariffId | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | hourlyPrice | dailyPrice | overtimeHourlyPrice | issuanceFee | minimumDurationMinutes | minimumDurationSurcharge | price |
+      | 1        | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               |             |            |                     |             | 30                     | 1.00                     |       |
+      | 2        | FLAT_HOURLY       |                |                |                    | 15.00       |            |                     |             | 30                     | 1.00                     |       |
+      | 3        | DAILY             |                |                |                    |             | 25.00      | 1.00                |             |                        |                          |       |
+      | 4        | FLAT_FEE          |                |                |                    |             |            |                     | 1.00        |                        |                          |       |
+      | 5        | SPECIAL           |                |                |                    |             |            |                     |             |                        |                          | 0     |
+    And the following tariff v2 records exist in db
+      | id | name                | description             | equipmentType | pricingType       | status | validFrom  | validTo |
+      | 1  | Hourly Bicycle      | Degressive hourly       | bicycle       | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
+      | 2  | Flat Hourly Scooter | Flat hourly             | scooter       | FLAT_HOURLY       | ACTIVE | 2026-01-01 |         |
+      | 3  | Daily Bicycle       | Daily hourly            | bicycle       | DAILY             | ACTIVE | 2026-01-01 |         |
+      | 4  | Flat Fee Helmet     | Flat fee                | helmet        | FLAT_FEE          | ACTIVE | 2026-01-01 |         |
+      | 5  | Special Tariff      | Apply for any equipment | any           | SPECIAL           | ACTIVE | 2025-01-31 |         |
 
   Scenario Outline: Get active rentals with status filter
     Given now is "<now>"

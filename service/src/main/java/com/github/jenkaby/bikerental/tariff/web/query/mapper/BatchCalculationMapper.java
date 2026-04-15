@@ -48,10 +48,11 @@ public abstract class BatchCalculationMapper {
 
     public abstract EquipmentCostItem toItem(CostCalculationRequest.EquipmentItemRequest item);
 
+    //    TODO use Mapstruct features
     public CostCalculationResponse toResponse(RentalCostCalculationResult result) {
         return new CostCalculationResponse(
                 breakdownMapper.toBreakdownResponses(result.equipmentBreakdowns()),
-                result.subtotal().amount(),
+                moneyMapper.toBigDecimal(result.subtotal()),
                 discountMapper.toResponse(result.discount()),
                 moneyMapper.toBigDecimal(result.totalCost()),
                 durationMapper.toMinutes(result.effectiveDuration()),
