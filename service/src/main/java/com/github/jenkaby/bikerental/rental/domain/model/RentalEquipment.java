@@ -15,14 +15,16 @@ public class RentalEquipment {
     private Long id;
     private Long equipmentId;
     private String equipmentUid;
+    private String equipmentType;
+
     private RentalEquipmentStatus status;
-    private Long tariffId;
     private LocalDateTime startedAt;
     private LocalDateTime expectedReturnAt;
     private LocalDateTime actualReturnAt;
+
+    private Long tariffId;
     private Money estimatedCost;
     private Money finalCost;
-    private String equipmentType;
 
     public RentalEquipment activateForRental(Rental rental) {
         if (rental.getStartedAt() == null) {
@@ -42,7 +44,6 @@ public class RentalEquipment {
         this.setActualReturnAt(returnAt);
         return this;
     }
-
 
     public static RentalEquipment assigned(Long equipmentId, String equipmentUid, String equipmentType) {
         return RentalEquipment.builder()

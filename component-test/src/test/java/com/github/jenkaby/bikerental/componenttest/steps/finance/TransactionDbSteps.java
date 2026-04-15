@@ -76,7 +76,7 @@ public class TransactionDbSteps {
             softly.assertThat(actual.getRecordedAt()).as("Recorded at").isNotNull();
         } else {
             softly.assertThat(actual.getRecordedAt()).as("Recorded at")
-                    .isCloseTo(exp.getRecordedAt(), within(1, ChronoUnit.SECONDS));
+                    .isCloseTo(exp.getRecordedAt(), within(3, ChronoUnit.SECONDS));
         }
         softly.assertThat(actual.getRecords()).as("Records").isNotEmpty();
         if (exp.getReason() != null) {

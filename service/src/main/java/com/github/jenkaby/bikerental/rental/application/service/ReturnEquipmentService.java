@@ -2,8 +2,8 @@ package com.github.jenkaby.bikerental.rental.application.service;
 
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.finance.SettlementInfo;
+import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
-import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentResult;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
@@ -19,8 +19,7 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.OverBudgetSettlementException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
-import com.github.jenkaby.bikerental.tariff.RentalCost;
-import com.github.jenkaby.bikerental.tariff.TariffFacade;
+import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
@@ -28,8 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+
 
 @Slf4j
 @Service
@@ -39,7 +37,8 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
 
     private final RentalRepository rentalRepository;
     private final RentalDurationCalculator durationCalculator;
-    private final TariffFacade tariffFacade;
+    private final TariffV2Facade tariffV2Facade;
+    private final RentalCostCommandMapper costCommandMapper;
     private final FinanceFacade financeFacade;
     private final RentalEventMapper eventMapper;
     private final EventPublisher eventPublisher;
@@ -48,14 +47,16 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
     ReturnEquipmentService(
             RentalRepository rentalRepository,
             RentalDurationCalculator durationCalculator,
-            TariffFacade tariffFacade,
+            TariffV2Facade tariffV2Facade,
+            RentalCostCommandMapper costCommandMapper,
             FinanceFacade financeFacade,
             RentalEventMapper eventMapper,
             EventPublisher eventPublisher,
             Clock clock) {
         this.rentalRepository = rentalRepository;
         this.durationCalculator = durationCalculator;
-        this.tariffFacade = tariffFacade;
+        this.tariffV2Facade = tariffV2Facade;
+        this.costCommandMapper = costCommandMapper;
         this.financeFacade = financeFacade;
         this.eventMapper = eventMapper;
         this.eventPublisher = eventPublisher;
@@ -77,26 +78,23 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
         var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);
         var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);
 
-        Money totalCost = Money.zero();
-        Map<Long, RentalCost> rentalCostMapToEquipment = new HashMap<>();
-        for (var equipment : equipmentsToReturn) {
-            RentalCost cost = tariffFacade.calculateRentalCost(
-                    equipment.getTariffId(),
-                    rental.getActualDuration(),
-                    durationResult.billableMinutes(),
-                    rental.getPlannedDuration()
-            );
-            equipment.setFinalCost(cost.totalCost());
-            rentalCostMapToEquipment.put(equipment.getEquipmentId(), cost);
-            totalCost = totalCost.add(cost.totalCost());
+        var costCommand = costCommandMapper.toReturnCommand(rental, equipmentsToReturn, durationResult.billableDuration());
+        var costResult = tariffV2Facade.calculateRentalCost(costCommand);
+
+        var breakdowns = costResult.equipmentBreakdowns();
+        for (int i = 0; i < equipmentsToReturn.size(); i++) {
+            var equipment = equipmentsToReturn.get(i);
+            var breakdown = breakdowns.get(i);
+            equipment.setFinalCost(breakdown.itemCost());
+            equipment.setTariffId(breakdown.tariffId());
         }
 
         if (!rental.allEquipmentReturned()) {
             Rental saved = rentalRepository.save(rental);
             log.info("Partial return recorded for rental {}", saved.getId());
-            RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalCost);
+            RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, saved.getFinalCost());
             eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);
-            return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, null);
+            return new ReturnEquipmentResult(saved, null);
         }
 
         // TODO Move to rental class
@@ -106,7 +104,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
                 .map(RentalEquipment::getFinalCost)
                 .reduce(Money.zero(), Money::add);
 
-        var totalFinalCost = previouslyReturnedCost.add(totalCost);
+        var totalFinalCost = previouslyReturnedCost.add(costResult.totalCost());
         SettlementInfo settlementInfo = null;
         try {
             settlementInfo = financeFacade.settleRental(
@@ -125,7 +123,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
         RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalFinalCost);
         eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);
 
-        return new ReturnEquipmentResult(saved, rentalCostMapToEquipment, settlementInfo);
+        return new ReturnEquipmentResult(saved, settlementInfo);
     }
 
     private Rental findRental(ReturnEquipmentCommand command) {

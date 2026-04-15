@@ -8,7 +8,6 @@ import java.time.Duration;
 @Mapper
 public interface DurationMapper {
 
-
     default Duration toDuration(Integer minutes) {
         return minutes != null ? Duration.ofMinutes(minutes) : null;
     }

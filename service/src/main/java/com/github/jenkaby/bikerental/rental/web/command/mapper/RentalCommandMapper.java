@@ -1,14 +1,12 @@
 package com.github.jenkaby.bikerental.rental.web.command.mapper;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
-import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentResult;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
-import com.github.jenkaby.bikerental.tariff.RentalCost;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,28 +33,10 @@ public abstract class RentalCommandMapper {
 
     public abstract ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request);
 
-    public RentalReturnResponse toReturnResponse(ReturnEquipmentResult result) {
+    public RentalReturnResponse toReturnResponse(ReturnEquipmentUseCase.ReturnEquipmentResult result) {
         RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());
-        var costsBreakdown = result.breakDownCosts().entrySet().stream()
-                .map(entry -> toCostBreakdown(entry.getKey(), entry.getValue()))
-                .toList();
         var settlementResponse = settlementMapper.toResponse(result.settlementInfo());
-        return new RentalReturnResponse(rentalResponse, costsBreakdown, settlementResponse);
-    }
-
-    RentalReturnResponse.CostBreakdown toCostBreakdown(Long equipmentId, RentalCost cost) {
-        return new RentalReturnResponse.CostBreakdown(
-                equipmentId,
-                cost.baseCost().amount(),
-                cost.overtimeCost().amount(),
-                cost.totalCost().amount(),
-                cost.actualMinutes(),
-                cost.billableMinutes(),
-                cost.plannedMinutes(),
-                cost.overtimeMinutes(),
-                cost.forgivenessApplied(),
-                cost.calculationMessage()
-        );
+        return new RentalReturnResponse(rentalResponse, settlementResponse);
     }
 
     public Map<String, Object> toPatchMap(RentalUpdateJsonPatchRequest request) {
