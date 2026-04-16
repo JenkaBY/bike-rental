@@ -94,3 +94,20 @@ Feature: Customer Profile Management
       | path     | value                                                                     |
       | $.title  | Not Found                                                                 |
       | $.detail | Customer with identifier '999e8400-e29b-41d4-a716-446655440099' not found |
+
+  Scenario: Retrieve customer by id - found
+    When a GET request has been made to "/api/customers/{customerId}" endpoint with
+      | {customerId} |
+      | CUS3         |
+    Then the response status is 200
+    And the response matches expected customer
+      | id   | phone        | firstName | lastName | email          | birthDate  | comments |
+      | CUS3 | +79998883333 | Maria     | Garcia   | maria@test.com | 1983-03-03 | Sexy     |
+
+  Scenario: Retrieve customer by id - not found
+    When a GET request has been made to "/api/customers/999e8400-e29b-41d4-a716-446655440099" endpoint
+    Then the response status is 404
+    And the response contains
+      | path     | value                                                                     |
+      | $.title  | Not Found                                                                 |
+      | $.detail | Customer with identifier '999e8400-e29b-41d4-a716-446655440099' not found |

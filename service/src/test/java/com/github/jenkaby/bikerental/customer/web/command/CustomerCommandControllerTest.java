@@ -4,7 +4,7 @@ import com.github.jenkaby.bikerental.customer.application.usecase.CreateCustomer
 import com.github.jenkaby.bikerental.customer.application.usecase.UpdateCustomerUseCase;
 import com.github.jenkaby.bikerental.customer.domain.model.Customer;
 import com.github.jenkaby.bikerental.customer.web.command.dto.CustomerRequest;
-import com.github.jenkaby.bikerental.customer.web.command.mapper.CustomerCommandMapper;
+import com.github.jenkaby.bikerental.customer.web.mapper.CustomerWebMapper;
 import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerResponse;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import org.jspecify.annotations.NonNull;
@@ -50,7 +50,7 @@ class CustomerCommandControllerTest {
     private UpdateCustomerUseCase updateCustomerUseCase;
 
     @MockitoBean
-    private CustomerCommandMapper mapper;
+    private CustomerWebMapper mapper;
 
     @Nested
     class PostCustomers {

@@ -4,7 +4,7 @@ import com.github.jenkaby.bikerental.customer.application.usecase.CreateCustomer
 import com.github.jenkaby.bikerental.customer.application.usecase.UpdateCustomerUseCase;
 import com.github.jenkaby.bikerental.customer.domain.model.Customer;
 import com.github.jenkaby.bikerental.customer.web.command.dto.CustomerRequest;
-import com.github.jenkaby.bikerental.customer.web.command.mapper.CustomerCommandMapper;
+import com.github.jenkaby.bikerental.customer.web.mapper.CustomerWebMapper;
 import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerResponse;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,12 +33,12 @@ class CustomerCommandController {
 
     private final CreateCustomerUseCase createCustomerUseCase;
     private final UpdateCustomerUseCase updateCustomerUseCase;
-    private final CustomerCommandMapper mapper;
+    private final CustomerWebMapper mapper;
 
     CustomerCommandController(
             CreateCustomerUseCase createCustomerUseCase,
             UpdateCustomerUseCase updateCustomerUseCase,
-            CustomerCommandMapper mapper) {
+            CustomerWebMapper mapper) {
         this.createCustomerUseCase = createCustomerUseCase;
         this.updateCustomerUseCase = updateCustomerUseCase;
         this.mapper = mapper;
