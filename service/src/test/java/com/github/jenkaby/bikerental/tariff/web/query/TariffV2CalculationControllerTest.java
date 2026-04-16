@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Tariff V2 Calculation Controller Tests")
 class TariffV2CalculationControllerTest {
 
-    private static final String API_V2_CALCULATE = "/api/v2/tariffs/calculate";
+    private static final String API_V2_CALCULATE = "/api/tariffs/calculate";
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,7 +53,7 @@ class TariffV2CalculationControllerTest {
     private BatchCalculationMapper batchMapper;
 
     @Test
-    @DisplayName("POST /api/v2/tariffs/calculate returns 200 with normal mode result")
+    @DisplayName("POST /api/tariffs/calculate returns 200 with normal mode result")
     void calculate_normalMode_returns200() throws Exception {
         var request = new CostCalculationRequest(
                 List.of(
@@ -168,7 +168,7 @@ class TariffV2CalculationControllerTest {
 
         // --- plannedDuration null (unique) ---
         @Test
-        @DisplayName("POST /api/v2/tariffs/calculate returns 400 when plannedDurationMinutes is null")
+        @DisplayName("POST /api/tariffs/calculate returns 400 when plannedDurationMinutes is null")
         void whenPlannedDurationNull_returns400() throws Exception {
             var request = new CostCalculationRequest(
                     List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
@@ -249,7 +249,7 @@ class TariffV2CalculationControllerTest {
         }
 
         @Test
-        @DisplayName("POST /api/v2/tariffs/calculate returns 400 when specialPrice is negative")
+        @DisplayName("POST /api/tariffs/calculate returns 400 when specialPrice is negative")
         void whenSpecialPriceNegative_returns400() throws Exception {
             var request = new CostCalculationRequest(
                     List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
@@ -271,7 +271,7 @@ class TariffV2CalculationControllerTest {
         }
 
         @Test
-        @DisplayName("POST /api/v2/tariffs/calculate returns 400 when specialTariffId is zero")
+        @DisplayName("POST /api/tariffs/calculate returns 400 when specialTariffId is zero")
         void whenSpecialTariffIdZero_returns400() throws Exception {
             var request = new CostCalculationRequest(
                     List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),

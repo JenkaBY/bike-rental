@@ -26,7 +26,7 @@ different pricing model that supports **degressive hourly pricing** (decreasing 
 **operator-defined special pricing**.
 
 The new model (V2) must coexist with V1 — new tables, new domain classes (suffixed with `V2`),
-and new endpoints (`/api/v2/tariffs`). No changes to existing V1 implementation.
+and new endpoints (`/api/tariffs`). No changes to existing V1 implementation.
 
 ### Design Principles
 
@@ -499,14 +499,14 @@ tariff/
   │
   └── web/
       ├── command/
-      │   ├── TariffV2CommandController.java        ← /api/v2/tariffs
+      │   ├── TariffV2CommandController.java        ← /api/tariffs
       │   ├── dto/
       │   │   └── TariffV2Request.java
       │   └── mapper/
       │       └── TariffV2CommandMapper.java
       ├── query/
-      │   ├── TariffV2QueryController.java          ← /api/v2/tariffs (GET endpoints)
-      │   ├── TariffV2CalculationController.java    ← POST /api/v2/tariffs/calculate
+      │   ├── TariffV2QueryController.java          ← /api/tariffs (GET endpoints)
+      │   ├── TariffV2CalculationController.java    ← POST /api/tariffs/calculate
       │   ├── dto/
       │   │   ├── TariffV2Response.java
       │   │   ├── PricingTypeResponse.java          ← { slug, title, description }
@@ -526,27 +526,27 @@ tariff/
 
 ### 6.1 Command Endpoints (`TariffV2CommandController`)
 
-| Method  | Path                              | Description                  |
-|---------|-----------------------------------|------------------------------|
-| `POST`  | `/api/v2/tariffs`                 | Create a new V2 tariff       |
-| `PUT`   | `/api/v2/tariffs/{id}`            | Update an existing V2 tariff |
-| `PATCH` | `/api/v2/tariffs/{id}/activate`   | Activate tariff              |
-| `PATCH` | `/api/v2/tariffs/{id}/deactivate` | Deactivate tariff            |
+| Method  | Path                           | Description                  |
+|---------|--------------------------------|------------------------------|
+| `POST`  | `/api/tariffs`                 | Create a new V2 tariff       |
+| `PUT`   | `/api/tariffs/{id}`            | Update an existing V2 tariff |
+| `PATCH` | `/api/tariffs/{id}/activate`   | Activate tariff              |
+| `PATCH` | `/api/tariffs/{id}/deactivate` | Deactivate tariff            |
 
 ### 6.2 Query Endpoints (`TariffV2QueryController`)
 
-| Method | Path                            | Description                                                 |
-|--------|---------------------------------|-------------------------------------------------------------|
-| `GET`  | `/api/v2/tariffs/{id}`          | Get tariff by ID                                            |
-| `GET`  | `/api/v2/tariffs`               | List all tariffs (paginated)                                |
-| `GET`  | `/api/v2/tariffs/active`        | Active tariffs, optional `?equipmentType=` filter           |
-| `GET`  | `/api/v2/tariffs/pricing-types` | List all pricing types with localized title and description |
-| `GET`  | `/api/v2/tariffs/selection`     | Auto-select cheapest tariff for equipment type + duration   |
-| `GET`  | `/api/v2/tariffs/cost-estimate` | Calculate cost for a specific tariff + duration             |
+| Method | Path                         | Description                                                 |
+|--------|------------------------------|-------------------------------------------------------------|
+| `GET`  | `/api/tariffs/{id}`          | Get tariff by ID                                            |
+| `GET`  | `/api/tariffs`               | List all tariffs (paginated)                                |
+| `GET`  | `/api/tariffs/active`        | Active tariffs, optional `?equipmentType=` filter           |
+| `GET`  | `/api/tariffs/pricing-types` | List all pricing types with localized title and description |
+| `GET`  | `/api/tariffs/selection`     | Auto-select cheapest tariff for equipment type + duration   |
+| `GET`  | `/api/tariffs/cost-estimate` | Calculate cost for a specific tariff + duration             |
 
 ### 6.3 Pricing Types Endpoint
 
-`GET /api/v2/tariffs/pricing-types`
+`GET /api/tariffs/pricing-types`
 
 Returns all available pricing types with localized title and description.
 Localization is resolved via `Accept-Language` header using `MessageService`.
@@ -597,7 +597,7 @@ With `Accept-Language: ru`:
 
 ### 6.5 Tariff Selection Endpoint (single item)
 
-`GET /api/v2/tariffs/selection?equipmentType={slug}&durationMinutes={min}&rentalDate={date}`
+`GET /api/tariffs/selection?equipmentType={slug}&durationMinutes={min}&rentalDate={date}`
 
 Evaluates all active tariffs for the equipment type, calculates cost with each,
 returns the cheapest. Response includes the selected tariff details and cost breakdown.
@@ -606,14 +606,14 @@ returns the cheapest. Response includes the selected tariff details and cost bre
 
 ### 6.6 Cost Estimate Endpoint (single item, specific tariff)
 
-`GET /api/v2/tariffs/cost-estimate?tariffId={id}&durationMinutes={min}`
+`GET /api/tariffs/cost-estimate?tariffId={id}&durationMinutes={min}`
 
 Calculates cost for a **specific** tariff (no auto-selection). Returns detailed breakdown:
 full hours with per-hour rates, partial hour interval cost, and total.
 
 ### 6.7 Batch Cost Calculation Endpoint (multi-item + discount)
 
-`POST /api/v2/tariffs/calculate`
+`POST /api/tariffs/calculate`
 
 **Request body:**
 **Normal flow (auto-select tariffs, apply discount):**
@@ -1260,7 +1260,7 @@ specialTariffId=6, specialPrice=15.00):
 
 ### AC-1b: Pricing Types Endpoint
 
-- [ ] `GET /api/v2/tariffs/pricing-types` returns 5 entries (DEGRESSIVE_HOURLY, FLAT_HOURLY, DAILY, FLAT_FEE, SPECIAL)
+- [ ] `GET /api/tariffs/pricing-types` returns 5 entries (DEGRESSIVE_HOURLY, FLAT_HOURLY, DAILY, FLAT_FEE, SPECIAL)
 - [ ] Each entry has `slug`, `title`, `description`
 - [ ] `slug` matches enum value name (e.g. `"DEGRESSIVE_HOURLY"`)
 - [ ] Default language (no `Accept-Language`) returns English titles and descriptions
@@ -1349,7 +1349,7 @@ specialTariffId=6, specialPrice=15.00):
 
 ### AC-10: Automatic Tariff Selection
 
-- [ ] `GET /api/v2/tariffs/selection?equipmentType=bicycle&durationMinutes=60` returns the cheapest active tariff
+- [ ] `GET /api/tariffs/selection?equipmentType=bicycle&durationMinutes=60` returns the cheapest active tariff
 - [ ] Bicycle 3h: if DEGRESSIVE_HOURLY=21 and DAILY=20, selects DAILY
 - [ ] Bicycle 1h: if DEGRESSIVE_HOURLY=9 and DAILY=20, selects DEGRESSIVE_HOURLY
 - [ ] Bicycle 30min planned → returns after 30min: selects cheapest tariff for 30min duration
@@ -1366,7 +1366,7 @@ specialTariffId=6, specialPrice=15.00):
 
 ### AC-12: Cost Estimate Endpoint
 
-- [ ] `GET /api/v2/tariffs/cost-estimate?tariffId=1&durationMinutes=300` returns correct cost breakdown
+- [ ] `GET /api/tariffs/cost-estimate?tariffId=1&durationMinutes=300` returns correct cost breakdown
 - [ ] Missing tariffId → 400
 - [ ] Non-existent tariffId → 404
 - [ ] durationMinutes ≤ 0 → 400 (for non-FLAT_FEE/SPECIAL types)
@@ -1388,7 +1388,7 @@ specialTariffId=6, specialPrice=15.00):
 
 2. **`minimumDurationSurcharge` is per-tariff, API-editable.** Each tariff stores its own
    surcharge value. Operator can set/change it through the tariff CRUD API.
-   **→ Resolved: field on TariffV2, editable via PUT /api/v2/tariffs/{id}.**
+   **→ Resolved: field on TariffV2, editable via PUT /api/tariffs/{id}.**
 
 3. **`overtimeHourlyPrice` is a separate configurable field on DAILY tariffs.**
    Set per-tariff via API. Not derived from other tariffs or parameters.

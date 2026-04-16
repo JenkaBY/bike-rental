@@ -30,7 +30,7 @@ Feature: Tariff V2 API
     Given the rental request is prepared with the following data
       | equipmentTypes  | plannedDurationMinutes | actualDurationMinutes | discountPercent   | specialTariffId   | specialPrice   | rentalDate   |
       | <equipmentType> | <durationMinutes>      | <durationMinutes>     | <discountPercent> | <specialTariffId> | <specialPrice> | <rentalDate> |
-    When a POST request has been made to "/api/v2/tariffs/calculate" endpoint
+    When a POST request has been made to "/api/tariffs/calculate" endpoint
     Then the response status is 200
     And the rental cost calculation response only contains
       | totalCost  | subtotal | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate   | specialPricingApplied |
@@ -51,7 +51,7 @@ Feature: Tariff V2 API
     Given the rental request is prepared with the following data
       | equipmentTypes | plannedDurationMinutes | actualDurationMinutes | discountPercent   |
       | bicycle        | 60                     | <durationMinutes>     | <discountPercent> |
-    When a POST request has been made to "/api/v2/tariffs/calculate" endpoint
+    When a POST request has been made to "/api/tariffs/calculate" endpoint
     Then the response status is 200
     And the rental cost calculation response only contains
       | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate   |
@@ -85,7 +85,7 @@ Feature: Tariff V2 API
     Given the rental request is prepared with the following data
       | equipmentTypes         | plannedDurationMinutes |
       | bicycle,helmet,bicycle | 60                     |
-    When a POST request has been made to "/api/v2/tariffs/calculate" endpoint
+    When a POST request has been made to "/api/tariffs/calculate" endpoint
     Then the response status is 200
     And the rental cost calculation response only contains
       | totalCost | subtotal | effectiveDurationMinutes | estimate |
@@ -100,7 +100,7 @@ Feature: Tariff V2 API
     Given the rental request is prepared with the following data
       | equipmentTypes | plannedDurationMinutes | actualDurationMinutes | discountPercent   |
       | scooter        | 60                     | <durationMinutes>     | <discountPercent> |
-    When a POST request has been made to "/api/v2/tariffs/calculate" endpoint
+    When a POST request has been made to "/api/tariffs/calculate" endpoint
     Then the response status is 200
     And the rental cost calculation response only contains
       | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate |
@@ -127,7 +127,7 @@ Feature: Tariff V2 API
     Given the rental request is prepared with the following data
       | equipmentTypes | plannedDurationMinutes | actualDurationMinutes | discountPercent   |
       | bicycle        | 310                    | <durationMinutes>     | <discountPercent> |
-    When a POST request has been made to "/api/v2/tariffs/calculate" endpoint
+    When a POST request has been made to "/api/tariffs/calculate" endpoint
     Then the response status is 200
     And the rental cost calculation response only contains
       | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate |
@@ -151,7 +151,7 @@ Feature: Tariff V2 API
     Given the rental request is prepared with the following data
       | equipmentTypes | plannedDurationMinutes | actualDurationMinutes | discountPercent   |
       | helmet         | 60                     | <durationMinutes>     | <discountPercent> |
-    When a POST request has been made to "/api/v2/tariffs/calculate" endpoint
+    When a POST request has been made to "/api/tariffs/calculate" endpoint
     Then the response status is 200
     And the rental cost calculation response only contains
       | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate |

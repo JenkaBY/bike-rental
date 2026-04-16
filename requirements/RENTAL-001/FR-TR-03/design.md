@@ -66,7 +66,7 @@ scope for this story.
 
 * **Interaction: External Client → Tariff Module (V2 endpoints)**
     * **Protocol:** REST / HTTP
-    * **Payload Changes:** No change. `GET /api/v2/tariffs`, `GET /api/v2/tariffs/{id}`, and related V2 paths
+  * **Payload Changes:** No change. `GET /api/tariffs`, `GET /api/tariffs/{id}`, and related V2 paths
       continue to function as before.
 
 * **Interaction: Any Module → `TariffFacade` (V1)**
@@ -99,7 +99,7 @@ scope for this story.
 
 ### Runtime Sequence — V2 Endpoint Remains Functional
 
-1. A client sends `GET /api/v2/tariffs`.
+1. A client sends `GET /api/tariffs`.
 2. The V2 query controller handles the request normally.
 3. Response: `200 OK` with the V2 tariff list.
 

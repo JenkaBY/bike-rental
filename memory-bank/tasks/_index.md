@@ -81,7 +81,7 @@ Task IDs correspond to User Story IDs from docs/tasks/user-stories.md
 ## In Progress
 
 - [US-TR-007] Tariff V2 — New Pricing Model - HIGH priority, tariff module, degressive hourly / flat hourly / daily /
-  flat fee / special pricing types, new tables + domain + endpoints (`/api/v2/tariffs`), no V1 changes
+  flat fee / special pricing types, new tables + domain + endpoints (`/api/tariffs`), no V1 changes
 
 ## Pending - Technical Improvements
 

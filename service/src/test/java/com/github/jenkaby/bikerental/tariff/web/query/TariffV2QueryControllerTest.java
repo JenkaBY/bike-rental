@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Tariff V2 Query Controller Tests")
 class TariffV2QueryControllerTest {
 
-    private static final String API_V2_TARIFFS = "/api/v2/tariffs";
+    private static final String API_V2_TARIFFS = "/api/tariffs";
 
     @Autowired
     private MockMvc mockMvc;
@@ -59,7 +59,7 @@ class TariffV2QueryControllerTest {
             null, null, null, null, null, null, null, null, null, null);
 
     @Test
-    @DisplayName("GET /api/v2/tariffs/{id} returns 200 when found")
+    @DisplayName("GET /api/tariffs/{id} returns 200 when found")
     void getById_returns200() throws Exception {
         TariffV2 tariff = new DegressiveHourlyTariffV2(
                 1L, "T", null, "bicycle", "v2",
@@ -80,7 +80,7 @@ class TariffV2QueryControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v2/tariffs/{id} returns 404 when not found")
+    @DisplayName("GET /api/tariffs/{id} returns 404 when not found")
     void getById_returns404() throws Exception {
         given(getByIdUseCase.get(999L)).willThrow(new ResourceNotFoundException(TariffV2.class, "999"));
         mockMvc.perform(get(API_V2_TARIFFS + "/999"))
@@ -88,7 +88,7 @@ class TariffV2QueryControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v2/tariffs returns 200 with page")
+    @DisplayName("GET /api/tariffs returns 200 with page")
     void getAll_returns200() throws Exception {
         PageRequest pr = new PageRequest(20, 0, null);
         given(getAllUseCase.execute(any())).willReturn(Page.empty(pr));
@@ -100,11 +100,11 @@ class TariffV2QueryControllerTest {
 
 
     @Nested
-    @DisplayName("GET /api/v2/tariffs/selection tests")
+    @DisplayName("GET /api/tariffs/selection tests")
     class Selection {
 
         @Test
-        @DisplayName("GET /api/v2/tariffs/selection returns 200 when tariff found")
+        @DisplayName("GET /api/tariffs/selection returns 200 when tariff found")
         void selection_returns200() throws Exception {
             TariffV2 tariff = new DegressiveHourlyTariffV2(
                     1L, "T", null, "bicycle", "v2",

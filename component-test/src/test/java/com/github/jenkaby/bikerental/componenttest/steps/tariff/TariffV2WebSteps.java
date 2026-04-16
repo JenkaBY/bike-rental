@@ -23,7 +23,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 @RequiredArgsConstructor
 public class TariffV2WebSteps {
 
-    private static final String API_V2_TARIFFS = "/api/v2/tariffs";
+    private static final String API_V2_TARIFFS = "/api/tariffs";
     public static final Comparator<TariffV2Response> DEFAULT_COMPORATOR = Comparator.comparing(TariffV2Response::name)
             .thenComparing(TariffV2Response::equipmentType)
             .thenComparing(TariffV2Response::validFrom);

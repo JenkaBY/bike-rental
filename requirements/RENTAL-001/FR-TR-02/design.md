@@ -64,7 +64,7 @@ column is nullable (set in FR-TR-01) and is ignored by settlement.
   * **Payload Changes (Response — Breaking):** `RentalReturnResponse` no longer contains a per-item cost
     breakdown. The response body is the updated `Rental` object only (including status and aggregate
     `finalCost`). Callers requiring itemised cost details must invoke the idempotent
-    `POST /api/v2/tariffs/calculation` endpoint separately.
+    `POST /api/tariffs/calculation` endpoint separately.
 
 * **Interaction: `ReturnEquipmentService` → `TariffV2Facade`**
     * **Protocol:** In-process synchronous call (Spring Modulith Facade)
@@ -156,6 +156,6 @@ column is nullable (set in FR-TR-01) and is ignored by settlement.
   replaces the prior N individual V1 calls (one per returned item). Settlement (including the `settleRental` call)
   must complete within the existing 2-second transaction time budget for final return.
 
-* **Idempotency:** Callers needing a cost breakdown after return must use `POST /api/v2/tariffs/calculation`.
+* **Idempotency:** Callers needing a cost breakdown after return must use `POST /api/tariffs/calculation`.
   That endpoint is idempotent — repeated calls with the same inputs produce the same result without side effects
   on the rental or finance state.

@@ -36,7 +36,7 @@ and the Rental module no longer depends on the deprecated V1 TariffFacade
   * `RentalReturnResponse` does **not** include a per-item cost breakdown. The response carries the updated
     `Rental` object only, which contains sufficient information (e.g., `finalCost`, status) to initiate customer
     charging. Callers requiring a detailed cost breakdown must invoke the idempotent
-    `POST /api/v2/tariffs/calculation` endpoint separately.
+    `POST /api/tariffs/calculation` endpoint separately.
 
 * **Domain model change — `RentalEquipment.equipmentTypeSlug` (new field):**
     * Added as part of FR-TR-01 (or as a prerequisite task within this story if not already done).
@@ -53,7 +53,7 @@ and the Rental module no longer depends on the deprecated V1 TariffFacade
   in the rental module.
 * **Usability/Other:** `RentalReturnResponse` must **not** include a per-item cost breakdown. The response
   contains the updated `Rental` object only. Callers needing itemised cost details must use the idempotent
-  `POST /api/v2/tariffs/calculation` endpoint.
+  `POST /api/tariffs/calculation` endpoint.
 
 ## 4. Acceptance Criteria (BDD)
 
@@ -102,5 +102,5 @@ and the Rental module no longer depends on the deprecated V1 TariffFacade
 ## 5. Out of Scope
 
 * Removal of `TariffFacade` and V1 classes from the tariff module itself (covered by FR-TR-03).
-* Implementing the `POST /api/v2/tariffs/calculation` endpoint (assumed to exist; covered by a separate story).
+* Implementing the `POST /api/tariffs/calculation` endpoint (assumed to exist; covered by a separate story).
 * Debt auto-recovery on subsequent deposit (covered by FR-FIN-12).
