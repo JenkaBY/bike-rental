@@ -16,3 +16,4 @@
 - [] [Optional] Add ability to set up special price and discount during return equipments. Now discount and special
   tariff can be applied during creation rental only
 - [x] use '/api/tariffs' tariff endpoints for V2
+- [] Create separate use cases for customer scenarios
