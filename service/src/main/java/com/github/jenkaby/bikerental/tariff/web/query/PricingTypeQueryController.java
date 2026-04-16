@@ -20,7 +20,7 @@ import java.util.List;
 @Validated
 @Slf4j
 @RestController
-@RequestMapping("/api/v2/tariffs")
+@RequestMapping("/api/tariffs")
 @Tag(name = OpenApiConfig.Tags.TARIFFS, description = "Tariff V2 API")
 public class PricingTypeQueryController {
 

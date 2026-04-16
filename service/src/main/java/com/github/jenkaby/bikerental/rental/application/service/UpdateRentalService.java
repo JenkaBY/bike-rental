@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -98,7 +97,6 @@ class UpdateRentalService implements UpdateRentalUseCase {
             rental.setPlannedDuration(duration);
         }
 
-        List<EquipmentInfo> equipments = new ArrayList<>();
         if (patch.containsKey("equipmentIds")) {
             List<Long> equipmentIds = valueParser.parseListOfLong(patch.get("equipmentIds"));
             List<EquipmentInfo> foundEquipments = equipmentFacade.findByIds(equipmentIds);
@@ -108,7 +106,6 @@ class UpdateRentalService implements UpdateRentalUseCase {
                     .filter(e -> !alreadyReservedOrRented.contains(e.id()))
                     .toList();
             validator.validateAvailability(beingReserved);
-            equipments.addAll(foundEquipments);
 
             if (rental.getPlannedDuration() == null) {
                 throw new InvalidRentalPlannedDurationException(rental.getId());
@@ -121,10 +118,7 @@ class UpdateRentalService implements UpdateRentalUseCase {
             rental.clearEquipmentRentals();
             for (int i = 0; i < foundEquipments.size(); i++) {
                 var equipment = foundEquipments.get(i);
-                RentalEquipment rentalEquipment = RentalEquipment.assigned(
-                        equipment.id(),
-                        equipment.uid(),
-                        equipment.typeSlug());
+                var rentalEquipment = RentalEquipment.assigned(equipment.id(), equipment.uid(), equipment.typeSlug());
                 rentalEquipment.setEstimatedCost(breakdowns.get(i).itemCost());
                 rental.addEquipment(rentalEquipment);
             }

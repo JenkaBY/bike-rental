@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Tariff V2 Command Controller Tests")
 class TariffV2CommandControllerTest {
 
-    private static final String API_V2_TARIFFS = "/api/v2/tariffs";
+    private static final String API_V2_TARIFFS = "/api/tariffs";
 
     @Autowired
     private MockMvc mockMvc;
@@ -83,7 +83,7 @@ class TariffV2CommandControllerTest {
     }
 
     @Nested
-    @DisplayName("POST /api/v2/tariffs")
+    @DisplayName("POST /api/tariffs")
     class PostTests {
         @Test
         @DisplayName("returns 201 when valid DEGRESSIVE_HOURLY request")
@@ -208,7 +208,7 @@ class TariffV2CommandControllerTest {
     }
 
     @Nested
-    @DisplayName("PUT /api/v2/tariffs/{id}")
+    @DisplayName("PUT /api/tariffs/{id}")
     class PutTests {
         @Test
         @DisplayName("returns 200 when valid")
@@ -277,7 +277,7 @@ class TariffV2CommandControllerTest {
     }
 
     @Nested
-    @DisplayName("PATCH /api/v2/tariffs/{id}")
+    @DisplayName("PATCH /api/tariffs/{id}")
     class PatchTests {
         @Test
         @DisplayName("/activate returns 200")
@@ -321,7 +321,7 @@ class TariffV2CommandControllerTest {
     }
 
     @Nested
-    @DisplayName("@ValidTariffV2Pricing validation (POST /api/v2/tariffs)")
+    @DisplayName("@ValidTariffV2Pricing validation (POST /api/tariffs)")
     class ValidTariffV2PricingPostTests {
         @Test
         @DisplayName("returns 201 when DEGRESSIVE_HOURLY params are valid")
@@ -438,7 +438,7 @@ class TariffV2CommandControllerTest {
     }
 
     @Nested
-    @DisplayName("@ValidTariffV2Pricing validation (POST /api/v2/tariffs) — FLAT_HOURLY")
+    @DisplayName("@ValidTariffV2Pricing validation (POST /api/tariffs) — FLAT_HOURLY")
     class ValidTariffV2PricingPostFlatHourlyTests {
         @Test
         @DisplayName("returns 200 when FLAT_HOURLY params are valid")
@@ -559,7 +559,7 @@ class TariffV2CommandControllerTest {
     }
 
     @Nested
-    @DisplayName("@ValidTariffV2Pricing validation (POST /api/v2/tariffs) — DAILY")
+    @DisplayName("@ValidTariffV2Pricing validation (POST /api/tariffs) — DAILY")
     class ValidTariffV2PricingPostDailyTests {
         @Test
         @DisplayName("returns 200 when DAILY params are valid")
@@ -683,7 +683,7 @@ class TariffV2CommandControllerTest {
     }
 
     @Nested
-    @DisplayName("@ValidTariffV2Pricing validation (POST /api/v2/tariffs) — FLAT_FEE")
+    @DisplayName("@ValidTariffV2Pricing validation (POST /api/tariffs) — FLAT_FEE")
     class ValidTariffV2PricingPostFlatFeeTests {
         @Test
         @DisplayName("returns 200 when FLAT_FEE params are valid")
@@ -801,7 +801,7 @@ class TariffV2CommandControllerTest {
     }
 
     @Nested
-    @DisplayName("@ValidTariffV2Pricing validation (POST /api/v2/tariffs) — SPECIAL")
+    @DisplayName("@ValidTariffV2Pricing validation (POST /api/tariffs) — SPECIAL")
     class ValidTariffV2PricingPostSpecialTests {
         @Test
         @DisplayName("returns 200 when SPECIAL params are valid")

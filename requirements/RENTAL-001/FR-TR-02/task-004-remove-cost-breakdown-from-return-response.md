@@ -10,7 +10,7 @@ field and the nested `CostBreakdown` record. The response retains `RentalRespons
 `@Nullable SettlementResponse settlement`.
 
 This is a **breaking API change** — any consumers relying on the `costs` array must switch to
-`POST /api/v2/tariffs/calculation` for itemised details.
+`POST /api/tariffs/calculation` for itemised details.
 
 ## 2. File to Modify / Create
 

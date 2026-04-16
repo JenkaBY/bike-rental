@@ -66,7 +66,7 @@ cannot accidentally depend on the legacy pricing path
 * **Security/Compliance:** Removing the V1 endpoint reduces the API attack surface. Ensure the build succeeds with
   zero compilation errors and zero warnings related to removed symbols.
 * **Usability/Other:** After removal, the OpenAPI documentation must list only V2 tariff endpoints
-  (`/api/v2/tariffs`). Any V1 tariff paths must return `404 Not Found`.
+  (`/api/tariffs`). Any V1 tariff paths must return `404 Not Found`.
 
 ## 4. Acceptance Criteria (BDD)
 
@@ -93,7 +93,7 @@ cannot accidentally depend on the legacy pricing path
 **Scenario 4: V2 tariff endpoints remain functional**
 
 * **Given** FR-TR-03 changes are applied
-* **When** a client calls `GET /api/v2/tariffs`
+* **When** a client calls `GET /api/tariffs`
 * **Then** the response is `200 OK` with the tariff list
 
 **Scenario 5: V1 Liquibase changelog files are physically removed**

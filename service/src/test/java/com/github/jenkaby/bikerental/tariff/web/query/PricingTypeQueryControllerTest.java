@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Pricing Type Query Controller Tests")
 class PricingTypeQueryControllerTest {
 
-    private static final String API_V2_TARIFFS = "/api/v2/tariffs";
+    private static final String API_V2_TARIFFS = "/api/tariffs";
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,7 +35,7 @@ class PricingTypeQueryControllerTest {
     private TariffV2QueryMapper mapper;
 
     @Test
-    @DisplayName("GET /api/v2/tariffs/pricing-types returns 200 with list")
+    @DisplayName("GET /api/tariffs/pricing-types returns 200 with list")
     void getPricingTypes_returns200() throws Exception {
         given(getPricingTypesUseCase.execute()).willReturn(List.of(
                 new PricingTypeInfo("DEGRESSIVE_HOURLY", "Degressive Hourly", "Desc")

@@ -19,13 +19,13 @@ Feature: Tariff V2 API
     And the tariff v2 request is prepared with the following data
       | name           | description       | equipmentType | pricingType   | validFrom  | validTo    |
       | Hourly Bicycle | Degressive hourly | bicycle       | <pricingType> | 2026-01-01 | 2029-01-01 |
-    When a POST request has been made to "/api/v2/tariffs" endpoint
+    When a POST request has been made to "/api/tariffs" endpoint
     Then the response status is 201
     And the tariff v2 response only contains
       | name           | description       | equipmentType | pricingType   | status   | validFrom  | validTo    |
       | Hourly Bicycle | Degressive hourly | bicycle       | <pricingType> | INACTIVE | 2026-01-01 | 2029-01-01 |
 #    next scenario
-    When a GET request has been made to "/api/v2/tariffs/{requestedObjectId}" endpoint with context
+    When a GET request has been made to "/api/tariffs/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the tariff v2 response only contains
       | name           | description       | equipmentType | pricingType   | status   | validFrom  | validTo    |
@@ -45,7 +45,7 @@ Feature: Tariff V2 API
     And the tariff v2 request is prepared with the following data
       | name           | description | equipmentType | pricingType | validFrom  | validTo    |
       | Hourly Bicycle | Flat fee    | helmet        | FLAT_FEE    | 2026-01-01 | 2029-01-01 |
-    When a POST request has been made to "/api/v2/tariffs" endpoint
+    When a POST request has been made to "/api/tariffs" endpoint
     Then the response status is 201
     And the tariff v2 response only contains
       | name           | description | equipmentType | pricingType | status   | validFrom  | validTo    |
@@ -57,12 +57,12 @@ Feature: Tariff V2 API
     And the tariff v2 request is prepared with the following data
       | name            | description | equipmentType | pricingType | validFrom  | validTo    |
       | Special Bicycle | Special     | bicycle       | SPECIAL     | 2025-01-31 | 2028-01-02 |
-    When a PUT request has been made to "/api/v2/tariffs/{requestedObjectId}" endpoint with context
+    When a PUT request has been made to "/api/tariffs/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the tariff v2 response only contains
       | name            | description | equipmentType | pricingType | status   | validFrom  | validTo    |
       | Special Bicycle | Special     | bicycle       | SPECIAL     | INACTIVE | 2025-01-31 | 2028-01-02 |
-    When a GET request has been made to "/api/v2/tariffs/{requestedObjectId}" endpoint with context
+    When a GET request has been made to "/api/tariffs/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the tariff v2 response only contains
       | name            | description | equipmentType | pricingType | status   | validFrom  | validTo    |
@@ -81,7 +81,7 @@ Feature: Tariff V2 API
     And the tariff v2 request is prepared with the following data
       | name                        | description  | equipmentType | pricingType | validFrom  | validTo    |
       | Special Tariff for any type | For any type | any           | SPECIAL     | 2026-01-01 | 2029-01-01 |
-    When a PUT request has been made to "/api/v2/tariffs/1" endpoint
+    When a PUT request has been made to "/api/tariffs/1" endpoint
     Then the response status is 200
     And the response contains
       | path     | value          |
@@ -92,7 +92,7 @@ Feature: Tariff V2 API
       | INACTIVE     |
 
   Scenario: Get all tariff v2 paginated
-    When a GET request has been made to "/api/v2/tariffs" endpoint with query parameters
+    When a GET request has been made to "/api/tariffs" endpoint with query parameters
       | page | size |
       | 0    | 20   |
     Then the response status is 200
@@ -108,20 +108,20 @@ Feature: Tariff V2 API
     And the tariff v2 request is prepared with the following data
       | name           | description | equipmentType | pricingType | validFrom  | validTo    |
       | Hourly Bicycle | Flat fee    | helmet        | FLAT_FEE    | 2026-01-01 | 2029-01-01 |
-    When a POST request has been made to "/api/v2/tariffs" endpoint
+    When a POST request has been made to "/api/tariffs" endpoint
     Then the response status is 201
 #    default inactive
     And the tariff v2 response only contains
       | name           | description | equipmentType | pricingType | status   | validFrom  | validTo    |
       | Hourly Bicycle | Flat fee    | helmet        | FLAT_FEE    | INACTIVE | 2026-01-01 | 2029-01-01 |
-    When a PATCH request has been made to "/api/v2/tariffs/{requestedObjectId}/activate" endpoint with context
+    When a PATCH request has been made to "/api/tariffs/{requestedObjectId}/activate" endpoint with context
 #    Activate
     Then the response status is 200
     And the response contains
       | path     | value  |
       | $.status | ACTIVE |
 #    deactivate
-    When a PATCH request has been made to "/api/v2/tariffs/{requestedObjectId}/deactivate" endpoint with context
+    When a PATCH request has been made to "/api/tariffs/{requestedObjectId}/deactivate" endpoint with context
     Then the response status is 200
     And the response contains
       | path     | value    |
@@ -138,7 +138,7 @@ Feature: Tariff V2 API
       | 1  | Hourly Bicycle  | Degressive hourly | bicycle       | FLAT_FEE    | ACTIVE   | 2026-01-01 | 2029-01-01 |
       | 2  | Flat Fee Helmet | Flat fee          | helmet        | FLAT_FEE    | INACTIVE | 2026-01-01 | 2029-01-01 |
       | 3  | Special Scooter | Special           | special       | SPECIAL     | ACTIVE   | 2025-01-31 | 2028-01-02 |
-    When a GET request has been made to "/api/v2/tariffs/active" endpoint with query parameters
+    When a GET request has been made to "/api/tariffs/active" endpoint with query parameters
       | equipmentType |
       | special       |
     Then the response status is 200
