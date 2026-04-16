@@ -25,8 +25,8 @@ public class EquipmentStatusTransitionPolicy implements StatusTransitionPolicy {
 <span class="fc" id="L25">    }</span>
 
     public void validateTransition(@Nullable Object equipmentId, @NonNull String fromStatusSlug, @NonNull String toStatusSlug) {
-<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        if (!statusRepository.existsBySlug(toStatusSlug)) {</span>
-<span class="nc" id="L29">            throw new ReferenceNotFoundException(EquipmentStatus.class, toStatusSlug);</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (!statusRepository.existsBySlug(toStatusSlug)) {</span>
+<span class="fc" id="L29">            throw new ReferenceNotFoundException(EquipmentStatus.class, toStatusSlug);</span>
         }
 
 <span class="fc" id="L32">        EquipmentStatus fromStatus = statusRepository.findBySlug(fromStatusSlug)</span>
