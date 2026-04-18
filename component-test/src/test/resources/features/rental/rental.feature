@@ -65,8 +65,8 @@ Feature: Rental Management
 
   Scenario Outline: Create rental with all required fields (tariff autoselect)
     Given a rental request with the following data
-      | customerId   | equipmentIds                 | duration   | operatorId |
-      | <customerId> | <equipmentId>,<equipmentId2> | <duration> | OP1        |
+      | customerId   | equipmentIds                 | duration          | operatorId |
+      | <customerId> | <equipmentId>,<equipmentId2> | <plannedDuration> | OP1        |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
     And the rental response only contains
@@ -90,8 +90,8 @@ Feature: Rental Management
       | <equipmentId>  | EQ-001       | BIKE-001       | RESERVED | bicycle | Model A | Good      |
       | <equipmentId2> | EQ-003       | HELM-ADULT-001 | RESERVED | helmet  | Model B | Excellent |
     Examples:
-      | customerId | equipmentId | equipmentId2 | duration | plannedDuration |
-      | CUS1       | 1           | 3            | PT2H     | 120             |
+      | customerId | equipmentId | equipmentId2 | plannedDuration |
+      | CUS1       | 1           | 3            | 120             |
 
   @ResetClock
   Scenario: Create rental with auto-selected tariff when no suitable tariff found
@@ -101,7 +101,7 @@ Feature: Rental Management
       | 4  | EQ-005       | OTHER-004 | AVAILABLE | other | Other X | Good      |
     And a rental request with the following data
       | customerId | equipmentIds | duration | tariffId | operatorId |
-      | CUS1       | 4            | PT2H     |          | OP1        |
+      | CUS1       | 4            | 120      |          | OP1        |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 404
     And the response contains
@@ -111,7 +111,7 @@ Feature: Rental Management
       | $.errorCode            | tariff.suitable.not_found                                                                        |
       | $.params.equipmentType | other                                                                                            |
       | $.params.rentalDate    | 2026-02-09                                                                                       |
-      | $.params.duration      | PT2H                                                                                             |
+      | $.params.duration      | 120                                                                                              |
 
   # Rental Update Scenarios
   Scenario: Update rental - select customer
@@ -210,7 +210,7 @@ Feature: Rental Management
       | <rentalId> | <equipmentId> | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path      | value |
-      | replace | /duration | PT3H  |
+      | replace | /duration | 180   |
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the rental response only contains
@@ -401,7 +401,7 @@ Feature: Rental Management
   Scenario: Create rental holds funds from customer wallet — sufficient balance
     Given a rental request with the following data
       | customerId | equipmentIds | duration | operatorId |
-      | CUS1       | 1,3          | PT2H     | OP1        |
+      | CUS1       | 1,3          | 120      | OP1        |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
     And the following sub-ledger records were persisted in db
@@ -415,7 +415,7 @@ Feature: Rental Management
   Scenario: Create rental rejected when customer wallet has insufficient balance
     Given a rental request with the following data
       | customerId | equipmentIds | duration | operatorId |
-      | CUS2       | 1,3          | PT2H     | OP1        |
+      | CUS2       | 1,3          | 120      | OP1        |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 422
     And there are only 2 transactions in db
@@ -426,7 +426,7 @@ Feature: Rental Management
   Scenario: Create rental with discount — hold reflects discounted total
     Given a rental request with the following data
       | customerId | equipmentIds | duration | operatorId | discountPercent |
-      | CUS1       | 1            | PT2H     | OP1        | 10              |
+      | CUS1       | 1            | 120      | OP1        | 10              |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
     And the rental response only contains
@@ -445,7 +445,7 @@ Feature: Rental Management
   Scenario: Create rental with SPECIAL tariff — specialPrice used as total
     Given a rental request with the following data
       | customerId | equipmentIds | duration | operatorId | specialTariffId | specialPrice |
-      | CUS1       | 1            | PT2H     | OP1        | 13              | 15.00        |
+      | CUS1       | 1            | 120      | OP1        | 13              | 15.00        |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
     And the rental response only contains
@@ -464,7 +464,7 @@ Feature: Rental Management
   Scenario: Create rental with SPECIAL tariff — ZERO specialPrice used as total
     Given a rental request with the following data
       | customerId | equipmentIds | duration | operatorId | specialTariffId | specialPrice |
-      | CUS1       | 1            | PT2H     | OP1        | 13              | 0.00         |
+      | CUS1       | 1            | 120      | OP1        | 13              | 0.00         |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
     And the rental response only contains
@@ -483,7 +483,7 @@ Feature: Rental Management
   Scenario: Rejected — specialTariffId references a non-SPECIAL tariff type
     Given a rental request with the following data
       | customerId | equipmentIds | duration | operatorId | specialTariffId | specialPrice |
-      | CUS1       | 1            | PT2H     | OP1        | 10              | 15.00        |
+      | CUS1       | 1            | 120      | OP1        | 10              | 15.00        |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 422
     And the response contains

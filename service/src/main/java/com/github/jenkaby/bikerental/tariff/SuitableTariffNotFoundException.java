@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Optional;
 
 /**
  * Exception thrown when no suitable tariff can be found for the given criteria.
@@ -20,7 +21,7 @@ public class SuitableTariffNotFoundException extends BikeRentalException {
     public SuitableTariffNotFoundException(String equipmentTypeSlug, LocalDate rentalDate, Duration duration) {
         super(MESSAGE_TEMPLATE.formatted(equipmentTypeSlug, rentalDate) +
                         (duration != null ? " for duration: " + duration.toMinutes() + " minutes" : ""), ERROR_CODE,
-                new Details(equipmentTypeSlug, rentalDate, duration));
+                new Details(equipmentTypeSlug, rentalDate, Optional.ofNullable(duration).map(Duration::toMinutes).orElse(null)));
     }
 
     public Details getDetails() {
@@ -28,6 +29,6 @@ public class SuitableTariffNotFoundException extends BikeRentalException {
                 .orElseThrow(() -> new IllegalArgumentException("Expected Details in exception parameters"));
     }
 
-    public record Details(String equipmentType, LocalDate rentalDate, Duration duration) {
+    public record Details(String equipmentType, LocalDate rentalDate, Long duration) {
     }
 }

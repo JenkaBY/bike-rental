@@ -12,7 +12,7 @@ public class RentalRequestTransformer {
     public CreateRentalRequest transform(Map<String, String> entry) {
         var customerId = Aliases.getCustomerId(entry.get("customerId"));
         var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
-        var duration = DataTableHelper.toDuration(entry, "duration");
+        var duration = DataTableHelper.toInt(entry, "duration");
         var tariffId = DataTableHelper.toLong(entry, "tariffId");
         var operator = Aliases.getValueOrDefault(entry.get("operatorId"));
 

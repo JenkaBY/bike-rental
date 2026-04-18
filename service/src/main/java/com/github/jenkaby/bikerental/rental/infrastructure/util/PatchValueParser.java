@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,14 +25,14 @@ public class PatchValueParser {
         return objectMapper.convertValue(value, UUID.class);
     }
 
-    public Long parseLong(Object value) {
+    public Integer parseInt(Object value) {
         if (value instanceof Number num) {
-            return num.longValue();
+            return num.intValue();
         }
         if (value instanceof String str) {
-            return Long.parseLong(str);
+            return Integer.valueOf(str);
         }
-        return objectMapper.convertValue(value, Long.class);
+        return objectMapper.convertValue(value, Integer.class);
     }
 
     public List<Long> parseListOfLong(Object value) {
@@ -50,20 +48,6 @@ public class PatchValueParser {
             return objectMapper.readValue(str, listLongType);
         }
         return objectMapper.convertValue(value, listLongType);
-    }
-
-    public Duration parseDuration(Object value) {
-        if (value instanceof String str) {
-            return Duration.parse(str);
-        }
-        return objectMapper.convertValue(value, Duration.class);
-    }
-
-    public LocalDateTime parseLocalDateTime(Object value) {
-        if (value instanceof String str) {
-            return LocalDateTime.parse(str);
-        }
-        return objectMapper.convertValue(value, LocalDateTime.class);
     }
 
     public String parseString(Object value) {

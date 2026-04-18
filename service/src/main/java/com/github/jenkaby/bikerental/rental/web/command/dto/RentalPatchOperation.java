@@ -45,7 +45,7 @@ public class RentalPatchOperation {
      * - /customerId: UUID string
      * - /equipmentId: Long number
      * - /tariffId: Long number
-     * - /duration: ISO-8601 duration string (e.g., "PT2H")
+     * - /duration: Integer number
      * - /status: {@link RentalStatus} enum value (e.g., "ACTIVE", "DRAFT", "COMPLETED", "CANCELLED")
      */
     private Object value;
