@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Optional;
 
 /**
  * Exception thrown when no suitable tariff can be found for the given criteria.
@@ -18,17 +19,17 @@ public class SuitableTariffNotFoundException extends BikeRentalException {
     private static final String MESSAGE_TEMPLATE = &quot;No suitable tariff found for equipment type '%s' on date %s&quot;;
 
     public SuitableTariffNotFoundException(String equipmentTypeSlug, LocalDate rentalDate, Duration duration) {
-<span class="fc" id="L21">        super(MESSAGE_TEMPLATE.formatted(equipmentTypeSlug, rentalDate) +</span>
-<span class="pc bpc" id="L22" title="1 of 2 branches missed.">                        (duration != null ? &quot; for duration: &quot; + duration.toMinutes() + &quot; minutes&quot; : &quot;&quot;), ERROR_CODE,</span>
-                new Details(equipmentTypeSlug, rentalDate, duration));
-<span class="fc" id="L24">    }</span>
+<span class="fc" id="L22">        super(MESSAGE_TEMPLATE.formatted(equipmentTypeSlug, rentalDate) +</span>
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">                        (duration != null ? &quot; for duration: &quot; + duration.toMinutes() + &quot; minutes&quot; : &quot;&quot;), ERROR_CODE,</span>
+<span class="fc" id="L24">                new Details(equipmentTypeSlug, rentalDate, Optional.ofNullable(duration).map(Duration::toMinutes).orElse(null)));</span>
+<span class="fc" id="L25">    }</span>
 
     public Details getDetails() {
-<span class="fc" id="L27">        return getParams().map(params -&gt; (Details) params)</span>
-<span class="pc" id="L28">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected Details in exception parameters&quot;));</span>
+<span class="fc" id="L28">        return getParams().map(params -&gt; (Details) params)</span>
+<span class="pc" id="L29">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected Details in exception parameters&quot;));</span>
     }
 
-<span class="fc" id="L31">    public record Details(String equipmentType, LocalDate rentalDate, Duration duration) {</span>
+<span class="fc" id="L32">    public record Details(String equipmentType, LocalDate rentalDate, Long duration) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

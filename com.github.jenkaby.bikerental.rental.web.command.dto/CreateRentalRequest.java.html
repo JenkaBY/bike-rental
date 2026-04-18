@@ -9,15 +9,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
 @Schema(description = &quot;Request body for creating a rental via Fast Path&quot;)
-<span class="fc" id="L17">public record CreateRentalRequest(</span>
+<span class="fc" id="L16">public record CreateRentalRequest(</span>
         @Schema(description = &quot;Customer UUID&quot;) @NotNull(message = &quot;Customer ID is required&quot;) UUID customerId,
         @Schema(description = &quot;List of Equipment IDs to rent (preferred)&quot;) List&lt;@Positive @NotNull Long&gt; equipmentIds,
-        @Schema(description = &quot;Planned rental duration (ISO-8601)&quot;, example = &quot;PT2H&quot;) @NotNull(message = &quot;Duration is required&quot;) Duration duration,
+        @Schema(description = &quot;Planned rental duration in minutes&quot;, example = &quot;120&quot;) @NotNull(message = &quot;Duration is required&quot;) @Positive(message = &quot;Duration must be positive&quot;) Integer duration,
         @Schema(description = &quot;Optional tariff ID; auto-selected if not provided&quot;, example = &quot;5&quot;) Long tariffId,
         @Schema(description = &quot;Operator identifier&quot;, example = &quot;operator-1&quot;) @NotBlank String operatorId,
         @Schema(description = &quot;ID of a SPECIAL-type V2 tariff; mutually exclusive with discountPercent&quot;, example = &quot;99&quot;)
@@ -31,7 +30,7 @@ import java.util.UUID;
     @AssertTrue(message = &quot;specialTariffId and discountPercent are mutually exclusive&quot;)
     @Schema(hidden = true)
     boolean isSpecialTariffAndDiscountMutuallyExclusive() {
-<span class="pc bpc" id="L34" title="1 of 4 branches missed.">        return specialTariffId == null || discountPercent == null;</span>
+<span class="pc bpc" id="L33" title="1 of 4 branches missed.">        return specialTariffId == null || discountPercent == null;</span>
     }
 
 }

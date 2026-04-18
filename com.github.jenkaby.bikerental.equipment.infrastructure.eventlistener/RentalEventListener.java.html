@@ -91,8 +91,8 @@ public class RentalEventListener {
 <span class="fc" id="L91">            updateEquipmentUseCase.execute(command);</span>
 <span class="fc" id="L92">            log.info(&quot;Successfully changed equipment {} status to {}&quot;, equipment.getId(), targetStatus);</span>
 
-<span class="nc" id="L94">        } catch (Exception e) {</span>
-<span class="nc" id="L95">            log.error(&quot;Failed to update equipment {} status to {}: {}&quot;, equipment.getId(), targetStatus, e.getMessage(), e);</span>
+<span class="fc" id="L94">        } catch (Exception e) {</span>
+<span class="fc" id="L95">            log.error(&quot;Failed to update equipment {} status to {}: {}&quot;, equipment.getId(), targetStatus, e.getMessage(), e);</span>
 <span class="fc" id="L96">        }</span>
 <span class="fc" id="L97">    }</span>
 

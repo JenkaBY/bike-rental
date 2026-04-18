@@ -90,11 +90,11 @@ class UpdateRentalService implements UpdateRentalUseCase {
         }
 
 <span class="fc bfc" id="L92" title="All 2 branches covered.">        if (patch.containsKey(&quot;duration&quot;)) {</span>
-<span class="fc" id="L93">            Duration duration = valueParser.parseDuration(patch.get(&quot;duration&quot;));</span>
+<span class="fc" id="L93">            Integer duration = valueParser.parseInt(patch.get(&quot;duration&quot;));</span>
 <span class="pc bpc" id="L94" title="1 of 2 branches missed.">            if (duration == null) {</span>
 <span class="nc" id="L95">                throw new InvalidRentalUpdateException(&quot;Duration must be provided&quot;);</span>
             }
-<span class="fc" id="L97">            rental.setPlannedDuration(duration);</span>
+<span class="fc" id="L97">            rental.setPlannedDuration(Duration.ofMinutes(duration));</span>
         }
 
 <span class="fc bfc" id="L100" title="All 2 branches covered.">        if (patch.containsKey(&quot;equipmentIds&quot;)) {</span>
