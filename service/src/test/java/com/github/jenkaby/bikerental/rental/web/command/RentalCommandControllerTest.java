@@ -44,7 +44,7 @@ class RentalCommandControllerTest {
     private static final String API_RENTALS = "/api/rentals";
     private static final UUID VALID_CUSTOMER_ID = UUID.randomUUID();
     private static final Long VALID_EQUIPMENT_ID = 1L;
-    private static final Duration VALID_DURATION = Duration.ofHours(2);
+    private static final int VALID_DURATION = (int) Duration.ofHours(2).toMinutes();
 
     @Autowired
     private MockMvc mockMvc;
@@ -143,11 +143,11 @@ class RentalCommandControllerTest {
                         {
                           "customerId": "%s",
                           "equipmentIds": [1],
-                          "duration": "PT2H",
+                          "duration": %d,
                           "operatorId": "operator-1",
                           "discountPercent": 10
                         }
-                        """.formatted(VALID_CUSTOMER_ID);
+                        """.formatted(VALID_CUSTOMER_ID, VALID_DURATION);
 
                 Rental rental = mock(Rental.class);
                 given(rental.getId()).willReturn(1L);
@@ -173,12 +173,12 @@ class RentalCommandControllerTest {
                         {
                           "customerId": "%s",
                           "equipmentIds": [1],
-                          "duration": "PT2H",
+                          "duration": %d,
                           "operatorId": "operator-1",
                           "specialTariffId": 99,
                           "specialPrice": 15.00
                         }
-                        """.formatted(VALID_CUSTOMER_ID);
+                        """.formatted(VALID_CUSTOMER_ID, VALID_DURATION);
 
                 Rental rental = mock(Rental.class);
                 given(rental.getId()).willReturn(1L);
@@ -242,11 +242,11 @@ class RentalCommandControllerTest {
                         {
                           "customerId": "%s",
                           "equipmentIds": [1],
-                          "duration": "PT2H",
+                          "duration": %d,
                           "operatorId": "operator-1",
                           "discountPercent": %d
                         }
-                        """.formatted(VALID_CUSTOMER_ID, discountPercent);
+                        """.formatted(VALID_CUSTOMER_ID, VALID_DURATION, discountPercent);
 
                 mockMvc.perform(post(API_RENTALS)
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -266,12 +266,12 @@ class RentalCommandControllerTest {
                         {
                           "customerId": "%s",
                           "equipmentIds": [1],
-                          "duration": "PT2H",
+                          "duration": %d,
                           "operatorId": "operator-1",
                           "specialTariffId": 99,
                           "discountPercent": 10
                         }
-                        """.formatted(VALID_CUSTOMER_ID);
+                        """.formatted(VALID_CUSTOMER_ID, VALID_DURATION);
 
                 mockMvc.perform(post(API_RENTALS)
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -316,7 +316,7 @@ class RentalCommandControllerTest {
             @ParameterizedTest
             @NullSource
             @DisplayName("when duration is null")
-            void whenDurationIsNull(Duration duration) throws Exception {
+            void whenDurationIsNull(Integer duration) throws Exception {
                 CreateRentalRequest request = new CreateRentalRequest(
                         VALID_CUSTOMER_ID,
                         List.of(VALID_EQUIPMENT_ID),
@@ -435,7 +435,7 @@ class RentalCommandControllerTest {
                     case "/customerId" -> UUID.randomUUID().toString();
                     case "/tariffId" -> 123L;
                     case "/equipmentIds" -> "[123]";
-                    case "/duration" -> "PT2H";
+                    case "/duration" -> "180";
                     case "/status" -> "ACTIVE";
                     default -> "value";
                 };
@@ -451,7 +451,7 @@ class RentalCommandControllerTest {
                 // Special handling for duration/startTime - they must be together
                 if ("/duration".equals(path)) {
                     List<RentalPatchOperation> operations = List.of(
-                            new RentalPatchOperation(JsonPatchOperation.REPLACE, "/duration", "PT2H")
+                            new RentalPatchOperation(JsonPatchOperation.REPLACE, "/duration", "180")
                     );
                     request = new RentalUpdateJsonPatchRequest(operations);
                 }
@@ -503,7 +503,7 @@ class RentalCommandControllerTest {
             void whenPatchRequestContainsDurationAndStartTimeTogether() throws Exception {
                 RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
                         List.of(
-                                new RentalPatchOperation(JsonPatchOperation.REPLACE, "/duration", "PT2H")
+                                new RentalPatchOperation(JsonPatchOperation.REPLACE, "/duration", "180")
                         )
                 );
 

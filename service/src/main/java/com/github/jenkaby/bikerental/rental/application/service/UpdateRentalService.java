@@ -90,11 +90,11 @@ class UpdateRentalService implements UpdateRentalUseCase {
         }
 
         if (patch.containsKey("duration")) {
-            Duration duration = valueParser.parseDuration(patch.get("duration"));
+            Integer duration = valueParser.parseInt(patch.get("duration"));
             if (duration == null) {
                 throw new InvalidRentalUpdateException("Duration must be provided");
             }
-            rental.setPlannedDuration(duration);
+            rental.setPlannedDuration(Duration.ofMinutes(duration));
         }
 
         if (patch.containsKey("equipmentIds")) {

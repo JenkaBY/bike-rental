@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.rental.web.command.dto.RentalPatchOperation
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import java.time.Duration;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -69,10 +68,10 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
         if (operation.getOp() != null && "/duration".equals(operation.getPath()) && operation.getValue() != null) {
             // For duration, value must be a valid ISO-8601 duration string
             try {
-                Duration.parse(operation.getValue().toString());
+                Integer.valueOf((String) operation.getValue());
             } catch (Exception e) {
                 context.buildConstraintViolationWithTemplate(
-                                "Value for path '/duration' must be a valid ISO-8601 duration string, e.g. 'PT1H30M'")
+                                "Value for path '/duration' must be integer")
                         .addPropertyNode("value")
                         .addConstraintViolation();
                 isValid = false;

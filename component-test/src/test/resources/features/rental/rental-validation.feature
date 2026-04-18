@@ -168,7 +168,7 @@ Feature: Rental Update Validation
       | 1        | 4           | BIKE-004     | bicycle       |          | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 0.00          | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path          | value |
-      | replace | /duration     | PT2H  |
+      | replace | /duration     | 120   |
       | replace | /equipmentIds | [4]   |
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
     Then the response status is 404
