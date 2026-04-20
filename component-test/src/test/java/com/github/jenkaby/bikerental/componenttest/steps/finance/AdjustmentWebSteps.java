@@ -3,7 +3,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.finance;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.componenttest.steps.common.WebRequestSteps;
 import com.github.jenkaby.bikerental.finance.web.command.dto.AdjustmentRequest;
-import com.github.jenkaby.bikerental.finance.web.command.dto.AdjustmentResponse;
+import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class AdjustmentWebSteps {
 
     @Then("the adjustment response contains a transactionId")
     public void theAdjustmentResponseContainsATransactionId() {
-        AdjustmentResponse body = scenarioContext.getResponseBody(AdjustmentResponse.class);
+        TransactionResponse body = scenarioContext.getResponseBody(TransactionResponse.class);
         assertThat(body.transactionId()).as("transactionId must be present in adjustment response").isNotNull();
         assertThat(body.recordedAt()).isCloseTo(clock.instant(), within(Duration.ofSeconds(2)));
         scenarioContext.setRequestedObjectId(body.transactionId().toString());
