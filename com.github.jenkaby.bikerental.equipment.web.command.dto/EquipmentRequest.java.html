@@ -17,6 +17,7 @@ import java.time.LocalDate;
 
         @Schema(description = &quot;Unique identifier tag (UID)&quot;, example = &quot;BIKE-001&quot;)
         @Size(max = 100, message = &quot;UID must not exceed 100 characters&quot;)
+        @NotBlank
         String uid,
 
         @Schema(description = &quot;Equipment type slug&quot;, example = &quot;bike&quot;)

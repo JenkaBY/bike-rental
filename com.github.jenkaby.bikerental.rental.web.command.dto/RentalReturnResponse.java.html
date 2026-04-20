@@ -2,11 +2,12 @@
 
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
 
 @Schema(description = &quot;Result of equipment return operation&quot;)
-<span class="fc" id="L8">public record RentalReturnResponse(</span>
-        @Schema(description = &quot;Updated rental details&quot;) RentalResponse rental,
+<span class="fc" id="L9">public record RentalReturnResponse(</span>
+        @Schema(description = &quot;Updated rental details&quot;) @NotNull RentalResponse rental,
         @Schema(description = &quot;Settlement transaction related to rental return&quot;) @Nullable SettlementResponse settlement
 ) {
 }

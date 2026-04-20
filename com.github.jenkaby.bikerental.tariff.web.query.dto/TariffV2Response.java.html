@@ -3,21 +3,22 @@
 import com.github.jenkaby.bikerental.tariff.domain.model.PricingType;
 import com.github.jenkaby.bikerental.tariff.domain.model.TariffV2Status;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
 @Schema(description = &quot;V2 Tariff details&quot;)
-<span class="fc" id="L10">public record TariffV2Response(</span>
-        Long id,
-        String name,
+<span class="fc" id="L11">public record TariffV2Response(</span>
+        @NotNull Long id,
+        @NotNull String name,
         String description,
-        String equipmentType,
-        PricingType pricingType,
-        PricingParams params,
-        LocalDate validFrom,
+        @NotNull String equipmentType,
+        @NotNull PricingType pricingType,
+        @NotNull PricingParams params,
+        @NotNull LocalDate validFrom,
         LocalDate validTo,
         String version,
-        TariffV2Status status
+        @NotNull TariffV2Status status
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

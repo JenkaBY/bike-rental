@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.web.query.dto</a> &gt; <span class="el_source">TransactionResponse.java</span></div><h1>TransactionResponse.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.web.query.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -8,11 +9,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Schema(description = &quot;A single journal entry line in the transaction history&quot;)
-<span class="fc" id="L11">public record TransactionResponse(</span>
-        @Schema(description = &quot;Customer id&quot;) UUID customerId,
-        @Schema(description = &quot;TxN amount&quot;) BigDecimal amount,
-        @Schema(description = &quot;Business transaction type&quot;) String type,
-        @Schema(description = &quot;When the entry was recorded (UTC ISO-8601)&quot;) Instant recordedAt,
+<span class="fc" id="L12">public record TransactionResponse(</span>
+        @Schema(description = &quot;Customer id&quot;) @NotNull UUID customerId,
+        @Schema(description = &quot;TxN amount&quot;) @NotNull BigDecimal amount,
+        @Schema(description = &quot;Business transaction type&quot;) @NotNull String type,
+        @Schema(description = &quot;When the entry was recorded (UTC ISO-8601)&quot;) @NotNull Instant recordedAt,
         @Nullable @Schema(description = &quot;Payment method, present for deposits and withdrawals&quot;) String paymentMethod,
         @Nullable @Schema(description = &quot;Free-text reason, present for adjustments&quot;) String reason,
         @Nullable @Schema(description = &quot;Source type, e.g. RENTAL&quot;) String sourceType,

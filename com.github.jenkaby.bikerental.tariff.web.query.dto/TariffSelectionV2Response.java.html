@@ -2,14 +2,15 @@
 
 import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
 @Schema(description = &quot;Selected V2 tariff with cost for the given duration&quot;)
-<span class="nc" id="L9">public record TariffSelectionV2Response(</span>
-        @Schema(description = &quot;Selected tariff&quot;) TariffV2Response tariff,
-        @Schema(description = &quot;Total cost&quot;) BigDecimal totalCost,
-        @Schema(description = &quot;Calculation breakdown&quot;) BreakdownCostDetails calculationBreakdown
+<span class="nc" id="L10">public record TariffSelectionV2Response(</span>
+        @Schema(description = &quot;Selected tariff&quot;) @NotNull TariffV2Response tariff,
+        @Schema(description = &quot;Total cost&quot;) @NotNull BigDecimal totalCost,
+        @Schema(description = &quot;Calculation breakdown&quot;) @NotNull BreakdownCostDetails calculationBreakdown
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

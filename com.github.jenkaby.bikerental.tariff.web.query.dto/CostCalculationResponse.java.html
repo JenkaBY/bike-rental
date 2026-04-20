@@ -2,40 +2,41 @@
 
 import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Schema(description = &quot;Rental cost calculation result&quot;)
-<span class="fc" id="L10">public record CostCalculationResponse(</span>
-        List&lt;EquipmentCostBreakdownResponse&gt; equipmentBreakdowns,
+<span class="fc" id="L11">public record CostCalculationResponse(</span>
+        @NotNull List&lt;EquipmentCostBreakdownResponse&gt; equipmentBreakdowns,
         @Schema(description = &quot;cost without discount applied&quot;)
-        BigDecimal subtotal,
+        @NotNull BigDecimal subtotal,
         DiscountDetailResponse discount,
         @Schema(description = &quot;cost with discount applied&quot;)
-        BigDecimal totalCost,
-        Integer effectiveDurationMinutes,
+        @NotNull BigDecimal totalCost,
+        @NotNull Integer effectiveDurationMinutes,
         boolean estimate,
         boolean specialPricingApplied
 ) {
     @Schema(description = &quot;Per-equipment cost breakdown&quot;)
-<span class="fc" id="L22">    public record EquipmentCostBreakdownResponse(</span>
-            String equipmentType,
-            Long tariffId,
-            String tariffName,
-            String pricingType,
-            BigDecimal itemCost,
-            Integer billedDurationMinutes,
+<span class="fc" id="L23">    public record EquipmentCostBreakdownResponse(</span>
+            @NotNull String equipmentType,
+            @NotNull Long tariffId,
+            @NotNull String tariffName,
+            @NotNull String pricingType,
+            @NotNull BigDecimal itemCost,
+            @NotNull Integer billedDurationMinutes,
             Integer overtimeMinutes,
             Integer forgivenMinutes,
-            BreakdownCostDetails calculationBreakdown
+            @NotNull BreakdownCostDetails calculationBreakdown
     ) {
     }
 
     @Schema(description = &quot;Discount applied&quot;)
-<span class="fc" id="L36">    public record DiscountDetailResponse(</span>
-            BigDecimal percent,
-            BigDecimal amount
+<span class="fc" id="L37">    public record DiscountDetailResponse(</span>
+            @NotNull BigDecimal percent,
+            @NotNull BigDecimal amount
     ) {
     }
 }
