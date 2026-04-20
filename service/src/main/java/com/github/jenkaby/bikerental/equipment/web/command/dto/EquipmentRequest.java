@@ -17,6 +17,7 @@ public record EquipmentRequest(
 
         @Schema(description = "Unique identifier tag (UID)", example = "BIKE-001")
         @Size(max = 100, message = "UID must not exceed 100 characters")
+        @NotBlank
         String uid,
 
         @Schema(description = "Equipment type slug", example = "bike")

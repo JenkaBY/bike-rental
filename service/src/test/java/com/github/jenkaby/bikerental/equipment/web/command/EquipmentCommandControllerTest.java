@@ -79,7 +79,7 @@ class EquipmentCommandControllerTest {
             void whenRequestContainsOnlyRequiredFields() throws Exception {
                 EquipmentRequest request = new EquipmentRequest(
                         "SN-101",
-                        null,
+                        "uid",
                         "bicycle",
                         "available",
                         null,

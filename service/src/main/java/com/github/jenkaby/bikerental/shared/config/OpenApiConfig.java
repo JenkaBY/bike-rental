@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.boot.info.BuildProperties;
@@ -19,6 +20,7 @@ import org.springframework.http.ProblemDetail;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Configuration
 public class OpenApiConfig {
 
@@ -53,8 +55,7 @@ public class OpenApiConfig {
                         .title("Bike Rental API")
                         .version(version)
                         .description("REST API for the Bike Rental management system")
-                        .contact(new Contact()
-                                .name("Bike Rental Team")))
+                        .contact(new Contact().name("Bike Rental Team")))
                 .tags(List.of(
                         new Tag().name(Tags.CUSTOMERS).description("Customer search and profile management"),
                         new Tag().name(Tags.EQUIPMENT).description("Equipment catalog management"),
@@ -116,7 +117,7 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("finance")
                 .displayName(Tags.FINANCE)
-                .pathsToMatch("/api/payments/**")
+                .pathsToMatch("/api/finance/**")
                 .build();
     }
 
