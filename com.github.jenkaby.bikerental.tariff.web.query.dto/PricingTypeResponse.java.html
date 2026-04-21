@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 <span class="fc" id="L7">public record PricingTypeResponse(</span>
         @Schema(description = &quot;Enum slug&quot;, example = &quot;DEGRESSIVE_HOURLY&quot;) @NotNull String slug,
         @Schema(description = &quot;Localized title&quot;) @NotNull String title,
-        @Schema(description = &quot;Localized description&quot;) @NotNull String description
+        @Schema(description = &quot;Localized description&quot;) String description
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
