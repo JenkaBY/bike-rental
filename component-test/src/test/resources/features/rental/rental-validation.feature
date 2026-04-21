@@ -17,13 +17,13 @@ Feature: Rental Update Validation
       | RENTED      | Rented      | In use already    | AVAILABLE,BROKEN          |
     And the following equipment types exist in the database
       | slug    | name    | description |
-      | bicycle | Bicycle | Two-wheeled |
-      | scooter | Scooter | Scooter     |
+      | BICYCLE | Bicycle | Two-wheeled |
+      | SCOOTER | Scooter | Scooter     |
     And the following equipment records exist in db
       | id | serialNumber | uid        | status    | type    | model   | condition |
-      | 1  | EQ-001       | BIKE-001   | AVAILABLE | bicycle | Model A | Good      |
-      | 2  | EQ-002       | E-BIKE-001 | RENTED    | scooter | Model B | Excellent |
-      | 3  | EQ-003       | BIKE-002   | BROKEN    | bicycle | Model C | Poor      |
+      | 1  | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A | Good      |
+      | 2  | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B | Excellent |
+      | 3  | EQ-003       | BIKE-002   | BROKEN    | BICYCLE | Model C | Poor      |
 
 
   Scenario: Update non-existent rental
@@ -45,7 +45,7 @@ Feature: Rental Update Validation
       | 1  | CUS1       | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path        | value |
       | replace | /customerId | CUS3  |
@@ -62,7 +62,7 @@ Feature: Rental Update Validation
       | 1  | CUS1       | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path          | value |
       | replace | /equipmentIds | [999] |
@@ -79,7 +79,7 @@ Feature: Rental Update Validation
       | 1  | CUS1       | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path          | value |
       | replace | /equipmentIds | [2]   |
@@ -96,7 +96,7 @@ Feature: Rental Update Validation
       | 1  | CUS1       | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path          | value |
       | replace | /equipmentIds | [3]   |
@@ -113,7 +113,7 @@ Feature: Rental Update Validation
       | 1  | CUS1       | 1        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path      | value      |
       | replace | /duration | <duration> |
@@ -136,13 +136,13 @@ Feature: Rental Update Validation
     Given today is "2026-02-09"
     And the following equipment records exist in db
       | id | serialNumber | uid      | status    | type    | model   | condition |
-      | 4  | EQ-004       | BIKE-004 | AVAILABLE | scooter | Model D | Good      |
+      | 4  | EQ-004       | BIKE-004 | AVAILABLE | SCOOTER | Model D | Good      |
     And a single rental exists in the database with the following data
       | id | customerId | tariffId | status | plannedDuration | createdAt           | updatedAt           |
       | 1  | CUS1       | 1        | DRAFT  | 120             | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path          | value |
       | replace | /equipmentIds | [4]   |
@@ -151,7 +151,7 @@ Feature: Rental Update Validation
     And the response contains
       | path     | value                                                                                              |
       | $.title  | Suitable tariff not found                                                                          |
-      | $.detail | No suitable tariff found for equipment type 'scooter' on date 2026-02-09 for duration: 120 minutes |
+      | $.detail | No suitable tariff found for equipment type 'SCOOTER' on date 2026-02-09 for duration: 120 minutes |
 
   @ResetClock
 #    tariff selection is performed when equipmentIds is present
@@ -159,13 +159,13 @@ Feature: Rental Update Validation
     Given today is "2026-02-09"
     And the following equipment records exist in db
       | id | serialNumber | uid      | status    | type    | model   | condition |
-      | 4  | EQ-004       | BIKE-004 | AVAILABLE | scooter | Model D | Good      |
+      | 4  | EQ-004       | BIKE-004 | AVAILABLE | SCOOTER | Model D | Good      |
     And a single rental exists in the database with the following data
       | id | customerId | status | createdAt           | updatedAt           |
       | 1  | CUS1       | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 4           | BIKE-004     | bicycle       |          | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 0.00          | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | 1        | 4           | BIKE-004     | BICYCLE       |          | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 0.00          | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path          | value |
       | replace | /duration     | 120   |
@@ -175,5 +175,4 @@ Feature: Rental Update Validation
     And the response contains
       | path     | value                                                                                              |
       | $.title  | Suitable tariff not found                                                                          |
-      | $.detail | No suitable tariff found for equipment type 'scooter' on date 2026-02-09 for duration: 120 minutes |
-
+      | $.detail | No suitable tariff found for equipment type 'SCOOTER' on date 2026-02-09 for duration: 120 minutes |

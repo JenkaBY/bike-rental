@@ -7,6 +7,6 @@ import jakarta.validation.constraints.NotNull;
 public record PricingTypeResponse(
         @Schema(description = "Enum slug", example = "DEGRESSIVE_HOURLY") @NotNull String slug,
         @Schema(description = "Localized title") @NotNull String title,
-        @Schema(description = "Localized description") @NotNull String description
+        @Schema(description = "Localized description") String description
 ) {
 }

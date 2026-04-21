@@ -6,11 +6,11 @@ Feature: Tariff V2 API
   Background:
     Given the following equipment types exist in the database
       | slug    | name    | description                  |
-      | bicycle | Bicycle | Two-wheeled                  |
-      | scooter | Scooter | Electric                     |
-      | helmet  | Helmet  | Accessory                    |
-      | special | Special | It's used for special tariff |
-      | any     | Any     | It's used for special tariff |
+      | BICYCLE | Bicycle | Two-wheeled                  |
+      | SCOOTER | Scooter | Electric                     |
+      | HELMET  | Helmet  | Accessory                    |
+      | SPECIAL | Special | It's used for special tariff |
+      | ANY     | Any     | It's used for special tariff |
 
   Scenario Outline: Create a tariff v2 and get by id
     Given the pricing params for tariff request are
@@ -18,18 +18,18 @@ Feature: Tariff V2 API
       | <firstHourPrice> | <hourlyDiscount> | <minimumHourlyPrice> | <hourlyPrice> | <dailyPrice> | <overtimeHourlyPrice> | <issuanceFee> | <minimumDurationMinutes> | <minimumDurationSurcharge> | <price> |
     And the tariff v2 request is prepared with the following data
       | name           | description       | equipmentType | pricingType   | validFrom  | validTo    |
-      | Hourly Bicycle | Degressive hourly | bicycle       | <pricingType> | 2026-01-01 | 2029-01-01 |
+      | Hourly Bicycle | Degressive hourly | BICYCLE       | <pricingType> | 2026-01-01 | 2029-01-01 |
     When a POST request has been made to "/api/tariffs" endpoint
     Then the response status is 201
     And the tariff v2 response only contains
       | name           | description       | equipmentType | pricingType   | status   | validFrom  | validTo    |
-      | Hourly Bicycle | Degressive hourly | bicycle       | <pricingType> | INACTIVE | 2026-01-01 | 2029-01-01 |
+      | Hourly Bicycle | Degressive hourly | BICYCLE       | <pricingType> | INACTIVE | 2026-01-01 | 2029-01-01 |
 #    next scenario
     When a GET request has been made to "/api/tariffs/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the tariff v2 response only contains
       | name           | description       | equipmentType | pricingType   | status   | validFrom  | validTo    |
-      | Hourly Bicycle | Degressive hourly | bicycle       | <pricingType> | INACTIVE | 2026-01-01 | 2029-01-01 |
+      | Hourly Bicycle | Degressive hourly | BICYCLE       | <pricingType> | INACTIVE | 2026-01-01 | 2029-01-01 |
     Examples:
       | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | hourlyPrice | dailyPrice | overtimeHourlyPrice | issuanceFee | minimumDurationMinutes | minimumDurationSurcharge | price |
       | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               |             |            |                     |             | 30                     | 1.00                     |       |
@@ -44,29 +44,29 @@ Feature: Tariff V2 API
       | 1           |
     And the tariff v2 request is prepared with the following data
       | name           | description | equipmentType | pricingType | validFrom  | validTo    |
-      | Hourly Bicycle | Flat fee    | helmet        | FLAT_FEE    | 2026-01-01 | 2029-01-01 |
+      | Hourly Bicycle | Flat fee    | HELMET        | FLAT_FEE    | 2026-01-01 | 2029-01-01 |
     When a POST request has been made to "/api/tariffs" endpoint
     Then the response status is 201
     And the tariff v2 response only contains
       | name           | description | equipmentType | pricingType | status   | validFrom  | validTo    |
-      | Hourly Bicycle | Flat fee    | helmet        | FLAT_FEE    | INACTIVE | 2026-01-01 | 2029-01-01 |
+      | Hourly Bicycle | Flat fee    | HELMET        | FLAT_FEE    | INACTIVE | 2026-01-01 | 2029-01-01 |
 #    next stage
     Given the pricing params for tariff request are
       | price |
       | 0     |
     And the tariff v2 request is prepared with the following data
       | name            | description | equipmentType | pricingType | validFrom  | validTo    |
-      | Special Bicycle | Special     | bicycle       | SPECIAL     | 2025-01-31 | 2028-01-02 |
+      | Special Bicycle | Special     | BICYCLE       | SPECIAL     | 2025-01-31 | 2028-01-02 |
     When a PUT request has been made to "/api/tariffs/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the tariff v2 response only contains
       | name            | description | equipmentType | pricingType | status   | validFrom  | validTo    |
-      | Special Bicycle | Special     | bicycle       | SPECIAL     | INACTIVE | 2025-01-31 | 2028-01-02 |
+      | Special Bicycle | Special     | BICYCLE       | SPECIAL     | INACTIVE | 2025-01-31 | 2028-01-02 |
     When a GET request has been made to "/api/tariffs/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the tariff v2 response only contains
       | name            | description | equipmentType | pricingType | status   | validFrom  | validTo    |
-      | Special Bicycle | Special     | bicycle       | SPECIAL     | INACTIVE | 2025-01-31 | 2028-01-02 |
+      | Special Bicycle | Special     | BICYCLE       | SPECIAL     | INACTIVE | 2025-01-31 | 2028-01-02 |
 
   Scenario Outline: Update a tariff v2 should keep its <sourceStatus> status after update
     Given the pricing params list for tariff request is
@@ -74,13 +74,13 @@ Feature: Tariff V2 API
       | 1        | SPECIAL     |
     And the following tariff v2 records exist in db
       | id | name           | description             | equipmentType | pricingType | status         | validFrom  | validTo |
-      | 1  | Special Tariff | Apply for any equipment | any           | SPECIAL     | <sourceStatus> | 2025-01-31 |         |
+      | 1  | Special Tariff | Apply for any equipment | ANY           | SPECIAL     | <sourceStatus> | 2025-01-31 |         |
     Given the pricing params for tariff request are
       | price |
       | 0     |
     And the tariff v2 request is prepared with the following data
       | name                        | description  | equipmentType | pricingType | validFrom  | validTo    |
-      | Special Tariff for any type | For any type | any           | SPECIAL     | 2026-01-01 | 2029-01-01 |
+      | Special Tariff for any type | For any type | ANY           | SPECIAL     | 2026-01-01 | 2029-01-01 |
     When a PUT request has been made to "/api/tariffs/1" endpoint
     Then the response status is 200
     And the response contains
@@ -107,13 +107,13 @@ Feature: Tariff V2 API
       | 1           |
     And the tariff v2 request is prepared with the following data
       | name           | description | equipmentType | pricingType | validFrom  | validTo    |
-      | Hourly Bicycle | Flat fee    | helmet        | FLAT_FEE    | 2026-01-01 | 2029-01-01 |
+      | Hourly Bicycle | Flat fee    | HELMET        | FLAT_FEE    | 2026-01-01 | 2029-01-01 |
     When a POST request has been made to "/api/tariffs" endpoint
     Then the response status is 201
 #    default inactive
     And the tariff v2 response only contains
       | name           | description | equipmentType | pricingType | status   | validFrom  | validTo    |
-      | Hourly Bicycle | Flat fee    | helmet        | FLAT_FEE    | INACTIVE | 2026-01-01 | 2029-01-01 |
+      | Hourly Bicycle | Flat fee    | HELMET        | FLAT_FEE    | INACTIVE | 2026-01-01 | 2029-01-01 |
     When a PATCH request has been made to "/api/tariffs/{requestedObjectId}/activate" endpoint with context
 #    Activate
     Then the response status is 200
@@ -135,13 +135,13 @@ Feature: Tariff V2 API
       | 3        |             | 0     |
     And the following tariff v2 records exist in db
       | id | name            | description       | equipmentType | pricingType | status   | validFrom  | validTo    |
-      | 1  | Hourly Bicycle  | Degressive hourly | bicycle       | FLAT_FEE    | ACTIVE   | 2026-01-01 | 2029-01-01 |
-      | 2  | Flat Fee Helmet | Flat fee          | helmet        | FLAT_FEE    | INACTIVE | 2026-01-01 | 2029-01-01 |
-      | 3  | Special Scooter | Special           | special       | SPECIAL     | ACTIVE   | 2025-01-31 | 2028-01-02 |
+      | 1  | Hourly Bicycle  | Degressive hourly | BICYCLE       | FLAT_FEE    | ACTIVE   | 2026-01-01 | 2029-01-01 |
+      | 2  | Flat Fee Helmet | Flat fee          | HELMET        | FLAT_FEE    | INACTIVE | 2026-01-01 | 2029-01-01 |
+      | 3  | Special Scooter | Special           | SPECIAL       | SPECIAL     | ACTIVE   | 2025-01-31 | 2028-01-02 |
     When a GET request has been made to "/api/tariffs/active" endpoint with query parameters
       | equipmentType |
-      | special       |
+      | SPECIAL       |
     Then the response status is 200
     And the tariff v2 response contains list of
       | id | name            | description | equipmentType | pricingType | status | validFrom  | validTo    |
-      | 3  | Special Scooter | Special     | special       | SPECIAL     | ACTIVE | 2025-01-31 | 2028-01-02 |
+      | 3  | Special Scooter | Special     | SPECIAL       | SPECIAL     | ACTIVE | 2025-01-31 | 2028-01-02 |
