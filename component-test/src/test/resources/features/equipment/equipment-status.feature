@@ -60,7 +60,7 @@ Feature: Equipment status endpoints
   Scenario: Update status by slug when no status exists
     Given the equipment status request is prepared with the following data
       | slug           | name |
-      | DOES_NOT_EXIST | any  |
+      | DOES_NOT_EXIST | ANY  |
     When a PUT request has been made to "/api/equipment-statuses/DOES_NOT_EXIST" endpoint
     Then the response status is 404
     And the response contains

@@ -91,26 +91,26 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Hourly Bicycle",
                     "Desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DEGRESSIVE_HOURLY,
                     DEGRESSIVE_PARAMS,
                     LocalDate.parse("2026-01-01"),
                     null
             );
             TariffV2 domain = new DegressiveHourlyTariffV2(
-                    1L, "Hourly Bicycle", "Desc", "bicycle", "v2",
+                    1L, "Hourly Bicycle", "Desc", "BICYCLE", "v2",
                     LocalDate.parse("2026-01-01"), null, TariffV2Status.INACTIVE,
                     Money.of("9.00"), Money.of("2.00"), Money.of("1.00"), 30, Money.of("1.00")
             );
             TariffV2Response response = new TariffV2Response(
-                    1L, "Hourly Bicycle", "Desc", "bicycle", PricingType.DEGRESSIVE_HOURLY,
+                    1L, "Hourly Bicycle", "Desc", "BICYCLE", PricingType.DEGRESSIVE_HOURLY,
                     DEGRESSIVE_PARAMS,
                     LocalDate.parse("2026-01-01"), null, "v2", TariffV2Status.INACTIVE
             );
 
             given(commandMapper.toCreateCommand(any())).willReturn(
                     new CreateTariffV2UseCase.CreateTariffV2Command(
-                            "Hourly Bicycle", "Desc", "bicycle", PricingType.DEGRESSIVE_HOURLY,
+                            "Hourly Bicycle", "Desc", "BICYCLE", PricingType.DEGRESSIVE_HOURLY,
                             degressiveParamsMap(),
                             LocalDate.parse("2026-01-01"), null
                     ));
@@ -132,7 +132,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     null, // name is missing
                     "Desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DEGRESSIVE_HOURLY,
                     DEGRESSIVE_PARAMS,
                     LocalDate.parse("2026-01-01"),
@@ -154,7 +154,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     invalidName,
                     "Desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DEGRESSIVE_HOURLY,
                     DEGRESSIVE_PARAMS,
                     LocalDate.parse("2026-01-01"),
@@ -216,32 +216,32 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Updated",
                     "Desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DEGRESSIVE_HOURLY,
                     DEGRESSIVE_PARAMS,
                     LocalDate.parse("2026-01-01"),
                     null
             );
             TariffV2 existing = new DegressiveHourlyTariffV2(
-                    1L, "Old", null, "bicycle", "v2",
+                    1L, "Old", null, "BICYCLE", "v2",
                     LocalDate.parse("2026-01-01"), null, TariffV2Status.INACTIVE,
                     Money.of("0"), Money.of("0"), Money.of("0"), 0, Money.of("0")
             );
             TariffV2 updated = new DegressiveHourlyTariffV2(
-                    1L, "Updated", "Desc", "bicycle", "v2",
+                    1L, "Updated", "Desc", "BICYCLE", "v2",
                     LocalDate.parse("2026-01-01"), null, TariffV2Status.INACTIVE,
                     Money.of("9.00"), Money.of("2.00"), Money.of("1.00"), 30, Money.of("1.00")
             );
             given(getByIdUseCase.get(1L)).willReturn(existing);
             given(commandMapper.toUpdateCommand(eq(1L), any())).willReturn(
                     new UpdateTariffV2UseCase.UpdateTariffV2Command(
-                            1L, "Updated", "Desc", "bicycle", PricingType.DEGRESSIVE_HOURLY,
+                            1L, "Updated", "Desc", "BICYCLE", PricingType.DEGRESSIVE_HOURLY,
                             degressiveParamsMap(),
                             LocalDate.parse("2026-01-01"), null
                     ));
             given(updateUseCase.execute(any())).willReturn(updated);
             given(queryMapper.toResponse(updated)).willReturn(new TariffV2Response(
-                    1L, "Updated", "Desc", "bicycle", PricingType.DEGRESSIVE_HOURLY,
+                    1L, "Updated", "Desc", "BICYCLE", PricingType.DEGRESSIVE_HOURLY,
                     DEGRESSIVE_PARAMS,
                     LocalDate.parse("2026-01-01"), null, "v2", TariffV2Status.INACTIVE
             ));
@@ -260,7 +260,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     invalidName,
                     "Desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DEGRESSIVE_HOURLY,
                     DEGRESSIVE_PARAMS,
                     LocalDate.parse("2026-01-01"),
@@ -283,13 +283,13 @@ class TariffV2CommandControllerTest {
         @DisplayName("/activate returns 200")
         void patch_activate_returns200() throws Exception {
             TariffV2 activated = new DegressiveHourlyTariffV2(
-                    1L, "T", null, "bicycle", "v2",
+                    1L, "T", null, "BICYCLE", "v2",
                     LocalDate.now(), null, TariffV2Status.ACTIVE,
                     Money.of("0"), Money.of("0"), Money.of("0"), 30, Money.of("0")
             );
             given(activateUseCase.execute(1L)).willReturn(activated);
             given(queryMapper.toResponse(activated)).willReturn(new TariffV2Response(
-                    1L, "T", null, "bicycle", PricingType.DEGRESSIVE_HOURLY,
+                    1L, "T", null, "BICYCLE", PricingType.DEGRESSIVE_HOURLY,
                     new PricingParams(null, null, null, null, null, null, null, 30, null, null),
                     LocalDate.now(), null, "v2", TariffV2Status.ACTIVE
             ));
@@ -303,13 +303,13 @@ class TariffV2CommandControllerTest {
         @DisplayName("/deactivate returns 200")
         void patch_deactivate_returns200() throws Exception {
             TariffV2 deactivated = new DegressiveHourlyTariffV2(
-                    1L, "T", null, "bicycle", "v2",
+                    1L, "T", null, "BICYCLE", "v2",
                     LocalDate.now(), null, TariffV2Status.INACTIVE,
                     Money.of("0"), Money.of("0"), Money.of("0"), 30, Money.of("0")
             );
             given(deactivateUseCase.execute(1L)).willReturn(deactivated);
             given(queryMapper.toResponse(deactivated)).willReturn(new TariffV2Response(
-                    1L, "T", null, "bicycle", PricingType.DEGRESSIVE_HOURLY,
+                    1L, "T", null, "BICYCLE", PricingType.DEGRESSIVE_HOURLY,
                     new PricingParams(null, null, null, null, null, null, null, 30, null, null),
                     LocalDate.now(), null, "v2", TariffV2Status.INACTIVE
             ));
@@ -329,7 +329,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Valid Degressive",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DEGRESSIVE_HOURLY,
                     new PricingParams(
                             new BigDecimal("10.00"), // firstHourPrice
@@ -358,7 +358,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "No firstHourPrice",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DEGRESSIVE_HOURLY,
                     new PricingParams(
                             null, // firstHourPrice missing
@@ -386,7 +386,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Min > First",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DEGRESSIVE_HOURLY,
                     new PricingParams(
                             new BigDecimal("10.00"),
@@ -414,7 +414,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Negative min duration",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DEGRESSIVE_HOURLY,
                     new PricingParams(
                             new BigDecimal("10.00"),
@@ -446,7 +446,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Valid Flat Hourly",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.FLAT_HOURLY,
                     new PricingParams(
                             null, // firstHourPrice
@@ -475,7 +475,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "No hourlyPrice",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.FLAT_HOURLY,
                     new PricingParams(
                             null, null, null,
@@ -504,7 +504,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Negative hourlyPrice",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.FLAT_HOURLY,
                     new PricingParams(
                             null, null, null,
@@ -533,7 +533,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Has firstHourPrice",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.FLAT_HOURLY,
                     new PricingParams(
                             new BigDecimal("10.00"), // not applicable
@@ -567,7 +567,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Valid Daily",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DAILY,
                     new PricingParams(
                             null, // firstHourPrice
@@ -596,7 +596,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "No dailyPrice",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DAILY,
                     new PricingParams(
                             null, null, null,
@@ -626,7 +626,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Negative dailyPrice",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DAILY,
                     new PricingParams(
                             null, null, null,
@@ -656,7 +656,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Has firstHourPrice",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.DAILY,
                     new PricingParams(
                             new BigDecimal("10.00"), // not applicable
@@ -691,7 +691,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Valid Flat Fee",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.FLAT_FEE,
                     new PricingParams(
                             null, // firstHourPrice
@@ -720,7 +720,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "No issuanceFee",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.FLAT_FEE,
                     new PricingParams(
                             null, null, null,
@@ -747,7 +747,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Negative issuanceFee",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.FLAT_FEE,
                     new PricingParams(
                             null, null, null,
@@ -774,7 +774,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Has firstHourPrice",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.FLAT_FEE,
                     new PricingParams(
                             new BigDecimal("10.00"), // not applicable
@@ -809,7 +809,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "Valid Special",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.SPECIAL,
                     new PricingParams(
                             null, null, null,
@@ -833,7 +833,7 @@ class TariffV2CommandControllerTest {
             TariffV2Request request = new TariffV2Request(
                     "No price",
                     "desc",
-                    "bicycle",
+                    "BICYCLE",
                     PricingType.SPECIAL,
                     null,
                     LocalDate.now(),

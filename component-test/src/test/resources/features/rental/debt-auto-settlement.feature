@@ -23,7 +23,7 @@ Feature: Automatic DEBT rental settlement on customer deposit
       | 12 | CUS2       | DEBT   | 80.00         | 120             | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
     And rental equipments exist in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | totalCost | createdAt           | updatedAt           |
-      | 12       | 1           | BIKE-001     | bicycle       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 100       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
+      | 12       | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 100       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
 
   Scenario Outline: Deposit fully covers a single DEBT rental
     Given now is "<now>"
@@ -61,7 +61,7 @@ Feature: Automatic DEBT rental settlement on customer deposit
       | 13 | CUS2       | DEBT   | 80.00         | 120             | 280.00    | 2026-03-01T08:00:00 | 2026-03-01T09:00:00 | 2026-03-01T09:00:00 |
     And rental equipments exist in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | totalCost | createdAt           | updatedAt           |
-      | 13       | 1           | BIKE-001     | bicycle       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 280       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
+      | 13       | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 280       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
     And the deposit request is prepared with the following data
       | idempotencyKey | customerId | amount | paymentMethod | operatorId |
       | IDK1           | CUS2       | 80     | CASH          | OP1        |
@@ -94,7 +94,7 @@ Feature: Automatic DEBT rental settlement on customer deposit
       | 13 | CUS2       | DEBT   | 80.00         | 120             | 2026-03-01T08:00:00 | 2026-03-01T09:00:00 | 2026-03-01T09:00:00 |
     And rental equipments exist in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | totalCost | createdAt           | updatedAt           |
-      | 13       | 1           | BIKE-001     | bicycle       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 110       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
+      | 13       | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 110       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
     And the deposit request is prepared with the following data
       | idempotencyKey | customerId | amount | paymentMethod | operatorId |
       | IDK1           | CUS2       | 130    | CASH          | OP1        |
@@ -130,7 +130,7 @@ Feature: Automatic DEBT rental settlement on customer deposit
       | 13 | CUS4       | DEBT   | 80.00         | 120             | 2026-03-01T08:00:00 | 2026-03-01T09:00:00 | 2026-03-01T09:00:00 |
     And rental equipments exist in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | totalCost | createdAt           | updatedAt           |
-      | 13       | 1           | BIKE-001     | bicycle       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 100       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
+      | 13       | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 100       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
     And the deposit request is prepared with the following data
       | idempotencyKey | customerId | amount | paymentMethod | operatorId |
       | IDK1           | CUS4       | 55     | CASH          | OP1        |
@@ -186,4 +186,3 @@ Feature: Automatic DEBT rental settlement on customer deposit
     When a POST request has been made to "/api/finance/deposits" endpoint
     Then the response status is 201
     And there is only 1 transactions in db
-

@@ -19,11 +19,11 @@ Feature: Equipment Return
       | RENTED      | Rented      | In use already    | AVAILABLE,BROKEN          |
     And the following equipment types exist in the database
       | slug    | name    | description |
-      | bicycle | Bicycle | Two-wheeled |
+      | BICYCLE | Bicycle | Two-wheeled |
     And the following equipment records exist in db
       | id | serialNumber | uid      | status | type    | model   | condition |
-      | 1  | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
-      | 2  | EQ-002       | BIKE-002 | RENTED | bicycle | Model A | Good      |
+      | 1  | EQ-001       | BIKE-001 | RENTED | BICYCLE | Model A | Good      |
+      | 2  | EQ-002       | BIKE-002 | RENTED | BICYCLE | Model A | Good      |
     And the pricing params list for tariff request is
       | tariffId | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | hourlyPrice | dailyPrice | overtimeHourlyPrice | issuanceFee | minimumDurationMinutes | minimumDurationSurcharge | price |
       | 1        | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               |             |            |                     |             | 30                     | 1.00                     |       |
@@ -33,11 +33,11 @@ Feature: Equipment Return
       | 5        | SPECIAL           |                |                |                    |             |            |                     |             |                        |                          | 0     |
     And the following tariff v2 records exist in db
       | id | name                | description             | equipmentType | pricingType       | status | validFrom  | validTo |
-      | 1  | Hourly Bicycle      | Degressive hourly       | bicycle       | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
-      | 2  | Flat Hourly Scooter | Flat hourly             | scooter       | FLAT_HOURLY       | ACTIVE | 2026-01-01 |         |
-      | 3  | Daily Bicycle       | Daily hourly            | bicycle       | DAILY             | ACTIVE | 2026-01-01 |         |
-      | 4  | Flat Fee Helmet     | Flat fee                | helmet        | FLAT_FEE          | ACTIVE | 2026-01-01 |         |
-      | 5  | Special Tariff      | Apply for any equipment | any           | SPECIAL           | ACTIVE | 2025-01-31 |         |
+      | 1  | Hourly Bicycle      | Degressive hourly       | BICYCLE       | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
+      | 2  | Flat Hourly Scooter | Flat hourly             | SCOOTER       | FLAT_HOURLY       | ACTIVE | 2026-01-01 |         |
+      | 3  | Daily Bicycle       | Daily hourly            | BICYCLE       | DAILY             | ACTIVE | 2026-01-01 |         |
+      | 4  | Flat Fee Helmet     | Flat fee                | HELMET        | FLAT_FEE          | ACTIVE | 2026-01-01 |         |
+      | 5  | Special Tariff      | Apply for any equipment | ANY           | SPECIAL           | ACTIVE | 2025-01-31 |         |
     And the following account records exist in db
       | id   | accountType | customerId |
       | ACC2 | CUSTOMER    | CUS2       |
@@ -56,7 +56,7 @@ Feature: Equipment Return
       | <rentalId> | CUS2       | ACTIVE | 16.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId   | equipmentUid   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | <equipmentUid> | bicycle       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | <rentalId> | <equipmentId> | <equipmentUid> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | equipmentIds  | paymentMethod | operatorId |
       | <rentalId> | <equipmentId> | CASH          | <operator> |
@@ -71,7 +71,7 @@ Feature: Equipment Return
       | <rentalId> | <equipmentId> | <equipmentId>        | 16.00     | <now>      |
     And the following equipment record was persisted in db
       | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | bicycle | Model A | Good      |
+      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00    |
@@ -96,7 +96,7 @@ Feature: Equipment Return
       | <rentalId> | CUS2       | ACTIVE | 16.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | paymentMethod | operatorId |
       | <rentalId> | CASH          | OP1        |
@@ -138,7 +138,7 @@ Feature: Equipment Return
       | <rentalId> | CUS2       | ACTIVE | 16.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | paymentMethod | operatorId |
       | <rentalId> | CASH          | OP1        |
@@ -180,7 +180,7 @@ Feature: Equipment Return
       | <rentalId> | <customerId> | ACTIVE | 9.00          | 60              | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 9.00          | <startedAt> | <startedAt> |
+      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 9.00          | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | paymentMethod | operatorId |
       | <rentalId> | CASH          | OP1        |
@@ -222,7 +222,7 @@ Feature: Equipment Return
       | 1  | CUS1       | 1        | <status> | 100.00        | 120             | 2026-02-10T10:00:00 | 2026-02-10T10:00:00 |
     And rental equipments exist in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 100.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 100.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the return equipment request is
       | rentalId | paymentMethod | operatorId |
       | 1        | CASH          | OP1        |
@@ -246,8 +246,8 @@ Feature: Equipment Return
       | <rentalId> | <customerId> | 1        | ACTIVE | 16.00         | 60              | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
-      | <rentalId> | 2           | BIKE-002     | bicycle       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
+      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
+      | <rentalId> | 2           | BIKE-002     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | equipmentIds | paymentMethod | operatorId |
       | <rentalId> | <returnedId> | CASH          | <operator> |
@@ -266,8 +266,8 @@ Feature: Equipment Return
       | <rentalId> | <returnedId>,<remainingId> | <returnedId>         | <now>      | 6         |
     And the following equipment record was persisted in db
       | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <returnedId>  | EQ-001       | BIKE-001 | AVAILABLE | bicycle | Model A | Good      |
-      | <remainingId> | EQ-002       | BIKE-002 | RENTED    | bicycle | Model A | Good      |
+      | <returnedId>  | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
+      | <remainingId> | EQ-002       | BIKE-002 | RENTED    | BICYCLE | Model A | Good      |
 #    return the remaining equipment
     Given now is "<nowReturn>"
     And the return equipment request is
@@ -309,7 +309,7 @@ Feature: Equipment Return
       | <rentalId> | CUS2       | ACTIVE | 14.40         | 120             | 10              | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | bicycle       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | equipmentIds  | paymentMethod | operatorId |
       | <rentalId> | <equipmentId> | CASH          | <operator> |
@@ -324,7 +324,7 @@ Feature: Equipment Return
       | <rentalId> | <equipmentId> | <equipmentId>        | 14.40     | <now>      |
     And the following equipment record was persisted in db
       | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | bicycle | Model A | Good      |
+      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00    |
@@ -351,7 +351,7 @@ Feature: Equipment Return
       | <rentalId> | CUS2       | ACTIVE | 5               | 10.00        | 10.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | bicycle       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | equipmentIds  | paymentMethod | operatorId |
       | <rentalId> | <equipmentId> | CASH          | <operator> |
@@ -366,7 +366,7 @@ Feature: Equipment Return
       | <rentalId> | <equipmentId> | <equipmentId>        | 10.00     | <now>      |
     And the following equipment record was persisted in db
       | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | bicycle | Model A | Good      |
+      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00    |
@@ -393,7 +393,7 @@ Feature: Equipment Return
       | <rentalId> | CUS2       | ACTIVE | 5               | 0.00         | 0.00          | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | bicycle       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | equipmentIds  | paymentMethod | operatorId |
       | <rentalId> | <equipmentId> | CASH          | <operator> |
@@ -408,7 +408,7 @@ Feature: Equipment Return
       | <rentalId> | <equipmentId> | <equipmentId>        | 0.00      | <now>      |
     And the following equipment record was persisted in db
       | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | bicycle | Model A | Good      |
+      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 16.00   |

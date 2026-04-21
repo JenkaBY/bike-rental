@@ -1,6 +1,6 @@
 slug,name,description
-bicycle,Bicycle,Standard bicycles for rental
-scooter,Scooter,Electric and manual scooters
-other,Other,Other equipment types
-child_seat,Child Seat,Child seats for bicycles and scooters
-any,Any,Only for special tariffs
+BICYCLE,Bicycle,Standard bicycles for rental
+SCOOTER,Scooter,Electric and manual scooters
+OTHER,Other,Other equipment types
+CHILD_SEAT,Child Seat,Child seats for bicycles and scooters
+ANY,Any,Only for special tariffs

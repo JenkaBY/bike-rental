@@ -80,8 +80,8 @@ class EquipmentCommandControllerTest {
                 EquipmentRequest request = new EquipmentRequest(
                         "SN-101",
                         "uid",
-                        "bicycle",
-                        "available",
+                        "BICYCLE",
+                        "AVAILABLE",
                         null,
                         null,
                         null
@@ -251,8 +251,8 @@ class EquipmentCommandControllerTest {
             return new EquipmentRequest(
                     "SN-100",
                     "UID-100",
-                    "bicycle",
-                    "available",
+                    "BICYCLE",
+                    "AVAILABLE",
                     "ModelA",
                     LocalDate.of(2024, 1, 1),
                     "good"
@@ -462,8 +462,8 @@ class EquipmentCommandControllerTest {
             return new EquipmentRequest(
                     "SN-200",
                     "UID-200",
-                    "scooter",
-                    "maintenance",
+                    "SCOOTER",
+                    "MAINTENANCE",
                     "ModelB",
                     LocalDate.of(2024, 2, 1),
                     "fair"

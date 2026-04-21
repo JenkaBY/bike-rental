@@ -17,15 +17,15 @@ Feature: Rental Management
       | RENTED    | Rented    | In use already | AVAILABLE        |
     And the following equipment types exist in the database
       | slug    | name    | description |
-      | bicycle | Bicycle | Two-wheeled |
-      | scooter | Scooter | Scooter     |
-      | helmet  | Helmet  | Helmet      |
-      | other   | Other   | Other       |
+      | BICYCLE | Bicycle | Two-wheeled |
+      | SCOOTER | Scooter | Scooter     |
+      | HELMET  | Helmet  | Helmet      |
+      | OTHER   | Other   | Other       |
     And the following equipment records exist in db
       | id | serialNumber | uid            | status    | type    | model   | condition |
-      | 1  | EQ-001       | BIKE-001       | AVAILABLE | bicycle | Model A | Good      |
-      | 2  | EQ-002       | E-BIKE-001     | AVAILABLE | scooter | Model B | Excellent |
-      | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | helmet  | Model B | Excellent |
+      | 1  | EQ-001       | BIKE-001       | AVAILABLE | BICYCLE | Model A | Good      |
+      | 2  | EQ-002       | E-BIKE-001     | AVAILABLE | SCOOTER | Model B | Excellent |
+      | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | HELMET  | Model B | Excellent |
     And the following account records exist in db
       | id   | accountType | customerId |
       | ACC1 | CUSTOMER    | CUS1       |
@@ -48,10 +48,10 @@ Feature: Rental Management
       | 13       | SPECIAL           |                |                |                    |             |            |                     |             |                        |                          | 0     |
     And the following tariff v2 records exist in db
       | id | name                   | description                | equipmentType | pricingType       | status | validFrom  | validTo |
-      | 10 | Degressive Hourly Bike | Bicycle degressive hourly  | bicycle       | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
-      | 11 | Flat Fee Helmet        | Helmet flat fee            | helmet        | FLAT_FEE          | ACTIVE | 2026-01-01 |         |
-      | 12 | Flat Hourly Scooter    | Scooter flat hourly rate   | scooter       | FLAT_HOURLY       | ACTIVE | 2026-01-01 |         |
-      | 13 | Special Group Tariff   | Special pricing for groups | any           | SPECIAL           | ACTIVE | 2025-01-01 |         |
+      | 10 | Degressive Hourly Bike | Bicycle degressive hourly  | BICYCLE       | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
+      | 11 | Flat Fee Helmet        | Helmet flat fee            | HELMET        | FLAT_FEE          | ACTIVE | 2026-01-01 |         |
+      | 12 | Flat Hourly Scooter    | Scooter flat hourly rate   | SCOOTER       | FLAT_HOURLY       | ACTIVE | 2026-01-01 |         |
+      | 13 | Special Group Tariff   | Special pricing for groups | ANY           | SPECIAL           | ACTIVE | 2025-01-01 |         |
 
   Scenario: Create rental draft
     When a POST request has been made to "/api/rentals/draft" endpoint
@@ -87,8 +87,8 @@ Feature: Rental Management
 #    equipment module
     And the following equipment records were persisted in db
       | id             | serialNumber | uid            | status   | type    | model   | condition |
-      | <equipmentId>  | EQ-001       | BIKE-001       | RESERVED | bicycle | Model A | Good      |
-      | <equipmentId2> | EQ-003       | HELM-ADULT-001 | RESERVED | helmet  | Model B | Excellent |
+      | <equipmentId>  | EQ-001       | BIKE-001       | RESERVED | BICYCLE | Model A | Good      |
+      | <equipmentId2> | EQ-003       | HELM-ADULT-001 | RESERVED | HELMET  | Model B | Excellent |
     Examples:
       | customerId | equipmentId | equipmentId2 | plannedDuration |
       | CUS1       | 1           | 3            | 120             |
@@ -98,7 +98,7 @@ Feature: Rental Management
     Given today is "2026-02-09"
     And the following equipment records exist in db
       | id | serialNumber | uid       | status    | type  | model   | condition |
-      | 4  | EQ-005       | OTHER-004 | AVAILABLE | other | Other X | Good      |
+      | 4  | EQ-005       | OTHER-004 | AVAILABLE | OTHER | Other X | Good      |
     And a rental request with the following data
       | customerId | equipmentIds | duration | tariffId | operatorId |
       | CUS1       | 4            | 120      |          | OP1        |
@@ -107,9 +107,9 @@ Feature: Rental Management
     And the response contains
       | path                   | value                                                                                            |
       | $.title                | Suitable tariff not found                                                                        |
-      | $.detail               | No suitable tariff found for equipment type 'other' on date 2026-02-09 for duration: 120 minutes |
+      | $.detail               | No suitable tariff found for equipment type 'OTHER' on date 2026-02-09 for duration: 120 minutes |
       | $.errorCode            | tariff.suitable.not_found                                                                        |
-      | $.params.equipmentType | other                                                                                            |
+      | $.params.equipmentType | OTHER                                                                                            |
       | $.params.rentalDate    | 2026-02-09                                                                                       |
       | $.params.duration      | 120                                                                                              |
 
@@ -136,8 +136,8 @@ Feature: Rental Management
       | <rentalId> | <customerId> | <plannedDuration> | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId | equipmentUid   | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | <rentalId> | 1           | BIKE-001       | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
-      | <rentalId> | 3           | HELM-ADULT-001 | helm          | 3        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 20.00         | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | <rentalId> | 1           | BIKE-001       | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | <rentalId> | 3           | HELM-ADULT-001 | HELMET        | 3        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 20.00         | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path          | value |
       | replace | /equipmentIds | [2]   |
@@ -151,9 +151,9 @@ Feature: Rental Management
       | 2           | E-BIKE-001   | ASSIGNED | 15.00         |           |
     And the following equipment records were persisted in db
       | id | serialNumber | uid            | status    | type    | model   | condition |
-      | 1  | EQ-001       | BIKE-001       | AVAILABLE | bicycle | Model A | Good      |
-      | 2  | EQ-002       | E-BIKE-001     | RESERVED  | scooter | Model B | Excellent |
-      | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | helmet  | Model B | Excellent |
+      | 1  | EQ-001       | BIKE-001       | AVAILABLE | BICYCLE | Model A | Good      |
+      | 2  | EQ-002       | E-BIKE-001     | RESERVED  | SCOOTER | Model B | Excellent |
+      | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | HELMET  | Model B | Excellent |
     Examples:
       | rentalId | customerId | plannedDuration |
       | 1        | CUS1       | 60              |
@@ -183,7 +183,7 @@ Feature: Rental Management
 #    equipment module
     And the following equipment record was persisted in db
       | id | serialNumber | uid        | status   | type    | model   | condition |
-      | 2  | EQ-002       | E-BIKE-001 | RESERVED | scooter | Model B | Excellent |
+      | 2  | EQ-002       | E-BIKE-001 | RESERVED | SCOOTER | Model B | Excellent |
 # second update equipments
     And the rental update request is
       | op      | path          | value |
@@ -207,7 +207,7 @@ Feature: Rental Management
       | <rentalId> | <customerId> | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId   | equipmentId   | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | <rentalId> | <equipmentId> | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
+      | <rentalId> | <equipmentId> | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path      | value |
       | replace | /duration | 180   |
@@ -233,7 +233,7 @@ Feature: Rental Management
       | <rentalId> | <customer> | DRAFT  | 120             | <now>     | <now>     |
     And rental equipment exists in the database with the following data
       | rentalId   | equipmentId   | equipmentUid | equipmentType | tariffId   | status   | startedAt           | expectedReturnAt    | estimatedCost   | createdAt           |
-      | <rentalId> | <equipmentId> | BIKE-001     | bicycle       | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | <estimatedCost> | 2026-02-10T08:00:00 |
+      | <rentalId> | <equipmentId> | BIKE-001     | BICYCLE       | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | <estimatedCost> | 2026-02-10T08:00:00 |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount          | customerId | operatorId | sourceType | sourceId   | recordedAt          | idempotencyKey |
       | TX2 | HOLD | CASH          | <estimatedCost> | <customer> | OP1        | RENTAL     | <rentalId> | 2026-02-10T08:00:00 | IDK2           |
@@ -263,7 +263,7 @@ Feature: Rental Management
       | <customer> | <equipmentId> | <now>     |
     And the following equipment record was persisted in db
       | id            | serialNumber | uid      | status | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
+      | <equipmentId> | EQ-001       | BIKE-001 | RENTED | BICYCLE | Model A | Good      |
     Examples:
       | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
       | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |
@@ -275,7 +275,7 @@ Feature: Rental Management
       | <rentalId> | <customer> | DRAFT  | 120             | <now>     | <now>     |
     And rental equipment exists in the database with the following data
       | rentalId   | equipmentId   | equipmentUid | equipmentType | tariffId   | status   | startedAt           | expectedReturnAt    | estimatedCost   | createdAt           |
-      | <rentalId> | <equipmentId> | BIKE-001     | bicycle       | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | <estimatedCost> | 2026-02-10T08:00:00 |
+      | <rentalId> | <equipmentId> | BIKE-001     | BICYCLE       | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | <estimatedCost> | 2026-02-10T08:00:00 |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount          | customerId | operatorId | sourceType | sourceId   | recordedAt          | idempotencyKey |
       | TX2 | HOLD | CASH          | <estimatedCost> | <customer> | OP1        | RENTAL     | <rentalId> | 2026-02-10T08:00:00 | IDK2           |
@@ -305,7 +305,7 @@ Feature: Rental Management
       | <customer> | <equipmentId> | <now>     |
     And the following equipment record was persisted in db
       | id            | serialNumber | uid      | status | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | RENTED | bicycle | Model A | Good      |
+      | <equipmentId> | EQ-001       | BIKE-001 | RENTED | BICYCLE | Model A | Good      |
     Examples:
       | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
       | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |
@@ -316,7 +316,7 @@ Feature: Rental Management
       | 1  | CUS1       | DRAFT  | 120             | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path    | value  |
       | replace | /status | ACTIVE |
@@ -333,7 +333,7 @@ Feature: Rental Management
       | 1  | CUS1       | 1           | 2        | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path          | value |
       | replace | /customerId   | CUS2  |
@@ -352,7 +352,7 @@ Feature: Rental Management
       | 1  | CUS1       | 1           | 2        | DRAFT  | 60              | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           |
-      | 1        | 1           | BIKE-001     | bicycle       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
     And the rental update request is
       | op      | path          | value |
       | replace | /customerId   | CUS2  |
@@ -373,8 +373,8 @@ Feature: Rental Management
       | <rentalId> | <customerId> | <equipmentId> | <status> | <plannedDuration> | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     And rental equipment exists in the database with the following data
       | rentalId   | equipmentId   | equipmentUid   | equipmentType | tariffId   | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           |
-      | <rentalId> | <equipmentId> | BIKE-001       | bicycle       | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
-      | <rentalId> | 3             | HELM-ADULT-001 | helm          | 3          | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 10.00         | 2026-02-10T08:00:00 |
+      | <rentalId> | <equipmentId> | BIKE-001       | BICYCLE       | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
+      | <rentalId> | 3             | HELM-ADULT-001 | HELMET        | 3          | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 10.00         | 2026-02-10T08:00:00 |
     When a GET request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the rental response only contains

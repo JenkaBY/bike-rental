@@ -6,16 +6,16 @@ Feature: Equipment type endpoints
   Background:
     Given the following equipment types exist in the database
       | slug    | name    | description |
-      | bicycle | Bicycle | Two-wheeled |
-      | scooter | Scooter | Electric    |
+      | BICYCLE | Bicycle | Two-wheeled |
+      | SCOOTER | Scooter | Electric    |
 
   Scenario: Retrieve all types
     When a GET request has been made to "/api/equipment-types" endpoint
     Then the response status is 200
     And the 'equipment type' response only contains list of
       | slug    | name    | description |
-      | bicycle | Bicycle | Two-wheeled |
-      | scooter | Scooter | Electric    |
+      | BICYCLE | Bicycle | Two-wheeled |
+      | SCOOTER | Scooter | Electric    |
 
   Scenario Outline: Create a new type
     Given the 'equipment type' request is prepared with the following data
@@ -31,7 +31,7 @@ Feature: Equipment type endpoints
       | <slug> | <name> | <description> |
     Examples:
       | slug    | name    | description        |
-      | trailer | Trailer | Tow-behind trailer |
+      | TRAILER | Trailer | Tow-behind trailer |
 
   Scenario Outline: Update type by slug
     Given the 'equipment type' request is prepared with the following data
@@ -49,7 +49,7 @@ Feature: Equipment type endpoints
       | <slug> | <name> | <description> |
     Examples:
       | slug    | name        | description        |
-      | scooter | Big Trailer | Heavy-duty trailer |
+      | SCOOTER | Big Trailer | Heavy-duty trailer |
 
   Scenario: Update equipment type by slug when no status exists
     Given the equipment status request is prepared with the following data
