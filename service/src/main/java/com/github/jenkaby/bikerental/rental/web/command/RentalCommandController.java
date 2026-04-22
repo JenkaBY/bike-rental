@@ -24,6 +24,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -33,7 +34,7 @@ import java.util.Map;
 
 @Validated
 @RestController
-@RequestMapping("/api/rentals")
+@RequestMapping(path = "/api/rentals", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Slf4j
 @Tag(name = OpenApiConfig.Tags.RENTALS)
 class RentalCommandController {

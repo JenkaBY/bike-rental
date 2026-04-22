@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,7 +31,7 @@ import java.util.UUID;
 
 @Validated
 @RestController
-@RequestMapping("/api/finance/customers")
+@RequestMapping(path = "/api/finance/customers", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.FINANCE)
 @Slf4j
 public class AccountQueryController {

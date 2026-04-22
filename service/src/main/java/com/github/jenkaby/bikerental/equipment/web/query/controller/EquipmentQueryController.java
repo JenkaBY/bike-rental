@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @Slf4j
 @RestController
-@RequestMapping("/api/equipments")
+@RequestMapping(path = "/api/equipments", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.EQUIPMENT)
 public class EquipmentQueryController {
 

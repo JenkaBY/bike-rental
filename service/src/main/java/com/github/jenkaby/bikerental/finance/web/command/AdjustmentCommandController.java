@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Validated
 @RestController
-@RequestMapping("/api/finance/adjustments")
+@RequestMapping(path = "/api/finance/adjustments", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.FINANCE)
 @Slf4j
 public class AdjustmentCommandController {
