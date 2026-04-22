@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
-@RequestMapping("/api/equipment-types")
+@RequestMapping(path = "/api/equipment-types", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.EQUIPMENT_TYPES)
 public class EquipmentTypeCommandController {
 

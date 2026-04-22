@@ -1,7 +1,7 @@
 # BikeRental — Agent Guide
 
 Equipment rental management system built as a **Spring Boot 4 / Spring Modulith modular monolith** with hexagonal
-architecture. Read `memory-bank/` files before starting any task (see `.github/copilot-instructions.md`).
+architecture.
 Follow [the instructions](.github/instructions/agent-skills.instructions.md) to use agents for specific tasks.
 
 ---

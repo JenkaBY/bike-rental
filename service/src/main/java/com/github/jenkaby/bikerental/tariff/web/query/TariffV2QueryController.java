@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +40,7 @@ import java.util.List;
 @Validated
 @Slf4j
 @RestController
-@RequestMapping("/api/tariffs")
+@RequestMapping(path = "/api/tariffs", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.TARIFFS, description = "Tariff V2 API")
 public class TariffV2QueryController {
 

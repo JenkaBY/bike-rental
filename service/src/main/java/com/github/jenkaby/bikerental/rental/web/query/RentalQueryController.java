@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -32,7 +33,7 @@ import java.util.UUID;
 
 @Validated
 @RestController
-@RequestMapping("/api/rentals")
+@RequestMapping(path = "/api/rentals", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Slf4j
 @Tag(name = OpenApiConfig.Tags.RENTALS)
 class RentalQueryController {
