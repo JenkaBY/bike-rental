@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,19 +20,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-<span class="fc" id="L22">@Slf4j</span>
+<span class="fc" id="L23">@Slf4j</span>
 @RestController
-@RequestMapping(&quot;/api/equipment-types&quot;)
+@RequestMapping(path = &quot;/api/equipment-types&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.EQUIPMENT_TYPES)
 public class EquipmentTypeQueryController {
 
     private final GetEquipmentTypesUseCase useCase;
     private final EquipmentTypeMapper mapper;
 
-<span class="fc" id="L31">    EquipmentTypeQueryController(GetEquipmentTypesUseCase useCase, EquipmentTypeMapper mapper) {</span>
-<span class="fc" id="L32">        this.useCase = useCase;</span>
-<span class="fc" id="L33">        this.mapper = mapper;</span>
-<span class="fc" id="L34">    }</span>
+<span class="fc" id="L32">    EquipmentTypeQueryController(GetEquipmentTypesUseCase useCase, EquipmentTypeMapper mapper) {</span>
+<span class="fc" id="L33">        this.useCase = useCase;</span>
+<span class="fc" id="L34">        this.mapper = mapper;</span>
+<span class="fc" id="L35">    }</span>
 
     @GetMapping
     @Operation(summary = &quot;Get all equipment types&quot;)
@@ -41,10 +42,10 @@ public class EquipmentTypeQueryController {
             @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
     })
     public ResponseEntity&lt;List&lt;EquipmentTypeResponse&gt;&gt; getAllEquipmentTypes() {
-<span class="fc" id="L44">        log.info(&quot;[GET] Get all equipment types&quot;);</span>
-<span class="fc" id="L45">        var types = useCase.findAll();</span>
-<span class="fc" id="L46">        var responses = types.stream().map(mapper::toResponse).toList();</span>
-<span class="fc" id="L47">        return ResponseEntity.ok(responses);</span>
+<span class="fc" id="L45">        log.info(&quot;[GET] Get all equipment types&quot;);</span>
+<span class="fc" id="L46">        var types = useCase.findAll();</span>
+<span class="fc" id="L47">        var responses = types.stream().map(mapper::toResponse).toList();</span>
+<span class="fc" id="L48">        return ResponseEntity.ok(responses);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

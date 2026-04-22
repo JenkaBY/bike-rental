@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @Validated
-<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L22">@Slf4j</span>
 @RestController
-@RequestMapping(&quot;/api/tariffs&quot;)
+@RequestMapping(path = &quot;/api/tariffs&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.TARIFFS, description = &quot;Tariff V2 API&quot;)
 public class PricingTypeQueryController {
 
@@ -28,20 +29,20 @@ public class PricingTypeQueryController {
     private final TariffV2QueryMapper mapper;
 
     PricingTypeQueryController(GetPricingTypesUseCase getPricingTypesUseCase,
-<span class="fc" id="L31">                               TariffV2QueryMapper mapper) {</span>
-<span class="fc" id="L32">        this.getPricingTypesUseCase = getPricingTypesUseCase;</span>
-<span class="fc" id="L33">        this.mapper = mapper;</span>
-<span class="fc" id="L34">    }</span>
+<span class="fc" id="L32">                               TariffV2QueryMapper mapper) {</span>
+<span class="fc" id="L33">        this.getPricingTypesUseCase = getPricingTypesUseCase;</span>
+<span class="fc" id="L34">        this.mapper = mapper;</span>
+<span class="fc" id="L35">    }</span>
 
     @GetMapping(&quot;/pricing-types&quot;)
     @Operation(summary = &quot;Get all pricing types with localized title and description&quot;)
     @ApiResponses(@ApiResponse(responseCode = &quot;200&quot;, description = &quot;Pricing types list&quot;))
     public ResponseEntity&lt;List&lt;PricingTypeResponse&gt;&gt; getPricingTypes() {
-<span class="fc" id="L40">        log.info(&quot;[GET] Get pricing types&quot;);</span>
-<span class="fc" id="L41">        var list = getPricingTypesUseCase.execute().stream()</span>
-<span class="fc" id="L42">                .map(mapper::toResponse)</span>
-<span class="fc" id="L43">                .toList();</span>
-<span class="fc" id="L44">        return ResponseEntity.ok(list);</span>
+<span class="fc" id="L41">        log.info(&quot;[GET] Get pricing types&quot;);</span>
+<span class="fc" id="L42">        var list = getPricingTypesUseCase.execute().stream()</span>
+<span class="fc" id="L43">                .map(mapper::toResponse)</span>
+<span class="fc" id="L44">                .toList();</span>
+<span class="fc" id="L45">        return ResponseEntity.ok(list);</span>
     }
 }
 

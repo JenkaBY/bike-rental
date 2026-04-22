@@ -21,14 +21,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-<span class="fc" id="L29">@Slf4j</span>
+<span class="fc" id="L30">@Slf4j</span>
 @RestController
-@RequestMapping(&quot;/api/tariffs&quot;)
+@RequestMapping(path = &quot;/api/tariffs&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
 @Tag(name = OpenApiConfig.Tags.TARIFFS, description = &quot;Tariff V2 API&quot;)
 public class TariffV2CommandController {
@@ -45,14 +46,14 @@ public class TariffV2CommandController {
                               ActivateTariffV2UseCase activateUseCase,
                               DeactivateTariffV2UseCase deactivateUseCase,
                               TariffV2CommandMapper commandMapper,
-<span class="fc" id="L48">                              TariffV2QueryMapper queryMapper) {</span>
-<span class="fc" id="L49">        this.createUseCase = createUseCase;</span>
-<span class="fc" id="L50">        this.updateUseCase = updateUseCase;</span>
-<span class="fc" id="L51">        this.activateUseCase = activateUseCase;</span>
-<span class="fc" id="L52">        this.deactivateUseCase = deactivateUseCase;</span>
-<span class="fc" id="L53">        this.commandMapper = commandMapper;</span>
-<span class="fc" id="L54">        this.queryMapper = queryMapper;</span>
-<span class="fc" id="L55">    }</span>
+<span class="fc" id="L49">                              TariffV2QueryMapper queryMapper) {</span>
+<span class="fc" id="L50">        this.createUseCase = createUseCase;</span>
+<span class="fc" id="L51">        this.updateUseCase = updateUseCase;</span>
+<span class="fc" id="L52">        this.activateUseCase = activateUseCase;</span>
+<span class="fc" id="L53">        this.deactivateUseCase = deactivateUseCase;</span>
+<span class="fc" id="L54">        this.commandMapper = commandMapper;</span>
+<span class="fc" id="L55">        this.queryMapper = queryMapper;</span>
+<span class="fc" id="L56">    }</span>
 
     @PostMapping
     @Operation(summary = &quot;Create V2 tariff&quot;)
@@ -63,10 +64,10 @@ public class TariffV2CommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;TariffV2Response&gt; createTariff(@Valid @RequestBody @ValidTariffV2Pricing TariffV2Request request) {
-<span class="fc" id="L66">        log.info(&quot;[POST] Create V2 tariff with name {}&quot;, request.name());</span>
-<span class="fc" id="L67">        var command = commandMapper.toCreateCommand(request);</span>
-<span class="fc" id="L68">        var created = createUseCase.execute(command);</span>
-<span class="fc" id="L69">        return ResponseEntity.status(HttpStatus.CREATED).body(queryMapper.toResponse(created));</span>
+<span class="fc" id="L67">        log.info(&quot;[POST] Create V2 tariff with name {}&quot;, request.name());</span>
+<span class="fc" id="L68">        var command = commandMapper.toCreateCommand(request);</span>
+<span class="fc" id="L69">        var created = createUseCase.execute(command);</span>
+<span class="fc" id="L70">        return ResponseEntity.status(HttpStatus.CREATED).body(queryMapper.toResponse(created));</span>
     }
 
     @PutMapping(&quot;/{id}&quot;)
@@ -82,10 +83,10 @@ public class TariffV2CommandController {
     public ResponseEntity&lt;TariffV2Response&gt; updateTariff(
             @Parameter(description = &quot;Tariff ID&quot;) @PathVariable(&quot;id&quot;) @Id Long id,
             @Valid @RequestBody @ValidTariffV2Pricing TariffV2Request request) {
-<span class="fc" id="L85">        log.info(&quot;[PUT] Update V2 tariff with id {}&quot;, id);</span>
-<span class="fc" id="L86">        var command = commandMapper.toUpdateCommand(id, request);</span>
-<span class="fc" id="L87">        var updated = updateUseCase.execute(command);</span>
-<span class="fc" id="L88">        return ResponseEntity.ok(queryMapper.toResponse(updated));</span>
+<span class="fc" id="L86">        log.info(&quot;[PUT] Update V2 tariff with id {}&quot;, id);</span>
+<span class="fc" id="L87">        var command = commandMapper.toUpdateCommand(id, request);</span>
+<span class="fc" id="L88">        var updated = updateUseCase.execute(command);</span>
+<span class="fc" id="L89">        return ResponseEntity.ok(queryMapper.toResponse(updated));</span>
     }
 
     @PatchMapping(&quot;/{id}/activate&quot;)
@@ -97,9 +98,9 @@ public class TariffV2CommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;TariffV2Response&gt; activateTariff(@Parameter(description = &quot;Tariff ID&quot;) @PathVariable(&quot;id&quot;) @Id Long id) {
-<span class="fc" id="L100">        log.info(&quot;[PATCH] Activate V2 tariff with id {}&quot;, id);</span>
-<span class="fc" id="L101">        var activated = activateUseCase.execute(id);</span>
-<span class="fc" id="L102">        return ResponseEntity.ok(queryMapper.toResponse(activated));</span>
+<span class="fc" id="L101">        log.info(&quot;[PATCH] Activate V2 tariff with id {}&quot;, id);</span>
+<span class="fc" id="L102">        var activated = activateUseCase.execute(id);</span>
+<span class="fc" id="L103">        return ResponseEntity.ok(queryMapper.toResponse(activated));</span>
     }
 
     @PatchMapping(&quot;/{id}/deactivate&quot;)
@@ -111,9 +112,9 @@ public class TariffV2CommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;TariffV2Response&gt; deactivateTariff(@Parameter(description = &quot;Tariff ID&quot;) @PathVariable(&quot;id&quot;) @Id Long id) {
-<span class="fc" id="L114">        log.info(&quot;[PATCH] Deactivate V2 tariff with id {}&quot;, id);</span>
-<span class="fc" id="L115">        var deactivated = deactivateUseCase.execute(id);</span>
-<span class="fc" id="L116">        return ResponseEntity.ok(queryMapper.toResponse(deactivated));</span>
+<span class="fc" id="L115">        log.info(&quot;[PATCH] Deactivate V2 tariff with id {}&quot;, id);</span>
+<span class="fc" id="L116">        var deactivated = deactivateUseCase.execute(id);</span>
+<span class="fc" id="L117">        return ResponseEntity.ok(queryMapper.toResponse(deactivated));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

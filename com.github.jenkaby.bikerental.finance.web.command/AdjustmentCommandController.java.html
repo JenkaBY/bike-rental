@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,19 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Validated
 @RestController
-@RequestMapping(&quot;/api/finance/adjustments&quot;)
+@RequestMapping(path = &quot;/api/finance/adjustments&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.FINANCE)
-<span class="fc" id="L29">@Slf4j</span>
+<span class="fc" id="L30">@Slf4j</span>
 public class AdjustmentCommandController {
 
     private final ApplyAdjustmentUseCase applyAdjustmentUseCase;
     private final AdjustmentCommandMapper mapper;
 
     public AdjustmentCommandController(ApplyAdjustmentUseCase applyAdjustmentUseCase,
-<span class="fc" id="L36">                                       AdjustmentCommandMapper mapper) {</span>
-<span class="fc" id="L37">        this.applyAdjustmentUseCase = applyAdjustmentUseCase;</span>
-<span class="fc" id="L38">        this.mapper = mapper;</span>
-<span class="fc" id="L39">    }</span>
+<span class="fc" id="L37">                                       AdjustmentCommandMapper mapper) {</span>
+<span class="fc" id="L38">        this.applyAdjustmentUseCase = applyAdjustmentUseCase;</span>
+<span class="fc" id="L39">        this.mapper = mapper;</span>
+<span class="fc" id="L40">    }</span>
 
     @Operation(summary = &quot;Apply a manual balance adjustment to a customer wallet&quot;)
     @ApiResponses({
@@ -51,14 +52,14 @@ public class AdjustmentCommandController {
     })
     @PostMapping
     public ResponseEntity&lt;TransactionResponse&gt; applyAdjustment(@Valid @RequestBody AdjustmentRequest request) {
-<span class="fc" id="L54">        log.info(&quot;[POST] Apply adjustment request customerId={} amount={}&quot;, request.customerId(), request.amount());</span>
+<span class="fc" id="L55">        log.info(&quot;[POST] Apply adjustment request customerId={} amount={}&quot;, request.customerId(), request.amount());</span>
 
-<span class="fc" id="L56">        var command = mapper.toCommand(request);</span>
-<span class="fc" id="L57">        var result = applyAdjustmentUseCase.execute(command);</span>
+<span class="fc" id="L57">        var command = mapper.toCommand(request);</span>
+<span class="fc" id="L58">        var result = applyAdjustmentUseCase.execute(command);</span>
 
-<span class="fc" id="L59">        log.info(&quot;[POST] Adjustment applied transactionId={} customerId={}&quot;, result.transactionId(), request.customerId());</span>
+<span class="fc" id="L60">        log.info(&quot;[POST] Adjustment applied transactionId={} customerId={}&quot;, result.transactionId(), request.customerId());</span>
 
-<span class="fc" id="L61">        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(result));</span>
+<span class="fc" id="L62">        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(result));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

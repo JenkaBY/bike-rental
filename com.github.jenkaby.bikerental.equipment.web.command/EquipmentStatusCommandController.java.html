@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
-@RequestMapping(&quot;/api/equipment-statuses&quot;)
+@RequestMapping(path = &quot;/api/equipment-statuses&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.EQUIPMENT_STATUSES)
 public class EquipmentStatusCommandController {
 
@@ -37,12 +38,12 @@ public class EquipmentStatusCommandController {
     EquipmentStatusCommandController(CreateEquipmentStatusUseCase createUseCase,
                                      UpdateEquipmentStatusUseCase updateUseCase,
                                      EquipmentStatusCommandMapper commandMapper,
-<span class="fc" id="L40">                                     EquipmentStatusMapper queryMapper) {</span>
-<span class="fc" id="L41">        this.createUseCase = createUseCase;</span>
-<span class="fc" id="L42">        this.updateUseCase = updateUseCase;</span>
-<span class="fc" id="L43">        this.commandMapper = commandMapper;</span>
-<span class="fc" id="L44">        this.queryMapper = queryMapper;</span>
-<span class="fc" id="L45">    }</span>
+<span class="fc" id="L41">                                     EquipmentStatusMapper queryMapper) {</span>
+<span class="fc" id="L42">        this.createUseCase = createUseCase;</span>
+<span class="fc" id="L43">        this.updateUseCase = updateUseCase;</span>
+<span class="fc" id="L44">        this.commandMapper = commandMapper;</span>
+<span class="fc" id="L45">        this.queryMapper = queryMapper;</span>
+<span class="fc" id="L46">    }</span>
 
     @PostMapping
     @Operation(summary = &quot;Create equipment status&quot;)
@@ -55,9 +56,9 @@ public class EquipmentStatusCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;EquipmentStatusResponse&gt; create(@RequestBody @Valid EquipmentStatusRequest request) {
-<span class="fc" id="L58">        var command = commandMapper.toCreateCommand(request);</span>
-<span class="fc" id="L59">        var created = createUseCase.execute(command);</span>
-<span class="fc" id="L60">        return ResponseEntity.status(HttpStatus.CREATED).body(queryMapper.toResponse(created));</span>
+<span class="fc" id="L59">        var command = commandMapper.toCreateCommand(request);</span>
+<span class="fc" id="L60">        var created = createUseCase.execute(command);</span>
+<span class="fc" id="L61">        return ResponseEntity.status(HttpStatus.CREATED).body(queryMapper.toResponse(created));</span>
     }
 
     @PutMapping(&quot;/{slug}&quot;)
@@ -75,9 +76,9 @@ public class EquipmentStatusCommandController {
     public ResponseEntity&lt;EquipmentStatusResponse&gt; update(
             @Parameter(description = &quot;Equipment status slug&quot;, example = &quot;available&quot;) @PathVariable(&quot;slug&quot;) @Slug String slug,
             @RequestBody @Valid EquipmentStatusUpdateRequest request) {
-<span class="fc" id="L78">        var command = commandMapper.toUpdateCommand(slug, request);</span>
-<span class="fc" id="L79">        var updated = updateUseCase.execute(command);</span>
-<span class="fc" id="L80">        return ResponseEntity.ok(queryMapper.toResponse(updated));</span>
+<span class="fc" id="L79">        var command = commandMapper.toUpdateCommand(slug, request);</span>
+<span class="fc" id="L80">        var updated = updateUseCase.execute(command);</span>
+<span class="fc" id="L81">        return ResponseEntity.ok(queryMapper.toResponse(updated));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
