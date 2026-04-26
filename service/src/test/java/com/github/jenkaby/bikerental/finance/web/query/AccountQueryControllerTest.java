@@ -6,7 +6,7 @@ import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionH
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerAccountBalancesResponse;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.AccountQueryMapper;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionHistoryQueryMapper;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
@@ -114,7 +114,7 @@ class AccountQueryControllerTest {
             );
             var pageRequest = new PageRequest(20, 0, null);
             var page = new Page<>(List.of(entry), 1L, pageRequest);
-            var entryResponse = new TransactionResponse(
+            var entryResponse = new CustomerTransactionResponse(
                     CUSTOMER_ID,
                     new BigDecimal("50.00"),
                     "DEPOSIT",

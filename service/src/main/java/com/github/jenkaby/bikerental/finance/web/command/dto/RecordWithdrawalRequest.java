@@ -22,7 +22,8 @@ public record RecordWithdrawalRequest(
         @Schema(description = "Withdrawal amount", example = "30.00")
         @NotNull @DecimalMin(value = "0.01") @MoneyAmount BigDecimal amount,
 
-        @Schema(description = "Payout method (CASH, CARD_TERMINAL, BANK_TRANSFER)")
+        @Schema(description = "Payout method (CASH, CARD_TERMINAL, BANK_TRANSFER)",
+                allowableValues = {"CASH", "CARD_TERMINAL", "BANK_TRANSFER"})
         @NotNull PaymentMethod paymentMethod,
 
         @Schema(description = "Operator identifier", example = "operator-1")

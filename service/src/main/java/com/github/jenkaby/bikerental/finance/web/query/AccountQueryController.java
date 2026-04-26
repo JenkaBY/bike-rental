@@ -4,8 +4,8 @@ import com.github.jenkaby.bikerental.finance.application.usecase.GetCustomerAcco
 import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionHistoryUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
 import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerAccountBalancesResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionHistoryFilterParams;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.AccountQueryMapper;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionHistoryQueryMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
@@ -78,7 +78,7 @@ public class AccountQueryController {
             @ApiResponse(responseCode = "400", description = "Invalid request parameters",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity<Page<TransactionResponse>> getTransactionHistory(
+    public ResponseEntity<Page<CustomerTransactionResponse>> getTransactionHistory(
             @Parameter(description = "Customer UUID") @PathVariable("customerId") UUID customerId,
             @ModelAttribute TransactionHistoryFilterParams filterParams,
             @PageableDefault(size = 20) Pageable pageable) {

@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.steps.finance;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,14 +17,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RequiredArgsConstructor
 public class TransactionHistoryWebSteps {
 
-    private static final Comparator<TransactionResponse> COMPARING_BY_RECORDED_AT =
+    private static final Comparator<CustomerTransactionResponse> COMPARING_BY_RECORDED_AT =
             Comparator.comparing(e -> e.recordedAt().toString());
 
     private final ScenarioContext scenarioContext;
 
     @Then("the transaction history response only contains entries of")
-    public void theTransactionHistoryResponseOnlyContainsEntriesOf(List<TransactionResponse> expectedEntries) {
-        var actualEntries = scenarioContext.getResponseAsPage(TransactionResponse.class).items()
+    public void theTransactionHistoryResponseOnlyContainsEntriesOf(List<CustomerTransactionResponse> expectedEntries) {
+        var actualEntries = scenarioContext.getResponseAsPage(CustomerTransactionResponse.class).items()
                 .stream().sorted(COMPARING_BY_RECORDED_AT).toList();
         log.info("Comparing transaction history actual: {} with expected: {}", actualEntries, expectedEntries);
         assertThat(actualEntries)
@@ -51,7 +51,7 @@ public class TransactionHistoryWebSteps {
         }
     }
 
-    private void validateEntry(TransactionResponse actual, TransactionResponse expected) {
+    private void validateEntry(CustomerTransactionResponse actual, CustomerTransactionResponse expected) {
         log.info("Comparing transaction entry actual: {} with expected: {}", actual, expected);
         var softly = new SoftAssertions();
         softly.assertThat(actual.amount()).as("amount").isEqualByComparingTo(expected.amount());
