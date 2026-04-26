@@ -179,7 +179,7 @@ columns are plain strings in the response record, so no conversion is needed for
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import io.cucumber.java.DataTableType;
 
 import java.util.Map;
@@ -230,7 +230,7 @@ The pagination assertion (`totalItems`, `pageRequest.page`, `pageRequest.size`) 
 package com.github.jenkaby.bikerental.componenttest.steps.finance;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
