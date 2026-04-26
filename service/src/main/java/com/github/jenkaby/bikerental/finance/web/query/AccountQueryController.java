@@ -54,8 +54,7 @@ public class AccountQueryController {
     @GetMapping("/{customerId}/balances")
     @Operation(summary = "Retrieve customer account balances")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Account balances retrieved",
-                    content = @Content(schema = @Schema(implementation = CustomerAccountBalancesResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Account balances retrieved"),
             @ApiResponse(responseCode = "404", description = "Customer finance account not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "400", description = "Invalid customer UUID format",
@@ -71,8 +70,7 @@ public class AccountQueryController {
     @GetMapping("/{customerId}/transactions")
     @Operation(summary = "Retrieve paginated transaction history for a customer")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Transaction history retrieved",
-                    content = @Content(schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "200", description = "Transaction history retrieved"),
             @ApiResponse(responseCode = "404", description = "Customer finance account not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters",
