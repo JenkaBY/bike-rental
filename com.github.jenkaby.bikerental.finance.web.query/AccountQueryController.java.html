@@ -4,8 +4,8 @@ import com.github.jenkaby.bikerental.finance.application.usecase.GetCustomerAcco
 import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionHistoryUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
 import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerAccountBalancesResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionHistoryFilterParams;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.AccountQueryMapper;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionHistoryQueryMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
@@ -54,8 +54,7 @@ public class AccountQueryController {
     @GetMapping(&quot;/{customerId}/balances&quot;)
     @Operation(summary = &quot;Retrieve customer account balances&quot;)
     @ApiResponses({
-            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Account balances retrieved&quot;,
-                    content = @Content(schema = @Schema(implementation = CustomerAccountBalancesResponse.class))),
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Account balances retrieved&quot;),
             @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Customer finance account not found&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid customer UUID format&quot;,
@@ -63,34 +62,33 @@ public class AccountQueryController {
     })
     public ResponseEntity&lt;CustomerAccountBalancesResponse&gt; getBalances(
             @Parameter(description = &quot;Customer UUID&quot;) @PathVariable(&quot;customerId&quot;) UUID customerId) {
-<span class="fc" id="L66">        log.info(&quot;[GET] Retrieve balances for customerId={}&quot;, customerId);</span>
-<span class="fc" id="L67">        var result = getCustomerAccountBalancesUseCase.execute(customerId);</span>
-<span class="fc" id="L68">        return ResponseEntity.ok(mapper.toResponse(result));</span>
+<span class="fc" id="L65">        log.info(&quot;[GET] Retrieve balances for customerId={}&quot;, customerId);</span>
+<span class="fc" id="L66">        var result = getCustomerAccountBalancesUseCase.execute(customerId);</span>
+<span class="fc" id="L67">        return ResponseEntity.ok(mapper.toResponse(result));</span>
     }
 
     @GetMapping(&quot;/{customerId}/transactions&quot;)
     @Operation(summary = &quot;Retrieve paginated transaction history for a customer&quot;)
     @ApiResponses({
-            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Transaction history retrieved&quot;,
-                    content = @Content(schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Transaction history retrieved&quot;),
             @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Customer finance account not found&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request parameters&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity&lt;Page&lt;TransactionResponse&gt;&gt; getTransactionHistory(
+    public ResponseEntity&lt;Page&lt;CustomerTransactionResponse&gt;&gt; getTransactionHistory(
             @Parameter(description = &quot;Customer UUID&quot;) @PathVariable(&quot;customerId&quot;) UUID customerId,
             @ModelAttribute TransactionHistoryFilterParams filterParams,
             @PageableDefault(size = 20) Pageable pageable) {
 
-<span class="fc" id="L86">        log.info(&quot;[GET] Transaction history for customerId={} page={} size={} filter={}&quot;,</span>
-<span class="fc" id="L87">                customerId, pageable.getPageNumber(), pageable.getPageSize(), filterParams);</span>
-<span class="fc" id="L88">        var filter = new TransactionHistoryFilter(</span>
-<span class="fc" id="L89">                filterParams.fromDate(), filterParams.toDate(),</span>
-<span class="fc" id="L90">                filterParams.sourceId(), filterParams.sourceType());</span>
-<span class="fc" id="L91">        var pageRequest = new PageRequest(pageable.getPageSize(), pageable.getPageNumber(), null);</span>
-<span class="fc" id="L92">        var result = getTransactionHistoryUseCase.execute(customerId, filter, pageRequest);</span>
-<span class="fc" id="L93">        return ResponseEntity.ok(result.map(transactionHistoryQueryMapper::toResponse));</span>
+<span class="fc" id="L84">        log.info(&quot;[GET] Transaction history for customerId={} page={} size={} filter={}&quot;,</span>
+<span class="fc" id="L85">                customerId, pageable.getPageNumber(), pageable.getPageSize(), filterParams);</span>
+<span class="fc" id="L86">        var filter = new TransactionHistoryFilter(</span>
+<span class="fc" id="L87">                filterParams.fromDate(), filterParams.toDate(),</span>
+<span class="fc" id="L88">                filterParams.sourceId(), filterParams.sourceType());</span>
+<span class="fc" id="L89">        var pageRequest = new PageRequest(pageable.getPageSize(), pageable.getPageNumber(), null);</span>
+<span class="fc" id="L90">        var result = getTransactionHistoryUseCase.execute(customerId, filter, pageRequest);</span>
+<span class="fc" id="L91">        return ResponseEntity.ok(result.map(transactionHistoryQueryMapper::toResponse));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

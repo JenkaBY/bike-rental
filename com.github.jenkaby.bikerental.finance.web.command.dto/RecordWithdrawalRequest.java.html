@@ -22,7 +22,8 @@ import java.util.UUID;
         @Schema(description = &quot;Withdrawal amount&quot;, example = &quot;30.00&quot;)
         @NotNull @DecimalMin(value = &quot;0.01&quot;) @MoneyAmount BigDecimal amount,
 
-        @Schema(description = &quot;Payout method (CASH, CARD_TERMINAL, BANK_TRANSFER)&quot;)
+        @Schema(description = &quot;Payout method (CASH, CARD_TERMINAL, BANK_TRANSFER)&quot;,
+                allowableValues = {&quot;CASH&quot;, &quot;CARD_TERMINAL&quot;, &quot;BANK_TRANSFER&quot;})
         @NotNull PaymentMethod paymentMethod,
 
         @Schema(description = &quot;Operator identifier&quot;, example = &quot;operator-1&quot;)
