@@ -27,7 +27,7 @@ import com.github.jenkaby.bikerental.finance.domain.model.EntryDirection;
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionHistoryQueryMapper;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;

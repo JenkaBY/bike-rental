@@ -97,7 +97,7 @@ public record TransactionEntryResponse(
 package com.github.jenkaby.bikerental.finance.web.query.mapper;
 
 import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionHistoryUseCase.TransactionEntryDto;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import org.mapstruct.Mapper;
 
 @Mapper
@@ -116,7 +116,7 @@ public interface TransactionHistoryQueryMapper {
 ```java
 import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionHistoryUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionHistoryFilterParams;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionHistoryQueryMapper;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;

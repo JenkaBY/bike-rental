@@ -22,7 +22,7 @@ public record RecordDepositRequest(
         @Schema(description = "Deposit amount", example = "50.00")
         @NotNull @DecimalMin(value = "0.01") @MoneyAmount BigDecimal amount,
 
-        @Schema(description = "Payment method (CASH, CARD_TERMINAL, BANK_TRANSFER)")
+        @Schema(description = "Payment method (CASH, CARD_TERMINAL, BANK_TRANSFER)", allowableValues = {"CASH", "CARD_TERMINAL", "BANK_TRANSFER"})
         @NotNull PaymentMethod paymentMethod,
 
         @Schema(description = "Operator identifier", example = "operator-1")

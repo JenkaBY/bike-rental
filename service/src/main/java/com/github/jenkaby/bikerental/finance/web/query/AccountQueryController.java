@@ -4,8 +4,8 @@ import com.github.jenkaby.bikerental.finance.application.usecase.GetCustomerAcco
 import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionHistoryUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
 import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerAccountBalancesResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionHistoryFilterParams;
-import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.AccountQueryMapper;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionHistoryQueryMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
@@ -54,8 +54,7 @@ public class AccountQueryController {
     @GetMapping("/{customerId}/balances")
     @Operation(summary = "Retrieve customer account balances")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Account balances retrieved",
-                    content = @Content(schema = @Schema(implementation = CustomerAccountBalancesResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Account balances retrieved"),
             @ApiResponse(responseCode = "404", description = "Customer finance account not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "400", description = "Invalid customer UUID format",
@@ -71,14 +70,13 @@ public class AccountQueryController {
     @GetMapping("/{customerId}/transactions")
     @Operation(summary = "Retrieve paginated transaction history for a customer")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Transaction history retrieved",
-                    content = @Content(schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "200", description = "Transaction history retrieved"),
             @ApiResponse(responseCode = "404", description = "Customer finance account not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity<Page<TransactionResponse>> getTransactionHistory(
+    public ResponseEntity<Page<CustomerTransactionResponse>> getTransactionHistory(
             @Parameter(description = "Customer UUID") @PathVariable("customerId") UUID customerId,
             @ModelAttribute TransactionHistoryFilterParams filterParams,
             @PageableDefault(size = 20) Pageable pageable) {
