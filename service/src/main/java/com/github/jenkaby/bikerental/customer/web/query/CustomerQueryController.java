@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -52,9 +53,10 @@ class CustomerQueryController {
             @ApiResponse(responseCode = "400", description = "Invalid phone search pattern", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<List<CustomerSearchResponse>> searchByPhone(
-            @Parameter(description = "Phone digits to search (4–11 digits)", example = "9161")
+            @Parameter(description = "Phone digits to search (4–11 digits)", example = "9161", required = false)
             @RequestParam(name = "phone", required = false)
-            @Pattern(regexp = "^\\d{4,11}$", message = "Phone search must be 4 to 11 digits") String phone) {
+            @Pattern(regexp = "^\\d{4,11}$", message = "Phone search must be 4 to 11 digits")
+            @Nullable String phone) {
         log.info("[GET] Searching customers by phone: {}", phone);
         var results = customerQueryUseCase.searchByPhone(phone);
         log.info("[GET] Found {} customers matching phone: {}", results.size(), phone);
