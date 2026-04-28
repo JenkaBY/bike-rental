@@ -4,7 +4,10 @@ import com.github.jenkaby.bikerental.customer.domain.model.Customer;
 import com.github.jenkaby.bikerental.customer.domain.repository.CustomerRepository;
 import com.github.jenkaby.bikerental.customer.infrastructure.persistence.mapper.CustomerJpaMapper;
 import com.github.jenkaby.bikerental.customer.infrastructure.persistence.repository.CustomerJpaRepository;
-import org.springframework.data.domain.PageRequest;
+import com.github.jenkaby.bikerental.customer.infrastructure.persistence.specification.CustomerSpec;
+import com.github.jenkaby.bikerental.customer.infrastructure.persistence.specification.SpecConstant;
+import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,6 +17,9 @@ import java.util.UUID;
 @Component
 class CustomerRepositoryAdapter implements CustomerRepository {
 
+    private static final int FIRST_PAGE = 0;
+    private static final Sort SORT_BY_LAST_NAME_AND_FIRST_NAME_ASC = Sort.by(Sort.Direction.ASC, SpecConstant.LAST_NAME)
+            .and(Sort.by(Sort.Direction.ASC, SpecConstant.FIRST_NAME));
     private final CustomerJpaRepository repository;
     private final CustomerJpaMapper mapper;
 
@@ -46,8 +52,15 @@ class CustomerRepositoryAdapter implements CustomerRepository {
 
     @Override
     public List<Customer> searchByPhone(String phone, int limit) {
-        var pageable = PageRequest.of(0, limit);
-        return repository.findByPhoneContaining(phone, pageable).stream()
+        var pageable = org.springframework.data.domain.PageRequest.of(FIRST_PAGE, limit,
+                SORT_BY_LAST_NAME_AND_FIRST_NAME_ASC);
+
+        var customerSpec = SpecificationBuilder.specification(CustomerSpec.class)
+                .withParam(SpecConstant.PHONE, phone);
+        var spec = customerSpec.build();
+
+        var springPage = repository.findAll(spec, pageable);
+        return springPage.getContent().stream()
                 .map(mapper::toDomain)
                 .toList();
     }
