@@ -5,9 +5,7 @@ Feature: Customer Search by Phone
 
   Background:
     Given the request header "Content-Type" is "application/vnd.bikerental.v1+json"
-
-  Scenario: Search returns matching customers limited to 10 results
-    Given customers exist in the database with the following data
+    And customers exist in the database with the following data
       | phone        | firstName | lastName |
       | +79991234001 | Alex      | Doe      |
       | +79991234002 | Ben       | Doe      |
@@ -22,6 +20,8 @@ Feature: Customer Search by Phone
       | +79991234011 | Kyle      | Doe      |
       | +79991234012 | Liam      | Doe      |
       | +70000000000 | Nora      | Doe      |
+
+  Scenario: Search returns matching customers limited to 10 results
     When a GET request has been made to "/api/customers" endpoint with query parameters
       | phone |
       | 1234  |
@@ -32,6 +32,21 @@ Feature: Customer Search by Phone
       | +79991234005 |
       | +79991234010 |
 
+  Scenario: Search returns matching customers limited to 10 results
+    When a GET request has been made to "/api/customers" endpoint
+    Then the response status is 200
+    And the response list at "$" has size 10
+    And the response list at "$[*].phone" contains values
+      | +79991234001 |
+      | +79991234002 |
+      | +79991234003 |
+      | +79991234004 |
+      | +79991234005 |
+      | +79991234006 |
+      | +79991234007 |
+      | +79991234008 |
+      | +79991234009 |
+      | +79991234010 |
   Scenario: Search requires at least 4 digits
     When a GET request has been made to "/api/customers" endpoint with query parameters
       | phone |
