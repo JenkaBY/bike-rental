@@ -82,7 +82,6 @@ dependencies {
     implementation libs.specification.arg.resolver
 
     compileOnly libs.lombok
-    developmentOnly libs.spring.boot.devtools
     runtimeOnly libs.postgresql
 
     annotationProcessor libs.spring.boot.configuration.processor
