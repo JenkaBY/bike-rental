@@ -46,13 +46,13 @@ class CustomerQueryController {
     }
 
     @GetMapping
-    @Operation(summary = "Search customers by phone", description = "Returns customers whose phone number contains the given digit sequence. " +
+    @Operation(summary = "Search customers by phone and get first 10 customers", description = "Returns customers whose phone number contains the given digit sequence. " +
             "Returns 10 customers sorted by last and first name asc, if no phone provided, ")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Matching customers returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CustomerSearchResponse.class)))),
+            @ApiResponse(responseCode = "200", description = "customers", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CustomerSearchResponse.class)))),
             @ApiResponse(responseCode = "400", description = "Invalid phone search pattern", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity<List<CustomerSearchResponse>> searchByPhone(
+    public ResponseEntity<List<CustomerSearchResponse>> getAll(
             @Parameter(description = "Phone digits to search (4–11 digits)", example = "9161", required = false)
             @RequestParam(name = "phone", required = false)
             @Pattern(regexp = "^\\d{4,11}$", message = "Phone search must be 4 to 11 digits")
