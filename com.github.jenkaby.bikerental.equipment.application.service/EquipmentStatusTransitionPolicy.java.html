@@ -30,7 +30,7 @@ public class EquipmentStatusTransitionPolicy implements StatusTransitionPolicy {
         }
 
 <span class="fc" id="L32">        EquipmentStatus fromStatus = statusRepository.findBySlug(fromStatusSlug)</span>
-<span class="fc" id="L33">                .orElseThrow(() -&gt; new ReferenceNotFoundException(EquipmentStatus.class, fromStatusSlug));</span>
+<span class="pc" id="L33">                .orElseThrow(() -&gt; new ReferenceNotFoundException(EquipmentStatus.class, fromStatusSlug));</span>
 
 <span class="fc bfc" id="L35" title="All 2 branches covered.">        if (!fromStatus.canTransitionTo(toStatusSlug)) {</span>
 <span class="fc" id="L36">            throw new InvalidStatusTransitionException(equipmentId, fromStatusSlug, toStatusSlug);</span>

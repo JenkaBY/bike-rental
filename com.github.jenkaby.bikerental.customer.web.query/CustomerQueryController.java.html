@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -28,7 +29,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping(path = &quot;/api/customers&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
-<span class="fc" id="L31">@Slf4j</span>
+<span class="fc" id="L32">@Slf4j</span>
 @Tag(name = OpenApiConfig.Tags.CUSTOMERS)
 class CustomerQueryController {
 
@@ -38,24 +39,28 @@ class CustomerQueryController {
 
     CustomerQueryController(CustomerQueryUseCase customerQueryUseCase,
                             GetCustomerByIdUseCase getCustomerByIdUseCase,
-<span class="fc" id="L41">                            CustomerWebMapper customerMapper) {</span>
-<span class="fc" id="L42">        this.customerQueryUseCase = customerQueryUseCase;</span>
-<span class="fc" id="L43">        this.mapper = customerMapper;</span>
-<span class="fc" id="L44">        this.getCustomerByIdUseCase = getCustomerByIdUseCase;</span>
-<span class="fc" id="L45">    }</span>
+<span class="fc" id="L42">                            CustomerWebMapper customerMapper) {</span>
+<span class="fc" id="L43">        this.customerQueryUseCase = customerQueryUseCase;</span>
+<span class="fc" id="L44">        this.mapper = customerMapper;</span>
+<span class="fc" id="L45">        this.getCustomerByIdUseCase = getCustomerByIdUseCase;</span>
+<span class="fc" id="L46">    }</span>
 
     @GetMapping
-    @Operation(summary = &quot;Search customers by phone&quot;, description = &quot;Returns customers whose phone number contains the given digit sequence&quot;)
+    @Operation(summary = &quot;Search customers by phone and get first 10 customers&quot;, description = &quot;Returns customers whose phone number contains the given digit sequence. &quot; +
+            &quot;Returns 10 customers sorted by last and first name asc, if no phone provided, &quot;)
     @ApiResponses({
-            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Matching customers returned&quot;, content = @Content(array = @ArraySchema(schema = @Schema(implementation = CustomerSearchResponse.class)))),
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;customers&quot;, content = @Content(array = @ArraySchema(schema = @Schema(implementation = CustomerSearchResponse.class)))),
             @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid phone search pattern&quot;, content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity&lt;List&lt;CustomerSearchResponse&gt;&gt; searchByPhone(
-            @Parameter(description = &quot;Phone digits to search (4–11 digits)&quot;, example = &quot;9161&quot;) @RequestParam(&quot;phone&quot;) @Pattern(regexp = &quot;^\\d{4,11}$&quot;, message = &quot;Phone search must be 4 to 11 digits&quot;) String phone) {
-<span class="fc" id="L55">        log.info(&quot;[GET] Searching customers by phone: {}&quot;, phone);</span>
-<span class="fc" id="L56">        var results = customerQueryUseCase.searchByPhone(phone);</span>
-<span class="fc" id="L57">        log.info(&quot;[GET] Found {} customers matching phone: {}&quot;, results.size(), phone);</span>
-<span class="fc" id="L58">        return ResponseEntity.ok(mapper.toSearchResponses(results));</span>
+    public ResponseEntity&lt;List&lt;CustomerSearchResponse&gt;&gt; getAll(
+            @Parameter(description = &quot;Phone digits to search (4–11 digits)&quot;, example = &quot;9161&quot;, required = false)
+            @RequestParam(name = &quot;phone&quot;, required = false)
+            @Pattern(regexp = &quot;^\\d{4,11}$&quot;, message = &quot;Phone search must be 4 to 11 digits&quot;)
+            @Nullable String phone) {
+<span class="fc" id="L60">        log.info(&quot;[GET] Searching customers by phone: {}&quot;, phone);</span>
+<span class="fc" id="L61">        var results = customerQueryUseCase.searchByPhone(phone);</span>
+<span class="fc" id="L62">        log.info(&quot;[GET] Found {} customers matching phone: {}&quot;, results.size(), phone);</span>
+<span class="fc" id="L63">        return ResponseEntity.ok(mapper.toSearchResponses(results));</span>
     }
 
     @GetMapping(&quot;/{id}&quot;)
@@ -68,9 +73,9 @@ class CustomerQueryController {
     public ResponseEntity&lt;CustomerResponse&gt; getById(
             @Parameter(description = &quot;Customer UUID&quot;, example = &quot;3fa85f64-5717-4562-b3fc-2c963f66afa6&quot;)
             @PathVariable(&quot;id&quot;) UUID id) {
-<span class="fc" id="L71">        log.info(&quot;[GET] Fetching customer by id: {}&quot;, id);</span>
-<span class="fc" id="L72">        var customer = getCustomerByIdUseCase.getById(id);</span>
-<span class="fc" id="L73">        return ResponseEntity.ok(mapper.toResponse(customer));</span>
+<span class="fc" id="L76">        log.info(&quot;[GET] Fetching customer by id: {}&quot;, id);</span>
+<span class="fc" id="L77">        var customer = getCustomerByIdUseCase.getById(id);</span>
+<span class="fc" id="L78">        return ResponseEntity.ok(mapper.toResponse(customer));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
