@@ -11,6 +11,7 @@
 - [ ] [Optional] Add ability to set up special price and discount during return equipments. Now discount and special
   tariff can be applied during creation rental only
 - [ ] Create separate use cases for customer scenarios
+- [ ] Use the same email validator for both request and EmailAddress
 
 --- 
 
