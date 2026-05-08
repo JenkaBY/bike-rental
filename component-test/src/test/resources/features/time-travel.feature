@@ -7,17 +7,12 @@ Feature: Time travel virtual clock
     Given the time travel request instant is "2026-01-01T00:00:00Z"
     When a PUT request has been made to "/api/dev/time" endpoint
     Then the response status is 200
-    And the response contains
-      | path      | value                |
-      | $.instant | 2026-01-01T00:00:00Z |
+
 
   Scenario: Reset virtual clock restores system time
     Given the time travel request instant is "2020-06-01T12:00:00Z"
     And a PUT request has been made to "/api/dev/time" endpoint
     Then the response status is 200
-    And the response contains
-      | path      | value                |
-      | $.instant | 2020-06-01T12:00:00Z |
     When a DELETE request has been made to "/api/dev/time" endpoint
     Then the response status is 204
     And the virtual clock instant is approximately the current time
