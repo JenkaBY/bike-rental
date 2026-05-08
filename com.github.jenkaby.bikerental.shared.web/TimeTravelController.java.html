@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeTravelController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.shared.web</a> &gt; <span class="el_source">TimeTravelController.java</span></div><h1>TimeTravelController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.shared.web;
+
+import com.github.jenkaby.bikerental.shared.config.DevClockConfig.SettableClock;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
+import java.time.Instant;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+@Profile({&quot;dev&quot;, &quot;test&quot;})
+@RestController
+@RequestMapping(&quot;/api/dev/time&quot;)
+public class TimeTravelController {
+
+    private final SettableClock settableClock;
+    private final long sseIntervalMs;
+
+    public TimeTravelController(
+            SettableClock settableClock,
+            @Value(&quot;${app.dev.virtual-clock.sse-interval-ms:1000}&quot;) long sseIntervalMs
+<span class="fc" id="L29">    ) {</span>
+<span class="fc" id="L30">        this.settableClock = settableClock;</span>
+<span class="fc" id="L31">        this.sseIntervalMs = sseIntervalMs;</span>
+<span class="fc" id="L32">    }</span>
+
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity&lt;TimeResponse&gt; setTime(@Valid @RequestBody SetTimeRequest request) {
+<span class="fc" id="L36">        settableClock.setInstant(request.instant());</span>
+<span class="fc" id="L37">        return ResponseEntity.ok(new TimeResponse(settableClock.instant()));</span>
+    }
+
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamTime() {
+<span class="nc" id="L42">        SseEmitter emitter = new SseEmitter(0L);</span>
+<span class="nc" id="L43">        var executor = Executors.newSingleThreadScheduledExecutor();</span>
+<span class="nc" id="L44">        executor.scheduleAtFixedRate(() -&gt; {</span>
+            try {
+<span class="nc" id="L46">                emitter.send(SseEmitter.event()</span>
+<span class="nc" id="L47">                        .data(new TimeEvent(settableClock.instant(), settableClock.isFixed())));</span>
+<span class="nc" id="L48">            } catch (IOException e) {</span>
+<span class="nc" id="L49">                emitter.completeWithError(e);</span>
+<span class="nc" id="L50">                executor.shutdown();</span>
+<span class="nc" id="L51">            }</span>
+<span class="nc" id="L52">        }, 0, sseIntervalMs, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L53">        emitter.onCompletion(executor::shutdown);</span>
+<span class="nc" id="L54">        emitter.onTimeout(executor::shutdown);</span>
+<span class="nc" id="L55">        return emitter;</span>
+    }
+
+    @DeleteMapping
+    public ResponseEntity&lt;Void&gt; resetTime() {
+<span class="fc" id="L60">        settableClock.reset();</span>
+<span class="fc" id="L61">        return ResponseEntity.noContent().build();</span>
+    }
+
+<span class="fc" id="L64">    public record SetTimeRequest(</span>
+            @NotNull(message = &quot;instant must not be null&quot;)
+            Instant instant
+    ) {
+    }
+
+<span class="fc" id="L70">    public record TimeResponse(@NotNull Instant instant) {</span>
+    }
+
+<span class="nc" id="L73">    public record TimeEvent(@NotNull Instant instant, boolean fixed) {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

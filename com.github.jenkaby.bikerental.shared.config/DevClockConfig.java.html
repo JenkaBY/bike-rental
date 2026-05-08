@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DevClockConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.shared.config</a> &gt; <span class="el_source">DevClockConfig.java</span></div><h1>DevClockConfig.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.shared.config;
+
+import lombok.Setter;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+
+@Profile({&quot;dev&quot;, &quot;test&quot;})
+@Configuration
+<span class="fc" id="L18">public class DevClockConfig {</span>
+
+    @Primary
+    @Bean
+    public SettableClock clock(Clock applicationClock) {
+<span class="fc" id="L23">        return new SettableClock(applicationClock);</span>
+    }
+
+    public static final class SettableClock extends Clock {
+
+        @Setter
+        private @Nullable Instant fixedInstant;
+        private @Nullable Clock offsetClock;
+        private final Clock delegate;
+
+<span class="fc" id="L33">        public SettableClock(Clock original) {</span>
+<span class="fc" id="L34">            this.delegate = original;</span>
+<span class="fc" id="L35">        }</span>
+
+        public void setInstant(@NonNull Instant desiredInstant) {
+<span class="fc" id="L38">            this.fixedInstant = desiredInstant;</span>
+<span class="fc" id="L39">            this.offsetClock = Clock.offset(delegate, Duration.between(delegate.instant(), desiredInstant));</span>
+<span class="fc" id="L40">        }</span>
+
+        public void reset() {
+<span class="fc" id="L43">            this.fixedInstant = null;</span>
+<span class="fc" id="L44">            this.offsetClock = null;</span>
+<span class="fc" id="L45">        }</span>
+
+        @Override
+        public ZoneId getZone() {
+<span class="fc" id="L49">            return getClock().getZone();</span>
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+<span class="nc" id="L54">            SettableClock mutableClock = new SettableClock(getClock().withZone(zone));</span>
+<span class="nc" id="L55">            mutableClock.setFixedInstant(fixedInstant);</span>
+<span class="nc" id="L56">            return mutableClock;</span>
+        }
+
+        @Override
+        public Instant instant() {
+<span class="fc" id="L61">            return getClock().instant();</span>
+        }
+
+        public boolean isFixed() {
+<span class="nc bnc" id="L65" title="All 2 branches missed.">            return this.offsetClock != null;</span>
+        }
+
+        private Clock getClock() {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            return offsetClock != null ? offsetClock : delegate;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
