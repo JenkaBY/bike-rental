@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.steps.common;
 
 import com.github.jenkaby.bikerental.componenttest.config.ClockTestConfig;
+import com.github.jenkaby.bikerental.shared.config.DevClockConfig;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,9 @@ public class DateTimeSteps {
     @After("@ResetClock")
     public void resetClock() {
         if (clock instanceof ClockTestConfig.MutableClock mutableClock) {
+            mutableClock.reset();
+            log.info("Reset the clock to the system time");
+        } else if (clock instanceof DevClockConfig.SettableClock mutableClock) {
             mutableClock.reset();
             log.info("Reset the clock to the system time");
         } else {
@@ -50,6 +54,10 @@ public class DateTimeSteps {
         if (clock instanceof ClockTestConfig.MutableClock mutableClock) {
             mutableClock.setInstant(currentTime);
             log.debug("Set project widely the current time: {}", currentTime);
+        } else if (clock instanceof DevClockConfig.SettableClock mutableClock) {
+            mutableClock.setInstant(currentTime);
+            log.debug("Set project widely the current time: {}", currentTime);
+
         } else {
             log.warn("Clock is not mutable, cannot set current time to {}", currentTime);
         }

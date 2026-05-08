@@ -1,32 +1,36 @@
-package com.github.jenkaby.bikerental.componenttest.config;
+package com.github.jenkaby.bikerental.shared.config;
 
 import lombok.Setter;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 
-@Configuration(proxyBeanMethods = false)
-public class ClockTestConfig {
+@Profile({"dev", "test"})
+@Configuration
+public class DevClockConfig {
 
-    //    @Bean
-//    @Primary
-    public Clock mutableClock(Clock applicationClock) {
-        return new MutableClock(applicationClock);
+    @Primary
+    @Bean
+    public SettableClock clock(Clock applicationClock) {
+        return new SettableClock(applicationClock);
     }
 
-    // Not ThreadSafe, but sufficient for single-threaded component tests
-    public static class MutableClock extends Clock {
+    public static final class SettableClock extends Clock {
+
         @Setter
         private @Nullable Instant fixedInstant;
         private @Nullable Clock offsetClock;
         private final Clock delegate;
 
-        public MutableClock(Clock original) {
+        public SettableClock(Clock original) {
             this.delegate = original;
         }
 
@@ -47,7 +51,7 @@ public class ClockTestConfig {
 
         @Override
         public Clock withZone(ZoneId zone) {
-            MutableClock mutableClock = new MutableClock(getClock().withZone(zone));
+            SettableClock mutableClock = new SettableClock(getClock().withZone(zone));
             mutableClock.setFixedInstant(fixedInstant);
             return mutableClock;
         }
@@ -55,6 +59,10 @@ public class ClockTestConfig {
         @Override
         public Instant instant() {
             return getClock().instant();
+        }
+
+        public boolean isFixed() {
+            return this.offsetClock != null;
         }
 
         private Clock getClock() {

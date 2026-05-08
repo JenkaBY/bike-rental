@@ -39,3 +39,6 @@ app:
     allowed-headers: "*"
     allow-credentials: false
     max-age: 3600
+  dev:
+    virtual-clock:
+      sse-interval-ms: 1000
