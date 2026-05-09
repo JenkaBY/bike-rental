@@ -62,8 +62,8 @@ public class EquipmentQueryMapperImpl implements EquipmentQueryMapper {
     }
 
     @Override
-    public SearchEquipmentsUseCase.SearchEquipmentsQuery toSearchQuery(String status, String type, Pageable pageable) {
-<span class="pc bpc" id="L66" title="1 of 6 branches missed.">        if ( status == null &amp;&amp; type == null &amp;&amp; pageable == null ) {</span>
+    public SearchEquipmentsUseCase.SearchEquipmentsQuery toSearchQuery(String status, String type, String searchText, Pageable pageable) {
+<span class="pc bpc" id="L66" title="1 of 8 branches missed.">        if ( status == null &amp;&amp; type == null &amp;&amp; searchText == null &amp;&amp; pageable == null ) {</span>
 <span class="nc" id="L67">            return null;</span>
         }
 
@@ -71,12 +71,14 @@ public class EquipmentQueryMapperImpl implements EquipmentQueryMapper {
 <span class="fc" id="L71">        statusSlug = status;</span>
 <span class="fc" id="L72">        String typeSlug = null;</span>
 <span class="fc" id="L73">        typeSlug = type;</span>
-<span class="fc" id="L74">        PageRequest pageRequest = null;</span>
-<span class="fc" id="L75">        pageRequest = pageMapper.toPageRequest( pageable );</span>
+<span class="fc" id="L74">        String searchText1 = null;</span>
+<span class="fc" id="L75">        searchText1 = searchText;</span>
+<span class="fc" id="L76">        PageRequest pageRequest = null;</span>
+<span class="fc" id="L77">        pageRequest = pageMapper.toPageRequest( pageable );</span>
 
-<span class="fc" id="L77">        SearchEquipmentsUseCase.SearchEquipmentsQuery searchEquipmentsQuery = new SearchEquipmentsUseCase.SearchEquipmentsQuery( statusSlug, typeSlug, pageRequest );</span>
+<span class="fc" id="L79">        SearchEquipmentsUseCase.SearchEquipmentsQuery searchEquipmentsQuery = new SearchEquipmentsUseCase.SearchEquipmentsQuery( statusSlug, typeSlug, searchText1, pageRequest );</span>
 
-<span class="fc" id="L79">        return searchEquipmentsQuery;</span>
+<span class="fc" id="L81">        return searchEquipmentsQuery;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

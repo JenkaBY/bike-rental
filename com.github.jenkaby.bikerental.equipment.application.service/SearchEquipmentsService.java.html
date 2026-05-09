@@ -20,7 +20,7 @@ class SearchEquipmentsService implements SearchEquipmentsUseCase {
     public Page&lt;Equipment&gt; execute(SearchEquipmentsQuery query) {
 <span class="fc" id="L21">        PageRequest pageRequest = query.pageRequest();</span>
 
-<span class="fc" id="L23">        return repository.findAll(query.statusSlug(), query.typeSlug(), pageRequest);</span>
+<span class="fc" id="L23">        return repository.findAll(query.statusSlug(), query.typeSlug(), query.searchText(), pageRequest);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
