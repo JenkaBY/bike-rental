@@ -27,7 +27,6 @@ import lombok.experimental.UtilityClass;
 * **Location:** New file — full content below.
 
 * **Snippet:**
-
 ```java
 package com.github.jenkaby.bikerental.equipment.infrastructure.persistence.specification;
 

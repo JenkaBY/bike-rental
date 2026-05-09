@@ -35,7 +35,6 @@ import org.springframework.data.jpa.domain.Specification;
 * **Location:** New file — full content below.
 
 * **Snippet:**
-
 ```java
 package com.github.jenkaby.bikerental.equipment.infrastructure.persistence.specification;
 

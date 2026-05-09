@@ -34,7 +34,6 @@ import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
 * **Location:** Replace the entire `findAll` method inside `EquipmentRepositoryAdapter`.
 
 * **Current code (as left by FR-01 task 004):**
-
 ```java
     @Override
     public Page<Equipment> findAll(String statusSlug, String typeSlug, String searchText, PageRequest request) {
@@ -47,7 +46,6 @@ import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
 ```
 
 * **Snippet (replace with):**
-
 ```java
     @Override
     public Page<Equipment> findAll(String statusSlug, String typeSlug, String searchText, PageRequest request) {

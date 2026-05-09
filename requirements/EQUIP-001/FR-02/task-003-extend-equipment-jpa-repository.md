@@ -37,13 +37,11 @@ import org.springframework.data.repository.query.Param;
 * **Location — interface declaration:** Replace the `extends` clause on `EquipmentJpaRepository`.
 
 * **Current code:**
-
 ```java
 public interface EquipmentJpaRepository extends JpaRepository<EquipmentJpaEntity, Long> {
 ```
 
 * **Snippet (replace with):**
-
 ```java
 public interface EquipmentJpaRepository extends JpaRepository<EquipmentJpaEntity, Long>,
         JpaSpecificationExecutor<EquipmentJpaEntity> {
@@ -55,7 +53,6 @@ public interface EquipmentJpaRepository extends JpaRepository<EquipmentJpaEntity
   interface.
 
 * **Current code to delete:**
-
 ```java
     @Query("SELECT e FROM EquipmentJpaEntity e WHERE " +
             "(:statusSlug IS NULL OR e.statusSlug = :statusSlug) AND " +
