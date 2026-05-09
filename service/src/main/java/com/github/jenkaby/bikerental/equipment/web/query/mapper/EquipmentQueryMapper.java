@@ -24,5 +24,6 @@ public interface EquipmentQueryMapper {
     SearchEquipmentsUseCase.SearchEquipmentsQuery toSearchQuery(
             String status,
             String type,
+            String searchText,
             Pageable pageable);
 }

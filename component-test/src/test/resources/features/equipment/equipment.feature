@@ -15,11 +15,14 @@ Feature: Equipment management endpoints
       | BICYCLE | Bicycle | Two-wheeled |
       | SCOOTER | Scooter | Electric    |
     And the following equipment records exist in db
-      | id | serialNumber | uid        | status    | type    | model   | commissionedAt | condition |
-      | 1  | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A |                | Good      |
-      | 2  | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B |                | Excellent |
-      | 3  | EQ-005       | BIKE-003   | AVAILABLE | BICYCLE | Model C |                | Fair      |
-      | 4  | EQ-004       | BIKE-002   | BROKEN    | BICYCLE | Model C | 2026-01-30     | Fair      |
+      | id | serialNumber | uid        | status    | type    | model      | commissionedAt | condition |
+      | 1  | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A    |                | Good      |
+      | 2  | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B    |                | Excellent |
+      | 3  | EQ-005       | BIKE-003   | AVAILABLE | BICYCLE | Model C    |                | Fair      |
+      | 4  | EQ-004       | BIKE-002   | BROKEN    | BICYCLE | Model C    | 2026-01-30     | Fair      |
+      | 5  | EQ-0066      | BIKE-00-   | AVAILABLE | BICYCLE | Model 1    |                | Good      |
+      | 6  | EQ-007       | BIKE-0066  | AVAILABLE | BICYCLE | Model 2    |                | Good      |
+      | 7  | EQ-009       | BIKE-009   | RENTED    | BICYCLE | Model 0066 |                | Good      |
 
   Scenario Outline: Get equipment by ID
     When a GET request has been made to "/api/equipments/{id}" endpoint with
@@ -50,11 +53,14 @@ Feature: Equipment management endpoints
     When a GET request has been made to "/api/equipments" endpoint
     Then the response status is 200
     And the equipment response only contains list of
-      | serialNumber | uid        | status    | type    | model   | commissionedAt | condition |
-      | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A |                | Good      |
-      | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B |                | Excellent |
-      | EQ-005       | BIKE-003   | AVAILABLE | BICYCLE | Model C |                | Fair      |
-      | EQ-004       | BIKE-002   | BROKEN    | BICYCLE | Model C | 2026-01-30     | Fair      |
+      | serialNumber | uid        | status    | type    | model      | commissionedAt | condition |
+      | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A    |                | Good      |
+      | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B    |                | Excellent |
+      | EQ-005       | BIKE-003   | AVAILABLE | BICYCLE | Model C    |                | Fair      |
+      | EQ-004       | BIKE-002   | BROKEN    | BICYCLE | Model C    | 2026-01-30     | Fair      |
+      | EQ-0066      | BIKE-00-   | AVAILABLE | BICYCLE | Model 1    |                | Good      |
+      | EQ-007       | BIKE-0066  | AVAILABLE | BICYCLE | Model 2    |                | Good      |
+      | EQ-009       | BIKE-009   | RENTED    | BICYCLE | Model 0066 |                | Good      |
 
   Scenario: Search equipments by status and pagination
     When a GET request has been made to "/api/equipments" endpoint with query parameters
@@ -65,6 +71,27 @@ Feature: Equipment management endpoints
       | serialNumber | uid      | status    | type    | model   | commissionedAt | condition |
       | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A |                | Good      |
       | EQ-005       | BIKE-003 | AVAILABLE | BICYCLE | Model C |                | Fair      |
+
+  Scenario: Search equipments by search text in serial number, uid and model
+    When a GET request has been made to "/api/equipments" endpoint with query parameters
+      | q    |
+      | 0066 |
+    Then the response status is 200
+    And the equipment response only contains list of
+      | serialNumber | uid       | status    | type    | model      | commissionedAt | condition |
+      | EQ-0066      | BIKE-00-  | AVAILABLE | BICYCLE | Model 1    |                | Good      |
+      | EQ-007       | BIKE-0066 | AVAILABLE | BICYCLE | Model 2    |                | Good      |
+      | EQ-009       | BIKE-009  | RENTED    | BICYCLE | Model 0066 |                | Good      |
+
+  Scenario: Search equipments by status and search text in serial number, uid and model
+    When a GET request has been made to "/api/equipments" endpoint with query parameters
+      | q    | status    |
+      | 0066 | AVAILABLE |
+    Then the response status is 200
+    And the equipment response only contains list of
+      | serialNumber | uid       | status    | type    | model   | commissionedAt | condition |
+      | EQ-0066      | BIKE-00-  | AVAILABLE | BICYCLE | Model 1 |                | Good      |
+      | EQ-007       | BIKE-0066 | AVAILABLE | BICYCLE | Model 2 |                | Good      |
 
   Scenario: Search equipments by type
     When a GET request has been made to "/api/equipments" endpoint with query parameters

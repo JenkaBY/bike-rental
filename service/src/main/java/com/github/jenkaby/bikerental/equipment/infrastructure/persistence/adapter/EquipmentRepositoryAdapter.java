@@ -5,11 +5,14 @@ import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentReposi
 import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.entity.EquipmentJpaEntity;
 import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.mapper.EquipmentJpaMapper;
 import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.repository.EquipmentJpaRepository;
+import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.specification.EquipmentSpec;
+import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.specification.EquipmentSpecConstant;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
+import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -58,10 +61,16 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     }
 
     @Override
-    public Page<Equipment> findAll(String statusSlug, String typeSlug, PageRequest request) {
+    public Page<Equipment> findAll(String statusSlug, String typeSlug, String searchText, PageRequest request) {
         var pageRequest = pageMapper.toSpring(request);
 
-        org.springframework.data.domain.Page<EquipmentJpaEntity> page = jpaRepository.findAllByFilters(statusSlug, typeSlug, pageRequest);
+        var spec = SpecificationBuilder.specification(EquipmentSpec.class)
+                .withParam(EquipmentSpecConstant.STATUS, statusSlug)
+                .withParam(EquipmentSpecConstant.TYPE, typeSlug)
+                .withParam(EquipmentSpecConstant.SEARCH, searchText)
+                .build();
+
+        org.springframework.data.domain.Page<EquipmentJpaEntity> page = jpaRepository.findAll(spec, pageRequest);
         return pageMapper.toDomain(page)
                 .map(mapper::toDomain);
     }
