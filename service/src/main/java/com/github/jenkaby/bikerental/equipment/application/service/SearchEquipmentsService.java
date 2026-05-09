@@ -20,6 +20,6 @@ class SearchEquipmentsService implements SearchEquipmentsUseCase {
     public Page<Equipment> execute(SearchEquipmentsQuery query) {
         PageRequest pageRequest = query.pageRequest();
 
-        return repository.findAll(query.statusSlug(), query.typeSlug(), pageRequest);
+        return repository.findAll(query.statusSlug(), query.typeSlug(), query.searchText(), pageRequest);
     }
 }

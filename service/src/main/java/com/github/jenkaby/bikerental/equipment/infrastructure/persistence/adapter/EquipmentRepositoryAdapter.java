@@ -58,7 +58,7 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     }
 
     @Override
-    public Page<Equipment> findAll(String statusSlug, String typeSlug, PageRequest request) {
+    public Page<Equipment> findAll(String statusSlug, String typeSlug, String searchText, PageRequest request) {
         var pageRequest = pageMapper.toSpring(request);
 
         org.springframework.data.domain.Page<EquipmentJpaEntity> page = jpaRepository.findAllByFilters(statusSlug, typeSlug, pageRequest);

@@ -107,7 +107,7 @@ public class EquipmentQueryController {
     }
 
     @GetMapping
-    @Operation(summary = "Search equipment", description = "Returns paginated equipment list filtered by status and/or type")
+    @Operation(summary = "Search equipment", description = "Returns paginated equipment list filtered by status, type, and/or free-text search across uid, serial number, and model")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Equipment page returned"),
             @ApiResponse(responseCode = "400", description = "Invalid filter parameters",
@@ -116,10 +116,11 @@ public class EquipmentQueryController {
     public ResponseEntity<Page<EquipmentResponse>> searchEquipments(
             @Parameter(description = "Status slug filter", example = "available") @RequestParam(name = "status", required = false) String status,
             @Parameter(description = "Type slug filter", example = "bike") @RequestParam(name = "type", required = false) String type,
+            @Parameter(description = "Free-text search across uid, serial number, and model (case-insensitive substring match)", example = "city") @RequestParam(name = "q", required = false) String q,
             @PageableDefault(size = 20, sort = "serialNumber", direction = Sort.Direction.ASC) Pageable pageable) {
 
-        log.info("[GET] Search equipments filters status={} type={}", status, type);
-        var query = mapper.toSearchQuery(status, type, pageable);
+        log.info("[GET] Search equipments filters status={} type={} q={}", status, type, q);
+        var query = mapper.toSearchQuery(status, type, q, pageable);
         var page = searchUseCase.execute(query).map(mapper::toResponse);
         return ResponseEntity.ok(page);
     }

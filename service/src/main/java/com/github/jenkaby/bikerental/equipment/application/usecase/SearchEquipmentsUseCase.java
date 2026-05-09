@@ -10,6 +10,7 @@ public interface SearchEquipmentsUseCase {
     record SearchEquipmentsQuery(
             String statusSlug,
             String typeSlug,
+            String searchText,
             PageRequest pageRequest
     ) {
     }

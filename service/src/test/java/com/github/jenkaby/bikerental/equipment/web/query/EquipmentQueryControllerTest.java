@@ -133,11 +133,9 @@ class EquipmentQueryControllerTest {
             var domain = mock(Equipment.class);
 
             var response = mock(EquipmentResponse.class);
-            // mapper.toSearchQuery(...) will be called by controller; provide a valid query object
-            given(mapper.toSearchQuery(any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
-                    null, null, new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, null)));
+            given(mapper.toSearchQuery(any(), any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
+                    null, null, null, new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, null)));
 
-            // create a properly typed Page<Equipment> to avoid generic inference issues
             var page = new Page<>(List.of(domain), 1L, new PageRequest(20, 0, null));
 
             given(searchUseCase.execute(any())).willReturn(page);
@@ -151,12 +149,32 @@ class EquipmentQueryControllerTest {
 
         @Test
         void searchEquipments_empty() throws Exception {
-            given(mapper.toSearchQuery(any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
-                    null, null, new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, null)));
+            given(mapper.toSearchQuery(any(), any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
+                    null, null, null, new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, null)));
 
             given(searchUseCase.execute(any())).willReturn(com.github.jenkaby.bikerental.shared.domain.model.vo.Page.empty(new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, null)));
 
             mockMvc.perform(get(API_EQUIPMENTS).accept(org.springframework.http.MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+
+            verify(searchUseCase).execute(any());
+        }
+
+        @Test
+        void searchEquipments_withQ_returnsOk() throws Exception {
+            var domain = mock(Equipment.class);
+            var response = mock(EquipmentResponse.class);
+            given(mapper.toSearchQuery(any(), any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
+                    null, null, "bike", new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, null)));
+
+            var page = new Page<>(List.of(domain), 1L, new PageRequest(20, 0, null));
+
+            given(searchUseCase.execute(any())).willReturn(page);
+            given(mapper.toResponse(domain)).willReturn(response);
+
+            mockMvc.perform(get(API_EQUIPMENTS)
+                            .param("q", "bike")
+                            .accept(org.springframework.http.MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
 
             verify(searchUseCase).execute(any());
