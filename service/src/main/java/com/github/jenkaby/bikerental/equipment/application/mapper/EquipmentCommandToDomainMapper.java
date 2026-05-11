@@ -12,14 +12,11 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(uses = {SerialNumberMapper.class, UidMapper.class})
 public interface EquipmentCommandToDomainMapper {
-    //TODO update conditions slug
+
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "conditionSlug", ignore = true)
     Equipment toEquipment(CreateEquipmentUseCase.CreateEquipmentCommand command);
 
-    //TODO update conditions slug
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "conditionSlug", ignore = true)
     Equipment toEquipment(@MappingTarget Equipment toUpdate, UpdateEquipmentUseCase.UpdateEquipmentCommand command);
 
     @Mapping(target = "statusSlug", source = "newStatusSlug")

@@ -36,6 +36,10 @@ public record EquipmentRequest(
         LocalDate commissionedAt,
 
         @Schema(description = "Condition description", example = "Good")
-        String condition
+        String condition,
+
+        @Schema(description = "Condition slug", example = "GOOD",
+                allowableValues = {"GOOD", "MAINTENANCE", "BROKEN", "DECOMMISSIONED"})
+        String conditionSlug
 ) {
 }
