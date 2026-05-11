@@ -28,6 +28,9 @@
             <column name="status_slug" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
+            <column name="condition_slug" type="VARCHAR(50)" defaultValue="GOOD">
+                <constraints nullable="false"/>
+            </column>
             <column name="model" type="VARCHAR(200)"/>
             <column name="commissioned_at" type="DATE"/>
             <column name="condition" type="TEXT"/>

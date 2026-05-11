@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.equipment.infrastructure.persistence.entity;
 
+import com.github.jenkaby.bikerental.shared.domain.model.Condition;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,10 @@ public class EquipmentJpaEntity {
 
     @Column(name = "status_slug", nullable = false, length = 50)
     private String statusSlug;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "condition_slug", nullable = false, length = 50)
+    private Condition conditionSlug;
 
     @Column(length = 200)
     private String model;
