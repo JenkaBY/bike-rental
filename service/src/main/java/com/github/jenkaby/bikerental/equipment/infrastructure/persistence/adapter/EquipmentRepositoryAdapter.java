@@ -9,10 +9,12 @@ import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.specif
 import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.specification.EquipmentSpecConstant;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
+import com.github.jenkaby.bikerental.shared.domain.model.Condition;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -20,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 class EquipmentRepositoryAdapter implements EquipmentRepository {
@@ -73,6 +76,25 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
         org.springframework.data.domain.Page<EquipmentJpaEntity> page = jpaRepository.findAll(spec, pageRequest);
         return pageMapper.toDomain(page)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Equipment> findByConditions(Set<Condition> conditions, String searchText) {
+        if (conditions.isEmpty()) {
+            throw new IllegalArgumentException("conditions must not be empty");
+        }
+        Specification<EquipmentJpaEntity> spec =
+                (root, query, cb) -> root.get(EquipmentSpecConstant.CONDITION_SLUG).in(conditions);
+        if (searchText != null) {
+            var textSpec = SpecificationBuilder.specification(EquipmentSpec.class)
+                    .withParam(EquipmentSpecConstant.SEARCH, searchText)
+                    .build();
+            spec = spec.and(textSpec);
+        }
+        return jpaRepository.findAll(spec).stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override
