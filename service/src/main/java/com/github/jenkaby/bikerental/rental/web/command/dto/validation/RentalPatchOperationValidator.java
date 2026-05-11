@@ -65,10 +65,11 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
                     .addConstraintViolation();
             isValid = false;
         }
-        if (operation.getOp() != null && "/duration".equals(operation.getPath()) && operation.getValue() != null) {
-            // For duration, value must be a valid ISO-8601 duration string
+        if (operation.getOp() != null && "/duration".equals(operation.getPath())
+                && operation.getValue() != null) {
             try {
-                Integer.valueOf((String) operation.getValue());
+                if (operation.getValue() instanceof String durationStr)
+                    Integer.valueOf(durationStr);
             } catch (Exception e) {
                 context.buildConstraintViolationWithTemplate(
                                 "Value for path '/duration' must be integer")

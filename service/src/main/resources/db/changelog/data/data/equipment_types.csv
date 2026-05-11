@@ -3,4 +3,4 @@ BICYCLE,Bicycle,Standard bicycles for rental
 SCOOTER,Scooter,Electric and manual scooters
 OTHER,Other,Other equipment types
 CHILD_SEAT,Child Seat,Child seats for bicycles and scooters
-ANY,Any,Only for special tariffs
+SPECIAL,Special,Only for special tariffs
