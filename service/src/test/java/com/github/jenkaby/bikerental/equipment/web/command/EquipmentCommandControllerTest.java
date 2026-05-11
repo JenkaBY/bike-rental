@@ -84,7 +84,8 @@ class EquipmentCommandControllerTest {
                         "AVAILABLE",
                         null,
                         null,
-                        null
+                        null,
+                        "GOOD"
                 );
 
                 configureMapperDefaults();
@@ -112,7 +113,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         "ModelA",
                         LocalDate.of(2024, 1, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(post(API_EQUIPMENTS)
@@ -133,7 +135,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         "ModelA",
                         LocalDate.of(2024, 1, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(post(API_EQUIPMENTS)
@@ -154,7 +157,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         "ModelA",
                         LocalDate.of(2024, 1, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(post(API_EQUIPMENTS)
@@ -176,7 +180,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         "ModelA",
                         LocalDate.of(2024, 1, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(post(API_EQUIPMENTS)
@@ -198,7 +203,8 @@ class EquipmentCommandControllerTest {
                         statusSlug,
                         "ModelA",
                         LocalDate.of(2024, 1, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(post(API_EQUIPMENTS)
@@ -219,7 +225,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         longModel,
                         LocalDate.of(2024, 1, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(post(API_EQUIPMENTS)
@@ -255,7 +262,8 @@ class EquipmentCommandControllerTest {
                     "AVAILABLE",
                     "ModelA",
                     LocalDate.of(2024, 1, 1),
-                    "good"
+                    "good",
+                    "GOOD"
             );
         }
 
@@ -304,7 +312,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         "ModelB",
                         LocalDate.of(2024, 2, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(put(API_EQUIPMENTS + "/{id}", equipmentId)
@@ -326,7 +335,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         "ModelB",
                         LocalDate.of(2024, 2, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(put(API_EQUIPMENTS + "/{id}", equipmentId)
@@ -348,7 +358,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         "ModelB",
                         LocalDate.of(2024, 2, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(put(API_EQUIPMENTS + "/{id}", equipmentId)
@@ -371,7 +382,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         "ModelB",
                         LocalDate.of(2024, 2, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(put(API_EQUIPMENTS + "/{id}", equipmentId)
@@ -394,7 +406,8 @@ class EquipmentCommandControllerTest {
                         statusSlug,
                         "ModelB",
                         LocalDate.of(2024, 2, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(put(API_EQUIPMENTS + "/{id}", equipmentId)
@@ -416,7 +429,8 @@ class EquipmentCommandControllerTest {
                         "available",
                         longModel,
                         LocalDate.of(2024, 2, 1),
-                        "good"
+                        "good",
+                        "GOOD"
                 );
 
                 mockMvc.perform(put(API_EQUIPMENTS + "/{id}", equipmentId)
@@ -466,7 +480,8 @@ class EquipmentCommandControllerTest {
                     "MAINTENANCE",
                     "ModelB",
                     LocalDate.of(2024, 2, 1),
-                    "fair"
+                    "fair",
+                    "GOOD"
             );
         }
 

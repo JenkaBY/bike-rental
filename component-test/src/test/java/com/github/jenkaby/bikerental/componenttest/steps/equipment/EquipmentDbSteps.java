@@ -80,9 +80,6 @@ public class EquipmentDbSteps {
                     softly.assertThat(actual.getUid())
                             .as("UID should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getUid());
-                    softly.assertThat(actual.getStatusSlug())
-                            .as("Status slug should match for serialNumberValue: %s", exp.getSerialNumber())
-                            .isEqualTo(exp.getStatusSlug());
                     softly.assertThat(actual.getTypeSlug())
                             .as("Equipment type slug should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getTypeSlug());

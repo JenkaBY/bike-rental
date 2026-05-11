@@ -51,6 +51,11 @@
                                  referencedTableName="rentals" referencedColumnNames="id"
                                  constraintName="fk_rent_equip_rental_id"/>
 
+        <sql>
+            CREATE UNIQUE INDEX idx_rental_equipments_one_active
+                ON rental_equipments (equipment_id) WHERE status IN ('ACTIVE', 'ASSIGNED');
+        </sql>
+
     </changeSet>
 
 </databaseChangeLog>

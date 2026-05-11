@@ -12,7 +12,7 @@ public record EquipmentInfo(
         Condition conditionSlug
 ) {
 
-    public boolean isAvailable() {
-        return "AVAILABLE".equals(statusSlug);
+    public boolean isAvailableForRental() {
+        return conditionSlug == Condition.GOOD;
     }
 }

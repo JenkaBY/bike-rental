@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.rental;
 
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.InsertableRentalEquipmentRepository;
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.InsertableRentalRepository;
-import com.github.jenkaby.bikerental.componenttest.config.db.repository.RentalEquipmentJpaRepository;
+import com.github.jenkaby.bikerental.componenttest.config.db.repository.RentalEquipmentTestJpaRepository;
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.RentalJpaRepositoryWrapper;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalEquipmentJpaEntity;
@@ -34,7 +34,7 @@ public class RentalDbSteps {
 
     private final InsertableRentalRepository rentalRepository;
     private final InsertableRentalEquipmentRepository rentalEquipmentsRepository;
-    private final RentalEquipmentJpaRepository rentalEquipmentsJpaRepository;
+    private final RentalEquipmentTestJpaRepository rentalEquipmentsJpaRepository;
     private final RentalJpaRepositoryWrapper rentalJpaRepository;
     private final ScenarioContext scenarioContext;
 

@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.customer.CustomerFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
-import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
@@ -12,7 +11,6 @@ import com.github.jenkaby.bikerental.rental.domain.exception.HoldRequiredExcepti
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalPlannedDurationException;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
-import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.util.PatchValueParser;
@@ -20,7 +18,6 @@ import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
-import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,9 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,38 +40,35 @@ class UpdateRentalService implements UpdateRentalUseCase {
     private final RentalRepository rentalRepository;
     private final CustomerFacade customerFacade;
     private final EquipmentFacade equipmentFacade;
-    private final TariffV2Facade tariffV2Facade;
     private final FinanceFacade financeFacade;
     private final EventPublisher eventPublisher;
     private final Clock clock;
     private final RentalEventMapper eventMapper;
-    private final RentalCostCommandMapper costCommandMapper;
     private final PatchValueParser valueParser;
     private final RequestedEquipmentValidator validator;
+    private final RentalEquipmentFactory rentalEquipmentFactory;
 
     UpdateRentalService(
             RentalRepository rentalRepository,
             CustomerFacade customerFacade,
             EquipmentFacade equipmentFacade,
-            TariffV2Facade tariffV2Facade,
             FinanceFacade financeFacade,
             EventPublisher eventPublisher,
             Clock clock,
             RentalEventMapper eventMapper,
-            RentalCostCommandMapper costCommandMapper,
             PatchValueParser valueParser,
-            RequestedEquipmentValidator validator) {
+            RequestedEquipmentValidator validator,
+            RentalEquipmentFactory rentalEquipmentFactory) {
         this.rentalRepository = rentalRepository;
         this.customerFacade = customerFacade;
         this.equipmentFacade = equipmentFacade;
-        this.tariffV2Facade = tariffV2Facade;
         this.financeFacade = financeFacade;
         this.eventPublisher = eventPublisher;
         this.clock = clock;
         this.eventMapper = eventMapper;
-        this.costCommandMapper = costCommandMapper;
         this.valueParser = valueParser;
         this.validator = validator;
+        this.rentalEquipmentFactory = rentalEquipmentFactory;
     }
 
     @Override
@@ -101,29 +97,29 @@ class UpdateRentalService implements UpdateRentalUseCase {
             List<Long> equipmentIds = valueParser.parseListOfLong(patch.get("equipmentIds"));
             List<EquipmentInfo> foundEquipments = equipmentFacade.findByIds(equipmentIds);
             validator.validateSize(equipmentIds, foundEquipments);
-            var alreadyReservedOrRented = previousState.equipmentIds();
+
+            var alreadyReservedOrRented = new HashSet<>(previousState.equipmentIds());
             var beingReserved = foundEquipments.stream()
                     .filter(e -> !alreadyReservedOrRented.contains(e.id()))
                     .toList();
+            validator.validateEquipmentsCondition(beingReserved);
             validator.validateAvailability(beingReserved);
 
             if (rental.getPlannedDuration() == null) {
                 throw new InvalidRentalPlannedDurationException(rental.getId());
             }
 
-            var costCommand = costCommandMapper.toCommand(rental, foundEquipments);
-            var costResult = tariffV2Facade.calculateRentalCost(costCommand);
-            var breakdowns = costResult.equipmentBreakdowns();
+            var incomingIds = foundEquipments.stream()
+                    .map(EquipmentInfo::id)
+                    .collect(Collectors.toSet());
+            var newEquipmentIds = rental.getNewEquipmentIds(incomingIds);
+            var newEquipments = foundEquipments.stream()
+                    .filter(e -> newEquipmentIds.contains(e.id()))
+                    .toList();
 
-            rental.clearEquipmentRentals();
-            for (int i = 0; i < foundEquipments.size(); i++) {
-                var equipment = foundEquipments.get(i);
-                var rentalEquipment = RentalEquipment.assigned(equipment.id(), equipment.uid(), equipment.typeSlug());
-                rentalEquipment.setEstimatedCost(breakdowns.get(i).itemCost());
-                rental.addEquipment(rentalEquipment);
-            }
+            var equipmentsToAdd = rentalEquipmentFactory.buildAssignedWithCost(rental, newEquipments);
+            rental.replaceEquipments(equipmentsToAdd, incomingIds);
         }
-
 
         if (patch.containsKey("status")) {
             String newStatusStr = valueParser.parseString(patch.get("status"));

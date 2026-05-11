@@ -22,10 +22,10 @@ Feature: Rental Management
       | HELMET  | Helmet  | Helmet      |
       | OTHER   | Other   | Other       |
     And the following equipment records exist in db
-      | id | serialNumber | uid            | status    | type    | model   | condition |
-      | 1  | EQ-001       | BIKE-001       | AVAILABLE | BICYCLE | Model A | Good      |
-      | 2  | EQ-002       | E-BIKE-001     | AVAILABLE | SCOOTER | Model B | Excellent |
-      | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | HELMET  | Model B | Excellent |
+      | id | serialNumber | uid            | status    | type    | model   | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001       | AVAILABLE | BICYCLE | Model A | Good           | GOOD      |
+      | 2  | EQ-002       | E-BIKE-001     | AVAILABLE | SCOOTER | Model B | Excellent      | GOOD      |
+      | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | HELMET  | Model B | Excellent      | GOOD      |
     And the following account records exist in db
       | id   | accountType | customerId |
       | ACC1 | CUSTOMER    | CUS1       |
@@ -86,9 +86,9 @@ Feature: Rental Management
       | <customerId> | <equipmentId>,<equipmentId2> | DRAFT  |
 #    equipment module
     And the following equipment records were persisted in db
-      | id             | serialNumber | uid            | status   | type    | model   | condition |
-      | <equipmentId>  | EQ-001       | BIKE-001       | RESERVED | BICYCLE | Model A | Good      |
-      | <equipmentId2> | EQ-003       | HELM-ADULT-001 | RESERVED | HELMET  | Model B | Excellent |
+      | id             | serialNumber | uid            | type    | model   | conditionNotes | condition |
+      | <equipmentId>  | EQ-001       | BIKE-001       | BICYCLE | Model A | Good           | GOOD      |
+      | <equipmentId2> | EQ-003       | HELM-ADULT-001 | HELMET  | Model B | Excellent      | GOOD      |
     Examples:
       | customerId | equipmentId | equipmentId2 | plannedDuration |
       | CUS1       | 1           | 3            | 120             |
@@ -97,8 +97,8 @@ Feature: Rental Management
   Scenario: Create rental with auto-selected tariff when no suitable tariff found
     Given today is "2026-02-09"
     And the following equipment records exist in db
-      | id | serialNumber | uid       | status    | type  | model   | condition |
-      | 4  | EQ-005       | OTHER-004 | AVAILABLE | OTHER | Other X | Good      |
+      | id | serialNumber | uid       | status    | type  | model   | conditionNotes | condition |
+      | 4  | EQ-005       | OTHER-004 | AVAILABLE | OTHER | Other X | Good           | GOOD      |
     And a rental request with the following data
       | customerId | equipmentIds | duration | tariffId | operatorId |
       | CUS1       | 4            | 120      |          | OP1        |
@@ -150,10 +150,10 @@ Feature: Rental Management
       | equipmentId | equipmentUid | status   | estimatedCost | finalCost |
       | 2           | E-BIKE-001   | ASSIGNED | 15.00         |           |
     And the following equipment records were persisted in db
-      | id | serialNumber | uid            | status    | type    | model   | condition |
-      | 1  | EQ-001       | BIKE-001       | AVAILABLE | BICYCLE | Model A | Good      |
-      | 2  | EQ-002       | E-BIKE-001     | RESERVED  | SCOOTER | Model B | Excellent |
-      | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | HELMET  | Model B | Excellent |
+      | id | serialNumber | uid            | type    | model   | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001       | BICYCLE | Model A | Good           | GOOD      |
+      | 2  | EQ-002       | E-BIKE-001     | SCOOTER | Model B | Excellent      | GOOD      |
+      | 3  | EQ-003       | HELM-ADULT-001 | HELMET  | Model B | Excellent      | GOOD      |
     Examples:
       | rentalId | customerId | plannedDuration |
       | 1        | CUS1       | 60              |
@@ -182,8 +182,8 @@ Feature: Rental Management
       | <rentalId> | 2           | E-BIKE-001   | ASSIGNED | 15.00         |
 #    equipment module
     And the following equipment record was persisted in db
-      | id | serialNumber | uid        | status   | type    | model   | condition |
-      | 2  | EQ-002       | E-BIKE-001 | RESERVED | SCOOTER | Model B | Excellent |
+      | id | serialNumber | uid        | type    | model   | conditionNotes | condition |
+      | 2  | EQ-002       | E-BIKE-001 | SCOOTER | Model B | Excellent      | GOOD      |
 # second update equipments
     And the rental update request is
       | op      | path          | value |
@@ -262,8 +262,8 @@ Feature: Rental Management
       | customerId | equipmentId   | startedAt |
       | <customer> | <equipmentId> | <now>     |
     And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | status | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | RENTED | BICYCLE | Model A | Good      |
+      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     Examples:
       | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
       | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |
@@ -304,8 +304,8 @@ Feature: Rental Management
       | customerId | equipmentId   | startedAt |
       | <customer> | <equipmentId> | <now>     |
     And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | status | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | RENTED | BICYCLE | Model A | Good      |
+      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     Examples:
       | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
       | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |

@@ -12,12 +12,10 @@ import lombok.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 
 @Getter
@@ -142,12 +140,10 @@ public class Rental {
     }
 
     public void activate(LocalDateTime actualStartTime) {
-        // Validate status
         if (this.status != RentalStatus.DRAFT) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
 
-        // Validate required fields
         if (!canBeActivated()) {
             List<String> missingFields = new ArrayList<>();
             if (customerId == null) missingFields.add("customerId");
@@ -165,9 +161,32 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    // For cases update rental during patch
-    public void clearEquipmentRentals() {
-        this.equipments.clear();
+    public List<Long> getEquipmentIdsToRemove(Set<Long> incomingIds) {
+        return equipments.stream()
+                .map(RentalEquipment::getEquipmentId)
+                .filter(id -> !incomingIds.contains(id))
+                .toList();
+    }
+
+    public List<Long> getNewEquipmentIds(Set<Long> incomingIds) {
+        var existingIds = equipments.stream()
+                .map(RentalEquipment::getEquipmentId)
+                .collect(Collectors.toSet());
+        return incomingIds.stream()
+                .filter(id -> !existingIds.contains(id))
+                .toList();
+    }
+
+    public void replaceEquipments(List<RentalEquipment> toAdd, Set<Long> incomingIds) {
+        equipments.removeIf(e -> !incomingIds.contains(e.getEquipmentId()));
+        toAdd.forEach(this::addEquipment);
+    }
+
+    public void removeEquipment(RentalEquipment rentalEquipment) {
+        if (this.status != RentalStatus.DRAFT) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
+        }
+        this.equipments.remove(rentalEquipment);
     }
 
     public void addEquipment(RentalEquipment equipment) {
@@ -190,7 +209,6 @@ public class Rental {
     }
 
     public List<RentalEquipment> equipmentsToReturn(List<Long> toReturnEquipmentIds, List<String> toReturnEquipmentUids, LocalDateTime returnedAt) {
-//         assume when no equipments are present in request, entire rental must be completed
         var isEmptyRequest = isEmpty(toReturnEquipmentIds) && isEmpty(toReturnEquipmentUids);
         Predicate<RentalEquipment> filter = eq -> isEmptyRequest
                 || toReturnEquipmentIds.contains(eq.getEquipmentId())
@@ -260,11 +278,12 @@ public class Rental {
 
     public static class RentalBuilder {
         public Rental build() {
-            if (specialTariffId != null && discountPercent != null) {
+            if ((specialTariffId != null || specialPrice != null) && discountPercent != null) {
                 throw new IllegalArgumentException(
                         "specialTariffId and discountPercent are mutually exclusive");
             }
-            if (specialTariffId != null && specialPrice == null) {
+            if ((specialTariffId != null && specialPrice == null)
+                    || (specialTariffId == null && specialPrice != null)) {
                 throw new IllegalArgumentException(
                         "specialPrice is required when specialTariffId is set");
             }

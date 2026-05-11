@@ -21,9 +21,9 @@ Feature: Equipment Return
       | slug    | name    | description |
       | BICYCLE | Bicycle | Two-wheeled |
     And the following equipment records exist in db
-      | id | serialNumber | uid      | status | type    | model   | condition |
-      | 1  | EQ-001       | BIKE-001 | RENTED | BICYCLE | Model A | Good      |
-      | 2  | EQ-002       | BIKE-002 | RENTED | BICYCLE | Model A | Good      |
+      | id | serialNumber | uid      | status | type    | model   | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001 | RENTED | BICYCLE | Model A | Good           | GOOD      |
+      | 2  | EQ-002       | BIKE-002 | RENTED | BICYCLE | Model A | Good           | GOOD      |
     And the pricing params list for tariff request is
       | tariffId | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | hourlyPrice | dailyPrice | overtimeHourlyPrice | issuanceFee | minimumDurationMinutes | minimumDurationSurcharge | price |
       | 1        | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               |             |            |                     |             | 30                     | 1.00                     |       |
@@ -70,8 +70,8 @@ Feature: Equipment Return
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
       | <rentalId> | <equipmentId> | <equipmentId>        | 16.00     | <now>      |
     And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
+      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00    |
@@ -265,9 +265,9 @@ Feature: Equipment Return
       | rentalId   | equipmentIds               | returnedEquipmentIds | returnTime | totalCost |
       | <rentalId> | <returnedId>,<remainingId> | <returnedId>         | <now>      | 6         |
     And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <returnedId>  | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
-      | <remainingId> | EQ-002       | BIKE-002 | RENTED    | BICYCLE | Model A | Good      |
+      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | <returnedId>  | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
+      | <remainingId> | EQ-002       | BIKE-002 | BICYCLE | Model A | Good           | GOOD      |
 #    return the remaining equipment
     Given now is "<nowReturn>"
     And the return equipment request is
@@ -323,8 +323,8 @@ Feature: Equipment Return
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
       | <rentalId> | <equipmentId> | <equipmentId>        | 14.40     | <now>      |
     And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
+      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00    |
@@ -365,8 +365,8 @@ Feature: Equipment Return
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
       | <rentalId> | <equipmentId> | <equipmentId>        | 10.00     | <now>      |
     And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
+      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00    |
@@ -407,8 +407,8 @@ Feature: Equipment Return
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
       | <rentalId> | <equipmentId> | <equipmentId>        | 0.00      | <now>      |
     And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | status    | type    | model   | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good      |
+      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 16.00   |

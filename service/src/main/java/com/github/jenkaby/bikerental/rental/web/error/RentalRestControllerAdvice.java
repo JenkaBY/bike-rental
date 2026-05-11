@@ -121,6 +121,19 @@ public class RentalRestControllerAdvice {
         return ResponseEntity.of(problem).build();
     }
 
+    @ExceptionHandler(EquipmentOccupiedException.class)
+    public ResponseEntity<ProblemDetail> handleEquipmentOccupied(EquipmentOccupiedException ex) {
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Equipment occupied: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("Equipment not available");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.EQUIPMENT_NOT_AVAILABLE);
+        problem.setProperty("unavailableIds", ex.getDetails().unavailableIds());
+        return ResponseEntity.of(problem).build();
+    }
+
     private String resolveCorrelationId() {
         String correlationId = MDC.get("correlationId");
         return correlationId != null ? correlationId : UUID.randomUUID().toString();
