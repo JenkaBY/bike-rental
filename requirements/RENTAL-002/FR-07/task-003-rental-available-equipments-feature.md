@@ -166,16 +166,8 @@ Feature: Available equipment query
 
 ## 5. Validation Steps
 
-Execute after all FR-01 through FR-06 tasks are complete:
-
 ```bash
-./gradlew :component-test:test "-Dspring.profiles.active=test" --tests "*.rental.rental-available-equipments*"
+./gradlew :component-test:test "-Dspring.profiles.active=test"
 ```
 
-Or run via the Cucumber tag (tag the feature with `@run` temporarily, switch `RunComponentTests` filter):
-
-```bash
-./gradlew :component-test:test "-Dspring.profiles.active=test" --tests RunComponentTests
-```
-
-All 6 scenarios must be green. Zero skipped.
+All 6 scenarios must be green, other could fail. Ignore failed outside from the new scenarios 

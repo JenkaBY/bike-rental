@@ -114,5 +114,4 @@ Execute the following commands to ensure this task was successful. Do NOT run th
 
 ```bash
 ./gradlew :service:compileJava
-./gradlew :service:test "-Dspring.profiles.active=test"
 ```

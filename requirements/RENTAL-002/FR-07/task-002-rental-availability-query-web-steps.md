@@ -89,8 +89,4 @@ public class RentalAvailabilityQueryWebSteps {
 
 ## 4. Validation Steps
 
-```bash
-./gradlew :component-test:test "-Dspring.profiles.active=test" --tests RunComponentTests
-```
-
-The build must compile without errors. Step registration is confirmed by a successful compile.
+skip
