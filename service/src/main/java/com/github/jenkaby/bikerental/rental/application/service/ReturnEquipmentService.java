@@ -89,7 +89,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
             equipment.setTariffId(breakdown.tariffId());
         }
 
-        if (!rental.allEquipmentReturned()) {
+        if (!rental.allEquipmentsReturned()) {
             Rental saved = rentalRepository.save(rental);
             log.info("Partial return recorded for rental {}", saved.getId());
             RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, saved.getFinalCost());

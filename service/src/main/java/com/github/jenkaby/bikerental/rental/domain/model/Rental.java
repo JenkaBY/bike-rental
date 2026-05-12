@@ -67,28 +67,12 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    public void selectTariff(Long tariffId) {
-        if (this.status != RentalStatus.DRAFT) {
-            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
-        }
-        this.updatedAt = Instant.now();
-    }
-
     public void setPlannedDuration(Duration duration) {
         if (this.status != RentalStatus.DRAFT) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
         this.plannedDuration = duration;
         // startedAt and expectedReturnAt will be set automatically when rental is activated
-        this.updatedAt = Instant.now();
-    }
-
-    @Deprecated
-    public void setEstimatedCost(Money estimatedCost) {
-        if (this.status != RentalStatus.DRAFT) {
-            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
-        }
-        this.estimatedCost = estimatedCost;
         this.updatedAt = Instant.now();
     }
 
@@ -116,14 +100,6 @@ public class Rental {
 
     public RentalRef toRentalRef() {
         return new RentalRef(id);
-    }
-
-    @Deprecated
-    public boolean isPrepaymentSufficient(Money amount) {
-        if (estimatedCost == null) {
-            return false;
-        }
-        return amount.compareTo(estimatedCost) >= 0;
     }
 
     public boolean hasActiveStatus() {
@@ -161,13 +137,6 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    public List<Long> getEquipmentIdsToRemove(Set<Long> incomingIds) {
-        return equipments.stream()
-                .map(RentalEquipment::getEquipmentId)
-                .filter(id -> !incomingIds.contains(id))
-                .toList();
-    }
-
     public List<Long> getNewEquipmentIds(Set<Long> incomingIds) {
         var existingIds = equipments.stream()
                 .map(RentalEquipment::getEquipmentId)
@@ -178,15 +147,12 @@ public class Rental {
     }
 
     public void replaceEquipments(List<RentalEquipment> toAdd, Set<Long> incomingIds) {
-        equipments.removeIf(e -> !incomingIds.contains(e.getEquipmentId()));
-        toAdd.forEach(this::addEquipment);
-    }
-
-    public void removeEquipment(RentalEquipment rentalEquipment) {
         if (this.status != RentalStatus.DRAFT) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
-        this.equipments.remove(rentalEquipment);
+        equipments.removeIf(e -> !incomingIds.contains(e.getEquipmentId()));
+        toAdd.forEach(this::addEquipment);
+        this.updatedAt = Instant.now();
     }
 
     public void addEquipment(RentalEquipment equipment) {
@@ -197,7 +163,7 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    public boolean allEquipmentReturned() {
+    public boolean allEquipmentsReturned() {
         return equipments.stream()
                 .allMatch(RETURNED);
     }
@@ -240,15 +206,15 @@ public class Rental {
         if (this.finalCost == null) {
             throw new IllegalArgumentException("Final cost cannot be null");
         }
-        this.updatedAt = Instant.now();
         this.status = RentalStatus.COMPLETED;
+        this.updatedAt = Instant.now();
     }
 
     public void completeWithStatus(Money finalCost, RentalStatus status) {
         validateCompletion(finalCost);
 
         this.finalCost = finalCost;
-        if (allEquipmentReturned()) {
+        if (allEquipmentsReturned()) {
             this.status = status;
         }
         this.updatedAt = Instant.now();
