@@ -26,6 +26,7 @@ import java.time.LocalDate;
 
         @Schema(description = &quot;Equipment status slug&quot;, example = &quot;available&quot;)
         @Slug
+        @Deprecated(forRemoval = true)
         String statusSlug,
 
         @Schema(description = &quot;Model name&quot;, example = &quot;Trek Marlin 5&quot;)
@@ -36,7 +37,11 @@ import java.time.LocalDate;
         LocalDate commissionedAt,
 
         @Schema(description = &quot;Condition description&quot;, example = &quot;Good&quot;)
-        String condition
+        String condition,
+
+        @Schema(description = &quot;Condition slug&quot;, example = &quot;GOOD&quot;,
+                allowableValues = {&quot;GOOD&quot;, &quot;MAINTENANCE&quot;, &quot;BROKEN&quot;, &quot;DECOMMISSIONED&quot;})
+        String conditionSlug
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

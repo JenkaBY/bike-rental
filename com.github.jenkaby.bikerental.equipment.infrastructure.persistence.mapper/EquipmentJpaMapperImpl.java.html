@@ -38,31 +38,33 @@ public class EquipmentJpaMapperImpl implements EquipmentJpaMapper {
 <span class="fc" id="L38">        equipment.uid( uidMapper.toUid( entity.getUid() ) );</span>
 <span class="fc" id="L39">        equipment.typeSlug( entity.getTypeSlug() );</span>
 <span class="fc" id="L40">        equipment.statusSlug( entity.getStatusSlug() );</span>
-<span class="fc" id="L41">        equipment.model( entity.getModel() );</span>
-<span class="fc" id="L42">        equipment.commissionedAt( entity.getCommissionedAt() );</span>
-<span class="fc" id="L43">        equipment.condition( entity.getCondition() );</span>
+<span class="fc" id="L41">        equipment.conditionSlug( entity.getConditionSlug() );</span>
+<span class="fc" id="L42">        equipment.model( entity.getModel() );</span>
+<span class="fc" id="L43">        equipment.commissionedAt( entity.getCommissionedAt() );</span>
+<span class="fc" id="L44">        equipment.condition( entity.getCondition() );</span>
 
-<span class="fc" id="L45">        return equipment.build();</span>
+<span class="fc" id="L46">        return equipment.build();</span>
     }
 
     @Override
     public EquipmentJpaEntity toEntity(Equipment equipment) {
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
-<span class="nc" id="L51">            return null;</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
+<span class="nc" id="L52">            return null;</span>
         }
 
-<span class="fc" id="L54">        EquipmentJpaEntity equipmentJpaEntity = new EquipmentJpaEntity();</span>
+<span class="fc" id="L55">        EquipmentJpaEntity equipmentJpaEntity = new EquipmentJpaEntity();</span>
 
-<span class="fc" id="L56">        equipmentJpaEntity.setId( equipment.getId() );</span>
-<span class="fc" id="L57">        equipmentJpaEntity.setSerialNumber( serialNumberMapper.toString( equipment.getSerialNumber() ) );</span>
-<span class="fc" id="L58">        equipmentJpaEntity.setUid( uidMapper.toString( equipment.getUid() ) );</span>
-<span class="fc" id="L59">        equipmentJpaEntity.setTypeSlug( equipment.getTypeSlug() );</span>
-<span class="fc" id="L60">        equipmentJpaEntity.setStatusSlug( equipment.getStatusSlug() );</span>
-<span class="fc" id="L61">        equipmentJpaEntity.setModel( equipment.getModel() );</span>
-<span class="fc" id="L62">        equipmentJpaEntity.setCommissionedAt( equipment.getCommissionedAt() );</span>
-<span class="fc" id="L63">        equipmentJpaEntity.setCondition( equipment.getCondition() );</span>
+<span class="fc" id="L57">        equipmentJpaEntity.setId( equipment.getId() );</span>
+<span class="fc" id="L58">        equipmentJpaEntity.setSerialNumber( serialNumberMapper.toString( equipment.getSerialNumber() ) );</span>
+<span class="fc" id="L59">        equipmentJpaEntity.setUid( uidMapper.toString( equipment.getUid() ) );</span>
+<span class="fc" id="L60">        equipmentJpaEntity.setTypeSlug( equipment.getTypeSlug() );</span>
+<span class="fc" id="L61">        equipmentJpaEntity.setStatusSlug( equipment.getStatusSlug() );</span>
+<span class="fc" id="L62">        equipmentJpaEntity.setConditionSlug( equipment.getConditionSlug() );</span>
+<span class="fc" id="L63">        equipmentJpaEntity.setModel( equipment.getModel() );</span>
+<span class="fc" id="L64">        equipmentJpaEntity.setCommissionedAt( equipment.getCommissionedAt() );</span>
+<span class="fc" id="L65">        equipmentJpaEntity.setCondition( equipment.getCondition() );</span>
 
-<span class="fc" id="L65">        return equipmentJpaEntity;</span>
+<span class="fc" id="L67">        return equipmentJpaEntity;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -9,10 +9,12 @@ import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.specif
 import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.specification.EquipmentSpecConstant;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
+import com.github.jenkaby.bikerental.shared.domain.model.Condition;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -20,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 class EquipmentRepositoryAdapter implements EquipmentRepository {
@@ -30,69 +33,88 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
 
     EquipmentRepositoryAdapter(
             EquipmentJpaRepository jpaRepository,
-<span class="fc" id="L33">            EquipmentJpaMapper mapper, PageMapper pageMapper) {</span>
-<span class="fc" id="L34">        this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L35">        this.mapper = mapper;</span>
-<span class="fc" id="L36">        this.pageMapper = pageMapper;</span>
-<span class="fc" id="L37">    }</span>
+<span class="fc" id="L36">            EquipmentJpaMapper mapper, PageMapper pageMapper) {</span>
+<span class="fc" id="L37">        this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L38">        this.mapper = mapper;</span>
+<span class="fc" id="L39">        this.pageMapper = pageMapper;</span>
+<span class="fc" id="L40">    }</span>
 
     @Override
     @Transactional
     public Equipment save(Equipment equipment) {
-<span class="fc" id="L42">        var jpaEntity = mapper.toEntity(equipment);</span>
-<span class="fc" id="L43">        var savedEntity = jpaRepository.save(jpaEntity);</span>
-<span class="fc" id="L44">        return mapper.toDomain(savedEntity);</span>
+<span class="fc" id="L45">        var jpaEntity = mapper.toEntity(equipment);</span>
+<span class="fc" id="L46">        var savedEntity = jpaRepository.save(jpaEntity);</span>
+<span class="fc" id="L47">        return mapper.toDomain(savedEntity);</span>
     }
 
     @Override
     public Optional&lt;Equipment&gt; findById(Long id) {
-<span class="fc" id="L49">        return jpaRepository.findById(id)</span>
-<span class="fc" id="L50">                .map(mapper::toDomain);</span>
+<span class="fc" id="L52">        return jpaRepository.findById(id)</span>
+<span class="fc" id="L53">                .map(mapper::toDomain);</span>
     }
 
     @Override
     public List&lt;Equipment&gt; findByIds(Collection&lt;Long&gt; ids) {
-<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(ids)) {</span>
-<span class="fc" id="L56">            return List.of();</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if (CollectionUtils.isEmpty(ids)) {</span>
+<span class="nc" id="L59">            return List.of();</span>
         }
-<span class="fc" id="L58">        return jpaRepository.findAllByIdIn(ids).stream()</span>
-<span class="fc" id="L59">                .map(mapper::toDomain)</span>
-<span class="fc" id="L60">                .toList();</span>
+<span class="fc" id="L61">        return jpaRepository.findAllByIdIn(ids).stream()</span>
+<span class="fc" id="L62">                .map(mapper::toDomain)</span>
+<span class="fc" id="L63">                .toList();</span>
     }
 
     @Override
     public Page&lt;Equipment&gt; findAll(String statusSlug, String typeSlug, String searchText, PageRequest request) {
-<span class="fc" id="L65">        var pageRequest = pageMapper.toSpring(request);</span>
+<span class="fc" id="L68">        var pageRequest = pageMapper.toSpring(request);</span>
 
-<span class="fc" id="L67">        var spec = SpecificationBuilder.specification(EquipmentSpec.class)</span>
-<span class="fc" id="L68">                .withParam(EquipmentSpecConstant.STATUS, statusSlug)</span>
-<span class="fc" id="L69">                .withParam(EquipmentSpecConstant.TYPE, typeSlug)</span>
-<span class="fc" id="L70">                .withParam(EquipmentSpecConstant.SEARCH, searchText)</span>
-<span class="fc" id="L71">                .build();</span>
+<span class="fc" id="L70">        var spec = SpecificationBuilder.specification(EquipmentSpec.class)</span>
+<span class="fc" id="L71">                .withParam(EquipmentSpecConstant.STATUS, statusSlug)</span>
+<span class="fc" id="L72">                .withParam(EquipmentSpecConstant.TYPE, typeSlug)</span>
+<span class="fc" id="L73">                .withParam(EquipmentSpecConstant.SEARCH, searchText)</span>
+<span class="fc" id="L74">                .build();</span>
 
-<span class="fc" id="L73">        org.springframework.data.domain.Page&lt;EquipmentJpaEntity&gt; page = jpaRepository.findAll(spec, pageRequest);</span>
-<span class="fc" id="L74">        return pageMapper.toDomain(page)</span>
-<span class="fc" id="L75">                .map(mapper::toDomain);</span>
+<span class="fc" id="L76">        org.springframework.data.domain.Page&lt;EquipmentJpaEntity&gt; page = jpaRepository.findAll(spec, pageRequest);</span>
+<span class="fc" id="L77">        return pageMapper.toDomain(page)</span>
+<span class="fc" id="L78">                .map(mapper::toDomain);</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;Equipment&gt; findByConditions(Set&lt;Condition&gt; conditions, String searchText) {
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (conditions.isEmpty()) {</span>
+<span class="nc" id="L85">            throw new IllegalArgumentException(&quot;conditions must not be empty&quot;);</span>
+        }
+<span class="fc" id="L87">        Specification&lt;EquipmentJpaEntity&gt; spec =</span>
+<span class="fc" id="L88">                (root, query, cb) -&gt; root.get(EquipmentSpecConstant.CONDITION_SLUG).in(conditions);</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (searchText != null) {</span>
+<span class="fc" id="L90">            var textSpec = SpecificationBuilder.specification(EquipmentSpec.class)</span>
+<span class="fc" id="L91">                    .withParam(EquipmentSpecConstant.SEARCH, searchText)</span>
+<span class="fc" id="L92">                    .build();</span>
+<span class="fc" id="L93">            spec = spec.and(textSpec);</span>
+        }
+<span class="fc" id="L95">        return jpaRepository.findAll(spec).stream()</span>
+<span class="fc" id="L96">                .map(mapper::toDomain)</span>
+<span class="fc" id="L97">                .toList();</span>
     }
 
     @Override
     public boolean existsBySerialNumber(SerialNumber serialNumber) {
-<span class="fc" id="L80">        return jpaRepository.existsBySerialNumber(serialNumber.value());</span>
+<span class="fc" id="L102">        return jpaRepository.existsBySerialNumber(serialNumber.value());</span>
     }
 
     @Override
     public boolean existsByUid(Uid uid) {
-<span class="fc" id="L85">        return jpaRepository.existsByUid(uid.value());</span>
+<span class="fc" id="L107">        return jpaRepository.existsByUid(uid.value());</span>
     }
 
     @Override
     public Optional&lt;Equipment&gt; findBySerialNumber(SerialNumber serialNumber) {
-<span class="fc" id="L90">        return jpaRepository.findBySerialNumber(serialNumber.value()).map(mapper::toDomain);</span>
+<span class="fc" id="L112">        return jpaRepository.findBySerialNumber(serialNumber.value()).map(mapper::toDomain);</span>
     }
 
     @Override
     public Optional&lt;Equipment&gt; findByUid(Uid uid) {
-<span class="fc" id="L95">        return jpaRepository.findByUid(uid.value()).map(mapper::toDomain);</span>
+<span class="fc" id="L117">        return jpaRepository.findByUid(uid.value()).map(mapper::toDomain);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

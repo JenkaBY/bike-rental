@@ -121,9 +121,22 @@ import java.util.UUID;
 <span class="fc" id="L121">        return ResponseEntity.of(problem).build();</span>
     }
 
+    @ExceptionHandler(EquipmentOccupiedException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleEquipmentOccupied(EquipmentOccupiedException ex) {
+<span class="fc" id="L126">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L127">        log.warn(&quot;[correlationId={}] Equipment occupied: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L128">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
+<span class="fc" id="L129">        problem.setTitle(&quot;Equipment not available&quot;);</span>
+<span class="fc" id="L130">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L131">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L132">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.EQUIPMENT_NOT_AVAILABLE);</span>
+<span class="fc" id="L133">        problem.setProperty(&quot;unavailableIds&quot;, ex.getDetails().unavailableIds());</span>
+<span class="fc" id="L134">        return ResponseEntity.of(problem).build();</span>
+    }
+
     private String resolveCorrelationId() {
-<span class="fc" id="L125">        String correlationId = MDC.get(&quot;correlationId&quot;);</span>
-<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : UUID.randomUUID().toString();</span>
+<span class="fc" id="L138">        String correlationId = MDC.get(&quot;correlationId&quot;);</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : UUID.randomUUID().toString();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

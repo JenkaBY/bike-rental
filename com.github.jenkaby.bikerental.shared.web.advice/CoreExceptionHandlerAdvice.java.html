@@ -168,13 +168,13 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(Exception.class)
     ResponseEntity&lt;ProblemDetail&gt; handleError(Exception ex) {
-<span class="nc" id="L171">        var correlationId = resolveCorrelationId();</span>
-<span class="nc" id="L172">        log.error(&quot;[correlationId={}] Unexpected {} was thrown: {}&quot;, correlationId, ex.getClass(), ex.getMessage());</span>
-<span class="nc" id="L173">        log.debug(&quot;[correlationId={}] Unexpected error&quot;, correlationId, ex);</span>
-<span class="nc" id="L174">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());</span>
-<span class="nc" id="L175">        body.setProperty(CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L176">        body.setProperty(ERROR_CODE, INTERNAL_SERVER_ERROR);</span>
-<span class="nc" id="L177">        return ResponseEntity.of(body).build();</span>
+<span class="fc" id="L171">        var correlationId = resolveCorrelationId();</span>
+<span class="fc" id="L172">        log.error(&quot;[correlationId={}] Unexpected {} was thrown: {}&quot;, correlationId, ex.getClass(), ex.getMessage());</span>
+<span class="fc" id="L173">        log.debug(&quot;[correlationId={}] Unexpected error&quot;, correlationId, ex);</span>
+<span class="fc" id="L174">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());</span>
+<span class="fc" id="L175">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L176">        body.setProperty(ERROR_CODE, INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L177">        return ResponseEntity.of(body).build();</span>
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -225,7 +225,7 @@ public class CoreExceptionHandlerAdvice {
     public ResponseEntity&lt;ProblemDetail&gt; handleEquipmentNotAvailableException(EquipmentNotAvailableException ex) {
 <span class="fc" id="L226">        var correlationId = resolveCorrelationId();</span>
 <span class="fc" id="L227">        var details = ex.getDetails();</span>
-<span class="fc" id="L228">        log.warn(&quot;[correlationId={}] Equipment {} is not available for operation. Current status: {}&quot;, correlationId, details.identifier(), details.status());</span>
+<span class="fc" id="L228">        log.warn(&quot;[correlationId={}] Equipment {} is not available for operation.&quot;, correlationId, details.identifiers());</span>
 <span class="fc" id="L229">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());</span>
 <span class="fc" id="L230">        body.setProperty(CORRELATION_ID, correlationId);</span>
 <span class="fc" id="L231">        body.setProperty(ERROR_CODE, ex.getErrorCode());</span>

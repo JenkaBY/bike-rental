@@ -3,30 +3,31 @@
 import lombok.Getter;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Collection;
+
 /**
- * Exception thrown when equipment is not available for rental or other operations.
+ * Exception thrown when equipment is not in good state for rental or other operations.
  * &lt;p&gt;
  * This exception indicates that the equipment exists but is in a state that prevents
- * the requested operation (e.g., already rented, in maintenance, decommissioned).
+ * the requested operation (e.g., in maintenance, decommissioned).
  */
 @Getter
 public class EquipmentNotAvailableException extends BikeRentalException {
 
     public static final String ERROR_CODE = &quot;shared.equipment.not_available&quot;;
 
-    private static final String MESSAGE_TEMPLATE = &quot;Equipment with id %s is not available. Current status: %s&quot;;
+    private static final String MESSAGE_TEMPLATE = &quot;Equipments with ids %s is not in GOOD state&quot;;
 
-
-    public EquipmentNotAvailableException(@NonNull Long equipmentId, String currentStatus) {
-<span class="fc" id="L21">        super(MESSAGE_TEMPLATE.formatted(equipmentId, currentStatus), ERROR_CODE, new EquipmentDetails(equipmentId.toString(), currentStatus));</span>
-<span class="fc" id="L22">    }</span>
+    public EquipmentNotAvailableException(@NonNull Collection&lt;Long&gt; equipmentIds) {
+<span class="fc" id="L22">        super(MESSAGE_TEMPLATE.formatted(equipmentIds), ERROR_CODE, new EquipmentDetails(equipmentIds));</span>
+<span class="fc" id="L23">    }</span>
 
     public EquipmentDetails getDetails() {
-<span class="fc" id="L25">        return getParams().map(params -&gt; (EquipmentDetails) params)</span>
-<span class="pc" id="L26">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected EquipmentDetails in exception parameters&quot;));</span>
+<span class="fc" id="L26">        return getParams().map(params -&gt; (EquipmentDetails) params)</span>
+<span class="pc" id="L27">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected EquipmentDetails in exception parameters&quot;));</span>
     }
 
-<span class="fc" id="L29">    public record EquipmentDetails(String identifier, String status) {</span>
+<span class="fc" id="L30">    public record EquipmentDetails(Collection&lt;Long&gt; identifiers) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -13,12 +13,12 @@ public interface PageMapper {
 <span class="fc" id="L13">        return new PageRequest(</span>
 <span class="fc" id="L14">                pageable.getPageSize(),</span>
 <span class="fc" id="L15">                pageable.getPageNumber(),</span>
-<span class="pc bpc" id="L16" title="1 of 2 branches missed.">                pageable.getSort().isSorted() ?</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">                pageable.getSort().isSorted() ?</span>
 <span class="fc" id="L17">                        pageable.getSort().stream()</span>
 <span class="fc" id="L18">                                .map(Sort.Order::getProperty)</span>
 <span class="fc" id="L19">                                .findFirst()</span>
 <span class="fc" id="L20">                                .orElse(null)</span>
-<span class="pc" id="L21">                        : null</span>
+<span class="fc" id="L21">                        : null</span>
         );
     }
 

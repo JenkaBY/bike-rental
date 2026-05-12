@@ -114,15 +114,16 @@ public class EquipmentQueryController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;Page&lt;EquipmentResponse&gt;&gt; searchEquipments(
+            @Deprecated(forRemoval = true)
             @Parameter(description = &quot;Status slug filter&quot;, example = &quot;available&quot;) @RequestParam(name = &quot;status&quot;, required = false) String status,
             @Parameter(description = &quot;Type slug filter&quot;, example = &quot;bike&quot;) @RequestParam(name = &quot;type&quot;, required = false) String type,
             @Parameter(description = &quot;Free-text search across uid, serial number, and model (case-insensitive substring match)&quot;, example = &quot;city&quot;) @RequestParam(name = &quot;q&quot;, required = false) String q,
             @PageableDefault(size = 20, sort = &quot;serialNumber&quot;, direction = Sort.Direction.ASC) Pageable pageable) {
 
-<span class="fc" id="L122">        log.info(&quot;[GET] Search equipments filters status={} type={} q={}&quot;, status, type, q);</span>
-<span class="fc" id="L123">        var query = mapper.toSearchQuery(status, type, q, pageable);</span>
-<span class="fc" id="L124">        var page = searchUseCase.execute(query).map(mapper::toResponse);</span>
-<span class="fc" id="L125">        return ResponseEntity.ok(page);</span>
+<span class="fc" id="L123">        log.info(&quot;[GET] Search equipments filters status={} type={} q={}&quot;, status, type, q);</span>
+<span class="fc" id="L124">        var query = mapper.toSearchQuery(status, type, q, pageable);</span>
+<span class="fc" id="L125">        var page = searchUseCase.execute(query).map(mapper::toResponse);</span>
+<span class="fc" id="L126">        return ResponseEntity.ok(page);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -11,10 +11,12 @@ import java.time.LocalDate;
         @Schema(description = &quot;Serial number&quot;, example = &quot;SN-123456&quot;) @NotNull String serialNumber,
         @Schema(description = &quot;UID tag&quot;, example = &quot;BIKE-001&quot;) @NotNull String uid,
         @Schema(description = &quot;Equipment type slug&quot;, example = &quot;bike&quot;) @NotNull String type,
+        @Deprecated(forRemoval = true)
         @Schema(description = &quot;Equipment status slug&quot;, example = &quot;available&quot;) @NotNull String status,
         @Schema(description = &quot;Model name&quot;, example = &quot;Trek Marlin 5&quot;) @NotNull String model,
         @Schema(description = &quot;Commissioned date&quot;, example = &quot;2023-06-01&quot;) LocalDate commissionedAt,
-        @Schema(description = &quot;Condition&quot;, example = &quot;Good&quot;) String condition
+        @Schema(description = &quot;Condition notes&quot;, example = &quot;Good&quot;) String conditionNotes,
+        @Schema(description = &quot;Physical condition slug&quot;, example = &quot;GOOD&quot;) String condition
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

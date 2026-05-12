@@ -68,7 +68,7 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Customer or equipment not found&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = &quot;422&quot;, description = &quot;Equipment not available&quot;,
+            @ApiResponse(responseCode = &quot;409&quot;, description = &quot;Equipment not available&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;RentalResponse&gt; createRental(@Valid @RequestBody CreateRentalRequest request) {
@@ -86,15 +86,17 @@ class RentalCommandController {
     @Operation(summary = &quot;Create rental draft (Draft Path)&quot;, description = &quot;Creates an empty rental draft to be filled step by step&quot;)
     @ApiResponses({
             @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Draft created&quot;,
-                    content = @Content(schema = @Schema(implementation = RentalResponse.class)))
+                    content = @Content(schema = @Schema(implementation = RentalResponse.class))),
+            @ApiResponse(responseCode = &quot;409&quot;, description = &quot;Equipment not available&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;RentalResponse&gt; createDraft() {
-<span class="fc" id="L92">        log.info(&quot;[POST] Creating new rental draft&quot;);</span>
-<span class="fc" id="L93">        var command = new CreateRentalUseCase.CreateDraftCommand();</span>
-<span class="fc" id="L94">        Rental rental = createRentalUseCase.execute(command);</span>
-<span class="fc" id="L95">        var response = queryMapper.toResponse(rental);</span>
-<span class="fc" id="L96">        log.info(&quot;[POST] Rental draft created successfully with id: {}&quot;, rental.getId());</span>
-<span class="fc" id="L97">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
+<span class="fc" id="L94">        log.info(&quot;[POST] Creating new rental draft&quot;);</span>
+<span class="fc" id="L95">        var command = new CreateRentalUseCase.CreateDraftCommand();</span>
+<span class="fc" id="L96">        Rental rental = createRentalUseCase.execute(command);</span>
+<span class="fc" id="L97">        var response = queryMapper.toResponse(rental);</span>
+<span class="fc" id="L98">        log.info(&quot;[POST] Rental draft created successfully with id: {}&quot;, rental.getId());</span>
+<span class="fc" id="L99">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
     }
 
     /**
@@ -126,21 +128,23 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Rental not found&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = &quot;422&quot;, description = &quot;Invalid rental status transition or equipment not available&quot;,
+            @ApiResponse(responseCode = &quot;409&quot;, description = &quot;Equipment not available&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;422&quot;, description = &quot;Invalid rental status transition&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;RentalResponse&gt; updateRental(
             @Parameter(description = &quot;Rental ID&quot;, example = &quot;1&quot;) @PathVariable(name = &quot;id&quot;) @Positive Long id,
             @Valid @RequestBody RentalUpdateJsonPatchRequest request) {
-<span class="fc" id="L135">        log.info(&quot;[PATCH] Updating rental {} with {} patch operations&quot;, id, request.getOperations().size());</span>
+<span class="fc" id="L139">        log.info(&quot;[PATCH] Updating rental {} with {} patch operations&quot;, id, request.getOperations().size());</span>
 
         // Convert validated RentalUpdateJsonPatchRequest to Map for use case layer
-<span class="fc" id="L138">        Map&lt;String, Object&gt; patch = commandMapper.toPatchMap(request);</span>
+<span class="fc" id="L142">        Map&lt;String, Object&gt; patch = commandMapper.toPatchMap(request);</span>
 
-<span class="fc" id="L140">        Rental rental = updateRentalUseCase.execute(id, patch);</span>
-<span class="fc" id="L141">        var response = queryMapper.toResponse(rental);</span>
-<span class="fc" id="L142">        log.info(&quot;[PATCH] Rental {} updated successfully&quot;, id);</span>
-<span class="fc" id="L143">        return ResponseEntity.ok(response);</span>
+<span class="fc" id="L144">        Rental rental = updateRentalUseCase.execute(id, patch);</span>
+<span class="fc" id="L145">        var response = queryMapper.toResponse(rental);</span>
+<span class="fc" id="L146">        log.info(&quot;[PATCH] Rental {} updated successfully&quot;, id);</span>
+<span class="fc" id="L147">        return ResponseEntity.ok(response);</span>
     }
 
 
@@ -153,17 +157,17 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Rental or equipment not found&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = &quot;422&quot;, description = &quot;Rental not in active state or insufficient prepayment&quot;,
+            @ApiResponse(responseCode = &quot;422&quot;, description = &quot;Rental not in active state&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;RentalReturnResponse&gt; returnEquipment(@Valid @RequestBody ReturnEquipmentRequest request) {
-<span class="fc" id="L160">        log.info(&quot;[POST] Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
-<span class="fc" id="L161">                request.rentalId(), request.equipmentIds(), request.equipmentUids());</span>
-<span class="fc" id="L162">        var command = commandMapper.toReturnCommand(request);</span>
-<span class="fc" id="L163">        var result = returnEquipmentUseCase.execute(command);</span>
-<span class="fc" id="L164">        var response = commandMapper.toReturnResponse(result);</span>
-<span class="fc" id="L165">        log.info(&quot;[POST] Equipment return processed successfully for rental {}&quot;, result.rental().getId());</span>
-<span class="fc" id="L166">        return ResponseEntity.ok(response);</span>
+<span class="fc" id="L164">        log.info(&quot;[POST] Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
+<span class="fc" id="L165">                request.rentalId(), request.equipmentIds(), request.equipmentUids());</span>
+<span class="fc" id="L166">        var command = commandMapper.toReturnCommand(request);</span>
+<span class="fc" id="L167">        var result = returnEquipmentUseCase.execute(command);</span>
+<span class="fc" id="L168">        var response = commandMapper.toReturnResponse(result);</span>
+<span class="fc" id="L169">        log.info(&quot;[POST] Equipment return processed successfully for rental {}&quot;, result.rental().getId());</span>
+<span class="fc" id="L170">        return ResponseEntity.ok(response);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

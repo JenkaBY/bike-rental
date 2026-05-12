@@ -89,7 +89,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
 <span class="fc" id="L89">            equipment.setTariffId(breakdown.tariffId());</span>
         }
 
-<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (!rental.allEquipmentReturned()) {</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (!rental.allEquipmentsReturned()) {</span>
 <span class="fc" id="L93">            Rental saved = rentalRepository.save(rental);</span>
 <span class="fc" id="L94">            log.info(&quot;Partial return recorded for rental {}&quot;, saved.getId());</span>
 <span class="fc" id="L95">            RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, saved.getFinalCost());</span>

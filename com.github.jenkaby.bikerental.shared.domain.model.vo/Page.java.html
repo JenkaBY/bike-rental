@@ -30,7 +30,7 @@ public record Page&lt;T&gt;(List&lt;T&gt; items, long totalItems, PageRequest pa
     }
 
     public static &lt;S&gt; Page&lt;S&gt; empty(PageRequest pageRequest) {
-<span class="nc" id="L33">        return new Page&lt;S&gt;(List.&lt;S&gt;of(), 0, pageRequest);</span>
+<span class="fc" id="L33">        return new Page&lt;S&gt;(List.&lt;S&gt;of(), 0, pageRequest);</span>
     }
 
     public static &lt;T&gt; Page&lt;?&gt; of(@NonNull T item, PageRequest pageRequest) {

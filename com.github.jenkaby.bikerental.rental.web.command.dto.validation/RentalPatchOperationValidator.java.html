@@ -65,28 +65,29 @@ import java.util.regex.Pattern;
 <span class="fc" id="L65">                    .addConstraintViolation();</span>
 <span class="fc" id="L66">            isValid = false;</span>
         }
-<span class="pc bpc" id="L68" title="1 of 6 branches missed.">        if (operation.getOp() != null &amp;&amp; &quot;/duration&quot;.equals(operation.getPath()) &amp;&amp; operation.getValue() != null) {</span>
-            // For duration, value must be a valid ISO-8601 duration string
+<span class="pc bpc" id="L68" title="1 of 4 branches missed.">        if (operation.getOp() != null &amp;&amp; &quot;/duration&quot;.equals(operation.getPath())</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">                &amp;&amp; operation.getValue() != null) {</span>
             try {
-<span class="fc" id="L71">                Integer.valueOf((String) operation.getValue());</span>
-<span class="fc" id="L72">            } catch (Exception e) {</span>
-<span class="fc" id="L73">                context.buildConstraintViolationWithTemplate(</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">                if (operation.getValue() instanceof String durationStr)</span>
+<span class="fc" id="L72">                    Integer.valueOf(durationStr);</span>
+<span class="fc" id="L73">            } catch (Exception e) {</span>
+<span class="fc" id="L74">                context.buildConstraintViolationWithTemplate(</span>
                                 &quot;Value for path '/duration' must be integer&quot;)
-<span class="fc" id="L75">                        .addPropertyNode(&quot;value&quot;)</span>
-<span class="fc" id="L76">                        .addConstraintViolation();</span>
-<span class="fc" id="L77">                isValid = false;</span>
-<span class="fc" id="L78">            }</span>
+<span class="fc" id="L76">                        .addPropertyNode(&quot;value&quot;)</span>
+<span class="fc" id="L77">                        .addConstraintViolation();</span>
+<span class="fc" id="L78">                isValid = false;</span>
+<span class="fc" id="L79">            }</span>
         }
-<span class="pc bpc" id="L80" title="2 of 6 branches missed.">        if (operation.getOp() != null &amp;&amp; &quot;/equipmentIds&quot;.equals(operation.getPath()) &amp;&amp; operation.getValue() != null) {</span>
-<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            if (!IS_ARRAY_OF_NUMBERS.matcher(operation.getValue().toString()).matches()) {</span>
-<span class="nc" id="L82">                context.buildConstraintViolationWithTemplate(</span>
+<span class="pc bpc" id="L81" title="2 of 6 branches missed.">        if (operation.getOp() != null &amp;&amp; &quot;/equipmentIds&quot;.equals(operation.getPath()) &amp;&amp; operation.getValue() != null) {</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">            if (!IS_ARRAY_OF_NUMBERS.matcher(operation.getValue().toString()).matches()) {</span>
+<span class="nc" id="L83">                context.buildConstraintViolationWithTemplate(</span>
                                 &quot;Value for path '/equipmentIds' must be an array of int64&quot;)
-<span class="nc" id="L84">                        .addPropertyNode(&quot;value&quot;)</span>
-<span class="nc" id="L85">                        .addConstraintViolation();</span>
-<span class="nc" id="L86">                isValid = false;</span>
+<span class="nc" id="L85">                        .addPropertyNode(&quot;value&quot;)</span>
+<span class="nc" id="L86">                        .addConstraintViolation();</span>
+<span class="nc" id="L87">                isValid = false;</span>
             }
         }
-<span class="fc" id="L89">        return isValid;</span>
+<span class="fc" id="L90">        return isValid;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

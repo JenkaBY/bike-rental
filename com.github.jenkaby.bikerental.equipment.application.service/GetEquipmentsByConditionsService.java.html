@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GetEquipmentsByConditionsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.equipment.application.service</a> &gt; <span class="el_source">GetEquipmentsByConditionsService.java</span></div><h1>GetEquipmentsByConditionsService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.equipment.application.service;
+
+import com.github.jenkaby.bikerental.equipment.EquipmentSearchFilter;
+import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentsByConditionsUseCase;
+import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
+import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
+import com.github.jenkaby.bikerental.shared.domain.model.Condition;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Set;
+
+@Service
+class GetEquipmentsByConditionsService implements GetEquipmentsByConditionsUseCase {
+
+    private final EquipmentRepository repository;
+
+<span class="fc" id="L18">    GetEquipmentsByConditionsService(EquipmentRepository repository) {</span>
+<span class="fc" id="L19">        this.repository = repository;</span>
+<span class="fc" id="L20">    }</span>
+
+    @Override
+    public List&lt;Equipment&gt; execute(Set&lt;Condition&gt; conditions, EquipmentSearchFilter filter) {
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if (conditions.isEmpty()) {</span>
+<span class="nc" id="L25">            throw new IllegalArgumentException(&quot;conditions must not be empty&quot;);</span>
+        }
+<span class="fc" id="L27">        return repository.findByConditions(conditions, filter.q());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -3,19 +3,16 @@
 import com.github.jenkaby.bikerental.customer.CustomerFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
-import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
-import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
-import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +22,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 
-<span class="fc" id="L28">@Slf4j</span>
+<span class="fc" id="L25">@Slf4j</span>
 @Service
 class CreateRentalService implements CreateRentalUseCase {
 
@@ -34,100 +31,86 @@ class CreateRentalService implements CreateRentalUseCase {
     private final RentalRepository repository;
     private final CustomerFacade customerFacade;
     private final EquipmentFacade equipmentFacade;
-    private final TariffV2Facade tariffV2Facade;
     private final EventPublisher eventPublisher;
     private final RentalEventMapper eventMapper;
-    private final RentalCostCommandMapper costCommandMapper;
     private final Clock clock;
     private final RequestedEquipmentValidator validator;
     private final FinanceFacade financeFacade;
+    private final RentalEquipmentFactory rentalEquipmentFactory;
 
     CreateRentalService(
             RentalRepository repository,
             CustomerFacade customerFacade,
             EquipmentFacade equipmentFacade,
-            TariffV2Facade tariffV2Facade,
             EventPublisher eventPublisher,
             RentalEventMapper eventMapper,
-            RentalCostCommandMapper costCommandMapper,
             Clock clock,
             RequestedEquipmentValidator validator,
-<span class="fc" id="L55">            FinanceFacade financeFacade) {</span>
-<span class="fc" id="L56">        this.repository = repository;</span>
-<span class="fc" id="L57">        this.customerFacade = customerFacade;</span>
-<span class="fc" id="L58">        this.equipmentFacade = equipmentFacade;</span>
-<span class="fc" id="L59">        this.tariffV2Facade = tariffV2Facade;</span>
-<span class="fc" id="L60">        this.eventPublisher = eventPublisher;</span>
-<span class="fc" id="L61">        this.eventMapper = eventMapper;</span>
-<span class="fc" id="L62">        this.costCommandMapper = costCommandMapper;</span>
-<span class="fc" id="L63">        this.clock = clock;</span>
-<span class="fc" id="L64">        this.validator = validator;</span>
-<span class="fc" id="L65">        this.financeFacade = financeFacade;</span>
-<span class="fc" id="L66">    }</span>
+<span class="fc" id="L49">            FinanceFacade financeFacade, RentalEquipmentFactory rentalEquipmentFactory) {</span>
+<span class="fc" id="L50">        this.repository = repository;</span>
+<span class="fc" id="L51">        this.customerFacade = customerFacade;</span>
+<span class="fc" id="L52">        this.equipmentFacade = equipmentFacade;</span>
+<span class="fc" id="L53">        this.eventPublisher = eventPublisher;</span>
+<span class="fc" id="L54">        this.eventMapper = eventMapper;</span>
+<span class="fc" id="L55">        this.clock = clock;</span>
+<span class="fc" id="L56">        this.validator = validator;</span>
+<span class="fc" id="L57">        this.financeFacade = financeFacade;</span>
+<span class="fc" id="L58">        this.rentalEquipmentFactory = rentalEquipmentFactory;</span>
+<span class="fc" id="L59">    }</span>
 
     @Override
     @Transactional
     public Rental execute(CreateRentalCommand command) {
-<span class="fc" id="L71">        customerFacade.findById(command.customerId())</span>
-<span class="pc" id="L72">                .orElseThrow(() -&gt; new ReferenceNotFoundException(&quot;Customer&quot;, command.customerId().toString()));</span>
+<span class="fc" id="L64">        customerFacade.findById(command.customerId())</span>
+<span class="pc" id="L65">                .orElseThrow(() -&gt; new ReferenceNotFoundException(&quot;Customer&quot;, command.customerId().toString()));</span>
 
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (CollectionUtils.isEmpty(command.equipmentIds())) {</span>
-<span class="nc" id="L75">            throw new IllegalArgumentException(&quot;At least one equipmentId must be provided&quot;);</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (CollectionUtils.isEmpty(command.equipmentIds())) {</span>
+<span class="nc" id="L68">            throw new IllegalArgumentException(&quot;At least one equipmentId must be provided&quot;);</span>
         }
 
-<span class="fc" id="L78">        var equipments = equipmentFacade.findByIds(command.equipmentIds());</span>
-<span class="fc" id="L79">        validator.validateSize(command.equipmentIds(), equipments);</span>
-<span class="fc" id="L80">        validator.validateAvailability(equipments);</span>
+<span class="fc" id="L71">        var equipments = equipmentFacade.findByIds(command.equipmentIds());</span>
+<span class="fc" id="L72">        validator.validateSize(command.equipmentIds(), equipments);</span>
+<span class="fc" id="L73">        validator.validateEquipmentsCondition(equipments);</span>
+<span class="fc" id="L74">        validator.validateAvailability(equipments);</span>
 
-<span class="fc" id="L82">        var costCommand = costCommandMapper.toCommand(command, equipments);</span>
-<span class="fc" id="L83">        var costResult = tariffV2Facade.calculateRentalCost(costCommand);</span>
-<span class="fc" id="L84">        var breakdowns = costResult.equipmentBreakdowns();</span>
+<span class="fc" id="L76">        var rental = Rental.builder()</span>
+<span class="fc" id="L77">                .status(RentalStatus.DRAFT)</span>
+<span class="fc" id="L78">                .customerId(command.customerId())</span>
+<span class="fc" id="L79">                .createdAt(Instant.now(clock))</span>
+<span class="fc" id="L80">                .equipments(new ArrayList&lt;&gt;())</span>
+<span class="fc" id="L81">                .plannedDuration(command.duration())</span>
+<span class="fc" id="L82">                .specialTariffId(command.specialTariffId())</span>
+<span class="fc" id="L83">                .specialPrice(command.specialPrice())</span>
+<span class="fc" id="L84">                .discountPercent(command.discountPercent())</span>
+<span class="fc" id="L85">                .build();</span>
 
-<span class="fc" id="L86">        Rental rental = Rental.builder()</span>
-<span class="fc" id="L87">                .status(RentalStatus.DRAFT)</span>
-<span class="fc" id="L88">                .customerId(command.customerId())</span>
-<span class="fc" id="L89">                .createdAt(Instant.now(clock))</span>
-<span class="fc" id="L90">                .equipments(new ArrayList&lt;&gt;())</span>
-<span class="fc" id="L91">                .plannedDuration(command.duration())</span>
-<span class="fc" id="L92">                .specialTariffId(command.specialTariffId())</span>
-<span class="fc" id="L93">                .specialPrice(command.specialPrice())</span>
-<span class="fc" id="L94">                .discountPercent(command.discountPercent())</span>
-<span class="fc" id="L95">                .build();</span>
+<span class="fc" id="L87">        rentalEquipmentFactory.buildAssignedWithCost(rental, equipments)</span>
+<span class="fc" id="L88">                .forEach(rental::addEquipment);</span>
 
-<span class="fc bfc" id="L97" title="All 2 branches covered.">        for (int i = 0; i &lt; equipments.size(); i++) {</span>
-<span class="fc" id="L98">            var equipment = equipments.get(i);</span>
-<span class="fc" id="L99">            var rentalEquipment = RentalEquipment.assigned(</span>
-<span class="fc" id="L100">                    equipment.id(),</span>
-<span class="fc" id="L101">                    equipment.uid(),</span>
-<span class="fc" id="L102">                    equipment.typeSlug());</span>
-<span class="fc" id="L103">            rentalEquipment.setEstimatedCost(breakdowns.get(i).itemCost());</span>
-<span class="fc" id="L104">            rental.addEquipment(rentalEquipment);</span>
+<span class="fc" id="L90">        Rental saved = repository.save(rental);</span>
+
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (saved.getEstimatedCost().isPositive()) {</span>
+<span class="fc" id="L93">            var holdInfo = financeFacade.holdFunds(</span>
+<span class="fc" id="L94">                    new CustomerRef(saved.getCustomerId()),</span>
+<span class="fc" id="L95">                    saved.toRentalRef(),</span>
+<span class="fc" id="L96">                    rental.getEstimatedCost(),</span>
+<span class="fc" id="L97">                    command.operatorId());</span>
+<span class="fc" id="L98">            log.info(&quot;Funds held for rental {}: transactionId={}, heldAt={}&quot;,</span>
+<span class="fc" id="L99">                    saved.getId(), holdInfo.transactionRef().id(), holdInfo.recordedAt());</span>
         }
 
-<span class="fc" id="L107">        Rental saved = repository.save(rental);</span>
-
-<span class="fc bfc" id="L109" title="All 2 branches covered.">        if (saved.getEstimatedCost().isPositive()) {</span>
-<span class="fc" id="L110">            var holdInfo = financeFacade.holdFunds(</span>
-<span class="fc" id="L111">                    new CustomerRef(saved.getCustomerId()),</span>
-<span class="fc" id="L112">                    saved.toRentalRef(),</span>
-<span class="fc" id="L113">                    costResult.totalCost(),</span>
-<span class="fc" id="L114">                    command.operatorId());</span>
-<span class="fc" id="L115">            log.info(&quot;Funds held for rental {}: transactionId={}, heldAt={}&quot;,</span>
-<span class="fc" id="L116">                    saved.getId(), holdInfo.transactionRef().id(), holdInfo.recordedAt());</span>
-        }
-
-<span class="fc" id="L119">        RentalCreated event = eventMapper.toRentalCreated(saved);</span>
-<span class="fc" id="L120">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
-<span class="fc" id="L121">        return saved;</span>
+<span class="fc" id="L102">        RentalCreated event = eventMapper.toRentalCreated(saved);</span>
+<span class="fc" id="L103">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
+<span class="fc" id="L104">        return saved;</span>
     }
 
     @Override
     @Transactional
     public Rental execute(CreateDraftCommand command) {
-<span class="fc" id="L127">        var draft = repository.save(Rental.createDraft());</span>
-<span class="fc" id="L128">        RentalCreated event = eventMapper.toRentalCreated(draft);</span>
-<span class="fc" id="L129">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
-<span class="fc" id="L130">        return draft;</span>
+<span class="fc" id="L110">        var draft = repository.save(Rental.createDraft());</span>
+<span class="fc" id="L111">        RentalCreated event = eventMapper.toRentalCreated(draft);</span>
+<span class="fc" id="L112">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
+<span class="fc" id="L113">        return draft;</span>
     }
 
 }

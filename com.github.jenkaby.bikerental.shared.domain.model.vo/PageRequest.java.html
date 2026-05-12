@@ -13,11 +13,11 @@ public record PageRequest(int size, int page, @Nullable String sortBy) {
 <span class="fc" id="L13">    }</span>
 
     public int offset() {
-<span class="nc" id="L16">        return page * size;</span>
+<span class="fc" id="L16">        return page * size;</span>
     }
 
     public int limit() {
-<span class="nc" id="L20">        return size;</span>
+<span class="fc" id="L20">        return size;</span>
     }
 
     public static PageRequest singleItem() {

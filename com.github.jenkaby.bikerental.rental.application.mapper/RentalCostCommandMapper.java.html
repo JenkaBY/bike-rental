@@ -34,40 +34,40 @@ import java.util.List;
     public RentalCostCalculationCommand toCommand(
             CreateRentalUseCase.CreateRentalCommand command,
             List&lt;EquipmentInfo&gt; equipments) {
-<span class="fc" id="L37">        var costItems = equipmentCostItemMapper.toEquipmentCostItems(equipments);</span>
-<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (command.specialTariffId() != null) {</span>
-<span class="fc" id="L39">            return new RentalCostCalculationCommand(</span>
+<span class="nc" id="L37">        var costItems = equipmentCostItemMapper.toEquipmentCostItems(equipments);</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (command.specialTariffId() != null) {</span>
+<span class="nc" id="L39">            return new RentalCostCalculationCommand(</span>
                     costItems,
-<span class="fc" id="L41">                    command.duration(),</span>
+<span class="nc" id="L41">                    command.duration(),</span>
                     null,
                     null,
-<span class="fc" id="L44">                    command.specialTariffId(),</span>
-<span class="fc" id="L45">                    command.specialPrice(),</span>
-<span class="fc" id="L46">                    LocalDate.now(clock));</span>
+<span class="nc" id="L44">                    command.specialTariffId(),</span>
+<span class="nc" id="L45">                    command.specialPrice(),</span>
+<span class="nc" id="L46">                    LocalDate.now(clock));</span>
         }
-<span class="fc" id="L48">        return new RentalCostCalculationCommand(</span>
+<span class="nc" id="L48">        return new RentalCostCalculationCommand(</span>
                 costItems,
-<span class="fc" id="L50">                command.duration(),</span>
+<span class="nc" id="L50">                command.duration(),</span>
                 null,
-<span class="fc" id="L52">                command.discountPercent(),</span>
+<span class="nc" id="L52">                command.discountPercent(),</span>
                 null,
                 null,
-<span class="fc" id="L55">                LocalDate.now(clock));</span>
+<span class="nc" id="L55">                LocalDate.now(clock));</span>
     }
 
     public RentalCostCalculationCommand toCommand(
             Rental rental,
             List&lt;EquipmentInfo&gt; equipments) {
 <span class="fc" id="L61">        var costItems = equipmentCostItemMapper.toEquipmentCostItems(equipments);</span>
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (rental.getSpecialTariffId() != null) {</span>
-<span class="nc" id="L63">            return new RentalCostCalculationCommand(</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (rental.getSpecialTariffId() != null) {</span>
+<span class="fc" id="L63">            return new RentalCostCalculationCommand(</span>
                     costItems,
-<span class="nc" id="L65">                    rental.getPlannedDuration(),</span>
+<span class="fc" id="L65">                    rental.getPlannedDuration(),</span>
                     null,
                     null,
-<span class="nc" id="L68">                    rental.getSpecialTariffId(),</span>
-<span class="nc" id="L69">                    rental.getSpecialPrice(),</span>
-<span class="nc" id="L70">                    LocalDate.now(clock));</span>
+<span class="fc" id="L68">                    rental.getSpecialTariffId(),</span>
+<span class="fc" id="L69">                    rental.getSpecialPrice(),</span>
+<span class="fc" id="L70">                    LocalDate.now(clock));</span>
         }
 <span class="fc" id="L72">        return new RentalCostCalculationCommand(</span>
                 costItems,

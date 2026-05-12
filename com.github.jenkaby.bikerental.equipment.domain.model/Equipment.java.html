@@ -3,6 +3,7 @@
 import com.github.jenkaby.bikerental.equipment.domain.service.StatusTransitionPolicy;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
+import com.github.jenkaby.bikerental.shared.domain.model.Condition;
 import lombok.*;
 import org.jspecify.annotations.NonNull;
 
@@ -19,14 +20,15 @@ public class Equipment {
     private Uid uid;
     private String typeSlug;
     private String statusSlug;
+    private Condition conditionSlug;
     private String model;
     private LocalDate commissionedAt;
     private String condition;
 
 
     public void changeStatusTo(@NonNull String newStatusSlug, @NonNull StatusTransitionPolicy policy) {
-<span class="fc" id="L28">        policy.validateTransition(this.statusSlug, newStatusSlug);</span>
-<span class="fc" id="L29">        this.statusSlug = newStatusSlug;</span>
-<span class="fc" id="L30">    }</span>
+<span class="fc" id="L30">        policy.validateTransition(this.statusSlug, newStatusSlug);</span>
+<span class="fc" id="L31">        this.statusSlug = newStatusSlug;</span>
+<span class="fc" id="L32">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

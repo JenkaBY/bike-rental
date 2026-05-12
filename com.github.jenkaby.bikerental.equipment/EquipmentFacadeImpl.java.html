@@ -3,38 +3,52 @@
 import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentToInfoMapper;
 import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentByIdUseCase;
 import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentByIdsUseCase;
+import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentsByConditionsUseCase;
+import com.github.jenkaby.bikerental.shared.domain.model.Condition;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 class EquipmentFacadeImpl implements EquipmentFacade {
 
     private final GetEquipmentByIdUseCase getEquipmentByIdUseCase;
     private final GetEquipmentByIdsUseCase getEquipmentByIdsUseCase;
+    private final GetEquipmentsByConditionsUseCase getEquipmentsByConditionsUseCase;
     private final EquipmentToInfoMapper equipmentToInfoMapper;
 
     EquipmentFacadeImpl(GetEquipmentByIdUseCase getEquipmentByIdUseCase,
                         GetEquipmentByIdsUseCase getEquipmentByIdsUseCase,
-<span class="fc" id="L20">            EquipmentToInfoMapper equipmentToInfoMapper) {</span>
-<span class="fc" id="L21">        this.getEquipmentByIdUseCase = getEquipmentByIdUseCase;</span>
-<span class="fc" id="L22">        this.getEquipmentByIdsUseCase = getEquipmentByIdsUseCase;</span>
-<span class="fc" id="L23">        this.equipmentToInfoMapper = equipmentToInfoMapper;</span>
-<span class="fc" id="L24">    }</span>
+                        GetEquipmentsByConditionsUseCase getEquipmentsByConditionsUseCase,
+<span class="fc" id="L25">                        EquipmentToInfoMapper equipmentToInfoMapper) {</span>
+<span class="fc" id="L26">        this.getEquipmentByIdUseCase = getEquipmentByIdUseCase;</span>
+<span class="fc" id="L27">        this.getEquipmentByIdsUseCase = getEquipmentByIdsUseCase;</span>
+<span class="fc" id="L28">        this.getEquipmentsByConditionsUseCase = getEquipmentsByConditionsUseCase;</span>
+<span class="fc" id="L29">        this.equipmentToInfoMapper = equipmentToInfoMapper;</span>
+<span class="fc" id="L30">    }</span>
 
     @Override
     public Optional&lt;EquipmentInfo&gt; findById(Long equipmentId) {
-<span class="nc" id="L28">        return getEquipmentByIdUseCase.execute(equipmentId)</span>
-<span class="nc" id="L29">                .map(equipmentToInfoMapper::toEquipmentInfo);</span>
+<span class="nc" id="L34">        return getEquipmentByIdUseCase.execute(equipmentId)</span>
+<span class="nc" id="L35">                .map(equipmentToInfoMapper::toEquipmentInfo);</span>
     }
 
     @Override
     public List&lt;EquipmentInfo&gt; findByIds(List&lt;Long&gt; equipmentIds) {
-<span class="fc" id="L34">        return getEquipmentByIdsUseCase.execute(equipmentIds)</span>
-<span class="fc" id="L35">                .stream()</span>
-<span class="fc" id="L36">                .map(equipmentToInfoMapper::toEquipmentInfo)</span>
-<span class="fc" id="L37">                .toList();</span>
+<span class="fc" id="L40">        return getEquipmentByIdsUseCase.execute(equipmentIds)</span>
+<span class="fc" id="L41">                .stream()</span>
+<span class="fc" id="L42">                .map(equipmentToInfoMapper::toEquipmentInfo)</span>
+<span class="fc" id="L43">                .toList();</span>
+    }
+
+    @Override
+    public List&lt;EquipmentInfo&gt; getEquipmentsByConditions(Set&lt;Condition&gt; conditions, EquipmentSearchFilter filter) {
+<span class="fc" id="L48">        return getEquipmentsByConditionsUseCase.execute(conditions, filter)</span>
+<span class="fc" id="L49">                .stream()</span>
+<span class="fc" id="L50">                .map(equipmentToInfoMapper::toEquipmentInfo)</span>
+<span class="fc" id="L51">                .toList();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
