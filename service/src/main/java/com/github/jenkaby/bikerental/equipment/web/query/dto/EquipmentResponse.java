@@ -11,9 +11,11 @@ public record EquipmentResponse(
         @Schema(description = "Serial number", example = "SN-123456") @NotNull String serialNumber,
         @Schema(description = "UID tag", example = "BIKE-001") @NotNull String uid,
         @Schema(description = "Equipment type slug", example = "bike") @NotNull String type,
+        @Deprecated(forRemoval = true)
         @Schema(description = "Equipment status slug", example = "available") @NotNull String status,
         @Schema(description = "Model name", example = "Trek Marlin 5") @NotNull String model,
         @Schema(description = "Commissioned date", example = "2023-06-01") LocalDate commissionedAt,
-        @Schema(description = "Condition", example = "Good") String condition
+        @Schema(description = "Condition notes", example = "Good") String conditionNotes,
+        @Schema(description = "Physical condition slug", example = "GOOD") String condition
 ) {
 }

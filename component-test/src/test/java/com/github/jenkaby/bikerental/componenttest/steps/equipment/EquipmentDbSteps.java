@@ -80,9 +80,6 @@ public class EquipmentDbSteps {
                     softly.assertThat(actual.getUid())
                             .as("UID should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getUid());
-                    softly.assertThat(actual.getStatusSlug())
-                            .as("Status slug should match for serialNumberValue: %s", exp.getSerialNumber())
-                            .isEqualTo(exp.getStatusSlug());
                     softly.assertThat(actual.getTypeSlug())
                             .as("Equipment type slug should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getTypeSlug());
@@ -93,8 +90,11 @@ public class EquipmentDbSteps {
                             .as("Commissioned date should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getCommissionedAt());
                     softly.assertThat(actual.getCondition())
-                            .as("Condition should match for serialNumberValue: %s", exp.getSerialNumber())
+                            .as("Condition notes should match for serialNumberValue: %s", exp.getSerialNumber())
                             .isEqualTo(exp.getCondition());
+                    softly.assertThat(actual.getConditionSlug())
+                            .as("Condition slug should match for serialNumberValue: %s", exp.getSerialNumber())
+                            .isEqualTo(exp.getConditionSlug());
                     softly.assertAll();
                 });
 

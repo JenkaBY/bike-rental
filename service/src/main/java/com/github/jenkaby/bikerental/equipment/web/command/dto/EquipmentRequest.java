@@ -26,6 +26,7 @@ public record EquipmentRequest(
 
         @Schema(description = "Equipment status slug", example = "available")
         @Slug
+        @Deprecated(forRemoval = true)
         String statusSlug,
 
         @Schema(description = "Model name", example = "Trek Marlin 5")
@@ -36,6 +37,10 @@ public record EquipmentRequest(
         LocalDate commissionedAt,
 
         @Schema(description = "Condition description", example = "Good")
-        String condition
+        String condition,
+
+        @Schema(description = "Condition slug", example = "GOOD",
+                allowableValues = {"GOOD", "MAINTENANCE", "BROKEN", "DECOMMISSIONED"})
+        String conditionSlug
 ) {
 }

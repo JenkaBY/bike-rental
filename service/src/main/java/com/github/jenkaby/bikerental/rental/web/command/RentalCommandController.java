@@ -68,7 +68,7 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Customer or equipment not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "Equipment not available",
+            @ApiResponse(responseCode = "409", description = "Equipment not available",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<RentalResponse> createRental(@Valid @RequestBody CreateRentalRequest request) {
@@ -86,7 +86,9 @@ class RentalCommandController {
     @Operation(summary = "Create rental draft (Draft Path)", description = "Creates an empty rental draft to be filled step by step")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Draft created",
-                    content = @Content(schema = @Schema(implementation = RentalResponse.class)))
+                    content = @Content(schema = @Schema(implementation = RentalResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Equipment not available",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<RentalResponse> createDraft() {
         log.info("[POST] Creating new rental draft");
@@ -126,7 +128,9 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Rental not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "Invalid rental status transition or equipment not available",
+            @ApiResponse(responseCode = "409", description = "Equipment not available",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Invalid rental status transition",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<RentalResponse> updateRental(
@@ -153,7 +157,7 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Rental or equipment not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "Rental not in active state or insufficient prepayment",
+            @ApiResponse(responseCode = "422", description = "Rental not in active state",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<RentalReturnResponse> returnEquipment(@Valid @RequestBody ReturnEquipmentRequest request) {

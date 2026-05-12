@@ -3,19 +3,16 @@ package com.github.jenkaby.bikerental.rental.application.service;
 import com.github.jenkaby.bikerental.customer.CustomerFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
-import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
-import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
-import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,35 +31,31 @@ class CreateRentalService implements CreateRentalUseCase {
     private final RentalRepository repository;
     private final CustomerFacade customerFacade;
     private final EquipmentFacade equipmentFacade;
-    private final TariffV2Facade tariffV2Facade;
     private final EventPublisher eventPublisher;
     private final RentalEventMapper eventMapper;
-    private final RentalCostCommandMapper costCommandMapper;
     private final Clock clock;
     private final RequestedEquipmentValidator validator;
     private final FinanceFacade financeFacade;
+    private final RentalEquipmentFactory rentalEquipmentFactory;
 
     CreateRentalService(
             RentalRepository repository,
             CustomerFacade customerFacade,
             EquipmentFacade equipmentFacade,
-            TariffV2Facade tariffV2Facade,
             EventPublisher eventPublisher,
             RentalEventMapper eventMapper,
-            RentalCostCommandMapper costCommandMapper,
             Clock clock,
             RequestedEquipmentValidator validator,
-            FinanceFacade financeFacade) {
+            FinanceFacade financeFacade, RentalEquipmentFactory rentalEquipmentFactory) {
         this.repository = repository;
         this.customerFacade = customerFacade;
         this.equipmentFacade = equipmentFacade;
-        this.tariffV2Facade = tariffV2Facade;
         this.eventPublisher = eventPublisher;
         this.eventMapper = eventMapper;
-        this.costCommandMapper = costCommandMapper;
         this.clock = clock;
         this.validator = validator;
         this.financeFacade = financeFacade;
+        this.rentalEquipmentFactory = rentalEquipmentFactory;
     }
 
     @Override
@@ -77,13 +70,10 @@ class CreateRentalService implements CreateRentalUseCase {
 
         var equipments = equipmentFacade.findByIds(command.equipmentIds());
         validator.validateSize(command.equipmentIds(), equipments);
+        validator.validateEquipmentsCondition(equipments);
         validator.validateAvailability(equipments);
 
-        var costCommand = costCommandMapper.toCommand(command, equipments);
-        var costResult = tariffV2Facade.calculateRentalCost(costCommand);
-        var breakdowns = costResult.equipmentBreakdowns();
-
-        Rental rental = Rental.builder()
+        var rental = Rental.builder()
                 .status(RentalStatus.DRAFT)
                 .customerId(command.customerId())
                 .createdAt(Instant.now(clock))
@@ -94,15 +84,8 @@ class CreateRentalService implements CreateRentalUseCase {
                 .discountPercent(command.discountPercent())
                 .build();
 
-        for (int i = 0; i < equipments.size(); i++) {
-            var equipment = equipments.get(i);
-            var rentalEquipment = RentalEquipment.assigned(
-                    equipment.id(),
-                    equipment.uid(),
-                    equipment.typeSlug());
-            rentalEquipment.setEstimatedCost(breakdowns.get(i).itemCost());
-            rental.addEquipment(rentalEquipment);
-        }
+        rentalEquipmentFactory.buildAssignedWithCost(rental, equipments)
+                .forEach(rental::addEquipment);
 
         Rental saved = repository.save(rental);
 
@@ -110,7 +93,7 @@ class CreateRentalService implements CreateRentalUseCase {
             var holdInfo = financeFacade.holdFunds(
                     new CustomerRef(saved.getCustomerId()),
                     saved.toRentalRef(),
-                    costResult.totalCost(),
+                    rental.getEstimatedCost(),
                     command.operatorId());
             log.info("Funds held for rental {}: transactionId={}, heldAt={}",
                     saved.getId(), holdInfo.transactionRef().id(), holdInfo.recordedAt());

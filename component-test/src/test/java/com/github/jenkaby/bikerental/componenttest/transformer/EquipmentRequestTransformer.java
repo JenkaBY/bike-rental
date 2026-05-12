@@ -16,6 +16,7 @@ public class EquipmentRequestTransformer {
         var model = DataTableHelper.getStringOrNull(entry, "model");
         var commissionedAtString = DataTableHelper.getStringOrNull(entry, "commissionedAt");
         var commissionedAt = commissionedAtString != null ? LocalDate.parse(commissionedAtString) : null;
+        var conditionNotes = DataTableHelper.getStringOrNull(entry, "conditionNotes");
         var condition = DataTableHelper.getStringOrNull(entry, "condition");
 
         return new EquipmentRequest(
@@ -25,6 +26,7 @@ public class EquipmentRequestTransformer {
                 statusSlug,
                 model,
                 commissionedAt,
+                conditionNotes,
                 condition
         );
     }

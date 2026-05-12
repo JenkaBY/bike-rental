@@ -15,7 +15,8 @@ public interface UpdateEquipmentUseCase {
             String statusSlug,
             String model,
             LocalDate commissionedAt,
-            String condition
+            String condition,
+            String conditionSlug
     ) {
     }
 }

@@ -9,8 +9,6 @@ import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalUpdated;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.modulith.events.ApplicationModuleListener;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
@@ -18,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-@Component
+//@Component
 public class RentalEventListener {
 
     private final EquipmentRepository equipmentRepository;
@@ -34,28 +32,28 @@ public class RentalEventListener {
         this.equipmentCommandToDomainMapper = equipmentCommandToDomainMapper;
     }
 
-    @ApplicationModuleListener
+    //    @ApplicationModuleListener
     public void onRentalStarted(RentalStarted event) {
         log.info("Received RentalStarted event for equipments {}", event.equipmentIds());
         equipmentRepository.findByIds(event.equipmentIds())
                 .forEach(equipment -> setStatusForEquipment(equipment, EquipmentStatus.RENTED.name()));
     }
 
-    @ApplicationModuleListener
+    //    @ApplicationModuleListener
     public void onRentalStarted(RentalCreated event) {
         log.info("Received RentalCreated event {}", event);
         equipmentRepository.findByIds(event.equipmentIds())
                 .forEach(equipment -> setStatusForEquipment(equipment, EquipmentStatus.RESERVED.name()));
     }
 
-    @ApplicationModuleListener
+    //    @ApplicationModuleListener
     public void onRentalCompleted(RentalCompleted event) {
         log.info("Received RentalCompleted event for equipments {}", event.equipmentIds());
         equipmentRepository.findByIds(event.returnedEquipmentIds())
                 .forEach(equipment -> setStatusForEquipment(equipment, EquipmentStatus.AVAILABLE.name()));
     }
 
-    @ApplicationModuleListener
+    //    @ApplicationModuleListener
     public void onRentalUpdated(RentalUpdated event) {
         log.info("Received RentalUpdated event {}", event);
         if (CollectionUtils.isEmpty(event.currentState().equipmentIds()) && CollectionUtils.isEmpty(event.previousState().equipmentIds())) {

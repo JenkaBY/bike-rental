@@ -12,12 +12,10 @@ import lombok.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 
 @Getter
@@ -69,28 +67,12 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    public void selectTariff(Long tariffId) {
-        if (this.status != RentalStatus.DRAFT) {
-            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
-        }
-        this.updatedAt = Instant.now();
-    }
-
     public void setPlannedDuration(Duration duration) {
         if (this.status != RentalStatus.DRAFT) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
         this.plannedDuration = duration;
         // startedAt and expectedReturnAt will be set automatically when rental is activated
-        this.updatedAt = Instant.now();
-    }
-
-    @Deprecated
-    public void setEstimatedCost(Money estimatedCost) {
-        if (this.status != RentalStatus.DRAFT) {
-            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
-        }
-        this.estimatedCost = estimatedCost;
         this.updatedAt = Instant.now();
     }
 
@@ -120,14 +102,6 @@ public class Rental {
         return new RentalRef(id);
     }
 
-    @Deprecated
-    public boolean isPrepaymentSufficient(Money amount) {
-        if (estimatedCost == null) {
-            return false;
-        }
-        return amount.compareTo(estimatedCost) >= 0;
-    }
-
     public boolean hasActiveStatus() {
         return status == RentalStatus.ACTIVE;
     }
@@ -142,12 +116,10 @@ public class Rental {
     }
 
     public void activate(LocalDateTime actualStartTime) {
-        // Validate status
         if (this.status != RentalStatus.DRAFT) {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
 
-        // Validate required fields
         if (!canBeActivated()) {
             List<String> missingFields = new ArrayList<>();
             if (customerId == null) missingFields.add("customerId");
@@ -165,9 +137,22 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    // For cases update rental during patch
-    public void clearEquipmentRentals() {
-        this.equipments.clear();
+    public List<Long> getNewEquipmentIds(Set<Long> incomingIds) {
+        var existingIds = equipments.stream()
+                .map(RentalEquipment::getEquipmentId)
+                .collect(Collectors.toSet());
+        return incomingIds.stream()
+                .filter(id -> !existingIds.contains(id))
+                .toList();
+    }
+
+    public void replaceEquipments(List<RentalEquipment> toAdd, Set<Long> incomingIds) {
+        if (this.status != RentalStatus.DRAFT) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
+        }
+        equipments.removeIf(e -> !incomingIds.contains(e.getEquipmentId()));
+        toAdd.forEach(this::addEquipment);
+        this.updatedAt = Instant.now();
     }
 
     public void addEquipment(RentalEquipment equipment) {
@@ -178,7 +163,7 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    public boolean allEquipmentReturned() {
+    public boolean allEquipmentsReturned() {
         return equipments.stream()
                 .allMatch(RETURNED);
     }
@@ -190,7 +175,6 @@ public class Rental {
     }
 
     public List<RentalEquipment> equipmentsToReturn(List<Long> toReturnEquipmentIds, List<String> toReturnEquipmentUids, LocalDateTime returnedAt) {
-//         assume when no equipments are present in request, entire rental must be completed
         var isEmptyRequest = isEmpty(toReturnEquipmentIds) && isEmpty(toReturnEquipmentUids);
         Predicate<RentalEquipment> filter = eq -> isEmptyRequest
                 || toReturnEquipmentIds.contains(eq.getEquipmentId())
@@ -222,15 +206,15 @@ public class Rental {
         if (this.finalCost == null) {
             throw new IllegalArgumentException("Final cost cannot be null");
         }
-        this.updatedAt = Instant.now();
         this.status = RentalStatus.COMPLETED;
+        this.updatedAt = Instant.now();
     }
 
     public void completeWithStatus(Money finalCost, RentalStatus status) {
         validateCompletion(finalCost);
 
         this.finalCost = finalCost;
-        if (allEquipmentReturned()) {
+        if (allEquipmentsReturned()) {
             this.status = status;
         }
         this.updatedAt = Instant.now();
@@ -260,11 +244,12 @@ public class Rental {
 
     public static class RentalBuilder {
         public Rental build() {
-            if (specialTariffId != null && discountPercent != null) {
+            if ((specialTariffId != null || specialPrice != null) && discountPercent != null) {
                 throw new IllegalArgumentException(
                         "specialTariffId and discountPercent are mutually exclusive");
             }
-            if (specialTariffId != null && specialPrice == null) {
+            if ((specialTariffId != null && specialPrice == null)
+                    || (specialTariffId == null && specialPrice != null)) {
                 throw new IllegalArgumentException(
                         "specialPrice is required when specialTariffId is set");
             }

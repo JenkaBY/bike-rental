@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.equipment.infrastructure.persistence.entity.EquipmentJpaEntity;
+import com.github.jenkaby.bikerental.shared.domain.model.Condition;
 import io.cucumber.java.DataTableType;
 
 import java.time.Instant;
@@ -24,7 +25,8 @@ public class EquipmentJpaEntityTransformer {
         } else {
             entity.setCommissionedAt(null);
         }
-        entity.setCondition(entry.get("condition"));
+        entity.setCondition(entry.get("conditionNotes"));
+        entity.setConditionSlug(Condition.valueOf(entry.get("condition")));
         entity.setCreatedAt(Optional.ofNullable(DataTableHelper.toInstant(entry, "createdAt")).orElse(Instant.now()));
         entity.setUpdatedAt(DataTableHelper.toInstant(entry, "updatedAt"));
         return entity;

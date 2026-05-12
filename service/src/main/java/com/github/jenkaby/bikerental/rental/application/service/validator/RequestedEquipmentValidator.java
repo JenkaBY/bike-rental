@@ -9,4 +9,6 @@ public interface RequestedEquipmentValidator {
     void validateAvailability(List<EquipmentInfo> equipments);
 
     void validateSize(List<Long> requestedEquipmentIds, List<EquipmentInfo> equipments);
+
+    void validateEquipmentsCondition(List<EquipmentInfo> equipments);
 }

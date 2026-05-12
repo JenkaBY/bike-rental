@@ -225,7 +225,7 @@ public class CoreExceptionHandlerAdvice {
     public ResponseEntity<ProblemDetail> handleEquipmentNotAvailableException(EquipmentNotAvailableException ex) {
         var correlationId = resolveCorrelationId();
         var details = ex.getDetails();
-        log.warn("[correlationId={}] Equipment {} is not available for operation. Current status: {}", correlationId, details.identifier(), details.status());
+        log.warn("[correlationId={}] Equipment {} is not available for operation.", correlationId, details.identifiers());
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, ex.getErrorCode());

@@ -16,6 +16,8 @@ public interface EquipmentQueryMapper {
 
     @Mapping(target = "status", source = "statusSlug")
     @Mapping(target = "type", source = "typeSlug")
+    @Mapping(target = "conditionNotes", source = "condition")
+    @Mapping(target = "condition", source = "conditionSlug")
     EquipmentResponse toResponse(Equipment equipment);
 
     @Mapping(target = "typeSlug", source = "type")

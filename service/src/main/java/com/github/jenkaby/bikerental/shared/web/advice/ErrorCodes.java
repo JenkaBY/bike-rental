@@ -22,4 +22,5 @@ public class ErrorCodes {
     public static final String INSUFFICIENT_HOLD = "finance.insufficient_hold";
     public static final String INSUFFICIENT_FUNDS = "rental.insufficient_funds";
     public static final String HOLD_REQUIRED = "rental.hold.required";
+    public static final String EQUIPMENT_NOT_AVAILABLE = "rental.equipment.not_available";
 }

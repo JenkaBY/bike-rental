@@ -11,13 +11,8 @@ public enum JsonPatchOperation {
     /**
      * Replace operation: replaces the value at the target location with a new value.
      */
-    REPLACE("replace"),
+    REPLACE("replace");
 
-    /**
-     * Add operation: adds a value at the target location.
-     * For our use case, it's equivalent to replace.
-     */
-    ADD("add");
 
     private final String value;
 

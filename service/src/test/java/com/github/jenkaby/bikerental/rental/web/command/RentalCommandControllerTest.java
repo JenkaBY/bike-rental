@@ -406,7 +406,7 @@ class RentalCommandControllerTest {
             void whenPatchRequestIsValidWithAddOperation() throws Exception {
                 RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
                         List.of(new RentalPatchOperation(
-                                JsonPatchOperation.ADD,
+                                JsonPatchOperation.REPLACE,
                                 "/equipmentIds",
                                 "[123]"
                         ))
@@ -699,7 +699,7 @@ class RentalCommandControllerTest {
             void whenOperationValueIsNullForAddOperation() throws Exception {
                 RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
                         List.of(new RentalPatchOperation(
-                                JsonPatchOperation.ADD,
+                                JsonPatchOperation.REPLACE,
                                 "/customerId",
                                 null
                         ))
@@ -744,7 +744,7 @@ class RentalCommandControllerTest {
             void whenEquipmentIdsValueIsInvalid(String value) throws Exception {
                 RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
                         List.of(new RentalPatchOperation(
-                                JsonPatchOperation.ADD,
+                                JsonPatchOperation.REPLACE,
                                 "/equipmentIds",
                                 value
                         ))
