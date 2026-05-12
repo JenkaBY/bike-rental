@@ -26,6 +26,7 @@ public record EquipmentRequest(
 
         @Schema(description = "Equipment status slug", example = "available")
         @Slug
+        @Deprecated(forRemoval = true)
         String statusSlug,
 
         @Schema(description = "Model name", example = "Trek Marlin 5")

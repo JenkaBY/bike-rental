@@ -26,7 +26,7 @@ public class OpenApiConfig {
 
     public static final class Tags {
         public static final String CUSTOMERS = "Customers";
-        public static final String EQUIPMENT = "Equipment";
+        public static final String EQUIPMENT = "Equipments Catalogue";
         public static final String EQUIPMENT_TYPES = "Equipment Types";
         public static final String EQUIPMENT_STATUSES = "Equipment Statuses";
         public static final String FINANCE = "Finance";

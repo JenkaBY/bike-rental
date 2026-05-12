@@ -7,6 +7,7 @@ public record EquipmentInfo(
         String serialNumber,
         String uid,
         String typeSlug,
+        @Deprecated(forRemoval = true)
         String statusSlug,
         String model,
         Condition conditionSlug

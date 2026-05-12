@@ -114,6 +114,7 @@ public class EquipmentQueryController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<Page<EquipmentResponse>> searchEquipments(
+            @Deprecated(forRemoval = true)
             @Parameter(description = "Status slug filter", example = "available") @RequestParam(name = "status", required = false) String status,
             @Parameter(description = "Type slug filter", example = "bike") @RequestParam(name = "type", required = false) String type,
             @Parameter(description = "Free-text search across uid, serial number, and model (case-insensitive substring match)", example = "city") @RequestParam(name = "q", required = false) String q,
