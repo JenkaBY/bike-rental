@@ -255,20 +255,20 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/rentals")
 class RentalCommandController {
 
-    private final CreateRentalUseCase createRentalUseCase;
+    private final CreateRentalUseCase updateDraftRentalUseCase;
     private final StartRentalUseCase startRentalUseCase;
     private final ReturnEquipmentUseCase returnEquipmentUseCase;
     private final CancelRentalUseCase cancelRentalUseCase;
     private final RentalCommandMapper mapper;
 
     RentalCommandController(
-            CreateRentalUseCase createRentalUseCase,
+            CreateRentalUseCase updateDraftRentalUseCase,
             StartRentalUseCase startRentalUseCase,
             ReturnEquipmentUseCase returnEquipmentUseCase,
             CancelRentalUseCase cancelRentalUseCase,
             RentalCommandMapper mapper
     ) {
-        this.createRentalUseCase = createRentalUseCase;
+        this.updateDraftRentalUseCase = updateDraftRentalUseCase;
         this.startRentalUseCase = startRentalUseCase;
         this.returnEquipmentUseCase = returnEquipmentUseCase;
         this.cancelRentalUseCase = cancelRentalUseCase;
@@ -283,7 +283,7 @@ class RentalCommandController {
             @Valid @RequestBody CreateRentalRequest request
     ) {
         var command = mapper.toCreateCommand(request);
-        Long rentalId = createRentalUseCase.execute(command);
+        Long rentalId = updateDraftRentalUseCase.execute(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(rentalId);
     }
 

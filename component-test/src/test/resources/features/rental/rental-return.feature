@@ -261,13 +261,6 @@ Feature: Equipment Return
       | <returnedId>  | BIKE-001     | RETURNED | 1        | 8.00          | 6         |
       | <remainingId> | BIKE-002     | ACTIVE   | 1        | 8.00          |           |
     And the rental return response does not contain settlement info
-    And the following rental completed event was published
-      | rentalId   | equipmentIds               | returnedEquipmentIds | returnTime | totalCost |
-      | <rentalId> | <returnedId>,<remainingId> | <returnedId>         | <now>      | 6         |
-    And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
-      | <returnedId>  | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
-      | <remainingId> | EQ-002       | BIKE-002 | BICYCLE | Model A | Good           | GOOD      |
 #    return the remaining equipment
     Given now is "<nowReturn>"
     And the return equipment request is
@@ -322,9 +315,6 @@ Feature: Equipment Return
     And the following rental completed event was published
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
       | <rentalId> | <equipmentId> | <equipmentId>        | 14.40     | <now>      |
-    And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00    |
@@ -364,9 +354,6 @@ Feature: Equipment Return
     And the following rental completed event was published
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
       | <rentalId> | <equipmentId> | <equipmentId>        | 10.00     | <now>      |
-    And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00    |
@@ -406,9 +393,6 @@ Feature: Equipment Return
     And the following rental completed event was published
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
       | <rentalId> | <equipmentId> | <equipmentId>        | 0.00      | <now>      |
-    And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
       | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 16.00   |

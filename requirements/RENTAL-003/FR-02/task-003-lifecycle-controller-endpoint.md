@@ -45,13 +45,13 @@ Replace the existing constructor with:
 
 ```java
     RentalCommandController(
-            CreateRentalUseCase createRentalUseCase,
+            CreateRentalUseCase updateDraftRentalUseCase,
             UpdateRentalUseCase updateRentalUseCase,
             ReturnEquipmentUseCase returnEquipmentUseCase,
             RentalCommandMapper commandMapper,
             RentalQueryMapper queryMapper,
             RentalLifecycleUseCase rentalLifecycleUseCase) {
-        this.createRentalUseCase = createRentalUseCase;
+        this.updateDraftRentalUseCase = updateDraftRentalUseCase;
         this.updateRentalUseCase = updateRentalUseCase;
         this.returnEquipmentUseCase = returnEquipmentUseCase;
         this.commandMapper = commandMapper;

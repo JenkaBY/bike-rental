@@ -69,7 +69,7 @@ import org.junit.jupiter.params.provider.Arguments;
                         .andExpect(jsonPath("$.errors[?(@.field == 'discountPercent')].message")
                                 .value(expectedMessage));
 
-                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
             }
 
             @Test
@@ -94,7 +94,7 @@ import org.junit.jupiter.params.provider.Arguments;
                         .andExpect(jsonPath("$.errors[?(@.field == 'isSpecialTariffAndDiscountMutuallyExclusive')].message")
                                 .value("specialTariffId and discountPercent are mutually exclusive"));
 
-                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
             }
 ```
 
@@ -121,7 +121,7 @@ fields are accepted:
                 given(rental.getId()).willReturn(1L);
                 given(commandMapper.toCreateCommand(any(CreateRentalRequest.class)))
                         .willReturn(mock(CreateRentalUseCase.CreateRentalCommand.class));
-                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
+                given(updateDraftRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
                         .willReturn(rental);
                 given(queryMapper.toResponse(any(Rental.class)))
                         .willReturn(mock(RentalResponse.class));
@@ -131,7 +131,7 @@ fields are accepted:
                                 .content(body))
                         .andExpect(status().isCreated());
 
-                verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
             }
 
             @Test
@@ -152,7 +152,7 @@ fields are accepted:
                 given(rental.getId()).willReturn(1L);
                 given(commandMapper.toCreateCommand(any(CreateRentalRequest.class)))
                         .willReturn(mock(CreateRentalUseCase.CreateRentalCommand.class));
-                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
+                given(updateDraftRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
                         .willReturn(rental);
                 given(queryMapper.toResponse(any(Rental.class)))
                         .willReturn(mock(RentalResponse.class));
@@ -162,7 +162,7 @@ fields are accepted:
                                 .content(body))
                         .andExpect(status().isCreated());
 
-                verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
             }
 ```
 

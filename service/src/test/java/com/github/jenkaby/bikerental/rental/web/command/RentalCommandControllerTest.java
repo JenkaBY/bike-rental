@@ -1,6 +1,6 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
-import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
@@ -65,7 +65,7 @@ class RentalCommandControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private CreateRentalUseCase createRentalUseCase;
+    private CreateOrUpdateDraftRentalUseCase updateDraftRentalUseCase;
 
     @MockitoBean
     private UpdateRentalUseCase updateRentalUseCase;
@@ -92,11 +92,10 @@ class RentalCommandControllerTest {
             @Test
             @DisplayName("when request contains all required fields")
             void whenRequestContainsAllRequiredFields() throws Exception {
-                CreateRentalRequest request = new CreateRentalRequest(
+                RentalRequest request = new RentalRequest(
                         VALID_CUSTOMER_ID,
                         List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
-                        null,
                         "Operator",
                         null,
                         null,
@@ -105,9 +104,9 @@ class RentalCommandControllerTest {
 
                 Rental rental = mock(Rental.class);
                 given(rental.getId()).willReturn(1L);
-                given(commandMapper.toCreateCommand(any(CreateRentalRequest.class)))
-                        .willReturn(mock(CreateRentalUseCase.CreateRentalCommand.class));
-                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
+                given(commandMapper.toUpdateDraftRentalCommand(1L, any(RentalRequest.class)))
+                        .willReturn(mock(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
+                given(updateDraftRentalUseCase.execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class)))
                         .willReturn(rental);
                 given(queryMapper.toResponse(any(Rental.class)))
                         .willReturn(mock(RentalResponse.class));
@@ -117,17 +116,16 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isCreated());
 
-                verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
             }
 
             @Test
             @DisplayName("when request contains all fields including optional tariffId")
             void whenRequestContainsAllFieldsIncludingOptionalTariffId() throws Exception {
-                CreateRentalRequest request = new CreateRentalRequest(
+                RentalRequest request = new RentalRequest(
                         VALID_CUSTOMER_ID,
                         List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
-                        123L,
                         "Op",
                         null,
                         null,
@@ -136,9 +134,9 @@ class RentalCommandControllerTest {
 
                 Rental rental = mock(Rental.class);
                 given(rental.getId()).willReturn(1L);
-                given(commandMapper.toCreateCommand(any(CreateRentalRequest.class)))
-                        .willReturn(mock(CreateRentalUseCase.CreateRentalCommand.class));
-                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
+                given(commandMapper.toUpdateDraftRentalCommand(1L, any(RentalRequest.class)))
+                        .willReturn(mock(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
+                given(updateDraftRentalUseCase.execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class)))
                         .willReturn(rental);
                 given(queryMapper.toResponse(any(Rental.class)))
                         .willReturn(mock(RentalResponse.class));
@@ -148,7 +146,7 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isCreated());
 
-                verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
             }
 
             @Test
@@ -166,9 +164,9 @@ class RentalCommandControllerTest {
 
                 Rental rental = mock(Rental.class);
                 given(rental.getId()).willReturn(1L);
-                given(commandMapper.toCreateCommand(any(CreateRentalRequest.class)))
-                        .willReturn(mock(CreateRentalUseCase.CreateRentalCommand.class));
-                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
+                given(commandMapper.toUpdateDraftRentalCommand(1L, any(RentalRequest.class)))
+                        .willReturn(mock(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
+                given(updateDraftRentalUseCase.execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class)))
                         .willReturn(rental);
                 given(queryMapper.toResponse(any(Rental.class)))
                         .willReturn(mock(RentalResponse.class));
@@ -178,7 +176,7 @@ class RentalCommandControllerTest {
                                 .content(body))
                         .andExpect(status().isCreated());
 
-                verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
             }
 
             @Test
@@ -197,9 +195,9 @@ class RentalCommandControllerTest {
 
                 Rental rental = mock(Rental.class);
                 given(rental.getId()).willReturn(1L);
-                given(commandMapper.toCreateCommand(any(CreateRentalRequest.class)))
-                        .willReturn(mock(CreateRentalUseCase.CreateRentalCommand.class));
-                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
+                given(commandMapper.toUpdateDraftRentalCommand(1L, any(RentalRequest.class)))
+                        .willReturn(mock(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
+                given(updateDraftRentalUseCase.execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class)))
                         .willReturn(rental);
                 given(queryMapper.toResponse(any(Rental.class)))
                         .willReturn(mock(RentalResponse.class));
@@ -209,7 +207,7 @@ class RentalCommandControllerTest {
                                 .content(body))
                         .andExpect(status().isCreated());
 
-                verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
             }
         }
 
@@ -221,11 +219,10 @@ class RentalCommandControllerTest {
             @NullSource
             @DisplayName("when customerId is null")
             void whenCustomerIdIsNull(UUID customerId) throws Exception {
-                CreateRentalRequest request = new CreateRentalRequest(
+                RentalRequest request = new RentalRequest(
                         customerId,
                         List.of(VALID_EQUIPMENT_ID),
                         VALID_DURATION,
-                        null,
                         "Operator",
                         null,
                         null,
@@ -239,7 +236,7 @@ class RentalCommandControllerTest {
                         .andExpect(jsonPath("$.title").value("Bad Request"))
                         .andExpect(jsonPath("$.errors[0].code").exists());
 
-                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
             }
 
             public static Stream<Arguments> invalidDiscountPercentRequests() {
@@ -271,7 +268,7 @@ class RentalCommandControllerTest {
                         .andExpect(jsonPath("$.errors[0].field").value("discountPercent"))
                         .andExpect(jsonPath("$.errors[0].code").value(expectedMessage));
 
-                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
             }
 
             @Test
@@ -298,7 +295,7 @@ class RentalCommandControllerTest {
                         .andExpect(jsonPath("$.errors[0].field")
                                 .value("specialTariffAndDiscountMutuallyExclusive"));
 
-                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
             }
 
             @ParameterizedTest
@@ -307,11 +304,10 @@ class RentalCommandControllerTest {
             void whenEquipmentIdIsNull(Long equipmentId) throws Exception {
                 List<Long> eqIds = new ArrayList<>();
                 eqIds.add(equipmentId);
-                CreateRentalRequest request = new CreateRentalRequest(
+                RentalRequest request = new RentalRequest(
                         VALID_CUSTOMER_ID,
                         eqIds,
                         VALID_DURATION,
-                        null,
                         "Operator",
                         null,
                         null,
@@ -325,18 +321,17 @@ class RentalCommandControllerTest {
                         .andExpect(jsonPath("$.title").value("Bad Request"))
                         .andExpect(jsonPath("$.errors[0].code").exists());
 
-                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
             }
 
             @ParameterizedTest
             @NullSource
             @DisplayName("when duration is null")
             void whenDurationIsNull(Integer duration) throws Exception {
-                CreateRentalRequest request = new CreateRentalRequest(
+                RentalRequest request = new RentalRequest(
                         VALID_CUSTOMER_ID,
                         List.of(VALID_EQUIPMENT_ID),
                         duration,
-                        null,
                         "Op",
                         null,
                         null,
@@ -350,7 +345,7 @@ class RentalCommandControllerTest {
                         .andExpect(jsonPath("$.title").value("Bad Request"))
                         .andExpect(jsonPath("$.errors[0].code").exists());
 
-                verify(createRentalUseCase, never()).execute(any(CreateRentalUseCase.CreateRentalCommand.class));
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
             }
 
         }
@@ -369,7 +364,7 @@ class RentalCommandControllerTest {
             void whenCreatingDraftRental() throws Exception {
                 Rental rental = mock(Rental.class);
                 given(rental.getId()).willReturn(1L);
-                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateDraftCommand.class)))
+                given(updateDraftRentalUseCase.execute(any(CreateOrUpdateDraftRentalUseCase.CreateDraftCommand.class)))
                         .willReturn(rental);
                 given(queryMapper.toResponse(any(Rental.class)))
                         .willReturn(mock(RentalResponse.class));
@@ -377,7 +372,7 @@ class RentalCommandControllerTest {
                 mockMvc.perform(post(API_RENTALS + "/draft"))
                         .andExpect(status().isCreated());
 
-                verify(createRentalUseCase).execute(any(CreateRentalUseCase.CreateDraftCommand.class));
+                verify(updateDraftRentalUseCase).execute(any(CreateOrUpdateDraftRentalUseCase.CreateDraftCommand.class));
             }
         }
     }

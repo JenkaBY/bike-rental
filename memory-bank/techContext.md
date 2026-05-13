@@ -454,7 +454,7 @@ class RentalCommandControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private CreateRentalUseCase createRentalUseCase;
+    private CreateRentalUseCase updateDraftRentalUseCase;
 
     @Test
     void shouldRejectRequestWhenCustomerIdIsNull() throws Exception {
