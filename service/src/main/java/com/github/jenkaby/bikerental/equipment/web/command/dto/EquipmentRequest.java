@@ -11,7 +11,6 @@ import java.time.LocalDate;
 public record EquipmentRequest(
 
         @Schema(description = "Unique serial number", example = "SN-123456")
-        @NotBlank(message = "Serial number is required")
         @Size(max = 50, message = "Serial number must not exceed 50 characters")
         String serialNumber,
 
