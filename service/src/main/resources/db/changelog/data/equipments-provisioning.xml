@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="equipments.provision-data" author="bikerental" context="!test">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="equipments"/>
+        </preConditions>
+
+        <loadData tableName="equipments"
+                  file="data/equipments.csv"
+                  relativeToChangelogFile="true">
+            <column name="serial_number" type="string"/>
+            <column name="uid" type="string"/>
+            <column name="type_slug" type="string"/>
+            <column name="status_slug" type="string"/>
+            <column name="condition_slug" type="string"/>
+            <column name="model" type="string"/>
+            <column name="commissioned_at" type="date"/>
+            <column name="condition" type="string"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </loadData>
+    </changeSet>
+
+</databaseChangeLog>
