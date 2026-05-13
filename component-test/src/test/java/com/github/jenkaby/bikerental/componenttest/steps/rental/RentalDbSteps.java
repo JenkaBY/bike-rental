@@ -167,6 +167,11 @@ public class RentalDbSteps {
                 .untilAsserted(() -> assertRentalEquipmentsPersisted(expected));
     }
 
+    @Then("there's/there're {int} rental equipment(s) in database")
+    public void aRentalEquipmentsWerePersistedInDatabase(int expectedSize) {
+        assertThat(rentalEquipmentsJpaRepository.findAll().size()).isEqualTo(expectedSize);
+    }
+
     private void assertRentalEquipmentsPersisted(List<RentalEquipmentJpaEntity> expected) {
 //        log.info("Verifying rental equipments persisted in database. Expected: {}", expected);
         Set<String> uids = expected.stream()

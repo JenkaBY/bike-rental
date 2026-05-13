@@ -19,8 +19,15 @@ public class RentalEquipmentFactory {
     private final TariffV2Facade tariffV2Facade;
     private final RentalCostCommandMapper costCommandMapper;
 
+//    public List<RentalEquipment> buildAssignedAndExistingWithCost(@NonNull Rental rental, @NonNull List<EquipmentInfo> newEquipments, Map<Long, RentalEquipment> existingById) {
+//
+//    }
+
+
     public List<RentalEquipment> buildAssignedWithCost(@NonNull Rental rental, @NonNull List<EquipmentInfo> newEquipments) {
-        if (newEquipments.isEmpty()) return List.of();
+        if (newEquipments.isEmpty()) {
+            return List.of();
+        }
 
         var costCommand = costCommandMapper.toCommand(rental, newEquipments);
         var breakdowns = tariffV2Facade.calculateRentalCost(costCommand).equipmentBreakdowns();

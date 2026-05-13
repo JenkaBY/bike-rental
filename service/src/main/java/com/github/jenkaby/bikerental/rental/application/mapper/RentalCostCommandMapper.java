@@ -1,9 +1,8 @@
 package com.github.jenkaby.bikerental.rental.application.mapper;
 
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
-import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
-import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.tariff.EquipmentCostItem;
 import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
 import org.mapstruct.Mapper;
@@ -32,7 +31,7 @@ public abstract class RentalCostCommandMapper {
 
     // TODO fix these 3 methods. Seems we can replace only by one
     public RentalCostCalculationCommand toCommand(
-            CreateRentalUseCase.CreateRentalCommand command,
+            CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand command,
             List<EquipmentInfo> equipments) {
         var costItems = equipmentCostItemMapper.toEquipmentCostItems(equipments);
         if (command.specialTariffId() != null) {
@@ -81,10 +80,10 @@ public abstract class RentalCostCommandMapper {
 
     public RentalCostCalculationCommand toReturnCommand(
             Rental rental,
-            List<RentalEquipment> equipmentsToReturn,
+            List<EquipmentInfo> equipmentsToReturn,
             Duration actualDuration) {
         var costItems = equipmentsToReturn.stream()
-                .map(e -> new EquipmentCostItem(e.getEquipmentType()))
+                .map(e -> new EquipmentCostItem(e.typeSlug()))
                 .toList();
         return new RentalCostCalculationCommand(
                 costItems,

@@ -2,8 +2,8 @@ package com.github.jenkaby.bikerental.componenttest.steps.rental;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentItemResponseTransformer;
-import com.github.jenkaby.bikerental.rental.web.command.dto.CreateRentalRequest;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalPatchOperation;
+import com.github.jenkaby.bikerental.rental.web.command.dto.RentalRequest;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalUpdateJsonPatchRequest;
 import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
@@ -38,7 +38,7 @@ public class RentalWebSteps {
     }
 
     @Given("a rental request with the following data")
-    public void aRentalRequestWithTheFollowingData(CreateRentalRequest request) {
+    public void aRentalRequestWithTheFollowingData(RentalRequest request) {
         log.info("Preparing rental request with data: {}", request);
         scenarioContext.setRequestBody(request);
     }

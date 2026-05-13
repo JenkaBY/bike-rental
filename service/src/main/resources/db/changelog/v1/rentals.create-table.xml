@@ -25,15 +25,13 @@
             <column name="actual_return_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="planned_duration_minutes" type="INTEGER"/>
             <column name="actual_duration_minutes" type="INTEGER"/>
-            <column name="estimated_cost" type="DECIMAL(10,2)"/>
-            <column name="final_cost" type="DECIMAL(10,2)"/>
+            <column name="special_tariff_id" type="BIGINT"/>
+            <column name="special_price" type="NUMERIC(19,4)"/>
+            <column name="discount_percent" type="SMALLINT"/>
             <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
             <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="special_tariff_id" type="BIGINT"/>
-            <column name="special_price" type="NUMERIC(19,4)"/>
-            <column name="discount_percent" type="SMALLINT"/>
         </createTable>
 
     </changeSet>

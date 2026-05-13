@@ -180,3 +180,31 @@ Feature: Rental Update Validation
       | path     | value                                                                                              |
       | $.title  | Suitable tariff not found                                                                          |
       | $.detail | No suitable tariff found for equipment type 'SCOOTER' on date 2026-02-09 for duration: 120 minutes |
+
+  Scenario Outline: Update rental - status update is not supported
+    Given now is "<now>"
+    And a single rental exists in the database with the following data
+      | id         | customerId | status | plannedDuration | createdAt | updatedAt |
+      | <rentalId> | <customer> | DRAFT  | 120             | <now>     | <now>     |
+    And rental equipment exists in the database with the following data
+      | rentalId   | equipmentId   | equipmentUid | equipmentType | tariffId   | status   | startedAt           | expectedReturnAt    | estimatedCost   | createdAt           |
+      | <rentalId> | <equipmentId> | BIKE-001     | BICYCLE       | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | <estimatedCost> | 2026-02-10T08:00:00 |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount          | customerId | operatorId | sourceType | sourceId   | recordedAt          | idempotencyKey |
+      | TX2 | HOLD | CASH          | <estimatedCost> | <customer> | OP1        | RENTAL     | <rentalId> | 2026-02-10T08:00:00 | IDK2           |
+    And the rental update request is
+      | op      | path    | value  |
+      | replace | /status | ACTIVE |
+    When a PATCH request has been made to "/api/rentals/{rentalId}" endpoint with
+      | {rentalId} |
+      | <rentalId> |
+    Then the response status is 400
+    And the response contains
+      | path              | value                                     |
+      | $.title           | Bad Request                               |
+      | $.errorCode       | shared.method_arguments.validation_failed |
+      | $.errors[0].field | operations[0].path                        |
+      | $.errors[0].code  | validation.valid_rental_patch_operation   |
+    Examples:
+      | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
+      | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |

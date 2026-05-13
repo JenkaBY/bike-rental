@@ -1,6 +1,5 @@
 package com.github.jenkaby.bikerental.rental.web.command.dto;
 
-import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.web.command.dto.validation.ValidRentalPatchOperation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,7 +33,6 @@ public class RentalPatchOperation {
      * - /equipmentId
      * - /tariffId
      * - /duration
-     * - /status
      */
     @NotBlank(message = "Path is required")
     private String path;
@@ -46,7 +44,6 @@ public class RentalPatchOperation {
      * - /equipmentId: Long number
      * - /tariffId: Long number
      * - /duration: Integer number
-     * - /status: {@link RentalStatus} enum value (e.g., "ACTIVE", "DRAFT", "COMPLETED", "CANCELLED")
      */
     private Object value;
 }

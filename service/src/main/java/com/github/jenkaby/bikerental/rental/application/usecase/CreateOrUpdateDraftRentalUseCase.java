@@ -8,19 +8,19 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
-public interface CreateRentalUseCase {
+public interface CreateOrUpdateDraftRentalUseCase {
 
 
-    Rental execute(CreateRentalCommand command);
+    Rental execute(UpdateDraftRentalCommand command);
 
     Rental execute(CreateDraftCommand command);
 
-    record CreateRentalCommand(
+    record UpdateDraftRentalCommand(
+            Long rentalId,
             UUID customerId,
             List<Long> equipmentIds,
             Duration duration,
             String operatorId,
-            Long tariffId,
             Long specialTariffId,
             Money specialPrice,
             DiscountPercent discountPercent

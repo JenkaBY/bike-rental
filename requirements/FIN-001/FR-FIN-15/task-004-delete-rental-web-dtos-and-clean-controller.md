@@ -122,13 +122,13 @@ reads:
 
 ```java
     RentalCommandController(
-            CreateRentalUseCase createRentalUseCase,
+            CreateRentalUseCase updateDraftRentalUseCase,
             UpdateRentalUseCase updateRentalUseCase,
             RecordPrepaymentUseCase recordPrepaymentUseCase,
             ReturnEquipmentUseCase returnEquipmentUseCase,
             RentalCommandMapper commandMapper,
             RentalQueryMapper queryMapper) {
-        this.createRentalUseCase = createRentalUseCase;
+        this.updateDraftRentalUseCase = updateDraftRentalUseCase;
         this.updateRentalUseCase = updateRentalUseCase;
         this.recordPrepaymentUseCase = recordPrepaymentUseCase;
         this.returnEquipmentUseCase = returnEquipmentUseCase;
@@ -141,12 +141,12 @@ Replace it with:
 
 ```java
     RentalCommandController(
-            CreateRentalUseCase createRentalUseCase,
+            CreateRentalUseCase updateDraftRentalUseCase,
             UpdateRentalUseCase updateRentalUseCase,
             ReturnEquipmentUseCase returnEquipmentUseCase,
             RentalCommandMapper commandMapper,
             RentalQueryMapper queryMapper) {
-        this.createRentalUseCase = createRentalUseCase;
+        this.updateDraftRentalUseCase = updateDraftRentalUseCase;
         this.updateRentalUseCase = updateRentalUseCase;
         this.returnEquipmentUseCase = returnEquipmentUseCase;
         this.commandMapper = commandMapper;

@@ -55,7 +55,7 @@ public interface EquipmentCostItemMapper {
 package com.github.jenkaby.bikerental.rental.application.mapper;
 
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
-import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
 import org.mapstruct.Mapper;

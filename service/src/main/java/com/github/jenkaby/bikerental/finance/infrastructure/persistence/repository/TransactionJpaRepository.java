@@ -16,6 +16,8 @@ public interface TransactionJpaRepository extends JpaRepository<TransactionJpaEn
 
     Optional<TransactionJpaEntity> findByIdempotencyKeyAndCustomerId(UUID idempotencyKey, UUID customerId);
 
+    Optional<TransactionJpaEntity> findByIdempotencyKey(UUID idempotencyKey);
+
     List<TransactionJpaEntity> findAllBySourceTypeAndSourceIdAndTransactionType(
             TransactionSourceType sourceType, String sourceId, TransactionType transactionType);
 

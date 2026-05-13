@@ -45,6 +45,16 @@ public class RentalEquipment {
         return this;
     }
 
+    public void applyEstimatedCost(Long tariffId, Money estimatedCost) {
+        this.tariffId = tariffId;
+        this.estimatedCost = estimatedCost;
+    }
+
+    public void applyFinalCost(Long tariffId, Money estimatedCost) {
+        this.tariffId = tariffId;
+        this.finalCost = estimatedCost;
+    }
+
     public static RentalEquipment assigned(Long equipmentId, String equipmentUid, String equipmentType) {
         return RentalEquipment.builder()
                 .equipmentId(equipmentId)

@@ -4,10 +4,7 @@ import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentComma
 import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
-import com.github.jenkaby.bikerental.shared.domain.event.RentalCompleted;
-import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
-import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
-import com.github.jenkaby.bikerental.shared.domain.event.RentalUpdated;
+import com.github.jenkaby.bikerental.shared.domain.event.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -77,6 +74,13 @@ public class RentalEventListener {
                         .forEach(equipment -> setStatusForEquipment(equipment, EquipmentStatus.RESERVED.name()));
             }
         }
+    }
+
+    //@ApplicationModuleListener
+    public void onRentalCancelled(RentalCancelled event) {
+        log.info("Received RentalCancelled event for equipments {}", event.equipmentIds());
+        equipmentRepository.findByIds(event.equipmentIds())
+                .forEach(equipment -> setStatusForEquipment(equipment, EquipmentStatus.AVAILABLE.name()));
     }
 
     private void setStatusForEquipment(Equipment equipment, String targetStatus) {

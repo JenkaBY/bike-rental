@@ -18,6 +18,8 @@ public interface TransactionRepository {
 
     Optional<Transaction> findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, CustomerRef customerId);
 
+    Optional<Transaction> findByIdempotencyKey(IdempotencyKey idempotencyKey);
+
     Optional<Transaction> findByRentalRefAndType(RentalRef rentalRef, TransactionType type);
 
     List<Transaction> findAllByRentalRefAndType(RentalRef rentalRef, TransactionType type);

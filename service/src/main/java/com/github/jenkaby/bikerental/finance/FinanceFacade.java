@@ -12,6 +12,8 @@ public interface FinanceFacade {
 
     boolean hasHold(RentalRef rentalRef);
 
+    ReleaseHoldInfo releaseHold(@NonNull RentalRef rentalRef, @NonNull String operatorId);
+
     SettlementInfo settleRental(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef,
                                 @NonNull Money finalCost, @NonNull String operatorId);
 }

@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
-import com.github.jenkaby.bikerental.rental.web.command.dto.CreateRentalRequest;
+import com.github.jenkaby.bikerental.rental.web.command.dto.RentalRequest;
 import io.cucumber.java.DataTableType;
 
 import java.util.Map;
@@ -9,22 +9,20 @@ import java.util.Map;
 public class RentalRequestTransformer {
 
     @DataTableType
-    public CreateRentalRequest transform(Map<String, String> entry) {
+    public RentalRequest transform(Map<String, String> entry) {
         var customerId = Aliases.getCustomerId(entry.get("customerId"));
         var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
         var duration = DataTableHelper.toInt(entry, "duration");
-        var tariffId = DataTableHelper.toLong(entry, "tariffId");
         var operator = Aliases.getValueOrDefault(entry.get("operatorId"));
 
         var specialTariffId = DataTableHelper.toLong(entry, "specialTariffId");
         var specialPrice = DataTableHelper.toBigDecimal(entry, "specialPrice");
         var discountPercent = DataTableHelper.toInt(entry, "discountPercent");
 
-        return new CreateRentalRequest(
+        return new RentalRequest(
                 customerId,
                 equipmentIds,
                 duration,
-                tariffId,
                 operator,
                 specialTariffId,
                 specialPrice,

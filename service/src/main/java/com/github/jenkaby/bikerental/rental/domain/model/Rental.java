@@ -1,7 +1,9 @@
 package com.github.jenkaby.bikerental.rental.domain.model;
 
+import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
 import com.github.jenkaby.bikerental.rental.domain.exception.RentalNotReadyForActivationException;
+import com.github.jenkaby.bikerental.rental.domain.model.vo.EquipmentCostResult;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationResult;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
@@ -73,6 +75,44 @@ public class Rental {
         }
         this.plannedDuration = duration;
         // startedAt and expectedReturnAt will be set automatically when rental is activated
+        this.updatedAt = Instant.now();
+    }
+
+    public void updateEquipments(Collection<EquipmentInfo> incoming) {
+        var incomingIds = incoming.stream()
+                .map(EquipmentInfo::id)
+                .collect(Collectors.toSet());
+
+        equipments.removeIf(e -> !incomingIds.contains(e.getEquipmentId()));
+
+        var existingIds = equipments.stream()
+                .map(RentalEquipment::getEquipmentId)
+                .collect(Collectors.toSet());
+
+        incoming.stream()
+                .filter(e -> !existingIds.contains(e.id()))
+                .map(e -> RentalEquipment.assigned(e.id(), e.uid(), e.typeSlug()))
+                .forEach(equipments::add);
+    }
+
+    public void setSpecialPriceOrDiscount(Long newSpecialTariffId, Money newSpecialPrice, DiscountPercent newDiscount) {
+        if (newSpecialTariffId == null) {
+            this.specialTariffId = null;
+            this.specialPrice = null;
+        }
+        if (newDiscount == null) {
+            this.discountPercent = null;
+        }
+        if (newDiscount != null && newSpecialTariffId != null) {
+            throw new IllegalArgumentException("discount and special price mutually excluded");
+        }
+        if (newDiscount != null) {
+            this.discountPercent = newDiscount;
+        }
+        if (newSpecialTariffId != null && newSpecialPrice != null) {
+            this.specialPrice = newSpecialPrice;
+            this.specialTariffId = newSpecialTariffId;
+        }
         this.updatedAt = Instant.now();
     }
 
@@ -163,6 +203,13 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
+    public void cancel() {
+        this.status.validateTransitionTo(RentalStatus.CANCELLED);
+        this.equipments.forEach(e -> e.setStatus(RentalEquipmentStatus.RETURNED));
+        this.status = RentalStatus.CANCELLED;
+        this.updatedAt = Instant.now();
+    }
+
     public boolean allEquipmentsReturned() {
         return equipments.stream()
                 .allMatch(RETURNED);
@@ -240,6 +287,36 @@ public class Rental {
 
     private static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
+    }
+
+    public void applyEstimatedCost(List<EquipmentCostResult> results) {
+        var resultsByEquipmentId = results.stream()
+                .collect(Collectors.toMap(EquipmentCostResult::equipmentId, Function.identity()));
+
+        this.equipments.forEach(re -> {
+            var result = resultsByEquipmentId.get(re.getEquipmentId());
+            if (result != null) {
+                re.applyEstimatedCost(result.tariffId(), result.estimatedCost());
+            }
+        });
+    }
+
+    public void applyFinalCost(List<EquipmentCostResult> results) {
+        var byEquipmentId = results.stream()
+                .collect(Collectors.toMap(EquipmentCostResult::equipmentId, Function.identity()));
+
+        equipments.forEach(re -> {
+            var result = byEquipmentId.get(re.getEquipmentId());
+            if (result != null) {
+                re.applyFinalCost(result.tariffId(), result.estimatedCost());
+            }
+        });
+    }
+
+    public Set<Long> getEquipmentIds() {
+        return this.equipments.stream()
+                .map(RentalEquipment::getEquipmentId)
+                .collect(Collectors.toSet());
     }
 
     public static class RentalBuilder {

@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.finance;
 
+import com.github.jenkaby.bikerental.finance.application.usecase.ReleaseHoldUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.SettleRentalUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
@@ -14,14 +15,16 @@ import org.springframework.stereotype.Service;
 class FinanceFacadeImpl implements FinanceFacade {
 
     private final RentalHoldUseCase rentalHoldUseCase;
+    private final ReleaseHoldUseCase releaseHoldUseCase;
     private final SettleRentalUseCase settleRentalUseCase;
     private final TransactionRepository transactionRepository;
 
     FinanceFacadeImpl(
-            RentalHoldUseCase rentalHoldUseCase,
+            RentalHoldUseCase rentalHoldUseCase, ReleaseHoldUseCase releaseHoldUseCase,
             SettleRentalUseCase settleRentalUseCase,
             TransactionRepository transactionRepository) {
         this.rentalHoldUseCase = rentalHoldUseCase;
+        this.releaseHoldUseCase = releaseHoldUseCase;
         this.settleRentalUseCase = settleRentalUseCase;
         this.transactionRepository = transactionRepository;
     }
@@ -44,5 +47,11 @@ class FinanceFacadeImpl implements FinanceFacade {
     @Override
     public boolean hasHold(RentalRef rentalRef) {
         return transactionRepository.existsByRentalRefAndType(rentalRef, TransactionType.HOLD);
+    }
+
+    @Override
+    public ReleaseHoldInfo releaseHold(@NonNull RentalRef rentalRef, @NonNull String operatorId) {
+        var result = this.releaseHoldUseCase.execute(new ReleaseHoldUseCase.ReleaseHoldCommand(rentalRef, operatorId));
+        return new ReleaseHoldInfo(result.transactionRef(), result.recordedAt());
     }
 }

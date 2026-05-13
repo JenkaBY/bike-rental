@@ -48,7 +48,7 @@ import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 
                 given(commandMapper.toCreateCommand(any(CreateRentalRequest.class)))
                         .willReturn(mock(CreateRentalUseCase.CreateRentalCommand.class));
-                given(createRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
+                given(updateDraftRentalUseCase.execute(any(CreateRentalUseCase.CreateRentalCommand.class)))
                         .willThrow(new InsufficientBalanceException(Money.of("30.00"), Money.of("60.00")));
 
                 mockMvc.perform(post(API_RENTALS)
@@ -61,7 +61,7 @@ import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 ```
 
 > **Note on `@MockitoBean` for `FinanceFacade`:** `FinanceFacade` is called by `CreateRentalService`, not directly by
-> the controller. The controller test stubs `createRentalUseCase` to throw the exception directly — no additional
+> the controller. The controller test stubs `updateDraftRentalUseCase` to throw the exception directly — no additional
 `@MockitoBean` for `FinanceFacade` is needed here.
 
 ## 4. Validation Steps
