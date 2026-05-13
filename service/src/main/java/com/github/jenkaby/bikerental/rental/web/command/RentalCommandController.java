@@ -59,7 +59,6 @@ class RentalCommandController {
         this.rentalLifecycleUseCase = rentalLifecycleUseCase;
     }
 
-
     @PutMapping("/{rentalId}")
     @Operation(summary = "Create rental (Fast Path)", description = "Creates an active rental in one step with all required data")
     @ApiResponses({

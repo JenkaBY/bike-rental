@@ -16,8 +16,8 @@
             <column name="id" type="SERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="serial_number" type="VARCHAR(50)">
-                <constraints nullable="false" unique="true"/>
+            <column name="serial_number" type="VARCHAR(50)" defaultValue="NA">
+                <constraints nullable="false"/>
             </column>
             <column name="uid" type="VARCHAR(100)">
                 <constraints unique="true"/>
