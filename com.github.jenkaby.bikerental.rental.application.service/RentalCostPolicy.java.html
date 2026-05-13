@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalCostPolicy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.application.service</a> &gt; <span class="el_source">RentalCostPolicy.java</span></div><h1>RentalCostPolicy.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.application.service;
+
+import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
+import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
+import com.github.jenkaby.bikerental.rental.application.RentalEquipmentCostCalculator;
+import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalPlannedDurationException;
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class RentalCostPolicy {
+
+    private final RentalEquipmentCostCalculator calculator;
+    private final EquipmentFacade equipmentFacade;
+
+    public void recalculateEstimatedCost(Rental rental) {
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if (rental.getPlannedDuration() == null) {</span>
+<span class="nc" id="L24">            throw new InvalidRentalPlannedDurationException(rental.getId());</span>
+        }
+<span class="fc" id="L26">        var equipments = equipmentFacade.findByIds(new ArrayList&lt;&gt;(rental.getEquipmentIds()));</span>
+<span class="fc" id="L27">        var results = calculator.calculateEstimated(rental, equipments);</span>
+<span class="fc" id="L28">        rental.applyEstimatedCost(results);</span>
+<span class="fc" id="L29">    }</span>
+
+    public void calculateFinalCost(Rental rental, List&lt;EquipmentInfo&gt; returningEquipments, Duration billableDuration) {
+<span class="fc" id="L32">        var results = calculator.calculateFinal(rental, returningEquipments, billableDuration);</span>
+<span class="fc" id="L33">        rental.applyFinalCost(results);</span>
+<span class="fc" id="L34">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

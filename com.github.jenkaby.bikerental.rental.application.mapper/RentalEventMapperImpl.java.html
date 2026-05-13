@@ -2,6 +2,7 @@
 
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentMapper;
+import com.github.jenkaby.bikerental.shared.domain.event.RentalCancelled;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalCompleted;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
@@ -25,122 +26,141 @@ public class RentalEventMapperImpl implements RentalEventMapper {
     private final RentalEquipmentMapper rentalEquipmentMapper;
 
     @Autowired
-<span class="fc" id="L28">    public RentalEventMapperImpl(RentalEquipmentMapper rentalEquipmentMapper) {</span>
+<span class="fc" id="L29">    public RentalEventMapperImpl(RentalEquipmentMapper rentalEquipmentMapper) {</span>
 
-<span class="fc" id="L30">        this.rentalEquipmentMapper = rentalEquipmentMapper;</span>
-<span class="fc" id="L31">    }</span>
+<span class="fc" id="L31">        this.rentalEquipmentMapper = rentalEquipmentMapper;</span>
+<span class="fc" id="L32">    }</span>
 
     @Override
     public RentalCreated toRentalCreated(Rental rental) {
-<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
-<span class="nc" id="L36">            return null;</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
+<span class="nc" id="L37">            return null;</span>
         }
 
-<span class="fc" id="L39">        Long rentalId = null;</span>
-<span class="fc" id="L40">        String status = null;</span>
-<span class="fc" id="L41">        List&lt;Long&gt; equipmentIds = null;</span>
-<span class="fc" id="L42">        UUID customerId = null;</span>
-<span class="fc" id="L43">        Instant createdAt = null;</span>
+<span class="fc" id="L40">        Long rentalId = null;</span>
+<span class="fc" id="L41">        String status = null;</span>
+<span class="fc" id="L42">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L43">        UUID customerId = null;</span>
+<span class="fc" id="L44">        Instant createdAt = null;</span>
 
-<span class="fc" id="L45">        rentalId = rental.getId();</span>
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if ( rental.getStatus() != null ) {</span>
-<span class="fc" id="L47">            status = rental.getStatus().name();</span>
+<span class="fc" id="L46">        rentalId = rental.getId();</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if ( rental.getStatus() != null ) {</span>
+<span class="fc" id="L48">            status = rental.getStatus().name();</span>
         }
-<span class="fc" id="L49">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
-<span class="fc" id="L50">        customerId = rental.getCustomerId();</span>
-<span class="fc" id="L51">        createdAt = rental.getCreatedAt();</span>
+<span class="fc" id="L50">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
+<span class="fc" id="L51">        customerId = rental.getCustomerId();</span>
+<span class="fc" id="L52">        createdAt = rental.getCreatedAt();</span>
 
-<span class="fc" id="L53">        RentalCreated rentalCreated = new RentalCreated( rentalId, customerId, equipmentIds, status, createdAt );</span>
+<span class="fc" id="L54">        RentalCreated rentalCreated = new RentalCreated( rentalId, customerId, equipmentIds, status, createdAt );</span>
 
-<span class="fc" id="L55">        return rentalCreated;</span>
+<span class="fc" id="L56">        return rentalCreated;</span>
     }
 
     @Override
     public RentalStarted toRentalStarted(Rental rental) {
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
-<span class="nc" id="L61">            return null;</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
+<span class="nc" id="L62">            return null;</span>
         }
 
-<span class="fc" id="L64">        List&lt;Long&gt; equipmentIds = null;</span>
-<span class="fc" id="L65">        Long rentalId = null;</span>
-<span class="fc" id="L66">        UUID customerId = null;</span>
-<span class="fc" id="L67">        LocalDateTime startedAt = null;</span>
-<span class="fc" id="L68">        LocalDateTime expectedReturnAt = null;</span>
+<span class="fc" id="L65">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L66">        Long rentalId = null;</span>
+<span class="fc" id="L67">        UUID customerId = null;</span>
+<span class="fc" id="L68">        LocalDateTime startedAt = null;</span>
+<span class="fc" id="L69">        LocalDateTime expectedReturnAt = null;</span>
 
-<span class="fc" id="L70">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
-<span class="fc" id="L71">        rentalId = rental.getId();</span>
-<span class="fc" id="L72">        customerId = rental.getCustomerId();</span>
-<span class="fc" id="L73">        startedAt = rental.getStartedAt();</span>
-<span class="fc" id="L74">        expectedReturnAt = rental.getExpectedReturnAt();</span>
+<span class="fc" id="L71">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
+<span class="fc" id="L72">        rentalId = rental.getId();</span>
+<span class="fc" id="L73">        customerId = rental.getCustomerId();</span>
+<span class="fc" id="L74">        startedAt = rental.getStartedAt();</span>
+<span class="fc" id="L75">        expectedReturnAt = rental.getExpectedReturnAt();</span>
 
-<span class="fc" id="L76">        RentalStarted rentalStarted = new RentalStarted( rentalId, customerId, equipmentIds, startedAt, expectedReturnAt );</span>
+<span class="fc" id="L77">        RentalStarted rentalStarted = new RentalStarted( rentalId, customerId, equipmentIds, startedAt, expectedReturnAt );</span>
 
-<span class="fc" id="L78">        return rentalStarted;</span>
+<span class="fc" id="L79">        return rentalStarted;</span>
     }
 
     @Override
     public RentalCompleted toRentalCompleted(Rental rental, LocalDateTime returnTime, Money totalCost) {
-<span class="pc bpc" id="L83" title="5 of 6 branches missed.">        if ( rental == null &amp;&amp; returnTime == null &amp;&amp; totalCost == null ) {</span>
-<span class="nc" id="L84">            return null;</span>
+<span class="pc bpc" id="L84" title="5 of 6 branches missed.">        if ( rental == null &amp;&amp; returnTime == null &amp;&amp; totalCost == null ) {</span>
+<span class="nc" id="L85">            return null;</span>
         }
 
-<span class="fc" id="L87">        Long rentalId = null;</span>
-<span class="fc" id="L88">        List&lt;Long&gt; equipmentIds = null;</span>
-<span class="fc" id="L89">        List&lt;Long&gt; returnedEquipmentIds = null;</span>
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if ( rental != null ) {</span>
-<span class="fc" id="L91">            rentalId = rental.getId();</span>
-<span class="fc" id="L92">            equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
-<span class="fc" id="L93">            returnedEquipmentIds = rentalEquipmentMapper.mapEquipmentsToIds( rental.getEquipments() );</span>
+<span class="fc" id="L88">        Long rentalId = null;</span>
+<span class="fc" id="L89">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L90">        List&lt;Long&gt; returnedEquipmentIds = null;</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if ( rental != null ) {</span>
+<span class="fc" id="L92">            rentalId = rental.getId();</span>
+<span class="fc" id="L93">            equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
+<span class="fc" id="L94">            returnedEquipmentIds = rentalEquipmentMapper.mapEquipmentsToIds( rental.getEquipments() );</span>
         }
-<span class="fc" id="L95">        LocalDateTime returnTime1 = null;</span>
-<span class="fc" id="L96">        returnTime1 = returnTime;</span>
-<span class="fc" id="L97">        Money totalCost1 = null;</span>
-<span class="fc" id="L98">        totalCost1 = totalCost;</span>
+<span class="fc" id="L96">        LocalDateTime returnTime1 = null;</span>
+<span class="fc" id="L97">        returnTime1 = returnTime;</span>
+<span class="fc" id="L98">        Money totalCost1 = null;</span>
+<span class="fc" id="L99">        totalCost1 = totalCost;</span>
 
-<span class="fc" id="L100">        RentalCompleted rentalCompleted = new RentalCompleted( rentalId, equipmentIds, returnedEquipmentIds, returnTime1, totalCost1 );</span>
+<span class="fc" id="L101">        RentalCompleted rentalCompleted = new RentalCompleted( rentalId, equipmentIds, returnedEquipmentIds, returnTime1, totalCost1 );</span>
 
-<span class="fc" id="L102">        return rentalCompleted;</span>
+<span class="fc" id="L103">        return rentalCompleted;</span>
     }
 
     @Override
     public RentalUpdated toRentalUpdated(Rental rental, RentalUpdated.RentalState previous, RentalUpdated.RentalState current) {
-<span class="pc bpc" id="L107" title="5 of 6 branches missed.">        if ( rental == null &amp;&amp; previous == null &amp;&amp; current == null ) {</span>
-<span class="nc" id="L108">            return null;</span>
+<span class="nc bnc" id="L108" title="All 6 branches missed.">        if ( rental == null &amp;&amp; previous == null &amp;&amp; current == null ) {</span>
+<span class="nc" id="L109">            return null;</span>
         }
 
-<span class="fc" id="L111">        Long rentalId = null;</span>
-<span class="fc" id="L112">        UUID customerId = null;</span>
-<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if ( rental != null ) {</span>
-<span class="fc" id="L114">            rentalId = rental.getId();</span>
-<span class="fc" id="L115">            customerId = rental.getCustomerId();</span>
+<span class="nc" id="L112">        Long rentalId = null;</span>
+<span class="nc" id="L113">        UUID customerId = null;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if ( rental != null ) {</span>
+<span class="nc" id="L115">            rentalId = rental.getId();</span>
+<span class="nc" id="L116">            customerId = rental.getCustomerId();</span>
         }
-<span class="fc" id="L117">        RentalUpdated.RentalState previousState = null;</span>
-<span class="fc" id="L118">        previousState = previous;</span>
-<span class="fc" id="L119">        RentalUpdated.RentalState currentState = null;</span>
-<span class="fc" id="L120">        currentState = current;</span>
+<span class="nc" id="L118">        RentalUpdated.RentalState previousState = null;</span>
+<span class="nc" id="L119">        previousState = previous;</span>
+<span class="nc" id="L120">        RentalUpdated.RentalState currentState = null;</span>
+<span class="nc" id="L121">        currentState = current;</span>
 
-<span class="fc" id="L122">        RentalUpdated rentalUpdated = new RentalUpdated( rentalId, customerId, previousState, currentState );</span>
+<span class="nc" id="L123">        RentalUpdated rentalUpdated = new RentalUpdated( rentalId, customerId, previousState, currentState );</span>
 
-<span class="fc" id="L124">        return rentalUpdated;</span>
+<span class="nc" id="L125">        return rentalUpdated;</span>
     }
 
     @Override
     public RentalUpdated.RentalState toRentalState(Rental source) {
-<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if ( source == null ) {</span>
-<span class="nc" id="L130">            return null;</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if ( source == null ) {</span>
+<span class="nc" id="L131">            return null;</span>
         }
 
-<span class="fc" id="L133">        String rentalStatus = null;</span>
-<span class="fc" id="L134">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L134">        String rentalStatus = null;</span>
+<span class="fc" id="L135">        List&lt;Long&gt; equipmentIds = null;</span>
 
-<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if ( source.getStatus() != null ) {</span>
-<span class="fc" id="L137">            rentalStatus = source.getStatus().name();</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if ( source.getStatus() != null ) {</span>
+<span class="fc" id="L138">            rentalStatus = source.getStatus().name();</span>
         }
-<span class="fc" id="L139">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( source.getEquipments() );</span>
+<span class="fc" id="L140">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( source.getEquipments() );</span>
 
-<span class="fc" id="L141">        RentalUpdated.RentalState rentalState = new RentalUpdated.RentalState( rentalStatus, equipmentIds );</span>
+<span class="fc" id="L142">        RentalUpdated.RentalState rentalState = new RentalUpdated.RentalState( rentalStatus, equipmentIds );</span>
 
-<span class="fc" id="L143">        return rentalState;</span>
+<span class="fc" id="L144">        return rentalState;</span>
+    }
+
+    @Override
+    public RentalCancelled toRentalCancelled(Rental rental) {
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
+<span class="nc" id="L150">            return null;</span>
+        }
+
+<span class="fc" id="L153">        Long rentalId = null;</span>
+<span class="fc" id="L154">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L155">        UUID customerId = null;</span>
+
+<span class="fc" id="L157">        rentalId = rental.getId();</span>
+<span class="fc" id="L158">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
+<span class="fc" id="L159">        customerId = rental.getCustomerId();</span>
+
+<span class="fc" id="L161">        RentalCancelled rentalCancelled = new RentalCancelled( rentalId, customerId, equipmentIds );</span>
+
+<span class="fc" id="L163">        return rentalCancelled;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

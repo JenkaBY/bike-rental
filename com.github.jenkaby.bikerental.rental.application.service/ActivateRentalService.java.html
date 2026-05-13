@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivateRentalService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.application.service</a> &gt; <span class="el_source">ActivateRentalService.java</span></div><h1>ActivateRentalService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.application.service;
+
+import com.github.jenkaby.bikerental.finance.FinanceFacade;
+import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
+import com.github.jenkaby.bikerental.rental.application.usecase.ActivateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
+import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
+
+<span class="fc" id="L19">@Slf4j</span>
+@Service
+class ActivateRentalService implements ActivateRentalUseCase {
+
+    private static final String RENTAL_EVENTS_EXCHANGER = &quot;rental-events&quot;;
+
+    private final RentalRepository rentalRepository;
+    private final FinanceFacade financeFacade;
+    private final EventPublisher eventPublisher;
+    private final RentalEventMapper eventMapper;
+    private final Clock clock;
+
+    ActivateRentalService(
+            RentalRepository rentalRepository,
+            FinanceFacade financeFacade,
+            EventPublisher eventPublisher,
+            RentalEventMapper eventMapper,
+<span class="fc" id="L36">            Clock clock) {</span>
+<span class="fc" id="L37">        this.rentalRepository = rentalRepository;</span>
+<span class="fc" id="L38">        this.financeFacade = financeFacade;</span>
+<span class="fc" id="L39">        this.eventPublisher = eventPublisher;</span>
+<span class="fc" id="L40">        this.eventMapper = eventMapper;</span>
+<span class="fc" id="L41">        this.clock = clock;</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    @Transactional
+    public Rental execute(ActivateCommand command) {
+<span class="fc" id="L47">        Rental rental = rentalRepository.findById(command.rentalId())</span>
+<span class="pc" id="L48">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
+
+<span class="fc" id="L50">        rental.getStatus().validateTransitionTo(RentalStatus.ACTIVE);</span>
+
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (rental.getEstimatedCost().isPositive()) {</span>
+<span class="fc" id="L53">            var holdInfo = financeFacade.holdFunds(</span>
+<span class="fc" id="L54">                    new CustomerRef(rental.getCustomerId()),</span>
+<span class="fc" id="L55">                    rental.toRentalRef(),</span>
+<span class="fc" id="L56">                    rental.getEstimatedCost(),</span>
+<span class="fc" id="L57">                    command.operatorId());</span>
+<span class="fc" id="L58">            log.info(&quot;Funds held for rental {}: transactionId={}, heldAt={}&quot;,</span>
+<span class="fc" id="L59">                    rental.getId(), holdInfo.transactionRef().id(), holdInfo.recordedAt());</span>
+        }
+
+<span class="fc" id="L62">        LocalDateTime startedAt = LocalDateTime.now(clock);</span>
+<span class="fc" id="L63">        rental.activate(startedAt);</span>
+
+<span class="fc" id="L65">        Rental saved = rentalRepository.save(rental);</span>
+<span class="fc" id="L66">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalStarted(saved));</span>
+<span class="fc" id="L67">        log.info(&quot;Rental {} activated at {}&quot;, saved.getId(), startedAt);</span>
+<span class="fc" id="L68">        return saved;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

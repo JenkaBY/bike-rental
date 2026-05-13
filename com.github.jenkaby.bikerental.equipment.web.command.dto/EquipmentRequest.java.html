@@ -11,7 +11,6 @@ import java.time.LocalDate;
 <span class="fc" id="L11">public record EquipmentRequest(</span>
 
         @Schema(description = &quot;Unique serial number&quot;, example = &quot;SN-123456&quot;)
-        @NotBlank(message = &quot;Serial number is required&quot;)
         @Size(max = 50, message = &quot;Serial number must not exceed 50 characters&quot;)
         String serialNumber,
 

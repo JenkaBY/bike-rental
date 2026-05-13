@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReleaseHoldService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.application.service</a> &gt; <span class="el_source">ReleaseHoldService.java</span></div><h1>ReleaseHoldService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.application.service;
+
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
+import com.github.jenkaby.bikerental.finance.application.usecase.ReleaseHoldUseCase;
+import com.github.jenkaby.bikerental.finance.domain.model.Account;
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
+import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
+import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
+import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
+import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
+import com.github.jenkaby.bikerental.shared.domain.TransactionRef;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+<span class="fc" id="L27">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class ReleaseHoldService implements ReleaseHoldUseCase {
+
+    private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
+    private final UuidGenerator uuidGenerator;
+    private final Clock clock;
+
+    @Override
+    @Transactional
+    public HoldResult execute(ReleaseHoldCommand command) {
+<span class="fc" id="L40">        var idempotencyKey = new IdempotencyKey(</span>
+<span class="fc" id="L41">                uuidGenerator.generateNameBased(&quot;%s_%s&quot;.formatted(TransactionType.RELEASE.name(), command.rentalRef().id()))</span>
+        );
+<span class="fc" id="L43">        var existing = transactionRepository.findByIdempotencyKey(idempotencyKey);</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (existing.isPresent()) {</span>
+<span class="nc" id="L45">            var t = existing.get();</span>
+<span class="nc" id="L46">            return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());</span>
+        }
+
+<span class="fc" id="L49">        Optional&lt;Transaction&gt; holdOptional = transactionRepository.findByRentalRefAndType(command.rentalRef(), TransactionType.HOLD);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (holdOptional.isEmpty()) {</span>
+<span class="fc" id="L51">            return new HoldResult(null, clock.instant());</span>
+        }
+<span class="fc" id="L53">        var holdTxN = holdOptional.get();</span>
+<span class="fc" id="L54">        var customerRef = new CustomerRef(holdTxN.getCustomerId());</span>
+
+<span class="fc" id="L56">        var now = clock.instant();</span>
+<span class="fc" id="L57">        var customerAccount = accountRepository.findByCustomerId(customerRef)</span>
+<span class="pc" id="L58">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, customerRef.id()));</span>
+
+<span class="fc" id="L60">        Money releaseHold = holdTxN.getAmount();</span>
+<span class="fc" id="L61">        var debitChange = customerAccount.getWallet().credit(releaseHold);</span>
+<span class="fc" id="L62">        var creditChange = customerAccount.getOnHold().debit(releaseHold);</span>
+
+<span class="fc" id="L64">        accountRepository.save(customerAccount);</span>
+<span class="fc" id="L65">        UUID transactionId = uuidGenerator.generate();</span>
+
+<span class="fc" id="L67">        var transaction = Transaction.builder()</span>
+<span class="fc" id="L68">                .id(transactionId)</span>
+<span class="fc" id="L69">                .type(TransactionType.RELEASE)</span>
+<span class="fc" id="L70">                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
+<span class="fc" id="L71">                .amount(releaseHold)</span>
+<span class="fc" id="L72">                .customerId(customerRef.id())</span>
+<span class="fc" id="L73">                .operatorId(command.operatorId())</span>
+<span class="fc" id="L74">                .sourceType(TransactionSourceType.RENTAL)</span>
+<span class="fc" id="L75">                .sourceId(String.valueOf(command.rentalRef().id()))</span>
+<span class="fc" id="L76">                .recordedAt(now)</span>
+<span class="fc" id="L77">                .idempotencyKey(idempotencyKey)</span>
+<span class="fc" id="L78">                .reason(null)</span>
+<span class="fc" id="L79">                .records(List.of(</span>
+<span class="fc" id="L80">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L81">                        creditChange.toTransaction(uuidGenerator.generate())</span>
+                ))
+<span class="fc" id="L83">                .build();</span>
+
+<span class="fc" id="L85">        transactionRepository.save(transaction);</span>
+<span class="fc" id="L86">        return new HoldResult(new TransactionRef(transactionId), now);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FinanceFacadeImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance</a> &gt; <span class="el_source">FinanceFacadeImpl.java</span></div><h1>FinanceFacadeImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance;
 
+import com.github.jenkaby.bikerental.finance.application.usecase.ReleaseHoldUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.SettleRentalUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
@@ -14,36 +15,44 @@ import org.springframework.stereotype.Service;
 class FinanceFacadeImpl implements FinanceFacade {
 
     private final RentalHoldUseCase rentalHoldUseCase;
+    private final ReleaseHoldUseCase releaseHoldUseCase;
     private final SettleRentalUseCase settleRentalUseCase;
     private final TransactionRepository transactionRepository;
 
     FinanceFacadeImpl(
-            RentalHoldUseCase rentalHoldUseCase,
+            RentalHoldUseCase rentalHoldUseCase, ReleaseHoldUseCase releaseHoldUseCase,
             SettleRentalUseCase settleRentalUseCase,
-<span class="fc" id="L23">            TransactionRepository transactionRepository) {</span>
-<span class="fc" id="L24">        this.rentalHoldUseCase = rentalHoldUseCase;</span>
-<span class="fc" id="L25">        this.settleRentalUseCase = settleRentalUseCase;</span>
-<span class="fc" id="L26">        this.transactionRepository = transactionRepository;</span>
-<span class="fc" id="L27">    }</span>
+<span class="fc" id="L25">            TransactionRepository transactionRepository) {</span>
+<span class="fc" id="L26">        this.rentalHoldUseCase = rentalHoldUseCase;</span>
+<span class="fc" id="L27">        this.releaseHoldUseCase = releaseHoldUseCase;</span>
+<span class="fc" id="L28">        this.settleRentalUseCase = settleRentalUseCase;</span>
+<span class="fc" id="L29">        this.transactionRepository = transactionRepository;</span>
+<span class="fc" id="L30">    }</span>
 
     @Override
     public HoldInfo holdFunds(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef, @NonNull Money plannedCost, @NonNull String operatorId) {
-<span class="fc" id="L31">        var command = new RentalHoldUseCase.RentalHoldCommand(customerRef, rentalRef, plannedCost, operatorId);</span>
-<span class="fc" id="L32">        var result = rentalHoldUseCase.execute(command);</span>
-<span class="fc" id="L33">        return new HoldInfo(result.transactionRef(), result.recordedAt());</span>
+<span class="fc" id="L34">        var command = new RentalHoldUseCase.RentalHoldCommand(customerRef, rentalRef, plannedCost, operatorId);</span>
+<span class="fc" id="L35">        var result = rentalHoldUseCase.execute(command);</span>
+<span class="fc" id="L36">        return new HoldInfo(result.transactionRef(), result.recordedAt());</span>
     }
 
     @Override
     public SettlementInfo settleRental(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef,
                                        @NonNull Money finalCost, @NonNull String operatorId) {
-<span class="fc" id="L39">        var command = new SettleRentalUseCase.SettleRentalCommand(customerRef, rentalRef, finalCost, operatorId);</span>
-<span class="fc" id="L40">        var result = settleRentalUseCase.execute(command);</span>
-<span class="fc" id="L41">        return new SettlementInfo(result.captureTransactionRefs(), result.releaseTransactionRef(), result.recordedAt());</span>
+<span class="fc" id="L42">        var command = new SettleRentalUseCase.SettleRentalCommand(customerRef, rentalRef, finalCost, operatorId);</span>
+<span class="fc" id="L43">        var result = settleRentalUseCase.execute(command);</span>
+<span class="fc" id="L44">        return new SettlementInfo(result.captureTransactionRefs(), result.releaseTransactionRef(), result.recordedAt());</span>
     }
 
     @Override
     public boolean hasHold(RentalRef rentalRef) {
-<span class="fc" id="L46">        return transactionRepository.existsByRentalRefAndType(rentalRef, TransactionType.HOLD);</span>
+<span class="nc" id="L49">        return transactionRepository.existsByRentalRefAndType(rentalRef, TransactionType.HOLD);</span>
+    }
+
+    @Override
+    public ReleaseHoldInfo releaseHold(@NonNull RentalRef rentalRef, @NonNull String operatorId) {
+<span class="fc" id="L54">        var result = this.releaseHoldUseCase.execute(new ReleaseHoldUseCase.ReleaseHoldCommand(rentalRef, operatorId));</span>
+<span class="fc" id="L55">        return new ReleaseHoldInfo(result.transactionRef(), result.recordedAt());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

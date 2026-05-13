@@ -15,8 +15,8 @@ public class EquipmentAvailabilityService {
 <span class="fc" id="L15">    }</span>
 
     public Set&lt;Long&gt; getUnavailableIds(Set&lt;Long&gt; equipmentIds) {
-<span class="pc bpc" id="L18" title="1 of 2 branches missed.">        if (equipmentIds.isEmpty()) {</span>
-<span class="nc" id="L19">            return Set.of();</span>
+<span class="fc bfc" id="L18" title="All 2 branches covered.">        if (equipmentIds.isEmpty()) {</span>
+<span class="fc" id="L19">            return Set.of();</span>
         }
 <span class="fc" id="L21">        return rentalEquipmentRepository.findOccupiedEquipmentIds(equipmentIds);</span>
     }

@@ -10,16 +10,16 @@ public class HoldRequiredException extends BikeRentalException {
     private static final String MESSAGE = &quot;A fund hold must exist before the rental can be activated&quot;;
 
     public HoldRequiredException(Long rentalId) {
-<span class="fc" id="L13">        super(MESSAGE, ErrorCodes.HOLD_REQUIRED, new HoldRequiredDetails(rentalId));</span>
-<span class="fc" id="L14">    }</span>
+<span class="nc" id="L13">        super(MESSAGE, ErrorCodes.HOLD_REQUIRED, new HoldRequiredDetails(rentalId));</span>
+<span class="nc" id="L14">    }</span>
 
     public HoldRequiredDetails getDetails() {
-<span class="fc" id="L17">        return getParams()</span>
-<span class="fc" id="L18">                .map(d -&gt; (HoldRequiredDetails) d)</span>
-<span class="pc" id="L19">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected HoldRequiredDetails in exception parameters&quot;));</span>
+<span class="nc" id="L17">        return getParams()</span>
+<span class="nc" id="L18">                .map(d -&gt; (HoldRequiredDetails) d)</span>
+<span class="nc" id="L19">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected HoldRequiredDetails in exception parameters&quot;));</span>
     }
 
-<span class="fc" id="L22">    public record HoldRequiredDetails(Long rentalId) {</span>
+<span class="nc" id="L22">    public record HoldRequiredDetails(Long rentalId) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

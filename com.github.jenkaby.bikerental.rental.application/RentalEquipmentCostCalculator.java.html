@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalEquipmentCostCalculator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.application</a> &gt; <span class="el_source">RentalEquipmentCostCalculator.java</span></div><h1>RentalEquipmentCostCalculator.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.application;
+
+import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
+import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.vo.EquipmentCostResult;
+import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
+import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class RentalEquipmentCostCalculator {
+
+    private final TariffV2Facade tariffFacade;
+    private final RentalCostCommandMapper costCommandMapper;
+
+    public List&lt;EquipmentCostResult&gt; calculateEstimated(Rental rental, List&lt;EquipmentInfo&gt; equipments) {
+<span class="fc" id="L24">        var command = costCommandMapper.toCommand(rental, equipments);</span>
+<span class="fc" id="L25">        return extractResults(equipments, command);</span>
+    }
+
+    public List&lt;EquipmentCostResult&gt; calculateFinal(Rental rental, List&lt;EquipmentInfo&gt; equipments, Duration billableDuration) {
+<span class="fc" id="L29">        var command = costCommandMapper.toReturnCommand(rental, equipments, billableDuration);</span>
+<span class="fc" id="L30">        return extractResults(equipments, command);</span>
+    }
+
+    private List&lt;EquipmentCostResult&gt; extractResults(List&lt;EquipmentInfo&gt; equipments, RentalCostCalculationCommand command) {
+<span class="fc" id="L34">        var breakdowns = tariffFacade.calculateRentalCost(command).equipmentBreakdowns();</span>
+
+<span class="fc" id="L36">        var results = new ArrayList&lt;EquipmentCostResult&gt;();</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        for (int i = 0; i &lt; equipments.size(); i++) {</span>
+<span class="fc" id="L38">            var breakdown = breakdowns.get(i);</span>
+<span class="fc" id="L39">            results.add(new EquipmentCostResult(</span>
+<span class="fc" id="L40">                    equipments.get(i).id(),</span>
+<span class="fc" id="L41">                    breakdown.tariffId(),</span>
+<span class="fc" id="L42">                    breakdown.itemCost()</span>
+            ));
+        }
+<span class="fc" id="L45">        return results;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

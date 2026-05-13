@@ -45,13 +45,23 @@ public class RentalEquipment {
 <span class="fc" id="L45">        return this;</span>
     }
 
+    public void applyEstimatedCost(Long tariffId, Money estimatedCost) {
+<span class="fc" id="L49">        this.tariffId = tariffId;</span>
+<span class="fc" id="L50">        this.estimatedCost = estimatedCost;</span>
+<span class="fc" id="L51">    }</span>
+
+    public void applyFinalCost(Long tariffId, Money estimatedCost) {
+<span class="fc" id="L54">        this.tariffId = tariffId;</span>
+<span class="fc" id="L55">        this.finalCost = estimatedCost;</span>
+<span class="fc" id="L56">    }</span>
+
     public static RentalEquipment assigned(Long equipmentId, String equipmentUid, String equipmentType) {
-<span class="fc" id="L49">        return RentalEquipment.builder()</span>
-<span class="fc" id="L50">                .equipmentId(equipmentId)</span>
-<span class="fc" id="L51">                .equipmentUid(equipmentUid)</span>
-<span class="fc" id="L52">                .status(RentalEquipmentStatus.ASSIGNED)</span>
-<span class="fc" id="L53">                .equipmentType(equipmentType)</span>
-<span class="fc" id="L54">                .build();</span>
+<span class="fc" id="L59">        return RentalEquipment.builder()</span>
+<span class="fc" id="L60">                .equipmentId(equipmentId)</span>
+<span class="fc" id="L61">                .equipmentUid(equipmentUid)</span>
+<span class="fc" id="L62">                .status(RentalEquipmentStatus.ASSIGNED)</span>
+<span class="fc" id="L63">                .equipmentType(equipmentType)</span>
+<span class="fc" id="L64">                .build();</span>
     }
 }
 

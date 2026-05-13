@@ -22,7 +22,7 @@ public interface RentalEquipmentMapper {
     @Named(&quot;RentalEquipment.returnedEquipmentIds&quot;)
     default List&lt;Long&gt; mapEquipmentsToIds(List&lt;RentalEquipment&gt; equipments) {
 <span class="fc" id="L24">        return equipments.stream()</span>
-<span class="fc bfc" id="L25" title="All 2 branches covered.">                .filter(re -&gt; re.getStatus() == RentalEquipmentStatus.RETURNED)</span>
+<span class="pc bpc" id="L25" title="1 of 2 branches missed.">                .filter(re -&gt; re.getStatus() == RentalEquipmentStatus.RETURNED)</span>
 <span class="fc" id="L26">                .map(RentalEquipment::getEquipmentId)</span>
 <span class="fc" id="L27">                .toList();</span>
     }
