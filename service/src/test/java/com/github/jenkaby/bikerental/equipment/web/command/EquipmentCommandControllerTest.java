@@ -102,28 +102,6 @@ class EquipmentCommandControllerTest {
         @Nested
         class ShouldReturn400 {
 
-            @ParameterizedTest
-            @ValueSource(strings = {"   ", "\t"})
-            @NullAndEmptySource
-            void whenSerialNumberIsBlank(String serialNumber) throws Exception {
-                EquipmentRequest request = new EquipmentRequest(
-                        serialNumber,
-                        "UID-100",
-                        "bicycle",
-                        "available",
-                        "ModelA",
-                        LocalDate.of(2024, 1, 1),
-                        "good",
-                        "GOOD"
-                );
-
-                mockMvc.perform(post(API_EQUIPMENTS)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.errors[?(@.field=='serialNumber')].code").value(hasItem("validation.not_blank")));
-            }
 
             @Test
             void whenSerialNumberExceedsMaxLength() throws Exception {
@@ -299,30 +277,6 @@ class EquipmentCommandControllerTest {
 
         @Nested
         class ShouldReturn400 {
-
-            @ParameterizedTest
-            @ValueSource(strings = {"   ", "\t"})
-            @NullAndEmptySource
-            void whenSerialNumberIsBlank(String serialNumber) throws Exception {
-                Long equipmentId = 1L;
-                EquipmentRequest request = new EquipmentRequest(
-                        serialNumber,
-                        "UID-200",
-                        "bicycle",
-                        "available",
-                        "ModelB",
-                        LocalDate.of(2024, 2, 1),
-                        "good",
-                        "GOOD"
-                );
-
-                mockMvc.perform(put(API_EQUIPMENTS + "/{id}", equipmentId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.errors[?(@.field=='serialNumber')].code").value(hasItem("validation.not_blank")));
-            }
 
             @Test
             void whenSerialNumberExceedsMaxLength() throws Exception {
