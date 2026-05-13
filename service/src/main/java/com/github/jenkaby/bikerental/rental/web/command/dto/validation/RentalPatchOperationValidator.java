@@ -14,8 +14,7 @@ public class RentalPatchOperationValidator implements ConstraintValidator<ValidR
             "/customerId",
             "/equipmentIds",
             "/tariffId",
-            "/duration",
-            "/status"
+            "/duration"
     );
 
     private static final Pattern IS_ARRAY_OF_NUMBERS = Pattern.compile("^\\s*\\[\\s*(?:\\d+\\s*(?:,\\s*\\d+\\s*)*)?\\]\\s*$");

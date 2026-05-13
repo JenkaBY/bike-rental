@@ -1,14 +1,12 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
-import com.github.jenkaby.bikerental.rental.web.command.dto.CreateRentalRequest;
-import com.github.jenkaby.bikerental.rental.web.command.dto.RentalReturnResponse;
-import com.github.jenkaby.bikerental.rental.web.command.dto.RentalUpdateJsonPatchRequest;
-import com.github.jenkaby.bikerental.rental.web.command.dto.ReturnEquipmentRequest;
+import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.command.mapper.RentalCommandMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
@@ -44,18 +42,21 @@ class RentalCommandController {
     private final ReturnEquipmentUseCase returnEquipmentUseCase;
     private final RentalCommandMapper commandMapper;
     private final RentalQueryMapper queryMapper;
+    private final RentalLifecycleUseCase rentalLifecycleUseCase;
 
     RentalCommandController(
             CreateRentalUseCase createRentalUseCase,
             UpdateRentalUseCase updateRentalUseCase,
             ReturnEquipmentUseCase returnEquipmentUseCase,
             RentalCommandMapper commandMapper,
-            RentalQueryMapper queryMapper) {
+            RentalQueryMapper queryMapper,
+            RentalLifecycleUseCase rentalLifecycleUseCase) {
         this.createRentalUseCase = createRentalUseCase;
         this.updateRentalUseCase = updateRentalUseCase;
         this.returnEquipmentUseCase = returnEquipmentUseCase;
         this.commandMapper = commandMapper;
         this.queryMapper = queryMapper;
+        this.rentalLifecycleUseCase = rentalLifecycleUseCase;
     }
 
 
@@ -105,13 +106,12 @@ class RentalCommandController {
      * <p>
      * Examples:
      * - Select customer: [{"op": "replace", "path": "/customerId", "value": "uuid"}]
-     * - Select equipment: [{"op": "replace", "path": "/equipmentId", "value": 123}]
+     * - Select equipment: [{"op": "replace", "path": "/equipmentIds", "value": [123,125]}]
      * - Set duration: [{"op": "replace", "path": "/duration", "value": "120"}]
-     * - Start rental: [{"op": "replace", "path": "/status", "value": "ACTIVE"}] (see {@link RentalStatus})
      *   Note: startedAt is set automatically when rental is activated
      * - Combined update: [
      * {"op": "replace", "path": "/customerId", "value": "uuid"},
-     * {"op": "replace", "path": "/equipmentId", "value": 123}
+     * {"op": "replace", "path": "/equipmentIds", "value": [123,125]}
      * ]
      *
      * @param id      rental ID
@@ -167,6 +167,33 @@ class RentalCommandController {
         var result = returnEquipmentUseCase.execute(command);
         var response = commandMapper.toReturnResponse(result);
         log.info("[POST] Equipment return processed successfully for rental {}", result.rental().getId());
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{rentalId}/lifecycles")
+    @Operation(summary = "Transition rental lifecycle status",
+            description = "Transitions a rental to ACTIVE or CANCELLED status")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Rental status updated",
+                    content = @Content(schema = @Schema(implementation = RentalResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Rental not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Invalid status transition",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<RentalResponse> updateLifecycle(
+            @Positive @PathVariable("rentalId") Long rentalId,
+            @Valid @RequestBody RentalLifecycleRequest request) {
+        log.info("[PATCH] Lifecycle transition for rentalId={}, targetStatus={}", rentalId, request.status());
+        var command = new RentalLifecycleUseCase.RentalLifecycleCommand(
+                rentalId,
+                RentalStatus.valueOf(request.status().name()),
+                request.operatorId());
+        var rental = rentalLifecycleUseCase.execute(command);
+        var response = queryMapper.toResponse(rental);
+        log.info("[PATCH] Rental {} lifecycle updated to {}", rentalId, rental.getStatus());
         return ResponseEntity.ok(response);
     }
 }

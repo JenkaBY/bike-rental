@@ -2,14 +2,12 @@ package com.github.jenkaby.bikerental.rental.application.service;
 
 import com.github.jenkaby.bikerental.customer.CustomerFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
-import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
-import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
@@ -35,7 +33,6 @@ class CreateRentalService implements CreateRentalUseCase {
     private final RentalEventMapper eventMapper;
     private final Clock clock;
     private final RequestedEquipmentValidator validator;
-    private final FinanceFacade financeFacade;
     private final RentalEquipmentFactory rentalEquipmentFactory;
 
     CreateRentalService(
@@ -46,7 +43,7 @@ class CreateRentalService implements CreateRentalUseCase {
             RentalEventMapper eventMapper,
             Clock clock,
             RequestedEquipmentValidator validator,
-            FinanceFacade financeFacade, RentalEquipmentFactory rentalEquipmentFactory) {
+            RentalEquipmentFactory rentalEquipmentFactory) {
         this.repository = repository;
         this.customerFacade = customerFacade;
         this.equipmentFacade = equipmentFacade;
@@ -54,7 +51,6 @@ class CreateRentalService implements CreateRentalUseCase {
         this.eventMapper = eventMapper;
         this.clock = clock;
         this.validator = validator;
-        this.financeFacade = financeFacade;
         this.rentalEquipmentFactory = rentalEquipmentFactory;
     }
 
@@ -88,16 +84,6 @@ class CreateRentalService implements CreateRentalUseCase {
                 .forEach(rental::addEquipment);
 
         Rental saved = repository.save(rental);
-
-        if (saved.getEstimatedCost().isPositive()) {
-            var holdInfo = financeFacade.holdFunds(
-                    new CustomerRef(saved.getCustomerId()),
-                    saved.toRentalRef(),
-                    rental.getEstimatedCost(),
-                    command.operatorId());
-            log.info("Funds held for rental {}: transactionId={}, heldAt={}",
-                    saved.getId(), holdInfo.transactionRef().id(), holdInfo.recordedAt());
-        }
 
         RentalCreated event = eventMapper.toRentalCreated(saved);
         eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);

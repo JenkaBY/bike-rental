@@ -2,10 +2,7 @@ package com.github.jenkaby.bikerental.rental.application.mapper;
 
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentMapper;
-import com.github.jenkaby.bikerental.shared.domain.event.RentalCompleted;
-import com.github.jenkaby.bikerental.shared.domain.event.RentalCreated;
-import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
-import com.github.jenkaby.bikerental.shared.domain.event.RentalUpdated;
+import com.github.jenkaby.bikerental.shared.domain.event.*;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -38,4 +35,8 @@ public interface RentalEventMapper {
     @Mapping(target = "rentalStatus", source = "status")
     @Mapping(target = "equipmentIds", source = "equipments")
     RentalUpdated.RentalState toRentalState(Rental source);
+
+    @Mapping(target = "rentalId", source = "id")
+    @Mapping(target = "equipmentIds", source = "equipments")
+    RentalCancelled toRentalCancelled(Rental rental);
 }

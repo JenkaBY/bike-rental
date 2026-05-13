@@ -2,26 +2,26 @@
 
 ## Files to Create
 
-- [ ] `component-test/src/test/java/.../transformer/RentalCancelledEventTransformer.java`
-    - [ ] `@DataTableType` method handles `rentalId`, `customerId` (via `Aliases`), `equipmentIds` (comma-separated)
-    - [ ] Compiles without errors
+- [x] `component-test/src/test/java/.../transformer/RentalCancelledEventTransformer.java`
+    - [x] `@DataTableType` method handles `rentalId`, `customerId` (via `Aliases`), `equipmentIds` (comma-separated)
+    - [x] Compiles without errors
 
-- [ ] `component-test/src/test/java/.../steps/rental/RentalCancelledEventSteps.java`
-    - [ ] Step `@Then("the following rental cancelled event was published")` registered
-    - [ ] Uses `MessageStore.getEventsFor(RentalCancelled.class, ...)`
-    - [ ] `Awaitility` with `atMost(3s)`, `pollInterval(100ms)`
-    - [ ] Asserts `rentalId`, `customerId`, `equipmentIds` with `SoftAssertions`
+- [x] `component-test/src/test/java/.../steps/rental/RentalCancelledEventSteps.java`
+    - [x] Step `@Then("the following rental cancelled event was published")` registered
+    - [x] Uses `MessageStore.getEventsFor(RentalCancelled.class, ...)`
+    - [x] `Awaitility` with `atMost(3s)`, `pollInterval(100ms)`
+    - [x] Asserts `rentalId`, `customerId`, `equipmentIds` with `SoftAssertions`
 
-- [ ] `component-test/src/test/java/.../transformer/RentalLifecycleRequestTransformer.java`
-    - [ ] `@DataTableType` method handles `status` (→ `RentalLifecycleStatus` enum) and `operatorId`
-    - [ ] Compiles without errors
+- [x] `component-test/src/test/java/.../transformer/RentalLifecycleRequestTransformer.java`
+    - [x] `@DataTableType` method handles `status` (→ `RentalLifecycleStatus` enum) and `operatorId`
+    - [x] Compiles without errors
 
-- [ ] `component-test/src/test/java/.../steps/rental/RentalLifecycleWebSteps.java`
-    - [ ] Step `@Given("the lifecycle request is")` registered
-    - [ ] Accepts `RentalLifecycleRequest` directly as method parameter (no `ObjectMapper`)
-    - [ ] Calls `scenarioContext.setRequestBody(request)`
+- [x] `component-test/src/test/java/.../steps/rental/RentalLifecycleWebSteps.java`
+    - [x] Step `@Given("the lifecycle request is")` registered
+    - [x] Accepts `RentalLifecycleRequest` directly as method parameter (no `ObjectMapper`)
+    - [x] Calls `scenarioContext.setRequestBody(request)`
 
-- [ ] `component-test/src/test/resources/features/rental/rental-lifecycle.feature`
+- [x] `component-test/src/test/resources/features/rental/rental-lifecycle.feature`
     - [ ] `@ReinitializeSystemLedgers` tag present
     - [ ] `Background:` seeds customers, equipment statuses, equipment types, equipment records,
       accounts, sub-ledgers, transactions, tariff pricing params, tariffs
@@ -40,7 +40,7 @@
 
 - [ ] All three scenarios pass: `./gradlew :component-test:test "-Dspring.profiles.active=test"`
 - [ ] No step definition ambiguity warnings in test output
-- [ ] `RentalCancelled` event record exists in `shared/domain/event/` (created by FR-04 task-002)
+- [x] `RentalCancelled` event record exists in `shared/domain/event/` (created by FR-04 task-002)
   before implementing this FR
-- [ ] `RentalLifecycleUseCase` and its `execute` method exist (created by FR-02) before implementing
+- [x] `RentalLifecycleUseCase` and its `execute` method exist (created by FR-02) before implementing
   this FR

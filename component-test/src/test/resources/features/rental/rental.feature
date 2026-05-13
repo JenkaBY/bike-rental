@@ -226,107 +226,6 @@ Feature: Rental Management
       | rentalId | equipmentId | customerId | plannedDuration |
       | 1        | 1           | CUS1       | 180             |
 
-  Scenario Outline: Update rental - activate rental
-    Given now is "<now>"
-    And a single rental exists in the database with the following data
-      | id         | customerId | status | plannedDuration | createdAt | updatedAt |
-      | <rentalId> | <customer> | DRAFT  | 120             | <now>     | <now>     |
-    And rental equipment exists in the database with the following data
-      | rentalId   | equipmentId   | equipmentUid | equipmentType | tariffId   | status   | startedAt           | expectedReturnAt    | estimatedCost   | createdAt           |
-      | <rentalId> | <equipmentId> | BIKE-001     | BICYCLE       | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | <estimatedCost> | 2026-02-10T08:00:00 |
-    And the following transaction records exist in db
-      | id  | type | paymentMethod | amount          | customerId | operatorId | sourceType | sourceId   | recordedAt          | idempotencyKey |
-      | TX2 | HOLD | CASH          | <estimatedCost> | <customer> | OP1        | RENTAL     | <rentalId> | 2026-02-10T08:00:00 | IDK2           |
-    And the rental update request is
-      | op      | path    | value  |
-      | replace | /status | ACTIVE |
-    When a PATCH request has been made to "/api/rentals/{rentalId}" endpoint with
-      | {rentalId} |
-      | <rentalId> |
-    Then the response status is 200
-    And the rental response only contains
-      | customerId | status | estimatedCost   | plannedDuration   | startedAt |
-      | <customer> | ACTIVE | <estimatedCost> | <plannedDuration> | <now>     |
-    And the rental response only contains rental equipments
-      | equipmentId   | equipmentUid | status | tariffId   | estimatedCost   | finalCost |
-      | <equipmentId> | BIKE-001     | ACTIVE | <tariffId> | <estimatedCost> |           |
-#    rental module
-    And rental was persisted in database
-      | customerId | status | createdAt | plannedDuration   |
-      | <customer> | ACTIVE | <now>     | <plannedDuration> |
-    And rental equipment was persisted in database
-      | rentalId   | equipmentId   | equipmentUid | status | estimatedCost   | tariffId   |
-      | <rentalId> | <equipmentId> | BIKE-001     | ACTIVE | <estimatedCost> | <tariffId> |
-#    equipment module
-    And the following rental started event was published
-      | customerId | equipmentId   | startedAt |
-      | <customer> | <equipmentId> | <now>     |
-    And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
-    Examples:
-      | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
-      | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |
-
-  Scenario Outline: Update rental - activate rental
-    Given now is "<now>"
-    And a single rental exists in the database with the following data
-      | id         | customerId | status | plannedDuration | createdAt | updatedAt |
-      | <rentalId> | <customer> | DRAFT  | 120             | <now>     | <now>     |
-    And rental equipment exists in the database with the following data
-      | rentalId   | equipmentId   | equipmentUid | equipmentType | tariffId   | status   | startedAt           | expectedReturnAt    | estimatedCost   | createdAt           |
-      | <rentalId> | <equipmentId> | BIKE-001     | BICYCLE       | <tariffId> | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | <estimatedCost> | 2026-02-10T08:00:00 |
-    And the following transaction records exist in db
-      | id  | type | paymentMethod | amount          | customerId | operatorId | sourceType | sourceId   | recordedAt          | idempotencyKey |
-      | TX2 | HOLD | CASH          | <estimatedCost> | <customer> | OP1        | RENTAL     | <rentalId> | 2026-02-10T08:00:00 | IDK2           |
-    And the rental update request is
-      | op      | path    | value  |
-      | replace | /status | ACTIVE |
-    When a PATCH request has been made to "/api/rentals/{rentalId}" endpoint with
-      | {rentalId} |
-      | <rentalId> |
-    Then the response status is 200
-    And the rental response only contains
-      | customerId | status | estimatedCost   | plannedDuration   | startedAt |
-      | <customer> | ACTIVE | <estimatedCost> | <plannedDuration> | <now>     |
-    And the rental response only contains rental equipments
-      | equipmentId   | equipmentUid | status | tariffId   | estimatedCost   | finalCost |
-      | <equipmentId> | BIKE-001     | ACTIVE | <tariffId> | <estimatedCost> |           |
-#    rental module
-    And rental was persisted in database
-      | customerId | status | createdAt | plannedDuration   |
-      | <customer> | ACTIVE | <now>     | <plannedDuration> |
-    And rental equipment was persisted in database
-      | rentalId   | equipmentId   | equipmentUid | status | estimatedCost   | tariffId   |
-      | <rentalId> | <equipmentId> | BIKE-001     | ACTIVE | <estimatedCost> | <tariffId> |
-#    equipment module
-    And the following rental started event was published
-      | customerId | equipmentId   | startedAt |
-      | <customer> | <equipmentId> | <now>     |
-    And the following equipment record was persisted in db
-      | id            | serialNumber | uid      | type    | model   | conditionNotes | condition |
-      | <equipmentId> | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
-    Examples:
-      | rentalId | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
-      | RENT2    | 1           | 1        | CUS2     | 2026-02-10T10:30:00 | 120             | 200           |
-
-  Scenario: Attempt to activate rental without hold
-    Given a single rental exists in the database with the following data
-      | id | customerId | status | plannedDuration | createdAt           | updatedAt           |
-      | 1  | CUS1       | DRAFT  | 120             | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
-    And rental equipment exists in the database with the following data
-      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           |
-      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 200.00        | 2026-02-10T08:00:00 |
-    And the rental update request is
-      | op      | path    | value  |
-      | replace | /status | ACTIVE |
-    When a PATCH request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
-    Then the response status is 409
-    And the response contains
-      | path     | value                                                     |
-      | $.title  | Hold required                                             |
-      | $.detail | A fund hold must exist before the rental can be activated |
-
   Scenario: Update rental without duration. Duration must present
     Given a single rental exists in the database with the following data
       | id | customerId | equipmentId | tariffId | status | createdAt           | updatedAt           |
@@ -398,30 +297,19 @@ Feature: Rental Management
       | $.title  | Not Found                              |
       | $.detail | Rental with identifier '999' not found |
 
-  Scenario: Create rental holds funds from customer wallet — sufficient balance
+  Scenario: Create rental doesn't hold funds from customer wallet
     Given a rental request with the following data
       | customerId | equipmentIds | duration | operatorId |
       | CUS1       | 1,3          | 120      | OP1        |
     When a POST request has been made to "/api/rentals" endpoint
     Then the response status is 201
+    And the rental response only contains
+      | customerId | status | estimatedCost | plannedDuration |
+      | CUS1       | DRAFT  | 17            | 120             |
     And the following sub-ledger records were persisted in db
       | id     | accountId | ledgerType      | balance |
-      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 283.00  |
-      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 17.00   |
-    And the following transactions were persisted in db
-      | customerId | amount | type | paymentMethod     | operatorId |
-      | CUS1       | 17.00  | HOLD | INTERNAL_TRANSFER | OP1        |
-
-  Scenario: Create rental rejected when customer wallet has insufficient balance
-    Given a rental request with the following data
-      | customerId | equipmentIds | duration | operatorId |
-      | CUS2       | 1,3          | 120      | OP1        |
-    When a POST request has been made to "/api/rentals" endpoint
-    Then the response status is 422
-    And there are only 2 transactions in db
-    And the response contains
-      | path        | value                     |
-      | $.errorCode | rental.insufficient_funds |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 300.00  |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 0.00    |
 
   Scenario: Create rental with discount — hold reflects discounted total
     Given a rental request with the following data
@@ -442,7 +330,7 @@ Feature: Rental Management
       | equipmentId | equipmentUid | status   | estimatedCost |
       | 1           | BIKE-001     | ASSIGNED | 16.00         |
 
-  Scenario: Create rental with SPECIAL tariff — specialPrice used as total
+  Scenario: Create rental with SPECIAL tariff — specialPrice is used as total
     Given a rental request with the following data
       | customerId | equipmentIds | duration | operatorId | specialTariffId | specialPrice |
       | CUS1       | 1            | 120      | OP1        | 13              | 15.00        |

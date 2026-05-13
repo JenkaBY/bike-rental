@@ -163,6 +163,13 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
+    public void cancel() {
+        this.status.validateTransitionTo(RentalStatus.CANCELLED);
+        this.equipments.forEach(e -> e.setStatus(RentalEquipmentStatus.RETURNED));
+        this.status = RentalStatus.CANCELLED;
+        this.updatedAt = Instant.now();
+    }
+
     public boolean allEquipmentsReturned() {
         return equipments.stream()
                 .allMatch(RETURNED);

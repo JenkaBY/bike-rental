@@ -3,35 +3,28 @@ package com.github.jenkaby.bikerental.rental.application.service;
 import com.github.jenkaby.bikerental.customer.CustomerFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
-import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.service.validator.RequestedEquipmentValidator;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
-import com.github.jenkaby.bikerental.rental.domain.exception.HoldRequiredException;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalPlannedDurationException;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalUpdateException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
-import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.util.PatchValueParser;
-import com.github.jenkaby.bikerental.shared.domain.event.RentalStarted;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 class UpdateRentalService implements UpdateRentalUseCase {
 
@@ -40,7 +33,6 @@ class UpdateRentalService implements UpdateRentalUseCase {
     private final RentalRepository rentalRepository;
     private final CustomerFacade customerFacade;
     private final EquipmentFacade equipmentFacade;
-    private final FinanceFacade financeFacade;
     private final EventPublisher eventPublisher;
     private final Clock clock;
     private final RentalEventMapper eventMapper;
@@ -52,7 +44,6 @@ class UpdateRentalService implements UpdateRentalUseCase {
             RentalRepository rentalRepository,
             CustomerFacade customerFacade,
             EquipmentFacade equipmentFacade,
-            FinanceFacade financeFacade,
             EventPublisher eventPublisher,
             Clock clock,
             RentalEventMapper eventMapper,
@@ -62,7 +53,6 @@ class UpdateRentalService implements UpdateRentalUseCase {
         this.rentalRepository = rentalRepository;
         this.customerFacade = customerFacade;
         this.equipmentFacade = equipmentFacade;
-        this.financeFacade = financeFacade;
         this.eventPublisher = eventPublisher;
         this.clock = clock;
         this.eventMapper = eventMapper;
@@ -121,38 +111,10 @@ class UpdateRentalService implements UpdateRentalUseCase {
             rental.replaceEquipments(equipmentsToAdd, incomingIds);
         }
 
-        if (patch.containsKey("status")) {
-            String newStatusStr = valueParser.parseString(patch.get("status"));
-            RentalStatus newStatus = RentalStatus.valueOf(newStatusStr);
-            log.info("Updating rental {} status to {}", rental, newStatus);
-
-            if (RentalStatus.ACTIVE == newStatus) {
-                startRental(rental);
-            } else {
-                rental.setStatus(newStatus);
-            }
-        }
-        if (rental.getStatus() != RentalStatus.ACTIVE) {
-            var currentState = eventMapper.toRentalState(rental);
-            eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalUpdated(rental, previousState, currentState));
-        }
+        var currentState = eventMapper.toRentalState(rental);
+        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalUpdated(rental, previousState, currentState));
 
         return rentalRepository.save(rental);
     }
-
-    private void startRental(Rental rental) {
-        if (rental.getEstimatedCost().isPositive() && !financeFacade.hasHold(rental.toRentalRef())) {
-            throw new HoldRequiredException(rental.getId());
-        }
-
-        // Activate rental (validations are performed in Rental.activate())
-        LocalDateTime actualStartTime = LocalDateTime.now(clock);
-        rental.activate(actualStartTime);
-
-        // Publish event (inter-module)
-        RentalStarted event = eventMapper.toRentalStarted(rental);
-        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);
-    }
-
 
 }

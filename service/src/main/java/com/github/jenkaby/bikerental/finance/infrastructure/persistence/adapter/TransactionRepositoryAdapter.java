@@ -51,6 +51,12 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
+    public Optional<Transaction> findByIdempotencyKey(IdempotencyKey idempotencyKey) {
+        return jpaRepository.findByIdempotencyKey(idempotencyKey.id())
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<Transaction> findByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
         return findAllByRentalRefAndType(rentalRef, type).stream()
                 .findFirst();

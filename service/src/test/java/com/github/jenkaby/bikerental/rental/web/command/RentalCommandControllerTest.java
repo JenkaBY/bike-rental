@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
@@ -8,6 +9,7 @@ import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.command.mapper.RentalCommandMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,11 +17,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import tools.jackson.databind.ObjectMapper;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ApiTest(controllers = RentalCommandController.class)
+@Import(RentalCommandControllerTest.RentalLifecycleParameterNamesConfig.class)
 @DisplayName("Rental Command Controller WebMvc Tests")
 class RentalCommandControllerTest {
 
@@ -65,6 +77,9 @@ class RentalCommandControllerTest {
 
     @MockitoBean
     private RentalQueryMapper queryMapper;
+
+    @MockitoBean
+    private RentalLifecycleUseCase rentalLifecycleUseCase;
 
     @Nested
     @DisplayName("POST /api/rentals")
@@ -428,7 +443,7 @@ class RentalCommandControllerTest {
             }
 
             @ParameterizedTest
-            @ValueSource(strings = {"/customerId", "/equipmentIds", "/tariffId", "/duration", "/status"})
+            @ValueSource(strings = {"/customerId", "/equipmentIds", "/tariffId", "/duration"})
             @DisplayName("when patch request uses valid paths")
             void whenPatchRequestUsesValidPaths(String path) throws Exception {
                 Object value = switch (path) {
@@ -436,7 +451,6 @@ class RentalCommandControllerTest {
                     case "/tariffId" -> 123L;
                     case "/equipmentIds" -> "[123]";
                     case "/duration" -> "180";
-                    case "/status" -> "ACTIVE";
                     default -> "value";
                 };
 
@@ -455,33 +469,6 @@ class RentalCommandControllerTest {
                     );
                     request = new RentalUpdateJsonPatchRequest(operations);
                 }
-
-                given(commandMapper.toPatchMap(any(RentalUpdateJsonPatchRequest.class)))
-                        .willReturn(Map.of());
-                given(updateRentalUseCase.execute(anyLong(), anyMap()))
-                        .willReturn(mock(Rental.class));
-                given(queryMapper.toResponse(any(Rental.class)))
-                        .willReturn(mock(RentalResponse.class));
-
-                mockMvc.perform(patch(API_RENTALS + "/1")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isOk());
-
-                verify(updateRentalUseCase).execute(anyLong(), anyMap());
-            }
-
-            @ParameterizedTest
-            @ValueSource(strings = {"DRAFT", "ACTIVE", "COMPLETED", "CANCELLED"})
-            @DisplayName("when patch request uses valid status values")
-            void whenPatchRequestUsesValidStatusValues(String status) throws Exception {
-                RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
-                        List.of(new RentalPatchOperation(
-                                JsonPatchOperation.REPLACE,
-                                "/status",
-                                status
-                        ))
-                );
 
                 given(commandMapper.toPatchMap(any(RentalUpdateJsonPatchRequest.class)))
                         .willReturn(Map.of());
@@ -760,6 +747,23 @@ class RentalCommandControllerTest {
 
                 verify(updateRentalUseCase, never()).execute(anyLong(), anyMap());
             }
+
+            @Test
+            @DisplayName("when patch request uses /status path")
+            void whenPatchRequestUsesValidStatusValues() throws Exception {
+                RentalUpdateJsonPatchRequest request = new RentalUpdateJsonPatchRequest(
+                        List.of(new RentalPatchOperation(
+                                JsonPatchOperation.REPLACE,
+                                "/status",
+                                "ACTIVE"
+                        ))
+                );
+
+                mockMvc.perform(patch(API_RENTALS + "/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest());
+            }
         }
     }
 
@@ -848,6 +852,159 @@ class RentalCommandControllerTest {
 
                 verify(returnEquipmentUseCase, never()).execute(any(ReturnEquipmentUseCase.ReturnEquipmentCommand.class));
 
+            }
+        }
+    }
+
+    @TestConfiguration
+    static class RentalLifecycleParameterNamesConfig {
+
+        @Bean
+        BeanPostProcessor rentalLifecycleParameterNameDiscovererPostProcessor() {
+            return new BeanPostProcessor() {
+                @Override
+                public Object postProcessAfterInitialization(Object bean, String beanName) {
+                    if (bean instanceof RequestMappingHandlerAdapter adapter) {
+                        applyParameterNameDiscoverer(adapter);
+                    }
+                    return bean;
+                }
+
+                private void applyParameterNameDiscoverer(RequestMappingHandlerAdapter adapter) {
+                    ParameterNameDiscoverer discoverer = new ParameterNameDiscoverer() {
+                        @Override
+                        public String[] getParameterNames(Method method) {
+                            if (method.getDeclaringClass().equals(RentalCommandController.class)
+                                    && method.getName().equals("updateLifecycle")) {
+                                return new String[]{"rentalId", "request"};
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        public String[] getParameterNames(Constructor<?> constructor) {
+                            return null;
+                        }
+                    };
+
+                    try {
+                        Method setter = RequestMappingHandlerAdapter.class.getMethod(
+                                "setParameterNameDiscoverer", ParameterNameDiscoverer.class);
+                        setter.invoke(adapter, discoverer);
+                        return;
+                    } catch (ReflectiveOperationException ignored) {
+                    }
+
+                    try {
+                        Field field = RequestMappingHandlerAdapter.class.getDeclaredField("parameterNameDiscoverer");
+                        field.setAccessible(true);
+                        field.set(adapter, discoverer);
+                    } catch (ReflectiveOperationException exception) {
+                        throw new IllegalStateException(exception);
+                    }
+                }
+            };
+        }
+    }
+
+    @Nested
+    @DisplayName("PATCH /api/rentals/{rentalId}/lifecycles")
+    class UpdateLifecycle {
+
+        private static final String LIFECYCLE_URL = "/api/rentals/{rentalId}/lifecycles";
+
+        @Nested
+        @DisplayName("Should return 200 OK")
+        class ShouldReturn200 {
+
+            @Test
+            @DisplayName("when status is ACTIVE")
+            void whenStatusIsActive() throws Exception {
+                var rental = mock(Rental.class);
+                given(rentalLifecycleUseCase.execute(any(RentalLifecycleUseCase.RentalLifecycleCommand.class)))
+                        .willReturn(rental);
+                given(queryMapper.toResponse(any(Rental.class))).willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(
+                                        new RentalLifecycleRequest(LifecycleStatus.ACTIVE, "op-1"))))
+                        .andExpect(status().isOk());
+            }
+
+            @Test
+            @DisplayName("when status is CANCELLED")
+            void whenStatusIsCancelled() throws Exception {
+                var rental = mock(Rental.class);
+                given(rentalLifecycleUseCase.execute(any(RentalLifecycleUseCase.RentalLifecycleCommand.class)))
+                        .willReturn(rental);
+                given(queryMapper.toResponse(any(Rental.class))).willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(
+                                        new RentalLifecycleRequest(LifecycleStatus.CANCELLED, "op-1"))))
+                        .andExpect(status().isOk());
+            }
+        }
+
+        @Nested
+        @DisplayName("Should return 400 Bad Request")
+        class BadRequest {
+
+            @Test
+            @DisplayName("when status is null")
+            void whenStatusIsNull() throws Exception {
+                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(
+                                        new RentalLifecycleRequest(null, "op-1"))))
+                        .andExpect(status().isBadRequest());
+            }
+
+            @Test
+            @DisplayName("when status field is missing")
+            void whenStatusFieldIsMissing() throws Exception {
+                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest());
+            }
+
+            @Test
+            @DisplayName("when status is an invalid enum value")
+            void whenStatusIsInvalidEnumValue() throws Exception {
+                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"status\": \"COMPLETED\", \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest());
+            }
+
+            @Test
+            @DisplayName("when status is DRAFT")
+            void whenStatusIsDraft() throws Exception {
+                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"status\": \"DRAFT\", \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("Should return 404 Not Found")
+        class NotFound {
+
+            @Test
+            @DisplayName("when rental does not exist")
+            void whenRentalDoesNotExist() throws Exception {
+                given(rentalLifecycleUseCase.execute(any(RentalLifecycleUseCase.RentalLifecycleCommand.class)))
+                        .willThrow(new ResourceNotFoundException(Rental.class, "99"));
+
+                mockMvc.perform(patch(LIFECYCLE_URL, 99L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(
+                                        new RentalLifecycleRequest(LifecycleStatus.ACTIVE, "op-1"))))
+                        .andExpect(status().isNotFound());
             }
         }
     }
