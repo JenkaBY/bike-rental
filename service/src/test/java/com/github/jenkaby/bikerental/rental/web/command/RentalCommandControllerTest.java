@@ -285,30 +285,6 @@ class RentalCommandControllerTest {
             }
 
             @Test
-            @DisplayName("when equipmentIds is empty list")
-            void whenEquipmentIdsIsEmpty() throws Exception {
-                var request = new RentalRequest(
-                        VALID_CUSTOMER_ID,
-                        List.of(),
-                        VALID_DURATION,
-                        "operator-1",
-                        null,
-                        null,
-                        null
-                );
-
-                mockMvc.perform(put(RENTAL_ID_API, 1L)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.detail").value("Validation error"))
-                        .andExpect(jsonPath("$.errors[0].field").value("equipmentIds"));
-
-                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand.class));
-            }
-
-            @Test
             @DisplayName("when equipmentIds contains null element")
             void whenEquipmentIdsContainsNull() throws Exception {
                 var equipmentIds = new ArrayList<Long>();

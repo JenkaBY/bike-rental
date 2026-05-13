@@ -3,7 +3,10 @@ package com.github.jenkaby.bikerental.rental.web.command.dto;
 import com.github.jenkaby.bikerental.shared.web.support.MoneyAmount;
 import com.github.jenkaby.bikerental.shared.web.support.PercentValue;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,7 +19,7 @@ public record RentalRequest(
         UUID customerId,
 
         @Schema(description = "List of Equipment IDs to rent (preferred)")
-        @NotNull @Size(min = 1)
+        @NotNull
         List<@Positive @NotNull Long> equipmentIds,
 
         @Schema(description = "Planned rental duration in minutes", example = "120")

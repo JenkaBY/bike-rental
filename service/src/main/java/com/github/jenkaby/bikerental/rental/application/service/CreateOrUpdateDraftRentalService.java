@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
@@ -37,14 +36,9 @@ class CreateOrUpdateDraftRentalService implements CreateOrUpdateDraftRentalUseCa
     public Rental execute(UpdateDraftRentalCommand command) {
         Rental rental = repository.findById(command.rentalId())
                 .orElseThrow(() -> new ResourceNotFoundException(Rental.class, command.rentalId()));
-        var previousState = eventMapper.toRentalState(rental);
 
         customerFacade.findById(command.customerId())
                 .orElseThrow(() -> new ReferenceNotFoundException("Customer", command.customerId().toString()));
-
-        if (CollectionUtils.isEmpty(command.equipmentIds())) {
-            throw new IllegalArgumentException("At least one equipmentId must be provided");
-        }
 
         var equipments = equipmentFacade.findByIds(command.equipmentIds());
         validator.validateSize(command.equipmentIds(), equipments);
