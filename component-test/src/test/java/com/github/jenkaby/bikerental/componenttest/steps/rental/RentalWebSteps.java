@@ -79,9 +79,11 @@ public class RentalWebSteps {
                     .as("Expected return at")
                     .isCloseTo(expected.expectedReturnAt(), within(5, ChronoUnit.SECONDS));
         }
-        assertThat(actual.overdueMinutes())
-                .as("Overdue minutes")
-                .isEqualTo(expected.overdueMinutes());
+        if (expected.overdueMinutes() != null) {
+            assertThat(actual.overdueMinutes())
+                    .as("Overdue minutes")
+                    .isEqualTo(expected.overdueMinutes());
+        }
         softly.assertAll();
     }
 

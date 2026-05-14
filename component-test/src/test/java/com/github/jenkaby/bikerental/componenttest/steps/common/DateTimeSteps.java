@@ -3,17 +3,37 @@ package com.github.jenkaby.bikerental.componenttest.steps.common;
 import com.github.jenkaby.bikerental.componenttest.config.ClockTestConfig;
 import com.github.jenkaby.bikerental.shared.config.DevClockConfig;
 import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.*;
+import java.util.TimeZone;
 
 @Slf4j
 @RequiredArgsConstructor
 public class DateTimeSteps {
 
     private final Clock clock;
+    private TimeZone defaultTimezone;
+
+    @Before("@UseUTC")
+    public void setUTC() {
+        this.defaultTimezone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        log.info("Set UTC timezone. Default is {}", this.defaultTimezone);
+
+    }
+
+    @After("@UseUTC")
+    public void resetUTC() {
+        if (this.defaultTimezone != null) {
+            log.info("Reset Timezone to default {}", this.defaultTimezone);
+            TimeZone.setDefault(this.defaultTimezone);
+        }
+    }
+
 
     @After("@ResetClock")
     public void resetClock() {

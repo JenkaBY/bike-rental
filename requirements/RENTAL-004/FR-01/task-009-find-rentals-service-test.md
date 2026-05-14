@@ -1,5 +1,29 @@
-package com.github.jenkaby.bikerental.rental.application.service;
+# Task 009: Rewrite FindRentalsServiceTest for Unified Repository Method
 
+> **Applied Skill:** `java.instructions.md` — JUnit 5, Mockito BDD style;
+> `springboot.instructions.md` — unit test service in isolation
+
+## 1. Objective
+
+Replace all existing `FindRentalsServiceTest` test methods (which stub the old four per-combination
+`RentalRepository` methods) with tests that stub the single unified
+`RentalRepository.findAll(RentalSearchFilter, PageRequest)`. The new tests verify that the correct
+`RentalSearchFilter` fields are populated for each input combination, and that the date range
+fields are forwarded correctly.
+
+## 2. File to Modify / Create
+
+* **File Path:**
+  `service/src/test/java/com/github/jenkaby/bikerental/rental/application/service/FindRentalsServiceTest.java`
+* **Action:** Modify Existing File
+
+## 3. Code Implementation
+
+**Imports Required:**
+
+Replace the existing import block with:
+
+```java
 import com.github.jenkaby.bikerental.rental.application.usecase.FindRentalsUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalSearchFilter;
@@ -10,6 +34,7 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,9 +44,16 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+```
 
+**Code to Add/Replace:**
+
+* **Location:** Replace the entire class body (all fields and all test methods) with the content below.
+
+```java
 @ExtendWith(MockitoExtension.class)
 @DisplayName("FindRentalsService Tests")
 class FindRentalsServiceTest {
@@ -99,3 +131,8 @@ class FindRentalsServiceTest {
         return new Page<>(List.of(), 0L, PAGE_REQUEST);
     }
 }
+```
+
+## 4. Validation Steps
+
+skip
