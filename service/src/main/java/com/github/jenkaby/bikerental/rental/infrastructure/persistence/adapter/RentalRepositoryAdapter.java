@@ -1,20 +1,22 @@
 package com.github.jenkaby.bikerental.rental.infrastructure.persistence.adapter;
 
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalSearchFilter;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper.RentalJpaMapper;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.repository.RentalJpaRepository;
+import com.github.jenkaby.bikerental.rental.infrastructure.persistence.specification.RentalSpec;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
+import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 @Transactional(readOnly = true)
@@ -49,33 +51,12 @@ class RentalRepositoryAdapter implements RentalRepository {
     }
 
     @Override
-    public Page<Rental> findByStatus(RentalStatus status, PageRequest pageRequest) {
-        var springPageRequest = pageMapper.toSpring(pageRequest);
-        var page = repository.findByStatus(status, springPageRequest);
-        return pageMapper.toDomain(page)
-                .map(mapper::toDomain);
-    }
-
-    @Override
-    public Page<Rental> findByStatusAndCustomerId(RentalStatus status, UUID customerId, PageRequest pageRequest) {
-        var springPageRequest = pageMapper.toSpring(pageRequest);
-        var page = repository.findByStatusAndCustomerId(status, customerId, springPageRequest);
-        return pageMapper.toDomain(page)
-                .map(mapper::toDomain);
-    }
-
-    @Override
-    public Page<Rental> findByCustomerId(UUID customerId, PageRequest pageRequest) {
-        var springPageRequest = pageMapper.toSpring(pageRequest);
-        var page = repository.findByCustomerId(customerId, springPageRequest);
-        return pageMapper.toDomain(page)
-                .map(mapper::toDomain);
-    }
-
-    @Override
-    public Page<Rental> findByStatusAndEquipmentUid(RentalStatus status, String equipmentUid, PageRequest pageRequest) {
-        var springPageRequest = pageMapper.toSpring(pageRequest);
-        var page = repository.findByStatusAndEquipmentUid(status, equipmentUid, springPageRequest);
+    public Page<Rental> findAll(RentalSearchFilter filter, PageRequest pageRequest) {
+        var pageable = pageMapper.toSpring(pageRequest);
+        var specBuilder = SpecificationBuilder.specification(RentalSpec.class);
+        filter.toMap().forEach(specBuilder::withParam);
+        var spec = specBuilder.build();
+        var page = repository.findAll(spec, pageable);
         return pageMapper.toDomain(page)
                 .map(mapper::toDomain);
     }

@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.rental.application.service;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.FindRentalsUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
-import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalSearchFilter;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +30,8 @@ class FindRentalsServiceTest {
     private static final UUID CUSTOMER_ID = UUID.randomUUID();
     private static final String EQUIPMENT_UID = "BIKE-001";
     private static final PageRequest PAGE_REQUEST = new PageRequest(20, 0, null);
+    private static final LocalDate FROM_DATE = LocalDate.of(2026, 2, 15);
+    private static final LocalDate TO_DATE = LocalDate.of(2026, 2, 20);
 
     @Mock
     private RentalRepository repository;
@@ -37,122 +40,62 @@ class FindRentalsServiceTest {
     private FindRentalsService service;
 
     @Test
-    @DisplayName("Should find rentals by status and equipmentUid")
-    void shouldFindRentalsByStatusAndEquipmentUid() {
-        // Given
-        var query = new FindRentalsUseCase.FindRentalsQuery(STATUS, null, EQUIPMENT_UID, PAGE_REQUEST);
-        var rental = Rental.builder()
-                .id(1L)
-                .status(STATUS)
-                .equipments(List.of(RentalEquipment.assigned(1L, EQUIPMENT_UID, null)))
-                .build();
-        var page = new Page<>(List.of(rental), 1L, PAGE_REQUEST);
+    @DisplayName("Should pass all filter fields to repository")
+    void shouldPassAllFilterFieldsToRepository() {
+        var query = new FindRentalsUseCase.FindRentalsQuery(STATUS, CUSTOMER_ID, EQUIPMENT_UID, PAGE_REQUEST, FROM_DATE, TO_DATE);
+        var page = emptyPage();
+        given(repository.findAll(new RentalSearchFilter(STATUS, CUSTOMER_ID, EQUIPMENT_UID, FROM_DATE, TO_DATE), PAGE_REQUEST)).willReturn(page);
 
-        given(repository.findByStatusAndEquipmentUid(STATUS, EQUIPMENT_UID, PAGE_REQUEST)).willReturn(page);
-
-        // When
         Page<Rental> result = service.execute(query);
 
-        // Then
         assertThat(result).isNotNull();
-        assertThat(result.items()).hasSize(1);
-        assertThat(result.items().get(0).getEquipments()).isNotEmpty();
-        assertThat(result.items().get(0).getEquipments().get(0).getEquipmentUid()).isEqualTo(EQUIPMENT_UID);
-        then(repository).should().findByStatusAndEquipmentUid(STATUS, EQUIPMENT_UID, PAGE_REQUEST);
+        then(repository).should().findAll(new RentalSearchFilter(STATUS, CUSTOMER_ID, EQUIPMENT_UID, FROM_DATE, TO_DATE), PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
 
     @Test
-    @DisplayName("Should find rentals by status and customerId when both provided")
-    void shouldFindRentalsByStatusAndCustomerId() {
-        // Given
-        var query = new FindRentalsUseCase.FindRentalsQuery(STATUS, CUSTOMER_ID, null, PAGE_REQUEST);
-        var rental = Rental.builder()
-                .id(1L)
-                .status(STATUS)
-                .customerId(CUSTOMER_ID)
-                .build();
-        var page = new Page<>(List.of(rental), 1L, PAGE_REQUEST);
+    @DisplayName("Should pass null date fields when no date range supplied")
+    void shouldPassNullDateFieldsWhenNoDateRangeSupplied() {
+        var query = new FindRentalsUseCase.FindRentalsQuery(STATUS, null, null, PAGE_REQUEST, null, null);
+        var page = emptyPage();
+        given(repository.findAll(new RentalSearchFilter(STATUS, null, null, null, null), PAGE_REQUEST)).willReturn(page);
 
-        given(repository.findByStatusAndCustomerId(STATUS, CUSTOMER_ID, PAGE_REQUEST)).willReturn(page);
-
-        // When
         Page<Rental> result = service.execute(query);
 
-        // Then
         assertThat(result).isNotNull();
-        assertThat(result.items()).hasSize(1);
-        then(repository).should().findByStatusAndCustomerId(STATUS, CUSTOMER_ID, PAGE_REQUEST);
+        then(repository).should().findAll(new RentalSearchFilter(STATUS, null, null, null, null), PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
 
     @Test
-    @DisplayName("Should prioritize equipmentUid over customerId when both provided with status")
-    void shouldPrioritizeEquipmentUidOverCustomerId() {
-        // Given
-        var query = new FindRentalsUseCase.FindRentalsQuery(STATUS, CUSTOMER_ID, EQUIPMENT_UID, PAGE_REQUEST);
-        var rental = Rental.builder()
-                .id(1L)
-                .status(STATUS)
-                .equipments(List.of(RentalEquipment.assigned(1L, EQUIPMENT_UID, null)))
-                .build();
-        var page = new Page<>(List.of(rental), 1L, PAGE_REQUEST);
+    @DisplayName("Should pass only from date when to is absent")
+    void shouldPassOnlyFromDateWhenToIsAbsent() {
+        var query = new FindRentalsUseCase.FindRentalsQuery(null, null, null, PAGE_REQUEST, FROM_DATE, null);
+        var page = emptyPage();
+        given(repository.findAll(new RentalSearchFilter(null, null, null, FROM_DATE, null), PAGE_REQUEST)).willReturn(page);
 
-        given(repository.findByStatusAndEquipmentUid(STATUS, EQUIPMENT_UID, PAGE_REQUEST)).willReturn(page);
-
-        // When
         Page<Rental> result = service.execute(query);
 
-        // Then
         assertThat(result).isNotNull();
-        assertThat(result.items()).hasSize(1);
-        then(repository).should().findByStatusAndEquipmentUid(STATUS, EQUIPMENT_UID, PAGE_REQUEST);
+        then(repository).should().findAll(new RentalSearchFilter(null, null, null, FROM_DATE, null), PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
 
     @Test
-    @DisplayName("Should find rentals by customerId only")
-    void shouldFindRentalsByCustomerId() {
-        // Given
-        var query = new FindRentalsUseCase.FindRentalsQuery(null, CUSTOMER_ID, null, PAGE_REQUEST);
-        var rental = Rental.builder()
-                .id(1L)
-                .customerId(CUSTOMER_ID)
-                .build();
-        var page = new Page<>(List.of(rental), 1L, PAGE_REQUEST);
+    @DisplayName("Should pass only to date when from is absent")
+    void shouldPassOnlyToDateWhenFromIsAbsent() {
+        var query = new FindRentalsUseCase.FindRentalsQuery(null, CUSTOMER_ID, null, PAGE_REQUEST, null, TO_DATE);
+        var page = emptyPage();
+        given(repository.findAll(new RentalSearchFilter(null, CUSTOMER_ID, null, null, TO_DATE), PAGE_REQUEST)).willReturn(page);
 
-        given(repository.findByCustomerId(CUSTOMER_ID, PAGE_REQUEST)).willReturn(page);
-
-        // When
         Page<Rental> result = service.execute(query);
 
-        // Then
         assertThat(result).isNotNull();
-        assertThat(result.items()).hasSize(1);
-        then(repository).should().findByCustomerId(CUSTOMER_ID, PAGE_REQUEST);
+        then(repository).should().findAll(new RentalSearchFilter(null, CUSTOMER_ID, null, null, TO_DATE), PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
 
-    @Test
-    @DisplayName("Should find rentals by status only")
-    void shouldFindRentalsByStatus() {
-        // Given
-        var query = new FindRentalsUseCase.FindRentalsQuery(STATUS, null, null, PAGE_REQUEST);
-        var rental = Rental.builder()
-                .id(1L)
-                .status(STATUS)
-                .build();
-        var page = new Page<>(List.of(rental), 1L, PAGE_REQUEST);
-
-        given(repository.findByStatus(STATUS, PAGE_REQUEST)).willReturn(page);
-
-        // When
-        Page<Rental> result = service.execute(query);
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.items()).hasSize(1);
-        then(repository).should().findByStatus(STATUS, PAGE_REQUEST);
-        then(repository).shouldHaveNoMoreInteractions();
+    private Page<Rental> emptyPage() {
+        return new Page<>(List.of(), 0L, PAGE_REQUEST);
     }
 }

@@ -138,4 +138,14 @@ public class RentalRestControllerAdvice {
         String correlationId = MDC.get("correlationId");
         return correlationId != null ? correlationId : UUID.randomUUID().toString();
     }
+
+    @ExceptionHandler(InvalidDateRangeException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidDateRange(InvalidDateRangeException ex) {
+        var correlationId = resolveCorrelationId();
+        log.warn("[correlationId={}] Invalid date range: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.CONSTRAINT_VIOLATION);
+        return ResponseEntity.of(problem).build();
+    }
 }

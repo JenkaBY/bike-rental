@@ -30,7 +30,7 @@ public class RentalSummaryResponseTransformer {
         var overdueMinutesString = DataTableHelper.getStringOrNull(entry, "overdueMin");
         var overdueMinutes = Optional.ofNullable(overdueMinutesString)
                 .map(Integer::valueOf)
-                .orElse(0);
+                .orElse(null);
 
         return new RentalSummaryResponse(
                 id,

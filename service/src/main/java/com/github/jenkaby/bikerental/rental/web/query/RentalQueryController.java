@@ -9,7 +9,6 @@ import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
 import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
-import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import com.github.jenkaby.bikerental.shared.web.support.Id;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Validated
@@ -81,11 +81,13 @@ class RentalQueryController {
             @Parameter(description = "Rental status filter", example = "ACTIVE") @RequestParam(name = "status", required = false) RentalStatus status,
             @Parameter(description = "Customer UUID filter") @RequestParam(name = "customerId", required = false) UUID customerId,
             @Parameter(description = "Equipment UID filter", example = "BIKE-001") @RequestParam(name = "equipmentUid", required = false) String equipmentUid,
+            @Parameter(description = "Created-at range start (inclusive), format yyyy-MM-dd", example = "2026-02-15") @RequestParam(name = "from", required = false) LocalDate from,
+            @Parameter(description = "Created-at range end (inclusive), format yyyy-MM-dd", example = "2026-02-20") @RequestParam(name = "to", required = false) LocalDate to,
             @PageableDefault(size = 20, sort = "expectedReturnAt", direction = Sort.Direction.ASC) Pageable pageable) {
-        log.info("[GET] Get rentals with filters status={}, customerId={}, equipmentUid={}", status, customerId, equipmentUid);
+        log.info("[GET] Get rentals with filters status={}, customerId={}, equipmentUid={}, from={}, to={}", status, customerId, equipmentUid, from, to);
 
-        PageRequest pageRequest = pageMapper.toPageRequest(pageable);
-        var query = new FindRentalsUseCase.FindRentalsQuery(status, customerId, equipmentUid, pageRequest);
+        var pageRequest = pageMapper.toPageRequest(pageable);
+        var query = new FindRentalsUseCase.FindRentalsQuery(status, customerId, equipmentUid, pageRequest, from, to);
 
         Page<Rental> rentals = findRentalsUseCase.execute(query);
 

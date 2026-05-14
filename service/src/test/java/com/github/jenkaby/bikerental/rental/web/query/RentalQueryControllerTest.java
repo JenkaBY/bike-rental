@@ -81,19 +81,25 @@ class RentalQueryControllerTest {
         static Stream<Arguments> searchParameterCombinations() {
             var customerId = UUID.randomUUID().toString();
             return Stream.of(
-                    Arguments.of("status only", "ACTIVE", null, null),
-                    Arguments.of("customerId only", null, customerId, null),
-                    Arguments.of("equipmentUid only", null, null, "BIKE-001"),
-                    Arguments.of("status and customerId", "ACTIVE", customerId, null),
-                    Arguments.of("status and equipmentUid", "ACTIVE", null, "BIKE-001"),
-                    Arguments.of("all params", "ACTIVE", customerId, "BIKE-001"),
-                    Arguments.of("no params", null, null, null)
+                    Arguments.of("status only", "ACTIVE", null, null, null, null),
+                    Arguments.of("customerId only", null, customerId, null, null, null),
+                    Arguments.of("equipmentUid only", null, null, "BIKE-001", null, null),
+                    Arguments.of("status and customerId", "ACTIVE", customerId, null, null, null),
+                    Arguments.of("status and equipmentUid", "ACTIVE", null, "BIKE-001", null, null),
+                    Arguments.of("all params", "ACTIVE", customerId, "BIKE-001", null, null),
+                    Arguments.of("no params", null, null, null, null, null),
+                    Arguments.of("from only", null, null, null, "2026-02-15", null),
+                    Arguments.of("to only", null, null, null, null, "2026-02-20"),
+                    Arguments.of("from and to", null, null, null, "2026-02-15", "2026-02-20"),
+                    Arguments.of("status with date range", "ACTIVE", null, null, "2026-02-15", "2026-02-20"),
+                    Arguments.of("same day range", null, null, null, "2026-02-15", "2026-02-15")
             );
         }
 
         @ParameterizedTest(name = "{0}")
         @MethodSource("searchParameterCombinations")
-        void getRentals_returnsOk(String description, String status, String customerId, String equipmentUid) throws Exception {
+        void getRentals_returnsOk(String description, String status, String customerId, String equipmentUid,
+                                  String from, String to) throws Exception {
             var pageRequest = new PageRequest(20, 0, null);
             var page = new Page<>(List.of(mock(Rental.class)), 1L, pageRequest);
 
@@ -105,6 +111,8 @@ class RentalQueryControllerTest {
             if (status != null) request = request.param("status", status);
             if (customerId != null) request = request.param("customerId", customerId);
             if (equipmentUid != null) request = request.param("equipmentUid", equipmentUid);
+            if (from != null) request = request.param("from", from);
+            if (to != null) request = request.param("to", to);
 
             mockMvc.perform(request)
                     .andExpect(status().isOk());
@@ -116,6 +124,42 @@ class RentalQueryControllerTest {
                             .param("status", "INVALID_STATUS")
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void getRentals_invalidFromDateFormat_returnsBadRequest() throws Exception {
+            mockMvc.perform(get(API_RENTALS)
+                            .param("from", "15-02-2026")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void getRentals_invalidToDateFormat_returnsBadRequest() throws Exception {
+            mockMvc.perform(get(API_RENTALS)
+                            .param("to", "20-02-2026")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    class GetRentalsDateRangeValidation {
+
+        @Test
+        void getRentals_fromEqualsTo_returnsOk() throws Exception {
+            var pageRequest = new PageRequest(20, 0, null);
+            var page = new Page<>(List.of(mock(Rental.class)), 1L, pageRequest);
+
+            given(pageMapper.toPageRequest(any())).willReturn(pageRequest);
+            given(findRentalsUseCase.execute(any(FindRentalsUseCase.FindRentalsQuery.class))).willReturn(page);
+            given(mapper.toRentalSummaryResponse(any(Rental.class))).willReturn(mock(RentalSummaryResponse.class));
+
+            mockMvc.perform(get(API_RENTALS)
+                            .param("from", "2026-02-15")
+                            .param("to", "2026-02-15")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
         }
     }
 
