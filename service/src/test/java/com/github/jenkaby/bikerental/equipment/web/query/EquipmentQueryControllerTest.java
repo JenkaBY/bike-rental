@@ -1,9 +1,6 @@
 package com.github.jenkaby.bikerental.equipment.web.query;
 
-import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentByIdUseCase;
-import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentBySerialNumberUseCase;
-import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentByUidUseCase;
-import com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase;
+import com.github.jenkaby.bikerental.equipment.application.usecase.*;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.web.query.controller.EquipmentQueryController;
 import com.github.jenkaby.bikerental.equipment.web.query.dto.EquipmentResponse;
@@ -20,12 +17,15 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ApiTest(controllers = EquipmentQueryController.class)
@@ -47,6 +47,9 @@ class EquipmentQueryControllerTest {
 
     @MockitoBean
     private SearchEquipmentsUseCase searchUseCase;
+
+    @MockitoBean
+    private GetEquipmentByIdsUseCase getByIds;
 
     @MockitoBean
     private EquipmentQueryMapper mapper;
@@ -185,6 +188,97 @@ class EquipmentQueryControllerTest {
             // non-numeric id should result in 400 - type mismatch
             mockMvc.perform(get(API_EQUIPMENTS + "/abc").accept(org.springframework.http.MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    class GetBatchEquipments {
+
+        @Test
+        void allFound_returns200WithList() throws Exception {
+            var firstDomain = mock(Equipment.class);
+            var secondDomain = mock(Equipment.class);
+            var thirdDomain = mock(Equipment.class);
+
+            var firstResponse = mock(EquipmentResponse.class);
+            var secondResponse = mock(EquipmentResponse.class);
+            var thirdResponse = mock(EquipmentResponse.class);
+
+            given(getByIds.execute(any())).willReturn(List.of(firstDomain, secondDomain, thirdDomain));
+            given(mapper.toResponses(List.of(firstDomain, secondDomain, thirdDomain)))
+                    .willReturn(List.of(firstResponse, secondResponse, thirdResponse));
+
+            mockMvc.perform(get(API_EQUIPMENTS + "/batch")
+                            .queryParam("ids", "1,2,3")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+
+            verify(getByIds).execute(any());
+        }
+
+        @Test
+        void someNotFound_returns200WithList() throws Exception {
+            var firstDomain = mock(Equipment.class);
+            var secondDomain = mock(Equipment.class);
+
+            var firstResponse = mock(EquipmentResponse.class);
+            var secondResponse = mock(EquipmentResponse.class);
+
+            given(getByIds.execute(any())).willReturn(List.of(firstDomain, secondDomain));
+            given(mapper.toResponses(List.of(firstDomain, secondDomain)))
+                    .willReturn(List.of(firstResponse, secondResponse));
+
+            mockMvc.perform(get(API_EQUIPMENTS + "/batch")
+                            .queryParam("ids", "1,2,99")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+
+            verify(getByIds).execute(any());
+        }
+
+        @Test
+        void noneFound_returns200WithEmptyList() throws Exception {
+            given(getByIds.execute(any())).willReturn(List.of());
+            given(mapper.toResponses(List.of())).willReturn(List.of());
+
+            mockMvc.perform(get(API_EQUIPMENTS + "/batch")
+                            .queryParam("ids", "91,92,93")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").isEmpty());
+
+            verify(getByIds).execute(any());
+        }
+
+        @Nested
+        class BadRequest {
+
+            @Test
+            void whenIdsIsMissing() throws Exception {
+                mockMvc.perform(get(API_EQUIPMENTS + "/batch")
+                                .accept(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isBadRequest());
+            }
+
+            @Test
+            void whenIdCountExceeds100() throws Exception {
+                var ids = LongStream.rangeClosed(1, 101)
+                        .mapToObj(Long::toString)
+                        .collect(Collectors.joining(","));
+
+                mockMvc.perform(get(API_EQUIPMENTS + "/batch")
+                                .queryParam("ids", ids)
+                                .accept(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isBadRequest());
+            }
+
+            @Test
+            void whenIdsContainsNonPositiveValue() throws Exception {
+                mockMvc.perform(get(API_EQUIPMENTS + "/batch")
+                                .queryParam("ids", "1,-5,3")
+                                .accept(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isBadRequest());
+            }
         }
     }
 }

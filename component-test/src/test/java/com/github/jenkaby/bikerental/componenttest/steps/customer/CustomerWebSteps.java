@@ -10,6 +10,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 
+import java.util.Comparator;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,28 +42,43 @@ public class CustomerWebSteps {
     public void theResponseMatchesExpectedCustomer(CustomerResponse expectedCustomer) {
         var actualCustomer = scenarioContext.getResponseBody(CustomerResponse.class);
 
+        assertCustomer(actualCustomer, expectedCustomer);
+    }
+
+    @Then("the batch customer response contains")
+    public void theBatchCustomerResponseContains(List<CustomerResponse> expectedResponses) {
+        var actual = scenarioContext.getResponseAsList(CustomerResponse.class).stream()
+                .sorted(Comparator.comparing(CustomerResponse::phone))
+                .toList();
+        var expectedSorted = expectedResponses.stream()
+                .sorted(Comparator.comparing(CustomerResponse::phone))
+                .toList();
+
+        assertThat(actual).as("batch customer response size").hasSize(expectedSorted.size());
+
+        assertThat(actual).zipSatisfy(expectedSorted, this::assertCustomer);
+    }
+
+    private void assertCustomer(CustomerResponse actual, CustomerResponse expected) {
         var softly = new SoftAssertions();
-        softly.assertThat(actualCustomer.id())
-                .as("Customer ID")
-                .isEqualTo(expectedCustomer.id());
-        softly.assertThat(actualCustomer.phone())
-                .as("Customer phone")
-                .isEqualTo(expectedCustomer.phone());
-        softly.assertThat(actualCustomer.firstName())
-                .as("Customer firstName")
-                .isEqualTo(expectedCustomer.firstName());
-        softly.assertThat(actualCustomer.lastName())
-                .as("Customer lastName")
-                .isEqualTo(expectedCustomer.lastName());
-        softly.assertThat(actualCustomer.email())
-                .as("Customer email")
-                .isEqualTo(expectedCustomer.email());
-        softly.assertThat(actualCustomer.birthDate())
-                .as("Customer birthDate")
-                .isEqualTo(expectedCustomer.birthDate());
-        softly.assertThat(actualCustomer.comments())
-                .as("Customer comments")
-                .isEqualTo(expectedCustomer.comments());
+        if (expected.id() == null) {
+            softly.assertThat(actual.id()).as("Customer ID").isNotNull();
+        } else {
+            softly.assertThat(actual.id()).as("Customer ID").isEqualTo(expected.id());
+        }
+
+        softly.assertThat(actual.phone()).as("Customer phone").isEqualTo(expected.phone());
+        softly.assertThat(actual.firstName()).as("Customer firstName").isEqualTo(expected.firstName());
+        softly.assertThat(actual.lastName()).as("Customer lastName").isEqualTo(expected.lastName());
+        softly.assertThat(actual.email()).as("Customer email").isEqualTo(expected.email());
+        softly.assertThat(actual.birthDate()).as("Customer birthDate").isEqualTo(expected.birthDate());
+        softly.assertThat(actual.comments()).as("Customer comments").isEqualTo(expected.comments());
+
         softly.assertAll();
+    }
+
+    @Then("the batch customer response is empty")
+    public void theBatchCustomerResponseIsEmpty() {
+        assertThat(scenarioContext.getResponseAsList(CustomerResponse.class)).isEmpty();
     }
 }

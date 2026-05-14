@@ -225,3 +225,38 @@ Feature: Equipment management endpoints
       | path     | value                                     |
       | $.title  | Not Found                                 |
       | $.detail | Equipment with identifier '999' not found |
+
+  Scenario: Batch fetch returns all matching equipment when all IDs exist
+    When a GET request has been made to "/api/equipments/batch" endpoint with query parameters
+      | ids |
+      | 1,2 |
+    Then the response status is 200
+    And the batch equipment response contains
+      | serialNumber | uid        | status    | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A |                | Good           | GOOD      |
+      | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B |                | Excellent      | GOOD      |
+
+  Scenario: Batch fetch silently omits non-existent IDs
+    When a GET request has been made to "/api/equipments/batch" endpoint with query parameters
+      | ids      |
+      | 1,99,100 |
+    Then the response status is 200
+    And the batch equipment response contains
+      | serialNumber | uid      | status    | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A |                | Good           | GOOD      |
+
+  Scenario: Batch fetch returns empty list when no IDs match any record
+    When a GET request has been made to "/api/equipments/batch" endpoint with query parameters
+      | ids      |
+      | 91,92,93 |
+    Then the response status is 200
+    And the batch equipment response is empty
+
+  Scenario: Batch fetch de-duplicates repeated IDs
+    When a GET request has been made to "/api/equipments/batch" endpoint with query parameters
+      | ids   |
+      | 4,4,4 |
+    Then the response status is 200
+    And the batch equipment response contains
+      | serialNumber | uid      | status | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-004       | BIKE-002 | BROKEN | BICYCLE | Model C | 2026-01-30     | Fair           | BROKEN    |

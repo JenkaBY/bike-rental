@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.customer.web.query;
 import com.github.jenkaby.bikerental.customer.CustomerInfo;
 import com.github.jenkaby.bikerental.customer.application.usecase.CustomerQueryUseCase;
 import com.github.jenkaby.bikerental.customer.application.usecase.GetCustomerByIdUseCase;
+import com.github.jenkaby.bikerental.customer.application.usecase.GetCustomersByIdsUseCase;
 import com.github.jenkaby.bikerental.customer.domain.model.Customer;
 import com.github.jenkaby.bikerental.customer.domain.model.vo.PhoneNumber;
 import com.github.jenkaby.bikerental.customer.web.mapper.CustomerWebMapper;
@@ -14,14 +15,18 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,6 +45,9 @@ class CustomerQueryControllerTest {
 
     @MockitoBean
     private GetCustomerByIdUseCase getCustomerById;
+
+    @MockitoBean
+    private GetCustomersByIdsUseCase getCustomersByIds;
 
     @MockitoBean
     private CustomerWebMapper mapper;
@@ -127,6 +135,59 @@ class CustomerQueryControllerTest {
             mockMvc.perform(get(API_CUSTOMERS + "/{id}", path))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Bad Request"));
+        }
+    }
+
+    @Nested
+    class GetCustomersBatch {
+
+        @Test
+        void allFound_returns200WithList() throws Exception {
+            var id1 = UUID.randomUUID();
+            var id2 = UUID.randomUUID();
+            var cust1 = mock(Customer.class);
+            var cust2 = mock(Customer.class);
+            var resp1 = mock(CustomerResponse.class);
+            var resp2 = mock(CustomerResponse.class);
+
+            given(getCustomersByIds.execute(ArgumentMatchers.any())).willReturn(List.of(cust1, cust2));
+            given(mapper.toResponses(List.of(cust1, cust2))).willReturn(List.of(resp1, resp2));
+
+            mockMvc.perform(get(API_CUSTOMERS + "/batch")
+                            .queryParam("ids", id1 + "," + id2))
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        void noneFound_returns200WithEmptyList() throws Exception {
+            given(getCustomersByIds.execute(ArgumentMatchers.any())).willReturn(List.of());
+            given(mapper.toResponses(List.of())).willReturn(List.of());
+
+            mockMvc.perform(get(API_CUSTOMERS + "/batch")
+                            .queryParam("ids", UUID.randomUUID().toString()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").isEmpty());
+        }
+
+        @Nested
+        class BadRequest {
+
+            @Test
+            void whenIdsIsMissing() throws Exception {
+                mockMvc.perform(get(API_CUSTOMERS + "/batch"))
+                        .andExpect(status().isBadRequest());
+            }
+
+            @Test
+            void whenIdCountExceeds100() throws Exception {
+                var ids = IntStream.rangeClosed(1, 101)
+                        .mapToObj(i -> UUID.randomUUID().toString())
+                        .collect(Collectors.joining(","));
+
+                mockMvc.perform(get(API_CUSTOMERS + "/batch")
+                                .queryParam("ids", ids))
+                        .andExpect(status().isBadRequest());
+            }
         }
     }
 }

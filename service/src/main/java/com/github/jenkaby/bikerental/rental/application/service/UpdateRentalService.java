@@ -14,10 +14,10 @@ import com.github.jenkaby.bikerental.rental.infrastructure.util.PatchValueParser
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 class UpdateRentalService implements UpdateRentalUseCase {
 
     private static final String RENTAL_EVENTS_EXCHANGER = "rental-events";
@@ -34,32 +35,11 @@ class UpdateRentalService implements UpdateRentalUseCase {
     private final CustomerFacade customerFacade;
     private final EquipmentFacade equipmentFacade;
     private final EventPublisher eventPublisher;
-    private final Clock clock;
     private final RentalEventMapper eventMapper;
     private final PatchValueParser valueParser;
     private final RequestedEquipmentValidator validator;
     private final RentalEquipmentFactory rentalEquipmentFactory;
 
-    UpdateRentalService(
-            RentalRepository rentalRepository,
-            CustomerFacade customerFacade,
-            EquipmentFacade equipmentFacade,
-            EventPublisher eventPublisher,
-            Clock clock,
-            RentalEventMapper eventMapper,
-            PatchValueParser valueParser,
-            RequestedEquipmentValidator validator,
-            RentalEquipmentFactory rentalEquipmentFactory) {
-        this.rentalRepository = rentalRepository;
-        this.customerFacade = customerFacade;
-        this.equipmentFacade = equipmentFacade;
-        this.eventPublisher = eventPublisher;
-        this.clock = clock;
-        this.eventMapper = eventMapper;
-        this.valueParser = valueParser;
-        this.validator = validator;
-        this.rentalEquipmentFactory = rentalEquipmentFactory;
-    }
 
     @Override
     @Transactional

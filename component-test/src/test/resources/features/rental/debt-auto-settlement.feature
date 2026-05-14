@@ -23,7 +23,7 @@ Feature: Automatic DEBT rental settlement on customer deposit
       | 12 | CUS2       | DEBT   | 80.00         | 120             | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
     And rental equipments exist in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | totalCost | createdAt           | updatedAt           |
-      | 12       | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 100       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
+      | 12       | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 80.00         | 100       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
 
   Scenario Outline: Deposit fully covers a single DEBT rental
     Given now is "<now>"

@@ -96,6 +96,20 @@ public class EquipmentWebSteps {
         assertResult(expectedResponses, actual);
     }
 
+    @Then("the batch equipment response contains")
+    public void theBatchEquipmentResponseContains(List<EquipmentResponse> expectedResponses) {
+        var actual = scenarioContext.getResponseAsList(EquipmentResponse.class).stream()
+                .sorted(BY_SERIAL_NUMBER)
+                .toList();
+
+        assertResult(expectedResponses, actual);
+    }
+
+    @Then("the batch equipment response is empty")
+    public void theBatchEquipmentResponseIsEmpty() {
+        assertThat(scenarioContext.getResponseAsList(EquipmentResponse.class)).isEmpty();
+    }
+
     private static void assertResult(List<EquipmentResponse> expectedResponses, List<EquipmentResponse> actual) {
         assertThat(actual.size()).as("Sizes are matched").isEqualTo(expectedResponses.size());
 

@@ -10,6 +10,7 @@ import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,6 +39,13 @@ class CustomerRepositoryAdapter implements CustomerRepository {
     @Override
     public Optional<Customer> findById(UUID id) {
         return repository.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Customer> findByIds(Collection<UUID> ids) {
+        return repository.findAllById(ids).stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override
