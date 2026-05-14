@@ -138,5 +138,15 @@ import java.util.UUID;
 <span class="fc" id="L138">        String correlationId = MDC.get(&quot;correlationId&quot;);</span>
 <span class="pc bpc" id="L139" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : UUID.randomUUID().toString();</span>
     }
+
+    @ExceptionHandler(InvalidDateRangeException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleInvalidDateRange(InvalidDateRangeException ex) {
+<span class="nc" id="L144">        var correlationId = resolveCorrelationId();</span>
+<span class="nc" id="L145">        log.warn(&quot;[correlationId={}] Invalid date range: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L146">        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());</span>
+<span class="nc" id="L147">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L148">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.CONSTRAINT_VIOLATION);</span>
+<span class="nc" id="L149">        return ResponseEntity.of(problem).build();</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

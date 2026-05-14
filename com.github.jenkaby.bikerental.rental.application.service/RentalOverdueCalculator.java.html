@@ -22,13 +22,12 @@ public class RentalOverdueCalculator {
     public Integer calculateOverdueMinutes(Rental rental) {
 <span class="pc bpc" id="L23" title="1 of 4 branches missed.">        if (rental.getStatus() == RentalStatus.ACTIVE &amp;&amp; rental.getExpectedReturnAt() != null) {</span>
 <span class="fc" id="L24">            LocalDateTime now = LocalDateTime.now(clock);</span>
-<span class="fc" id="L25">            log.info(&quot;Now is {}. ReturnAt {}&quot;, now, rental.getExpectedReturnAt());</span>
-<span class="fc bfc" id="L26" title="All 2 branches covered.">            if (rental.getExpectedReturnAt().isBefore(now)) {</span>
-<span class="fc" id="L27">                Duration overdueTime = Duration.between(rental.getExpectedReturnAt(), now);</span>
-<span class="fc" id="L28">                return (int) overdueTime.toMinutes();</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">            if (rental.getExpectedReturnAt().isBefore(now)) {</span>
+<span class="fc" id="L26">                Duration overdueTime = Duration.between(rental.getExpectedReturnAt(), now);</span>
+<span class="fc" id="L27">                return (int) overdueTime.toMinutes();</span>
             }
         }
-<span class="fc" id="L31">        return 0;</span>
+<span class="fc" id="L30">        return 0;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

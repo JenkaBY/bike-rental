@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.infrastructure.persistence.adapter</a> &gt; <span class="el_source">RentalRepositoryAdapter.java</span></div><h1>RentalRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.infrastructure.persistence.adapter;
 
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalSearchFilter;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper.RentalJpaMapper;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.repository.RentalJpaRepository;
+import com.github.jenkaby.bikerental.rental.infrastructure.persistence.specification.RentalSpec;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
+import net.kaczmarzyk.spring.data.jpa.utils.SpecificationBuilder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 @Transactional(readOnly = true)
@@ -24,69 +26,48 @@ class RentalRepositoryAdapter implements RentalRepository {
     private final RentalJpaMapper mapper;
     private final PageMapper pageMapper;
 
-<span class="fc" id="L27">    RentalRepositoryAdapter(RentalJpaRepository repository, RentalJpaMapper mapper, PageMapper pageMapper) {</span>
-<span class="fc" id="L28">        this.repository = repository;</span>
-<span class="fc" id="L29">        this.mapper = mapper;</span>
-<span class="fc" id="L30">        this.pageMapper = pageMapper;</span>
-<span class="fc" id="L31">    }</span>
+<span class="fc" id="L29">    RentalRepositoryAdapter(RentalJpaRepository repository, RentalJpaMapper mapper, PageMapper pageMapper) {</span>
+<span class="fc" id="L30">        this.repository = repository;</span>
+<span class="fc" id="L31">        this.mapper = mapper;</span>
+<span class="fc" id="L32">        this.pageMapper = pageMapper;</span>
+<span class="fc" id="L33">    }</span>
 
     @Override
     @Transactional
     public Rental save(Rental rental) {
-<span class="fc" id="L36">        var entity = mapper.toEntity(rental);</span>
-<span class="fc" id="L37">        var savedEntity = repository.save(entity);</span>
-<span class="fc" id="L38">        return mapper.toDomain(savedEntity);</span>
+<span class="fc" id="L38">        var entity = mapper.toEntity(rental);</span>
+<span class="fc" id="L39">        var savedEntity = repository.save(entity);</span>
+<span class="fc" id="L40">        return mapper.toDomain(savedEntity);</span>
     }
 
     @Override
     public Optional&lt;Rental&gt; findById(Long id) {
-<span class="fc" id="L43">        return repository.findById(id).map(mapper::toDomain);</span>
+<span class="fc" id="L45">        return repository.findById(id).map(mapper::toDomain);</span>
     }
 
     @Override
     public boolean existsById(Long id) {
-<span class="nc" id="L48">        return repository.existsById(id);</span>
+<span class="nc" id="L50">        return repository.existsById(id);</span>
     }
 
     @Override
-    public Page&lt;Rental&gt; findByStatus(RentalStatus status, PageRequest pageRequest) {
-<span class="fc" id="L53">        var springPageRequest = pageMapper.toSpring(pageRequest);</span>
-<span class="fc" id="L54">        var page = repository.findByStatus(status, springPageRequest);</span>
-<span class="fc" id="L55">        return pageMapper.toDomain(page)</span>
-<span class="fc" id="L56">                .map(mapper::toDomain);</span>
-    }
-
-    @Override
-    public Page&lt;Rental&gt; findByStatusAndCustomerId(RentalStatus status, UUID customerId, PageRequest pageRequest) {
-<span class="fc" id="L61">        var springPageRequest = pageMapper.toSpring(pageRequest);</span>
-<span class="fc" id="L62">        var page = repository.findByStatusAndCustomerId(status, customerId, springPageRequest);</span>
-<span class="fc" id="L63">        return pageMapper.toDomain(page)</span>
-<span class="fc" id="L64">                .map(mapper::toDomain);</span>
-    }
-
-    @Override
-    public Page&lt;Rental&gt; findByCustomerId(UUID customerId, PageRequest pageRequest) {
-<span class="fc" id="L69">        var springPageRequest = pageMapper.toSpring(pageRequest);</span>
-<span class="fc" id="L70">        var page = repository.findByCustomerId(customerId, springPageRequest);</span>
-<span class="fc" id="L71">        return pageMapper.toDomain(page)</span>
-<span class="fc" id="L72">                .map(mapper::toDomain);</span>
-    }
-
-    @Override
-    public Page&lt;Rental&gt; findByStatusAndEquipmentUid(RentalStatus status, String equipmentUid, PageRequest pageRequest) {
-<span class="fc" id="L77">        var springPageRequest = pageMapper.toSpring(pageRequest);</span>
-<span class="fc" id="L78">        var page = repository.findByStatusAndEquipmentUid(status, equipmentUid, springPageRequest);</span>
-<span class="fc" id="L79">        return pageMapper.toDomain(page)</span>
-<span class="fc" id="L80">                .map(mapper::toDomain);</span>
+    public Page&lt;Rental&gt; findAll(RentalSearchFilter filter, PageRequest pageRequest) {
+<span class="fc" id="L55">        var pageable = pageMapper.toSpring(pageRequest);</span>
+<span class="fc" id="L56">        var specBuilder = SpecificationBuilder.specification(RentalSpec.class);</span>
+<span class="fc" id="L57">        filter.toMap().forEach(specBuilder::withParam);</span>
+<span class="fc" id="L58">        var spec = specBuilder.build();</span>
+<span class="fc" id="L59">        var page = repository.findAll(spec, pageable);</span>
+<span class="fc" id="L60">        return pageMapper.toDomain(page)</span>
+<span class="fc" id="L61">                .map(mapper::toDomain);</span>
     }
 
     @Override
     public List&lt;Rental&gt; getCustomerDebtRentals(CustomerRef customerRef) {
-<span class="fc" id="L85">        return repository</span>
-<span class="fc" id="L86">                .findAllByCustomerIdAndStatusOrderByCreatedAtAsc(customerRef.id(), RentalStatus.DEBT)</span>
-<span class="fc" id="L87">                .stream()</span>
-<span class="fc" id="L88">                .map(mapper::toDomain)</span>
-<span class="fc" id="L89">                .toList();</span>
+<span class="fc" id="L66">        return repository</span>
+<span class="fc" id="L67">                .findAllByCustomerIdAndStatusOrderByCreatedAtAsc(customerRef.id(), RentalStatus.DEBT)</span>
+<span class="fc" id="L68">                .stream()</span>
+<span class="fc" id="L69">                .map(mapper::toDomain)</span>
+<span class="fc" id="L70">                .toList();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

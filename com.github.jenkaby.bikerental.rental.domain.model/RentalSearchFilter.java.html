@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalSearchFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.domain.model</a> &gt; <span class="el_source">RentalSearchFilter.java</span></div><h1>RentalSearchFilter.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.domain.model;
+
+import org.jspecify.annotations.Nullable;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+<span class="fc" id="L14">public record RentalSearchFilter(</span>
+        @Nullable RentalStatus status,
+        @Nullable UUID customerId,
+        @Nullable String equipmentUid,
+        @Nullable LocalDate from,
+        @Nullable LocalDate to
+) {
+
+    public Map&lt;String, String&gt; toMap() {
+<span class="fc" id="L23">        var result = new HashMap&lt;String, String&gt;();</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        result.put(&quot;status&quot;, status != null ? status.name() : null);</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        result.put(&quot;customerId&quot;, customerId != null ? customerId.toString() : null);</span>
+<span class="fc" id="L26">        result.put(&quot;equipmentUid&quot;, equipmentUid);</span>
+<span class="fc" id="L27">        result.put(&quot;createdFrom&quot;, Optional.ofNullable(from).map(this::toStartOfDay).map(RentalSearchFilter::formatInstant).orElse(null));</span>
+<span class="fc" id="L28">        result.put(&quot;createdTo&quot;, Optional.ofNullable(to).map(this::toStartOfNextDay).map(RentalSearchFilter::formatInstant).orElse(null));</span>
+<span class="fc" id="L29">        return result;</span>
+    }
+
+    private Instant toStartOfDay(LocalDate date) {
+<span class="fc" id="L33">        return date.atStartOfDay().toInstant(ZoneOffset.UTC);</span>
+    }
+
+    private Instant toStartOfNextDay(LocalDate date) {
+<span class="fc" id="L37">        return date.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);</span>
+    }
+
+    private static String formatInstant(Instant instant) {
+<span class="fc" id="L41">        return DateTimeFormatter.ISO_INSTANT.format(instant);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
