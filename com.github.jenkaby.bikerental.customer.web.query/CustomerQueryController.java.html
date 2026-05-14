@@ -2,6 +2,7 @@
 
 import com.github.jenkaby.bikerental.customer.application.usecase.CustomerQueryUseCase;
 import com.github.jenkaby.bikerental.customer.application.usecase.GetCustomerByIdUseCase;
+import com.github.jenkaby.bikerental.customer.application.usecase.GetCustomersByIdsUseCase;
 import com.github.jenkaby.bikerental.customer.web.mapper.CustomerWebMapper;
 import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerResponse;
 import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerSearchResponse;
@@ -15,7 +16,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -29,21 +32,24 @@ import java.util.UUID;
 @RestController
 @RequestMapping(path = &quot;/api/customers&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
-<span class="fc" id="L32">@Slf4j</span>
+<span class="fc" id="L35">@Slf4j</span>
 @Tag(name = OpenApiConfig.Tags.CUSTOMERS)
 class CustomerQueryController {
 
     private final CustomerQueryUseCase customerQueryUseCase;
     private final CustomerWebMapper mapper;
     private final GetCustomerByIdUseCase getCustomerByIdUseCase;
+    private final GetCustomersByIdsUseCase getCustomersByIdsUseCase;
 
     CustomerQueryController(CustomerQueryUseCase customerQueryUseCase,
                             GetCustomerByIdUseCase getCustomerByIdUseCase,
-<span class="fc" id="L42">                            CustomerWebMapper customerMapper) {</span>
-<span class="fc" id="L43">        this.customerQueryUseCase = customerQueryUseCase;</span>
-<span class="fc" id="L44">        this.mapper = customerMapper;</span>
-<span class="fc" id="L45">        this.getCustomerByIdUseCase = getCustomerByIdUseCase;</span>
-<span class="fc" id="L46">    }</span>
+                            GetCustomersByIdsUseCase getCustomersByIdsUseCase,
+<span class="fc" id="L47">                            CustomerWebMapper customerMapper) {</span>
+<span class="fc" id="L48">        this.customerQueryUseCase = customerQueryUseCase;</span>
+<span class="fc" id="L49">        this.mapper = customerMapper;</span>
+<span class="fc" id="L50">        this.getCustomerByIdUseCase = getCustomerByIdUseCase;</span>
+<span class="fc" id="L51">        this.getCustomersByIdsUseCase = getCustomersByIdsUseCase;</span>
+<span class="fc" id="L52">    }</span>
 
     @GetMapping
     @Operation(summary = &quot;Search customers by phone and get first 10 customers&quot;, description = &quot;Returns customers whose phone number contains the given digit sequence. &quot; +
@@ -57,10 +63,10 @@ class CustomerQueryController {
             @RequestParam(name = &quot;phone&quot;, required = false)
             @Pattern(regexp = &quot;^\\d{4,11}$&quot;, message = &quot;Phone search must be 4 to 11 digits&quot;)
             @Nullable String phone) {
-<span class="fc" id="L60">        log.info(&quot;[GET] Searching customers by phone: {}&quot;, phone);</span>
-<span class="fc" id="L61">        var results = customerQueryUseCase.searchByPhone(phone);</span>
-<span class="fc" id="L62">        log.info(&quot;[GET] Found {} customers matching phone: {}&quot;, results.size(), phone);</span>
-<span class="fc" id="L63">        return ResponseEntity.ok(mapper.toSearchResponses(results));</span>
+<span class="fc" id="L66">        log.info(&quot;[GET] Searching customers by phone: {}&quot;, phone);</span>
+<span class="fc" id="L67">        var results = customerQueryUseCase.searchByPhone(phone);</span>
+<span class="fc" id="L68">        log.info(&quot;[GET] Found {} customers matching phone: {}&quot;, results.size(), phone);</span>
+<span class="fc" id="L69">        return ResponseEntity.ok(mapper.toSearchResponses(results));</span>
     }
 
     @GetMapping(&quot;/{id}&quot;)
@@ -73,9 +79,32 @@ class CustomerQueryController {
     public ResponseEntity&lt;CustomerResponse&gt; getById(
             @Parameter(description = &quot;Customer UUID&quot;, example = &quot;3fa85f64-5717-4562-b3fc-2c963f66afa6&quot;)
             @PathVariable(&quot;id&quot;) UUID id) {
-<span class="fc" id="L76">        log.info(&quot;[GET] Fetching customer by id: {}&quot;, id);</span>
-<span class="fc" id="L77">        var customer = getCustomerByIdUseCase.getById(id);</span>
-<span class="fc" id="L78">        return ResponseEntity.ok(mapper.toResponse(customer));</span>
+<span class="fc" id="L82">        log.info(&quot;[GET] Fetching customer by id: {}&quot;, id);</span>
+<span class="fc" id="L83">        var customer = getCustomerByIdUseCase.getById(id);</span>
+<span class="fc" id="L84">        return ResponseEntity.ok(mapper.toResponse(customer));</span>
+    }
+
+    @GetMapping(&quot;/batch&quot;)
+    @Operation(
+            summary = &quot;Batch get customers by UUIDs&quot;,
+            description = &quot;Returns a flat list of customer records for the provided UUIDs. UUIDs that do not match any record are silently omitted.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Customer list returned&quot;,
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = CustomerResponse.class)))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid ids parameter — missing, malformed UUID, or more than 100 elements&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;List&lt;CustomerResponse&gt;&gt; getCustomersBatch(
+            @Parameter(description = &quot;Comma-separated list of customer UUIDs, 1–100 elements&quot;,
+                    example = &quot;3fa85f64-5717-4562-b3fc-2c963f66afa6,9cb12d11-0000-0000-0000-000000000002&quot;)
+            @RequestParam(name = &quot;ids&quot;)
+            @NotEmpty(message = &quot;ids must not be empty&quot;)
+            @Size(max = 100, message = &quot;ids must contain at most 100 elements&quot;)
+            List&lt;UUID&gt; ids) {
+<span class="fc" id="L104">        log.info(&quot;[GET] Batch fetch customers ids count={}&quot;, ids.size());</span>
+<span class="fc" id="L105">        var distinctIds = ids.stream().distinct().toList();</span>
+<span class="fc" id="L106">        var customers = getCustomersByIdsUseCase.execute(distinctIds);</span>
+<span class="fc" id="L107">        return ResponseEntity.ok(mapper.toResponses(customers));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

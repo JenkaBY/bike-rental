@@ -14,10 +14,10 @@ import com.github.jenkaby.bikerental.rental.infrastructure.util.PatchValueParser
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 class UpdateRentalService implements UpdateRentalUseCase {
 
     private static final String RENTAL_EVENTS_EXCHANGER = &quot;rental-events&quot;;
@@ -34,87 +35,66 @@ class UpdateRentalService implements UpdateRentalUseCase {
     private final CustomerFacade customerFacade;
     private final EquipmentFacade equipmentFacade;
     private final EventPublisher eventPublisher;
-    private final Clock clock;
     private final RentalEventMapper eventMapper;
     private final PatchValueParser valueParser;
     private final RequestedEquipmentValidator validator;
     private final RentalEquipmentFactory rentalEquipmentFactory;
 
-    UpdateRentalService(
-            RentalRepository rentalRepository,
-            CustomerFacade customerFacade,
-            EquipmentFacade equipmentFacade,
-            EventPublisher eventPublisher,
-            Clock clock,
-            RentalEventMapper eventMapper,
-            PatchValueParser valueParser,
-            RequestedEquipmentValidator validator,
-<span class="fc" id="L52">            RentalEquipmentFactory rentalEquipmentFactory) {</span>
-<span class="fc" id="L53">        this.rentalRepository = rentalRepository;</span>
-<span class="fc" id="L54">        this.customerFacade = customerFacade;</span>
-<span class="fc" id="L55">        this.equipmentFacade = equipmentFacade;</span>
-<span class="fc" id="L56">        this.eventPublisher = eventPublisher;</span>
-<span class="fc" id="L57">        this.clock = clock;</span>
-<span class="fc" id="L58">        this.eventMapper = eventMapper;</span>
-<span class="fc" id="L59">        this.valueParser = valueParser;</span>
-<span class="fc" id="L60">        this.validator = validator;</span>
-<span class="fc" id="L61">        this.rentalEquipmentFactory = rentalEquipmentFactory;</span>
-<span class="fc" id="L62">    }</span>
 
     @Override
     @Transactional
     public Rental execute(Long rentalId, Map&lt;String, Object&gt; patch) {
-<span class="fc" id="L67">        Rental rental = rentalRepository.findById(rentalId)</span>
-<span class="fc" id="L68">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, rentalId.toString()));</span>
-<span class="fc" id="L69">        var previousState = eventMapper.toRentalState(rental);</span>
+<span class="fc" id="L47">        Rental rental = rentalRepository.findById(rentalId)</span>
+<span class="fc" id="L48">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, rentalId.toString()));</span>
+<span class="fc" id="L49">        var previousState = eventMapper.toRentalState(rental);</span>
 
-<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (patch.containsKey(&quot;customerId&quot;)) {</span>
-<span class="fc" id="L72">            UUID customerId = valueParser.parseUUID(patch.get(&quot;customerId&quot;));</span>
-<span class="fc" id="L73">            customerFacade.findById(customerId)</span>
-<span class="pc" id="L74">                    .orElseThrow(() -&gt; new ReferenceNotFoundException(&quot;Customer&quot;, customerId.toString()));</span>
-<span class="nc" id="L75">            rental.selectCustomer(customerId);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (patch.containsKey(&quot;customerId&quot;)) {</span>
+<span class="fc" id="L52">            UUID customerId = valueParser.parseUUID(patch.get(&quot;customerId&quot;));</span>
+<span class="fc" id="L53">            customerFacade.findById(customerId)</span>
+<span class="pc" id="L54">                    .orElseThrow(() -&gt; new ReferenceNotFoundException(&quot;Customer&quot;, customerId.toString()));</span>
+<span class="nc" id="L55">            rental.selectCustomer(customerId);</span>
         }
 
-<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (patch.containsKey(&quot;duration&quot;)) {</span>
-<span class="fc" id="L79">            Integer duration = valueParser.parseInt(patch.get(&quot;duration&quot;));</span>
-<span class="pc bpc" id="L80" title="1 of 2 branches missed.">            if (duration == null) {</span>
-<span class="nc" id="L81">                throw new InvalidRentalUpdateException(&quot;Duration must be provided&quot;);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (patch.containsKey(&quot;duration&quot;)) {</span>
+<span class="fc" id="L59">            Integer duration = valueParser.parseInt(patch.get(&quot;duration&quot;));</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">            if (duration == null) {</span>
+<span class="nc" id="L61">                throw new InvalidRentalUpdateException(&quot;Duration must be provided&quot;);</span>
             }
-<span class="fc" id="L83">            rental.setPlannedDuration(Duration.ofMinutes(duration));</span>
+<span class="fc" id="L63">            rental.setPlannedDuration(Duration.ofMinutes(duration));</span>
         }
 
-<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        if (patch.containsKey(&quot;equipmentIds&quot;)) {</span>
-<span class="fc" id="L87">            List&lt;Long&gt; equipmentIds = valueParser.parseListOfLong(patch.get(&quot;equipmentIds&quot;));</span>
-<span class="fc" id="L88">            List&lt;EquipmentInfo&gt; foundEquipments = equipmentFacade.findByIds(equipmentIds);</span>
-<span class="fc" id="L89">            validator.validateSize(equipmentIds, foundEquipments);</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (patch.containsKey(&quot;equipmentIds&quot;)) {</span>
+<span class="fc" id="L67">            List&lt;Long&gt; equipmentIds = valueParser.parseListOfLong(patch.get(&quot;equipmentIds&quot;));</span>
+<span class="fc" id="L68">            List&lt;EquipmentInfo&gt; foundEquipments = equipmentFacade.findByIds(equipmentIds);</span>
+<span class="fc" id="L69">            validator.validateSize(equipmentIds, foundEquipments);</span>
 
-<span class="fc" id="L91">            var alreadyReservedOrRented = new HashSet&lt;&gt;(previousState.equipmentIds());</span>
-<span class="fc" id="L92">            var beingReserved = foundEquipments.stream()</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                    .filter(e -&gt; !alreadyReservedOrRented.contains(e.id()))</span>
-<span class="fc" id="L94">                    .toList();</span>
-<span class="fc" id="L95">            validator.validateEquipmentsCondition(beingReserved);</span>
-<span class="fc" id="L96">            validator.validateAvailability(beingReserved);</span>
+<span class="fc" id="L71">            var alreadyReservedOrRented = new HashSet&lt;&gt;(previousState.equipmentIds());</span>
+<span class="fc" id="L72">            var beingReserved = foundEquipments.stream()</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">                    .filter(e -&gt; !alreadyReservedOrRented.contains(e.id()))</span>
+<span class="fc" id="L74">                    .toList();</span>
+<span class="fc" id="L75">            validator.validateEquipmentsCondition(beingReserved);</span>
+<span class="fc" id="L76">            validator.validateAvailability(beingReserved);</span>
 
-<span class="pc bpc" id="L98" title="1 of 2 branches missed.">            if (rental.getPlannedDuration() == null) {</span>
-<span class="nc" id="L99">                throw new InvalidRentalPlannedDurationException(rental.getId());</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">            if (rental.getPlannedDuration() == null) {</span>
+<span class="nc" id="L79">                throw new InvalidRentalPlannedDurationException(rental.getId());</span>
             }
 
-<span class="fc" id="L102">            var incomingIds = foundEquipments.stream()</span>
-<span class="fc" id="L103">                    .map(EquipmentInfo::id)</span>
-<span class="fc" id="L104">                    .collect(Collectors.toSet());</span>
-<span class="fc" id="L105">            var newEquipmentIds = rental.getNewEquipmentIds(incomingIds);</span>
-<span class="fc" id="L106">            var newEquipments = foundEquipments.stream()</span>
-<span class="fc" id="L107">                    .filter(e -&gt; newEquipmentIds.contains(e.id()))</span>
-<span class="fc" id="L108">                    .toList();</span>
+<span class="fc" id="L82">            var incomingIds = foundEquipments.stream()</span>
+<span class="fc" id="L83">                    .map(EquipmentInfo::id)</span>
+<span class="fc" id="L84">                    .collect(Collectors.toSet());</span>
+<span class="fc" id="L85">            var newEquipmentIds = rental.getNewEquipmentIds(incomingIds);</span>
+<span class="fc" id="L86">            var newEquipments = foundEquipments.stream()</span>
+<span class="fc" id="L87">                    .filter(e -&gt; newEquipmentIds.contains(e.id()))</span>
+<span class="fc" id="L88">                    .toList();</span>
 
-<span class="nc" id="L110">            var equipmentsToAdd = rentalEquipmentFactory.buildAssignedWithCost(rental, newEquipments);</span>
-<span class="nc" id="L111">            rental.replaceEquipments(equipmentsToAdd, incomingIds);</span>
+<span class="nc" id="L90">            var equipmentsToAdd = rentalEquipmentFactory.buildAssignedWithCost(rental, newEquipments);</span>
+<span class="nc" id="L91">            rental.replaceEquipments(equipmentsToAdd, incomingIds);</span>
         }
 
-<span class="nc" id="L114">        var currentState = eventMapper.toRentalState(rental);</span>
-<span class="nc" id="L115">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalUpdated(rental, previousState, currentState));</span>
+<span class="nc" id="L94">        var currentState = eventMapper.toRentalState(rental);</span>
+<span class="nc" id="L95">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalUpdated(rental, previousState, currentState));</span>
 
-<span class="nc" id="L117">        return rentalRepository.save(rental);</span>
+<span class="nc" id="L97">        return rentalRepository.save(rental);</span>
     }
 
 }
