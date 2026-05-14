@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.customer.web.query;
 
 import com.github.jenkaby.bikerental.customer.application.usecase.CustomerQueryUseCase;
 import com.github.jenkaby.bikerental.customer.application.usecase.GetCustomerByIdUseCase;
+import com.github.jenkaby.bikerental.customer.application.usecase.GetCustomersByIdsUseCase;
 import com.github.jenkaby.bikerental.customer.web.mapper.CustomerWebMapper;
 import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerResponse;
 import com.github.jenkaby.bikerental.customer.web.query.dto.CustomerSearchResponse;
@@ -15,7 +16,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -36,13 +39,16 @@ class CustomerQueryController {
     private final CustomerQueryUseCase customerQueryUseCase;
     private final CustomerWebMapper mapper;
     private final GetCustomerByIdUseCase getCustomerByIdUseCase;
+    private final GetCustomersByIdsUseCase getCustomersByIdsUseCase;
 
     CustomerQueryController(CustomerQueryUseCase customerQueryUseCase,
                             GetCustomerByIdUseCase getCustomerByIdUseCase,
+                            GetCustomersByIdsUseCase getCustomersByIdsUseCase,
                             CustomerWebMapper customerMapper) {
         this.customerQueryUseCase = customerQueryUseCase;
         this.mapper = customerMapper;
         this.getCustomerByIdUseCase = getCustomerByIdUseCase;
+        this.getCustomersByIdsUseCase = getCustomersByIdsUseCase;
     }
 
     @GetMapping
@@ -76,5 +82,28 @@ class CustomerQueryController {
         log.info("[GET] Fetching customer by id: {}", id);
         var customer = getCustomerByIdUseCase.getById(id);
         return ResponseEntity.ok(mapper.toResponse(customer));
+    }
+
+    @GetMapping("/batch")
+    @Operation(
+            summary = "Batch get customers by UUIDs",
+            description = "Returns a flat list of customer records for the provided UUIDs. UUIDs that do not match any record are silently omitted.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Customer list returned",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = CustomerResponse.class)))),
+            @ApiResponse(responseCode = "400", description = "Invalid ids parameter — missing, malformed UUID, or more than 100 elements",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<List<CustomerResponse>> getCustomersBatch(
+            @Parameter(description = "Comma-separated list of customer UUIDs, 1–100 elements",
+                    example = "3fa85f64-5717-4562-b3fc-2c963f66afa6,9cb12d11-0000-0000-0000-000000000002")
+            @RequestParam(name = "ids")
+            @NotEmpty(message = "ids must not be empty")
+            @Size(max = 100, message = "ids must contain at most 100 elements")
+            List<UUID> ids) {
+        log.info("[GET] Batch fetch customers ids count={}", ids.size());
+        var distinctIds = ids.stream().distinct().toList();
+        var customers = getCustomersByIdsUseCase.execute(distinctIds);
+        return ResponseEntity.ok(mapper.toResponses(customers));
     }
 }

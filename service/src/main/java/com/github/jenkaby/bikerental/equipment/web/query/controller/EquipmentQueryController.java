@@ -1,9 +1,6 @@
 package com.github.jenkaby.bikerental.equipment.web.query.controller;
 
-import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentByIdUseCase;
-import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentBySerialNumberUseCase;
-import com.github.jenkaby.bikerental.equipment.application.usecase.GetEquipmentByUidUseCase;
-import com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase;
+import com.github.jenkaby.bikerental.equipment.application.usecase.*;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.SerialNumber;
 import com.github.jenkaby.bikerental.equipment.shared.domain.model.vo.Uid;
@@ -14,11 +11,15 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,6 +29,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Validated
 @Slf4j
@@ -41,17 +44,20 @@ public class EquipmentQueryController {
     private final GetEquipmentByUidUseCase getByUid;
     private final GetEquipmentBySerialNumberUseCase getBySerial;
     private final SearchEquipmentsUseCase searchUseCase;
+    private final GetEquipmentByIdsUseCase getByIds;
     private final EquipmentQueryMapper mapper;
 
     EquipmentQueryController(GetEquipmentByIdUseCase getById,
                              GetEquipmentByUidUseCase getByUid,
                              GetEquipmentBySerialNumberUseCase getBySerial,
                              SearchEquipmentsUseCase searchUseCase,
+                             GetEquipmentByIdsUseCase getByIds,
                              EquipmentQueryMapper mapper) {
         this.getById = getById;
         this.getByUid = getByUid;
         this.getBySerial = getBySerial;
         this.searchUseCase = searchUseCase;
+        this.getByIds = getByIds;
         this.mapper = mapper;
     }
 
@@ -124,5 +130,27 @@ public class EquipmentQueryController {
         var query = mapper.toSearchQuery(status, type, q, pageable);
         var page = searchUseCase.execute(query).map(mapper::toResponse);
         return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/batch")
+    @Operation(
+            summary = "Batch get equipment by IDs",
+            description = "Returns a flat list of equipment records for the provided IDs. IDs that do not match any record are silently omitted.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Equipment list returned",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = EquipmentResponse.class)))),
+            @ApiResponse(responseCode = "400", description = "Invalid ids parameter — missing, non-numeric, non-positive, or more than 100 elements",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<List<EquipmentResponse>> getBatchEquipments(
+            @Parameter(description = "Comma-separated list of positive equipment IDs, 1–100 elements", example = "1,2,3")
+            @RequestParam(name = "ids")
+            @NotEmpty(message = "ids must not be empty")
+            @Size(max = 100, message = "ids must contain at most 100 elements")
+            List<@Positive(message = "Each equipment ID must be a positive number") Long> ids) {
+        log.info("[GET] Batch fetch equipment ids count={}", ids.size());
+        var distinctIds = ids.stream().distinct().toList();
+        var equipment = getByIds.execute(distinctIds);
+        return ResponseEntity.ok(mapper.toResponses(equipment));
     }
 }

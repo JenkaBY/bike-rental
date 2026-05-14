@@ -26,6 +26,8 @@ public interface CustomerWebMapper {
 
     CustomerResponse toResponse(Customer customer);
 
+    List<CustomerResponse> toResponses(List<Customer> customers);
+
     CustomerSearchResponse toSearchResponse(CustomerInfo customerInfo);
 
     List<CustomerSearchResponse> toSearchResponses(List<CustomerInfo> customers);
