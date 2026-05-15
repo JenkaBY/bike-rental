@@ -3,7 +3,7 @@ FROM gradle:jdk21-alpine AS builder
 ARG APP_HOME=/home/gradle/src
 ARG SERVICE=service
 ARG CI_ARGS='--no-daemon --stacktrace'
-ARG GIT_COMMIT=unknown
+ARG GIT_COMMIT=0c01905
 
 WORKDIR $APP_HOME
 # don't copy the settings.gradle file because it includes all submodules and gradle will require all of them to be present in order to run any task.
