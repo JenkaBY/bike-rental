@@ -2,84 +2,60 @@
 
 import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentCommandToDomainMapper;
 import com.github.jenkaby.bikerental.equipment.application.usecase.UpdateEquipmentUseCase;
-import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateSerialNumberException;
 import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateUidException;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentType;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentTypeRepository;
 import com.github.jenkaby.bikerental.equipment.domain.service.StatusTransitionPolicy;
-import com.github.jenkaby.bikerental.equipment.shared.mapper.SerialNumberMapper;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-<span class="fc" id="L20">@Slf4j</span>
+<span class="fc" id="L19">@Slf4j</span>
 @Service
+@RequiredArgsConstructor
 class UpdateEquipmentService implements UpdateEquipmentUseCase {
 
     private final EquipmentRepository repository;
     private final EquipmentCommandToDomainMapper mapper;
-    private final SerialNumberMapper serialNumberMapper;
     private final UidMapper uidMapper;
     private final EquipmentTypeRepository typeRepository;
     private final StatusTransitionPolicy statusTransitionPolicy;
 
-    UpdateEquipmentService(
-            EquipmentRepository repository,
-            EquipmentCommandToDomainMapper mapper,
-            SerialNumberMapper serialNumberMapper,
-            UidMapper uidMapper,
-            EquipmentTypeRepository typeRepository,
-<span class="fc" id="L37">            StatusTransitionPolicy statusTransitionPolicy) {</span>
-<span class="fc" id="L38">        this.repository = repository;</span>
-<span class="fc" id="L39">        this.mapper = mapper;</span>
-<span class="fc" id="L40">        this.serialNumberMapper = serialNumberMapper;</span>
-<span class="fc" id="L41">        this.typeRepository = typeRepository;</span>
-<span class="fc" id="L42">        this.uidMapper = uidMapper;</span>
-<span class="fc" id="L43">        this.statusTransitionPolicy = statusTransitionPolicy;</span>
-<span class="fc" id="L44">    }</span>
-
     @Override
     @Transactional
     public Equipment execute(UpdateEquipmentCommand command) {
-<span class="fc" id="L49">        var existing = repository.findById(command.id())</span>
-<span class="fc" id="L50">                .orElseThrow(() -&gt; new ResourceNotFoundException(Equipment.class.getSimpleName(), command.id().toString()));</span>
+<span class="fc" id="L33">        var existing = repository.findById(command.id())</span>
+<span class="fc" id="L34">                .orElseThrow(() -&gt; new ResourceNotFoundException(Equipment.class.getSimpleName(), command.id().toString()));</span>
 
-<span class="fc" id="L52">        var newSerial = serialNumberMapper.toSerialNumber(command.serialNumber());</span>
-
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if (!existing.getSerialNumber().equals(newSerial)) {</span>
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if (repository.existsBySerialNumber(newSerial)) {</span>
-<span class="nc" id="L56">                throw new DuplicateSerialNumberException(Equipment.class, newSerial.value());</span>
+<span class="fc" id="L36">        var newUid = uidMapper.toUid(command.uid());</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (!existing.getUid().equals(newUid)) {</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">            if (repository.existsByUid(newUid)) {</span>
+<span class="nc" id="L39">                throw new DuplicateUidException(Equipment.class, newUid.value());</span>
             }
         }
 
-<span class="fc" id="L60">        var newUid = uidMapper.toUid(command.uid());</span>
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (!existing.getUid().equals(newUid)) {</span>
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">            if (repository.existsByUid(newUid)) {</span>
-<span class="nc" id="L63">                throw new DuplicateUidException(Equipment.class, newUid.value());</span>
-            }
-        }
-
-<span class="fc" id="L67">        String newType = command.typeSlug();</span>
-<span class="pc bpc" id="L68" title="2 of 4 branches missed.">        if (newType != null &amp;&amp; !newType.equals(existing.getTypeSlug())) {</span>
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">            if (!typeRepository.existsBySlug(newType)) {</span>
-<span class="nc" id="L70">                throw new ReferenceNotFoundException(EquipmentType.class, newType);</span>
+<span class="fc" id="L43">        String newType = command.typeSlug();</span>
+<span class="pc bpc" id="L44" title="2 of 4 branches missed.">        if (newType != null &amp;&amp; !newType.equals(existing.getTypeSlug())) {</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">            if (!typeRepository.existsBySlug(newType)) {</span>
+<span class="nc" id="L46">                throw new ReferenceNotFoundException(EquipmentType.class, newType);</span>
             }
         }
 
         // validate status exists if changed
-<span class="fc" id="L75">        String newStatusSlug = command.statusSlug();</span>
-<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (!newStatusSlug.equals(existing.getStatusSlug())) {</span>
-<span class="fc" id="L77">            log.info(&quot;Changing status of equipment with id {} from {} to {}&quot;, existing.getId(), existing.getStatusSlug(), newStatusSlug);</span>
-<span class="fc" id="L78">            existing.changeStatusTo(newStatusSlug, statusTransitionPolicy);</span>
+<span class="fc" id="L51">        String newStatusSlug = command.statusSlug();</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (!newStatusSlug.equals(existing.getStatusSlug())) {</span>
+<span class="fc" id="L53">            log.info(&quot;Changing status of equipment with id {} from {} to {}&quot;, existing.getId(), existing.getStatusSlug(), newStatusSlug);</span>
+<span class="fc" id="L54">            existing.changeStatusTo(newStatusSlug, statusTransitionPolicy);</span>
         }
-<span class="fc" id="L80">        var updated = mapper.toEquipment(existing, command);</span>
+<span class="fc" id="L56">        var updated = mapper.toEquipment(existing, command);</span>
 
-<span class="fc" id="L82">        return repository.save(updated);</span>
+<span class="fc" id="L58">        return repository.save(updated);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
