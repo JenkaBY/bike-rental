@@ -56,7 +56,7 @@ public class EquipmentCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<EquipmentResponse> createEquipment(@Valid @RequestBody EquipmentRequest request) {
-        log.info("[POST] Create equipment with id {}", request.serialNumber());
+        log.info("[POST] Create equipment with uid {}", request.uid());
         log.debug("[POST] Create equipment {}", request);
         var command = commandMapper.toCreateCommand(request);
         var created = createUseCase.execute(command);

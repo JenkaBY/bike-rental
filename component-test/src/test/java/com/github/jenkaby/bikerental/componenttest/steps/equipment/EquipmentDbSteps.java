@@ -46,10 +46,10 @@ public class EquipmentDbSteps {
 
     private void assertEquipmentsPersisted(List<EquipmentJpaEntity> expected) {
         log.info("Asserting equipments persisted in db. Expected: {}", expected);
-        var serialNums = expected.stream()
-                .map(EquipmentJpaEntity::getSerialNumber)
+        var uids = expected.stream()
+                .map(EquipmentJpaEntity::getUid)
                 .collect(Collectors.toSet());
-        var sortedActual = getEquipments(actual -> serialNums.contains(actual.getSerialNumber()));
+        var sortedActual = getEquipments(actual -> uids.contains(actual.getUid()));
 
         var sortedExpected = expected.stream()
                 .sorted(BY_UID)
