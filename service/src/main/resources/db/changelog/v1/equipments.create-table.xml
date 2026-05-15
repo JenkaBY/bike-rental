@@ -39,20 +39,6 @@
             </column>
             <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
-
-        <addForeignKeyConstraint
-                baseTableName="equipments"
-                baseColumnNames="type_slug"
-                constraintName="fk_equipment_type"
-                referencedTableName="equipment_types"
-                referencedColumnNames="slug"/>
-
-        <addForeignKeyConstraint
-                baseTableName="equipments"
-                baseColumnNames="status_slug"
-                constraintName="fk_equipment_status"
-                referencedTableName="equipment_statuses"
-                referencedColumnNames="slug"/>
     </changeSet>
 
 </databaseChangeLog>

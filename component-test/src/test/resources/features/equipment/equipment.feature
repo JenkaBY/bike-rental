@@ -136,6 +136,21 @@ Feature: Equipment management endpoints
       | serialNumber | uid          | equipmentType | status      | model   | commissionedAt | conditionNotes | condition |
       | EQ-999       | BIKE-999-NEW | BICYCLE       | MAINTENANCE | Model X | 2026-01-15     | Excellent      | BROKEN    |
 
+  Scenario Outline: Create equipments the same serialNumber
+    Given the equipment request is prepared with the following data
+      | serialNumber   | uid      | type    | status    | model   | commissionedAt | condition |
+      | <serialNumber> | unique-1 | BICYCLE | AVAILABLE | Model X | 2026-01-15     | GOOD      |
+    When a POST request has been made to "/api/equipments" endpoint
+    Then the response status is 201
+    Given the equipment request is prepared with the following data
+      | serialNumber   | uid      | type    | status    | model   | commissionedAt | condition |
+      | <serialNumber> | unique-2 | BICYCLE | AVAILABLE | Model X | 2026-01-15     | GOOD      |
+    When a POST request has been made to "/api/equipments" endpoint
+    Then the response status is 201
+    Examples:
+      | serialNumber |
+      | EQ-001       |
+
   Scenario Outline: Update existing equipment
     Given the equipment being updated is
       | serialNumber | uid          | type    | status | model   | commissionedAt | conditionNotes | condition   |
@@ -154,6 +169,25 @@ Feature: Equipment management endpoints
     Examples:
       | serialNumber | uid             | equipmentType | status | model     | commissionedAt | conditionNotes | condition   |
       | EQ-001-UPD   | BIKE-001-UPDATE | SCOOTER       | BROKEN | Model A++ | 2026-01-20     | Fair           | MAINTENANCE |
+
+  Scenario Outline: Update equipment with the existing serialNumber
+    Given the equipment being updated is
+      | serialNumber | uid          | type    | status | model   | commissionedAt | conditionNotes | condition   |
+      | EQ-TO-UPDATE | EQ-TO-UPDATE | BICYCLE | RENTED | Model C | 2026-01-30     | New            | <condition> |
+    And the equipment request is prepared with the following data
+      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+    When a PUT request has been made to "/api/equipments/{requestedObjectId}" endpoint with context
+    Then the response status is 200
+    And the equipment response contains
+      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+    And the following equipment record was persisted in db
+      | serialNumber   | uid   | status   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <status> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+    Examples:
+      | serialNumber | uid             | equipmentType | status | model     | commissionedAt | conditionNotes | condition   |
+      | EQ-001       | BIKE-001-UPDATE | SCOOTER       | BROKEN | Model A++ | 2026-01-20     | Fair           | MAINTENANCE |
 
   Scenario Outline: Create new equipment with not existing status
     Given the equipment request is prepared with the following data
@@ -211,7 +245,6 @@ Feature: Equipment management endpoints
     Examples:
       | serialNumber | uid      | violation    | errorDetail                                         |
       | unique       | BIKE-001 | uid          | Equipment with identifier 'BIKE-001' already exists |
-      | EQ-001       | unique   | serialNumber | Equipment with identifier 'EQ-001' already exists   |
 
   Scenario: Update equipment with non-existent ID
     Given the equipment request is prepared with the following data
