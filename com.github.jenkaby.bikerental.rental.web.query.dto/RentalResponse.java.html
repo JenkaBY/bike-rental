@@ -20,6 +20,8 @@ import java.util.UUID;
         @Schema(description = &quot;Planned duration in minutes&quot;, example = &quot;120&quot;) @NotNull Integer plannedDurationMinutes,
         @Schema(description = &quot;Actual duration in minutes (null until returned)&quot;, example = &quot;130&quot;) Integer actualDurationMinutes,
         @Schema(description = &quot;Estimated rental cost&quot;, example = &quot;200.00&quot;) @NotNull BigDecimal estimatedCost,
+        @Schema(description = &quot;Special price applied to this rental (if any)&quot;, example = &quot;180.00&quot;) BigDecimal specialPrice,
+        @Schema(description = &quot;Discount percent applied to this rental (e.g. 10.5)&quot;, example = &quot;10.5&quot;) Integer discountPercent,
         @Schema(description = &quot;Final rental cost (null until returned)&quot;, example = &quot;250.00&quot;) BigDecimal finalCost
 ) {
 }

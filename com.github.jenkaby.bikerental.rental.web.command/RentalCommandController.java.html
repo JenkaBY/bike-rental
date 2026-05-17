@@ -156,7 +156,7 @@ class RentalCommandController {
     @PostMapping(&quot;/return&quot;)
     @Operation(summary = &quot;Return equipment&quot;, description = &quot;Completes a rental by returning the rented equipment, calculates final cost and records additional payment if needed&quot;)
     @ApiResponses({
-            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Equipment returned, rental completed&quot;,
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Equipment or equipments returned, rental completed or active&quot;,
                     content = @Content(schema = @Schema(implementation = RentalReturnResponse.class))),
             @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error or rental identifier missing&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
@@ -166,12 +166,12 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;RentalReturnResponse&gt; returnEquipment(@Valid @RequestBody ReturnEquipmentRequest request) {
-<span class="fc" id="L169">        log.info(&quot;[POST] Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
+<span class="fc" id="L169">        log.info(&quot;[POST] Processing equipments return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
 <span class="fc" id="L170">                request.rentalId(), request.equipmentIds(), request.equipmentUids());</span>
 <span class="fc" id="L171">        var command = commandMapper.toReturnCommand(request);</span>
 <span class="fc" id="L172">        var result = returnEquipmentUseCase.execute(command);</span>
 <span class="fc" id="L173">        var response = commandMapper.toReturnResponse(result);</span>
-<span class="fc" id="L174">        log.info(&quot;[POST] Equipment return processed successfully for rental {}&quot;, result.rental().getId());</span>
+<span class="fc" id="L174">        log.info(&quot;[POST] Equipments return processed successfully for rental {}&quot;, result.rental().getId());</span>
 <span class="fc" id="L175">        return ResponseEntity.ok(response);</span>
     }
 
