@@ -5,6 +5,7 @@ import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentMapper;
 import com.github.jenkaby.bikerental.rental.shared.mapper.RentalStatusMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
+import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
@@ -12,7 +13,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(uses = {MoneyMapper.class, InstantMapper.class, RentalStatusMapper.class,
-        DurationMapper.class, RentalOverdueMapper.class, RentalEquipmentWebMapper.class, RentalEquipmentMapper.class})
+        DurationMapper.class, RentalOverdueMapper.class, RentalEquipmentWebMapper.class, RentalEquipmentMapper.class,
+        DiscountMapper.class})
 public interface RentalQueryMapper {
 
     @Mapping(target = "actualDurationMinutes", source = "rental.actualDuration")

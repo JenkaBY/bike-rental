@@ -982,7 +982,7 @@ class RentalCommandControllerTest {
 
             @DisplayName("when return request is invalid and no ids")
             void whenReturnRequestHasNoIdsIsInvalid() throws Exception {
-                var request = new ReturnEquipmentRequest(null, null, null, null, "operator");
+                var request = new ReturnEquipmentRequest(null, null, null, "operator");
 
                 mockMvc.perform(post(API_RENTALS + "/return")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -1001,7 +1001,7 @@ class RentalCommandControllerTest {
             void whenReturnRequestHasListWithEmptyForEquipmentUds() throws Exception {
                 var list = new ArrayList<String>();
                 list.add("");
-                var request = new ReturnEquipmentRequest(null, null, list, null, "operator");
+                var request = new ReturnEquipmentRequest(null, null, list, "operator");
 
                 mockMvc.perform(post(API_RENTALS + "/return")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -1021,7 +1021,7 @@ class RentalCommandControllerTest {
             void whenReturnRequestHasListWithNullForEquipmentUids() throws Exception {
                 var list = new ArrayList<String>();
                 list.add(" ");
-                var request = new ReturnEquipmentRequest(null, null, list, null, "operator");
+                var request = new ReturnEquipmentRequest(null, null, list, "operator");
 
                 mockMvc.perform(post(API_RENTALS + "/return")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -1040,7 +1040,7 @@ class RentalCommandControllerTest {
             @ParameterizedTest
             @NullAndEmptySource
             void whenOperatorIdIsBlank(String operator) throws Exception {
-                var request = new ReturnEquipmentRequest(1L, null, null, null, operator);
+                var request = new ReturnEquipmentRequest(1L, null, null, operator);
 
                 mockMvc.perform(post(API_RENTALS + "/return")
                                 .contentType(MediaType.APPLICATION_JSON)

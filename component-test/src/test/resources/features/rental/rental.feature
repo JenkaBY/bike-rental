@@ -232,8 +232,8 @@ Feature: Rental Management
     When a PUT request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the rental response only contains
-      | customerId   | status | plannedDuration   | estimatedCost |
-      | <customerId> | DRAFT  | <plannedDuration> | 15.30         |
+      | customerId   | status | plannedDuration   | estimatedCost | discountPercent |
+      | <customerId> | DRAFT  | <plannedDuration> | 15.30         | 10              |
     And the rental response only contains rental equipments
       | equipmentId    | equipmentUid    | status   | estimatedCost |
       | <equipmentId>  | <equipmentUid1> | ASSIGNED | 16.00         |
@@ -259,8 +259,8 @@ Feature: Rental Management
     When a PUT request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the rental response only contains
-      | customerId   | status | plannedDuration   | estimatedCost  |
-      | <customerId> | DRAFT  | <plannedDuration> | <specialPrice> |
+      | customerId   | status | plannedDuration   | estimatedCost  | specialPrice   |
+      | <customerId> | DRAFT  | <plannedDuration> | <specialPrice> | <specialPrice> |
     And the rental response only contains rental equipments
       | equipmentId    | equipmentUid    | status   | estimatedCost |
       | <equipmentId>  | <equipmentUid1> | ASSIGNED | 0             |

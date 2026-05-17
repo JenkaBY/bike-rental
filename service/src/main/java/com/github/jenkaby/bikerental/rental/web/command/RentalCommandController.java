@@ -156,7 +156,7 @@ class RentalCommandController {
     @PostMapping("/return")
     @Operation(summary = "Return equipment", description = "Completes a rental by returning the rented equipment, calculates final cost and records additional payment if needed")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Equipment returned, rental completed",
+            @ApiResponse(responseCode = "200", description = "Equipment or equipments returned, rental completed or active",
                     content = @Content(schema = @Schema(implementation = RentalReturnResponse.class))),
             @ApiResponse(responseCode = "400", description = "Validation error or rental identifier missing",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
@@ -166,12 +166,12 @@ class RentalCommandController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<RentalReturnResponse> returnEquipment(@Valid @RequestBody ReturnEquipmentRequest request) {
-        log.info("[POST] Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}",
+        log.info("[POST] Processing equipments return for rentalId={}, equipmentIds={}, equipmentUids={}",
                 request.rentalId(), request.equipmentIds(), request.equipmentUids());
         var command = commandMapper.toReturnCommand(request);
         var result = returnEquipmentUseCase.execute(command);
         var response = commandMapper.toReturnResponse(result);
-        log.info("[POST] Equipment return processed successfully for rental {}", result.rental().getId());
+        log.info("[POST] Equipments return processed successfully for rental {}", result.rental().getId());
         return ResponseEntity.ok(response);
     }
 

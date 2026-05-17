@@ -58,8 +58,8 @@ Feature: Equipment Return
       | rentalId   | equipmentId   | equipmentUid   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | <equipmentId> | <equipmentUid> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
-      | rentalId   | equipmentIds  | paymentMethod | operatorId |
-      | <rentalId> | <equipmentId> | CASH          | <operator> |
+      | rentalId   | equipmentIds  | operatorId |
+      | <rentalId> | <equipmentId> | <operator> |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains rental
@@ -98,8 +98,8 @@ Feature: Equipment Return
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
-      | rentalId   | paymentMethod | operatorId |
-      | <rentalId> | CASH          | OP1        |
+      | rentalId   | operatorId |
+      | <rentalId> | OP1        |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains rental
@@ -140,8 +140,8 @@ Feature: Equipment Return
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
-      | rentalId   | paymentMethod | operatorId |
-      | <rentalId> | CASH          | OP1        |
+      | rentalId   | operatorId |
+      | <rentalId> | OP1        |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains rental
@@ -182,8 +182,8 @@ Feature: Equipment Return
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 9.00          | <startedAt> | <startedAt> |
     And the return equipment request is
-      | rentalId   | paymentMethod | operatorId |
-      | <rentalId> | CASH          | OP1        |
+      | rentalId   | operatorId |
+      | <rentalId> | OP1        |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains rental
@@ -207,8 +207,8 @@ Feature: Equipment Return
 
   Scenario: Return equipment - rental not found
     And the return equipment request is
-      | rentalId | paymentMethod | operatorId |
-      | 999      | CASH          | OP1        |
+      | rentalId | operatorId |
+      | 999      | OP1        |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 404
     And the response contains
@@ -224,8 +224,8 @@ Feature: Equipment Return
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
       | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ASSIGNED | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 100.00        | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |
     And the return equipment request is
-      | rentalId | paymentMethod | operatorId |
-      | 1        | CASH          | OP1        |
+      | rentalId | operatorId |
+      | 1        | OP1        |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 422
     And the response contains
@@ -249,8 +249,8 @@ Feature: Equipment Return
       | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
       | <rentalId> | 2           | BIKE-002     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
     And the return equipment request is
-      | rentalId   | equipmentIds | paymentMethod | operatorId |
-      | <rentalId> | <returnedId> | CASH          | <operator> |
+      | rentalId   | equipmentIds | operatorId |
+      | <rentalId> | <returnedId> | <operator> |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains rental
@@ -264,8 +264,8 @@ Feature: Equipment Return
 #    return the remaining equipment
     Given now is "<nowReturn>"
     And the return equipment request is
-      | rentalId   | equipmentIds  | paymentMethod | operatorId |
-      | <rentalId> | <remainingId> | CASH          | <operator> |
+      | rentalId   | equipmentIds  | operatorId |
+      | <rentalId> | <remainingId> | <operator> |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains rental
@@ -304,13 +304,13 @@ Feature: Equipment Return
       | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
-      | rentalId   | equipmentIds  | paymentMethod | operatorId |
-      | <rentalId> | <equipmentId> | CASH          | <operator> |
+      | rentalId   | equipmentIds  | operatorId |
+      | <rentalId> | <equipmentId> | <operator> |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains rental
-      | customerId | status    | actualDuration | plannedDuration | estimatedCost | totalCost |
-      | CUS2       | COMPLETED | 120            | 120             | 14.40         | 14.40     |
+      | customerId | status    | actualDuration | plannedDuration | estimatedCost | totalCost | discountPercent |
+      | CUS2       | COMPLETED | 120            | 120             | 14.40         | 14.40     | 10              |
     And the rental return response does contain settlement info
     And the following rental completed event was published
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
@@ -343,13 +343,13 @@ Feature: Equipment Return
       | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
-      | rentalId   | equipmentIds  | paymentMethod | operatorId |
-      | <rentalId> | <equipmentId> | CASH          | <operator> |
+      | rentalId   | equipmentIds  | operatorId |
+      | <rentalId> | <equipmentId> | <operator> |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains rental
-      | customerId | status    | actualDuration | plannedDuration | estimatedCost | totalCost |
-      | CUS2       | COMPLETED | 120            | 120             | 10.00         | 10.00     |
+      | customerId | status    | actualDuration | plannedDuration | estimatedCost | totalCost | specialPrice |
+      | CUS2       | COMPLETED | 120            | 120             | 10.00         | 10.00     | 10.00        |
     And the rental return response does contain settlement info
     And the following rental completed event was published
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
@@ -382,13 +382,13 @@ Feature: Equipment Return
       | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
-      | rentalId   | equipmentIds  | paymentMethod | operatorId |
-      | <rentalId> | <equipmentId> | CASH          | <operator> |
+      | rentalId   | equipmentIds  | operatorId |
+      | <rentalId> | <equipmentId> | <operator> |
     When a POST request has been made to "/api/rentals/return" endpoint
     Then the response status is 200
     And the rental return response contains rental
-      | customerId | status    | actualDuration | plannedDuration | estimatedCost | totalCost |
-      | CUS2       | COMPLETED | 120            | 120             | 0.00          | 0.00      |
+      | customerId | status    | actualDuration | plannedDuration | estimatedCost | totalCost | specialPrice |
+      | CUS2       | COMPLETED | 120            | 120             | 0.00          | 0.00      | 0.00         |
     And the rental return response does contain settlement info
     And the following rental completed event was published
       | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
