@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -81,8 +82,10 @@ class RentalQueryController {
             @Parameter(description = "Rental status filter", example = "ACTIVE") @RequestParam(name = "status", required = false) RentalStatus status,
             @Parameter(description = "Customer UUID filter") @RequestParam(name = "customerId", required = false) UUID customerId,
             @Parameter(description = "Equipment UID filter", example = "BIKE-001") @RequestParam(name = "equipmentUid", required = false) String equipmentUid,
-            @Parameter(description = "Created-at range start (inclusive), format yyyy-MM-dd", example = "2026-02-15") @RequestParam(name = "from", required = false) LocalDate from,
-            @Parameter(description = "Created-at range end (inclusive), format yyyy-MM-dd", example = "2026-02-20") @RequestParam(name = "to", required = false) LocalDate to,
+            @Parameter(description = "Created-at range start (inclusive), format yyyy-MM-dd", example = "2026-02-15") @RequestParam(name = "from", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Created-at range end (inclusive), format yyyy-MM-dd", example = "2026-02-20") @RequestParam(name = "to", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @PageableDefault(size = 20, sort = "expectedReturnAt", direction = Sort.Direction.ASC) Pageable pageable) {
         log.info("[GET] Get rentals with filters status={}, customerId={}, equipmentUid={}, from={}, to={}", status, customerId, equipmentUid, from, to);
 
