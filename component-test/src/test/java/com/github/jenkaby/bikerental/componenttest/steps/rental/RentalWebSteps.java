@@ -198,6 +198,16 @@ public class RentalWebSteps {
                     .as("Estimated cost")
                     .isEqualByComparingTo(expected.estimatedCost());
         }
+        if (expected.specialPrice() != null) {
+            softly.assertThat(actual.specialPrice())
+                    .as("Special price")
+                    .isEqualByComparingTo(expected.specialPrice());
+        }
+        if (expected.discountPercent() != null) {
+            softly.assertThat(actual.discountPercent())
+                    .as("Discount percent")
+                    .isEqualTo(expected.discountPercent());
+        }
         if (expected.finalCost() != null) {
             softly.assertThat(actual.finalCost())
                     .as("Final cost")

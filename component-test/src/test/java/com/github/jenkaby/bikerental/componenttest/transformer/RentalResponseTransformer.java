@@ -46,6 +46,8 @@ public class RentalResponseTransformer {
         var actualReturnAt = DataTableHelper.toLocalDateTime(entry, "actualReturnAt");
 
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
+        var specialPrice = DataTableHelper.toBigDecimal(entry, "specialPrice");
+        var discountPercent = DataTableHelper.toInt(entry, "discountPercent");
         var finalCost = DataTableHelper.toBigDecimal(entry, "totalCost");
         if (DataTableHelper.toBigDecimal(entry, "finalCost") != null) {
             throw new IllegalArgumentException("finalCost must NOT be provided. It must be total cost for RentalResponse");
@@ -61,6 +63,8 @@ public class RentalResponseTransformer {
                 plannedDurationMinutes,
                 actualDurationMinutes,
                 estimatedCost,
+                specialPrice,
+                discountPercent,
                 finalCost);
     }
 }

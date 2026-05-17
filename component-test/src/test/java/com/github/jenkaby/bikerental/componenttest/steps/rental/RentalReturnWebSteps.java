@@ -37,7 +37,6 @@ public class RentalReturnWebSteps {
                     Long.valueOf(scenarioContext.getRequestedObjectId()),
                     request.equipmentIds(),
                     request.equipmentUids(),
-                    request.paymentMethod(),
                     request.operatorId()
             );
             scenarioContext.setRequestBody(resolvedRequest);

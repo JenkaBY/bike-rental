@@ -59,20 +59,6 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
             throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);
         }
 
-//        var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);
-//        var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);
-//
-//        var costCommand = costCommandMapper.toReturnCommand(rental, equipmentsToReturn, durationResult.billableDuration());
-//        var costResult = tariffV2Facade.calculateRentalCost(costCommand);
-//
-//        var breakdowns = costResult.equipmentBreakdowns();
-//        for (int i = 0; i < equipmentsToReturn.size(); i++) {
-//            var equipment = equipmentsToReturn.get(i);
-//            var breakdown = breakdowns.get(i);
-//            equipment.setFinalCost(breakdown.itemCost());
-//            equipment.setTariffId(breakdown.tariffId());
-//        }
-
         var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);
         var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);
         var equipmentInfos = equipmentFacade.findByIds(equipmentsToReturn.stream()
@@ -86,13 +72,6 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
             log.info("Partial return recorded for rental {}", saved.getId());
             return new ReturnEquipmentResult(saved, null);
         }
-
-        // TODO Move to rental class
-//        Money previouslyReturnedCost = rental.getEquipments().stream()
-//                .filter(e -> e.getStatus() == RentalEquipmentStatus.RETURNED)
-//                .filter(e -> !equipmentsToReturn.contains(e))
-//                .map(RentalEquipment::getFinalCost)
-//                .reduce(Money.zero(), Money::add);
 
         var totalFinalCost = rental.getFinalCost();
         SettlementInfo settlementInfo = null;

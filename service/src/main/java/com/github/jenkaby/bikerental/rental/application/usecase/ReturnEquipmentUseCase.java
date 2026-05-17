@@ -1,6 +1,5 @@
 package com.github.jenkaby.bikerental.rental.application.usecase;
 
-import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.SettlementInfo;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import org.jspecify.annotations.NonNull;
@@ -17,7 +16,6 @@ public interface ReturnEquipmentUseCase {
             Long rentalId,
             List<Long> equipmentIds,
             List<String> equipmentUids,
-            PaymentMethod paymentMethod,
             String operatorId
     ) {
         public List<Long> getEquipmentIds() {

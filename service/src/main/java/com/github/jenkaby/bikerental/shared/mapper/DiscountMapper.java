@@ -19,5 +19,9 @@ public interface DiscountMapper {
     default BigDecimal toBigDecimal(DiscountPercent discount) {
         return discount == null ? null : discount.percent();
     }
+
+    default Integer toInteger(DiscountPercent discount) {
+        return discount == null ? null : discount.percent().intValue();
+    }
 }
 
