@@ -84,6 +84,16 @@ public class RentalWebSteps {
                     .as("Overdue minutes")
                     .isEqualTo(expected.overdueMinutes());
         }
+        if (expected.plannedDurationMinutes() != null) {
+            assertThat(actual.plannedDurationMinutes())
+                    .as("Planned duration minutes")
+                    .isEqualTo(expected.plannedDurationMinutes());
+        }
+        if (expected.actualDurationMinutes() != null) {
+            assertThat(actual.actualDurationMinutes())
+                    .as("Actual duration minutes")
+                    .isEqualTo(expected.actualDurationMinutes());
+        }
         softly.assertAll();
     }
 

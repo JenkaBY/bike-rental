@@ -76,10 +76,10 @@ Feature: Rental Query
   Scenario Outline: Get active rentals filtered by customerId
     Given now is "<now>"
     And rentals exist in the database with the following data
-      | id | customerId | status | startedAt   | expectedReturnAt   | createdAt   | updatedAt   |
-      | 1  | CUS1       | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 2  | CUS2       | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 3  | CUS1       | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | id | customerId | status | startedAt   | expectedReturnAt   | createdAt   | updatedAt   | plannedDuration   |
+      | 1  | CUS1       | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> | <plannedDuration> |
+      | 2  | CUS2       | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> | <plannedDuration> |
+      | 3  | CUS1       | ACTIVE | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> | <plannedDuration> |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt   | estimatedCost | finalCost | createdAt   |
       | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
@@ -90,9 +90,9 @@ Feature: Rental Query
       | ACTIVE | CUS1       |
     Then the response status is 200
     And the rental summary response only contains page of
-      | id | customerId | equipmentIds | status | startedAt   | expectedReturnAt   | overdueMin |
-      | 1  | CUS1       | 1            | ACTIVE | <startedAt> | <expectedReturnAt> | 60         |
-      | 3  | CUS1       | 3            | ACTIVE | <startedAt> | <expectedReturnAt> | 60         |
+      | id | customerId | equipmentIds | status | startedAt   | expectedReturnAt   | overdueMin | plannedDuration   |
+      | 1  | CUS1       | 1            | ACTIVE | <startedAt> | <expectedReturnAt> | 60         | <plannedDuration> |
+      | 3  | CUS1       | 3            | ACTIVE | <startedAt> | <expectedReturnAt> | 60         | <plannedDuration> |
     And the response contains
       | path                 | value            |
       | $.totalItems         | 2                |
@@ -100,8 +100,8 @@ Feature: Rental Query
       | $.pageRequest.page   | 0                |
       | $.pageRequest.sortBy | expectedReturnAt |
     Examples:
-      | now                 | startedAt           | expectedReturnAt    |
-      | 2026-02-18T12:00:00 | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 |
+      | now                 | startedAt           | expectedReturnAt    | plannedDuration |
+      | 2026-02-18T12:00:00 | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 180             |
 
   Scenario Outline: Get active rentals with overdue calculation
     Given now is "<now>"
@@ -157,11 +157,11 @@ Feature: Rental Query
   Scenario Outline: Get rentals filtered only by customerId
     Given now is "<now>"
     And rentals exist in the database with the following data
-      | id | customerId | status    | startedAt   | expectedReturnAt   | createdAt   | updatedAt   |
-      | 1  | CUS1       | ACTIVE    | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 2  | CUS2       | ACTIVE    | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 3  | CUS1       | COMPLETED | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
-      | 4  | CUS1       | DRAFT     | null        | null               | <startedAt> | <startedAt> |
+      | id | customerId | status    | startedAt   | expectedReturnAt   | createdAt   | updatedAt   | plannedDuration   | actualDuration   |
+      | 1  | CUS1       | ACTIVE    | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> | <plannedDuration> |                  |
+      | 2  | CUS2       | ACTIVE    | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> | <plannedDuration> |                  |
+      | 3  | CUS1       | COMPLETED | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> | <plannedDuration> | <actualDuration> |
+      | 4  | CUS1       | DRAFT     | null        | null               | <startedAt> | <startedAt> |                   |                  |
     And rental equipment exists in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt   | expectedReturnAt   | estimatedCost | finalCost | createdAt   |
       | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
@@ -173,10 +173,10 @@ Feature: Rental Query
       | CUS1       |
     Then the response status is 200
     And the rental summary response only contains page of
-      | id | customerId | equipmentIds | status    | startedAt   | expectedReturnAt   | overdueMin |
-      | 1  | CUS1       | 1            | ACTIVE    | <startedAt> | <expectedReturnAt> | 60         |
-      | 3  | CUS1       | 3            | COMPLETED | <startedAt> | <expectedReturnAt> | 0          |
-      | 4  | CUS1       | 4            | DRAFT     | null        | null               | 0          |
+      | id | customerId | equipmentIds | status    | startedAt   | expectedReturnAt   | overdueMin | plannedDuration   | actualDuration   |
+      | 1  | CUS1       | 1            | ACTIVE    | <startedAt> | <expectedReturnAt> | 60         | <plannedDuration> |                  |
+      | 3  | CUS1       | 3            | COMPLETED | <startedAt> | <expectedReturnAt> | 0          | <plannedDuration> | <actualDuration> |
+      | 4  | CUS1       | 4            | DRAFT     | null        | null               | 0          |                   |                  |
     And the response contains
       | path                 | value            |
       | $.totalItems         | 3                |
@@ -184,8 +184,8 @@ Feature: Rental Query
       | $.pageRequest.page   | 0                |
       | $.pageRequest.sortBy | expectedReturnAt |
     Examples:
-      | now                 | startedAt           | expectedReturnAt    |
-      | 2026-02-18T12:00:00 | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 |
+      | now                 | startedAt           | expectedReturnAt    | plannedDuration | actualDuration |
+      | 2026-02-18T12:00:00 | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 180             | 181            |
 
   Scenario Outline: Get active rentals filtered by equipmentUid
     Given now is "<now>"
