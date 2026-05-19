@@ -31,6 +31,8 @@ public class RentalSummaryResponseTransformer {
         var overdueMinutes = Optional.ofNullable(overdueMinutesString)
                 .map(Integer::valueOf)
                 .orElse(null);
+        var plannedDuration = DataTableHelper.toInt(entry, "plannedDuration");
+        var actualDuration = DataTableHelper.toInt(entry, "actualDuration");
 
         return new RentalSummaryResponse(
                 id,
@@ -39,7 +41,9 @@ public class RentalSummaryResponseTransformer {
                 status,
                 startedAt,
                 expectedReturnAt,
-                overdueMinutes
+                overdueMinutes,
+                plannedDuration,
+                actualDuration
         );
     }
 }

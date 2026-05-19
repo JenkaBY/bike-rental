@@ -24,5 +24,7 @@ public interface RentalQueryMapper {
 
     @Mapping(target = "equipmentIds", source = "equipments")
     @Mapping(target = "overdueMinutes", source = "rental")
+    @Mapping(target = "plannedDurationMinutes", source = "rental.plannedDuration")
+    @Mapping(target = "actualDurationMinutes", source = "rental.actualDuration")
     RentalSummaryResponse toRentalSummaryResponse(Rental rental);
 }
