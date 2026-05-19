@@ -5,8 +5,6 @@ import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import io.cucumber.java.DataTableType;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
@@ -29,21 +27,21 @@ public class RentalResponseTransformer {
         var plannedDurationMinutes = DataTableHelper.toInt(entry, "plannedDuration");
         var actualDurationMinutes = DataTableHelper.toInt(entry, "actualDuration");
 
-        LocalDateTime startedAt;
+        Instant startedAt;
         if ("now()".equals(entry.get("startedAt"))) {
-            startedAt = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.systemDefault());
+            startedAt = Instant.now();
         } else {
-            startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
+            startedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "startedAt");
         }
 
-        LocalDateTime expectedReturnAt;
+        Instant expectedReturnAt;
         if (startedAt != null && plannedDurationMinutes != null) {
-            expectedReturnAt = startedAt.plusMinutes(plannedDurationMinutes);
+            expectedReturnAt = startedAt.plusSeconds(plannedDurationMinutes * 60L);
         } else {
-            expectedReturnAt = DataTableHelper.toLocalDateTime(entry, "expectedReturnAt");
+            expectedReturnAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "expectedReturnAt");
         }
 
-        var actualReturnAt = DataTableHelper.toLocalDateTime(entry, "actualReturnAt");
+        var actualReturnAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "actualReturnAt");
 
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
         var specialPrice = DataTableHelper.toBigDecimal(entry, "specialPrice");
