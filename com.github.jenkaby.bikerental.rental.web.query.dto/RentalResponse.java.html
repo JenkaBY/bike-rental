@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,9 +14,9 @@ import java.util.UUID;
         @Schema(description = &quot;Customer UUID&quot;) @NotNull UUID customerId,
         @Schema(description = &quot;List of equipment items in this rental&quot;) @NotNull List&lt;EquipmentItemResponse&gt; equipmentItems,
         @Schema(description = &quot;Rental status&quot;, example = &quot;ACTIVE&quot;) @NotNull String status,
-        @Schema(description = &quot;Rental start time&quot;) @NotNull LocalDateTime startedAt,
-        @Schema(description = &quot;Expected return time&quot;) LocalDateTime expectedReturnAt,
-        @Schema(description = &quot;Actual return time (null if not returned)&quot;) LocalDateTime actualReturnAt,
+        @Schema(description = &quot;Rental start time&quot;) @NotNull Instant startedAt,
+        @Schema(description = &quot;Expected return time&quot;) Instant expectedReturnAt,
+        @Schema(description = &quot;Actual return time (null if not returned)&quot;) Instant actualReturnAt,
         @Schema(description = &quot;Planned duration in minutes&quot;, example = &quot;120&quot;) @NotNull Integer plannedDurationMinutes,
         @Schema(description = &quot;Actual duration in minutes (null until returned)&quot;, example = &quot;130&quot;) Integer actualDurationMinutes,
         @Schema(description = &quot;Estimated rental cost&quot;, example = &quot;200.00&quot;) @NotNull BigDecimal estimatedCost,
