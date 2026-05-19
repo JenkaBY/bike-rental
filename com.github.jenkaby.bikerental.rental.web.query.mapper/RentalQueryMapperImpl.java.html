@@ -93,36 +93,40 @@ public class RentalQueryMapperImpl implements RentalQueryMapper {
 
 <span class="fc" id="L94">        List&lt;Long&gt; equipmentIds = null;</span>
 <span class="fc" id="L95">        Integer overdueMinutes = null;</span>
-<span class="fc" id="L96">        Long id = null;</span>
-<span class="fc" id="L97">        UUID customerId = null;</span>
-<span class="fc" id="L98">        String status = null;</span>
-<span class="fc" id="L99">        LocalDateTime startedAt = null;</span>
-<span class="fc" id="L100">        LocalDateTime expectedReturnAt = null;</span>
+<span class="fc" id="L96">        Integer plannedDurationMinutes = null;</span>
+<span class="fc" id="L97">        Integer actualDurationMinutes = null;</span>
+<span class="fc" id="L98">        Long id = null;</span>
+<span class="fc" id="L99">        UUID customerId = null;</span>
+<span class="fc" id="L100">        String status = null;</span>
+<span class="fc" id="L101">        LocalDateTime startedAt = null;</span>
+<span class="fc" id="L102">        LocalDateTime expectedReturnAt = null;</span>
 
-<span class="fc" id="L102">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
-<span class="fc" id="L103">        overdueMinutes = rentalOverdueMapper.calculate( rental );</span>
-<span class="fc" id="L104">        id = rental.getId();</span>
-<span class="fc" id="L105">        customerId = rental.getCustomerId();</span>
-<span class="fc" id="L106">        status = rentalStatusMapper.statusToString( rental.getStatus() );</span>
-<span class="fc" id="L107">        startedAt = rental.getStartedAt();</span>
-<span class="fc" id="L108">        expectedReturnAt = rental.getExpectedReturnAt();</span>
+<span class="fc" id="L104">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
+<span class="fc" id="L105">        overdueMinutes = rentalOverdueMapper.calculate( rental );</span>
+<span class="fc" id="L106">        plannedDurationMinutes = durationMapper.toMinutes( rental.getPlannedDuration() );</span>
+<span class="fc" id="L107">        actualDurationMinutes = durationMapper.toMinutes( rental.getActualDuration() );</span>
+<span class="fc" id="L108">        id = rental.getId();</span>
+<span class="fc" id="L109">        customerId = rental.getCustomerId();</span>
+<span class="fc" id="L110">        status = rentalStatusMapper.statusToString( rental.getStatus() );</span>
+<span class="fc" id="L111">        startedAt = rental.getStartedAt();</span>
+<span class="fc" id="L112">        expectedReturnAt = rental.getExpectedReturnAt();</span>
 
-<span class="fc" id="L110">        RentalSummaryResponse rentalSummaryResponse = new RentalSummaryResponse( id, customerId, equipmentIds, status, startedAt, expectedReturnAt, overdueMinutes );</span>
+<span class="fc" id="L114">        RentalSummaryResponse rentalSummaryResponse = new RentalSummaryResponse( id, customerId, equipmentIds, status, startedAt, expectedReturnAt, overdueMinutes, plannedDurationMinutes, actualDurationMinutes );</span>
 
-<span class="fc" id="L112">        return rentalSummaryResponse;</span>
+<span class="fc" id="L116">        return rentalSummaryResponse;</span>
     }
 
     protected List&lt;EquipmentItemResponse&gt; rentalEquipmentListToEquipmentItemResponseList(List&lt;RentalEquipment&gt; list) {
-<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L117">            return null;</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L121">            return null;</span>
         }
 
-<span class="fc" id="L120">        List&lt;EquipmentItemResponse&gt; list1 = new ArrayList&lt;EquipmentItemResponse&gt;( list.size() );</span>
-<span class="fc bfc" id="L121" title="All 2 branches covered.">        for ( RentalEquipment rentalEquipment : list ) {</span>
-<span class="fc" id="L122">            list1.add( rentalEquipmentWebMapper.toEquipmentItemResponse( rentalEquipment ) );</span>
-<span class="fc" id="L123">        }</span>
+<span class="fc" id="L124">        List&lt;EquipmentItemResponse&gt; list1 = new ArrayList&lt;EquipmentItemResponse&gt;( list.size() );</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        for ( RentalEquipment rentalEquipment : list ) {</span>
+<span class="fc" id="L126">            list1.add( rentalEquipmentWebMapper.toEquipmentItemResponse( rentalEquipment ) );</span>
+<span class="fc" id="L127">        }</span>
 
-<span class="fc" id="L125">        return list1;</span>
+<span class="fc" id="L129">        return list1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
