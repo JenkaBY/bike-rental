@@ -24,8 +24,8 @@ public class RentalSummaryResponseTransformer {
         var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
         var status = DataTableHelper.getStringOrNull(entry, "status");
 
-        var startedAt = DataTableHelper.toLocalDateTime(entry, "startedAt");
-        var expectedReturnAt = DataTableHelper.toLocalDateTime(entry, "expectedReturnAt");
+        var startedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "startedAt");
+        var expectedReturnAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "expectedReturnAt");
 
         var overdueMinutesString = DataTableHelper.getStringOrNull(entry, "overdueMin");
         var overdueMinutes = Optional.ofNullable(overdueMinutesString)
