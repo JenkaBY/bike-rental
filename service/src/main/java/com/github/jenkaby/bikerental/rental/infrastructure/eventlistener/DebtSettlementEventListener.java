@@ -27,7 +27,7 @@ public class DebtSettlementEventListener {
         var debtRentals = rentalRepository.getCustomerDebtRentals(customerRef);
 
         if (debtRentals.isEmpty()) {
-            log.debug("No DEBT rentals found for customerId={}", event.customerId());
+            log.info("No DEBT rentals found for customerId={}", event.customerId());
             return;
         }
 
