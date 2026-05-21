@@ -171,7 +171,7 @@ class RentalCommandController {
 <span class="fc" id="L171">        var command = commandMapper.toReturnCommand(request);</span>
 <span class="fc" id="L172">        var result = returnEquipmentUseCase.execute(command);</span>
 <span class="fc" id="L173">        var response = commandMapper.toReturnResponse(result);</span>
-<span class="fc" id="L174">        log.info(&quot;[POST] Equipments return processed successfully for rental {}&quot;, result.rental().getId());</span>
+<span class="fc" id="L174">        log.info(&quot;[POST] Equipments return processed successfully for rentalId=[{}]&quot;, result.rental().getId());</span>
 <span class="fc" id="L175">        return ResponseEntity.ok(response);</span>
     }
 
