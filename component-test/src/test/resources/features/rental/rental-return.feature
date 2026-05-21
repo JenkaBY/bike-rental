@@ -49,6 +49,7 @@ Feature: Equipment Return
       | L_C_W3 | ACC3      | CUSTOMER_WALLET | 10.00   | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
       | L_C_H3 | ACC3      | CUSTOMER_HOLD   | 9.00    | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
 
+
   Scenario Outline: Return equipment - identified by <identified>, no additional payment
     Given now is "<now>"
     And a single rental exists in the database with the following data
@@ -57,6 +58,9 @@ Feature: Equipment Return
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId   | equipmentUid   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | <equipmentId> | <equipmentUid> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
+      | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
     And the return equipment request is
       | rentalId   | equipmentIds  | operatorId |
       | <rentalId> | <equipmentId> | <operator> |
@@ -97,6 +101,9 @@ Feature: Equipment Return
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
+      | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
     And the return equipment request is
       | rentalId   | operatorId |
       | <rentalId> | OP1        |
@@ -139,6 +146,9 @@ Feature: Equipment Return
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
+      | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
     And the return equipment request is
       | rentalId   | operatorId |
       | <rentalId> | OP1        |
@@ -181,6 +191,9 @@ Feature: Equipment Return
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 9.00          | <startedAt> | <startedAt> |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
+      | TX2 | HOLD | CASH          | 9.00   | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
     And the return equipment request is
       | rentalId   | operatorId |
       | <rentalId> | OP1        |
@@ -248,6 +261,9 @@ Feature: Equipment Return
       | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
       | <rentalId> | 2           | BIKE-002     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
+      | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
     And the return equipment request is
       | rentalId   | equipmentIds | operatorId |
       | <rentalId> | <returnedId> | <operator> |
@@ -303,6 +319,9 @@ Feature: Equipment Return
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
+      | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
     And the return equipment request is
       | rentalId   | equipmentIds  | operatorId |
       | <rentalId> | <equipmentId> | <operator> |
@@ -342,6 +361,9 @@ Feature: Equipment Return
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
       | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
+      | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
     And the return equipment request is
       | rentalId   | equipmentIds  | operatorId |
       | <rentalId> | <equipmentId> | <operator> |

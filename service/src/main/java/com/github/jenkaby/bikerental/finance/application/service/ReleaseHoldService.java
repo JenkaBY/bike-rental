@@ -58,6 +58,8 @@ public class ReleaseHoldService implements ReleaseHoldUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, customerRef.id()));
 
         Money releaseHold = holdTxN.getAmount();
+        log.info("Releasing hold amount {} taken from transaction {} for rental {}",
+                releaseHold, holdTxN.getId(), command.rentalRef().id());
         var debitChange = customerAccount.getWallet().credit(releaseHold);
         var creditChange = customerAccount.getOnHold().debit(releaseHold);
 
@@ -83,6 +85,8 @@ public class ReleaseHoldService implements ReleaseHoldUseCase {
                 .build();
 
         transactionRepository.save(transaction);
+        log.info("Released hold amount {} taken in transaction {} for rental {}",
+                releaseHold, transaction.getId(), command.rentalRef().id());
         return new HoldResult(new TransactionRef(transactionId), now);
     }
 }

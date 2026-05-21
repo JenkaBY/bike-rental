@@ -30,12 +30,15 @@ Feature: Rental Lifecycle Management
       | id   | accountType | customerId |
       | ACC1 | CUSTOMER    | CUS1       |
       | ACC2 | CUSTOMER    | CUS2       |
+      | ACC3 | CUSTOMER    | CUS3       |
     And the following sub-ledger records exist in db
       | id     | accountId | ledgerType      | balance | version | createdAt            | updatedAt            |
       | L_C_W1 | ACC1      | CUSTOMER_WALLET | 300.00  | 2       | 2026-03-27T00:00:00Z | 2026-04-07T10:31:02Z |
       | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 0.00    | 2       | 2026-03-27T00:00:00Z | 2026-04-07T10:30:00Z |
       | L_C_W2 | ACC2      | CUSTOMER_WALLET | 10.00   | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
       | L_C_H2 | ACC2      | CUSTOMER_HOLD   | 0.00    | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
+      | L_C_W3 | ACC3      | CUSTOMER_WALLET | 16.00   | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
+      | L_C_H3 | ACC3      | CUSTOMER_HOLD   | 0       | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
     And the following transaction records exist in db
       | id  | type    | paymentMethod | amount | customerId | operatorId | sourceType | sourceId | recordedAt          | idempotencyKey |
       | TX1 | DEPOSIT | CASH          | 300.00 | CUS1       | OP1        |            |          | 2026-01-10T10:00:00 | IDK1           |
@@ -185,3 +188,50 @@ Feature: Rental Lifecycle Management
     And the following rental cancelled event was published
       | rentalId | customerId | equipmentIds |
       | 1        | CUS1       | 1            |
+
+  Scenario: Cancel an ACTIVE rental with hold and 0 on wallet — hold released, equipment RETURNED, event published
+    Given now is "2026-05-01T10:00:00"
+    And a single rental exists in the database with the following data
+      | id | customerId | status | plannedDuration | createdAt           | updatedAt           |
+      | 1  | CUS3       | DRAFT  | 120             | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And rental equipments exist in the database with the following data
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And the lifecycle request is
+      | status | operatorId |
+      | ACTIVE | OP1        |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
+    Then the response status is 200
+    #    rental module
+    And rental was persisted in database
+      | customerId | status |
+      | CUS3       | ACTIVE |
+    And rental equipments were persisted in database
+      | equipmentId | equipmentUid | status |
+      | 1           | BIKE-001     | ACTIVE |
+    #    finance module
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_W3 | ACC3      | CUSTOMER_WALLET | 0.00    |
+      | L_C_H3 | ACC3      | CUSTOMER_HOLD   | 16.00   |
+    And the lifecycle request is
+      | status    | operatorId |
+      | CANCELLED | OP1        |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
+    Then the response status is 200
+    #    rental module
+    And rental was persisted in database
+      | customerId | status    |
+      | CUS3       | CANCELLED |
+    And rental equipments were persisted in database
+      | equipmentId | equipmentUid | status   |
+      | 1           | BIKE-001     | RETURNED |
+    #    finance module — hold was placed, assert it has been released (balance 16.00 → 0.00)
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_W3 | ACC3      | CUSTOMER_WALLET | 16.00   |
+      | L_C_H3 | ACC3      | CUSTOMER_HOLD   | 0.00    |
+    #    events
+    And the following rental cancelled event was published
+      | rentalId | customerId | equipmentIds |
+      | 1        | CUS3       | 1            |

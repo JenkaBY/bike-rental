@@ -23,7 +23,8 @@ public class TransactionDbSteps {
 
     private static final Comparator<TransactionJpaEntity> COMPARATOR = Comparator
             .comparing((TransactionJpaEntity e) -> e.getCustomerId() != null ? e.getCustomerId().toString() : "")
-            .thenComparing(e -> e.getTransactionType() != null ? e.getTransactionType().name() : "");
+            .thenComparing(e -> e.getTransactionType() != null ? e.getTransactionType().name() : "")
+            .thenComparing(TransactionJpaEntity::getAmount);
 
     private final WrapperTransactionJpaRepository transactionJpaRepository;
     private final InsertableTransactionRepository insertable;
@@ -41,8 +42,9 @@ public class TransactionDbSteps {
                 .filter(actual -> expected.stream().anyMatch(exp -> matches(actual, exp)))
                 .sorted(COMPARATOR)
                 .toList();
-
+        log.info("Actual sorted adn filtered: {}", actualList);
         var expectedSorted = expected.stream().sorted(COMPARATOR).toList();
+        log.info("Expected sorted adn filtered: {}", expectedSorted);
 
         assertThat(actualList).hasSize(expectedSorted.size());
         assertThat(actualList).zipSatisfy(expectedSorted, TransactionDbSteps::compareSingleElement);
@@ -92,7 +94,10 @@ public class TransactionDbSteps {
         }
         if (exp.getCustomerId() != null) {
             return Objects.equals(actual.getCustomerId(), exp.getCustomerId())
-                    && Objects.equals(actual.getTransactionType(), exp.getTransactionType());
+                    && Objects.equals(actual.getTransactionType(), exp.getTransactionType())
+//                    && Objects.equals(actual.getSourceId(), exp.getSourceId())
+//                    && Objects.equals(actual.getAmount(), exp.getAmount())
+                    ;
         }
         return Objects.equals(actual.getTransactionType(), exp.getTransactionType());
     }

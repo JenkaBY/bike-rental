@@ -171,7 +171,7 @@ class RentalCommandController {
         var command = commandMapper.toReturnCommand(request);
         var result = returnEquipmentUseCase.execute(command);
         var response = commandMapper.toReturnResponse(result);
-        log.info("[POST] Equipments return processed successfully for rental {}", result.rental().getId());
+        log.info("[POST] Equipments return processed successfully for rentalId=[{}]", result.rental().getId());
         return ResponseEntity.ok(response);
     }
 

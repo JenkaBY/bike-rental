@@ -36,9 +36,11 @@ public class SettleRentalService implements SettleRentalUseCase {
     @Override
     @Transactional(noRollbackFor = {OverBudgetSettlementException.class})
     public SettlementResult execute(SettleRentalCommand command) {
+        log.info("Settlement for rental id=[{}]", command.rentalRef().id());
         var existingCaptures = transactionRepository.findAllByRentalRefAndType(command.rentalRef(), TransactionType.CAPTURE);
         if (!existingCaptures.isEmpty()) {
             var captureRefs = existingCaptures.stream().map(t -> new TransactionRef(t.getId())).toList();
+            log.info("No settlement needed for rental id=[{}] as it exists with ids {}", command.rentalRef().id(), captureRefs);
             var releaseRef = transactionRepository
                     .findByRentalRefAndType(command.rentalRef(), TransactionType.RELEASE)
                     .map(t -> new TransactionRef(t.getId()))
@@ -46,19 +48,27 @@ public class SettleRentalService implements SettleRentalUseCase {
             return new SettlementResult(captureRefs, releaseRef, existingCaptures.getFirst().getRecordedAt());
         }
         if (command.finalCost().isZero()) {
-            log.info("No settlement needed for rental {} as final cost is zero", command.rentalRef().id());
+            log.info("No settlement needed for rental id=[{}] as final cost is zero", command.rentalRef().id());
             return new SettlementResult(List.of(), null, clock.instant());
         }
         var customerAccount = accountRepository.findByCustomerId(command.customerRef())
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerRef().id().toString()));
         var systemAccount = accountRepository.getSystemAccount();
 
-        var holdBalance = customerAccount.getOnHold().getBalance();
+        Optional<Transaction> holdOptional = transactionRepository.findByRentalRefAndType(command.rentalRef(), TransactionType.HOLD);
+        if (holdOptional.isEmpty()) {
+            log.info("No settlement needed for rental id=[{}] as no hold exists", command.rentalRef().id());
+            return new SettlementResult(List.of(), null, clock.instant());
+        }
+        var holdTxN = holdOptional.get();
+        var holdTxNAmount = holdTxN.getAmount();
+
         Instant now = clock.instant();
         var finalCost = command.finalCost();
 
         String sourceId = String.valueOf(command.rentalRef().id());
-        if (!finalCost.isMoreThan(holdBalance)) {
+        if (holdTxNAmount.isMoreThan(finalCost)) {
+            log.info("Final cost [{}] settlement needed for rental id=[{}] less than actual hold [{}]", finalCost, command.rentalRef().id(), holdTxN.getAmount());
             var captureHoldDebit = customerAccount.getOnHold().debit(finalCost);
             var captureRevenueCredit = systemAccount.getRevenue().credit(finalCost);
 
@@ -82,7 +92,7 @@ public class SettleRentalService implements SettleRentalUseCase {
                     .build();
             transactionRepository.save(captureTransaction);
 
-            var excess = customerAccount.getOnHold().getBalance();
+            var excess = holdTxNAmount.subtract(finalCost);
             var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, now)
                     .map(t -> new TransactionRef(t.getId()))
                     .orElse(null);
@@ -93,22 +103,25 @@ public class SettleRentalService implements SettleRentalUseCase {
             return new SettlementResult(List.of(new TransactionRef(captureId)), releaseTransactionRef, now);
         }
 
-        var shortfall = finalCost.subtract(holdBalance);
+        var shortfall = finalCost.subtract(holdTxNAmount);
         if (customerAccount.getWallet().getBalance().isLessThan(shortfall)) {
+            log.warn("Insufficient balance [{}] to cover shortfall [{}] for rental id=[{}]", customerAccount.getWallet().getBalance(),
+                    shortfall.amount(), command.rentalRef().id());
             throw new OverBudgetSettlementException(finalCost,
-                    holdBalance.add(customerAccount.getWallet().getBalance()));
+                    holdTxNAmount.add(customerAccount.getWallet().getBalance()));
         }
 
         var captureRefs = new ArrayList<TransactionRef>();
-        if (holdBalance.isPositive()) {
-            var holdDebit = customerAccount.getOnHold().debit(holdBalance);
-            var holdRevenueCredit = systemAccount.getRevenue().credit(holdBalance);
+        if (customerAccount.getOnHold().getBalance().isPositive()) {
+            log.info("Capturing customer's on hold [{}] for rental id=[{}]", holdTxNAmount.amount(), command.rentalRef().id());
+            var holdDebit = customerAccount.getOnHold().debit(holdTxNAmount);
+            var holdRevenueCredit = systemAccount.getRevenue().credit(holdTxNAmount);
             UUID holdCaptureId = uuidGenerator.generate();
             transactionRepository.save(Transaction.builder()
                     .id(holdCaptureId)
                     .type(TransactionType.CAPTURE)
                     .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
-                    .amount(holdBalance)
+                    .amount(holdTxNAmount)
                     .customerId(command.customerRef().id())
                     .operatorId(command.operatorId())
                     .sourceType(TransactionSourceType.RENTAL)
@@ -125,6 +138,7 @@ public class SettleRentalService implements SettleRentalUseCase {
         }
 
         if (shortfall.isPositive()) {
+            log.info("Capturing shortfall {} for rental {}", shortfall.amount(), command.rentalRef().id());
             var walletDebit = customerAccount.getWallet().debit(shortfall);
             var walletRevenueCredit = systemAccount.getRevenue().credit(shortfall);
             UUID walletCaptureId = uuidGenerator.generate();
@@ -176,6 +190,10 @@ public class SettleRentalService implements SettleRentalUseCase {
                     ))
                     .build();
             return Optional.of(transactionRepository.save(releaseTransaction));
+        }
+        if (excess.isNegative()) {
+            throw new IllegalArgumentException(
+                    "Unreachable state. The excess for rental %s is negative %s".formatted(command.rentalRef().id(), excess));
         }
         return Optional.empty();
     }
