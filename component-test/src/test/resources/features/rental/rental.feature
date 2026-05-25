@@ -88,8 +88,53 @@ Feature: Rental Management
       | customerId | equipmentId | equipmentId2 | plannedDuration |
       | CUS1       | 1           | 3            | 120             |
 
+  Scenario Outline: Create draft rental with all required fields
+    Given a rental request with the following data
+      | customerId   | equipmentIds                 | duration          | operatorId | discountPercent   | specialTariffId   | specialPrice   |
+      | <customerId> | <equipmentId>,<equipmentId2> | <plannedDuration> | OP1        | <discountPercent> | <specialTariffId> | <specialPrice> |
+    When a POST request has been made to "/api/rentals" endpoint
+    Then the response status is 201
+    And the rental response only contains
+      | customerId   | status | plannedDuration   | estimatedCost   | discountPercent   | specialTariffId   | specialPrice   |
+      | <customerId> | DRAFT  | <plannedDuration> | <estimatedCost> | <discountPercent> | <specialTariffId> | <specialPrice> |
+    And the rental response only contains rental equipments
+      | equipmentId    | equipmentUid   | status   | estimatedCost |
+      | <equipmentId>  | BIKE-001       | ASSIGNED | 16.00         |
+      | <equipmentId2> | HELM-ADULT-001 | ASSIGNED | 1.00          |
+    #    rental module
+    And rental equipments were persisted in database
+      | equipmentId    | equipmentUid   | status   | estimatedCost |
+      | <equipmentId>  | BIKE-001       | ASSIGNED | 16.00         |
+      | <equipmentId2> | HELM-ADULT-001 | ASSIGNED | 1.00          |
+    Examples:
+      | customerId | equipmentId | equipmentId2 | plannedDuration | estimatedCost | discountPercent | specialTariffId | specialPrice |
+      | CUS1       | 1           | 3            | 120             | 17            |                 |                 |              |
+      | CUS1       | 1           | 3            | 120             | 8.50          | 50              |                 |              |
+
+  Scenario Outline: Create draft rental with special price
+    Given a rental request with the following data
+      | customerId   | equipmentIds                 | duration          | operatorId | discountPercent   | specialTariffId   | specialPrice   |
+      | <customerId> | <equipmentId>,<equipmentId2> | <plannedDuration> | OP1        | <discountPercent> | <specialTariffId> | <specialPrice> |
+    When a POST request has been made to "/api/rentals" endpoint
+    Then the response status is 201
+    And the rental response only contains
+      | customerId   | status | plannedDuration   | estimatedCost   | discountPercent   | specialTariffId   | specialPrice   |
+      | <customerId> | DRAFT  | <plannedDuration> | <estimatedCost> | <discountPercent> | <specialTariffId> | <specialPrice> |
+    And the rental response only contains rental equipments
+      | equipmentId    | equipmentUid   | status   | estimatedCost |
+      | <equipmentId>  | BIKE-001       | ASSIGNED | 0.00          |
+      | <equipmentId2> | HELM-ADULT-001 | ASSIGNED | 0.00          |
+    #    rental module
+    And rental equipments were persisted in database
+      | equipmentId    | equipmentUid   | status   | estimatedCost |
+      | <equipmentId>  | BIKE-001       | ASSIGNED | 0.00          |
+      | <equipmentId2> | HELM-ADULT-001 | ASSIGNED | 0.00          |
+    Examples:
+      | customerId | equipmentId | equipmentId2 | plannedDuration | estimatedCost | discountPercent | specialTariffId | specialPrice |
+      | CUS1       | 1           | 3            | 120             | 1             |                 | 13              | 1            |
+
   @ResetClock
-  Scenario: Update rental with auto-selected tariff when no suitable tariff found
+  Scenario: Update rental when no suitable tariff found
     Given a single rental exists in the database with the following data
       | customerId | status | createdAt           | updatedAt           |
       | CUS1       | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |

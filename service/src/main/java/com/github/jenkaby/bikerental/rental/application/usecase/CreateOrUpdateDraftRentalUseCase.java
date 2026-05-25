@@ -15,6 +15,8 @@ public interface CreateOrUpdateDraftRentalUseCase {
 
     Rental execute(CreateDraftCommand command);
 
+    Rental execute(InitDraftCommand command);
+
     record UpdateDraftRentalCommand(
             Long rentalId,
             UUID customerId,
@@ -28,5 +30,14 @@ public interface CreateOrUpdateDraftRentalUseCase {
     }
 
     record CreateDraftCommand() {
+    }
+
+    record InitDraftCommand(UUID customerId,
+                            List<Long> equipmentIds,
+                            Duration duration,
+                            String operatorId,
+                            Long specialTariffId,
+                            Money specialPrice,
+                            DiscountPercent discountPercent) {
     }
 }
