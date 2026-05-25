@@ -586,6 +586,349 @@ class RentalCommandControllerTest {
     }
 
     @Nested
+    @DisplayName("POST /api/rentals")
+    class PostInitializeDraft {
+
+        @Nested
+        @DisplayName("Should return 201 Created")
+        class ShouldReturn201 {
+
+            @Test
+            @DisplayName("when request is valid with all required fields")
+            void whenRequestIsValid() throws Exception {
+                var request = new RentalRequest(
+                        VALID_CUSTOMER_ID,
+                        List.of(VALID_EQUIPMENT_ID),
+                        VALID_DURATION,
+                        "operator-1",
+                        null,
+                        null,
+                        null
+                );
+
+                Rental rental = mock(Rental.class);
+                given(rental.getId()).willReturn(1L);
+                given(commandMapper.toInitDraftRentalCommand(any(RentalRequest.class)))
+                        .willReturn(mock(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+                given(updateDraftRentalUseCase.execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class)))
+                        .willReturn(rental);
+                given(queryMapper.toResponse(any(Rental.class)))
+                        .willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated());
+
+                verify(updateDraftRentalUseCase).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("Should return 400 Bad Request")
+        class ShouldReturn400 {
+
+            @Test
+            @DisplayName("when request body is null")
+            void whenRequestBodyIsNull() throws Exception {
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("null"))
+                        .andExpect(status().isBadRequest());
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            @Test
+            @DisplayName("when customerId is null")
+            void whenCustomerIdIsNull() throws Exception {
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"equipmentIds\": [1], \"duration\": 120, \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("customerId"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            @Test
+            @DisplayName("when equipmentIds is null")
+            void whenEquipmentIdsIsNull() throws Exception {
+                var request = new RentalRequest(
+                        VALID_CUSTOMER_ID,
+                        null,
+                        VALID_DURATION,
+                        "operator-1",
+                        null,
+                        null,
+                        null
+                );
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("equipmentIds"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            @Test
+            @DisplayName("when equipmentIds contains null element")
+            void whenEquipmentIdsContainsNull() throws Exception {
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [1, null], \"duration\": 120, \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("equipmentIds[1]"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            static Stream<Arguments> invalidEquipmentIdValues() {
+                return Stream.of(
+                        Arguments.of("0", "equipmentIds[0]: must be greater than 0"),
+                        Arguments.of("-5", "equipmentIds[0]: must be greater than 0")
+                );
+            }
+
+            @ParameterizedTest
+            @MethodSource("invalidEquipmentIdValues")
+            @DisplayName("when equipmentIds contains non-positive values")
+            void whenEquipmentIdsContainsNonPositive(String equipmentId, String expectedError) throws Exception {
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [" + equipmentId + "], \"duration\": 120, \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            @Test
+            @DisplayName("when duration is null")
+            void whenDurationIsNull() throws Exception {
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [1], \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            static Stream<Arguments> invalidDurationValues() {
+                return Stream.of(
+                        Arguments.of(0, "duration: must be greater than 0"),
+                        Arguments.of(-1, "duration: must be greater than 0"),
+                        Arguments.of(-100, "duration: must be greater than 0")
+                );
+            }
+
+            @ParameterizedTest
+            @MethodSource("invalidDurationValues")
+            @DisplayName("when duration is non-positive")
+            void whenDurationIsNonPositive(int duration, String expectedError) throws Exception {
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [1], \"duration\": " + duration + ", \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            static Stream<Arguments> invalidOperatorIds() {
+                return Stream.of(
+                        Arguments.of("", "operatorId: must not be blank"),
+                        Arguments.of("   ", "operatorId: must not be blank")
+                );
+            }
+
+            @ParameterizedTest
+            @MethodSource("invalidOperatorIds")
+            @DisplayName("when operatorId is blank")
+            void whenOperatorIdIsBlank(String operatorId, String expectedError) throws Exception {
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [1], \"duration\": 120, \"operatorId\": \"" + operatorId + "\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            @Test
+            @DisplayName("when operatorId is missing")
+            void whenOperatorIdIsMissing() throws Exception {
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [1], \"duration\": 120}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            @Test
+            @DisplayName("when specialTariffId and discountPercent are both set (mutually exclusive)")
+            void whenSpecialTariffAndDiscountBothSet() throws Exception {
+                var request = new RentalRequest(
+                        VALID_CUSTOMER_ID,
+                        List.of(VALID_EQUIPMENT_ID),
+                        VALID_DURATION,
+                        "operator-1",
+                        99L,
+                        BigDecimal.valueOf(15.00),
+                        10
+                );
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            @Test
+            @DisplayName("when specialTariffId is set without specialPrice (inconsistent)")
+            void whenSpecialTariffIdWithoutSpecialPrice() throws Exception {
+                var request = new RentalRequest(
+                        VALID_CUSTOMER_ID,
+                        List.of(VALID_EQUIPMENT_ID),
+                        VALID_DURATION,
+                        "operator-1",
+                        99L,
+                        null,
+                        null
+                );
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest());
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            @Test
+            @DisplayName("when specialPrice is set without specialTariffId (inconsistent)")
+            void whenSpecialPriceWithoutSpecialTariffId() throws Exception {
+                var request = new RentalRequest(
+                        VALID_CUSTOMER_ID,
+                        List.of(VALID_EQUIPMENT_ID),
+                        VALID_DURATION,
+                        "operator-1",
+                        null,
+                        BigDecimal.valueOf(15.00),
+                        null
+                );
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+
+            static Stream<Arguments> invalidDiscountPercents() {
+                return Stream.of(
+                        Arguments.of(-1, "discountPercent: must be between 0 and 100"),
+                        Arguments.of(101, "discountPercent: must be between 0 and 100")
+                );
+            }
+
+            @ParameterizedTest
+            @MethodSource("invalidDiscountPercents")
+            @DisplayName("when discountPercent is out of range")
+            void whenDiscountPercentIsOutOfRange(Integer discountPercent, String expectedError) throws Exception {
+                var request = new RentalRequest(
+                        VALID_CUSTOMER_ID,
+                        List.of(VALID_EQUIPMENT_ID),
+                        VALID_DURATION,
+                        "operator-1",
+                        null,
+                        null,
+                        discountPercent
+                );
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"));
+
+                verify(updateDraftRentalUseCase, never()).execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("Should return 404 Not Found")
+        class ShouldReturn404 {
+
+            @Test
+            @DisplayName("when customer does not exist")
+            void whenCustomerDoesNotExist() throws Exception {
+                var request = new RentalRequest(
+                        UUID.randomUUID(),
+                        List.of(VALID_EQUIPMENT_ID),
+                        VALID_DURATION,
+                        "operator-1",
+                        null,
+                        null,
+                        null
+                );
+
+                given(commandMapper.toInitDraftRentalCommand(any(RentalRequest.class)))
+                        .willReturn(mock(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+                given(updateDraftRentalUseCase.execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class)))
+                        .willThrow(new ResourceNotFoundException("Customer", "customerId"));
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isNotFound());
+            }
+
+            @Test
+            @DisplayName("when equipment does not exist")
+            void whenEquipmentDoesNotExist() throws Exception {
+                var request = new RentalRequest(
+                        VALID_CUSTOMER_ID,
+                        List.of(999L),
+                        VALID_DURATION,
+                        "operator-1",
+                        null,
+                        null,
+                        null
+                );
+
+                given(commandMapper.toInitDraftRentalCommand(any(RentalRequest.class)))
+                        .willReturn(mock(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class));
+                given(updateDraftRentalUseCase.execute(any(CreateOrUpdateDraftRentalUseCase.InitDraftCommand.class)))
+                        .willThrow(new ResourceNotFoundException("Equipment", "999"));
+
+                mockMvc.perform(post(API_RENTALS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isNotFound());
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("PATCH /api/rentals/{id}")
     class PatchRentals {
 

@@ -68,4 +68,25 @@ class CreateOrUpdateDraftRentalService implements CreateOrUpdateDraftRentalUseCa
         return draft;
     }
 
+    @Override
+    @Transactional
+    public Rental execute(InitDraftCommand command) {
+
+        customerFacade.findById(command.customerId())
+                .orElseThrow(() -> new ReferenceNotFoundException("Customer", command.customerId().toString()));
+
+        var equipments = equipmentFacade.findByIds(command.equipmentIds());
+        validator.validateSize(command.equipmentIds(), equipments);
+        validator.validateEquipmentsCondition(equipments);
+        validator.validateAvailability(equipments);
+
+        var rental = Rental.createDraft();
+        rental.selectCustomer(command.customerId());
+        rental.setPlannedDuration(command.duration());
+        rental.setSpecialPriceOrDiscount(command.specialTariffId(), command.specialPrice(), command.discountPercent());
+        rental.updateEquipments(equipments);
+
+        rentalCostPolicy.recalculateEstimatedCost(rental);
+        return repository.save(rental);
+    }
 }
