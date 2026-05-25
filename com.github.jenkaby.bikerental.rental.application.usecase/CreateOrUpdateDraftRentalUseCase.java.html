@@ -15,7 +15,9 @@ public interface CreateOrUpdateDraftRentalUseCase {
 
     Rental execute(CreateDraftCommand command);
 
-<span class="fc" id="L18">    record UpdateDraftRentalCommand(</span>
+    Rental execute(InitDraftCommand command);
+
+<span class="fc" id="L20">    record UpdateDraftRentalCommand(</span>
             Long rentalId,
             UUID customerId,
             List&lt;Long&gt; equipmentIds,
@@ -27,7 +29,16 @@ public interface CreateOrUpdateDraftRentalUseCase {
     ) {
     }
 
-<span class="fc" id="L30">    record CreateDraftCommand() {</span>
+<span class="fc" id="L32">    record CreateDraftCommand() {</span>
+    }
+
+<span class="fc" id="L35">    record InitDraftCommand(UUID customerId,</span>
+                            List&lt;Long&gt; equipmentIds,
+                            Duration duration,
+                            String operatorId,
+                            Long specialTariffId,
+                            Money specialPrice,
+                            DiscountPercent discountPercent) {
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

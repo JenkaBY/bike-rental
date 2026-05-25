@@ -32,24 +32,26 @@ import java.util.Map;
 
     public abstract CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand toUpdateDraftRentalCommand(Long rentalId, RentalRequest request);
 
+    public abstract CreateOrUpdateDraftRentalUseCase.InitDraftCommand toInitDraftRentalCommand(RentalRequest request);
+
     public abstract ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request);
 
     public RentalReturnResponse toReturnResponse(ReturnEquipmentUseCase.ReturnEquipmentResult result) {
-<span class="fc" id="L38">        RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());</span>
-<span class="fc" id="L39">        var settlementResponse = settlementMapper.toResponse(result.settlementInfo());</span>
-<span class="fc" id="L40">        return new RentalReturnResponse(rentalResponse, settlementResponse);</span>
+<span class="fc" id="L40">        RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());</span>
+<span class="fc" id="L41">        var settlementResponse = settlementMapper.toResponse(result.settlementInfo());</span>
+<span class="fc" id="L42">        return new RentalReturnResponse(rentalResponse, settlementResponse);</span>
     }
 
     public Map&lt;String, Object&gt; toPatchMap(RentalUpdateJsonPatchRequest request) {
-<span class="fc" id="L44">        Map&lt;String, Object&gt; patch = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L45" title="All 2 branches covered.">        for (RentalPatchOperation operation : request.getOperations()) {</span>
-<span class="fc" id="L46">            String path = operation.getPath();</span>
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">            String fieldName = path.startsWith(&quot;/&quot;) ? path.substring(1) : path;</span>
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">            if (operation.getOp() != null) {</span>
-<span class="fc" id="L49">                patch.put(fieldName, operation.getValue());</span>
+<span class="fc" id="L46">        Map&lt;String, Object&gt; patch = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        for (RentalPatchOperation operation : request.getOperations()) {</span>
+<span class="fc" id="L48">            String path = operation.getPath();</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">            String fieldName = path.startsWith(&quot;/&quot;) ? path.substring(1) : path;</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">            if (operation.getOp() != null) {</span>
+<span class="fc" id="L51">                patch.put(fieldName, operation.getValue());</span>
             }
-<span class="fc" id="L51">        }</span>
-<span class="fc" id="L52">        return patch;</span>
+<span class="fc" id="L53">        }</span>
+<span class="fc" id="L54">        return patch;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
