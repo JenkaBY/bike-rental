@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="finance_accounts.provision-data" author="copilot" context="!test">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="finance_accounts"/>
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM finance_accounts
+                                         WHERE account_type = 'CUSTOMER'
+                                           and customer_id = '11111111-1111-1111-1111-111111111111'
+            </sqlCheck>
+        </preConditions>
+
+        <loadData tableName="finance_accounts"
+                  file="data/finance_accounts-customers.csv"
+                  relativeToChangelogFile="true">
+            <column name="id" type="uuid"/>
+            <column name="account_type" type="string"/>
+            <column name="customer_id" type="uuid"/>
+            <column name="created_at" type="datetime"/>
+        </loadData>
+    </changeSet>
+
+</databaseChangeLog>
