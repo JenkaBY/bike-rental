@@ -9,6 +9,7 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 public final class DegressiveHourlyTariffV2 extends TariffV2 {
@@ -32,7 +33,8 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
     }
 
     @Override
-    public RentalCostV2 calculateCost(Duration duration) {
+    public RentalCostV2 calculateCost(LocalDateTime startAt, LocalDateTime returnAt) {
+        Duration duration = Duration.between(startAt, returnAt);
         if (isNegative(duration)) {
             return new BaseRentalCostV2(Money.zero(), new BreakdownCostDetails.Zero());
         }

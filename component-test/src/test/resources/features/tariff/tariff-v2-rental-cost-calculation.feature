@@ -165,7 +165,7 @@ Feature: Tariff V2 API
       | 10              | 10             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
       | 60              | 60             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
       | 67              | 60             | 1    | 1        | 1     | 0               | 0              | 7        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
-      | 1440            | 1440           | 1    | 1        | 1     | 0               | 0              | 1380     |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
+      | 1440            | 1440           | 2    | 2        | 2     | 0               | 0              | 1380     |          | Flat fee: 1*2d = 2 | breakdown.cost.flat_fee |
       | 1441            | 1441           | 2    | 2        | 2     | 0               | 0              | 1381     |          | Flat fee: 1*2d = 2 | breakdown.cost.flat_fee |
       #     Discount applied
       | 305             | 305            | 1    | 1        | 0.9   | 10              | 0.1            | 245      | 0        | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |

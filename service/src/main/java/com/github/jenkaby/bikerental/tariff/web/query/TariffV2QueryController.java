@@ -123,7 +123,9 @@ public class TariffV2QueryController {
         log.info("[GET] Select V2 tariff for equipmentType={}, durationMinutes={}", equipmentType, durationMinutes);
         var duration = Duration.ofMinutes(durationMinutes);
         var tariff = selectTariffUseCase.execute(new SelectTariffV2UseCase.SelectTariffCommand(equipmentType, duration, rentalDate));
-        var cost = tariff.calculateCost(duration);
+        var startAt = rentalDate.atStartOfDay();
+        var returnAt = startAt.plus(duration);
+        var cost = tariff.calculateCost(startAt, returnAt);
         var response = new TariffSelectionV2Response(
                 mapper.toResponse(tariff),
                 cost.totalCost().amount(),

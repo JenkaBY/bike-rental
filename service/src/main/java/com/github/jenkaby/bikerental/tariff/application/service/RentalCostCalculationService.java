@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -122,7 +123,9 @@ class RentalCostCalculationService implements RentalCostCalculationUseCase {
         for (EquipmentCostItem item : command.equipments()) {
             TariffV2 tariff = tariffCache.computeIfAbsent(item.equipmentType(),
                     type -> selectTariffUseCase.execute(new SelectTariffV2UseCase.SelectTariffCommand(item.equipmentType(), billedDuration, rentalDate)));
-            RentalCostV2 cost = tariff.calculateCost(billedDuration);
+            LocalDateTime startAt = rentalDate.atStartOfDay();
+            LocalDateTime returnAt = startAt.plus(billedDuration);
+            RentalCostV2 cost = tariff.calculateCost(startAt, returnAt);
 
             breakdowns.add(new BaseEquipmentCostBreakdown(
                     item.equipmentType(),

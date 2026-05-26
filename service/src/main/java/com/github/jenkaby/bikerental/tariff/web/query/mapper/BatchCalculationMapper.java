@@ -46,7 +46,15 @@ public abstract class BatchCalculationMapper {
     @Mapping(target = "discount", source = "discountPercent")
     public abstract RentalCostCalculationCommand toCommand(CostCalculationRequest request);
 
+    @Mapping(target = "plannedDuration", source = "plannedDurationMinutes")
+    @Mapping(target = "actualDuration", source = "actualDurationMinutes")
+    @Mapping(target = "discount", source = "discountPercent")
+    @Mapping(target = "rentalDate", ignore = true)
+    public abstract RentalCostCalculationCommand toCommand(com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request request);
+
     public abstract EquipmentCostItem toItem(CostCalculationRequest.EquipmentItemRequest item);
+
+    public abstract EquipmentCostItem toItem(com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request.EquipmentItemRequest item);
 
     //    TODO use Mapstruct features
     public CostCalculationResponse toResponse(RentalCostCalculationResult result) {
