@@ -1,41 +1,28 @@
-package com.github.jenkaby.bikerental.tariff.web.query;
+# Task 010: Fix TariffV2CalculationController — URL typo and V2 facade wiring
 
-import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
-import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
-import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
-import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
-import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
-import com.github.jenkaby.bikerental.tariff.web.query.mapper.BatchCalculationMapper;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+> **Applied Skill:** `springboot.instructions.md` — @RestController pattern; `java.instructions.md` — no dead code
 
-@Validated
-@Slf4j
-@RestController
-@RequestMapping(path = "/api/tariffs", produces = {MediaType.APPLICATION_JSON_VALUE})
-@Tag(name = OpenApiConfig.Tags.TARIFFS, description = "Tariff V2 API")
-public class TariffV2CalculationController {
+## 1. Objective
 
-    private final TariffV2Facade tariffV2Facade;
-    private final BatchCalculationMapper requestMapper;
+Fix two bugs in the existing `PUT` handler:
 
-    TariffV2CalculationController(TariffV2Facade tariffV2Facade, BatchCalculationMapper requestMapper) {
-        this.tariffV2Facade = tariffV2Facade;
-        this.requestMapper = requestMapper;
-    }
+1. **URL typo**: `/calucations` → `/calculations`
+2. **Wrong facade call**: `calculateRentalCost(command)` (V1) → `calculateRentalCostV2(command)` (V2)
+3. **Wrong mapper call**: `requestMapper.toCommand(request)` (maps to V1 command) → `requestMapper.toV2Command(request)`
 
-    @PostMapping("/calculate")
+## 2. File to Modify
+
+* **File Path:**
+  `service/src/main/java/com/github/jenkaby/bikerental/tariff/web/query/TariffV2CalculationController.java`
+* **Action:** Modify Existing File
+
+**Code to Replace:**
+
+* **Location:** The entire `costCalculations` handler method.
+* **Remove:**
+
+```java
+    @PutMapping("/calucations")
     @Operation(summary = "Calculate rental cost for multiple equipment items",
             description = "Supports normal mode (auto-select tariffs, apply discount) and SPECIAL mode (fixed group price)")
     @ApiResponses({
@@ -46,13 +33,17 @@ public class TariffV2CalculationController {
             @ApiResponse(responseCode = "404", description = "No suitable tariff found for an equipment type",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity<CostCalculationResponse> calculateCost(@Valid @RequestBody CostCalculationRequest request) {
-        log.info("[POST] Batch cost calculation for {} equipment item(s)", request.equipments().size());
+    public ResponseEntity<CostCalculationResponse> costCalculations(@Valid @RequestBody CostCalculationV2Request request) {
+        log.info("[PUT] Batch cost calculation for {} equipment item(s)", request.equipments().size());
         var command = requestMapper.toCommand(request);
         var result = tariffV2Facade.calculateRentalCost(command);
         return ResponseEntity.ok(requestMapper.toResponse(result));
     }
+```
 
+* **Replace with:**
+
+```java
     @PutMapping("/calculations")
     @Operation(summary = "Calculate V2 rental cost with per-equipment return timestamps",
             description = "Supports normal mode (per-equipment billing from global startAt) and SPECIAL mode (fixed group price)")
@@ -70,4 +61,8 @@ public class TariffV2CalculationController {
         var result = tariffV2Facade.calculateRentalCostV2(command);
         return ResponseEntity.ok(requestMapper.toResponse(result));
     }
-}
+```
+
+## 4. Validation Steps
+
+skip

@@ -6,18 +6,15 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
-public record RentalCostCalculationCommand(
-        @NonNull List<EquipmentCostItem> equipments,
+public record RentalCostCalculationV2Command(
+        @NonNull List<EquipmentCostItemV2> equipments,
         @NonNull Duration plannedDuration,
         @Nullable DiscountPercent discount,
         @Nullable Long specialTariffId,
         @Nullable Money specialPrice,
-        LocalDate rentalDate
+        @NonNull LocalDateTime startAt
 ) {
-    public Duration effectiveDuration() {
-        return plannedDuration;
-    }
 }

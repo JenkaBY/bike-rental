@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.tariff.web.query.dto;
 import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,6 +22,8 @@ public record CostCalculationResponse(
 ) {
     @Schema(description = "Per-equipment cost breakdown")
     public record EquipmentCostBreakdownResponse(
+            @Schema(description = "Physical equipment unit ID; null for V1 calculations")
+            @Nullable Long equipmentId,
             @NotNull String equipmentType,
             @NotNull Long tariffId,
             @NotNull String tariffName,

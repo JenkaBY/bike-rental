@@ -69,7 +69,7 @@ pre-migrated DB, leave `spring.liquibase.enabled=false` in `application-test.yam
 ```
 
 Prefer to run individual test class by adding `--tests {testClassName}` for faster feedback.
-Eg. `./gradlew :service:test "-Dspring.profiles.active=test" --tests BikeRentalApplicationTest`
+Eg. `./gradlew :service:test "-Dspring.profiles.active=test" --tests TariffV2CommandControllerTest`
 
 ### Run component tests locally
 
@@ -85,7 +85,8 @@ Assume that DB is spun up already and accepts connections.
 ./gradlew :service:bootRun "-spring.profiles.active=local"
 ```
 
-Requires `service/src/main/resources/application-local.properties` (not committed) with `DATASOURCE_URL`,
+Requires `service/src/main/resources/application-local.properties` which referenced on the `nocommit.properties`(not
+committed) with `DATASOURCE_URL`,
 `DATASOURCE_USER`, `DATASOURCE_SECRET`.
 
 ### MapStruct compiler flags (set in `service/build.gradle`)
@@ -123,11 +124,11 @@ Module-scoped advice classes (e.g. `EquipmentRestControllerAdvice`) use
 
 ### Time Types
 
-| Type            | Usage                                          |
-|-----------------|------------------------------------------------|
-| `Instant`       | Audit fields: `createdAt`, `updatedAt` (UTC)   |
-| `LocalDateTime` | Business time: `startedAt`, `expectedReturnAt` |
-| `LocalDate`     | Date-only: `birthDate`, `validFrom`            |
+| Type            | Usage                                                                    |
+|-----------------|--------------------------------------------------------------------------|
+| `Instant`       | Audit fields: `createdAt`, `updatedAt` (UTC). Use only for API requests. |
+| `LocalDateTime` | Business time: `startedAt`, `expectedReturnAt`                           |
+| `LocalDate`     | Date-only: `birthDate`, `validFrom`. Use only for API requests.          |
 
 `InstantMapper` (shared) handles conversion between layers automatically via MapStruct.
 
@@ -153,4 +154,3 @@ Hard constraints (zero inline comments, records for DTOs, constructor injection,
 | `service/src/test/java/.../support/web/ApiTest.java`      | WebMvc test base annotation                                                                            |
 | `shared/web/advice/CoreExceptionHandlerAdvice.java`       | Global exception handler reference                                                                     |
 | `component-test/src/test/java/.../RunComponentTests.java` | Cucumber suite runner                                                                                  |
-

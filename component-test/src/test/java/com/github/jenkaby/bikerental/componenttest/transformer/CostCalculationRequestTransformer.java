@@ -18,7 +18,7 @@ public class CostCalculationRequestTransformer {
                 .toList();
 
         var plannedDurationMinutes = toInt(entry, "plannedDurationMinutes");
-        var actualDurationMinutes = toInt(entry, "actualDurationMinutes");
+//        var actualDurationMinutes = toInt(entry, "actualDurationMinutes");
         var discountPercent = toInt(entry, "discountPercent");
         var specialTariffId = toLong(entry, "specialTariffId");
         var specialPrice = toBigDecimal(entry, "specialPrice");
@@ -27,7 +27,7 @@ public class CostCalculationRequestTransformer {
         return new CostCalculationRequest(
                 equipments,
                 plannedDurationMinutes,
-                actualDurationMinutes,
+//                actualDurationMinutes,
                 discountPercent,
                 specialTariffId,
                 specialPrice,

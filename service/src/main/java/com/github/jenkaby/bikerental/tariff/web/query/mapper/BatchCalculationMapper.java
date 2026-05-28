@@ -3,14 +3,17 @@ package com.github.jenkaby.bikerental.tariff.web.query.mapper;
 import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
-import com.github.jenkaby.bikerental.tariff.EquipmentCostItem;
-import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
-import com.github.jenkaby.bikerental.tariff.RentalCostCalculationResult;
+import com.github.jenkaby.bikerental.tariff.*;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Mapper(uses = {MoneyMapper.class, DurationMapper.class, DiscountMapper.class, CalculationBreakdownMapper.class})
 public abstract class BatchCalculationMapper {
@@ -42,19 +45,21 @@ public abstract class BatchCalculationMapper {
 
     @Mapping(target = "equipments", source = "equipments")
     @Mapping(target = "plannedDuration", source = "plannedDurationMinutes")
-    @Mapping(target = "actualDuration", source = "actualDurationMinutes")
     @Mapping(target = "discount", source = "discountPercent")
     public abstract RentalCostCalculationCommand toCommand(CostCalculationRequest request);
 
-    @Mapping(target = "plannedDuration", source = "plannedDurationMinutes")
-    @Mapping(target = "actualDuration", source = "actualDurationMinutes")
-    @Mapping(target = "discount", source = "discountPercent")
-    @Mapping(target = "rentalDate", ignore = true)
-    public abstract RentalCostCalculationCommand toCommand(com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request request);
 
     public abstract EquipmentCostItem toItem(CostCalculationRequest.EquipmentItemRequest item);
 
-    public abstract EquipmentCostItem toItem(com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request.EquipmentItemRequest item);
+    @Mapping(target = "plannedDuration", source = "plannedDurationMinutes")
+    @Mapping(target = "discount", source = "discountPercent")
+    public abstract RentalCostCalculationV2Command toV2Command(CostCalculationV2Request request);
+
+    public abstract EquipmentCostItemV2 toV2Item(CostCalculationV2Request.EquipmentItemRequest item);
+
+    protected LocalDateTime map(Instant value) {
+        return value == null ? null : LocalDateTime.ofInstant(value, ZoneOffset.UTC);
+    }
 
     //    TODO use Mapstruct features
     public CostCalculationResponse toResponse(RentalCostCalculationResult result) {
