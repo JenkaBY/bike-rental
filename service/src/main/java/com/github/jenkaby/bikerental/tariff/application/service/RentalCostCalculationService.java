@@ -86,11 +86,36 @@ class RentalCostCalculationService implements RentalCostCalculationUseCase {
     private RentalCostCalculationResult executeNormalMode(RentalCostCalculationCommand command) {
         LocalDate rentalDate = Optional.ofNullable(command.rentalDate()).orElse(LocalDate.now(clock));
         Duration planned = command.plannedDuration();
-        boolean estimate = true;
+        Duration actual = command.actualDuration();
+        boolean estimate = actual == null;
         Duration effective = command.effectiveDuration();
-        Duration billedDuration = planned;
-        Duration overtime = Duration.ZERO;
-        Duration forgiven = Duration.ZERO;
+        Duration billedDuration;
+        Duration overtime;
+        Duration forgiven;
+
+        if (estimate) {
+            billedDuration = planned;
+            overtime = Duration.ZERO;
+            forgiven = Duration.ZERO;
+        } else {
+            Duration overtimeDur = actual.minus(planned);
+            if (overtimeDur.isNegative() || overtimeDur.isZero()) {
+                billedDuration = actual;
+                overtime = Duration.ZERO;
+                forgiven = Duration.ZERO;
+            } else {
+                overtime = overtimeDur;
+                int thresholdMinutes = rentalProperties.getForgivenessThresholdMinutes();
+                long overtimeMinutes = overtimeDur.toMinutes();
+                if (overtimeMinutes <= thresholdMinutes) {
+                    billedDuration = planned;
+                    forgiven = overtimeDur;
+                } else {
+                    billedDuration = actual;
+                    forgiven = Duration.ZERO;
+                }
+            }
+        }
 
         List<EquipmentCostBreakdown> breakdowns = new ArrayList<>();
         Money subtotal = Money.zero();

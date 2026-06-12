@@ -12,12 +12,13 @@ import java.util.List;
 public record RentalCostCalculationCommand(
         @NonNull List<EquipmentCostItem> equipments,
         @NonNull Duration plannedDuration,
+        @Nullable Duration actualDuration,
         @Nullable DiscountPercent discount,
         @Nullable Long specialTariffId,
         @Nullable Money specialPrice,
         LocalDate rentalDate
 ) {
     public Duration effectiveDuration() {
-        return plannedDuration;
+        return actualDuration != null ? actualDuration : plannedDuration;
     }
 }

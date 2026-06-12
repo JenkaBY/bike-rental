@@ -46,6 +46,7 @@ public abstract class BatchCalculationMapper {
     @Mapping(target = "equipments", source = "equipments")
     @Mapping(target = "plannedDuration", source = "plannedDurationMinutes")
     @Mapping(target = "discount", source = "discountPercent")
+    @Mapping(target = "actualDuration", source = "actualDurationMinutes")
     public abstract RentalCostCalculationCommand toCommand(CostCalculationRequest request);
 
 

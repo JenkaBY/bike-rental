@@ -15,6 +15,7 @@ import java.util.List;
 public record CostCalculationRequest(
         @NotEmpty List<@NotNull @Valid EquipmentItemRequest> equipments,
         @NotNull @Positive Integer plannedDurationMinutes,
+        @Min(0) Integer actualDurationMinutes,
         @PercentValue Integer discountPercent,
         @Positive Long specialTariffId,
         @DecimalMin("0") BigDecimal specialPrice,

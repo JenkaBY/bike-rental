@@ -1,4 +1,4 @@
-Feature: Tariff V2 API
+Feature: Tariff V2 API rental cost calculation
   As an operator
   I want to know the rental cost calculation with the pricing model
   So that I can request the cost calculation for a rental with the tariff v2
@@ -34,17 +34,17 @@ Feature: Tariff V2 API
     Then the response status is 200
     And the rental cost calculation response only contains
       | totalCost  | subtotal | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate   | specialPricingApplied |
-      | <subtotal> | <total>  | <discountAmount> | <discountPercent> | <durationMinutes>        | <estimate> | <special>             |
+      | <subtotal> | <total>  | <discountAmount> | <discountPercent> | <durationMinutes>        | false | <special>             |
     And the rental cost calculation response only contains the breakdown with the following data
       | equipmentType   | tariffId   | tariffName   | pricingType   | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
       | <equipmentType> | <tariffId> | <tariffName> | <pricingType> | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
-      | pricingType       | equipmentType | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | specialTariffId | specialPrice | rentalDate | tariffId | tariffName          | overtime | forgiven | message                           | pattern                                   | special | estimate |
-      | DEGRESSIVE_HOURLY | BICYCLE       | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |                 |              |            | 1        | Hourly Bicycle      |          |          | 1h 0min degressive: 9 = 9         | breakdown.cost.degressive_hourly.standard | false   | false    |
-      | FLAT_HOURLY       | SCOOTER       | 60              | 60             | 15.00 | 15.00    | 15.00 | 0               | 0              |                 |              |            | 2        | Flat Hourly Scooter |          |          | 1h 0min flat: 1*15 + partial = 15 | breakdown.cost.flat_hourly.standard       | false   | false    |
-      | DAILY             | BICYCLE       | 480             | 480            | 25.00 | 25.00    | 25.00 | 0               | 0              |                 |              |            | 3        | Daily Bicycle       |          |          | 1d = 25                           | breakdown.cost.daily.standard             | false   | false    |
-      | FLAT_FEE          | HELMET        | 60              | 60             | 1     | 1        | 1     | 0               | 0              |                 |              |            | 4        | Flat Fee Helmet     |          |          | Flat fee: 1*1d = 1                | breakdown.cost.flat_fee                   | false   | false    |
-      | SPECIAL           | ANY           | 60              | 60             | 0     | 666      | 666   | 0               | 0              | 5               | 666          |            | 5        | Special Tariff      |          |          | Special tariff applied to group   | breakdown.cost.special.group              | true    | false    |
+      | pricingType       | equipmentType | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | specialTariffId | specialPrice | rentalDate | tariffId | tariffName          | overtime | forgiven | message                           | pattern                                   | special |
+      | DEGRESSIVE_HOURLY | BICYCLE       | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |                 |              |            | 1        | Hourly Bicycle      |          |          | 1h 0min degressive: 9 = 9         | breakdown.cost.degressive_hourly.standard | false   |
+      | FLAT_HOURLY       | SCOOTER       | 60              | 60             | 15.00 | 15.00    | 15.00 | 0               | 0              |                 |              |            | 2        | Flat Hourly Scooter |          |          | 1h 0min flat: 1*15 + partial = 15 | breakdown.cost.flat_hourly.standard       | false   |
+      | DAILY             | BICYCLE       | 480             | 480            | 25.00 | 25.00    | 25.00 | 0               | 0              |                 |              |            | 3        | Daily Bicycle       |          |          | 1d = 25                           | breakdown.cost.daily.standard             | false   |
+      | FLAT_FEE          | HELMET        | 60              | 60             | 1     | 1        | 1     | 0               | 0              |                 |              |            | 4        | Flat Fee Helmet     |          |          | Flat fee: 1*1d = 1                | breakdown.cost.flat_fee                   | false   |
+      | SPECIAL           | ANY           | 60              | 60             | 0     | 666      | 666   | 0               | 0              | 5               | 666          |            | 5        | Special Tariff      |          |          | Special tariff applied to group   | breakdown.cost.special.group              | true    |
 
 
   Scenario Outline: Get rental cost calculation for a single rental - DEGRESSIVE_HOURLY:<durationMinutes>min
@@ -55,30 +55,30 @@ Feature: Tariff V2 API
     Then the response status is 200
     And the rental cost calculation response only contains
       | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate   |
-      | <total>   | <subtotal> | <discountAmount> | <discountPercent> | <durationMinutes>        | <estimate> |
+      | <total>   | <subtotal> | <discountAmount> | <discountPercent> | <durationMinutes>        | false |
     And the rental cost calculation response only contains the breakdown with the following data
       | equipmentType | tariffId | tariffName     | pricingType       | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
       | BICYCLE       | 1        | Hourly Bicycle | DEGRESSIVE_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
-      | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                                     | pattern                                   | estimate |
-      | 5               | 5              | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  | false    |
-      | 20              | 20             | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  | false    |
-      | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |          |          | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard | false    |
-      | 65              | 60             | 9.00  | 9.00     | 9.0   | 0               | 0              | 5        | 5        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard | false    |
-      | 68              | 68             | 9.58  | 9.58     | 9.58  | 0               | 0              | 8        | 0        | 1h 8min degressive: 9+1*(7/12) = 9.58       | breakdown.cost.degressive_hourly.standard | false    |
-      | 70              | 70             | 10.16 | 10.16    | 10.16 | 0               | 0              | 10       | 0        | 1h 10min degressive: 9+2*(7/12) = 10.16     | breakdown.cost.degressive_hourly.standard | false    |
-      | 120             | 120            | 16    | 16       | 16    | 0               | 0              | 60       | 0        | 2h 0min degressive: 9+7 = 16                | breakdown.cost.degressive_hourly.standard | false    |
-      | 180             | 180            | 21    | 21       | 21    | 0               | 0              | 120      | 0        | 3h 0min degressive: 9+7+5 = 21              | breakdown.cost.degressive_hourly.standard | false    |
-      | 240             | 240            | 24    | 24       | 24    | 0               | 0              | 180      | 0        | 4h 0min degressive: 9+7+5+3 = 24            | breakdown.cost.degressive_hourly.standard | false    |
-      | 300             | 300            | 25    | 25       | 25    | 0               | 0              | 240      | 0        | 5h 0min degressive: 9+7+5+3+1 = 25          | breakdown.cost.degressive_hourly.standard | false    |
-      | 304             | 304            | 25    | 25       | 25    | 0               | 0              | 244      | 0        | 5h 4min degressive: 9+7+5+3+1+0*(1/12) = 25 | breakdown.cost.degressive_hourly.standard | false    |
+      | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                                     | pattern                                   |
+      | 5               | 5              | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  |
+      | 20              | 20             | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  |
+      | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |          |          | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
+      | 65              | 60             | 9.00  | 9.00     | 9.0   | 0               | 0              | 5        | 5        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
+      | 68              | 68             | 9.58  | 9.58     | 9.58  | 0               | 0              | 8        | 0        | 1h 8min degressive: 9+1*(7/12) = 9.58       | breakdown.cost.degressive_hourly.standard |
+      | 70              | 70             | 10.16 | 10.16    | 10.16 | 0               | 0              | 10       | 0        | 1h 10min degressive: 9+2*(7/12) = 10.16     | breakdown.cost.degressive_hourly.standard |
+      | 120             | 120            | 16    | 16       | 16    | 0               | 0              | 60       | 0        | 2h 0min degressive: 9+7 = 16                | breakdown.cost.degressive_hourly.standard |
+      | 180             | 180            | 21    | 21       | 21    | 0               | 0              | 120      | 0        | 3h 0min degressive: 9+7+5 = 21              | breakdown.cost.degressive_hourly.standard |
+      | 240             | 240            | 24    | 24       | 24    | 0               | 0              | 180      | 0        | 4h 0min degressive: 9+7+5+3 = 24            | breakdown.cost.degressive_hourly.standard |
+      | 300             | 300            | 25    | 25       | 25    | 0               | 0              | 240      | 0        | 5h 0min degressive: 9+7+5+3+1 = 25          | breakdown.cost.degressive_hourly.standard |
+      | 304             | 304            | 25    | 25       | 25    | 0               | 0              | 244      | 0        | 5h 4min degressive: 9+7+5+3+1+0*(1/12) = 25 | breakdown.cost.degressive_hourly.standard |
       # starts the next DAILY tariff
-      # | 360             | 360            | 25    | 25       | 25    | 0               | 0              | 300      | 0        | 24h daily: 25.0                                | breakdown.cost.daily.standard             | false    |
+      # | 360             | 360            | 25    | 25       | 25    | 0               | 0              | 300      | 0        | 24h daily: 25.0                                | breakdown.cost.daily.standard             |
       #
       #     Discount applied
-      | 60              | 60             | 9     | 9.0      | 8.1   | 10              | 0.9            | 0        | 0        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard | false    |
-      | 60              | 60             | 9     | 9.0      | 0     | 100             | 9              | 0        | 0        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard | false    |
-      | 300             | 300            | 25    | 25       | 12.5  | 50              | 12.5           | 240      | 0        | 5h 0min degressive: 9+7+5+3+1 = 25          | breakdown.cost.degressive_hourly.standard | false    |
+      | 60              | 60             | 9     | 9.0      | 8.1   | 10              | 0.9            | 0        | 0        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
+      | 60              | 60             | 9     | 9.0      | 0     | 100             | 9              | 0        | 0        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
+      | 300             | 300            | 25    | 25       | 12.5  | 50              | 12.5           | 240      | 0        | 5h 0min degressive: 9+7+5+3+1 = 25          | breakdown.cost.degressive_hourly.standard |
 
 
   Scenario: Multiple rental equipments calculation

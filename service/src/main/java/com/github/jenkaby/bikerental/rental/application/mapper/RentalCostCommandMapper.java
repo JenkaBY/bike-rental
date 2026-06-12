@@ -39,6 +39,7 @@ public abstract class RentalCostCommandMapper {
                     costItems,
                     command.duration(),
                     null,
+                    null,
                     command.specialTariffId(),
                     command.specialPrice(),
                     LocalDate.now(clock));
@@ -46,6 +47,7 @@ public abstract class RentalCostCommandMapper {
         return new RentalCostCalculationCommand(
                 costItems,
                 command.duration(),
+                null,
                 command.discountPercent(),
                 null,
                 null,
@@ -61,6 +63,7 @@ public abstract class RentalCostCommandMapper {
                     costItems,
                     rental.getPlannedDuration(),
                     null,
+                    null,
                     rental.getSpecialTariffId(),
                     rental.getSpecialPrice(),
                     LocalDate.now(clock));
@@ -68,6 +71,7 @@ public abstract class RentalCostCommandMapper {
         return new RentalCostCalculationCommand(
                 costItems,
                 rental.getPlannedDuration(),
+                null,
                 rental.getDiscountPercent(),
                 null,
                 null,
@@ -84,6 +88,7 @@ public abstract class RentalCostCommandMapper {
         return new RentalCostCalculationCommand(
                 costItems,
                 rental.getPlannedDuration(),
+                actualDuration,
                 rental.getDiscountPercent(),
                 rental.getSpecialTariffId(),
                 rental.getSpecialPrice(),
