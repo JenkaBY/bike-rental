@@ -24,3 +24,15 @@ bin/
 
 ### Project related ###
 nocommit.properties
+
+### Deprecated AI assistant config (migrated to Claude — see docs/claude-migration.md) ###
+# Legacy GitHub Copilot configuration (superseded by .claude/ and CLAUDE.md)
+.github/agents/
+.github/prompts/
+.github/instructions/
+.github/skills/
+.github/copilot-instructions.md
+# Legacy Cursor configuration (superseded by CLAUDE.md)
+.cursor/
+# Claude Code local settings
+.claude/settings.local.json

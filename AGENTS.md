@@ -100,33 +100,10 @@ Requires `service/src/main/resources/application-local.properties` (not committe
 
 ## Testing Conventions
 
-### Unit / WebMvc tests — `service` module
+Maintained as path-scoped rules — single source of truth:
 
-WebMvc tests use the `@ApiTest` meta-annotation (`support/web/ApiTest.java`):
-
-```java
-
-@ApiTest(controllers = RentalCommandController.class)
-class RentalCommandControllerTest { ...
-}
-```
-
-`@ApiTest` activates profile `test`, imports `TestingAppConfig` (which registers `CorsProperties` via
-`@EnableConfigurationProperties` and imports `UuidCreatorAdapter` + `BaseValidationErrorMapper`). Always use
-`@ApiTest` for controller slice tests — never bare `@WebMvcTest`.
-
-Use `@MockitoBean` (not `@MockBean`) for Spring-managed dependencies in WebMvc tests.
-
-### Component (integration) tests — `component-test` module
-
-Cucumber features in `component-test/src/test/resources/features/`. Runner: `RunComponentTests`. Tag `@skip` to
-suppress; tag `@run` + swap the filter line to run a single scenario during development.
-
-Component tests cover happy paths only; request-validation negative cases belong in WebMvc tests.
-
-### Assertions
-
-**AssertJ only** — `assertThat(actual).as("description")...`
+- Unit / WebMvc tests (`service` module): [.claude/rules/unit-tests.md](.claude/rules/unit-tests.md)
+- Component tests (`component-test` module): [.claude/rules/component-tests.md](.claude/rules/component-tests.md)
 
 ---
 
@@ -159,9 +136,10 @@ Module-scoped advice classes (e.g. `EquipmentRestControllerAdvice`) use
 Typed config via `@ConfigurationProperties` records, auto-scanned from `BikeRentalApplication`. Key prefixes:
 `app.rental`, `app.cors`, `app` (default locale). Always inject via constructor, never `@Value`.
 
-### No Comments in Code
+### Java Style
 
-The project convention is **zero inline comments**. Use expressive naming and self-documenting structures.
+Hard constraints (zero inline comments, records for DTOs, constructor injection, immutability) are maintained in
+[.claude/rules/java-style.md](.claude/rules/java-style.md).
 
 ---
 
