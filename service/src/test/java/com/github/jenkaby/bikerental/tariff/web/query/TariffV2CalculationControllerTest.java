@@ -67,6 +67,7 @@ class TariffV2CalculationControllerTest {
                         10,
                         null,
                         null,
+                        null,
                         null);
                 var breakdowns = List.<com.github.jenkaby.bikerental.tariff.EquipmentCostBreakdown>of(
                         new BaseEquipmentCostBreakdown(
@@ -141,14 +142,14 @@ class TariffV2CalculationControllerTest {
                         return Stream.of(
                                 Arguments.of(
                                         new CostCalculationRequest(List.of(), 60, null, null, null,
-                                                null),
+                                                null, null),
                                         "equipments",
                                         "validation.not_empty"),
                                 Arguments.of(
                                         new CostCalculationRequest(List.of(
                                                 new CostCalculationRequest.EquipmentItemRequest(
                                                         " ")),
-                                                60, null, null, null, null),
+                                                60, null, null, null, null, null),
                                         "equipments[0].equipmentType",
                                         "validation.not_blank"));
                 }
@@ -172,6 +173,7 @@ class TariffV2CalculationControllerTest {
                 void whenPlannedDurationNull_returns400() throws Exception {
                         var request = new CostCalculationRequest(
                                 List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
+                                null,
                                 null,
                                 null,
                                 null,
@@ -201,6 +203,7 @@ class TariffV2CalculationControllerTest {
                         var request = new CostCalculationRequest(
                                 List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
                                 60,
+                                null,
                                 discountValue,
                                 null,
                                 null,
@@ -229,6 +232,7 @@ class TariffV2CalculationControllerTest {
                                 List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
                                 60,
                                 null,
+                                null,
                                 tariffId,
                                 price,
                                 null);
@@ -250,6 +254,7 @@ class TariffV2CalculationControllerTest {
                                 60,
                                 null,
                                 null,
+                                null,
                                 new BigDecimal("-1"),
                                 null);
 
@@ -268,6 +273,7 @@ class TariffV2CalculationControllerTest {
                         var request = new CostCalculationRequest(
                                 List.of(new CostCalculationRequest.EquipmentItemRequest("bicycle")),
                                 60,
+                                null,
                                 null,
                                 0L,
                                 null,
