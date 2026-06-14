@@ -170,3 +170,122 @@ Feature: Tariff V2 API rental cost calculation
       #     Discount applied
       | 305             | 305            | 1    | 1        | 0.9   | 10              | 0.1            | 245      | 0        | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
 
+
+  # ---------------------------------------------------------------------------
+  # V2 endpoint: PUT /api/tariffs/calculations (per-equipment return timestamps)
+  # ---------------------------------------------------------------------------
+
+  Scenario: V2 partial return - two items of the same type returned at different times
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt         |
+      | 10          | SCOOTER       | 2026-06-01T11:00 |
+      | 11          | SCOOTER       | 2026-06-01T14:00 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 180                    |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 105       | 105      | 300                      | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                             | message                           |
+      | 10          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 30       | 120            | 0               | 0               | breakdown.cost.flat_hourly.standard | 2h 0min flat: 2*15 + partial = 30 |
+      | 11          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 75       | 300            | 120             | 0               | breakdown.cost.flat_hourly.standard | 5h 0min flat: 5*15 + partial = 75 |
+
+  Scenario: V2 overnight FLAT_FEE item spans two calendar dates - charged 2 days
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt         |
+      | 20          | HELMET        | 2026-06-02T08:00 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T20:00 | 720                    |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 2         | 2        | 720                      | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName      | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                 | message            |
+      | 20          | HELMET        | 4        | Flat Fee Helmet | FLAT_FEE    | 2        | 720            | 0               | 0               | breakdown.cost.flat_fee | Flat fee: 1*2d = 2 |
+
+  Scenario: V2 item without returnAt is billed using the planned duration (estimate mode)
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt |
+      | 30          | SCOOTER       |          |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 180                    |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 45        | 45       | 180                      | true     | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                             | message                           |
+      | 30          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 45       | 180            | 0               | 0               | breakdown.cost.flat_hourly.standard | 3h 0min flat: 3*15 + partial = 45 |
+
+  Scenario: V2 forgiveness threshold is applied independently per item
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt         |
+      | 40          | SCOOTER       | 2026-06-01T10:05 |
+      | 41          | SCOOTER       | 2026-06-01T10:08 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 60                     |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 31.25     | 31.25    | 68                       | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                             | message                              |
+      | 40          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 15       | 60             | 5               | 5               | breakdown.cost.flat_hourly.standard | 1h 0min flat: 1*15 + partial = 15    |
+      | 41          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 16.25    | 68             | 8               | 0               | breakdown.cost.flat_hourly.standard | 1h 8min flat: 1*15 + partial = 16.25 |
+
+  Scenario: V2 global discount is applied to the combined subtotal
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt         |
+      | 60          | SCOOTER       | 2026-06-01T10:00 |
+      | 61          | SCOOTER       | 2026-06-01T10:00 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes | discountPercent |
+      | 2026-06-01T09:00 | 60                     | 10              |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | discountAmount | discountPercent | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 27        | 30       | 3              | 10              | 60                       | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                             | message                           |
+      | 60          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 15       | 60             | 0               | 0               | breakdown.cost.flat_hourly.standard | 1h 0min flat: 1*15 + partial = 15 |
+      | 61          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 15       | 60             | 0               | 0               | breakdown.cost.flat_hourly.standard | 1h 0min flat: 1*15 + partial = 15 |
+
+  Scenario: V2 special tariff mode applies a fixed group price and zeroes item costs
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt         |
+      | 50          | SCOOTER       | 2026-06-01T10:00 |
+      | 51          | SCOOTER       | 2026-06-01T11:00 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes | specialTariffId | specialPrice |
+      | 2026-06-01T09:00 | 60                     | 5               | 666          |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 666       | 666      | 60                       | false    | true                  |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName     | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                      | message                         |
+      | 50          | SCOOTER       | 5        | Special Tariff | SPECIAL     | 0        | 60             | 0               | 0               | breakdown.cost.special.group | Special tariff applied to group |
+      | 51          | SCOOTER       | 5        | Special Tariff | SPECIAL     | 0        | 60             | 0               | 0               | breakdown.cost.special.group | Special tariff applied to group |
+
+  Scenario: V2 returns 404 when an equipment type has no active tariff
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt         |
+      | 99          | UNKNOWN       | 2026-06-01T10:00 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 60                     |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 404
+
