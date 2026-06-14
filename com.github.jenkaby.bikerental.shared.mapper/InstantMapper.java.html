@@ -11,7 +11,7 @@ public interface InstantMapper {
 
 
     default LocalDateTime instantToLocalDateTime(Instant instant) {
-<span class="nc bnc" id="L14" title="All 2 branches missed.">        return instant != null ? LocalDateTime.ofInstant(instant, ZoneId.systemDefault()) : null;</span>
+<span class="fc bfc" id="L14" title="All 2 branches covered.">        return instant != null ? LocalDateTime.ofInstant(instant, ZoneId.systemDefault()) : null;</span>
     }
 
     default Instant localDateTimeToInstant(LocalDateTime localDateTime) {

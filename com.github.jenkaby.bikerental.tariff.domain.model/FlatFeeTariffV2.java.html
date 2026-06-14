@@ -9,6 +9,8 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Getter
 public final class FlatFeeTariffV2 extends TariffV2 {
@@ -18,17 +20,22 @@ public final class FlatFeeTariffV2 extends TariffV2 {
     public FlatFeeTariffV2(Long id, String name, String description, String equipmentTypeSlug,
                            String version, LocalDate validFrom, LocalDate validTo, TariffV2Status status,
                            Money issuanceFee) {
-<span class="fc" id="L21">        super(id, name, description, equipmentTypeSlug, PricingType.FLAT_FEE, version, validFrom, validTo, status);</span>
-<span class="fc" id="L22">        this.issuanceFee = issuanceFee;</span>
-<span class="fc" id="L23">    }</span>
+<span class="fc" id="L23">        super(id, name, description, equipmentTypeSlug, PricingType.FLAT_FEE, version, validFrom, validTo, status);</span>
+<span class="fc" id="L24">        this.issuanceFee = issuanceFee;</span>
+<span class="fc" id="L25">    }</span>
 
     @Override
-    public RentalCostV2 calculateCost(Duration duration) {
-<span class="pc bpc" id="L27" title="1 of 2 branches missed.">        int days = isNegative(duration) ? 1 : getNumberOfDays(duration);</span>
-<span class="fc" id="L28">        Money cost = issuanceFee.multiply(BigDecimal.valueOf(days));</span>
-<span class="fc" id="L29">        String message = String.format(&quot;Flat fee: %s*%dd = %s&quot;, issuanceFee, days, cost);</span>
-<span class="fc" id="L30">        return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatFee(message,</span>
-<span class="fc" id="L31">                new BreakdownCostDetails.FlatFee.Details(issuanceFee.toString(), days, cost.toString())));</span>
+    public RentalCostV2 calculateCost(LocalDateTime startAt, LocalDateTime returnAt) {
+<span class="fc" id="L29">        Duration duration = Duration.between(startAt, returnAt);</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        int days = isNegative(duration) ? 1 : countCalendarDays(startAt.toLocalDate(), returnAt.toLocalDate());</span>
+<span class="fc" id="L31">        Money cost = issuanceFee.multiply(BigDecimal.valueOf(days));</span>
+<span class="fc" id="L32">        String message = String.format(&quot;Flat fee: %s*%dd = %s&quot;, issuanceFee, days, cost);</span>
+<span class="fc" id="L33">        return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatFee(message,</span>
+<span class="fc" id="L34">                new BreakdownCostDetails.FlatFee.Details(issuanceFee.toString(), days, cost.toString())));</span>
+    }
+
+    private static int countCalendarDays(LocalDate startDate, LocalDate endDate) {
+<span class="fc" id="L38">        return (int) (ChronoUnit.DAYS.between(startDate, endDate) + 1);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

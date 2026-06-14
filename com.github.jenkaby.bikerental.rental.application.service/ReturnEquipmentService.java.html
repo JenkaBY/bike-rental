@@ -74,30 +74,31 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
         }
 
 <span class="fc" id="L76">        var totalFinalCost = rental.getFinalCost();</span>
-<span class="fc" id="L77">        SettlementInfo settlementInfo = null;</span>
+<span class="fc" id="L77">        log.info(&quot;Rental [{}] returning equipments {}, final cost [{}]&quot;, rental.getId(), equipmentInfos, totalFinalCost);</span>
+<span class="fc" id="L78">        SettlementInfo settlementInfo = null;</span>
         try {
-<span class="fc" id="L79">            settlementInfo = financeFacade.settleRental(</span>
-<span class="fc" id="L80">                    CustomerRef.of(rental.getCustomerId()),</span>
-<span class="fc" id="L81">                    RentalRef.of(rental.getId()),</span>
+<span class="fc" id="L80">            settlementInfo = financeFacade.settleRental(</span>
+<span class="fc" id="L81">                    CustomerRef.of(rental.getCustomerId()),</span>
+<span class="fc" id="L82">                    RentalRef.of(rental.getId()),</span>
                     totalFinalCost,
-<span class="fc" id="L83">                    command.operatorId()</span>
+<span class="fc" id="L84">                    command.operatorId()</span>
             );
-<span class="fc" id="L85">            rental.completeWithStatus(totalFinalCost, RentalStatus.COMPLETED);</span>
-<span class="fc" id="L86">        } catch (OverBudgetSettlementException obe) {</span>
-<span class="fc" id="L87">            rental.completeWithStatus(totalFinalCost, RentalStatus.DEBT);</span>
-<span class="fc" id="L88">        }</span>
+<span class="fc" id="L86">            rental.completeWithStatus(totalFinalCost, RentalStatus.COMPLETED);</span>
+<span class="fc" id="L87">        } catch (OverBudgetSettlementException obe) {</span>
+<span class="fc" id="L88">            rental.completeWithStatus(totalFinalCost, RentalStatus.DEBT);</span>
+<span class="fc" id="L89">        }</span>
 
-<span class="fc" id="L90">        Rental saved = rentalRepository.save(rental);</span>
+<span class="fc" id="L91">        Rental saved = rentalRepository.save(rental);</span>
 
-<span class="fc" id="L92">        RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalFinalCost);</span>
-<span class="fc" id="L93">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
+<span class="fc" id="L93">        RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalFinalCost);</span>
+<span class="fc" id="L94">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
 
-<span class="fc" id="L95">        return new ReturnEquipmentResult(saved, settlementInfo);</span>
+<span class="fc" id="L96">        return new ReturnEquipmentResult(saved, settlementInfo);</span>
     }
 
     private Rental findRental(ReturnEquipmentCommand command) {
-<span class="fc" id="L99">        return rentalRepository.findById(command.rentalId())</span>
-<span class="fc" id="L100">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
+<span class="fc" id="L100">        return rentalRepository.findById(command.rentalId())</span>
+<span class="fc" id="L101">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

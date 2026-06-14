@@ -3,12 +3,13 @@
 import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Schema(description = &quot;Rental cost calculation result&quot;)
-<span class="fc" id="L11">public record CostCalculationResponse(</span>
+<span class="fc" id="L12">public record CostCalculationResponse(</span>
         @NotNull List&lt;EquipmentCostBreakdownResponse&gt; equipmentBreakdowns,
         @Schema(description = &quot;cost without discount applied&quot;)
         @NotNull BigDecimal subtotal,
@@ -20,7 +21,9 @@ import java.util.List;
         boolean specialPricingApplied
 ) {
     @Schema(description = &quot;Per-equipment cost breakdown&quot;)
-<span class="fc" id="L23">    public record EquipmentCostBreakdownResponse(</span>
+<span class="fc" id="L24">    public record EquipmentCostBreakdownResponse(</span>
+            @Schema(description = &quot;Physical equipment unit ID; null for V1 calculations&quot;)
+            @Nullable Long equipmentId,
             @NotNull String equipmentType,
             @NotNull Long tariffId,
             @NotNull String tariffName,
@@ -34,7 +37,7 @@ import java.util.List;
     }
 
     @Schema(description = &quot;Discount applied&quot;)
-<span class="fc" id="L37">    public record DiscountDetailResponse(</span>
+<span class="fc" id="L40">    public record DiscountDetailResponse(</span>
             @NotNull BigDecimal percent,
             @NotNull BigDecimal amount
     ) {

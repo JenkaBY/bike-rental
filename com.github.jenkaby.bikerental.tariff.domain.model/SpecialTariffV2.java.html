@@ -6,8 +6,8 @@ import com.github.jenkaby.bikerental.tariff.RentalCostV2;
 import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostV2;
 import lombok.Getter;
 
-import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 public final class SpecialTariffV2 extends TariffV2 {
@@ -21,7 +21,7 @@ public final class SpecialTariffV2 extends TariffV2 {
 <span class="fc" id="L21">    }</span>
 
     @Override
-    public RentalCostV2 calculateCost(Duration duration) {
+    public RentalCostV2 calculateCost(LocalDateTime startAt, LocalDateTime returnAt) {
 <span class="nc" id="L25">        return new BaseRentalCostV2(price, new BreakdownCostDetails.Special());</span>
     }
 }

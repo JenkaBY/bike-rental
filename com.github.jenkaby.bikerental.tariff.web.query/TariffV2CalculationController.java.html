@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
 import com.github.jenkaby.bikerental.tariff.web.query.mapper.BatchCalculationMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,13 +18,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Validated
-<span class="fc" id="L26">@Slf4j</span>
+<span class="fc" id="L24">@Slf4j</span>
 @RestController
 @RequestMapping(path = &quot;/api/tariffs&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.TARIFFS, description = &quot;Tariff V2 API&quot;)
@@ -32,10 +30,10 @@ public class TariffV2CalculationController {
     private final TariffV2Facade tariffV2Facade;
     private final BatchCalculationMapper requestMapper;
 
-<span class="fc" id="L35">    TariffV2CalculationController(TariffV2Facade tariffV2Facade, BatchCalculationMapper requestMapper) {</span>
-<span class="fc" id="L36">        this.tariffV2Facade = tariffV2Facade;</span>
-<span class="fc" id="L37">        this.requestMapper = requestMapper;</span>
-<span class="fc" id="L38">    }</span>
+<span class="fc" id="L33">    TariffV2CalculationController(TariffV2Facade tariffV2Facade, BatchCalculationMapper requestMapper) {</span>
+<span class="fc" id="L34">        this.tariffV2Facade = tariffV2Facade;</span>
+<span class="fc" id="L35">        this.requestMapper = requestMapper;</span>
+<span class="fc" id="L36">    }</span>
 
     @PostMapping(&quot;/calculate&quot;)
     @Operation(summary = &quot;Calculate rental cost for multiple equipment items&quot;,
@@ -49,10 +47,28 @@ public class TariffV2CalculationController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;CostCalculationResponse&gt; calculateCost(@Valid @RequestBody CostCalculationRequest request) {
-<span class="fc" id="L52">        log.info(&quot;[POST] Batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
-<span class="fc" id="L53">        var command = requestMapper.toCommand(request);</span>
-<span class="fc" id="L54">        var result = tariffV2Facade.calculateRentalCost(command);</span>
-<span class="fc" id="L55">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
+<span class="fc" id="L50">        log.info(&quot;[POST] Batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
+<span class="fc" id="L51">        var command = requestMapper.toCommand(request);</span>
+<span class="fc" id="L52">        var result = tariffV2Facade.calculateRentalCost(command);</span>
+<span class="fc" id="L53">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
+    }
+
+    @PutMapping(&quot;/calculations&quot;)
+    @Operation(summary = &quot;Calculate V2 rental cost with per-equipment return timestamps&quot;,
+            description = &quot;Supports normal mode (per-equipment billing from global startAt) and SPECIAL mode (fixed group price)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Cost calculation result&quot;,
+                    content = @Content(schema = @Schema(implementation = CostCalculationResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No suitable tariff found for an equipment type&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;CostCalculationResponse&gt; costCalculations(@Valid @RequestBody CostCalculationV2Request request) {
+<span class="fc" id="L68">        log.info(&quot;[PUT] V2 batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
+<span class="fc" id="L69">        var command = requestMapper.toV2Command(request);</span>
+<span class="fc" id="L70">        var result = tariffV2Facade.calculateRentalCostV2(command);</span>
+<span class="fc" id="L71">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -33,12 +33,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
 @Validated
-<span class="fc" id="L41">@Slf4j</span>
+<span class="fc" id="L42">@Slf4j</span>
 @RestController
 @RequestMapping(path = &quot;/api/tariffs&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.TARIFFS, description = &quot;Tariff V2 API&quot;)
@@ -49,18 +50,21 @@ public class TariffV2QueryController {
     private final GetActiveTariffsV2ByEquipmentTypeUseCase getActiveByTypeUseCase;
     private final SelectTariffV2UseCase selectTariffUseCase;
     private final TariffV2QueryMapper mapper;
+    private final Clock clock;
 
     TariffV2QueryController(GetTariffV2ByIdUseCase getByIdUseCase,
                             GetAllTariffsV2UseCase getAllUseCase,
                             GetActiveTariffsV2ByEquipmentTypeUseCase getActiveByTypeUseCase,
                             SelectTariffV2UseCase selectTariffUseCase,
-<span class="fc" id="L57">                            TariffV2QueryMapper mapper) {</span>
-<span class="fc" id="L58">        this.getByIdUseCase = getByIdUseCase;</span>
-<span class="fc" id="L59">        this.getAllUseCase = getAllUseCase;</span>
-<span class="fc" id="L60">        this.getActiveByTypeUseCase = getActiveByTypeUseCase;</span>
-<span class="fc" id="L61">        this.selectTariffUseCase = selectTariffUseCase;</span>
-<span class="fc" id="L62">        this.mapper = mapper;</span>
-<span class="fc" id="L63">    }</span>
+                            TariffV2QueryMapper mapper,
+<span class="fc" id="L60">                            Clock clock) {</span>
+<span class="fc" id="L61">        this.getByIdUseCase = getByIdUseCase;</span>
+<span class="fc" id="L62">        this.getAllUseCase = getAllUseCase;</span>
+<span class="fc" id="L63">        this.getActiveByTypeUseCase = getActiveByTypeUseCase;</span>
+<span class="fc" id="L64">        this.selectTariffUseCase = selectTariffUseCase;</span>
+<span class="fc" id="L65">        this.mapper = mapper;</span>
+<span class="fc" id="L66">        this.clock = clock;</span>
+<span class="fc" id="L67">    }</span>
 
     @GetMapping(&quot;/{id}&quot;)
     @Operation(summary = &quot;Get V2 tariff by ID&quot;)
@@ -72,9 +76,9 @@ public class TariffV2QueryController {
     })
     public ResponseEntity&lt;TariffV2Response&gt; getTariffById(
             @Parameter(description = &quot;Tariff ID&quot;) @PathVariable(&quot;id&quot;) @Id Long id) {
-<span class="fc" id="L75">        log.info(&quot;[GET] Get V2 tariff by id {}&quot;, id);</span>
-<span class="fc" id="L76">        TariffV2 tariff = getByIdUseCase.get(id);</span>
-<span class="fc" id="L77">        return ResponseEntity.ok(mapper.toResponse(tariff));</span>
+<span class="fc" id="L79">        log.info(&quot;[GET] Get V2 tariff by id {}&quot;, id);</span>
+<span class="fc" id="L80">        TariffV2 tariff = getByIdUseCase.get(id);</span>
+<span class="fc" id="L81">        return ResponseEntity.ok(mapper.toResponse(tariff));</span>
     }
 
     @GetMapping
@@ -82,15 +86,15 @@ public class TariffV2QueryController {
     @ApiResponses(@ApiResponse(responseCode = &quot;200&quot;, description = &quot;Tariff page returned&quot;))
     public ResponseEntity&lt;Page&lt;TariffV2Response&gt;&gt; getAllTariffs(
             @PageableDefault(size = 20, sort = &quot;name&quot;, direction = Sort.Direction.ASC) Pageable pageable) {
-<span class="fc" id="L85">        log.info(&quot;[GET] Get all V2 tariffs with pagination&quot;);</span>
-<span class="fc" id="L86">        PageRequest pageRequest = new PageRequest(</span>
-<span class="fc" id="L87">                pageable.getPageSize(),</span>
-<span class="fc" id="L88">                pageable.getPageNumber(),</span>
-<span class="fc" id="L89">                pageable.getSort().toString()</span>
+<span class="fc" id="L89">        log.info(&quot;[GET] Get all V2 tariffs with pagination&quot;);</span>
+<span class="fc" id="L90">        PageRequest pageRequest = new PageRequest(</span>
+<span class="fc" id="L91">                pageable.getPageSize(),</span>
+<span class="fc" id="L92">                pageable.getPageNumber(),</span>
+<span class="fc" id="L93">                pageable.getSort().toString()</span>
         );
-<span class="fc" id="L91">        Page&lt;TariffV2&gt; tariffs = getAllUseCase.execute(pageRequest);</span>
-<span class="fc" id="L92">        Page&lt;TariffV2Response&gt; response = tariffs.map(mapper::toResponse);</span>
-<span class="fc" id="L93">        return ResponseEntity.ok(response);</span>
+<span class="fc" id="L95">        Page&lt;TariffV2&gt; tariffs = getAllUseCase.execute(pageRequest);</span>
+<span class="fc" id="L96">        Page&lt;TariffV2Response&gt; response = tariffs.map(mapper::toResponse);</span>
+<span class="fc" id="L97">        return ResponseEntity.ok(response);</span>
     }
 
     @GetMapping(&quot;/active&quot;)
@@ -101,9 +105,9 @@ public class TariffV2QueryController {
     })
     public ResponseEntity&lt;List&lt;TariffV2Response&gt;&gt; getActiveTariffs(
             @Parameter(description = &quot;Equipment type slug&quot;) @RequestParam(value = &quot;equipmentType&quot;) String equipmentType) {
-<span class="fc" id="L104">        log.info(&quot;[GET] Get active V2 tariffs for equipment type {}&quot;, equipmentType);</span>
-<span class="fc" id="L105">        List&lt;TariffV2&gt; tariffs = getActiveByTypeUseCase.execute(equipmentType);</span>
-<span class="fc" id="L106">        return ResponseEntity.ok(tariffs.stream().map(mapper::toResponse).toList());</span>
+<span class="fc" id="L108">        log.info(&quot;[GET] Get active V2 tariffs for equipment type {}&quot;, equipmentType);</span>
+<span class="fc" id="L109">        List&lt;TariffV2&gt; tariffs = getActiveByTypeUseCase.execute(equipmentType);</span>
+<span class="fc" id="L110">        return ResponseEntity.ok(tariffs.stream().map(mapper::toResponse).toList());</span>
     }
 
     @GetMapping(&quot;/selection&quot;)
@@ -120,16 +124,19 @@ public class TariffV2QueryController {
             @Parameter(description = &quot;Rental date (default: today)&quot;)
             @RequestParam(value = &quot;rentalDate&quot;, required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate rentalDate) {
-<span class="nc" id="L123">        log.info(&quot;[GET] Select V2 tariff for equipmentType={}, durationMinutes={}&quot;, equipmentType, durationMinutes);</span>
-<span class="nc" id="L124">        var duration = Duration.ofMinutes(durationMinutes);</span>
-<span class="nc" id="L125">        var tariff = selectTariffUseCase.execute(new SelectTariffV2UseCase.SelectTariffCommand(equipmentType, duration, rentalDate));</span>
-<span class="nc" id="L126">        var cost = tariff.calculateCost(duration);</span>
-<span class="nc" id="L127">        var response = new TariffSelectionV2Response(</span>
-<span class="nc" id="L128">                mapper.toResponse(tariff),</span>
-<span class="nc" id="L129">                cost.totalCost().amount(),</span>
-<span class="nc" id="L130">                cost.calculationBreakdown()</span>
+<span class="nc" id="L127">        log.info(&quot;[GET] Select V2 tariff for equipmentType={}, durationMinutes={}&quot;, equipmentType, durationMinutes);</span>
+<span class="nc" id="L128">        var duration = Duration.ofMinutes(durationMinutes);</span>
+<span class="nc" id="L129">        var tariff = selectTariffUseCase.execute(new SelectTariffV2UseCase.SelectTariffCommand(equipmentType, duration, rentalDate));</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        var effectiveDate = rentalDate != null ? rentalDate : LocalDate.now(clock);</span>
+<span class="nc" id="L131">        var startAt = effectiveDate.atStartOfDay();</span>
+<span class="nc" id="L132">        var returnAt = startAt.plus(duration);</span>
+<span class="nc" id="L133">        var cost = tariff.calculateCost(startAt, returnAt);</span>
+<span class="nc" id="L134">        var response = new TariffSelectionV2Response(</span>
+<span class="nc" id="L135">                mapper.toResponse(tariff),</span>
+<span class="nc" id="L136">                cost.totalCost().amount(),</span>
+<span class="nc" id="L137">                cost.calculationBreakdown()</span>
         );
-<span class="nc" id="L132">        return ResponseEntity.ok(response);</span>
+<span class="nc" id="L139">        return ResponseEntity.ok(response);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -17,17 +18,19 @@ class SelectTariffV2Service implements SelectTariffV2UseCase {
     private final TariffV2Repository repository;
     private final Clock clock;
 
-<span class="fc" id="L20">    SelectTariffV2Service(TariffV2Repository repository, Clock clock) {</span>
-<span class="fc" id="L21">        this.repository = repository;</span>
-<span class="fc" id="L22">        this.clock = clock;</span>
-<span class="fc" id="L23">    }</span>
+<span class="fc" id="L21">    SelectTariffV2Service(TariffV2Repository repository, Clock clock) {</span>
+<span class="fc" id="L22">        this.repository = repository;</span>
+<span class="fc" id="L23">        this.clock = clock;</span>
+<span class="fc" id="L24">    }</span>
 
     @Override
     public TariffV2 execute(SelectTariffCommand command) {
-<span class="fc" id="L27">        var date = Optional.ofNullable(command.rentalDate()).orElse(LocalDate.now(clock));</span>
-<span class="fc" id="L28">        return repository.findActiveByEquipmentTypeAndValidOn(command.equipmentTypeSlug(), date).stream()</span>
-<span class="fc" id="L29">                .min(Comparator.comparing(tariff -&gt; tariff.calculateCost(command.duration()).totalCost()))</span>
-<span class="fc" id="L30">                .orElseThrow(() -&gt; new SuitableTariffNotFoundException(command.equipmentTypeSlug(), date, command.duration()));</span>
+<span class="fc" id="L28">        var date = Optional.ofNullable(command.rentalDate()).orElse(LocalDate.now(clock));</span>
+<span class="fc" id="L29">        LocalDateTime startAt = date.atStartOfDay();</span>
+<span class="fc" id="L30">        LocalDateTime returnAt = startAt.plus(command.duration());</span>
+<span class="fc" id="L31">        return repository.findActiveByEquipmentTypeAndValidOn(command.equipmentTypeSlug(), date).stream()</span>
+<span class="fc" id="L32">                .min(Comparator.comparing(tariff -&gt; tariff.calculateCost(startAt, returnAt).totalCost()))</span>
+<span class="fc" id="L33">                .orElseThrow(() -&gt; new SuitableTariffNotFoundException(command.equipmentTypeSlug(), date, command.duration()));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

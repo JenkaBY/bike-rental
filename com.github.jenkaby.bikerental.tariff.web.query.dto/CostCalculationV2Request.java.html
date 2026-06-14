@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CostCalculationV2Request.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.web.query.dto</a> &gt; <span class="el_source">CostCalculationV2Request.java</span></div><h1>CostCalculationV2Request.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.web.query.dto;
+
+import com.github.jenkaby.bikerental.shared.web.support.PercentValue;
+import com.github.jenkaby.bikerental.tariff.web.query.validation.SpecialTariffConsistency;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import org.jspecify.annotations.Nullable;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+
+@Schema(description = &quot;Request for rental cost calculation V2 (per-equipment return timestamps)&quot;)
+@SpecialTariffConsistency
+<span class="fc" id="L17">public record CostCalculationV2Request(</span>
+        @NotEmpty List&lt;@NotNull @Valid EquipmentItemRequest&gt; equipments,
+        @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startAt,
+        @NotNull @Positive Integer plannedDurationMinutes,
+        @PercentValue Integer discountPercent,
+        @Positive Long specialTariffId,
+        @DecimalMin(&quot;0&quot;) BigDecimal specialPrice
+) {
+    @Schema(description = &quot;Single equipment item for V2 cost calculation&quot;)
+<span class="fc" id="L26">    public record EquipmentItemRequest(</span>
+            @NotNull @Positive Long equipmentId,
+            @NotBlank String equipmentType,
+            @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant returnAt
+    ) {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

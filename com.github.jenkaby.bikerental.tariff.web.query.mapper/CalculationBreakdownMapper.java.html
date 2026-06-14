@@ -36,15 +36,16 @@ import java.util.List;
 
     public CostCalculationResponse.EquipmentCostBreakdownResponse toBreakdownResponse(EquipmentCostBreakdown source) {
 <span class="fc" id="L38">        return new CostCalculationResponse.EquipmentCostBreakdownResponse(</span>
-<span class="fc" id="L39">                source.equipmentType(),</span>
-<span class="fc" id="L40">                source.tariffId(),</span>
-<span class="fc" id="L41">                source.tariffName(),</span>
-<span class="fc" id="L42">                source.pricingType(),</span>
-<span class="fc" id="L43">                moneyMapper.toBigDecimal(source.itemCost()),</span>
-<span class="fc" id="L44">                durationMapper.toMinutes(source.billedDuration()),</span>
-<span class="fc" id="L45">                durationMapper.toMinutes(source.overtime()),</span>
-<span class="fc" id="L46">                durationMapper.toMinutes(source.forgiven()),</span>
-<span class="fc" id="L47">                source.calculationBreakdown()</span>
+<span class="fc" id="L39">                source.equipmentId(),</span>
+<span class="fc" id="L40">                source.equipmentType(),</span>
+<span class="fc" id="L41">                source.tariffId(),</span>
+<span class="fc" id="L42">                source.tariffName(),</span>
+<span class="fc" id="L43">                source.pricingType(),</span>
+<span class="fc" id="L44">                moneyMapper.toBigDecimal(source.itemCost()),</span>
+<span class="fc" id="L45">                durationMapper.toMinutes(source.billedDuration()),</span>
+<span class="fc" id="L46">                durationMapper.toMinutes(source.overtime()),</span>
+<span class="fc" id="L47">                durationMapper.toMinutes(source.forgiven()),</span>
+<span class="fc" id="L48">                source.calculationBreakdown()</span>
         );
     }
 }
