@@ -1,5 +1,10 @@
 # spec-workflow
 
+> **Note (2026-06):** This repository has migrated from the GitHub Copilot implementation described below to
+> **Claude Code**. The workflow itself is unchanged, but the agents now live in `.claude/` and are invoked as slash
+> commands: `/spec-requirements` → `/spec-design` → `/spec-tasks` → `/spec-implement` (see root `CLAUDE.md` and
+> `docs/claude-migration.md`). The Copilot setup instructions below are kept for reference only.
+
 **[Reference to the origin project](https://github.com/arturhaikou/spec-workflow/)**
 
 A lightweight, **technology-agnostic** spec-first SDD toolkit for AI-assisted feature delivery. Requirements, system
