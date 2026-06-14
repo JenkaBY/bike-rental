@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.tariff.web.query.mapper;
 
 import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
+import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import com.github.jenkaby.bikerental.tariff.*;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
@@ -11,11 +12,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
-@Mapper(uses = {MoneyMapper.class, DurationMapper.class, DiscountMapper.class, CalculationBreakdownMapper.class})
+@Mapper(uses = {MoneyMapper.class, DurationMapper.class, DiscountMapper.class, InstantMapper.class,
+        CalculationBreakdownMapper.class})
 public abstract class BatchCalculationMapper {
 
     private MoneyMapper moneyMapper;
@@ -57,10 +55,6 @@ public abstract class BatchCalculationMapper {
     public abstract RentalCostCalculationV2Command toV2Command(CostCalculationV2Request request);
 
     public abstract EquipmentCostItemV2 toV2Item(CostCalculationV2Request.EquipmentItemRequest item);
-
-    protected LocalDateTime map(Instant value) {
-        return value == null ? null : LocalDateTime.ofInstant(value, ZoneOffset.UTC);
-    }
 
     //    TODO use Mapstruct features
     public CostCalculationResponse toResponse(RentalCostCalculationResult result) {

@@ -9,4 +9,8 @@ public record EquipmentCostItemV2(
         @NonNull Long equipmentId,
         @NonNull String equipmentType,
         @Nullable LocalDateTime returnAt) {
+
+    public boolean isEstimate() {
+        return returnAt() == null;
+    }
 }

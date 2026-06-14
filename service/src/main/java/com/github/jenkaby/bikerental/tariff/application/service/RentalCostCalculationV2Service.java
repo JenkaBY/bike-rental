@@ -54,6 +54,7 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
 
         List<EquipmentCostBreakdown> breakdowns = new ArrayList<>();
         Duration planned = command.plannedDuration();
+        boolean estimate = command.equipments().stream().anyMatch(EquipmentCostItemV2::isEstimate);
         for (EquipmentCostItemV2 item : command.equipments()) {
             breakdowns.add(new EquipmentCostBreakdownV2(
                     item.equipmentId(),
@@ -75,7 +76,7 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
                 DiscountDetail.none(),
                 totalCost,
                 planned,
-                false,
+                estimate,
                 true
         );
     }
@@ -90,7 +91,7 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
         Map<String, TariffV2> tariffCache = new HashMap<>();
 
         for (EquipmentCostItemV2 item : command.equipments()) {
-            boolean itemIsEstimate = item.returnAt() == null;
+            boolean itemIsEstimate = item.isEstimate();
             anyEstimate |= itemIsEstimate;
 
             LocalDateTime itemReturnAt = itemIsEstimate

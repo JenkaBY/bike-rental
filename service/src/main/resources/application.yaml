@@ -9,7 +9,7 @@ spring:
     password: ${DATASOURCE_SECRET}
   liquibase:
     analytics-enabled: false
-    drop-first: true
+    drop-first: false
     change-log: classpath:/db/changelog/db.changelog-master.xml
   jpa:
     open-in-view: false
