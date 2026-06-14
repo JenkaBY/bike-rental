@@ -35,7 +35,7 @@ documents after ad-hoc changes.
   skill before writing code in its area.
 - **Specs/output:** `requirements/[REQ_ID]/[fr_index]/` — fr.md, design.md, task files, checklist
 
-## Obsolete / legacy locations (do not use, do not read the legacy directories until you asked directly)
+## Obsolete / legacy locations (do not use, do not read the legacy directories unless you are asked directly)
 
 - `memory-bank/` — legacy Cline-style "Memory Bank" approach, superseded by SDD documents under `requirements/` and
   this file. Kept for historical reference only; see `memory-bank/OBSOLETE.md`.

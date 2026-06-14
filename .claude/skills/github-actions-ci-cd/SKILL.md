@@ -7,7 +7,7 @@ description: Best practices for GitHub Actions CI/CD pipelines. Use when creatin
 
 ## Your Mission
 
-As GitHub Copilot, you are an expert in designing and optimizing CI/CD pipelines using GitHub Actions. Your mission is
+You are an expert in designing and optimizing CI/CD pipelines using GitHub Actions. Your mission is
 to assist developers in creating efficient, secure, and reliable automated workflows for building, testing, and
 deploying their applications. You must prioritize best practices, ensure security, and provide actionable, detailed
 guidance.
@@ -26,7 +26,7 @@ guidance.
       conditions or wasted resources.
     - **Permissions:** Define `permissions` at the workflow level for a secure default, overriding at the job level if
       needed.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Always start with a descriptive `name` and appropriate `on` trigger. Suggest granular triggers for specific use
       cases (e.g., `on: push: branches: [main]` vs. `on: pull_request`).
     - Recommend using `workflow_dispatch` for manual triggers, allowing input parameters for flexibility and controlled
@@ -51,7 +51,7 @@ guidance.
       messages, event types, or previous job status (`if: success()`, `if: failure()`, `if: always()`).
     - **Job Grouping:** Consider breaking large workflows into smaller, more focused jobs that run in parallel or
       sequence.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Define `jobs` with clear `name` and appropriate `runs-on` (e.g., `ubuntu-latest`, `windows-latest`,
       `self-hosted`).
     - Use `needs` to define dependencies between jobs, ensuring sequential execution and logical flow.
@@ -117,7 +117,7 @@ jobs:
       layer caching in Docker (if building images).
     - **`env`:** Define environment variables at the step or job level. Do not hardcode sensitive data here.
     - **`with`:** Provide inputs to actions. Ensure all required inputs are present.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Use `uses` to reference marketplace or custom actions, always specifying a secure version (tag or SHA).
     - Use `name` for each step for readability in logs and easier debugging.
     - Use `run` for shell commands, combining commands with `&&` for efficiency and using `|` for multi-line scripts.
@@ -139,7 +139,7 @@ jobs:
     - **Secret Masking:** GitHub Actions automatically masks secrets in logs, but it's good practice to avoid printing
       them directly.
     - **Minimize Scope:** Only grant access to secrets to the workflows/jobs that absolutely need them.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Always instruct users to use GitHub Secrets for sensitive information (e.g., API keys, passwords, cloud
       credentials, tokens).
     - Access secrets via `secrets.<SECRET_NAME>` in workflows.
@@ -172,7 +172,7 @@ jobs:
     - **Trust Policies:** Requires configuring identity providers and trust policies in your cloud environment to trust
       GitHub's OIDC provider.
     - **Federated Identity:** This is a key pattern for modern, secure cloud deployments.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Strongly recommend OIDC for authenticating with AWS, Azure, GCP, and other cloud providers instead of storing
       long-lived access keys as secrets.
     - Provide examples of how to configure the OIDC action for common cloud providers (e.g.,
@@ -192,7 +192,7 @@ jobs:
       `pull-requests: write`, `issues: read`).
     - **Read-Only by Default:** Start with `contents: read` as the default and add write permissions only when strictly
       necessary.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Configure `permissions` at the workflow or job level to restrict access. Always prefer `contents: read` as the
       default.
     - Advise against using `contents: write` or `pull-requests: write` unless the workflow explicitly needs to modify
@@ -222,7 +222,7 @@ jobs:
     - **Early Detection:** Integrate dependency checks early in the CI pipeline to catch issues before deployment.
     - **Tools:** Use `dependency-review-action`, Snyk, Trivy, Mend (formerly WhiteSource).
     - **Supply Chain Security:** This is a critical component of securing your software supply chain.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Integrate `dependency-review-action` or other SCA tools into the CI pipeline.
     - Recommend regular scanning for vulnerabilities in third-party libraries and setting up alerts for new findings.
     - Emphasize the importance of maintaining up-to-date dependency lists and understanding transitive dependencies.
@@ -235,7 +235,7 @@ jobs:
       cost-effective.
     - **Tools:** CodeQL, SonarQube, Bandit (Python), ESLint with security plugins (JS/TS).
     - **Automated Enforcement:** Configure SAST to break builds or block PRs if critical vulnerabilities are found.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Integrate SAST tools (e.g., CodeQL for GitHub Advanced Security, or open-source alternatives) into the CI
       pipeline.
     - Configure security scanning as a blocking step if critical vulnerabilities are found, enforcing a secure by
@@ -250,7 +250,7 @@ jobs:
     - **Pre-commit Hooks:** Tools like `git-secrets` can prevent secrets from being committed locally.
     - **Environment Variables Only:** Secrets should only be passed to the environment where they are needed at runtime,
       never in the build artifact.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Suggest enabling GitHub's built-in secret scanning for the repository.
     - Recommend implementing pre-commit hooks that scan for common secret patterns.
     - Advise reviewing workflow logs for accidental secret exposure, even with masking.
@@ -263,7 +263,7 @@ jobs:
     - **Image Signing:** Use tools like Notary or Cosign to cryptographically sign container images, verifying their
       origin and integrity.
     - **Deployment Gate:** Enforce that only signed images can be deployed to production environments.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Advocate for reproducible builds in Dockerfiles and build processes.
     - Suggest integrating image signing into the CI pipeline and verification during deployment stages.
 
@@ -278,7 +278,7 @@ jobs:
       `hashFiles('**/requirements.txt')`) to invalidate the cache only when dependencies change.
     - **Restore Keys:** Use `restore-keys` for fallbacks to older, compatible caches.
     - **Cache Scope:** Understand that caches are scoped to the repository and branch.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Use `actions/cache@v3` for caching common package manager dependencies (Node.js `node_modules`, Python `pip`
       packages, Java Maven/Gradle dependencies) and build artifacts.
     - Design highly effective cache keys using `hashFiles` to ensure optimal cache hit rates.
@@ -307,7 +307,7 @@ jobs:
     - **`include`/`exclude`:** Fine-tune combinations.
     - **`fail-fast`:** Control whether job failures in the matrix stop the entire strategy.
     - **Maximizing Concurrency:** Ideal for running tests across various environments simultaneously.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Utilize `strategy.matrix` to test applications against different environments, programming language versions, or
       operating systems concurrently.
     - Suggest `include` and `exclude` for specific matrix combinations to optimize test coverage without unnecessary
@@ -350,7 +350,7 @@ jobs:
       patching.
     - **Scalability:** Plan for how self-hosted runners will scale with demand, either manually or using auto-scaling
       solutions.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Recommend self-hosted runners when GitHub-hosted runners do not meet specific performance, cost, security, or
       network access requirements.
     - Emphasize the user's responsibility for securing, maintaining, and scaling self-hosted runners, including network
@@ -370,7 +370,7 @@ jobs:
     - **`lfs`:** Manage Git LFS (Large File Storage) files efficiently. If not needed, set `lfs: false`.
     - **Partial Clones:** Consider using Git's partial clone feature (`--filter=blob:none` or `--filter=tree:0`) for
       extremely large repositories, though this is often handled by specialized actions or Git client configurations.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Use `actions/checkout@v4` with `fetch-depth: 1` as the default for most build and test jobs to significantly save
       time and bandwidth.
     - Only use `fetch-depth: 0` if the workflow explicitly requires full Git history (e.g., for release tagging, deep
@@ -393,7 +393,7 @@ jobs:
       code coverage reports, security scan results, generated documentation, static website builds.
     - **Limitations:** Artifacts are immutable once uploaded. Max size per artifact can be several gigabytes, but be
       mindful of storage costs.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Use `actions/upload-artifact@v3` and `actions/download-artifact@v3` to reliably pass large files between jobs
       within the same workflow or across different workflows, promoting modularity and efficiency.
     - Set appropriate `retention-days` for artifacts to manage storage costs and ensure old artifacts are pruned.
@@ -418,7 +418,7 @@ jobs:
       test reporter actions that integrate with GitHub Checks/Annotations.
     - **Mocking and Stubbing:** Emphasize the use of mocks and stubs to isolate units under test from their
       dependencies.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Configure a dedicated job for running unit tests early in the CI pipeline, ideally triggered on every `push` and
       `pull_request`.
     - Use appropriate language-specific test runners and frameworks (Jest, Vitest, Pytest, Go testing, JUnit, NUnit,
@@ -441,7 +441,7 @@ jobs:
       reset between runs.
     - **Execution Time:** Integration tests are typically slower than unit tests. Optimize their execution and consider
       running them less frequently than unit tests (e.g., on PR merge instead of every push).
-- **Guidance for Copilot:**
+- **Guidance:**
     - Provision necessary services (databases like PostgreSQL/MySQL, message queues like RabbitMQ/Kafka, in-memory
       caches like Redis) using `services` in the workflow definition or Docker Compose during testing.
     - Advise on running integration tests after unit tests, but before E2E tests, to catch integration issues early.
@@ -462,7 +462,7 @@ jobs:
     - **Visual Regression Testing:** Consider integrating visual regression testing (e.g., Applitools, Percy) to catch
       UI discrepancies.
     - **Reporting:** Capture screenshots and video recordings on failure to aid debugging.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Use tools like Cypress, Playwright, or Selenium for E2E testing, providing guidance on their setup within GitHub
       Actions.
     - Recommend running E2E tests against a deployed staging environment to catch issues before production and validate
@@ -482,7 +482,7 @@ jobs:
     - **Thresholds:** Define clear performance thresholds (e.g., response time, throughput, error rates) and fail builds
       if these are exceeded.
     - **Baseline Comparison:** Compare current performance metrics against established baselines to detect degradation.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Suggest integrating performance and load testing into the CI pipeline for critical applications, providing
       examples for common tools.
     - Advise on setting performance baselines and failing the build if performance degrades beyond a set threshold.
@@ -503,7 +503,7 @@ jobs:
       reporting tools, Allure Report, TestRail) for aggregated views and historical trends.
     - **Status Badges:** Use GitHub Actions status badges in your README to indicate the latest build/test status at a
       glance.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Use actions that publish test results as annotations or checks on PRs for immediate feedback and easy debugging
       directly in the GitHub UI.
     - Upload detailed test reports (e.g., XML, HTML, JSON) as artifacts for later inspection and historical analysis,
@@ -527,7 +527,7 @@ jobs:
       enforce manual approvals, and restrict which branches can deploy to staging.
     - **Data Refresh:** Regularly refresh staging data from production (anonymized if necessary) to ensure realistic
       testing scenarios.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Create a dedicated `environment` for staging with approval rules, secret protection, and appropriate branch
       protection policies.
     - Design workflows to automatically deploy to staging on successful merges to specific development or release
@@ -550,7 +550,7 @@ jobs:
       rollouts.
     - **Emergency Deployments:** Have a separate, highly expedited pipeline for critical hotfixes that bypasses
       non-essential approvals but still maintains security checks.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Create a dedicated `environment` for production with required reviewers, strict branch protections, and clear
       deployment windows.
     - Implement manual approval steps for production deployments, potentially integrating with external ITSM or change
@@ -601,7 +601,7 @@ jobs:
     - **Post-Incident Review:** Conduct blameless post-incident reviews (PIRs) to understand the root cause of failures,
       identify lessons learned, and implement preventative measures to improve resilience and reduce MTTR.
     - **Communication Plan:** Have a clear communication plan for stakeholders during incidents and rollbacks.
-- **Guidance for Copilot:**
+- **Guidance:**
     - Instruct users to store previous successful build artifacts and images for quick recovery, ensuring they are
       versioned and easily retrievable.
     - Advise on implementing automated rollback steps in the pipeline, triggered by monitoring or health check failures,
