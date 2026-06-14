@@ -71,14 +71,15 @@ class RentalCostCalculationService implements RentalCostCalculationUseCase {
                     new BreakdownCostDetails.SpecialGroup()
             ));
         }
-
+        Duration actual = command.actualDuration();
+        boolean estimate = actual == null;
         return new BaseRentalCostCalculationResult(
                 breakdowns,
                 totalCost,
                 DiscountDetail.none(),
                 totalCost,
                 effective,
-                true,
+                estimate,
                 true
         );
     }

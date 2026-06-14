@@ -34,17 +34,17 @@ Feature: Tariff V2 API rental cost calculation
     Then the response status is 200
     And the rental cost calculation response only contains
       | totalCost  | subtotal | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate   | specialPricingApplied |
-      | <subtotal> | <total>  | <discountAmount> | <discountPercent> | <durationMinutes>        | false | <special>             |
+      | <subtotal> | <total>  | <discountAmount> | <discountPercent> | <durationMinutes>        | <estimate> | <special>             |
     And the rental cost calculation response only contains the breakdown with the following data
       | equipmentType   | tariffId   | tariffName   | pricingType   | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
       | <equipmentType> | <tariffId> | <tariffName> | <pricingType> | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
-      | pricingType       | equipmentType | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | specialTariffId | specialPrice | rentalDate | tariffId | tariffName          | overtime | forgiven | message                           | pattern                                   | special |
-      | DEGRESSIVE_HOURLY | BICYCLE       | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |                 |              |            | 1        | Hourly Bicycle      |          |          | 1h 0min degressive: 9 = 9         | breakdown.cost.degressive_hourly.standard | false   |
-      | FLAT_HOURLY       | SCOOTER       | 60              | 60             | 15.00 | 15.00    | 15.00 | 0               | 0              |                 |              |            | 2        | Flat Hourly Scooter |          |          | 1h 0min flat: 1*15 + partial = 15 | breakdown.cost.flat_hourly.standard       | false   |
-      | DAILY             | BICYCLE       | 480             | 480            | 25.00 | 25.00    | 25.00 | 0               | 0              |                 |              |            | 3        | Daily Bicycle       |          |          | 1d = 25                           | breakdown.cost.daily.standard             | false   |
-      | FLAT_FEE          | HELMET        | 60              | 60             | 1     | 1        | 1     | 0               | 0              |                 |              |            | 4        | Flat Fee Helmet     |          |          | Flat fee: 1*1d = 1                | breakdown.cost.flat_fee                   | false   |
-      | SPECIAL           | ANY           | 60              | 60             | 0     | 666      | 666   | 0               | 0              | 5               | 666          |            | 5        | Special Tariff      |          |          | Special tariff applied to group   | breakdown.cost.special.group              | true    |
+      | pricingType       | equipmentType | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | specialTariffId | specialPrice | rentalDate | tariffId | tariffName          | overtime | forgiven | message                           | pattern                                   | special | estimate |
+      | DEGRESSIVE_HOURLY | BICYCLE       | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |                 |              |            | 1        | Hourly Bicycle      |          |          | 1h 0min degressive: 9 = 9         | breakdown.cost.degressive_hourly.standard | false   | false    |
+      | FLAT_HOURLY       | SCOOTER       | 60              | 60             | 15.00 | 15.00    | 15.00 | 0               | 0              |                 |              |            | 2        | Flat Hourly Scooter |          |          | 1h 0min flat: 1*15 + partial = 15 | breakdown.cost.flat_hourly.standard       | false   | false    |
+      | DAILY             | BICYCLE       | 480             | 480            | 25.00 | 25.00    | 25.00 | 0               | 0              |                 |              |            | 3        | Daily Bicycle       |          |          | 1d = 25                           | breakdown.cost.daily.standard             | false   | false    |
+      | FLAT_FEE          | HELMET        | 60              | 60             | 1     | 1        | 1     | 0               | 0              |                 |              |            | 4        | Flat Fee Helmet     |          |          | Flat fee: 1*1d = 1                | breakdown.cost.flat_fee                   | false   | false    |
+      | SPECIAL           | ANY           | 60              | 60             | 0     | 666      | 666   | 0               | 0              | 5               | 666          |            | 5        | Special Tariff      |          |          | Special tariff applied to group   | breakdown.cost.special.group              | true    | false    |
 
 
   Scenario Outline: Get rental cost calculation for a single rental - DEGRESSIVE_HOURLY:<durationMinutes>min
@@ -54,8 +54,8 @@ Feature: Tariff V2 API rental cost calculation
     When a POST request has been made to "/api/tariffs/calculate" endpoint
     Then the response status is 200
     And the rental cost calculation response only contains
-      | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate   |
-      | <total>   | <subtotal> | <discountAmount> | <discountPercent> | <durationMinutes>        | false |
+      | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate |
+      | <total>   | <subtotal> | <discountAmount> | <discountPercent> | <durationMinutes>        | false    |
     And the rental cost calculation response only contains the breakdown with the following data
       | equipmentType | tariffId | tariffName     | pricingType       | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
       | BICYCLE       | 1        | Hourly Bicycle | DEGRESSIVE_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
