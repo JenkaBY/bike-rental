@@ -113,3 +113,59 @@ class HierarchyGroupDbSteps {
     }
 }
 ```
+
+# Builder + ScenarioContext (request with a nested list of sub-objects)
+
+When the endpoint request itself carries a nested collection (a list of sub-objects), prepare it across **two steps**
+and keep all conversion in transformers — never assemble the request or parse a DataTable inside the step:
+
+1. **Sub-part step** — one `@DataTableType` entry transformer maps each row to one sub-object; the step parameter is a
+   `List<Sub>`, and the step stores it in `ScenarioContext` (add a field; the context is `@Getter @Setter`).
+2. **`…request is prepared with the following data` step** — a second `@DataTableType` maps the single globals row to a
+   `{Request}Builder` record (in `model/`); the step calls `builder.toRequest(storedSubParts)` and sets the request
+   body.
+
+This mirrors the tariff pattern (`the pricing params for tariff request are` + `the tariff v2 request is prepared with
+the following data`, `TariffV2RequestBuilder.toRequest(pricingParams)`).
+
+```gherkin
+Given the equipment items for cost calculation request are
+  | equipmentId | equipmentType | returnAt         |
+  | 10          | SCOOTER       | 2026-06-01T11:00 |
+  | 11          | SCOOTER       | 2026-06-01T14:00 |
+And the rental cost calculation request is prepared with the following data
+  | startAt          | plannedDurationMinutes |
+  | 2026-06-01T09:00 | 180                    |
+```
+
+```java
+public class CostCalculationV2RequestTransformer {
+
+    @DataTableType
+    public CostCalculationV2RequestBuilder transform(Map<String, String> entry) { /* globals → builder */ }
+
+    @DataTableType
+    public CostCalculationV2Request.EquipmentItemRequest equipmentItem(Map<String, String> entry) { /* one item */ }
+}
+
+public record CostCalculationV2RequestBuilder(Instant startAt, Integer plannedDurationMinutes, /* ... */) {
+    public CostCalculationV2Request toRequest(List<CostCalculationV2Request.EquipmentItemRequest> equipments) {
+        return new CostCalculationV2Request(equipments, startAt, plannedDurationMinutes, /* ... */);
+    }
+}
+
+public class RentalCostCalculationV2WebSteps {
+
+    private final ScenarioContext scenarioContext;
+
+    @Given("the equipment items for cost calculation request are")
+    public void items(List<CostCalculationV2Request.EquipmentItemRequest> items) {
+        scenarioContext.setEquipmentItems(items);
+    }
+
+    @Given("the rental cost calculation request is prepared with the following data")
+    public void prepare(CostCalculationV2RequestBuilder builder) {
+        scenarioContext.setRequestBody(builder.toRequest(scenarioContext.getEquipmentItems()));
+    }
+}
+```

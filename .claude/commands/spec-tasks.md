@@ -19,7 +19,7 @@ and boilerplate code snippets that strictly adhere to the project's established 
 
 The project's technology standards live in `.claude/skills/*/SKILL.md` (e.g., `liquibase`, `mapstruct-hexagonal`,
 `spring-boot-data-ddd`, `spring-boot-modulith`, `spring-mvc-controller-test`, `spring-boot-java-cucumber`,
-`component-test-conventions`, `java-best-practices`, `spring-boot-best-practices`, `junit-best-practices`).
+`java-best-practices`, `spring-boot-best-practices`, `junit-best-practices`).
 
 You are FORBIDDEN from relying on your general pre-training for coding standards. Read the relevant skill files to
 determine *how* the code must be written.
