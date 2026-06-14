@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
 import com.github.jenkaby.bikerental.tariff.web.query.mapper.BatchCalculationMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,10 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Validated
 @Slf4j
@@ -52,6 +50,24 @@ public class TariffV2CalculationController {
         log.info("[POST] Batch cost calculation for {} equipment item(s)", request.equipments().size());
         var command = requestMapper.toCommand(request);
         var result = tariffV2Facade.calculateRentalCost(command);
+        return ResponseEntity.ok(requestMapper.toResponse(result));
+    }
+
+    @PutMapping("/calculations")
+    @Operation(summary = "Calculate V2 rental cost with per-equipment return timestamps",
+            description = "Supports normal mode (per-equipment billing from global startAt) and SPECIAL mode (fixed group price)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cost calculation result",
+                    content = @Content(schema = @Schema(implementation = CostCalculationResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "No suitable tariff found for an equipment type",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<CostCalculationResponse> costCalculations(@Valid @RequestBody CostCalculationV2Request request) {
+        log.info("[PUT] V2 batch cost calculation for {} equipment item(s)", request.equipments().size());
+        var command = requestMapper.toV2Command(request);
+        var result = tariffV2Facade.calculateRentalCostV2(command);
         return ResponseEntity.ok(requestMapper.toResponse(result));
     }
 }

@@ -1,6 +1,6 @@
 ---
 name: spring-boot-java-cucumber
-description: 'Spring Boot component testing with Cucumber BDD. Use for component or integration testing of Spring Boot applications.'
+description: 'Spring Boot component testing with Cucumber BDD in the component-test module - package structure, step definitions, transformers, ScenarioContext management, naming, and testing strategy. Use when writing or modifying component/integration tests or feature files.'
 ---
 
 # Spring Boot Java Cucumber Testing
@@ -97,9 +97,12 @@ component-test/
 - Use descriptive scenario names that explain the expected outcome
 - Never use JSON to pass it as request. Split complex request into several steps and then merge in a final request.
   See [the example](references/datatable-transformers.md)
-- If datatable becomes too large, split object creation into several steps and save intermediate state in scenario
-  context. See [the example](references/datatable-transformers.md)
-- Use transformers to convert datatables directly into domain objects and avoid using JSON in steps.
+- If a datatable becomes too large, or a request has nested fields (a list of sub-objects), split object creation into
+  several steps and save intermediate state in `ScenarioContext`: a sub-part step parses and stores the nested rows,
+  and a `…request is prepared with the following data` step merges them via a `{Request}Builder.toRequest(subPart)`
+  record in `model/`. See [the example](references/datatable-transformers.md)
+- Use transformers to convert datatables directly into domain objects and avoid using JSON in steps; **never convert a
+  DataTable inside a step class** — step methods receive already-transformed objects.
   See [the example](references/datatable-transformers.md) Public method in the transformer should be annotated with
   `@DataTableType` and have the `transform` name.
 - Use `Scenario Outline:` with `Examples:` for data repeated across multiple steps.

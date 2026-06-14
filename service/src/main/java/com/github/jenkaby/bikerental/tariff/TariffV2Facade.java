@@ -7,4 +7,6 @@ public interface TariffV2Facade {
     Optional<TariffV2Info> findById(Long tariffId);
 
     RentalCostCalculationResult calculateRentalCost(RentalCostCalculationCommand command);
+
+    RentalCostCalculationResult calculateRentalCostV2(RentalCostCalculationV2Command command);
 }

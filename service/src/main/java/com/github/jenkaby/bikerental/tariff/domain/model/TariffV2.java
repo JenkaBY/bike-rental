@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 public sealed abstract class TariffV2
@@ -59,15 +60,12 @@ public sealed abstract class TariffV2
         return afterStart && beforeEnd;
     }
 
-    public abstract RentalCostV2 calculateCost(Duration duration);
+    public abstract RentalCostV2 calculateCost(LocalDateTime startAt, LocalDateTime returnAt);
 
     protected static boolean isNegative(Duration duration) {
         return duration == null || duration.isZero() || duration.isNegative();
     }
 
-    protected static int getNumberOfDays(Duration duration) {
-        return (int) Math.ceil((double) duration.toMinutes() / Duration.ofDays(1).toMinutes());
-    }
 
     protected static int getIntervalMinutes(long minutes) {
         return (int) (minutes / INTERVAL_MINUTES);

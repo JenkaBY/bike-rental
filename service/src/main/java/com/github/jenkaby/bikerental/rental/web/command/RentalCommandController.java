@@ -103,7 +103,7 @@ class RentalCommandController {
 
 
     @PostMapping()
-    @Operation(summary = "Initialize rental draft", description = "Creates an rental draft with prefilled data")
+    @Operation(summary = "Initialize rental draft", description = "Creates a rental draft with prefilled data")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Draft created",
                     content = @Content(schema = @Schema(implementation = RentalResponse.class))),
@@ -114,7 +114,7 @@ class RentalCommandController {
             @ApiResponse(responseCode = "409", description = "Equipment not available",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity<RentalResponse> createDraft(@Valid @RequestBody RentalRequest request) {
+    public ResponseEntity<RentalResponse> initDraft(@Valid @RequestBody RentalRequest request) {
         log.info("[POST] Creating new rental draft");
         var command = commandMapper.toInitDraftRentalCommand(request);
         Rental rental = updateDraftRentalUseCase.execute(command);

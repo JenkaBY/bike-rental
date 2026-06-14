@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -25,8 +26,10 @@ class SelectTariffV2Service implements SelectTariffV2UseCase {
     @Override
     public TariffV2 execute(SelectTariffCommand command) {
         var date = Optional.ofNullable(command.rentalDate()).orElse(LocalDate.now(clock));
+        LocalDateTime startAt = date.atStartOfDay();
+        LocalDateTime returnAt = startAt.plus(command.duration());
         return repository.findActiveByEquipmentTypeAndValidOn(command.equipmentTypeSlug(), date).stream()
-                .min(Comparator.comparing(tariff -> tariff.calculateCost(command.duration()).totalCost()))
+                .min(Comparator.comparing(tariff -> tariff.calculateCost(startAt, returnAt).totalCost()))
                 .orElseThrow(() -> new SuitableTariffNotFoundException(command.equipmentTypeSlug(), date, command.duration()));
     }
 }

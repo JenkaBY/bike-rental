@@ -36,6 +36,7 @@ public abstract class CalculationBreakdownMapper {
 
     public CostCalculationResponse.EquipmentCostBreakdownResponse toBreakdownResponse(EquipmentCostBreakdown source) {
         return new CostCalculationResponse.EquipmentCostBreakdownResponse(
+                source.equipmentId(),
                 source.equipmentType(),
                 source.tariffId(),
                 source.tariffName(),

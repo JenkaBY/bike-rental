@@ -2,7 +2,9 @@ name: bike-rental
 
 services:
   postgres:
-    image: postgres:15-alpine
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
     restart: always
     container_name: postgres
     ports:
@@ -13,7 +15,6 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - "bikesharing-db:/var/lib/postgresql/data"
-      - "./postgres/create_second_db.sh:/docker-entrypoint-initdb.d/create_second_db.sh"
 
   bike-rental-app:
     build:

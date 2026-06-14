@@ -1,5 +1,7 @@
 # BikeRental — Equipment Rental Management System
 
+> **Last updated:** 2026-05-28
+
 ---
 
 ## Summary
@@ -58,7 +60,7 @@
   USED_BY: bike-rental-api
 
 - CATEGORY: API Documentation
-  TECHNOLOGY: SpringDoc OpenAPI (springdoc-openapi-starter-webmvc-ui 3.0.2)
+  TECHNOLOGY: SpringDoc OpenAPI (springdoc-openapi-starter-webmvc-ui 3+)
   USED_BY: bike-rental-api
 
 - CATEGORY: Object Mapping
@@ -72,6 +74,18 @@
 - CATEGORY: UUID Generation
   TECHNOLOGY: uuid-creator 6.1.1 (UUID v7)
   USED_BY: bike-rental-api
+
+- CATEGORY: Query Filtering
+  TECHNOLOGY: specification-arg-resolver 4.0.0 (net.kaczmarzyk)
+  USED_BY: bike-rental-api
+
+- CATEGORY: Architecture Testing
+  TECHNOLOGY: ArchUnit 1.4.2
+  USED_BY: bike-rental-api (test scope)
+
+- CATEGORY: Code Coverage
+  TECHNOLOGY: JaCoCo 0.8.14
+  USED_BY: bike-rental-api (test scope)
 
 - CATEGORY: Container
   TECHNOLOGY: Docker (multi-stage build, eclipse-temurin:21-jre-alpine runtime image)
@@ -111,23 +125,36 @@ ENTRY_POINT: `service/src/main/java/com/github/jenkaby/bikerental/BikeRentalAppl
 EXPOSES:
 
 - PROTOCOL: HTTP
-  ENDPOINT_OR_TOPIC: POST /api/rentals, POST /api/rentals/draft, PATCH /api/rentals/{id}, POST
-  /api/rentals/{id}/prepayments, POST /api/rentals/return, GET /api/rentals, GET /api/rentals/{id}
-  DESCRIPTION: Full rental lifecycle management — creation, update, prepayment, return, and query
+  ENDPOINT_OR_TOPIC: POST /api/rentals, PUT /api/rentals/{rentalId}, PATCH /api/rentals/{rentalId}/lifecycles,
+  POST /api/rentals/return, GET /api/rentals, GET /api/rentals/{id}, GET /api/rentals/available-equipments;
+  DEPRECATED: POST /api/rentals/draft, PATCH /api/rentals/{id}
+  DESCRIPTION: Full rental lifecycle management — draft initialisation, fast-path creation/update, lifecycle
+  transitions (ACTIVE/CANCELLED), equipment return, availability query, and paginated search.
+  Filter parameters on GET /api/rentals: status, customerId, equipmentUid, from, to (date range).
 - PROTOCOL: HTTP
   ENDPOINT_OR_TOPIC: POST /api/equipments, PUT /api/equipments/{id}, PATCH /api/equipments/{id}/status, GET
   /api/equipments, GET /api/equipments/{id}
   DESCRIPTION: Equipment catalogue management — registration, update, status transition, and search
 - PROTOCOL: HTTP
+  ENDPOINT_OR_TOPIC: POST /api/equipment-types, PUT /api/equipment-types/{slug}, GET /api/equipment-types,
+  GET /api/equipment-types/{slug}
+  DESCRIPTION: Equipment type management — creation, update, and lookup by slug
+- PROTOCOL: HTTP
+  ENDPOINT_OR_TOPIC: POST /api/equipment-statuses, PUT /api/equipment-statuses/{slug}, GET /api/equipment-statuses
+  DESCRIPTION: Equipment status management — creation, update, and catalogue listing
+- PROTOCOL: HTTP
   ENDPOINT_OR_TOPIC: POST /api/customers, PUT /api/customers/{id}, GET /api/customers, GET /api/customers/{id}
   DESCRIPTION: Customer profile management — creation, update, search by phone, and lookup
 - PROTOCOL: HTTP
-  ENDPOINT_OR_TOPIC: GET /api/tariffs, GET /api/tariffs/{id}, GET /api/tariffs/v2, GET /api/tariffs/v2/{id}, GET
-  /api/tariffs/pricing-types
-  DESCRIPTION: Tariff catalogue, active tariff query by equipment type, and tariff auto-selection
+  ENDPOINT_OR_TOPIC: GET /api/tariffs, GET /api/tariffs/{id}, GET /api/tariffs/v2, GET /api/tariffs/v2/{id},
+  GET /api/tariffs/pricing-types, POST /api/tariffs/calculate, PUT /api/tariffs/calculations
+  DESCRIPTION: Tariff catalogue, active tariff query by equipment type, tariff auto-selection, batch rental cost
+  calculation (v1 and v2 with per-equipment return timestamps)
 - PROTOCOL: HTTP
-  ENDPOINT_OR_TOPIC: POST /api/payments, GET /api/payments
-  DESCRIPTION: Standalone payment recording and query
+  ENDPOINT_OR_TOPIC: POST /api/finance/deposits, POST /api/finance/withdrawals, POST /api/finance/adjustments,
+  GET /api/finance/customers/{customerId}/balances, GET /api/finance/customers/{customerId}/transactions
+  DESCRIPTION: Finance ledger operations — customer fund deposits, withdrawals, manual adjustments, account balance
+  retrieval, and paginated transaction history. Implements double-entry accounting model.
 - PROTOCOL: HTTP
   ENDPOINT_OR_TOPIC: GET /actuator/health, GET /actuator/info, GET /actuator/metrics
   DESCRIPTION: Spring Boot Actuator operational endpoints
@@ -145,7 +172,8 @@ EXPOSES:
 
 SERVICE_NAME: bike-rental-db
 TYPE: Database
-PURPOSE: Stores all persistent state for the BikeRental system: rentals, equipment, customers, tariffs, and payments.
+PURPOSE: Stores all persistent state for the BikeRental system: rentals, equipment, customers, tariffs, and finance
+ledger (accounts, sub-ledgers, transactions, transaction records).
 OVERVIEW_REF: NONE
 ENTRY_POINT: NONE (managed service — PostgreSQL 15 container or Render-managed instance)
 EXPOSES:
@@ -166,7 +194,8 @@ TO_SERVICE: bike-rental-db
 PROTOCOL: TCP
 CHANNEL: JDBC — jdbc:postgresql://postgres:5432/bikerental (local) / Render internal URL (production)
 DIRECTION: Request-Response
-PURPOSE: Persists and retrieves all domain aggregates (Rental, Equipment, Customer, Tariff, Payment) through Spring Data
+PURPOSE: Persists and retrieves all domain aggregates (Rental, Equipment, Customer, Tariff, Finance
+accounts/transactions) through Spring Data
 JPA repositories
 CONTRACT_REF: `service/src/main/resources/db/changelog/db.changelog-master.xml` (Liquibase schema)
 
@@ -247,8 +276,9 @@ CONFIG_REF: `.github/workflows/build.yml`, `.github/workflows/deploy.yml`
 
 - PATTERN: Facade (cross-module boundary contract)
   SCOPE: Inter-module calls within bike-rental-api
-  EVIDENCE: `equipment/EquipmentFacade.java`, `customer/CustomerFacade.java`, `tariff/TariffFacade.java`,
-  `finance/FinanceFacade.java` — interfaces at module root; callers import only these, never internal domain types
+  EVIDENCE: `equipment/EquipmentFacade.java`, `customer/CustomerFacade.java`, `tariff/TariffV2Facade.java`,
+  `finance/FinanceFacade.java` — interfaces at module root; callers import only these, never internal domain types.
+  Note: `TariffFacade` (V1) is deprecated in favour of `TariffV2Facade`.
 
 - PATTERN: CQRS (Command/Query separation)
   SCOPE: All modules within bike-rental-api
@@ -256,10 +286,20 @@ CONFIG_REF: `.github/workflows/build.yml`, `.github/workflows/deploy.yml`
   `*UseCase` interfaces for commands and queries
 
 - PATTERN: Event-Driven (in-process domain events)
-  SCOPE: rental → equipment status propagation within bike-rental-api
-  EVIDENCE: `shared/infrastructure/messaging/SpringApplicationEventPublisher.java` (producer);
-  `equipment/infrastructure/eventlistener/RentalEventListener.java` (consumer using `@ApplicationModuleListener`);
-  events: `RentalCreated`, `RentalStarted`, `RentalCompleted`, `RentalUpdated`
+  SCOPE: Bidirectional between rental ↔ equipment and finance → rental within bike-rental-api
+  EVIDENCE:
+  - `shared/infrastructure/messaging/SpringApplicationEventPublisher.java` (producer)
+  - `equipment/infrastructure/eventlistener/RentalEventListener.java` — consumes rental events to update equipment
+    status (`RentalCreated`, `RentalStarted`, `RentalCompleted`, `RentalUpdated`, `RentalCancelled`)
+  - `rental/infrastructure/eventlistener/DebtSettlementEventListener.java` — consumes `CustomerFundDeposited` from
+    finance module to auto-settle DEBT rentals when a customer tops up their account
+  - All listeners use `@ApplicationModuleListener`
+
+- PATTERN: Double-Entry Accounting (finance module)
+  SCOPE: `finance/` module domain model
+  EVIDENCE: `finance/domain/model/` contains `Account`, `SubLedger`, `Transaction`, `TransactionRecord`,
+  `EntryDirection`, `LedgerType`, `TransactionType`, `CustomerAccount`, `SystemAccount` — full double-entry ledger
+  for customer deposits, withdrawals, holds, and adjustments.
 
 - PATTERN: Repository Pattern
   SCOPE: All five business modules within bike-rental-api
@@ -377,4 +417,3 @@ CONFIG_REF: `.github/workflows/build.yml`, `.github/workflows/deploy.yml`
   `NUMERIC(19, 2)` (or equivalent fixed-point type); application-layer money fields must be rounded to 2 decimal places
   before persistence or transmission.
 - CONSTRAINT: use uuid v7 for generated UUID, basically it's achieved by invoking `UuidGenerator.generate()`;
-

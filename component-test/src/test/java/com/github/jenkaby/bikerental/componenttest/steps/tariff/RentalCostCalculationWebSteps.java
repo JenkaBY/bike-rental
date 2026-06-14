@@ -57,6 +57,10 @@ public class RentalCostCalculationWebSteps {
                                        CostCalculationResponse.EquipmentCostBreakdownResponse expected) {
         assertSoftly(softly -> {
 
+            if (expected.equipmentId() != null) {
+                softly.assertThat(actual.equipmentId()).as("equipmentId").isEqualTo(expected.equipmentId());
+            }
+
             if (expected.equipmentType() != null) {
                 softly.assertThat(actual.equipmentType()).as("equipmentType").isEqualTo(expected.equipmentType());
             } else {

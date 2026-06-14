@@ -9,6 +9,8 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Getter
 public final class FlatFeeTariffV2 extends TariffV2 {
@@ -23,11 +25,16 @@ public final class FlatFeeTariffV2 extends TariffV2 {
     }
 
     @Override
-    public RentalCostV2 calculateCost(Duration duration) {
-        int days = isNegative(duration) ? 1 : getNumberOfDays(duration);
+    public RentalCostV2 calculateCost(LocalDateTime startAt, LocalDateTime returnAt) {
+        Duration duration = Duration.between(startAt, returnAt);
+        int days = isNegative(duration) ? 1 : countCalendarDays(startAt.toLocalDate(), returnAt.toLocalDate());
         Money cost = issuanceFee.multiply(BigDecimal.valueOf(days));
         String message = String.format("Flat fee: %s*%dd = %s", issuanceFee, days, cost);
         return new BaseRentalCostV2(cost, new BreakdownCostDetails.FlatFee(message,
                 new BreakdownCostDetails.FlatFee.Details(issuanceFee.toString(), days, cost.toString())));
+    }
+
+    private static int countCalendarDays(LocalDate startDate, LocalDate endDate) {
+        return (int) (ChronoUnit.DAYS.between(startDate, endDate) + 1);
     }
 }

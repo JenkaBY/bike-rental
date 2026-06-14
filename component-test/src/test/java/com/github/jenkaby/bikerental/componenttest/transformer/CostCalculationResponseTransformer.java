@@ -40,6 +40,7 @@ public class CostCalculationResponseTransformer {
 
     @DataTableType
     public CostCalculationResponse.EquipmentCostBreakdownResponse breakdownResponse(Map<String, String> entry) {
+        var equipmentId = toLong(entry, "equipmentId");
         var equipmentType = getStringOrNull(entry, "equipmentType");
         var tariffId = toLong(entry, "tariffId");
         var tariffName = getStringOrNull(entry, "tariffName");
@@ -52,6 +53,7 @@ public class CostCalculationResponseTransformer {
         var message = DataTableHelper.getStringOrNull(entry, "message");
 
         return new CostCalculationResponse.EquipmentCostBreakdownResponse(
+                equipmentId,
                 equipmentType,
                 tariffId,
                 tariffName,

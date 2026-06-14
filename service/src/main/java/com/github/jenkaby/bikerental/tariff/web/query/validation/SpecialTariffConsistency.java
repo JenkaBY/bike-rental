@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.TYPE;
 
 @Documented
-@Constraint(validatedBy = SpecialTariffConsistencyValidator.class)
+@Constraint(validatedBy = {SpecialTariffConsistencyValidator.class, SpecialTariffConsistencyValidatorV2.class})
 @Target({TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SpecialTariffConsistency {

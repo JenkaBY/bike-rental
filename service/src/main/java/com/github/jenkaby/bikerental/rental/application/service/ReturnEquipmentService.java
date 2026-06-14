@@ -74,6 +74,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
         }
 
         var totalFinalCost = rental.getFinalCost();
+        log.info("Rental [{}] returning equipments {}, final cost [{}]", rental.getId(), equipmentInfos, totalFinalCost);
         SettlementInfo settlementInfo = null;
         try {
             settlementInfo = financeFacade.settleRental(

@@ -20,7 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -54,6 +57,9 @@ class TariffV2QueryControllerTest {
 
     @MockitoBean
     private TariffV2QueryMapper mapper;
+
+    @MockitoBean
+    private Clock clock;
 
     private static final PricingParams EMPTY_PARAMS = new PricingParams(
             null, null, null, null, null, null, null, null, null, null);
@@ -106,6 +112,8 @@ class TariffV2QueryControllerTest {
         @Test
         @DisplayName("GET /api/tariffs/selection returns 200 when tariff found")
         void selection_returns200() throws Exception {
+            given(clock.instant()).willReturn(Instant.parse("2026-06-01T00:00:00Z"));
+            given(clock.getZone()).willReturn(ZoneOffset.UTC);
             TariffV2 tariff = new DegressiveHourlyTariffV2(
                     1L, "T", null, "bicycle", "v2",
                     LocalDate.now(), null, TariffV2Status.ACTIVE,

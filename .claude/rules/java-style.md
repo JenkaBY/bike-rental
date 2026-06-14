@@ -7,6 +7,9 @@ paths:
 
 - **Zero inline comments.** Use expressive naming and self-documenting structures instead.
 - **Records** for DTOs, commands, queries, events, and any immutable data carrier — never traditional classes.
+- **Temporal fields in web request DTOs must carry `@DateTimeFormat`** declaring the accepted format
+  (e.g. `@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)` for `Instant`/`LocalDateTime`, `ISO.DATE` for
+  `LocalDate`) — the frontend's generated API client services rely on it.
 - **Constructor injection only.** Dependency fields `private final`; never field injection, never `@Value` (use
   `@ConfigurationProperties` records).
 - **Immutability by default:** `final` where possible, `List.of()`/`Map.of()` for fixed data, `Stream.toList()`.

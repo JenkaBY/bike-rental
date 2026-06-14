@@ -33,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
@@ -49,17 +50,20 @@ public class TariffV2QueryController {
     private final GetActiveTariffsV2ByEquipmentTypeUseCase getActiveByTypeUseCase;
     private final SelectTariffV2UseCase selectTariffUseCase;
     private final TariffV2QueryMapper mapper;
+    private final Clock clock;
 
     TariffV2QueryController(GetTariffV2ByIdUseCase getByIdUseCase,
                             GetAllTariffsV2UseCase getAllUseCase,
                             GetActiveTariffsV2ByEquipmentTypeUseCase getActiveByTypeUseCase,
                             SelectTariffV2UseCase selectTariffUseCase,
-                            TariffV2QueryMapper mapper) {
+                            TariffV2QueryMapper mapper,
+                            Clock clock) {
         this.getByIdUseCase = getByIdUseCase;
         this.getAllUseCase = getAllUseCase;
         this.getActiveByTypeUseCase = getActiveByTypeUseCase;
         this.selectTariffUseCase = selectTariffUseCase;
         this.mapper = mapper;
+        this.clock = clock;
     }
 
     @GetMapping("/{id}")
@@ -123,7 +127,10 @@ public class TariffV2QueryController {
         log.info("[GET] Select V2 tariff for equipmentType={}, durationMinutes={}", equipmentType, durationMinutes);
         var duration = Duration.ofMinutes(durationMinutes);
         var tariff = selectTariffUseCase.execute(new SelectTariffV2UseCase.SelectTariffCommand(equipmentType, duration, rentalDate));
-        var cost = tariff.calculateCost(duration);
+        var effectiveDate = rentalDate != null ? rentalDate : LocalDate.now(clock);
+        var startAt = effectiveDate.atStartOfDay();
+        var returnAt = startAt.plus(duration);
+        var cost = tariff.calculateCost(startAt, returnAt);
         var response = new TariffSelectionV2Response(
                 mapper.toResponse(tariff),
                 cost.totalCost().amount(),
