@@ -308,13 +308,19 @@ public class Rental {
         equipments.forEach(re -> {
             var result = byEquipmentId.get(re.getEquipmentId());
             if (result != null) {
-                re.applyFinalCost(result.tariffId(), result.estimatedCost());
+                re.applyFinalCost(result.tariffId(), result.estimatedCost(), result.breakdown());
             }
         });
     }
 
     public Set<Long> getEquipmentIds() {
         return this.equipments.stream()
+                .map(RentalEquipment::getEquipmentId)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<Long> notReturnedEquipmentIds() {
+        return rentedEquipments().stream()
                 .map(RentalEquipment::getEquipmentId)
                 .collect(Collectors.toSet());
     }

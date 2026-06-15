@@ -30,7 +30,8 @@ public class EquipmentItemResponseTransformer {
                 estimatedCost,
                 finalCost,
                 tariffId,
-                status
+                status,
+                null
         ));
     }
 

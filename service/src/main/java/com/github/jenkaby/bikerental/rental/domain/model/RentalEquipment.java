@@ -1,7 +1,9 @@
 package com.github.jenkaby.bikerental.rental.domain.model;
 
+import com.github.jenkaby.bikerental.rental.domain.model.vo.RentalEquipmentCostBreakdown;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 
@@ -25,6 +27,8 @@ public class RentalEquipment {
     private Long tariffId;
     private Money estimatedCost;
     private Money finalCost;
+    @Nullable
+    private RentalEquipmentCostBreakdown finalCostBreakdown;
 
     public RentalEquipment activateForRental(Rental rental) {
         if (rental.getStartedAt() == null) {
@@ -50,9 +54,10 @@ public class RentalEquipment {
         this.estimatedCost = estimatedCost;
     }
 
-    public void applyFinalCost(Long tariffId, Money estimatedCost) {
+    public void applyFinalCost(Long tariffId, Money finalCost, @Nullable RentalEquipmentCostBreakdown breakdown) {
         this.tariffId = tariffId;
-        this.finalCost = estimatedCost;
+        this.finalCost = finalCost;
+        this.finalCostBreakdown = breakdown;
     }
 
     public static RentalEquipment assigned(Long equipmentId, String equipmentUid, String equipmentType) {

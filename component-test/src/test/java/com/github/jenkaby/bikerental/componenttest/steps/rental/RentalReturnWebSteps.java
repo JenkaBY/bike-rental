@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.steps.rental;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
+import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentCostBreakdownTransformer;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalReturnResponse;
 import com.github.jenkaby.bikerental.rental.web.command.dto.ReturnEquipmentRequest;
 import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
@@ -69,6 +70,25 @@ public class RentalReturnWebSteps {
         this.rentalWebSteps.rentalResponseContainsEquipments(expected);
 
         scenarioContext.setResponse(temp);
+    }
+
+    @Then("the rental return response contains equipment breakdowns")
+    public void theRentalReturnResponseContainsEquipmentBreakdowns(
+            List<EquipmentCostBreakdownTransformer.EquipmentCostBreakdownAssertionHolder> expected) {
+        var actual = scenarioContext.getResponseBody(RentalReturnResponse.class);
+        rentalWebSteps.assertEquipmentBreakdowns(actual.rental().equipmentItems(), expected);
+    }
+
+    @Then("the rental return response has no breakdown for equipment {long}")
+    public void theRentalReturnResponseHasNoBreakdownForEquipment(Long equipmentId) {
+        var actual = scenarioContext.getResponseBody(RentalReturnResponse.class);
+        var matchedItem = actual.rental().equipmentItems().stream()
+                .filter(item -> equipmentId.equals(item.equipmentId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("No equipment item found for id: " + equipmentId));
+        assertThat(matchedItem.breakdown())
+                .as("Breakdown for equipment %d should be null (not yet returned)", equipmentId)
+                .isNull();
     }
 
     @Then("the rental return response {booleanDo} contain settlement info")
