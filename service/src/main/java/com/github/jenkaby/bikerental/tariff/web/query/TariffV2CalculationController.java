@@ -37,6 +37,7 @@ public class TariffV2CalculationController {
 
     @PostMapping("/calculate")
     @Operation(summary = "Calculate rental cost for multiple equipment items",
+            deprecated = true,
             description = "Supports normal mode (auto-select tariffs, apply discount) and SPECIAL mode (fixed group price)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cost calculation result",
@@ -46,6 +47,7 @@ public class TariffV2CalculationController {
             @ApiResponse(responseCode = "404", description = "No suitable tariff found for an equipment type",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
+    @Deprecated(forRemoval = true)
     public ResponseEntity<CostCalculationResponse> calculateCost(@Valid @RequestBody CostCalculationRequest request) {
         log.info("[POST] Batch cost calculation for {} equipment item(s)", request.equipments().size());
         var command = requestMapper.toCommand(request);
