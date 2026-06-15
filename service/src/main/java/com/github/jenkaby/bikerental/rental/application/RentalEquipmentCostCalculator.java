@@ -5,7 +5,7 @@ import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommand
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEquipmentCostBreakdownMapper;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.vo.EquipmentCostResult;
-import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
+import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class RentalEquipmentCostCalculator {
     private final RentalEquipmentCostBreakdownMapper breakdownMapper;
 
     public List<EquipmentCostResult> calculateEstimated(Rental rental, List<EquipmentInfo> equipments) {
-        var command = costCommandMapper.toCommand(rental, equipments);
+        var command = costCommandMapper.toEstimateCommand(rental, equipments);
         return extractEstimatedResults(equipments, command);
     }
 
@@ -32,8 +32,8 @@ public class RentalEquipmentCostCalculator {
         return extractFinalResults(equipments, command);
     }
 
-    private List<EquipmentCostResult> extractEstimatedResults(List<EquipmentInfo> equipments, RentalCostCalculationCommand command) {
-        var breakdowns = tariffFacade.calculateRentalCost(command).equipmentBreakdowns();
+    private List<EquipmentCostResult> extractEstimatedResults(List<EquipmentInfo> equipments, RentalCostCalculationV2Command command) {
+        var breakdowns = tariffFacade.calculateRentalCostV2(command).equipmentBreakdowns();
 
         var results = new ArrayList<EquipmentCostResult>();
         for (int i = 0; i < equipments.size(); i++) {
@@ -47,8 +47,8 @@ public class RentalEquipmentCostCalculator {
         return results;
     }
 
-    private List<EquipmentCostResult> extractFinalResults(List<EquipmentInfo> equipments, RentalCostCalculationCommand command) {
-        var breakdowns = tariffFacade.calculateRentalCost(command).equipmentBreakdowns();
+    private List<EquipmentCostResult> extractFinalResults(List<EquipmentInfo> equipments, RentalCostCalculationV2Command command) {
+        var breakdowns = tariffFacade.calculateRentalCostV2(command).equipmentBreakdowns();
 
         var results = new ArrayList<EquipmentCostResult>();
         for (int i = 0; i < equipments.size(); i++) {

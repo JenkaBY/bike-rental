@@ -1,97 +1,61 @@
 package com.github.jenkaby.bikerental.rental.application.mapper;
 
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
-import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
-import com.github.jenkaby.bikerental.tariff.EquipmentCostItem;
-import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
+import com.github.jenkaby.bikerental.tariff.EquipmentCostItemV2;
+import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Mapper(uses = {EquipmentCostItemMapper.class})
+@Mapper
 public abstract class RentalCostCommandMapper {
 
     protected Clock clock;
-    protected EquipmentCostItemMapper equipmentCostItemMapper;
 
     @Autowired
     public void setClock(Clock clock) {
         this.clock = clock;
     }
 
-    @Autowired
-    public void setEquipmentCostItemMapper(EquipmentCostItemMapper equipmentCostItemMapper) {
-        this.equipmentCostItemMapper = equipmentCostItemMapper;
+    public RentalCostCalculationV2Command toEstimateCommand(Rental rental, List<EquipmentInfo> equipments) {
+        var startAt = LocalDate.now(clock).atStartOfDay();
+        var costItems = equipments.stream()
+                .map(equipment -> new EquipmentCostItemV2(equipment.id(), equipment.typeSlug(), null))
+                .toList();
+        return buildCommand(rental, costItems, startAt);
     }
 
-    // TODO fix these 3 methods. Seems we can replace only by one
-    public RentalCostCalculationCommand toCommand(
-            CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand command,
-            List<EquipmentInfo> equipments) {
-        var costItems = equipmentCostItemMapper.toEquipmentCostItems(equipments);
-        if (command.specialTariffId() != null) {
-            return new RentalCostCalculationCommand(
-                    costItems,
-                    command.duration(),
-                    null,
-                    null,
-                    command.specialTariffId(),
-                    command.specialPrice(),
-                    LocalDate.now(clock));
-        }
-        return new RentalCostCalculationCommand(
-                costItems,
-                command.duration(),
-                null,
-                command.discountPercent(),
-                null,
-                null,
-                LocalDate.now(clock));
+    public RentalCostCalculationV2Command toReturnCommand(Rental rental, List<EquipmentInfo> equipments, Duration billableDuration) {
+        var startAt = rental.getStartedAt();
+        var returnAt = startAt.plus(billableDuration);
+        var costItems = equipments.stream()
+                .map(equipment -> new EquipmentCostItemV2(equipment.id(), equipment.typeSlug(), returnAt))
+                .toList();
+        return buildCommand(rental, costItems, startAt);
     }
 
-    public RentalCostCalculationCommand toCommand(
-            Rental rental,
-            List<EquipmentInfo> equipments) {
-        var costItems = equipmentCostItemMapper.toEquipmentCostItems(equipments);
+    private RentalCostCalculationV2Command buildCommand(Rental rental, List<EquipmentCostItemV2> costItems, LocalDateTime startAt) {
         if (rental.getSpecialTariffId() != null) {
-            return new RentalCostCalculationCommand(
+            return new RentalCostCalculationV2Command(
                     costItems,
                     rental.getPlannedDuration(),
                     null,
-                    null,
                     rental.getSpecialTariffId(),
                     rental.getSpecialPrice(),
-                    LocalDate.now(clock));
+                    startAt);
         }
-        return new RentalCostCalculationCommand(
+        return new RentalCostCalculationV2Command(
                 costItems,
                 rental.getPlannedDuration(),
-                null,
                 rental.getDiscountPercent(),
                 null,
                 null,
-                LocalDate.now(clock));
-    }
-
-    public RentalCostCalculationCommand toReturnCommand(
-            Rental rental,
-            List<EquipmentInfo> equipmentsToReturn,
-            Duration actualDuration) {
-        var costItems = equipmentsToReturn.stream()
-                .map(e -> new EquipmentCostItem(e.typeSlug()))
-                .toList();
-        return new RentalCostCalculationCommand(
-                costItems,
-                rental.getPlannedDuration(),
-                actualDuration,
-                rental.getDiscountPercent(),
-                rental.getSpecialTariffId(),
-                rental.getSpecialPrice(),
-                rental.getStartedAt().toLocalDate());
+                startAt);
     }
 }

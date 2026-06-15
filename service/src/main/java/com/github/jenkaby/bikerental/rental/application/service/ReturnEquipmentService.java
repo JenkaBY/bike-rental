@@ -3,7 +3,6 @@ package com.github.jenkaby.bikerental.rental.application.service;
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.finance.SettlementInfo;
-import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
@@ -18,7 +17,6 @@ import com.github.jenkaby.bikerental.shared.domain.event.RentalCompleted;
 import com.github.jenkaby.bikerental.shared.exception.OverBudgetSettlementException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
-import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -38,8 +36,6 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
 
     private final RentalRepository rentalRepository;
     private final RentalDurationCalculator durationCalculator;
-    private final TariffV2Facade tariffV2Facade;
-    private final RentalCostCommandMapper costCommandMapper;
     private final FinanceFacade financeFacade;
     private final RentalEventMapper eventMapper;
     private final EventPublisher eventPublisher;
