@@ -308,7 +308,7 @@ public class Rental {
 <span class="fc" id="L308">        equipments.forEach(re -&gt; {</span>
 <span class="fc" id="L309">            var result = byEquipmentId.get(re.getEquipmentId());</span>
 <span class="fc bfc" id="L310" title="All 2 branches covered.">            if (result != null) {</span>
-<span class="fc" id="L311">                re.applyFinalCost(result.tariffId(), result.estimatedCost());</span>
+<span class="fc" id="L311">                re.applyFinalCost(result.tariffId(), result.estimatedCost(), result.breakdown());</span>
             }
 <span class="fc" id="L313">        });</span>
 <span class="fc" id="L314">    }</span>
@@ -319,18 +319,24 @@ public class Rental {
 <span class="fc" id="L319">                .collect(Collectors.toSet());</span>
     }
 
+    public Set&lt;Long&gt; notReturnedEquipmentIds() {
+<span class="fc" id="L323">        return rentedEquipments().stream()</span>
+<span class="fc" id="L324">                .map(RentalEquipment::getEquipmentId)</span>
+<span class="fc" id="L325">                .collect(Collectors.toSet());</span>
+    }
+
     public static class RentalBuilder {
         public Rental build() {
-<span class="pc bpc" id="L324" title="2 of 6 branches missed.">            if ((specialTariffId != null || specialPrice != null) &amp;&amp; discountPercent != null) {</span>
-<span class="nc" id="L325">                throw new IllegalArgumentException(</span>
+<span class="pc bpc" id="L330" title="2 of 6 branches missed.">            if ((specialTariffId != null || specialPrice != null) &amp;&amp; discountPercent != null) {</span>
+<span class="nc" id="L331">                throw new IllegalArgumentException(</span>
                         &quot;specialTariffId and discountPercent are mutually exclusive&quot;);
             }
-<span class="pc bpc" id="L328" title="2 of 8 branches missed.">            if ((specialTariffId != null &amp;&amp; specialPrice == null)</span>
+<span class="pc bpc" id="L334" title="2 of 8 branches missed.">            if ((specialTariffId != null &amp;&amp; specialPrice == null)</span>
                     || (specialTariffId == null &amp;&amp; specialPrice != null)) {
-<span class="nc" id="L330">                throw new IllegalArgumentException(</span>
+<span class="nc" id="L336">                throw new IllegalArgumentException(</span>
                         &quot;specialPrice is required when specialTariffId is set&quot;);
             }
-<span class="fc" id="L333">            return new Rental(id, customerId, equipments, status, startedAt, expectedReturnAt,</span>
+<span class="fc" id="L339">            return new Rental(id, customerId, equipments, status, startedAt, expectedReturnAt,</span>
                     actualReturnAt, plannedDuration, actualDuration, estimatedCost, finalCost,
                     specialTariffId, specialPrice, discountPercent, createdAt, updatedAt);
         }

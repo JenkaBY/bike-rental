@@ -2,6 +2,7 @@
 
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
+import com.github.jenkaby.bikerental.rental.application.mapper.RentalEquipmentCostBreakdownMapper;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.vo.EquipmentCostResult;
 import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
@@ -19,30 +20,47 @@ public class RentalEquipmentCostCalculator {
 
     private final TariffV2Facade tariffFacade;
     private final RentalCostCommandMapper costCommandMapper;
+    private final RentalEquipmentCostBreakdownMapper breakdownMapper;
 
     public List&lt;EquipmentCostResult&gt; calculateEstimated(Rental rental, List&lt;EquipmentInfo&gt; equipments) {
-<span class="fc" id="L24">        var command = costCommandMapper.toCommand(rental, equipments);</span>
-<span class="fc" id="L25">        return extractResults(equipments, command);</span>
+<span class="fc" id="L26">        var command = costCommandMapper.toCommand(rental, equipments);</span>
+<span class="fc" id="L27">        return extractEstimatedResults(equipments, command);</span>
     }
 
     public List&lt;EquipmentCostResult&gt; calculateFinal(Rental rental, List&lt;EquipmentInfo&gt; equipments, Duration billableDuration) {
-<span class="fc" id="L29">        var command = costCommandMapper.toReturnCommand(rental, equipments, billableDuration);</span>
-<span class="fc" id="L30">        return extractResults(equipments, command);</span>
+<span class="fc" id="L31">        var command = costCommandMapper.toReturnCommand(rental, equipments, billableDuration);</span>
+<span class="fc" id="L32">        return extractFinalResults(equipments, command);</span>
     }
 
-    private List&lt;EquipmentCostResult&gt; extractResults(List&lt;EquipmentInfo&gt; equipments, RentalCostCalculationCommand command) {
-<span class="fc" id="L34">        var breakdowns = tariffFacade.calculateRentalCost(command).equipmentBreakdowns();</span>
+    private List&lt;EquipmentCostResult&gt; extractEstimatedResults(List&lt;EquipmentInfo&gt; equipments, RentalCostCalculationCommand command) {
+<span class="fc" id="L36">        var breakdowns = tariffFacade.calculateRentalCost(command).equipmentBreakdowns();</span>
 
-<span class="fc" id="L36">        var results = new ArrayList&lt;EquipmentCostResult&gt;();</span>
-<span class="fc bfc" id="L37" title="All 2 branches covered.">        for (int i = 0; i &lt; equipments.size(); i++) {</span>
-<span class="fc" id="L38">            var breakdown = breakdowns.get(i);</span>
-<span class="fc" id="L39">            results.add(new EquipmentCostResult(</span>
-<span class="fc" id="L40">                    equipments.get(i).id(),</span>
-<span class="fc" id="L41">                    breakdown.tariffId(),</span>
-<span class="fc" id="L42">                    breakdown.itemCost()</span>
+<span class="fc" id="L38">        var results = new ArrayList&lt;EquipmentCostResult&gt;();</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        for (int i = 0; i &lt; equipments.size(); i++) {</span>
+<span class="fc" id="L40">            var breakdown = breakdowns.get(i);</span>
+<span class="fc" id="L41">            results.add(EquipmentCostResult.withoutBreakdown(</span>
+<span class="fc" id="L42">                    equipments.get(i).id(),</span>
+<span class="fc" id="L43">                    breakdown.tariffId(),</span>
+<span class="fc" id="L44">                    breakdown.itemCost()</span>
             ));
         }
-<span class="fc" id="L45">        return results;</span>
+<span class="fc" id="L47">        return results;</span>
+    }
+
+    private List&lt;EquipmentCostResult&gt; extractFinalResults(List&lt;EquipmentInfo&gt; equipments, RentalCostCalculationCommand command) {
+<span class="fc" id="L51">        var breakdowns = tariffFacade.calculateRentalCost(command).equipmentBreakdowns();</span>
+
+<span class="fc" id="L53">        var results = new ArrayList&lt;EquipmentCostResult&gt;();</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        for (int i = 0; i &lt; equipments.size(); i++) {</span>
+<span class="fc" id="L55">            var breakdown = breakdowns.get(i);</span>
+<span class="fc" id="L56">            results.add(new EquipmentCostResult(</span>
+<span class="fc" id="L57">                    equipments.get(i).id(),</span>
+<span class="fc" id="L58">                    breakdown.tariffId(),</span>
+<span class="fc" id="L59">                    breakdown.itemCost(),</span>
+<span class="fc" id="L60">                    breakdownMapper.toBreakdown(breakdown)</span>
+            ));
+        }
+<span class="fc" id="L63">        return results;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -2,18 +2,39 @@
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 
 @Schema(description = &quot;Equipment item within rental&quot;)
-<span class="fc" id="L9">public record EquipmentItemResponse(</span>
+<span class="fc" id="L10">public record EquipmentItemResponse(</span>
         @Schema(description = &quot;Equipment ID&quot;, example = &quot;1&quot;) @NotNull Long equipmentId,
         @Schema(description = &quot;Equipment UID&quot;, example = &quot;BIKE-001&quot;) String equipmentUid,
         @Schema(description = &quot;Estimated cost for this equipment (optional)&quot;) @NotNull BigDecimal estimatedCost,
         @Schema(description = &quot;Final cost for this equipment (optional)&quot;) BigDecimal finalCost,
         @Schema(description = &quot;Tariff ID&quot;, example = &quot;3&quot;) Long tariffId,
-        @Schema(description = &quot;Status rental equipment&quot;, example = &quot;ASSIGNED&quot;) @NotNull String status
+        @Schema(description = &quot;Status rental equipment&quot;, example = &quot;ASSIGNED&quot;) @NotNull String status,
+        @Schema(description = &quot;Final cost breakdown; populated only when equipment is returned&quot;) @Nullable CostBreakdown breakdown
 ) {
-}
 
+    @Schema(description = &quot;Per-equipment final cost breakdown&quot;)
+<span class="fc" id="L21">    public record CostBreakdown(</span>
+            @NotNull String pricingType,
+            @NotNull String tariffName,
+            @NotNull Integer billedDurationMinutes,
+            @Nullable Integer overtimeMinutes,
+            @Nullable Integer forgivenMinutes,
+            @NotNull BigDecimal itemCost,
+            @NotNull CalculationDetail calculationBreakdown
+    ) {
+
+        @Schema(description = &quot;Detailed calculation pattern and parameters&quot;)
+<span class="fc" id="L32">        public record CalculationDetail(</span>
+                @NotNull String breakdownPatternCode,
+                @NotNull String message,
+                @Nullable Object params
+        ) {
+        }
+    }
+}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

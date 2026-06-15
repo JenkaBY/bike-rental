@@ -23,7 +23,7 @@ public class RentalCostPolicy {
 <span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if (rental.getPlannedDuration() == null) {</span>
 <span class="nc" id="L24">            throw new InvalidRentalPlannedDurationException(rental.getId());</span>
         }
-<span class="fc" id="L26">        var equipments = equipmentFacade.findByIds(new ArrayList&lt;&gt;(rental.getEquipmentIds()));</span>
+<span class="fc" id="L26">        var equipments = equipmentFacade.findByIds(new ArrayList&lt;&gt;(rental.notReturnedEquipmentIds()));</span>
 <span class="fc" id="L27">        var results = calculator.calculateEstimated(rental, equipments);</span>
 <span class="fc" id="L28">        rental.applyEstimatedCost(results);</span>
 <span class="fc" id="L29">    }</span>

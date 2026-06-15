@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalEquipmentWebMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.web.query.mapper</a> &gt; <span class="el_source">RentalEquipmentWebMapper.java</span></div><h1>RentalEquipmentWebMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.web.query.mapper;
+
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.rental.domain.model.vo.RentalEquipmentCostBreakdown;
+import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentStatusMapper;
+import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
+import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+@Mapper(uses = {MoneyMapper.class, InstantMapper.class, RentalEquipmentStatusMapper.class})
+public interface RentalEquipmentWebMapper {
+
+    @Mapping(target = &quot;breakdown&quot;, source = &quot;finalCostBreakdown&quot;)
+    EquipmentItemResponse toEquipmentItemResponse(RentalEquipment equipment);
+
+    default EquipmentItemResponse.CostBreakdown toCostBreakdown(RentalEquipmentCostBreakdown source) {
+<span class="fc bfc" id="L19" title="All 2 branches covered.">        if (source == null) {</span>
+<span class="fc" id="L20">            return null;</span>
+        }
+<span class="fc" id="L22">        var detail = source.calculationBreakdown();</span>
+<span class="fc" id="L23">        var calculationDetail = new EquipmentItemResponse.CostBreakdown.CalculationDetail(</span>
+<span class="fc" id="L24">                detail.breakdownPatternCode(),</span>
+<span class="fc" id="L25">                detail.message(),</span>
+<span class="fc" id="L26">                detail.params()</span>
+        );
+<span class="fc" id="L28">        return new EquipmentItemResponse.CostBreakdown(</span>
+<span class="fc" id="L29">                source.pricingType(),</span>
+<span class="fc" id="L30">                source.tariffName(),</span>
+<span class="fc" id="L31">                source.billedDurationMinutes(),</span>
+<span class="fc" id="L32">                source.overtimeMinutes(),</span>
+<span class="fc" id="L33">                source.forgivenMinutes(),</span>
+<span class="fc" id="L34">                source.itemCost(),</span>
+                calculationDetail
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

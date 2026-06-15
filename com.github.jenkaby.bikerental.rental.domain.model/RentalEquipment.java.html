@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalEquipment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.domain.model</a> &gt; <span class="el_source">RentalEquipment.java</span></div><h1>RentalEquipment.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.domain.model;
 
+import com.github.jenkaby.bikerental.rental.domain.model.vo.RentalEquipmentCostBreakdown;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import lombok.*;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 
@@ -25,43 +27,46 @@ public class RentalEquipment {
     private Long tariffId;
     private Money estimatedCost;
     private Money finalCost;
+    @Nullable
+    private RentalEquipmentCostBreakdown finalCostBreakdown;
 
     public RentalEquipment activateForRental(Rental rental) {
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if (rental.getStartedAt() == null) {</span>
-<span class="nc" id="L31">            throw new IllegalArgumentException(&quot;Rental must have a start date to activate equipment&quot;);</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if (rental.getStartedAt() == null) {</span>
+<span class="nc" id="L35">            throw new IllegalArgumentException(&quot;Rental must have a start date to activate equipment&quot;);</span>
         }
-<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if (rental.getExpectedReturnAt() == null) {</span>
-<span class="nc" id="L34">            throw new IllegalArgumentException(&quot;Rental must have a Expected return at to activate equipment&quot;);</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (rental.getExpectedReturnAt() == null) {</span>
+<span class="nc" id="L38">            throw new IllegalArgumentException(&quot;Rental must have a Expected return at to activate equipment&quot;);</span>
         }
-<span class="fc" id="L36">        this.setStatus(RentalEquipmentStatus.ACTIVE);</span>
-<span class="fc" id="L37">        this.setStartedAt(rental.getStartedAt());</span>
-<span class="fc" id="L38">        this.setExpectedReturnAt(rental.getExpectedReturnAt());</span>
-<span class="fc" id="L39">        return this;</span>
+<span class="fc" id="L40">        this.setStatus(RentalEquipmentStatus.ACTIVE);</span>
+<span class="fc" id="L41">        this.setStartedAt(rental.getStartedAt());</span>
+<span class="fc" id="L42">        this.setExpectedReturnAt(rental.getExpectedReturnAt());</span>
+<span class="fc" id="L43">        return this;</span>
     }
 
     public RentalEquipment markReturned(LocalDateTime returnAt) {
-<span class="fc" id="L43">        this.setStatus(RentalEquipmentStatus.RETURNED);</span>
-<span class="fc" id="L44">        this.setActualReturnAt(returnAt);</span>
-<span class="fc" id="L45">        return this;</span>
+<span class="fc" id="L47">        this.setStatus(RentalEquipmentStatus.RETURNED);</span>
+<span class="fc" id="L48">        this.setActualReturnAt(returnAt);</span>
+<span class="fc" id="L49">        return this;</span>
     }
 
     public void applyEstimatedCost(Long tariffId, Money estimatedCost) {
-<span class="fc" id="L49">        this.tariffId = tariffId;</span>
-<span class="fc" id="L50">        this.estimatedCost = estimatedCost;</span>
-<span class="fc" id="L51">    }</span>
+<span class="fc" id="L53">        this.tariffId = tariffId;</span>
+<span class="fc" id="L54">        this.estimatedCost = estimatedCost;</span>
+<span class="fc" id="L55">    }</span>
 
-    public void applyFinalCost(Long tariffId, Money estimatedCost) {
-<span class="fc" id="L54">        this.tariffId = tariffId;</span>
-<span class="fc" id="L55">        this.finalCost = estimatedCost;</span>
-<span class="fc" id="L56">    }</span>
+    public void applyFinalCost(Long tariffId, Money finalCost, @Nullable RentalEquipmentCostBreakdown breakdown) {
+<span class="fc" id="L58">        this.tariffId = tariffId;</span>
+<span class="fc" id="L59">        this.finalCost = finalCost;</span>
+<span class="fc" id="L60">        this.finalCostBreakdown = breakdown;</span>
+<span class="fc" id="L61">    }</span>
 
     public static RentalEquipment assigned(Long equipmentId, String equipmentUid, String equipmentType) {
-<span class="fc" id="L59">        return RentalEquipment.builder()</span>
-<span class="fc" id="L60">                .equipmentId(equipmentId)</span>
-<span class="fc" id="L61">                .equipmentUid(equipmentUid)</span>
-<span class="fc" id="L62">                .status(RentalEquipmentStatus.ASSIGNED)</span>
-<span class="fc" id="L63">                .equipmentType(equipmentType)</span>
-<span class="fc" id="L64">                .build();</span>
+<span class="fc" id="L64">        return RentalEquipment.builder()</span>
+<span class="fc" id="L65">                .equipmentId(equipmentId)</span>
+<span class="fc" id="L66">                .equipmentUid(equipmentUid)</span>
+<span class="fc" id="L67">                .status(RentalEquipmentStatus.ASSIGNED)</span>
+<span class="fc" id="L68">                .equipmentType(equipmentType)</span>
+<span class="fc" id="L69">                .build();</span>
     }
 }
 
