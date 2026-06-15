@@ -32,6 +32,7 @@ class TariffV2FacadeImpl implements TariffV2Facade {
                 .map(tariffV2ToInfoMapper::toTariffV2Info);
     }
 
+    @Deprecated(forRemoval = true)
     @Override
     public RentalCostCalculationResult calculateRentalCost(RentalCostCalculationCommand command) {
         return rentalCostCalculationUseCase.execute(command);
