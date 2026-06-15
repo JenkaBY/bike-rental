@@ -38,7 +38,7 @@
 |---|---|---|
 | `.github/agents/business-analyst.agent.md` | `.claude/commands/spec-requirements.md` | Slash command, not subagent: needs interactive approval (`AskUserQuestion`); Copilot `askQuestions` mapped accordingly |
 | `.github/agents/architect.agent.md` | `.claude/commands/spec-design.md` | Slash command for consistency of the 4-step chain |
-| `.github/agents/team-lead.agent.md` | `.claude/commands/spec-tasks.md` | Slash command: must spawn the `Explore` subagent (subagents cannot nest subagents in Claude Code); `<skills>` directive repointed to `.claude/skills/` |
+| `.github/agents/team-lead.agent.md` | `.claude/commands/spec-tasks.md` | Slash command by design (inline, user-supervised); spawns the `Explore` subagent via the Agent tool; `<skills>` directive repointed to `.claude/skills/` |
 | `.github/agents/dev-manager.agent.md` + `.github/prompts/dev-manger-delegator.prompt.md` | `.claude/commands/spec-implement.md` | Orchestration loop runs in the main conversation and delegates each task to the `dev` subagent via the Agent tool |
 | `.github/agents/dev.agent.md` | `.claude/agents/dev.md` | The single true subagent: tools restricted to `Read, Edit, Write, Glob, Grep, Bash`; Success/Failure reporting protocol preserved |
 | `.github/prompts/project-architecture.prompt.md` | `.claude/commands/project-architecture.md` | `#tool:agent/runSubagent` → Agent tool (`subagent_type: "Explore"`); `{project}` bound to `$ARGUMENTS` |
@@ -54,10 +54,19 @@
 
 ## 3. Key migration decisions
 
-1. **Commands vs subagents.** Copilot's five `.agent.md` files map to **four slash commands + one subagent**. Reasons:
-   the BA must interact with the user (Claude subagents cannot), the team-lead must spawn `Explore` and the
-   dev-manager must spawn `dev` (Claude subagents cannot spawn other subagents). Only `dev` — a leaf executor — remains
-   a subagent, preserving the original delegation contract (input = task-file path; output = `Success:`/`Failure:`).
+1. **Commands vs subagents.** Copilot's five `.agent.md` files map to **four slash commands + one subagent**
+   (`business-analyst`, `architect`, `team-lead`, `dev-manager` → `/spec-*` commands; `dev` → subagent). The only
+   *hard* constraint is `business-analyst`: it must ask the user clarifying questions and get explicit plan approval,
+   and subagents run autonomously with no way to prompt the user. The other three are a deliberate **design choice**,
+   not a technical limit — they run inline in the main conversation so the user can watch and intervene in this
+   user-supervised pipeline, they form a uniform `/spec-requirements → /spec-design → /spec-tasks → /spec-implement`
+   chain, and their value is the files they write (not a returned summary, which is all an isolated subagent context
+   would surface). *Correction (second pass):* an earlier draft justified this by claiming "Claude subagents cannot
+   spawn other subagents" — that is **wrong**. As of Claude Code v2.1.172 subagents **can** nest (foreground at any
+   depth), so `team-lead`/`dev-manager` *could* be subagents; they are commands by choice. `dev` remains the one
+   subagent because it is a leaf executor where context isolation pays off — it grinds through a single task with heavy
+   build/test output and returns only `Success:`/`Failure:`, keeping the orchestrator's context clean (input =
+   task-file path; output = status line).
 2. **Path-scoped instructions → skills + rules.** The long-form Java/Spring/JUnit/CI guidance became on-demand skills
    with trigger-rich descriptions (too long for always-on context). *Correction (second pass):* Claude Code **does**
    support `applyTo`-style glob scoping via `.claude/rules/*.md` with `paths:` frontmatter — see §6; the hard

@@ -23,7 +23,7 @@ public class RentalCostPolicy {
         if (rental.getPlannedDuration() == null) {
             throw new InvalidRentalPlannedDurationException(rental.getId());
         }
-        var equipments = equipmentFacade.findByIds(new ArrayList<>(rental.getEquipmentIds()));
+        var equipments = equipmentFacade.findByIds(new ArrayList<>(rental.notReturnedEquipmentIds()));
         var results = calculator.calculateEstimated(rental, equipments);
         rental.applyEstimatedCost(results);
     }

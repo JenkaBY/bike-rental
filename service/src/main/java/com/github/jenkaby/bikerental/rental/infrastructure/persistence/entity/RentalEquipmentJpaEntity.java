@@ -1,7 +1,10 @@
 package com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity;
 
+import com.github.jenkaby.bikerental.rental.domain.model.vo.RentalEquipmentCostBreakdown;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -51,6 +54,10 @@ public class RentalEquipmentJpaEntity {
 
     @Column(name = "final_cost", precision = 10, scale = 2)
     private BigDecimal finalCost;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "final_cost_breakdown", columnDefinition = "jsonb")
+    private RentalEquipmentCostBreakdown finalCostBreakdown;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

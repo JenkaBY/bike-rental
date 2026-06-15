@@ -5,6 +5,7 @@ import com.github.jenkaby.bikerental.componenttest.config.db.repository.Insertab
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.RentalEquipmentTestJpaRepository;
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.RentalJpaRepositoryWrapper;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
+import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentCostBreakdownTransformer;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalEquipmentJpaEntity;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.entity.RentalJpaEntity;
 import io.cucumber.java.en.Given;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.awaitility.Awaitility.await;
 
 @Slf4j
@@ -170,6 +172,72 @@ public class RentalDbSteps {
     @Then("there's/there're {int} rental equipment(s) in database")
     public void aRentalEquipmentsWerePersistedInDatabase(int expectedSize) {
         assertThat(rentalEquipmentsJpaRepository.findAll().size()).isEqualTo(expectedSize);
+    }
+
+    @Then("rental equipment breakdowns were persisted in database")
+    public void rentalEquipmentBreakdownsWerePersistedInDatabase(
+            List<EquipmentCostBreakdownTransformer.EquipmentCostBreakdownAssertionHolder> expected) {
+        await()
+                .atMost(Duration.ofSeconds(2))
+                .pollInterval(Duration.ofMillis(100))
+                .untilAsserted(() -> assertRentalEquipmentBreakdownsPersisted(expected));
+    }
+
+    private void assertRentalEquipmentBreakdownsPersisted(
+            List<EquipmentCostBreakdownTransformer.EquipmentCostBreakdownAssertionHolder> expected) {
+        var allEquipments = rentalEquipmentsJpaRepository.findAll();
+        expected.forEach(expectedHolder -> {
+            var matchedEntity = allEquipments.stream()
+                    .filter(e -> expectedHolder.equipmentId().equals(e.getEquipmentId()))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("No rental equipment found for equipmentId: " + expectedHolder.equipmentId()));
+            var actualBreakdown = matchedEntity.getFinalCostBreakdown();
+            var expectedBreakdown = expectedHolder.breakdown();
+            assertSoftly(softly -> {
+                softly.assertThat(actualBreakdown)
+                        .as("finalCostBreakdown for equipment %d should not be null in DB", expectedHolder.equipmentId())
+                        .isNotNull();
+                if (actualBreakdown == null) {
+                    return;
+                }
+                if (expectedBreakdown.pricingType() != null) {
+                    softly.assertThat(actualBreakdown.pricingType())
+                            .as("pricingType for equipment %d", expectedHolder.equipmentId())
+                            .isEqualTo(expectedBreakdown.pricingType());
+                }
+                if (expectedBreakdown.tariffName() != null) {
+                    softly.assertThat(actualBreakdown.tariffName())
+                            .as("tariffName for equipment %d", expectedHolder.equipmentId())
+                            .isEqualTo(expectedBreakdown.tariffName());
+                }
+                if (expectedBreakdown.billedDurationMinutes() != null) {
+                    softly.assertThat(actualBreakdown.billedDurationMinutes())
+                            .as("billedDurationMinutes for equipment %d", expectedHolder.equipmentId())
+                            .isEqualTo(expectedBreakdown.billedDurationMinutes());
+                }
+                if (expectedBreakdown.overtimeMinutes() != null) {
+                    softly.assertThat(actualBreakdown.overtimeMinutes())
+                            .as("overtimeMinutes for equipment %d", expectedHolder.equipmentId())
+                            .isEqualTo(expectedBreakdown.overtimeMinutes());
+                }
+                if (expectedBreakdown.itemCost() != null) {
+                    softly.assertThat(actualBreakdown.itemCost())
+                            .as("itemCost for equipment %d", expectedHolder.equipmentId())
+                            .isEqualByComparingTo(expectedBreakdown.itemCost());
+                }
+                if (expectedBreakdown.calculationBreakdown() != null
+                        && expectedBreakdown.calculationBreakdown().breakdownPatternCode() != null) {
+                    softly.assertThat(actualBreakdown.calculationBreakdown())
+                            .as("calculationBreakdown for equipment %d should not be null in DB", expectedHolder.equipmentId())
+                            .isNotNull();
+                    if (actualBreakdown.calculationBreakdown() != null) {
+                        softly.assertThat(actualBreakdown.calculationBreakdown().breakdownPatternCode())
+                                .as("breakdownPatternCode for equipment %d", expectedHolder.equipmentId())
+                                .isEqualTo(expectedBreakdown.calculationBreakdown().breakdownPatternCode());
+                    }
+                }
+            });
+        });
     }
 
     private void assertRentalEquipmentsPersisted(List<RentalEquipmentJpaEntity> expected) {

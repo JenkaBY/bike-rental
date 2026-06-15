@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.steps.rental;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
+import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentCostBreakdownTransformer;
 import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentItemResponseTransformer;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalPatchOperation;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalRequest;
@@ -118,6 +119,63 @@ public class RentalWebSteps {
         var actualRental = scenarioContext.getResponseBody(RentalResponse.class);
         assertRentalEquipmentItemResponse(actualRental.equipmentItems(), expected);
         scenarioContext.setRequestedObjectId(actualRental.id().toString());
+    }
+
+    void assertEquipmentBreakdowns(List<EquipmentItemResponse> equipmentItems,
+            List<EquipmentCostBreakdownTransformer.EquipmentCostBreakdownAssertionHolder> expected) {
+        assertThat(equipmentItems).as("Equipment items in rental response").isNotNull();
+        expected.forEach(expectedHolder -> {
+            var matchedItem = equipmentItems.stream()
+                    .filter(item -> expectedHolder.equipmentId().equals(item.equipmentId()))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("No equipment item found for id: " + expectedHolder.equipmentId()));
+            var actualBreakdown = matchedItem.breakdown();
+            var expectedBreakdown = expectedHolder.breakdown();
+            assertSoftly(softly -> {
+                softly.assertThat(actualBreakdown)
+                        .as("Breakdown for equipment %d should not be null", expectedHolder.equipmentId())
+                        .isNotNull();
+                if (actualBreakdown == null) {
+                    return;
+                }
+                if (expectedBreakdown.pricingType() != null) {
+                    softly.assertThat(actualBreakdown.pricingType())
+                            .as("pricingType for equipment %d", expectedHolder.equipmentId())
+                            .isEqualTo(expectedBreakdown.pricingType());
+                }
+                if (expectedBreakdown.tariffName() != null) {
+                    softly.assertThat(actualBreakdown.tariffName())
+                            .as("tariffName for equipment %d", expectedHolder.equipmentId())
+                            .isEqualTo(expectedBreakdown.tariffName());
+                }
+                if (expectedBreakdown.billedDurationMinutes() != null) {
+                    softly.assertThat(actualBreakdown.billedDurationMinutes())
+                            .as("billedDurationMinutes for equipment %d", expectedHolder.equipmentId())
+                            .isEqualTo(expectedBreakdown.billedDurationMinutes());
+                }
+                if (expectedBreakdown.overtimeMinutes() != null) {
+                    softly.assertThat(actualBreakdown.overtimeMinutes())
+                            .as("overtimeMinutes for equipment %d", expectedHolder.equipmentId())
+                            .isEqualTo(expectedBreakdown.overtimeMinutes());
+                }
+                if (expectedBreakdown.itemCost() != null) {
+                    softly.assertThat(actualBreakdown.itemCost())
+                            .as("itemCost for equipment %d", expectedHolder.equipmentId())
+                            .isEqualByComparingTo(expectedBreakdown.itemCost());
+                }
+                if (expectedBreakdown.calculationBreakdown() != null
+                        && expectedBreakdown.calculationBreakdown().breakdownPatternCode() != null) {
+                    softly.assertThat(actualBreakdown.calculationBreakdown())
+                            .as("calculationBreakdown should not be null for equipment %d", expectedHolder.equipmentId())
+                            .isNotNull();
+                    if (actualBreakdown.calculationBreakdown() != null) {
+                        softly.assertThat(actualBreakdown.calculationBreakdown().breakdownPatternCode())
+                                .as("breakdownPatternCode for equipment %d", expectedHolder.equipmentId())
+                                .isEqualTo(expectedBreakdown.calculationBreakdown().breakdownPatternCode());
+                    }
+                }
+            });
+        });
     }
 
     private void assertRentalEquipmentItemResponse(List<EquipmentItemResponse> actual, List<EquipmentItemResponse> expected) {
