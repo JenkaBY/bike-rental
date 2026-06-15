@@ -4,7 +4,8 @@ import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.tariff.EquipmentCostItemV2;
 import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -12,12 +13,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Component
-public class RentalCostCommandMapper {
+@Mapper
+public abstract class RentalCostCommandMapper {
 
-    private final Clock clock;
+    protected Clock clock;
 
-    public RentalCostCommandMapper(Clock clock) {
+    @Autowired
+    public void setClock(Clock clock) {
         this.clock = clock;
     }
 
