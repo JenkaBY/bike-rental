@@ -3,7 +3,6 @@
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.finance.SettlementInfo;
-import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
@@ -18,7 +17,6 @@ import com.github.jenkaby.bikerental.shared.domain.event.RentalCompleted;
 import com.github.jenkaby.bikerental.shared.exception.OverBudgetSettlementException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
-import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -29,7 +27,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 
 
-<span class="fc" id="L32">@Slf4j</span>
+<span class="fc" id="L30">@Slf4j</span>
 @Service
 @RequiredArgsConstructor
 class ReturnEquipmentService implements ReturnEquipmentUseCase {
@@ -38,8 +36,6 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
 
     private final RentalRepository rentalRepository;
     private final RentalDurationCalculator durationCalculator;
-    private final TariffV2Facade tariffV2Facade;
-    private final RentalCostCommandMapper costCommandMapper;
     private final FinanceFacade financeFacade;
     private final RentalEventMapper eventMapper;
     private final EventPublisher eventPublisher;
@@ -50,55 +46,55 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
     @Override
     @Transactional
     public @NonNull ReturnEquipmentResult execute(@NonNull ReturnEquipmentCommand command) {
-<span class="fc" id="L53">        log.info(&quot;Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
-<span class="fc" id="L54">                command.rentalId(), command.equipmentIds(), command.equipmentUids());</span>
+<span class="fc" id="L49">        log.info(&quot;Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}&quot;,</span>
+<span class="fc" id="L50">                command.rentalId(), command.equipmentIds(), command.equipmentUids());</span>
 
-<span class="fc" id="L56">        LocalDateTime returnTime = LocalDateTime.now(clock);</span>
-<span class="fc" id="L57">        Rental rental = findRental(command);</span>
-<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (!rental.hasActiveStatus()) {</span>
-<span class="fc" id="L59">            throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);</span>
+<span class="fc" id="L52">        LocalDateTime returnTime = LocalDateTime.now(clock);</span>
+<span class="fc" id="L53">        Rental rental = findRental(command);</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (!rental.hasActiveStatus()) {</span>
+<span class="fc" id="L55">            throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);</span>
         }
 
-<span class="fc" id="L62">        var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);</span>
-<span class="fc" id="L63">        var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);</span>
-<span class="fc" id="L64">        var equipmentInfos = equipmentFacade.findByIds(equipmentsToReturn.stream()</span>
-<span class="fc" id="L65">                .map(RentalEquipment::getEquipmentId)</span>
-<span class="fc" id="L66">                .toList());</span>
+<span class="fc" id="L58">        var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);</span>
+<span class="fc" id="L59">        var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);</span>
+<span class="fc" id="L60">        var equipmentInfos = equipmentFacade.findByIds(equipmentsToReturn.stream()</span>
+<span class="fc" id="L61">                .map(RentalEquipment::getEquipmentId)</span>
+<span class="fc" id="L62">                .toList());</span>
 
-<span class="fc" id="L68">        costPolicy.calculateFinalCost(rental, equipmentInfos, durationResult.billableDuration());</span>
+<span class="fc" id="L64">        costPolicy.calculateFinalCost(rental, equipmentInfos, durationResult.billableDuration());</span>
 
-<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (!rental.allEquipmentsReturned()) {</span>
-<span class="fc" id="L71">            Rental saved = rentalRepository.save(rental);</span>
-<span class="fc" id="L72">            log.info(&quot;Partial return recorded for rental {}&quot;, saved.getId());</span>
-<span class="fc" id="L73">            return new ReturnEquipmentResult(saved, null);</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (!rental.allEquipmentsReturned()) {</span>
+<span class="fc" id="L67">            Rental saved = rentalRepository.save(rental);</span>
+<span class="fc" id="L68">            log.info(&quot;Partial return recorded for rental {}&quot;, saved.getId());</span>
+<span class="fc" id="L69">            return new ReturnEquipmentResult(saved, null);</span>
         }
 
-<span class="fc" id="L76">        var totalFinalCost = rental.getFinalCost();</span>
-<span class="fc" id="L77">        log.info(&quot;Rental [{}] returning equipments {}, final cost [{}]&quot;, rental.getId(), equipmentInfos, totalFinalCost);</span>
-<span class="fc" id="L78">        SettlementInfo settlementInfo = null;</span>
+<span class="fc" id="L72">        var totalFinalCost = rental.getFinalCost();</span>
+<span class="fc" id="L73">        log.info(&quot;Rental [{}] returning equipments {}, final cost [{}]&quot;, rental.getId(), equipmentInfos, totalFinalCost);</span>
+<span class="fc" id="L74">        SettlementInfo settlementInfo = null;</span>
         try {
-<span class="fc" id="L80">            settlementInfo = financeFacade.settleRental(</span>
-<span class="fc" id="L81">                    CustomerRef.of(rental.getCustomerId()),</span>
-<span class="fc" id="L82">                    RentalRef.of(rental.getId()),</span>
+<span class="fc" id="L76">            settlementInfo = financeFacade.settleRental(</span>
+<span class="fc" id="L77">                    CustomerRef.of(rental.getCustomerId()),</span>
+<span class="fc" id="L78">                    RentalRef.of(rental.getId()),</span>
                     totalFinalCost,
-<span class="fc" id="L84">                    command.operatorId()</span>
+<span class="fc" id="L80">                    command.operatorId()</span>
             );
-<span class="fc" id="L86">            rental.completeWithStatus(totalFinalCost, RentalStatus.COMPLETED);</span>
-<span class="fc" id="L87">        } catch (OverBudgetSettlementException obe) {</span>
-<span class="fc" id="L88">            rental.completeWithStatus(totalFinalCost, RentalStatus.DEBT);</span>
-<span class="fc" id="L89">        }</span>
+<span class="fc" id="L82">            rental.completeWithStatus(totalFinalCost, RentalStatus.COMPLETED);</span>
+<span class="fc" id="L83">        } catch (OverBudgetSettlementException obe) {</span>
+<span class="fc" id="L84">            rental.completeWithStatus(totalFinalCost, RentalStatus.DEBT);</span>
+<span class="fc" id="L85">        }</span>
 
-<span class="fc" id="L91">        Rental saved = rentalRepository.save(rental);</span>
+<span class="fc" id="L87">        Rental saved = rentalRepository.save(rental);</span>
 
-<span class="fc" id="L93">        RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalFinalCost);</span>
-<span class="fc" id="L94">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
+<span class="fc" id="L89">        RentalCompleted event = eventMapper.toRentalCompleted(saved, returnTime, totalFinalCost);</span>
+<span class="fc" id="L90">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, event);</span>
 
-<span class="fc" id="L96">        return new ReturnEquipmentResult(saved, settlementInfo);</span>
+<span class="fc" id="L92">        return new ReturnEquipmentResult(saved, settlementInfo);</span>
     }
 
     private Rental findRental(ReturnEquipmentCommand command) {
-<span class="fc" id="L100">        return rentalRepository.findById(command.rentalId())</span>
-<span class="fc" id="L101">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
+<span class="fc" id="L96">        return rentalRepository.findById(command.rentalId())</span>
+<span class="fc" id="L97">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

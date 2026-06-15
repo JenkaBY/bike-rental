@@ -32,14 +32,15 @@ class TariffV2FacadeImpl implements TariffV2Facade {
 <span class="nc" id="L32">                .map(tariffV2ToInfoMapper::toTariffV2Info);</span>
     }
 
+    @Deprecated(forRemoval = true)
     @Override
     public RentalCostCalculationResult calculateRentalCost(RentalCostCalculationCommand command) {
-<span class="fc" id="L37">        return rentalCostCalculationUseCase.execute(command);</span>
+<span class="fc" id="L38">        return rentalCostCalculationUseCase.execute(command);</span>
     }
 
     @Override
     public RentalCostCalculationResult calculateRentalCostV2(RentalCostCalculationV2Command command) {
-<span class="fc" id="L42">        return rentalCostCalculationV2UseCase.execute(command);</span>
+<span class="fc" id="L43">        return rentalCostCalculationV2UseCase.execute(command);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

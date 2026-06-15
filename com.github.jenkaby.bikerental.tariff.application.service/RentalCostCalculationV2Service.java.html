@@ -44,8 +44,8 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
 
     private RentalCostCalculationResult executeSpecialMode(RentalCostCalculationV2Command command) {
 <span class="fc" id="L46">        var specialTariff = tariffRepository.get(command.specialTariffId());</span>
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (specialTariff.getPricingType() != PricingType.SPECIAL) {</span>
-<span class="nc" id="L48">            throw new InvalidSpecialTariffTypeException(command.specialTariffId(), specialTariff.getPricingType());</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (specialTariff.getPricingType() != PricingType.SPECIAL) {</span>
+<span class="fc" id="L48">            throw new InvalidSpecialTariffTypeException(command.specialTariffId(), specialTariff.getPricingType());</span>
         }
 <span class="fc" id="L50">        Money totalCost = command.specialPrice();</span>
 <span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (totalCost.isNegative()) {</span>
