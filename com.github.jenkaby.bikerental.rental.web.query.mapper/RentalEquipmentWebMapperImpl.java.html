@@ -3,8 +3,10 @@
 import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentStatusMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
+import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import java.math.BigDecimal;
+import java.time.Instant;
 import javax.annotation.processing.Generated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,40 +19,44 @@ import org.springframework.stereotype.Component;
 public class RentalEquipmentWebMapperImpl implements RentalEquipmentWebMapper {
 
     private final MoneyMapper moneyMapper;
+    private final InstantMapper instantMapper;
     private final RentalEquipmentStatusMapper rentalEquipmentStatusMapper;
 
     @Autowired
-<span class="fc" id="L23">    public RentalEquipmentWebMapperImpl(MoneyMapper moneyMapper, RentalEquipmentStatusMapper rentalEquipmentStatusMapper) {</span>
+<span class="fc" id="L26">    public RentalEquipmentWebMapperImpl(MoneyMapper moneyMapper, InstantMapper instantMapper, RentalEquipmentStatusMapper rentalEquipmentStatusMapper) {</span>
 
-<span class="fc" id="L25">        this.moneyMapper = moneyMapper;</span>
-<span class="fc" id="L26">        this.rentalEquipmentStatusMapper = rentalEquipmentStatusMapper;</span>
-<span class="fc" id="L27">    }</span>
+<span class="fc" id="L28">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L29">        this.instantMapper = instantMapper;</span>
+<span class="fc" id="L30">        this.rentalEquipmentStatusMapper = rentalEquipmentStatusMapper;</span>
+<span class="fc" id="L31">    }</span>
 
     @Override
     public EquipmentItemResponse toEquipmentItemResponse(RentalEquipment equipment) {
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
-<span class="nc" id="L32">            return null;</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
+<span class="nc" id="L36">            return null;</span>
         }
 
-<span class="fc" id="L35">        EquipmentItemResponse.CostBreakdown breakdown = null;</span>
-<span class="fc" id="L36">        Long equipmentId = null;</span>
-<span class="fc" id="L37">        String equipmentUid = null;</span>
-<span class="fc" id="L38">        BigDecimal estimatedCost = null;</span>
-<span class="fc" id="L39">        BigDecimal finalCost = null;</span>
-<span class="fc" id="L40">        Long tariffId = null;</span>
-<span class="fc" id="L41">        String status = null;</span>
+<span class="fc" id="L39">        EquipmentItemResponse.CostBreakdown breakdown = null;</span>
+<span class="fc" id="L40">        Long equipmentId = null;</span>
+<span class="fc" id="L41">        String equipmentUid = null;</span>
+<span class="fc" id="L42">        BigDecimal estimatedCost = null;</span>
+<span class="fc" id="L43">        BigDecimal finalCost = null;</span>
+<span class="fc" id="L44">        Long tariffId = null;</span>
+<span class="fc" id="L45">        String status = null;</span>
+<span class="fc" id="L46">        Instant actualReturnAt = null;</span>
 
-<span class="fc" id="L43">        breakdown = toCostBreakdown( equipment.getFinalCostBreakdown() );</span>
-<span class="fc" id="L44">        equipmentId = equipment.getEquipmentId();</span>
-<span class="fc" id="L45">        equipmentUid = equipment.getEquipmentUid();</span>
-<span class="fc" id="L46">        estimatedCost = moneyMapper.toBigDecimal( equipment.getEstimatedCost() );</span>
-<span class="fc" id="L47">        finalCost = moneyMapper.toBigDecimal( equipment.getFinalCost() );</span>
-<span class="fc" id="L48">        tariffId = equipment.getTariffId();</span>
-<span class="fc" id="L49">        status = rentalEquipmentStatusMapper.statusToString( equipment.getStatus() );</span>
+<span class="fc" id="L48">        breakdown = toCostBreakdown( equipment.getFinalCostBreakdown() );</span>
+<span class="fc" id="L49">        equipmentId = equipment.getEquipmentId();</span>
+<span class="fc" id="L50">        equipmentUid = equipment.getEquipmentUid();</span>
+<span class="fc" id="L51">        estimatedCost = moneyMapper.toBigDecimal( equipment.getEstimatedCost() );</span>
+<span class="fc" id="L52">        finalCost = moneyMapper.toBigDecimal( equipment.getFinalCost() );</span>
+<span class="fc" id="L53">        tariffId = equipment.getTariffId();</span>
+<span class="fc" id="L54">        status = rentalEquipmentStatusMapper.statusToString( equipment.getStatus() );</span>
+<span class="fc" id="L55">        actualReturnAt = instantMapper.localDateTimeToInstant( equipment.getActualReturnAt() );</span>
 
-<span class="fc" id="L51">        EquipmentItemResponse equipmentItemResponse = new EquipmentItemResponse( equipmentId, equipmentUid, estimatedCost, finalCost, tariffId, status, breakdown );</span>
+<span class="fc" id="L57">        EquipmentItemResponse equipmentItemResponse = new EquipmentItemResponse( equipmentId, equipmentUid, estimatedCost, finalCost, tariffId, status, actualReturnAt, breakdown );</span>
 
-<span class="fc" id="L53">        return equipmentItemResponse;</span>
+<span class="fc" id="L59">        return equipmentItemResponse;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
