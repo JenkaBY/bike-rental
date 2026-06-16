@@ -2,9 +2,9 @@ package com.github.jenkaby.bikerental.componenttest.steps.rental;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentCostBreakdownTransformer;
+import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentItemResponseTransformer;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalReturnResponse;
 import com.github.jenkaby.bikerental.rental.web.command.dto.ReturnEquipmentRequest;
-import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -60,7 +60,11 @@ public class RentalReturnWebSteps {
     }
 
     @Then("the rental return response contains rental equipments")
-    public void theRentalReturnResponseContains(List<EquipmentItemResponse> expected) {
+    public void theRentalReturnResponseContains(List<EquipmentItemResponseTransformer.EquipmentItemResponseTransformerHolder> holders) {
+        var expected = holders.stream()
+                .map(EquipmentItemResponseTransformer.EquipmentItemResponseTransformerHolder::equipmentItemResponse)
+                .toList();
+
         var actual = scenarioContext.getResponseBody(RentalReturnResponse.class);
 
         var temp = scenarioContext.getResponse();

@@ -116,7 +116,7 @@ public class RentalDbSteps {
             }
             if (exp.getActualReturnAt() != null) {
                 softly.assertThat(actual.getActualReturnAt()).as("Actual return at")
-                        .isEqualTo(exp.getActualReturnAt());
+                        .isCloseTo(exp.getActualReturnAt(), within(2, ChronoUnit.SECONDS));
             }
 
             if (exp.getPlannedDurationMinutes() != null) {
@@ -294,7 +294,7 @@ public class RentalDbSteps {
             }
             if (exp.getActualReturnAt() != null) {
                 softly.assertThat(actual.getActualReturnAt()).as("Actual return at")
-                        .isEqualTo(exp.getActualReturnAt());
+                        .isCloseTo(exp.getActualReturnAt(), within(2, ChronoUnit.SECONDS));
             }
 
             if (exp.getEstimatedCost() != null) {

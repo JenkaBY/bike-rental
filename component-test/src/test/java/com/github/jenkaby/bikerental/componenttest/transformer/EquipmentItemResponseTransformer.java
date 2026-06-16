@@ -22,6 +22,7 @@ public class EquipmentItemResponseTransformer {
 
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
         var finalCost = DataTableHelper.toBigDecimal(entry, "finalCost");
+        var actualReturnAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "actualReturnAt");
 
         return new EquipmentItemResponseTransformerHolder(
                 rentalId, new EquipmentItemResponse(
@@ -31,6 +32,7 @@ public class EquipmentItemResponseTransformer {
                 finalCost,
                 tariffId,
                 status,
+                actualReturnAt,
                 null
         ));
     }

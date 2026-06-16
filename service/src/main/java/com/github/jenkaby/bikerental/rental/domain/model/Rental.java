@@ -203,10 +203,11 @@ public class Rental {
         this.updatedAt = Instant.now();
     }
 
-    public void cancel() {
+    public void cancel(LocalDateTime cancelledAt) {
         this.status.validateTransitionTo(RentalStatus.CANCELLED);
-        this.equipments.forEach(e -> e.setStatus(RentalEquipmentStatus.RETURNED));
+        this.equipments.forEach(e -> e.markReturned(cancelledAt));
         this.status = RentalStatus.CANCELLED;
+        this.actualReturnAt = cancelledAt;
         this.updatedAt = Instant.now();
     }
 

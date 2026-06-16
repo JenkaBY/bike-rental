@@ -174,11 +174,11 @@ Feature: Rental Lifecycle Management
     Then the response status is 200
     #    rental module
     And rental was persisted in database
-      | customerId | status    |
-      | CUS1       | CANCELLED |
+      | customerId | status    | actualReturnAt      |
+      | CUS1       | CANCELLED | 2026-05-01T10:00:00 |
     And rental equipments were persisted in database
-      | equipmentId | equipmentUid | status   |
-      | 1           | BIKE-001     | RETURNED |
+      | equipmentId | equipmentUid | status   | actualReturnAt      |
+      | 1           | BIKE-001     | RETURNED | 2026-05-01T10:00:00 |
     #    finance module — hold was placed, assert it has been released (balance 16.00 → 0.00)
     And the following sub-ledger records were persisted in db
       | id     | accountId | ledgerType      | balance |
@@ -221,11 +221,11 @@ Feature: Rental Lifecycle Management
     Then the response status is 200
     #    rental module
     And rental was persisted in database
-      | customerId | status    |
-      | CUS3       | CANCELLED |
+      | customerId | status    | actualReturnAt      |
+      | CUS3       | CANCELLED | 2026-05-01T10:00:00 |
     And rental equipments were persisted in database
-      | equipmentId | equipmentUid | status   |
-      | 1           | BIKE-001     | RETURNED |
+      | equipmentId | equipmentUid | status   | actualReturnAt      |
+      | 1           | BIKE-001     | RETURNED | 2026-05-01T10:00:00 |
     #    finance module — hold was placed, assert it has been released (balance 16.00 → 0.00)
     And the following sub-ledger records were persisted in db
       | id     | accountId | ledgerType      | balance |
