@@ -113,8 +113,8 @@ Feature: Equipment Return
       | customerId | status    | actualDuration | plannedDuration | estimatedCost | totalCost |
       | CUS2       | COMPLETED | 180            | 120             | 16.00         | 21.00     |
     And the rental return response contains rental equipments
-      | equipmentId | equipmentUid | status   | tariffId | estimatedCost | finalCost |
-      | 1           | BIKE-001     | RETURNED | 1        | 16.00         | 21.00     |
+      | equipmentId | equipmentUid | status   | tariffId | estimatedCost | finalCost | actualReturnAt |
+      | 1           | BIKE-001     | RETURNED | 1        | 16.00         | 21.00     | <now>          |
     And the rental return response contains equipment breakdowns
       | equipmentId | pricingType       | tariffName     | billedDurationMinutes | overtimeMinutes | itemCost | breakdownPatternCode                      |
       | 1           | DEGRESSIVE_HOURLY | Hourly Bicycle | 180                   | 60              | 21.00    | breakdown.cost.degressive_hourly.standard |
@@ -279,12 +279,12 @@ Feature: Equipment Return
       | customerId   | status | actualDuration | plannedDuration | estimatedCost | totalCost |
       | <customerId> | ACTIVE | 40             | 60              | 16.00         | 6         |
     And the rental return response contains rental equipments
-      | equipmentId   | equipmentUid | status   | tariffId | estimatedCost | finalCost |
-      | <returnedId>  | BIKE-001     | RETURNED | 1        | 8.00          | 6         |
-      | <remainingId> | BIKE-002     | ACTIVE   | 1        | 8.00          |           |
+      | equipmentId   | equipmentUid | status   | tariffId | estimatedCost | finalCost | actualReturnAt |
+      | <returnedId>  | BIKE-001     | RETURNED | 1        | 8.00          | 6         | <now>          |
+      | <remainingId> | BIKE-002     | ACTIVE   | 1        | 8.00          |           |                |
     And the rental return response contains equipment breakdowns
-      | equipmentId  | pricingType       | tariffName     | itemCost | breakdownPatternCode                             |
-      | <returnedId> | DEGRESSIVE_HOURLY | Hourly Bicycle | 6        | breakdown.cost.degressive_hourly.minutes_only    |
+      | equipmentId  | pricingType       | tariffName     | itemCost | breakdownPatternCode                          |
+      | <returnedId> | DEGRESSIVE_HOURLY | Hourly Bicycle | 6        | breakdown.cost.degressive_hourly.minutes_only |
     And the rental return response has no breakdown for equipment <remainingId>
     And the rental return response does not contain settlement info
 #    return the remaining equipment
@@ -298,17 +298,17 @@ Feature: Equipment Return
       | customerId   | status    | actualDuration | plannedDuration | estimatedCost | totalCost |
       | <customerId> | COMPLETED | 60             | 60              | 16.00         | 15.00     |
     And the rental return response contains rental equipments
-      | equipmentId   | equipmentUid | status   | tariffId | estimatedCost | finalCost |
-      | <returnedId>  | BIKE-001     | RETURNED | 1        | 8.00          | 6.00      |
-      | <remainingId> | BIKE-002     | RETURNED | 1        | 8.00          | 9.00      |
+      | equipmentId   | equipmentUid | status   | tariffId | estimatedCost | finalCost | actualReturnAt |
+      | <returnedId>  | BIKE-001     | RETURNED | 1        | 8.00          | 6.00      | <now>          |
+      | <remainingId> | BIKE-002     | RETURNED | 1        | 8.00          | 9.00      | <nowReturn>    |
     And the rental return response contains equipment breakdowns
-      | equipmentId   | pricingType       | tariffName     | itemCost | breakdownPatternCode                             |
-      | <returnedId>  | DEGRESSIVE_HOURLY | Hourly Bicycle | 6.00     | breakdown.cost.degressive_hourly.minutes_only    |
-      | <remainingId> | DEGRESSIVE_HOURLY | Hourly Bicycle | 9.00     | breakdown.cost.degressive_hourly.standard        |
+      | equipmentId   | pricingType       | tariffName     | itemCost | breakdownPatternCode                          |
+      | <returnedId>  | DEGRESSIVE_HOURLY | Hourly Bicycle | 6.00     | breakdown.cost.degressive_hourly.minutes_only |
+      | <remainingId> | DEGRESSIVE_HOURLY | Hourly Bicycle | 9.00     | breakdown.cost.degressive_hourly.standard     |
     And rental equipment breakdowns were persisted in database
-      | equipmentId   | pricingType       | tariffName     | itemCost | breakdownPatternCode                             |
-      | <returnedId>  | DEGRESSIVE_HOURLY | Hourly Bicycle | 6.00     | breakdown.cost.degressive_hourly.minutes_only    |
-      | <remainingId> | DEGRESSIVE_HOURLY | Hourly Bicycle | 9.00     | breakdown.cost.degressive_hourly.standard        |
+      | equipmentId   | pricingType       | tariffName     | itemCost | breakdownPatternCode                          |
+      | <returnedId>  | DEGRESSIVE_HOURLY | Hourly Bicycle | 6.00     | breakdown.cost.degressive_hourly.minutes_only |
+      | <remainingId> | DEGRESSIVE_HOURLY | Hourly Bicycle | 9.00     | breakdown.cost.degressive_hourly.standard     |
         #    check finance tables
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |

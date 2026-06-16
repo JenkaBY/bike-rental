@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Schema(description = "Equipment item within rental")
 public record EquipmentItemResponse(
@@ -14,6 +15,7 @@ public record EquipmentItemResponse(
         @Schema(description = "Final cost for this equipment (optional)") BigDecimal finalCost,
         @Schema(description = "Tariff ID", example = "3") Long tariffId,
         @Schema(description = "Status rental equipment", example = "ASSIGNED") @NotNull String status,
+        @Schema(description = "Actual return time (null if not returned or rental not cancelled)") @Nullable Instant actualReturnAt,
         @Schema(description = "Final cost breakdown; populated only when equipment is returned") @Nullable CostBreakdown breakdown
 ) {
 

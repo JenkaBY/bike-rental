@@ -216,6 +216,11 @@ public class RentalWebSteps {
                                 .as("Final cost")
                                 .isEqualByComparingTo(expectedItem.finalCost());
                     }
+                    if (expectedItem.actualReturnAt() != null) {
+                        softly.assertThat(item.actualReturnAt())
+                                .as("Actual return at")
+                                .isCloseTo(expectedItem.actualReturnAt(), within(5, ChronoUnit.SECONDS));
+                    }
                 })
         );
     }

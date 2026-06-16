@@ -12,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+
 @Slf4j
 @Service
 class CancelRentalService implements CancelRentalUseCase {
@@ -22,16 +25,19 @@ class CancelRentalService implements CancelRentalUseCase {
     private final FinanceFacade financeFacade;
     private final EventPublisher eventPublisher;
     private final RentalEventMapper eventMapper;
+    private final Clock clock;
 
     CancelRentalService(
             RentalRepository rentalRepository,
             FinanceFacade financeFacade,
             EventPublisher eventPublisher,
-            RentalEventMapper eventMapper) {
+            RentalEventMapper eventMapper,
+            Clock clock) {
         this.rentalRepository = rentalRepository;
         this.financeFacade = financeFacade;
         this.eventPublisher = eventPublisher;
         this.eventMapper = eventMapper;
+        this.clock = clock;
     }
 
     @Override
@@ -47,7 +53,7 @@ class CancelRentalService implements CancelRentalUseCase {
             financeFacade.releaseHold(rental.toRentalRef(), command.operatorId());
         }
 
-        rental.cancel();
+        rental.cancel(LocalDateTime.now(clock));
 
         Rental saved = rentalRepository.save(rental);
         eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalCancelled(saved));
