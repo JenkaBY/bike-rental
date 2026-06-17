@@ -1,0 +1,8 @@
+# Secrets and generated material - never commit these.
+.env
+certs/*.key
+certs/*.crt
+backups/*
+!backups/.gitkeep
+logs/*
+!logs/.gitkeep

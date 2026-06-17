@@ -1,0 +1,11 @@
+[Unit]
+Description=BikeRental PostgreSQL backup (pg_dump)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+# Adjust USER to your Pi username and the path if you cloned elsewhere.
+WorkingDirectory=/home/%i/bike-rental/docker/raspberrypi
+EnvironmentFile=/home/%i/bike-rental/docker/raspberrypi/.env
+ExecStart=/home/%i/bike-rental/docker/raspberrypi/backup/pg-backup.sh
