@@ -18,12 +18,13 @@ OUT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 docker run --rm \
     -v "${OUT_DIR}:/out" \
-    postgres:15-alpine \
-    openssl req -new -x509 -days 825 -noenc \
+    -e CN="${CN}" \
+    alpine \
+    sh -c 'apk add -q --no-cache openssl && openssl req -new -x509 -days 825 -noenc \
         -newkey rsa:2048 \
         -keyout /out/server.key \
         -out /out/server.crt \
-        -subj "/CN=${CN}"
+        -subj "/CN=$CN"'
 
 # Permissions are also enforced by entrypoint-wrapper.sh inside the container,
 # but set them here too for clarity. chmod is a no-op on Windows NTFS.

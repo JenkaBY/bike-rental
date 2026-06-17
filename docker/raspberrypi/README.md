@@ -77,6 +77,7 @@ cp .env.example .env
 # and replace YOUR_USERNAME in BACKUP_DIR with your actual Pi username.
 
 # 3. Generate the TLS certificate (CN = the hostname clients will use)
+chmod +x ./certs/generate-cert.sh
 ./certs/generate-cert.sh yourname.keenetic.link
 
 # 4. Build and start
