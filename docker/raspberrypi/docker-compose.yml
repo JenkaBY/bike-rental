@@ -44,9 +44,5 @@ services:
 
 volumes:
   pgdata:
+    external: true
     name: ${PGDATA_VOLUME:-bike-rental-pgdata}
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${PGDATA_HOST_PATH:-/data/postgres}
