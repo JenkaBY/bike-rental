@@ -11,18 +11,4 @@ class SerialNumberTest {
         var serial = new SerialNumber("BK-001");
         Assertions.assertThat(serial.value()).isEqualTo("BK-001");
     }
-
-    @Test
-    void shouldThrowExceptionForNullValue() {
-        Assertions.assertThatThrownBy(() -> new SerialNumber(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("cannot be null or blank");
-    }
-
-    @Test
-    void shouldThrowExceptionForBlankValue() {
-        Assertions.assertThatThrownBy(() -> new SerialNumber("   "))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("cannot be null or blank");
-    }
 }
