@@ -86,18 +86,33 @@ docker compose ps          # postgres should become healthy
 docker compose logs -f postgres
 ```
 
-### Preparing the data directory on the NVMe
+### Preparing the data directory and volume on the NVMe
 
-The named volume is backed by `PGDATA_HOST_PATH` (default `/data/postgres`).
-Create and own it before the first start:
+The `pgdata` volume is marked `external` in the Compose file — Compose never
+creates or deletes it automatically. You create it once with an explicit host
+path binding:
 
 ```bash
+# 1. Create the host directory and give ownership to the container's postgres user (uid 70)
 sudo mkdir -p /data/postgres && sudo chown 70:70 /data/postgres
+
+# 2. Create the named volume backed by that directory
+docker volume create \
+  --driver local \
+  --opt type=none \
+  --opt o=bind \
+  --opt device=/data/postgres \
+  bike-rental-pgdata
 ```
 
-UID 70 is the `postgres` user inside the `postgres:15-alpine` container.
-On Windows leave `PGDATA_HOST_PATH` unset in `.env` — Docker manages the
-volume location internally.
+After this, `docker compose up -d` attaches to the existing volume.
+`docker compose down` (without `-v`) leaves it untouched.
+`docker volume inspect bike-rental-pgdata` shows the host path.
+
+**On Windows** create a plain named volume instead (no host path binding):
+```bash
+docker volume create bike-rental-pgdata
+```
 
 ---
 
