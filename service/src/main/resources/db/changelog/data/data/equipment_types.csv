@@ -1,7 +1,17 @@
 slug,name,description
 BICYCLE,Bicycle,Standard bicycles for rental
-SCOOTER,Scooter,Electric and manual scooters
+SCOOTER,Электроскутер,Electric scooters
 OTHER,Other,Other equipment types
 CHILD_SEAT,Child Seat,Child seats for bicycles and scooters
 HELMET,Helmet,Helmet to protect head
 SPECIAL,Special,Only for special tariffs
+BIKE26,Велосипед 26,
+BIKE27,Велосипед 27.5,
+BIKE29,Велосипед 29,
+MINISCOOTER,Электросамокат,
+BIKE24,Детский велосипед,
+MOBILKIDS,Детский веломобиль,
+MOBIL5,Подростковый веломобиль,
+MOBIL10,Взрослый веломобиль,
+MOBIL20,2-х местный веломобиль,
+MOBIL40,4-х местный веломобиль,
