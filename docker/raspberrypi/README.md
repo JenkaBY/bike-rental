@@ -86,23 +86,18 @@ docker compose ps          # postgres should become healthy
 docker compose logs -f postgres
 ```
 
-### Putting the data on the NVMe explicitly (optional)
+### Preparing the data directory on the NVMe
 
-Docker's storage already lives on the NVMe (Ubuntu boots from it), so the named
-volume is on the NVMe by default. To use an explicit, visible path instead,
-replace the `pgdata` volume mount in `docker-compose.yml` with a bind mount:
-
-```yaml
-    volumes:
-      - /data/postgres:/var/lib/postgresql/data
-```
-
-and prepare the directory once (the container's postgres user is uid 70 on
-Alpine):
+The named volume is backed by `PGDATA_HOST_PATH` (default `/data/postgres`).
+Create and own it before the first start:
 
 ```bash
-sudo mkdir -p /data/postgres && sudo chown -R 70:70 /data/postgres
+sudo mkdir -p /data/postgres && sudo chown 70:70 /data/postgres
 ```
+
+UID 70 is the `postgres` user inside the `postgres:15-alpine` container.
+On Windows leave `PGDATA_HOST_PATH` unset in `.env` — Docker manages the
+volume location internally.
 
 ---
 
