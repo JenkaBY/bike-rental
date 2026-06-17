@@ -34,15 +34,3 @@ ALTER DEFAULT PRIVILEGES FOR ROLE bikerental_app_migrator IN SCHEMA public
     GRANT USAGE, SELECT ON SEQUENCES TO bikerental_app;
 ALTER DEFAULT PRIVILEGES FOR ROLE bikerental_app_migrator IN SCHEMA public
     GRANT ALL ON TABLES TO bikerental_admin;
-
--- bikerental_admin owns the DB and schema, so Liquibase migrations running as
--- that role create tables owned by it. Grant app_migrator and app access to
--- both existing and future objects created by bikerental_admin.
-ALTER DEFAULT PRIVILEGES FOR ROLE bikerental_admin IN SCHEMA public
-    GRANT ALL ON TABLES TO bikerental_app_migrator;
-ALTER DEFAULT PRIVILEGES FOR ROLE bikerental_admin IN SCHEMA public
-    GRANT ALL ON SEQUENCES TO bikerental_app_migrator;
-ALTER DEFAULT PRIVILEGES FOR ROLE bikerental_admin IN SCHEMA public
-    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO bikerental_app;
-ALTER DEFAULT PRIVILEGES FOR ROLE bikerental_admin IN SCHEMA public
-    GRANT USAGE, SELECT ON SEQUENCES TO bikerental_app;

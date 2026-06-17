@@ -44,5 +44,4 @@ services:
 
 volumes:
   pgdata:
-    external: true
     name: ${PGDATA_VOLUME:-bike-rental-pgdata}

@@ -77,7 +77,6 @@ cp .env.example .env
 # and replace YOUR_USERNAME in BACKUP_DIR with your actual Pi username.
 
 # 3. Generate the TLS certificate (CN = the hostname clients will use)
-chmod +x ./certs/generate-cert.sh
 ./certs/generate-cert.sh yourname.keenetic.link
 
 # 4. Build and start
@@ -86,32 +85,22 @@ docker compose ps          # postgres should become healthy
 docker compose logs -f postgres
 ```
 
-### Preparing the data directory and volume on the NVMe
+### Putting the data on the NVMe explicitly (optional)
 
-The `pgdata` volume is marked `external` in the Compose file — Compose never
-creates or deletes it automatically. You create it once with an explicit host
-path binding:
+Docker's storage already lives on the NVMe (Ubuntu boots from it), so the named
+volume is on the NVMe by default. To use an explicit, visible path instead,
+replace the `pgdata` volume mount in `docker-compose.yml` with a bind mount:
 
-```bash
-# 1. Create the host directory and give ownership to the container's postgres user (uid 70)
-sudo mkdir -p /data/postgres && sudo chown 70:70 /data/postgres
-
-# 2. Create the named volume backed by that directory
-docker volume create \
-  --driver local \
-  --opt type=none \
-  --opt o=bind \
-  --opt device=/data/postgres \
-  bike-rental-pgdata
+```yaml
+    volumes:
+      - /data/postgres:/var/lib/postgresql/data
 ```
 
-After this, `docker compose up -d` attaches to the existing volume.
-`docker compose down` (without `-v`) leaves it untouched.
-`docker volume inspect bike-rental-pgdata` shows the host path.
+and prepare the directory once (the container's postgres user is uid 70 on
+Alpine):
 
-**On Windows** create a plain named volume instead (no host path binding):
 ```bash
-docker volume create bike-rental-pgdata
+sudo mkdir -p /data/postgres && sudo chown -R 70:70 /data/postgres
 ```
 
 ---
