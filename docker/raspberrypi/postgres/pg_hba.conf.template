@@ -1,0 +1,23 @@
+# Client authentication rules. The entrypoint substitutes __LAN_SUBNET__ with
+# the LAN_SUBNET value from .env and writes the rendered file to
+# /etc/postgresql/pg_hba.conf. All TCP access requires TLS (hostssl) and
+# scram-sha-256; the superuser is reachable only over the local socket.
+#
+# TYPE      DATABASE      USER                      ADDRESS          METHOD
+
+# Local unix socket inside the container (used by init, healthcheck, backups).
+local       all           all                                        trust
+
+# Admin and migration roles: LAN only, TLS required.
+hostssl     all           bikerental_admin          __LAN_SUBNET__   scram-sha-256
+hostssl     all           bikerental_liquibase      __LAN_SUBNET__   scram-sha-256
+hostssl     bikerental    bikerental_app            __LAN_SUBNET__   scram-sha-256
+
+# Combined app+migrator role used by the Render backend: reachable from anywhere
+# (Render free tier has a dynamic egress IP), TLS required, bikerental DB only.
+hostssl     bikerental    bikerental_app_migrator   0.0.0.0/0        scram-sha-256
+hostssl     bikerental    bikerental_app_migrator   ::/0             scram-sha-256
+
+# Deny everything else explicitly.
+host        all           all                       0.0.0.0/0        reject
+host        all           all                       ::/0             reject

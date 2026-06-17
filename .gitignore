@@ -25,6 +25,11 @@ bin/
 ### Project related ###
 nocommit.properties
 
+### Raspberry Pi PostgreSQL deployment secrets/artifacts ###
+docker/raspberrypi/.env
+docker/raspberrypi/certs/*.key
+docker/raspberrypi/certs/*.crt
+
 ### Deprecated AI assistant config (migrated to Claude — see docs/claude-migration.md) ###
 # Legacy GitHub Copilot configuration (superseded by .claude/ and CLAUDE.md)
 .github/agents/
