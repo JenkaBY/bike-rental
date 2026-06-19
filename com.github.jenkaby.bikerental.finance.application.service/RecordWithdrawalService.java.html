@@ -11,6 +11,7 @@ import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceExcepti
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+<span class="fc" id="L24">@Slf4j</span>
 @RequiredArgsConstructor
 @Service
 public class RecordWithdrawalService implements RecordWithdrawalUseCase {
@@ -32,54 +34,59 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
     @Override
     @Transactional
     public WithdrawalResult execute(RecordWithdrawalCommand command) {
-<span class="fc" id="L35">        Optional&lt;Transaction&gt; existing = transactionRepository</span>
-<span class="fc" id="L36">                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));</span>
-<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (existing.isPresent()) {</span>
-<span class="fc" id="L38">            Transaction t = existing.get();</span>
-<span class="fc" id="L39">            return new WithdrawalResult(t.getId(), t.getRecordedAt());</span>
+<span class="fc" id="L37">        log.info(&quot;Recording withdrawal for customer={} amount={} via {}&quot;,</span>
+<span class="fc" id="L38">                command.customerId(), command.amount(), command.paymentMethod());</span>
+<span class="fc" id="L39">        Optional&lt;Transaction&gt; existing = transactionRepository</span>
+<span class="fc" id="L40">                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (existing.isPresent()) {</span>
+<span class="fc" id="L42">            Transaction t = existing.get();</span>
+<span class="fc" id="L43">            log.info(&quot;Withdrawal already recorded for customer={} idempotencyKey={}, returning existing transaction={}&quot;,</span>
+<span class="fc" id="L44">                    command.customerId(), command.idempotencyKey(), t.getId());</span>
+<span class="fc" id="L45">            return new WithdrawalResult(t.getId(), t.getRecordedAt());</span>
         }
 
-<span class="fc" id="L42">        var customerAccount = accountRepository</span>
-<span class="fc" id="L43">                .findByCustomerId(new CustomerRef(command.customerId()))</span>
-<span class="pc" id="L44">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, command.customerId().toString()));</span>
+<span class="fc" id="L48">        var customerAccount = accountRepository</span>
+<span class="fc" id="L49">                .findByCustomerId(new CustomerRef(command.customerId()))</span>
+<span class="pc" id="L50">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, command.customerId().toString()));</span>
 
-<span class="fc" id="L46">        var systemAccount = accountRepository.getSystemAccount();</span>
+<span class="fc" id="L52">        var systemAccount = accountRepository.getSystemAccount();</span>
 
-<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (!customerAccount.isBalanceSufficient(command.amount())) {</span>
-<span class="fc" id="L49">            throw new InsufficientBalanceException(customerAccount.availableBalance(), command.amount());</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (!customerAccount.isBalanceSufficient(command.amount())) {</span>
+<span class="fc" id="L55">            throw new InsufficientBalanceException(customerAccount.availableBalance(), command.amount());</span>
         }
 
-<span class="fc" id="L52">        var creditSubLedger = systemAccount.getSubLedger(command.paymentMethod());</span>
+<span class="fc" id="L58">        var creditSubLedger = systemAccount.getSubLedger(command.paymentMethod());</span>
 
-<span class="fc" id="L54">        var debitChange = customerAccount.getWallet().debit(command.amount());</span>
-<span class="fc" id="L55">        var creditChange = creditSubLedger.credit(command.amount());</span>
+<span class="fc" id="L60">        var debitChange = customerAccount.getWallet().debit(command.amount());</span>
+<span class="fc" id="L61">        var creditChange = creditSubLedger.credit(command.amount());</span>
 
-<span class="fc" id="L57">        accountRepository.save(systemAccount);</span>
-<span class="fc" id="L58">        accountRepository.save(customerAccount);</span>
+<span class="fc" id="L63">        accountRepository.save(systemAccount);</span>
+<span class="fc" id="L64">        accountRepository.save(customerAccount);</span>
 
-<span class="fc" id="L60">        Instant now = clock.instant();</span>
-<span class="fc" id="L61">        UUID transactionId = uuidGenerator.generate();</span>
+<span class="fc" id="L66">        Instant now = clock.instant();</span>
+<span class="fc" id="L67">        UUID transactionId = uuidGenerator.generate();</span>
 
-<span class="fc" id="L63">        var transaction = Transaction.builder()</span>
-<span class="fc" id="L64">                .id(transactionId)</span>
-<span class="fc" id="L65">                .type(TransactionType.WITHDRAWAL)</span>
-<span class="fc" id="L66">                .paymentMethod(command.paymentMethod())</span>
-<span class="fc" id="L67">                .amount(command.amount())</span>
-<span class="fc" id="L68">                .customerId(command.customerId())</span>
-<span class="fc" id="L69">                .operatorId(command.operatorId())</span>
-<span class="fc" id="L70">                .sourceType(null)</span>
-<span class="fc" id="L71">                .sourceId(null)</span>
-<span class="fc" id="L72">                .recordedAt(now)</span>
-<span class="fc" id="L73">                .idempotencyKey(command.idempotencyKey())</span>
-<span class="fc" id="L74">                .records(List.of(</span>
-<span class="fc" id="L75">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
-<span class="fc" id="L76">                        creditChange.toTransaction(uuidGenerator.generate())</span>
+<span class="fc" id="L69">        var transaction = Transaction.builder()</span>
+<span class="fc" id="L70">                .id(transactionId)</span>
+<span class="fc" id="L71">                .type(TransactionType.WITHDRAWAL)</span>
+<span class="fc" id="L72">                .paymentMethod(command.paymentMethod())</span>
+<span class="fc" id="L73">                .amount(command.amount())</span>
+<span class="fc" id="L74">                .customerId(command.customerId())</span>
+<span class="fc" id="L75">                .operatorId(command.operatorId())</span>
+<span class="fc" id="L76">                .sourceType(null)</span>
+<span class="fc" id="L77">                .sourceId(null)</span>
+<span class="fc" id="L78">                .recordedAt(now)</span>
+<span class="fc" id="L79">                .idempotencyKey(command.idempotencyKey())</span>
+<span class="fc" id="L80">                .records(List.of(</span>
+<span class="fc" id="L81">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L82">                        creditChange.toTransaction(uuidGenerator.generate())</span>
                 ))
-<span class="fc" id="L78">                .build();</span>
+<span class="fc" id="L84">                .build();</span>
 
-<span class="fc" id="L80">        transactionRepository.save(transaction);</span>
+<span class="fc" id="L86">        transactionRepository.save(transaction);</span>
+<span class="fc" id="L87">        log.info(&quot;Withdrawal {} recorded for customer={} amount={}&quot;, transactionId, command.customerId(), command.amount());</span>
 
-<span class="fc" id="L82">        return new WithdrawalResult(transactionId, now);</span>
+<span class="fc" id="L89">        return new WithdrawalResult(transactionId, now);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

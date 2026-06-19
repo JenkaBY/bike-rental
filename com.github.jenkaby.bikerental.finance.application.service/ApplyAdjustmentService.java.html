@@ -14,6 +14,7 @@ import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceExcepti
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+<span class="fc" id="L27">@Slf4j</span>
 @RequiredArgsConstructor
 @Service
 public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
@@ -35,66 +37,73 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
     @Override
     @Transactional
     public AdjustmentResult execute(ApplyAdjustmentCommand command) {
-<span class="fc" id="L38">        Optional&lt;Transaction&gt; existing = transactionRepository</span>
-<span class="fc" id="L39">                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));</span>
-<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (existing.isPresent()) {</span>
-<span class="fc" id="L41">            Transaction t = existing.get();</span>
-<span class="fc" id="L42">            return new AdjustmentResult(t.getId(), t.getRecordedAt());</span>
+<span class="fc" id="L40">        log.info(&quot;Applying adjustment for customer={} amount={} idempotencyKey={}&quot;,</span>
+<span class="fc" id="L41">                command.customerId(), command.amount(), command.idempotencyKey());</span>
+<span class="fc" id="L42">        Optional&lt;Transaction&gt; existing = transactionRepository</span>
+<span class="fc" id="L43">                .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (existing.isPresent()) {</span>
+<span class="fc" id="L45">            Transaction t = existing.get();</span>
+<span class="fc" id="L46">            log.info(&quot;Adjustment already applied for customer={} idempotencyKey={}, returning existing transaction={}&quot;,</span>
+<span class="fc" id="L47">                    command.customerId(), command.idempotencyKey(), t.getId());</span>
+<span class="fc" id="L48">            return new AdjustmentResult(t.getId(), t.getRecordedAt());</span>
         }
-<span class="fc" id="L44">        var customerAccount = accountRepository</span>
-<span class="fc" id="L45">                .findByCustomerId(new CustomerRef(command.customerId()))</span>
-<span class="pc" id="L46">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, command.customerId().toString()));</span>
+<span class="fc" id="L50">        var customerAccount = accountRepository</span>
+<span class="fc" id="L51">                .findByCustomerId(new CustomerRef(command.customerId()))</span>
+<span class="pc" id="L52">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, command.customerId().toString()));</span>
 
-<span class="fc" id="L48">        var systemAccount = accountRepository.getSystemAccount();</span>
+<span class="fc" id="L54">        var systemAccount = accountRepository.getSystemAccount();</span>
 
-<span class="fc" id="L50">        var customerWallet = customerAccount.getWallet();</span>
-<span class="fc" id="L51">        var adjustmentSubLedger = systemAccount.getAdjustment();</span>
+<span class="fc" id="L56">        var customerWallet = customerAccount.getWallet();</span>
+<span class="fc" id="L57">        var adjustmentSubLedger = systemAccount.getAdjustment();</span>
 
-<span class="fc" id="L53">        boolean isDeduction = command.amount().isNegative();</span>
-<span class="fc" id="L54">        Money absAmount = command.amount().abs();</span>
+<span class="fc" id="L59">        boolean isDeduction = command.amount().isNegative();</span>
+<span class="fc" id="L60">        Money absAmount = command.amount().abs();</span>
 
-<span class="fc bfc" id="L56" title="All 4 branches covered.">        if (isDeduction &amp;&amp; !customerAccount.isBalanceSufficient(absAmount)) {</span>
-<span class="fc" id="L57">            throw new InsufficientBalanceException(customerAccount.availableBalance(), absAmount);</span>
+<span class="fc bfc" id="L62" title="All 4 branches covered.">        if (isDeduction &amp;&amp; !customerAccount.isBalanceSufficient(absAmount)) {</span>
+<span class="fc" id="L63">            throw new InsufficientBalanceException(customerAccount.availableBalance(), absAmount);</span>
         }
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        log.debug(&quot;Adjustment direction for customer={}: {}&quot;, command.customerId(), isDeduction ? &quot;deduction&quot; : &quot;credit&quot;);</span>
 
         TransactionRecordWithoutId debitChange;
         TransactionRecordWithoutId creditChange;
 
-<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (isDeduction) {</span>
-<span class="fc" id="L64">            debitChange = customerWallet.debit(absAmount);</span>
-<span class="fc" id="L65">            creditChange = adjustmentSubLedger.credit(absAmount);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (isDeduction) {</span>
+<span class="fc" id="L71">            debitChange = customerWallet.debit(absAmount);</span>
+<span class="fc" id="L72">            creditChange = adjustmentSubLedger.credit(absAmount);</span>
         } else {
-<span class="fc" id="L67">            debitChange = adjustmentSubLedger.debit(absAmount);</span>
-<span class="fc" id="L68">            creditChange = customerWallet.credit(absAmount);</span>
+<span class="fc" id="L74">            debitChange = adjustmentSubLedger.debit(absAmount);</span>
+<span class="fc" id="L75">            creditChange = customerWallet.credit(absAmount);</span>
         }
 
-<span class="fc" id="L71">        accountRepository.save(systemAccount);</span>
-<span class="fc" id="L72">        accountRepository.save(customerAccount);</span>
+<span class="fc" id="L78">        accountRepository.save(systemAccount);</span>
+<span class="fc" id="L79">        accountRepository.save(customerAccount);</span>
 
-<span class="fc" id="L74">        Instant recordedAt = clock.instant();</span>
-<span class="fc" id="L75">        UUID transactionId = uuidGenerator.generate();</span>
+<span class="fc" id="L81">        Instant recordedAt = clock.instant();</span>
+<span class="fc" id="L82">        UUID transactionId = uuidGenerator.generate();</span>
 
-<span class="fc" id="L77">        var transaction = Transaction.builder()</span>
-<span class="fc" id="L78">                .id(transactionId)</span>
-<span class="fc" id="L79">                .type(TransactionType.ADJUSTMENT)</span>
-<span class="fc" id="L80">                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
-<span class="fc" id="L81">                .amount(absAmount)</span>
-<span class="fc" id="L82">                .customerId(command.customerId())</span>
-<span class="fc" id="L83">                .operatorId(command.operatorId())</span>
-<span class="fc" id="L84">                .sourceType(null)</span>
-<span class="fc" id="L85">                .sourceId(null)</span>
-<span class="fc" id="L86">                .recordedAt(recordedAt)</span>
-<span class="fc" id="L87">                .idempotencyKey(command.idempotencyKey())</span>
-<span class="fc" id="L88">                .reason(command.reason())</span>
-<span class="fc" id="L89">                .records(List.of(</span>
-<span class="fc" id="L90">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
-<span class="fc" id="L91">                        creditChange.toTransaction(uuidGenerator.generate())</span>
+<span class="fc" id="L84">        var transaction = Transaction.builder()</span>
+<span class="fc" id="L85">                .id(transactionId)</span>
+<span class="fc" id="L86">                .type(TransactionType.ADJUSTMENT)</span>
+<span class="fc" id="L87">                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
+<span class="fc" id="L88">                .amount(absAmount)</span>
+<span class="fc" id="L89">                .customerId(command.customerId())</span>
+<span class="fc" id="L90">                .operatorId(command.operatorId())</span>
+<span class="fc" id="L91">                .sourceType(null)</span>
+<span class="fc" id="L92">                .sourceId(null)</span>
+<span class="fc" id="L93">                .recordedAt(recordedAt)</span>
+<span class="fc" id="L94">                .idempotencyKey(command.idempotencyKey())</span>
+<span class="fc" id="L95">                .reason(command.reason())</span>
+<span class="fc" id="L96">                .records(List.of(</span>
+<span class="fc" id="L97">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L98">                        creditChange.toTransaction(uuidGenerator.generate())</span>
                 ))
-<span class="fc" id="L93">                .build();</span>
+<span class="fc" id="L100">                .build();</span>
 
-<span class="fc" id="L95">        transactionRepository.save(transaction);</span>
+<span class="fc" id="L102">        transactionRepository.save(transaction);</span>
+<span class="fc" id="L103">        log.info(&quot;Adjustment {} recorded for customer={}: {} amount={}&quot;,</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">                transactionId, command.customerId(), isDeduction ? &quot;deduction&quot; : &quot;credit&quot;, absAmount);</span>
 
-<span class="fc" id="L97">        return new AdjustmentResult(transactionId, recordedAt);</span>
+<span class="fc" id="L106">        return new AdjustmentResult(transactionId, recordedAt);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

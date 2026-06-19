@@ -54,6 +54,7 @@ class CreateCustomerAccountService implements CreateCustomerAccountUseCase {
 <span class="fc" id="L54">                .build();</span>
 
 <span class="fc" id="L56">        accountRepository.save(account);</span>
-<span class="fc" id="L57">    }</span>
+<span class="fc" id="L57">        log.info(&quot;Finance account {} created for customer={}&quot;, account.getId(), customerId);</span>
+<span class="fc" id="L58">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
