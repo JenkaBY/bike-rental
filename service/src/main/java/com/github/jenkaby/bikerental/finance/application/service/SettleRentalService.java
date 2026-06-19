@@ -40,16 +40,13 @@ public class SettleRentalService implements SettleRentalUseCase {
         var existingCaptures = transactionRepository.findAllByRentalRefAndType(command.rentalRef(), TransactionType.CAPTURE);
         if (!existingCaptures.isEmpty()) {
             var captureRefs = existingCaptures.stream().map(t -> new TransactionRef(t.getId())).toList();
-            log.info("No settlement needed for rental id=[{}] as it exists with ids {}", command.rentalRef().id(), captureRefs);
             var releaseRef = transactionRepository
                     .findByRentalRefAndType(command.rentalRef(), TransactionType.RELEASE)
                     .map(t -> new TransactionRef(t.getId()))
                     .orElse(null);
+            log.info("Settlement already completed for rental id=[{}], returning existing captures={} release={}",
+                    command.rentalRef().id(), captureRefs, releaseRef);
             return new SettlementResult(captureRefs, releaseRef, existingCaptures.getFirst().getRecordedAt());
-        }
-        if (command.finalCost().isZero()) {
-            log.info("No settlement needed for rental id=[{}] as final cost is zero", command.rentalRef().id());
-            return new SettlementResult(List.of(), null, clock.instant());
         }
         var customerAccount = accountRepository.findByCustomerId(command.customerRef())
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerRef().id().toString()));
@@ -57,8 +54,26 @@ public class SettleRentalService implements SettleRentalUseCase {
 
         Optional<Transaction> holdOptional = transactionRepository.findByRentalRefAndType(command.rentalRef(), TransactionType.HOLD);
         if (holdOptional.isEmpty()) {
-            log.info("No settlement needed for rental id=[{}] as no hold exists", command.rentalRef().id());
+            log.debug("No hold found for rental id=[{}], skipping settlement", command.rentalRef().id());
             return new SettlementResult(List.of(), null, clock.instant());
+        }
+
+        if (command.finalCost().isZero()) {
+            log.info("Final cost is zero for rental id=[{}], releasing full hold", command.rentalRef().id());
+            var existingRelease = transactionRepository.findByRentalRefAndType(command.rentalRef(), TransactionType.RELEASE);
+            if (existingRelease.isPresent()) {
+                log.info("Zero-cost settlement already released for rental id=[{}], returning existing release={}",
+                        command.rentalRef().id(), existingRelease.get().getId());
+                return new SettlementResult(List.of(), new TransactionRef(existingRelease.get().getId()), existingRelease.get().getRecordedAt());
+            }
+            Instant now = clock.instant();
+            var holdAmount = holdOptional.get().getAmount();
+            var releaseRef = commitReleaseTransaction(customerAccount, command, holdAmount, now)
+                    .map(t -> new TransactionRef(t.getId()))
+                    .orElse(null);
+            accountRepository.save(customerAccount);
+            log.info("Released full hold [{}] for rental id=[{}], release={}", holdAmount, command.rentalRef().id(), releaseRef);
+            return new SettlementResult(List.of(), releaseRef, now);
         }
         var holdTxN = holdOptional.get();
         var holdTxNAmount = holdTxN.getAmount();
@@ -91,6 +106,7 @@ public class SettleRentalService implements SettleRentalUseCase {
                     ))
                     .build();
             transactionRepository.save(captureTransaction);
+            log.debug("Capture transaction [{}] persisted for rental id=[{}] amount=[{}]", captureId, command.rentalRef().id(), finalCost);
 
             var excess = holdTxNAmount.subtract(finalCost);
             var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, now)
@@ -100,13 +116,14 @@ public class SettleRentalService implements SettleRentalUseCase {
             accountRepository.save(customerAccount);
             accountRepository.save(systemAccount);
 
+            log.info("Settlement complete for rental id=[{}]: captured=[{}] released=[{}]", command.rentalRef().id(), finalCost, excess);
             return new SettlementResult(List.of(new TransactionRef(captureId)), releaseTransactionRef, now);
         }
 
         var shortfall = finalCost.subtract(holdTxNAmount);
         if (customerAccount.getWallet().getBalance().isLessThan(shortfall)) {
-            log.warn("Insufficient balance [{}] to cover shortfall [{}] for rental id=[{}]", customerAccount.getWallet().getBalance(),
-                    shortfall.amount(), command.rentalRef().id());
+            log.warn("Over-budget settlement for rental id=[{}]: finalCost=[{}] holdAmount=[{}] walletBalance=[{}] shortfall=[{}]",
+                    command.rentalRef().id(), finalCost, holdTxNAmount, customerAccount.getWallet().getBalance(), shortfall.amount());
             throw new OverBudgetSettlementException(finalCost,
                     holdTxNAmount.add(customerAccount.getWallet().getBalance()));
         }
@@ -134,6 +151,7 @@ public class SettleRentalService implements SettleRentalUseCase {
                             holdRevenueCredit.toTransaction(uuidGenerator.generate())
                     ))
                     .build());
+            log.debug("Hold capture [{}] persisted for rental id=[{}] amount=[{}]", holdCaptureId, command.rentalRef().id(), holdTxNAmount);
             captureRefs.add(new TransactionRef(holdCaptureId));
         }
 
@@ -159,12 +177,15 @@ public class SettleRentalService implements SettleRentalUseCase {
                             walletRevenueCredit.toTransaction(uuidGenerator.generate())
                     ))
                     .build());
+            log.debug("Wallet capture [{}] persisted for rental id=[{}] shortfall=[{}]", walletCaptureId, command.rentalRef().id(), shortfall);
             captureRefs.add(new TransactionRef(walletCaptureId));
         }
 
         accountRepository.save(customerAccount);
         accountRepository.save(systemAccount);
 
+        log.info("Settlement complete (over-hold) for rental id=[{}]: finalCost=[{}] captureRefs={}",
+                command.rentalRef().id(), finalCost, captureRefs);
         return new SettlementResult(captureRefs, null, now);
     }
 
@@ -189,12 +210,16 @@ public class SettleRentalService implements SettleRentalUseCase {
                             releaseWalletCredit.toTransaction(uuidGenerator.generate())
                     ))
                     .build();
-            return Optional.of(transactionRepository.save(releaseTransaction));
+            var saved = transactionRepository.save(releaseTransaction);
+            log.debug("Release transaction [{}] committed: amount=[{}] for rental id=[{}]",
+                    saved.getId(), excess, command.rentalRef().id());
+            return Optional.of(saved);
         }
         if (excess.isNegative()) {
             throw new IllegalArgumentException(
                     "Unreachable state. The excess for rental %s is negative %s".formatted(command.rentalRef().id(), excess));
         }
+        log.debug("No release needed: excess is zero for rental id=[{}]", command.rentalRef().id());
         return Optional.empty();
     }
 }

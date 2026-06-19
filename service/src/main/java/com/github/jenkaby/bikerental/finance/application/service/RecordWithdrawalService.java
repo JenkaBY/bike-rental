@@ -11,6 +11,7 @@ import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceExcepti
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class RecordWithdrawalService implements RecordWithdrawalUseCase {
@@ -32,10 +34,14 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
     @Override
     @Transactional
     public WithdrawalResult execute(RecordWithdrawalCommand command) {
+        log.info("Recording withdrawal for customer={} amount={} via {}",
+                command.customerId(), command.amount(), command.paymentMethod());
         Optional<Transaction> existing = transactionRepository
                 .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));
         if (existing.isPresent()) {
             Transaction t = existing.get();
+            log.info("Withdrawal already recorded for customer={} idempotencyKey={}, returning existing transaction={}",
+                    command.customerId(), command.idempotencyKey(), t.getId());
             return new WithdrawalResult(t.getId(), t.getRecordedAt());
         }
 
@@ -78,6 +84,7 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
                 .build();
 
         transactionRepository.save(transaction);
+        log.info("Withdrawal {} recorded for customer={} amount={}", transactionId, command.customerId(), command.amount());
 
         return new WithdrawalResult(transactionId, now);
     }

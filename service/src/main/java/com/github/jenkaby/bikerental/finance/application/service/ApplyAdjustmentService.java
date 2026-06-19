@@ -14,6 +14,7 @@ import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceExcepti
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
@@ -35,10 +37,14 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
     @Override
     @Transactional
     public AdjustmentResult execute(ApplyAdjustmentCommand command) {
+        log.info("Applying adjustment for customer={} amount={} idempotencyKey={}",
+                command.customerId(), command.amount(), command.idempotencyKey());
         Optional<Transaction> existing = transactionRepository
                 .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));
         if (existing.isPresent()) {
             Transaction t = existing.get();
+            log.info("Adjustment already applied for customer={} idempotencyKey={}, returning existing transaction={}",
+                    command.customerId(), command.idempotencyKey(), t.getId());
             return new AdjustmentResult(t.getId(), t.getRecordedAt());
         }
         var customerAccount = accountRepository
@@ -56,6 +62,7 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
         if (isDeduction && !customerAccount.isBalanceSufficient(absAmount)) {
             throw new InsufficientBalanceException(customerAccount.availableBalance(), absAmount);
         }
+        log.debug("Adjustment direction for customer={}: {}", command.customerId(), isDeduction ? "deduction" : "credit");
 
         TransactionRecordWithoutId debitChange;
         TransactionRecordWithoutId creditChange;
@@ -93,6 +100,8 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
                 .build();
 
         transactionRepository.save(transaction);
+        log.info("Adjustment {} recorded for customer={}: {} amount={}",
+                transactionId, command.customerId(), isDeduction ? "deduction" : "credit", absAmount);
 
         return new AdjustmentResult(transactionId, recordedAt);
     }
