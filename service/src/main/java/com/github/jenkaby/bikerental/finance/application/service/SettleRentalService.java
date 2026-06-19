@@ -47,10 +47,6 @@ public class SettleRentalService implements SettleRentalUseCase {
                     .orElse(null);
             return new SettlementResult(captureRefs, releaseRef, existingCaptures.getFirst().getRecordedAt());
         }
-        if (command.finalCost().isZero()) {
-            log.info("No settlement needed for rental id=[{}] as final cost is zero", command.rentalRef().id());
-            return new SettlementResult(List.of(), null, clock.instant());
-        }
         var customerAccount = accountRepository.findByCustomerId(command.customerRef())
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerRef().id().toString()));
         var systemAccount = accountRepository.getSystemAccount();
@@ -59,6 +55,21 @@ public class SettleRentalService implements SettleRentalUseCase {
         if (holdOptional.isEmpty()) {
             log.info("No settlement needed for rental id=[{}] as no hold exists", command.rentalRef().id());
             return new SettlementResult(List.of(), null, clock.instant());
+        }
+
+        if (command.finalCost().isZero()) {
+            log.info("Final cost is zero for rental id=[{}], releasing full hold", command.rentalRef().id());
+            var existingRelease = transactionRepository.findByRentalRefAndType(command.rentalRef(), TransactionType.RELEASE);
+            if (existingRelease.isPresent()) {
+                return new SettlementResult(List.of(), new TransactionRef(existingRelease.get().getId()), existingRelease.get().getRecordedAt());
+            }
+            Instant now = clock.instant();
+            var holdAmount = holdOptional.get().getAmount();
+            var releaseRef = commitReleaseTransaction(customerAccount, command, holdAmount, now)
+                    .map(t -> new TransactionRef(t.getId()))
+                    .orElse(null);
+            accountRepository.save(customerAccount);
+            return new SettlementResult(List.of(), releaseRef, now);
         }
         var holdTxN = holdOptional.get();
         var holdTxNAmount = holdTxN.getAmount();

@@ -442,3 +442,50 @@ Feature: Equipment Return
     Examples:
       | rentalId | now                 | startedAt           | operator | equipmentId |
       | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | 1           |
+
+  Scenario Outline: Return within free period - zero cost releases the full hold back to the customer
+    Given now is "<startedAt>"
+    And a single rental exists in the database with the following data
+      | id         | customerId | status | specialTariffId | specialPrice | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
+      | <rentalId> | CUS2       | ACTIVE | 5               | 0.00         | 16.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
+    And rental equipments exist in the database with the following data
+      | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
+      | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
+    When a GET request has been made to "/api/finance/customers/{customerId}/balances" endpoint with
+      | {customerId} |
+      | CUS2         |
+    Then the response status is 200
+    And the balances response contains
+      | walletBalance | holdBalance |
+      | 20.00         | 16.00       |
+    Given now is "<now>"
+    And the return equipment request is
+      | rentalId   | equipmentIds  | operatorId |
+      | <rentalId> | <equipmentId> | <operator> |
+    When a POST request has been made to "/api/rentals/return" endpoint
+    Then the response status is 200
+    And the rental return response contains rental
+      | customerId | status    | actualDuration | plannedDuration | estimatedCost | totalCost | specialPrice |
+      | CUS2       | COMPLETED | 3              | 120             | 0.00          | 0.00      | 0.00         |
+    And the rental return response does contain settlement info
+    And the following rental completed event was published
+      | rentalId   | equipmentIds  | returnedEquipmentIds | totalCost | returnTime |
+      | <rentalId> | <equipmentId> | <equipmentId>        | 0.00      | <now>      |
+    And the following sub-ledger records were persisted in db
+      | id      | accountId | ledgerType      | balance |
+      | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00    |
+      | L_C_W2  | ACC2      | CUSTOMER_WALLET | 36.00   |
+      | L_S_REV | ACC_S     | REVENUE         | 0.00    |
+    And the following transactions were persisted in db
+      | customerId | amount | paymentMethod     | operatorId | type    | recordedAt | sourceId   | sourceType |
+      | CUS2       | 16.00  | INTERNAL_TRANSFER | <operator> | RELEASE | <now>      | <rentalId> | RENTAL     |
+    And the following transaction records were persisted in db
+      | subLedger | ledgerType      | direction | amount |
+      | L_C_H2    | CUSTOMER_HOLD   | DEBIT     | 16.00  |
+      | L_C_W2    | CUSTOMER_WALLET | CREDIT    | 16.00  |
+    Examples:
+      | rentalId | now                 | startedAt           | operator | equipmentId |
+      | 20       | 2026-02-10T08:03:00 | 2026-02-10T08:00:00 | OP1      | 1           |
