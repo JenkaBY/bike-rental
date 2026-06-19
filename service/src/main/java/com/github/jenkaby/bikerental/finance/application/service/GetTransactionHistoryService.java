@@ -12,11 +12,13 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 class GetTransactionHistoryService implements GetTransactionHistoryUseCase {
@@ -27,6 +29,7 @@ class GetTransactionHistoryService implements GetTransactionHistoryUseCase {
 
     @Override
     public Page<TransactionDto> execute(UUID customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
+        log.debug("Fetching transaction history for customer={} filter={} page={}", customerId, filter, pageRequest);
         var customerRef = CustomerRef.of(customerId);
         accountRepository.findByCustomerId(customerRef)
                 .orElseThrow(() -> new ResourceNotFoundException(CustomerAccount.class, customerId));
@@ -36,6 +39,7 @@ class GetTransactionHistoryService implements GetTransactionHistoryUseCase {
         List<TransactionDto> entries = page.items().stream()
                 .map(transactionMapper::toEntry)
                 .toList();
+        log.debug("Found {} transactions (total={}) for customer={}", entries.size(), page.totalItems(), customerId);
 
         return new Page<>(entries, page.totalItems(), pageRequest);
     }

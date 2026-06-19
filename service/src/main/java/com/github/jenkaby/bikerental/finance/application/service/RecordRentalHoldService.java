@@ -14,6 +14,7 @@ import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceExcepti
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class RecordRentalHoldService implements RentalHoldUseCase {
@@ -34,6 +36,8 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
     @Override
     @Transactional
     public HoldResult execute(RentalHoldCommand command) {
+        log.info("Recording rental hold for rental={} customer={} amount={}",
+                command.rentalRef().id(), command.customerRef().id(), command.amount());
         var idempotencyKey = new IdempotencyKey(
                 uuidGenerator.generateNameBased(String.valueOf(command.rentalRef().id()))
         );
@@ -42,6 +46,8 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
                 .findByIdempotencyKeyAndCustomerId(idempotencyKey, command.customerRef());
         if (existing.isPresent()) {
             var t = existing.get();
+            log.info("Hold already recorded for rental={} customer={}, returning existing transaction={}",
+                    command.rentalRef().id(), command.customerRef().id(), t.getId());
             return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());
         }
 
@@ -81,6 +87,7 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
                 .build();
 
         transactionRepository.save(transaction);
+        log.info("Hold {} recorded for rental={} amount={}", transactionId, command.rentalRef().id(), command.amount());
 
         return new HoldResult(new TransactionRef(transactionId), now);
     }

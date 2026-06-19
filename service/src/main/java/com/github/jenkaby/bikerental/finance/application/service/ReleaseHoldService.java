@@ -37,17 +37,21 @@ public class ReleaseHoldService implements ReleaseHoldUseCase {
     @Override
     @Transactional
     public HoldResult execute(ReleaseHoldCommand command) {
+        log.info("Releasing hold for rental {}", command.rentalRef().id());
         var idempotencyKey = new IdempotencyKey(
                 uuidGenerator.generateNameBased("%s_%s".formatted(TransactionType.RELEASE.name(), command.rentalRef().id()))
         );
         var existing = transactionRepository.findByIdempotencyKey(idempotencyKey);
         if (existing.isPresent()) {
             var t = existing.get();
+            log.info("Hold already released for rental {}, returning existing transaction {}",
+                    command.rentalRef().id(), t.getId());
             return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());
         }
 
         Optional<Transaction> holdOptional = transactionRepository.findByRentalRefAndType(command.rentalRef(), TransactionType.HOLD);
         if (holdOptional.isEmpty()) {
+            log.debug("No hold found for rental {}, nothing to release", command.rentalRef().id());
             return new HoldResult(null, clock.instant());
         }
         var holdTxN = holdOptional.get();

@@ -54,5 +54,6 @@ class CreateCustomerAccountService implements CreateCustomerAccountUseCase {
                 .build();
 
         accountRepository.save(account);
+        log.info("Finance account {} created for customer={}", account.getId(), customerId);
     }
 }

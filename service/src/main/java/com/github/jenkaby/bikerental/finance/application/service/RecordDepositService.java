@@ -12,6 +12,7 @@ import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class RecordDepositService implements RecordDepositUseCase {
@@ -35,10 +37,14 @@ public class RecordDepositService implements RecordDepositUseCase {
     @Override
     @Transactional
     public DepositResult execute(RecordDepositCommand command) {
+        log.info("Recording deposit for customer={} amount={} via {}",
+                command.customerId(), command.amount(), command.paymentMethod());
         Optional<Transaction> existing = transactionRepository
                 .findByIdempotencyKeyAndCustomerId(command.idempotencyKey(), new CustomerRef(command.customerId()));
         if (existing.isPresent()) {
             Transaction t = existing.get();
+            log.info("Deposit already recorded for customer={} idempotencyKey={}, returning existing transaction={}",
+                    command.customerId(), command.idempotencyKey(), t.getId());
             return new DepositResult(t.getId(), t.getRecordedAt());
         }
 
@@ -78,6 +84,7 @@ public class RecordDepositService implements RecordDepositUseCase {
                 .build();
 
         transactionRepository.save(transaction);
+        log.info("Deposit {} recorded for customer={} amount={}", transactionId, command.customerId(), command.amount());
 
         eventPublisher.publish(FINANCE_EVENTS_EXCHANGER, new CustomerFundDeposited(
                 command.customerId(),
@@ -85,6 +92,7 @@ public class RecordDepositService implements RecordDepositUseCase {
                 command.operatorId(),
                 now
         ));
+        log.debug("Published CustomerFundDeposited event for deposit {} customer={}", transactionId, command.customerId());
 
         return new DepositResult(transactionId, now);
     }
