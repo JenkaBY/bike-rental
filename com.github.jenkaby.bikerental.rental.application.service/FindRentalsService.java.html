@@ -23,7 +23,7 @@ class FindRentalsService implements FindRentalsUseCase {
 <span class="nc" id="L23">            throw new InvalidDateRangeException(query.from(), query.to());</span>
         }
 <span class="fc" id="L25">        var filter = new RentalSearchFilter(</span>
-<span class="fc" id="L26">                query.status(),</span>
+<span class="fc" id="L26">                query.statuses(),</span>
 <span class="fc" id="L27">                query.customerId(),</span>
 <span class="fc" id="L28">                query.equipmentUid(),</span>
 <span class="fc" id="L29">                query.from(),</span>

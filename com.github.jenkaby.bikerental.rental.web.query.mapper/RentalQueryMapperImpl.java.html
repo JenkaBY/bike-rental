@@ -2,10 +2,11 @@
 
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
-import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentMapper;
+import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentStatusMapper;
 import com.github.jenkaby.bikerental.rental.shared.mapper.RentalStatusMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
+import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryEquipmentResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
 import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
@@ -33,103 +34,135 @@ public class RentalQueryMapperImpl implements RentalQueryMapper {
     private final DurationMapper durationMapper;
     private final RentalOverdueMapper rentalOverdueMapper;
     private final RentalEquipmentWebMapper rentalEquipmentWebMapper;
-    private final RentalEquipmentMapper rentalEquipmentMapper;
+    private final RentalEquipmentStatusMapper rentalEquipmentStatusMapper;
     private final DiscountMapper discountMapper;
 
     @Autowired
-<span class="fc" id="L40">    public RentalQueryMapperImpl(MoneyMapper moneyMapper, InstantMapper instantMapper, RentalStatusMapper rentalStatusMapper, DurationMapper durationMapper, RentalOverdueMapper rentalOverdueMapper, RentalEquipmentWebMapper rentalEquipmentWebMapper, RentalEquipmentMapper rentalEquipmentMapper, DiscountMapper discountMapper) {</span>
+<span class="fc" id="L41">    public RentalQueryMapperImpl(MoneyMapper moneyMapper, InstantMapper instantMapper, RentalStatusMapper rentalStatusMapper, DurationMapper durationMapper, RentalOverdueMapper rentalOverdueMapper, RentalEquipmentWebMapper rentalEquipmentWebMapper, RentalEquipmentStatusMapper rentalEquipmentStatusMapper, DiscountMapper discountMapper) {</span>
 
-<span class="fc" id="L42">        this.moneyMapper = moneyMapper;</span>
-<span class="fc" id="L43">        this.instantMapper = instantMapper;</span>
-<span class="fc" id="L44">        this.rentalStatusMapper = rentalStatusMapper;</span>
-<span class="fc" id="L45">        this.durationMapper = durationMapper;</span>
-<span class="fc" id="L46">        this.rentalOverdueMapper = rentalOverdueMapper;</span>
-<span class="fc" id="L47">        this.rentalEquipmentWebMapper = rentalEquipmentWebMapper;</span>
-<span class="fc" id="L48">        this.rentalEquipmentMapper = rentalEquipmentMapper;</span>
-<span class="fc" id="L49">        this.discountMapper = discountMapper;</span>
-<span class="fc" id="L50">    }</span>
+<span class="fc" id="L43">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L44">        this.instantMapper = instantMapper;</span>
+<span class="fc" id="L45">        this.rentalStatusMapper = rentalStatusMapper;</span>
+<span class="fc" id="L46">        this.durationMapper = durationMapper;</span>
+<span class="fc" id="L47">        this.rentalOverdueMapper = rentalOverdueMapper;</span>
+<span class="fc" id="L48">        this.rentalEquipmentWebMapper = rentalEquipmentWebMapper;</span>
+<span class="fc" id="L49">        this.rentalEquipmentStatusMapper = rentalEquipmentStatusMapper;</span>
+<span class="fc" id="L50">        this.discountMapper = discountMapper;</span>
+<span class="fc" id="L51">    }</span>
 
     @Override
     public RentalResponse toResponse(Rental rental) {
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
-<span class="nc" id="L55">            return null;</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
+<span class="nc" id="L56">            return null;</span>
         }
 
-<span class="fc" id="L58">        Integer actualDurationMinutes = null;</span>
-<span class="fc" id="L59">        Integer plannedDurationMinutes = null;</span>
-<span class="fc" id="L60">        List&lt;EquipmentItemResponse&gt; equipmentItems = null;</span>
-<span class="fc" id="L61">        Long id = null;</span>
-<span class="fc" id="L62">        UUID customerId = null;</span>
-<span class="fc" id="L63">        String status = null;</span>
-<span class="fc" id="L64">        Instant startedAt = null;</span>
-<span class="fc" id="L65">        Instant expectedReturnAt = null;</span>
-<span class="fc" id="L66">        Instant actualReturnAt = null;</span>
-<span class="fc" id="L67">        BigDecimal estimatedCost = null;</span>
-<span class="fc" id="L68">        BigDecimal specialPrice = null;</span>
-<span class="fc" id="L69">        Integer discountPercent = null;</span>
-<span class="fc" id="L70">        BigDecimal finalCost = null;</span>
+<span class="fc" id="L59">        Integer actualDurationMinutes = null;</span>
+<span class="fc" id="L60">        Integer plannedDurationMinutes = null;</span>
+<span class="fc" id="L61">        List&lt;EquipmentItemResponse&gt; equipmentItems = null;</span>
+<span class="fc" id="L62">        Long id = null;</span>
+<span class="fc" id="L63">        UUID customerId = null;</span>
+<span class="fc" id="L64">        String status = null;</span>
+<span class="fc" id="L65">        Instant startedAt = null;</span>
+<span class="fc" id="L66">        Instant expectedReturnAt = null;</span>
+<span class="fc" id="L67">        Instant actualReturnAt = null;</span>
+<span class="fc" id="L68">        BigDecimal estimatedCost = null;</span>
+<span class="fc" id="L69">        BigDecimal specialPrice = null;</span>
+<span class="fc" id="L70">        Integer discountPercent = null;</span>
+<span class="fc" id="L71">        BigDecimal finalCost = null;</span>
 
-<span class="fc" id="L72">        actualDurationMinutes = durationMapper.toMinutes( rental.getActualDuration() );</span>
-<span class="fc" id="L73">        plannedDurationMinutes = durationMapper.toMinutes( rental.getPlannedDuration() );</span>
-<span class="fc" id="L74">        equipmentItems = rentalEquipmentListToEquipmentItemResponseList( rental.getEquipments() );</span>
-<span class="fc" id="L75">        id = rental.getId();</span>
-<span class="fc" id="L76">        customerId = rental.getCustomerId();</span>
-<span class="fc" id="L77">        status = rentalStatusMapper.statusToString( rental.getStatus() );</span>
-<span class="fc" id="L78">        startedAt = instantMapper.localDateTimeToInstant( rental.getStartedAt() );</span>
-<span class="fc" id="L79">        expectedReturnAt = instantMapper.localDateTimeToInstant( rental.getExpectedReturnAt() );</span>
-<span class="fc" id="L80">        actualReturnAt = instantMapper.localDateTimeToInstant( rental.getActualReturnAt() );</span>
-<span class="fc" id="L81">        estimatedCost = moneyMapper.toBigDecimal( rental.getEstimatedCost() );</span>
-<span class="fc" id="L82">        specialPrice = moneyMapper.toBigDecimal( rental.getSpecialPrice() );</span>
-<span class="fc" id="L83">        discountPercent = discountMapper.toInteger( rental.getDiscountPercent() );</span>
-<span class="fc" id="L84">        finalCost = moneyMapper.toBigDecimal( rental.getFinalCost() );</span>
+<span class="fc" id="L73">        actualDurationMinutes = durationMapper.toMinutes( rental.getActualDuration() );</span>
+<span class="fc" id="L74">        plannedDurationMinutes = durationMapper.toMinutes( rental.getPlannedDuration() );</span>
+<span class="fc" id="L75">        equipmentItems = rentalEquipmentListToEquipmentItemResponseList( rental.getEquipments() );</span>
+<span class="fc" id="L76">        id = rental.getId();</span>
+<span class="fc" id="L77">        customerId = rental.getCustomerId();</span>
+<span class="fc" id="L78">        status = rentalStatusMapper.statusToString( rental.getStatus() );</span>
+<span class="fc" id="L79">        startedAt = instantMapper.localDateTimeToInstant( rental.getStartedAt() );</span>
+<span class="fc" id="L80">        expectedReturnAt = instantMapper.localDateTimeToInstant( rental.getExpectedReturnAt() );</span>
+<span class="fc" id="L81">        actualReturnAt = instantMapper.localDateTimeToInstant( rental.getActualReturnAt() );</span>
+<span class="fc" id="L82">        estimatedCost = moneyMapper.toBigDecimal( rental.getEstimatedCost() );</span>
+<span class="fc" id="L83">        specialPrice = moneyMapper.toBigDecimal( rental.getSpecialPrice() );</span>
+<span class="fc" id="L84">        discountPercent = discountMapper.toInteger( rental.getDiscountPercent() );</span>
+<span class="fc" id="L85">        finalCost = moneyMapper.toBigDecimal( rental.getFinalCost() );</span>
 
-<span class="fc" id="L86">        RentalResponse rentalResponse = new RentalResponse( id, customerId, equipmentItems, status, startedAt, expectedReturnAt, actualReturnAt, plannedDurationMinutes, actualDurationMinutes, estimatedCost, specialPrice, discountPercent, finalCost );</span>
+<span class="fc" id="L87">        RentalResponse rentalResponse = new RentalResponse( id, customerId, equipmentItems, status, startedAt, expectedReturnAt, actualReturnAt, plannedDurationMinutes, actualDurationMinutes, estimatedCost, specialPrice, discountPercent, finalCost );</span>
 
-<span class="fc" id="L88">        return rentalResponse;</span>
+<span class="fc" id="L89">        return rentalResponse;</span>
     }
 
     @Override
     public RentalSummaryResponse toRentalSummaryResponse(Rental rental) {
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
-<span class="nc" id="L94">            return null;</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
+<span class="nc" id="L95">            return null;</span>
         }
 
-<span class="fc" id="L97">        List&lt;Long&gt; equipmentIds = null;</span>
-<span class="fc" id="L98">        Integer overdueMinutes = null;</span>
-<span class="fc" id="L99">        Integer plannedDurationMinutes = null;</span>
-<span class="fc" id="L100">        Integer actualDurationMinutes = null;</span>
-<span class="fc" id="L101">        Long id = null;</span>
-<span class="fc" id="L102">        UUID customerId = null;</span>
-<span class="fc" id="L103">        String status = null;</span>
-<span class="fc" id="L104">        Instant startedAt = null;</span>
-<span class="fc" id="L105">        Instant expectedReturnAt = null;</span>
+<span class="fc" id="L98">        List&lt;RentalSummaryEquipmentResponse&gt; equipments = null;</span>
+<span class="fc" id="L99">        Integer overdueMinutes = null;</span>
+<span class="fc" id="L100">        Integer plannedDurationMinutes = null;</span>
+<span class="fc" id="L101">        Integer actualDurationMinutes = null;</span>
+<span class="fc" id="L102">        Long id = null;</span>
+<span class="fc" id="L103">        UUID customerId = null;</span>
+<span class="fc" id="L104">        String status = null;</span>
+<span class="fc" id="L105">        Instant startedAt = null;</span>
+<span class="fc" id="L106">        Instant expectedReturnAt = null;</span>
 
-<span class="fc" id="L107">        equipmentIds = rentalEquipmentMapper.toEquipmentIds( rental.getEquipments() );</span>
-<span class="fc" id="L108">        overdueMinutes = rentalOverdueMapper.calculate( rental );</span>
-<span class="fc" id="L109">        plannedDurationMinutes = durationMapper.toMinutes( rental.getPlannedDuration() );</span>
-<span class="fc" id="L110">        actualDurationMinutes = durationMapper.toMinutes( rental.getActualDuration() );</span>
-<span class="fc" id="L111">        id = rental.getId();</span>
-<span class="fc" id="L112">        customerId = rental.getCustomerId();</span>
-<span class="fc" id="L113">        status = rentalStatusMapper.statusToString( rental.getStatus() );</span>
-<span class="fc" id="L114">        startedAt = instantMapper.localDateTimeToInstant( rental.getStartedAt() );</span>
-<span class="fc" id="L115">        expectedReturnAt = instantMapper.localDateTimeToInstant( rental.getExpectedReturnAt() );</span>
+<span class="fc" id="L108">        equipments = rentalEquipmentListToRentalSummaryEquipmentResponseList( rental.getEquipments() );</span>
+<span class="fc" id="L109">        overdueMinutes = rentalOverdueMapper.calculate( rental );</span>
+<span class="fc" id="L110">        plannedDurationMinutes = durationMapper.toMinutes( rental.getPlannedDuration() );</span>
+<span class="fc" id="L111">        actualDurationMinutes = durationMapper.toMinutes( rental.getActualDuration() );</span>
+<span class="fc" id="L112">        id = rental.getId();</span>
+<span class="fc" id="L113">        customerId = rental.getCustomerId();</span>
+<span class="fc" id="L114">        status = rentalStatusMapper.statusToString( rental.getStatus() );</span>
+<span class="fc" id="L115">        startedAt = instantMapper.localDateTimeToInstant( rental.getStartedAt() );</span>
+<span class="fc" id="L116">        expectedReturnAt = instantMapper.localDateTimeToInstant( rental.getExpectedReturnAt() );</span>
 
-<span class="fc" id="L117">        RentalSummaryResponse rentalSummaryResponse = new RentalSummaryResponse( id, customerId, equipmentIds, status, startedAt, expectedReturnAt, overdueMinutes, plannedDurationMinutes, actualDurationMinutes );</span>
+<span class="fc" id="L118">        RentalSummaryResponse rentalSummaryResponse = new RentalSummaryResponse( id, customerId, equipments, status, startedAt, expectedReturnAt, overdueMinutes, plannedDurationMinutes, actualDurationMinutes );</span>
 
-<span class="fc" id="L119">        return rentalSummaryResponse;</span>
+<span class="fc" id="L120">        return rentalSummaryResponse;</span>
+    }
+
+    @Override
+    public RentalSummaryEquipmentResponse toRentalSummaryEquipment(RentalEquipment equipment) {
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
+<span class="nc" id="L126">            return null;</span>
+        }
+
+<span class="fc" id="L129">        Long equipmentId = null;</span>
+<span class="fc" id="L130">        String equipmentUid = null;</span>
+<span class="fc" id="L131">        String status = null;</span>
+
+<span class="fc" id="L133">        equipmentId = equipment.getEquipmentId();</span>
+<span class="fc" id="L134">        equipmentUid = equipment.getEquipmentUid();</span>
+<span class="fc" id="L135">        status = rentalEquipmentStatusMapper.statusToString( equipment.getStatus() );</span>
+
+<span class="fc" id="L137">        RentalSummaryEquipmentResponse rentalSummaryEquipmentResponse = new RentalSummaryEquipmentResponse( equipmentId, equipmentUid, status );</span>
+
+<span class="fc" id="L139">        return rentalSummaryEquipmentResponse;</span>
     }
 
     protected List&lt;EquipmentItemResponse&gt; rentalEquipmentListToEquipmentItemResponseList(List&lt;RentalEquipment&gt; list) {
-<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L124">            return null;</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L144">            return null;</span>
         }
 
-<span class="fc" id="L127">        List&lt;EquipmentItemResponse&gt; list1 = new ArrayList&lt;EquipmentItemResponse&gt;( list.size() );</span>
-<span class="fc bfc" id="L128" title="All 2 branches covered.">        for ( RentalEquipment rentalEquipment : list ) {</span>
-<span class="fc" id="L129">            list1.add( rentalEquipmentWebMapper.toEquipmentItemResponse( rentalEquipment ) );</span>
-<span class="fc" id="L130">        }</span>
+<span class="fc" id="L147">        List&lt;EquipmentItemResponse&gt; list1 = new ArrayList&lt;EquipmentItemResponse&gt;( list.size() );</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        for ( RentalEquipment rentalEquipment : list ) {</span>
+<span class="fc" id="L149">            list1.add( rentalEquipmentWebMapper.toEquipmentItemResponse( rentalEquipment ) );</span>
+<span class="fc" id="L150">        }</span>
 
-<span class="fc" id="L132">        return list1;</span>
+<span class="fc" id="L152">        return list1;</span>
+    }
+
+    protected List&lt;RentalSummaryEquipmentResponse&gt; rentalEquipmentListToRentalSummaryEquipmentResponseList(List&lt;RentalEquipment&gt; list) {
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L157">            return null;</span>
+        }
+
+<span class="fc" id="L160">        List&lt;RentalSummaryEquipmentResponse&gt; list1 = new ArrayList&lt;RentalSummaryEquipmentResponse&gt;( list.size() );</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        for ( RentalEquipment rentalEquipment : list ) {</span>
+<span class="fc" id="L162">            list1.add( toRentalSummaryEquipment( rentalEquipment ) );</span>
+<span class="fc" id="L163">        }</span>
+
+<span class="fc" id="L165">        return list1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

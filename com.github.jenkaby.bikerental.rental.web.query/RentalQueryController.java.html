@@ -30,12 +30,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Validated
 @RestController
 @RequestMapping(path = &quot;/api/rentals&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
-<span class="fc" id="L38">@Slf4j</span>
+<span class="fc" id="L39">@Slf4j</span>
 @Tag(name = OpenApiConfig.Tags.RENTALS)
 class RentalQueryController {
 
@@ -48,12 +49,12 @@ class RentalQueryController {
             GetRentalByIdUseCase getRentalByIdUseCase,
             FindRentalsUseCase findRentalsUseCase,
             RentalQueryMapper mapper,
-<span class="fc" id="L51">            PageMapper pageMapper) {</span>
-<span class="fc" id="L52">        this.getRentalByIdUseCase = getRentalByIdUseCase;</span>
-<span class="fc" id="L53">        this.findRentalsUseCase = findRentalsUseCase;</span>
-<span class="fc" id="L54">        this.mapper = mapper;</span>
-<span class="fc" id="L55">        this.pageMapper = pageMapper;</span>
-<span class="fc" id="L56">    }</span>
+<span class="fc" id="L52">            PageMapper pageMapper) {</span>
+<span class="fc" id="L53">        this.getRentalByIdUseCase = getRentalByIdUseCase;</span>
+<span class="fc" id="L54">        this.findRentalsUseCase = findRentalsUseCase;</span>
+<span class="fc" id="L55">        this.mapper = mapper;</span>
+<span class="fc" id="L56">        this.pageMapper = pageMapper;</span>
+<span class="fc" id="L57">    }</span>
 
     @GetMapping(&quot;/{id}&quot;)
     @Operation(summary = &quot;Get rental by ID&quot;)
@@ -66,20 +67,20 @@ class RentalQueryController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;RentalResponse&gt; getRentalById(@Parameter(description = &quot;Rental ID&quot;, example = &quot;1&quot;) @PathVariable(&quot;id&quot;) @Id Long id) {
-<span class="fc" id="L69">        log.info(&quot;[GET] Get rental by id: {}&quot;, id);</span>
-<span class="fc" id="L70">        var rental = getRentalByIdUseCase.execute(id);</span>
-<span class="fc" id="L71">        return ResponseEntity.ok(mapper.toResponse(rental));</span>
+<span class="fc" id="L70">        log.info(&quot;[GET] Get rental by id: {}&quot;, id);</span>
+<span class="fc" id="L71">        var rental = getRentalByIdUseCase.execute(id);</span>
+<span class="fc" id="L72">        return ResponseEntity.ok(mapper.toResponse(rental));</span>
     }
 
     @GetMapping
-    @Operation(summary = &quot;Search rentals&quot;, description = &quot;Returns a paginated list of rentals filtered by status, customer or equipment UID&quot;)
+    @Operation(summary = &quot;Search rentals&quot;, description = &quot;Returns a paginated list of rentals filtered by one or more statuses, customer or equipment UID&quot;)
     @ApiResponses({
             @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Rental page returned&quot;),
             @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid filter parameters&quot;,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;Page&lt;RentalSummaryResponse&gt;&gt; getRentals(
-            @Parameter(description = &quot;Rental status filter&quot;, example = &quot;ACTIVE&quot;) @RequestParam(name = &quot;status&quot;, required = false) RentalStatus status,
+            @Parameter(description = &quot;Rental status filter; repeat the parameter or pass a comma-separated list to match any of the given statuses&quot;, example = &quot;ACTIVE&quot;) @RequestParam(name = &quot;status&quot;, required = false) List&lt;RentalStatus&gt; statuses,
             @Parameter(description = &quot;Customer UUID filter&quot;) @RequestParam(name = &quot;customerId&quot;, required = false) UUID customerId,
             @Parameter(description = &quot;Equipment UID filter&quot;, example = &quot;BIKE-001&quot;) @RequestParam(name = &quot;equipmentUid&quot;, required = false) String equipmentUid,
             @Parameter(description = &quot;Created-at range start (inclusive), format yyyy-MM-dd&quot;, example = &quot;2026-02-15&quot;) @RequestParam(name = &quot;from&quot;, required = false)
@@ -87,15 +88,15 @@ class RentalQueryController {
             @Parameter(description = &quot;Created-at range end (inclusive), format yyyy-MM-dd&quot;, example = &quot;2026-02-20&quot;) @RequestParam(name = &quot;to&quot;, required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @PageableDefault(size = 20, sort = &quot;expectedReturnAt&quot;, direction = Sort.Direction.ASC) Pageable pageable) {
-<span class="fc" id="L90">        log.info(&quot;[GET] Get rentals with filters status={}, customerId={}, equipmentUid={}, from={}, to={}&quot;, status, customerId, equipmentUid, from, to);</span>
+<span class="fc" id="L91">        log.info(&quot;[GET] Get rentals with filters statuses={}, customerId={}, equipmentUid={}, from={}, to={}&quot;, statuses, customerId, equipmentUid, from, to);</span>
 
-<span class="fc" id="L92">        var pageRequest = pageMapper.toPageRequest(pageable);</span>
-<span class="fc" id="L93">        var query = new FindRentalsUseCase.FindRentalsQuery(status, customerId, equipmentUid, pageRequest, from, to);</span>
+<span class="fc" id="L93">        var pageRequest = pageMapper.toPageRequest(pageable);</span>
+<span class="fc" id="L94">        var query = new FindRentalsUseCase.FindRentalsQuery(statuses, customerId, equipmentUid, pageRequest, from, to);</span>
 
-<span class="fc" id="L95">        Page&lt;Rental&gt; rentals = findRentalsUseCase.execute(query);</span>
+<span class="fc" id="L96">        Page&lt;Rental&gt; rentals = findRentalsUseCase.execute(query);</span>
 
-<span class="fc" id="L97">        Page&lt;RentalSummaryResponse&gt; response = rentals.map(mapper::toRentalSummaryResponse);</span>
-<span class="fc" id="L98">        return ResponseEntity.ok(response);</span>
+<span class="fc" id="L98">        Page&lt;RentalSummaryResponse&gt; response = rentals.map(mapper::toRentalSummaryResponse);</span>
+<span class="fc" id="L99">        return ResponseEntity.ok(response);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
