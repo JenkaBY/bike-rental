@@ -60,9 +60,9 @@ Feature: Rental Query
       | ACTIVE |
     Then the response status is 200
     And the rental summary response only contains page of
-      | id | customerId | equipmentIds | status | startedAt   | expectedReturnAt    | overdueMin |
-      | 1  | CUS1       | 1            | ACTIVE | <startedAt> | <expectedReturnAt>  | 43         |
-      | 2  | CUS2       | 2            | ACTIVE | <startedAt> | <expectedReturnAt2> | 0          |
+      | id | customerId | equipmentIds | equipmentUids | equipmentStatuses | status | startedAt   | expectedReturnAt    | overdueMin |
+      | 1  | CUS1       | 1            | BIKE-001      | ACTIVE            | ACTIVE | <startedAt> | <expectedReturnAt>  | 43         |
+      | 2  | CUS2       | 2            | E-BIKE-001    | ACTIVE            | ACTIVE | <startedAt> | <expectedReturnAt2> | 0          |
     And the response contains
       | path                 | value            |
       | $.totalItems         | 2                |
@@ -72,6 +72,35 @@ Feature: Rental Query
     Examples:
       | now                 | startedAt           | expectedReturnAt    | expectedReturnAt2   |
       | 2026-02-18T11:43:00 | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 | 2026-02-18T12:00:00 |
+
+  Scenario Outline: Get rentals filtered by multiple statuses
+    Given now is "<now>"
+    And rentals exist in the database with the following data
+      | id | customerId | status    | startedAt   | expectedReturnAt   | createdAt   | updatedAt   |
+      | 1  | CUS1       | ACTIVE    | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | 2  | CUS2       | COMPLETED | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+      | 3  | CUS1       | DRAFT     | null        | null               | <startedAt> | <startedAt> |
+      | 4  | CUS2       | CANCELLED | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+    And rental equipment exists in the database with the following data
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt   | expectedReturnAt   | estimatedCost | finalCost | createdAt   |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE   | <startedAt> | <expectedReturnAt> | 200.00        |           | <startedAt> |
+      | 2        | 2           | E-BIKE-001   | SCOOTER       | 2        | RETURNED | <startedAt> | <expectedReturnAt> | 200.00        | 200.00    | <startedAt> |
+      | 3        | 3           | E-BIKE-002   | SCOOTER       | 2        | ASSIGNED |             |                    |               |           | <startedAt> |
+      | 4        | 4           | E-BIKE-003   | SCOOTER       | 2        | RETURNED | <startedAt> | <expectedReturnAt> | 200.00        | 200.00    | <startedAt> |
+    When a GET request has been made to "/api/rentals" endpoint with query parameters
+      | status           |
+      | ACTIVE,COMPLETED |
+    Then the response status is 200
+    And the rental summary response only contains page of
+      | id | customerId | equipmentIds | equipmentUids | equipmentStatuses | status    | startedAt   | expectedReturnAt   |
+      | 1  | CUS1       | 1            | BIKE-001      | ACTIVE            | ACTIVE    | <startedAt> | <expectedReturnAt> |
+      | 2  | CUS2       | 2            | E-BIKE-001    | RETURNED          | COMPLETED | <startedAt> | <expectedReturnAt> |
+    And the response contains
+      | path         | value |
+      | $.totalItems | 2     |
+    Examples:
+      | now                 | startedAt           | expectedReturnAt    |
+      | 2026-02-18T12:00:00 | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 |
 
   Scenario Outline: Get active rentals filtered by customerId
     Given now is "<now>"
@@ -173,10 +202,10 @@ Feature: Rental Query
       | CUS1       |
     Then the response status is 200
     And the rental summary response only contains page of
-      | id | customerId | equipmentIds | status    | startedAt   | expectedReturnAt   | overdueMin | plannedDuration   | actualDuration   |
-      | 1  | CUS1       | 1            | ACTIVE    | <startedAt> | <expectedReturnAt> | 60         | <plannedDuration> |                  |
-      | 3  | CUS1       | 3            | COMPLETED | <startedAt> | <expectedReturnAt> | 0          | <plannedDuration> | <actualDuration> |
-      | 4  | CUS1       | 4            | DRAFT     | null        | null               | 0          |                   |                  |
+      | id | customerId | equipmentIds | equipmentUids | equipmentStatuses | status    | startedAt   | expectedReturnAt   | overdueMin | plannedDuration   | actualDuration   |
+      | 1  | CUS1       | 1            | BIKE-001      | ACTIVE            | ACTIVE    | <startedAt> | <expectedReturnAt> | 60         | <plannedDuration> |                  |
+      | 3  | CUS1       | 3            | E-BIKE-002    | RETURNED          | COMPLETED | <startedAt> | <expectedReturnAt> | 0          | <plannedDuration> | <actualDuration> |
+      | 4  | CUS1       | 4            | BIKE-001      | ASSIGNED          | DRAFT     | null        | null               | 0          |                   |                  |
     And the response contains
       | path                 | value            |
       | $.totalItems         | 3                |

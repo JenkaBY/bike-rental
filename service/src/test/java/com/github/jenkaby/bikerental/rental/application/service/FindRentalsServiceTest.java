@@ -26,7 +26,7 @@ import static org.mockito.BDDMockito.then;
 @DisplayName("FindRentalsService Tests")
 class FindRentalsServiceTest {
 
-    private static final RentalStatus STATUS = RentalStatus.ACTIVE;
+    private static final List<RentalStatus> STATUSES = List.of(RentalStatus.ACTIVE);
     private static final UUID CUSTOMER_ID = UUID.randomUUID();
     private static final String EQUIPMENT_UID = "BIKE-001";
     private static final PageRequest PAGE_REQUEST = new PageRequest(20, 0, null);
@@ -42,28 +42,28 @@ class FindRentalsServiceTest {
     @Test
     @DisplayName("Should pass all filter fields to repository")
     void shouldPassAllFilterFieldsToRepository() {
-        var query = new FindRentalsUseCase.FindRentalsQuery(STATUS, CUSTOMER_ID, EQUIPMENT_UID, PAGE_REQUEST, FROM_DATE, TO_DATE);
+        var query = new FindRentalsUseCase.FindRentalsQuery(STATUSES, CUSTOMER_ID, EQUIPMENT_UID, PAGE_REQUEST, FROM_DATE, TO_DATE);
         var page = emptyPage();
-        given(repository.findAll(new RentalSearchFilter(STATUS, CUSTOMER_ID, EQUIPMENT_UID, FROM_DATE, TO_DATE), PAGE_REQUEST)).willReturn(page);
+        given(repository.findAll(new RentalSearchFilter(STATUSES, CUSTOMER_ID, EQUIPMENT_UID, FROM_DATE, TO_DATE), PAGE_REQUEST)).willReturn(page);
 
         Page<Rental> result = service.execute(query);
 
         assertThat(result).isNotNull();
-        then(repository).should().findAll(new RentalSearchFilter(STATUS, CUSTOMER_ID, EQUIPMENT_UID, FROM_DATE, TO_DATE), PAGE_REQUEST);
+        then(repository).should().findAll(new RentalSearchFilter(STATUSES, CUSTOMER_ID, EQUIPMENT_UID, FROM_DATE, TO_DATE), PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
 
     @Test
     @DisplayName("Should pass null date fields when no date range supplied")
     void shouldPassNullDateFieldsWhenNoDateRangeSupplied() {
-        var query = new FindRentalsUseCase.FindRentalsQuery(STATUS, null, null, PAGE_REQUEST, null, null);
+        var query = new FindRentalsUseCase.FindRentalsQuery(STATUSES, null, null, PAGE_REQUEST, null, null);
         var page = emptyPage();
-        given(repository.findAll(new RentalSearchFilter(STATUS, null, null, null, null), PAGE_REQUEST)).willReturn(page);
+        given(repository.findAll(new RentalSearchFilter(STATUSES, null, null, null, null), PAGE_REQUEST)).willReturn(page);
 
         Page<Rental> result = service.execute(query);
 
         assertThat(result).isNotNull();
-        then(repository).should().findAll(new RentalSearchFilter(STATUS, null, null, null, null), PAGE_REQUEST);
+        then(repository).should().findAll(new RentalSearchFilter(STATUSES, null, null, null, null), PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
 
@@ -92,6 +92,21 @@ class FindRentalsServiceTest {
 
         assertThat(result).isNotNull();
         then(repository).should().findAll(new RentalSearchFilter(null, CUSTOMER_ID, null, null, TO_DATE), PAGE_REQUEST);
+        then(repository).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
+    @DisplayName("Should pass multiple statuses to repository")
+    void shouldPassMultipleStatusesToRepository() {
+        var statuses = List.of(RentalStatus.ACTIVE, RentalStatus.DRAFT);
+        var query = new FindRentalsUseCase.FindRentalsQuery(statuses, null, null, PAGE_REQUEST, null, null);
+        var page = emptyPage();
+        given(repository.findAll(new RentalSearchFilter(statuses, null, null, null, null), PAGE_REQUEST)).willReturn(page);
+
+        Page<Rental> result = service.execute(query);
+
+        assertThat(result).isNotNull();
+        then(repository).should().findAll(new RentalSearchFilter(statuses, null, null, null, null), PAGE_REQUEST);
         then(repository).shouldHaveNoMoreInteractions();
     }
 

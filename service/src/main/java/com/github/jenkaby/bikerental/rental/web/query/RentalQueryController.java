@@ -30,6 +30,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -72,14 +73,14 @@ class RentalQueryController {
     }
 
     @GetMapping
-    @Operation(summary = "Search rentals", description = "Returns a paginated list of rentals filtered by status, customer or equipment UID")
+    @Operation(summary = "Search rentals", description = "Returns a paginated list of rentals filtered by one or more statuses, customer or equipment UID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Rental page returned"),
             @ApiResponse(responseCode = "400", description = "Invalid filter parameters",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<Page<RentalSummaryResponse>> getRentals(
-            @Parameter(description = "Rental status filter", example = "ACTIVE") @RequestParam(name = "status", required = false) RentalStatus status,
+            @Parameter(description = "Rental status filter; repeat the parameter or pass a comma-separated list to match any of the given statuses", example = "ACTIVE") @RequestParam(name = "status", required = false) List<RentalStatus> statuses,
             @Parameter(description = "Customer UUID filter") @RequestParam(name = "customerId", required = false) UUID customerId,
             @Parameter(description = "Equipment UID filter", example = "BIKE-001") @RequestParam(name = "equipmentUid", required = false) String equipmentUid,
             @Parameter(description = "Created-at range start (inclusive), format yyyy-MM-dd", example = "2026-02-15") @RequestParam(name = "from", required = false)
@@ -87,10 +88,10 @@ class RentalQueryController {
             @Parameter(description = "Created-at range end (inclusive), format yyyy-MM-dd", example = "2026-02-20") @RequestParam(name = "to", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @PageableDefault(size = 20, sort = "expectedReturnAt", direction = Sort.Direction.ASC) Pageable pageable) {
-        log.info("[GET] Get rentals with filters status={}, customerId={}, equipmentUid={}, from={}, to={}", status, customerId, equipmentUid, from, to);
+        log.info("[GET] Get rentals with filters statuses={}, customerId={}, equipmentUid={}, from={}, to={}", statuses, customerId, equipmentUid, from, to);
 
         var pageRequest = pageMapper.toPageRequest(pageable);
-        var query = new FindRentalsUseCase.FindRentalsQuery(status, customerId, equipmentUid, pageRequest, from, to);
+        var query = new FindRentalsUseCase.FindRentalsQuery(statuses, customerId, equipmentUid, pageRequest, from, to);
 
         Page<Rental> rentals = findRentalsUseCase.execute(query);
 

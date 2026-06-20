@@ -119,6 +119,21 @@ class RentalQueryControllerTest {
         }
 
         @Test
+        void getRentals_multipleStatuses_returnsOk() throws Exception {
+            var pageRequest = new PageRequest(20, 0, null);
+            var page = new Page<>(List.of(mock(Rental.class)), 1L, pageRequest);
+
+            given(pageMapper.toPageRequest(any())).willReturn(pageRequest);
+            given(findRentalsUseCase.execute(any(FindRentalsUseCase.FindRentalsQuery.class))).willReturn(page);
+            given(mapper.toRentalSummaryResponse(any(Rental.class))).willReturn(mock(RentalSummaryResponse.class));
+
+            mockMvc.perform(get(API_RENTALS)
+                            .param("status", "ACTIVE", "DRAFT")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+        }
+
+        @Test
         void getRentals_invalidStatus() throws Exception {
             mockMvc.perform(get(API_RENTALS)
                             .param("status", "INVALID_STATUS")

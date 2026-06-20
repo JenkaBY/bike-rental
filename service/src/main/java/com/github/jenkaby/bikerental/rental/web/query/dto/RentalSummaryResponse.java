@@ -11,7 +11,7 @@ import java.util.UUID;
 public record RentalSummaryResponse(
         @Schema(description = "Rental ID", example = "1") @NotNull Long id,
         @Schema(description = "Customer UUID") @NotNull UUID customerId,
-        @Schema(description = "List of rented equipment IDs", example = "[1,3]") List<Long> equipmentIds,
+        @Schema(description = "Rented equipment items") List<RentalSummaryEquipmentResponse> equipments,
         @Schema(description = "Rental status", example = "ACTIVE") @NotNull String status,
         @Schema(description = "Rental start time") Instant startedAt,
         @Schema(description = "Expected return time") Instant expectedReturnAt,

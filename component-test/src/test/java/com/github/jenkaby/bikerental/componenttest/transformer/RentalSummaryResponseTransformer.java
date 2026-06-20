@@ -1,11 +1,14 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
+import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryEquipmentResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
 import io.cucumber.java.DataTableType;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 public class RentalSummaryResponseTransformer {
 
@@ -21,7 +24,7 @@ public class RentalSummaryResponseTransformer {
                 .map(Aliases::getCustomerId)
                 .orElse(null);
 
-        var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
+        var equipments = toEquipments(entry);
         var status = DataTableHelper.getStringOrNull(entry, "status");
 
         var startedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "startedAt");
@@ -37,7 +40,7 @@ public class RentalSummaryResponseTransformer {
         return new RentalSummaryResponse(
                 id,
                 customerId,
-                equipmentIds,
+                equipments,
                 status,
                 startedAt,
                 expectedReturnAt,
@@ -45,5 +48,21 @@ public class RentalSummaryResponseTransformer {
                 plannedDuration,
                 actualDuration
         );
+    }
+
+    private static List<RentalSummaryEquipmentResponse> toEquipments(Map<String, String> entry) {
+        var equipmentIds = DataTableHelper.toLongList(entry, "equipmentIds");
+        if (equipmentIds == null) {
+            return null;
+        }
+        var equipmentUids = DataTableHelper.toStringList(entry, "equipmentUids");
+        var equipmentStatuses = DataTableHelper.toStringList(entry, "equipmentStatuses");
+        return IntStream.range(0, equipmentIds.size())
+                .mapToObj(index -> new RentalSummaryEquipmentResponse(
+                        equipmentIds.get(index),
+                        equipmentUids != null ? equipmentUids.get(index) : null,
+                        equipmentStatuses != null ? equipmentStatuses.get(index) : null
+                ))
+                .toList();
     }
 }

@@ -8,6 +8,7 @@ import com.github.jenkaby.bikerental.rental.web.command.dto.RentalRequest;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalUpdateJsonPatchRequest;
 import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
+import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryEquipmentResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -18,6 +19,7 @@ import org.assertj.core.api.SoftAssertions;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -28,6 +30,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 public class RentalWebSteps {
 
     private static final Comparator<EquipmentItemResponse> COMPARING_EQUIPMENT_ITEM_BY_ID = Comparator.comparing(EquipmentItemResponse::equipmentId);
+    private static final Comparator<RentalSummaryEquipmentResponse> COMPARING_SUMMARY_EQUIPMENT_BY_ID = Comparator.comparing(RentalSummaryEquipmentResponse::equipmentId);
     public static final Comparator<RentalSummaryResponse> COMPARING_BY_ID = Comparator.comparing(RentalSummaryResponse::id);
     private final ScenarioContext scenarioContext;
 
@@ -64,9 +67,7 @@ public class RentalWebSteps {
         softly.assertThat(actual.customerId())
                 .as("Customer ID")
                 .isEqualTo(expected.customerId());
-        softly.assertThat(actual.equipmentIds())
-                .as("Equipment IDs")
-                .isEqualTo(expected.equipmentIds());
+        validateSummaryEquipments(softly, actual, expected);
         softly.assertThat(actual.status())
                 .as("Status")
                 .isEqualTo(expected.status());
@@ -96,6 +97,37 @@ public class RentalWebSteps {
                     .isEqualTo(expected.actualDurationMinutes());
         }
         softly.assertAll();
+    }
+
+    private void validateSummaryEquipments(SoftAssertions softly, RentalSummaryResponse actual, RentalSummaryResponse expected) {
+        if (expected.equipments() == null) {
+            return;
+        }
+        var actualEquipments = actual.equipments().stream().sorted(COMPARING_SUMMARY_EQUIPMENT_BY_ID).toList();
+        var expectedEquipments = expected.equipments().stream().sorted(COMPARING_SUMMARY_EQUIPMENT_BY_ID).toList();
+        softly.assertThat(actualEquipments)
+                .as("Rental summary equipments size")
+                .hasSize(expectedEquipments.size());
+        if (actualEquipments.size() != expectedEquipments.size()) {
+            return;
+        }
+        IntStream.range(0, expectedEquipments.size()).forEach(index -> {
+            var actualEquipment = actualEquipments.get(index);
+            var expectedEquipment = expectedEquipments.get(index);
+            softly.assertThat(actualEquipment.equipmentId())
+                    .as("Summary equipment ID")
+                    .isEqualTo(expectedEquipment.equipmentId());
+            if (expectedEquipment.equipmentUid() != null) {
+                softly.assertThat(actualEquipment.equipmentUid())
+                        .as("Summary equipment UID")
+                        .isEqualTo(expectedEquipment.equipmentUid());
+            }
+            if (expectedEquipment.status() != null) {
+                softly.assertThat(actualEquipment.status())
+                        .as("Summary equipment status")
+                        .isEqualTo(expectedEquipment.status());
+            }
+        });
     }
 
 
