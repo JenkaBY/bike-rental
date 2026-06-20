@@ -57,7 +57,7 @@ class RentalAvailabilityQueryController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<Page<AvailableEquipmentResponse>> getAvailableEquipments(
-            @Parameter(description = "Partial, case-insensitive text matched OR-style against uid, model, and serialNumber")
+            @Parameter(description = "Text matched OR-style: exact match on uid, partial case-insensitive match on model and serialNumber")
             @RequestParam(name = "q", required = false) String q,
             @PageableDefault(size = 20) Pageable pageable) {
         log.info("[GET] Get available equipments for rent: q={}, pageable={}", q, pageable);

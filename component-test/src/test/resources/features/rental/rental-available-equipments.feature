@@ -56,12 +56,11 @@ Feature: Available equipment query
       | 0066 |
     Then the response status is 200
     And the available equipment response only contains page of
-      | id | uid       | serialNumber | type    | model   |
-      | 5  | BIKE-00-  | EQ-0066      | BICYCLE | Model 1 |
-      | 6  | BIKE-0066 | EQ-007       | BICYCLE | Model 2 |
+      | id | uid      | serialNumber | type    | model   |
+      | 5  | BIKE-00- | EQ-0066      | BICYCLE | Model 1 |
     And the response contains
       | path         | value |
-      | $.totalItems | 2     |
+      | $.totalItems | 1     |
 
   Scenario: Returns empty result when all matched equipment is occupied
     When a GET request has been made to "/api/rentals/available-equipments" endpoint with query parameters
