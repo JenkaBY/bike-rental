@@ -1,9 +1,12 @@
 package com.github.jenkaby.bikerental.rental.web.query.mapper;
 
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentMapper;
+import com.github.jenkaby.bikerental.rental.shared.mapper.RentalEquipmentStatusMapper;
 import com.github.jenkaby.bikerental.rental.shared.mapper.RentalStatusMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
+import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryEquipmentResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
 import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
@@ -14,7 +17,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(uses = {MoneyMapper.class, InstantMapper.class, RentalStatusMapper.class,
         DurationMapper.class, RentalOverdueMapper.class, RentalEquipmentWebMapper.class, RentalEquipmentMapper.class,
-        DiscountMapper.class})
+        RentalEquipmentStatusMapper.class, DiscountMapper.class})
 public interface RentalQueryMapper {
 
     @Mapping(target = "actualDurationMinutes", source = "rental.actualDuration")
@@ -22,9 +25,11 @@ public interface RentalQueryMapper {
     @Mapping(target = "equipmentItems", source = "rental.equipments")
     RentalResponse toResponse(Rental rental);
 
-    @Mapping(target = "equipmentIds", source = "equipments")
+    @Mapping(target = "equipments", source = "equipments")
     @Mapping(target = "overdueMinutes", source = "rental")
     @Mapping(target = "plannedDurationMinutes", source = "rental.plannedDuration")
     @Mapping(target = "actualDurationMinutes", source = "rental.actualDuration")
     RentalSummaryResponse toRentalSummaryResponse(Rental rental);
+
+    RentalSummaryEquipmentResponse toRentalSummaryEquipment(RentalEquipment equipment);
 }

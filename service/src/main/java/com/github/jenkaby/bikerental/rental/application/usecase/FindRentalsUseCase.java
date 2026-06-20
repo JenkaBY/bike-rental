@@ -8,13 +8,14 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public interface FindRentalsUseCase {
     Page<Rental> execute(FindRentalsQuery query);
 
     record FindRentalsQuery(
-            @Nullable RentalStatus status,
+            @Nullable List<RentalStatus> statuses,
             @Nullable UUID customerId,
             @Nullable String equipmentUid,
             PageRequest pageRequest,
