@@ -113,7 +113,7 @@ public class EquipmentQueryController {
     }
 
     @GetMapping
-    @Operation(summary = &quot;Search equipment&quot;, description = &quot;Returns paginated equipment list filtered by status, type, and/or free-text search across uid, serial number, and model&quot;)
+    @Operation(summary = &quot;Search equipment&quot;, description = &quot;Returns paginated equipment list filtered by status, type, and/or free-text search: exact match on uid, case-insensitive substring match on serial number and model&quot;)
     @ApiResponses({
             @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Equipment page returned&quot;),
             @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid filter parameters&quot;,
@@ -123,7 +123,7 @@ public class EquipmentQueryController {
             @Deprecated(forRemoval = true)
             @Parameter(description = &quot;Status slug filter&quot;, example = &quot;available&quot;) @RequestParam(name = &quot;status&quot;, required = false) String status,
             @Parameter(description = &quot;Type slug filter&quot;, example = &quot;bike&quot;) @RequestParam(name = &quot;type&quot;, required = false) String type,
-            @Parameter(description = &quot;Free-text search across uid, serial number, and model (case-insensitive substring match)&quot;, example = &quot;city&quot;) @RequestParam(name = &quot;q&quot;, required = false) String q,
+            @Parameter(description = &quot;Free-text search: exact match on uid, case-insensitive substring match on serial number and model&quot;, example = &quot;BIKE-001&quot;) @RequestParam(name = &quot;q&quot;, required = false) String q,
             @PageableDefault(size = 20, sort = &quot;serialNumber&quot;, direction = Sort.Direction.ASC) Pageable pageable) {
 
 <span class="fc" id="L129">        log.info(&quot;[GET] Search equipments filters status={} type={} q={}&quot;, status, type, q);</span>
