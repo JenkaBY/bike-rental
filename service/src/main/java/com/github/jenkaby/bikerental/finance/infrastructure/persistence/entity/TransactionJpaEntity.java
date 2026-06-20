@@ -5,6 +5,8 @@ import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -65,6 +67,7 @@ public class TransactionJpaEntity {
     private String reason;
 
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     @Builder.Default
     private List<TransactionRecordJpaEntity> records = new ArrayList<>();
 }
