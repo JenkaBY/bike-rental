@@ -7,12 +7,12 @@ import net.kaczmarzyk.spring.data.jpa.domain.GreaterThanOrEqual;
 import net.kaczmarzyk.spring.data.jpa.domain.In;
 import net.kaczmarzyk.spring.data.jpa.domain.LessThan;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
-import net.kaczmarzyk.spring.data.jpa.web.annotation.JoinFetch;
+import net.kaczmarzyk.spring.data.jpa.web.annotation.Join;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
 import org.springframework.data.jpa.domain.Specification;
 
 
-@JoinFetch(paths = "records", alias = "r", joinType = JoinType.INNER)
+@Join(path = "records", alias = "r", type = JoinType.INNER)
 @And({
         @Spec(path = SpecConstant.TransactionField.CUSTOMER_ID, params = "customerId", spec = Equal.class),
         @Spec(path = "r." + SpecConstant.TransactionField.LEDGER_TYPE, constVal = {"CUSTOMER_HOLD", "CUSTOMER_WALLET"}, spec = In.class),
