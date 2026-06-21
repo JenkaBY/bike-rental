@@ -117,7 +117,20 @@ All error handlers return `ProblemDetail` with two mandatory extra properties:
 - `correlationId` — from `MDC.get("correlationId")` (set by `CorrelationIdFilter`), fallback to generated UUID
 - `errorCode` — string constant from `ErrorCodes` (e.g. `CONSTRAINT_VIOLATION`, `RESOURCE_NOT_FOUND`)
 
-Validation errors additionally include an `errors` array of `{field, message}` objects.
+Validation errors additionally include an `errors` array of `ValidationError` records — `{field, code, params}`:
+
+- `field` — offending property/parameter name (`null` for class-level/global constraints)
+- `code` — `validation.<snake_case>` derived **automatically** from the constraint annotation's simple name (e.g.
+  `@Size` → `validation.size`); the frontend maps it to localized text
+- `params` — the constraint annotation's declared attributes minus `message`/`groups`/`payload` (e.g.
+  `@Size(min=2, max=5)` → `{min: 2, max: 5}`), auto-extracted from the `ConstraintDescriptor` — no per-constraint code
+
+`BaseValidationErrorMapper` (shared) does this centrally for all three Jakarta entry points
+(`MethodArgumentNotValidException`, `HandlerMethodValidationException`, `ConstraintViolationException`). Every
+`errorCode` is catalogued (description + example payload per code) in [docs/error-codes.md](docs/error-codes.md). When
+adding a custom constraint or a new error code, follow
+[.claude/rules/error-responses.md](.claude/rules/error-responses.md) — no handler/mapper changes are needed for
+validation.
 
 Module-scoped advice classes (e.g. `EquipmentRestControllerAdvice`) use
 `@RestControllerAdvice(basePackages = "...")` with `@Order(Ordered.LOWEST_PRECEDENCE - 1)`.

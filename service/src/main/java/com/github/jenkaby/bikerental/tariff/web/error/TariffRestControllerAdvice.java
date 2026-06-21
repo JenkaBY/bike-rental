@@ -1,11 +1,12 @@
 package com.github.jenkaby.bikerental.tariff.web.error;
 
+import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.InvalidSpecialTariffTypeException;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialPriceException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -14,16 +15,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.UUID;
-
 @Slf4j
 @RestControllerAdvice(basePackages = "com.github.jenkaby.bikerental.tariff")
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
+@RequiredArgsConstructor
 public class TariffRestControllerAdvice {
+
+    private final CorrelationIdProvider correlationIdProvider;
 
     @ExceptionHandler(SuitableTariffNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleSuitableTariffNotFound(SuitableTariffNotFoundException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Suitable tariff not found: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problem.setTitle("Resource not found");
@@ -36,7 +38,7 @@ public class TariffRestControllerAdvice {
 
     @ExceptionHandler(InvalidTariffPricingException.class)
     public ResponseEntity<ProblemDetail> handleInvalidTariffV2Pricing(InvalidTariffPricingException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Invalid tariff V2 pricing: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Validation error");
@@ -48,7 +50,7 @@ public class TariffRestControllerAdvice {
 
     @ExceptionHandler(InvalidSpecialTariffTypeException.class)
     public ResponseEntity<ProblemDetail> handleInvalidSpecialTariffType(InvalidSpecialTariffTypeException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Invalid special tariff type: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Invalid special tariff");
@@ -61,7 +63,7 @@ public class TariffRestControllerAdvice {
 
     @ExceptionHandler(InvalidSpecialPriceException.class)
     public ResponseEntity<ProblemDetail> handleInvalidSpecialPrice(InvalidSpecialPriceException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Invalid special price: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Invalid special price");
@@ -69,10 +71,5 @@ public class TariffRestControllerAdvice {
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
         return ResponseEntity.badRequest().body(problem);
-    }
-
-    private String resolveCorrelationId() {
-        String correlationId = MDC.get("correlationId");
-        return correlationId != null ? correlationId : UUID.randomUUID().toString();
     }
 }

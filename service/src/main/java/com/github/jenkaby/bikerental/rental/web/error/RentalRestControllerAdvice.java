@@ -2,12 +2,13 @@ package com.github.jenkaby.bikerental.rental.web.error;
 
 import com.github.jenkaby.bikerental.rental.domain.exception.*;
 import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.InvalidSpecialTariffTypeException;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -16,16 +17,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.UUID;
-
 @Slf4j
 @RestControllerAdvice(basePackages = "com.github.jenkaby.bikerental.rental")
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
+@RequiredArgsConstructor
 public class RentalRestControllerAdvice {
+
+    private final CorrelationIdProvider correlationIdProvider;
 
     @ExceptionHandler(InvalidRentalStatusException.class)
     public ResponseEntity<ProblemDetail> handleInvalidRentalStatus(InvalidRentalStatusException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Invalid rental status: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Invalid rental status");
@@ -38,7 +40,7 @@ public class RentalRestControllerAdvice {
 
     @ExceptionHandler(RentalNotReadyForActivationException.class)
     public ResponseEntity<ProblemDetail> handleRentalNotReadyForActivation(RentalNotReadyForActivationException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Rental not ready for activation: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Rental not ready for activation");
@@ -50,7 +52,7 @@ public class RentalRestControllerAdvice {
 
     @ExceptionHandler(SuitableTariffNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleSuitableTariffNotFound(SuitableTariffNotFoundException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Suitable tariff not found: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problem.setTitle("Suitable tariff not found");
@@ -63,7 +65,7 @@ public class RentalRestControllerAdvice {
 
     @ExceptionHandler(InvalidRentalUpdateException.class)
     public ResponseEntity<ProblemDetail> handleInvalidRentalUpdate(InvalidRentalUpdateException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Invalid rental update: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Invalid rental update");
@@ -75,7 +77,7 @@ public class RentalRestControllerAdvice {
 
     @ExceptionHandler(InsufficientBalanceException.class)
     public ResponseEntity<ProblemDetail> handleInsufficientBalance(InsufficientBalanceException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Insufficient balance for rental creation: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Insufficient funds");
@@ -87,7 +89,7 @@ public class RentalRestControllerAdvice {
 
     @ExceptionHandler(HoldRequiredException.class)
     public ResponseEntity<ProblemDetail> handleHoldRequired(HoldRequiredException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Hold required for rental {}: {}", correlationId, ex.getDetails().rentalId(), ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
         problem.setTitle("Hold required");
@@ -99,7 +101,7 @@ public class RentalRestControllerAdvice {
 
     @ExceptionHandler(InvalidRentalPlannedDurationException.class)
     public ResponseEntity<ProblemDetail> handleInsufficientPrepayment(InvalidRentalPlannedDurationException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Planned duration is missing for rental {}: {}", correlationId, ex.getDetails().rentalId(), ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Invalid rental planned duration");
@@ -111,19 +113,20 @@ public class RentalRestControllerAdvice {
 
     @ExceptionHandler(InvalidSpecialTariffTypeException.class)
     public ResponseEntity<ProblemDetail> handleInvalidSpecialTariffType(InvalidSpecialTariffTypeException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Invalid special tariff type: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Invalid special tariff type");
         problem.setDetail(ex.getMessage());
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
         return ResponseEntity.of(problem).build();
     }
 
     @ExceptionHandler(EquipmentOccupiedException.class)
     public ResponseEntity<ProblemDetail> handleEquipmentOccupied(EquipmentOccupiedException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Equipment occupied: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
         problem.setTitle("Equipment not available");
@@ -134,14 +137,9 @@ public class RentalRestControllerAdvice {
         return ResponseEntity.of(problem).build();
     }
 
-    private String resolveCorrelationId() {
-        String correlationId = MDC.get("correlationId");
-        return correlationId != null ? correlationId : UUID.randomUUID().toString();
-    }
-
     @ExceptionHandler(InvalidDateRangeException.class)
     public ResponseEntity<ProblemDetail> handleInvalidDateRange(InvalidDateRangeException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Invalid date range: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);

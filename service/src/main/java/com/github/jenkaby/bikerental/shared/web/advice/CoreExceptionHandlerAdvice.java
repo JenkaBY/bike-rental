@@ -4,11 +4,9 @@ import com.github.jenkaby.bikerental.shared.exception.EquipmentNotAvailableExcep
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceConflictException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
-import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +36,7 @@ import static com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField
 @RequiredArgsConstructor
 public class CoreExceptionHandlerAdvice {
 
-    private final UuidGenerator uuidGenerator;
+    private final CorrelationIdProvider correlationIdProvider;
     private final ValidationErrorMapper validationErrorMapper;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -56,7 +54,7 @@ public class CoreExceptionHandlerAdvice {
         errors.addAll(globalErrors);
 
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation error");
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, METHOD_ARGUMENTS_VALIDATION_FAILED);
         body.setProperty(ERRORS, errors);
@@ -67,7 +65,7 @@ public class CoreExceptionHandlerAdvice {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity<ProblemDetail> handleError(MethodArgumentTypeMismatchException ex) {
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, METHOD_ARGUMENT_TYPE_MISMATCH);
         log.warn("[correlationId={}] Bad request for MethodArgumentTypeMismatchException: {}", correlationId, ex.getMessage());
@@ -77,7 +75,7 @@ public class CoreExceptionHandlerAdvice {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     ResponseEntity<ProblemDetail> handleError(MissingServletRequestParameterException ex) {
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, REQUEST_PARAMS_MISSING);
         log.warn("[correlationId={}] Bad request for MissingServletRequestParameterException: {}", correlationId, ex.getMessage());
@@ -87,14 +85,13 @@ public class CoreExceptionHandlerAdvice {
     //  Occurs when validation failed in annotated @RequestParam, @PathVariable, @RequestHeader, @CookieValue, @ModelAttribute
     @ExceptionHandler(HandlerMethodValidationException.class)
     ResponseEntity<ProblemDetail> handleError(HandlerMethodValidationException ex) {
-        var results = ex.getValueResults();
-        var errors = results.stream()
-                .flatMap(r -> r.getResolvableErrors().stream())
-                .map(this.validationErrorMapper::mapResolvableError)
+        var errors = ex.getValueResults().stream()
+                .flatMap(result -> result.getResolvableErrors().stream()
+                        .map(error -> validationErrorMapper.mapParameterError(result, error)))
                 .toList();
 
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation error");
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, HANDLER_METHOD_ERROR);
         body.setProperty(ERRORS, errors);
@@ -113,7 +110,7 @@ public class CoreExceptionHandlerAdvice {
                 .toList();
 
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase());
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, CONSTRAINT_VIOLATION);
         body.setProperty(ERRORS, errors);
@@ -126,16 +123,16 @@ public class CoreExceptionHandlerAdvice {
         var safeMessage = "Malformed or missing request body";
         var message = ex.getMessage() != null ? ex.getMessage() : safeMessage;
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, safeMessage);
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         body.setProperty(CORRELATION_ID, correlationId);
-        body.setProperty(ERROR_CODE, "shared.request.not_readable");
+        body.setProperty(ERROR_CODE, REQUEST_NOT_READABLE);
         log.warn("[correlationId={}] Bad request for HttpMessageNotReadableException: {}", correlationId, message);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({InvalidApiVersionException.class, MissingApiVersionException.class})
     ResponseEntity<ProblemDetail> handleError(ResponseStatusException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         var errorCode = ex instanceof MissingApiVersionException ? API_VERSION_MISSING : API_VERSION_INVALID;
         log.warn("[correlationId={}] Invalid api version requested", correlationId, ex);
         var body = ex.getBody();
@@ -148,9 +145,9 @@ public class CoreExceptionHandlerAdvice {
     ResponseEntity<ProblemDetail> handleError(HttpRequestMethodNotSupportedException ex) {
         var message = ex.getMessage() != null ? ex.getMessage() : "HTTP method not supported";
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.METHOD_NOT_ALLOWED, message);
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         body.setProperty(CORRELATION_ID, correlationId);
-        body.setProperty(ERROR_CODE, "shared.request.method_not_allowed");
+        body.setProperty(ERROR_CODE, METHOD_NOT_ALLOWED);
         log.warn("[correlationId={}] Method not allowed for HttpRequestMethodNotSupportedException: {}", correlationId, message);
         return new ResponseEntity<>(body, HttpStatus.METHOD_NOT_ALLOWED);
     }
@@ -159,16 +156,16 @@ public class CoreExceptionHandlerAdvice {
     ResponseEntity<ProblemDetail> handleError(HttpMediaTypeNotSupportedException ex) {
         var message = ex.getMessage() != null ? ex.getMessage() : "Media type not supported";
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         body.setProperty(CORRELATION_ID, correlationId);
-        body.setProperty(ERROR_CODE, "shared.request.media_type_not_supported");
+        body.setProperty(ERROR_CODE, MEDIA_TYPE_NOT_SUPPORTED);
         log.warn("[correlationId={}] Unsupported media type for HttpMediaTypeNotSupportedException: {}", correlationId, message);
         return new ResponseEntity<>(body, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<ProblemDetail> handleError(Exception ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.error("[correlationId={}] Unexpected {} was thrown: {}", correlationId, ex.getClass(), ex.getMessage());
         log.debug("[correlationId={}] Unexpected error", correlationId, ex);
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
@@ -179,7 +176,7 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ProblemDetail> handleNoResourceFound(NoResourceFoundException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         var body = ex.getBody();
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, RESOURCE_NOT_FOUND);
@@ -189,7 +186,7 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] The resource '{}[{}]' not found in DB", correlationId, ex.getResourceName(), ex.getIdentifier());
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         body.setProperty(CORRELATION_ID, correlationId);
@@ -199,7 +196,7 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(ReferenceNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleReferenceNotFoundException(ReferenceNotFoundException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         var details = ex.getDetails();
         log.warn("[correlationId={}] The referenced resource '{}[{}]' not found in DB", correlationId, details.resourceName(), details.identifier());
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
@@ -211,7 +208,7 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(ResourceConflictException.class)
     public ResponseEntity<ProblemDetail> handleResourceConflictException(ResourceConflictException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         var details = ex.getDetails();
         log.warn("[correlationId={}] The resource '{}[{}]' conflicts with other entity in DB", correlationId, details.resourceName(), details.identifier());
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
@@ -223,7 +220,7 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(EquipmentNotAvailableException.class)
     public ResponseEntity<ProblemDetail> handleEquipmentNotAvailableException(EquipmentNotAvailableException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         var details = ex.getDetails();
         log.warn("[correlationId={}] Equipment {} is not available for operation.", correlationId, details.identifiers());
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
@@ -235,7 +232,7 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ProblemDetail> handleOptimisticLockException(ObjectOptimisticLockingFailureException ex) {
-        var correlationId = resolveCorrelationId();
+        var correlationId = correlationIdProvider.resolve();
         log.warn("[correlationId={}] Optimistic lock occurred: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
         problem.setTitle("Optimistic lock");
@@ -243,10 +240,5 @@ public class CoreExceptionHandlerAdvice {
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.RESOURCE_OPTIMISTIC_LOCK);
         return ResponseEntity.of(problem).build();
-    }
-
-    private String resolveCorrelationId() {
-        String correlationId = MDC.get(CORRELATION_ID);
-        return correlationId != null ? correlationId : uuidGenerator.generate().toString();
     }
 }
