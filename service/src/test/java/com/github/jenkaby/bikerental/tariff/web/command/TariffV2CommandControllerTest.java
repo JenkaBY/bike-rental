@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -494,7 +495,7 @@ class TariffV2CommandControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0"))
+                    .andExpect(jsonPath("$.errors[*].field", hasItem("createTariff.arg0.params.hourlyPrice")))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"));
         }
 
@@ -523,12 +524,12 @@ class TariffV2CommandControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0"))
+                    .andExpect(jsonPath("$.errors[*].field", hasItem("createTariff.arg0.params.hourlyPrice")))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"));
         }
 
         @Test
-        @DisplayName("returns 400 when firstHourPrice is present (FLAT_HOURLY, not applicable field)")
+        @DisplayName("returns 400 when minimumDurationMinutes is missing (FLAT_HOURLY)")
         void post_create_returns400_whenFirstHourPricePresent() throws Exception {
             TariffV2Request request = new TariffV2Request(
                     "Has firstHourPrice",
@@ -553,7 +554,7 @@ class TariffV2CommandControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0"))
+                    .andExpect(jsonPath("$.errors[*].field", hasItem("createTariff.arg0.params.minimumDurationMinutes")))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"));
         }
     }
@@ -616,7 +617,7 @@ class TariffV2CommandControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0"))
+                    .andExpect(jsonPath("$.errors[*].field", hasItem("createTariff.arg0.params.dailyPrice")))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"));
         }
 
@@ -646,12 +647,12 @@ class TariffV2CommandControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0"))
+                    .andExpect(jsonPath("$.errors[*].field", hasItem("createTariff.arg0.params.dailyPrice")))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"));
         }
 
         @Test
-        @DisplayName("returns 400 when firstHourPrice is present (DAILY, not applicable field)")
+        @DisplayName("returns 400 when overtimeHourlyPrice is missing (DAILY)")
         void post_create_returns400_whenFirstHourPricePresent() throws Exception {
             TariffV2Request request = new TariffV2Request(
                     "Has firstHourPrice",
@@ -677,7 +678,7 @@ class TariffV2CommandControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0"))
+                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0.params.overtimeHourlyPrice"))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"));
         }
     }
@@ -737,7 +738,7 @@ class TariffV2CommandControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0"))
+                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0.params.issuanceFee"))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"));
         }
 
@@ -764,12 +765,12 @@ class TariffV2CommandControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0"))
+                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0.params.issuanceFee"))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"));
         }
 
         @Test
-        @DisplayName("returns 400 when firstHourPrice is present (FLAT_FEE, not applicable field)")
+        @DisplayName("returns 400 when issuanceFee is missing with inapplicable fields present (FLAT_FEE)")
         void post_create_returns400_whenFirstHourPricePresent() throws Exception {
             TariffV2Request request = new TariffV2Request(
                     "Has firstHourPrice",
@@ -795,7 +796,7 @@ class TariffV2CommandControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0"))
+                    .andExpect(jsonPath("$.errors[0].field").value("createTariff.arg0.params.issuanceFee"))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"));
         }
     }
@@ -847,6 +848,76 @@ class TariffV2CommandControllerTest {
                     .andExpect(jsonPath("$.correlationId").exists())
                     .andExpect(jsonPath("$.errors[0].field").value("params"))
                     .andExpect(jsonPath("$.errors[0].code").value("validation.not_null"));
+        }
+    }
+
+    @Nested
+    @DisplayName("@ValidTariffV2Pricing validation (PUT /api/tariffs/{id})")
+    class ValidTariffV2PricingPutTests {
+
+        @Test
+        @DisplayName("returns 400 with valid_tariff_v2pricing code and empty params when pricing values are negative (DEGRESSIVE_HOURLY)")
+        void put_update_returns400_whenNegativePricingValues() throws Exception {
+            TariffV2Request request = new TariffV2Request(
+                    "Hourly Bicycle",
+                    "Degressive hourly for bicycles",
+                    "BICYCLE",
+                    PricingType.DEGRESSIVE_HOURLY,
+                    new PricingParams(
+                            new BigDecimal("-9"),   // firstHourPrice — negative, must be > 0
+                            new BigDecimal("-2"),   // hourlyDiscount — negative, must be > 0
+                            BigDecimal.ZERO,        // minimumHourlyPrice — zero, must be > 0
+                            null, null, null, null,
+                            30,
+                            BigDecimal.ONE,
+                            null
+                    ),
+                    LocalDate.parse("2026-01-01"),
+                    null
+            );
+
+            mockMvc.perform(put(API_V2_TARIFFS + "/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
+                    .andExpect(jsonPath("$.correlationId").exists())
+                    .andExpect(jsonPath("$.errors[*].field", hasItem("updateTariff.arg1.params.firstHourPrice")))
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"))
+                    .andExpect(jsonPath("$.errors[0].params").exists())
+                    .andExpect(jsonPath("$.errors[0].params.firstHourPrice").doesNotExist());
+        }
+
+        @Test
+        @DisplayName("returns 400 with valid_tariff_v2pricing code when required field is missing (DEGRESSIVE_HOURLY)")
+        void put_update_returns400_whenRequiredFieldMissing() throws Exception {
+            TariffV2Request request = new TariffV2Request(
+                    "Hourly Bicycle",
+                    "desc",
+                    "BICYCLE",
+                    PricingType.DEGRESSIVE_HOURLY,
+                    new PricingParams(
+                            null,                  // firstHourPrice — missing
+                            new BigDecimal("2.00"),
+                            new BigDecimal("1.00"),
+                            null, null, null, null,
+                            30,
+                            new BigDecimal("1.00"),
+                            null
+                    ),
+                    LocalDate.parse("2026-01-01"),
+                    null
+            );
+
+            mockMvc.perform(put(API_V2_TARIFFS + "/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errorCode").value("shared.request.constraint_violation"))
+                    .andExpect(jsonPath("$.errors[0].field").value("updateTariff.arg1.params.firstHourPrice"))
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.valid_tariff_v2pricing"))
+                    .andExpect(jsonPath("$.errors[0].params").exists())
+                    .andExpect(jsonPath("$.errors[0].params.firstHourPrice").doesNotExist());
         }
     }
 }

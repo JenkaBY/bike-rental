@@ -17,15 +17,17 @@ public class TariffV2PricingConstraintValidator implements ConstraintValidator<V
         if (req == null) {
             return true;
         }
-        try {
-            delegate.validate(req.pricingType(), req.params());
-        } catch (RuntimeException ex) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(ex.getMessage())
-                    .addConstraintViolation();
-            return false;
+        var violations = delegate.collectViolations(req.pricingType(), req.params());
+        if (violations.isEmpty()) {
+            return true;
         }
-
-        return true;
+        context.disableDefaultConstraintViolation();
+        for (var violation : violations) {
+            context.buildConstraintViolationWithTemplate(violation.message())
+                    .addPropertyNode("params")
+                    .addPropertyNode(violation.field())
+                    .addConstraintViolation();
+        }
+        return false;
     }
 }
