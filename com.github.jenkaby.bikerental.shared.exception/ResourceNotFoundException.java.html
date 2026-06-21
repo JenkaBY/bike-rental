@@ -14,7 +14,7 @@ public class ResourceNotFoundException extends BikeRentalException {
     private final String identifier;
 
     public ResourceNotFoundException(String resourceName, String identifier) {
-<span class="fc" id="L17">        super(MESSAGE_TEMPLATE.formatted(resourceName, identifier), ERROR_CODE);</span>
+<span class="fc" id="L17">        super(MESSAGE_TEMPLATE.formatted(resourceName, identifier), ERROR_CODE, new Details(resourceName, identifier));</span>
 <span class="fc" id="L18">        this.resourceName = resourceName;</span>
 <span class="fc" id="L19">        this.identifier = identifier;</span>
 <span class="fc" id="L20">    }</span>
@@ -22,5 +22,12 @@ public class ResourceNotFoundException extends BikeRentalException {
     public ResourceNotFoundException(@NonNull Class&lt;?&gt; cls, @NonNull Object identifier) {
 <span class="fc" id="L23">        this(cls.getSimpleName(), identifier.toString());</span>
 <span class="fc" id="L24">    }</span>
+
+    public Details getDetails() {
+<span class="fc" id="L27">        return getParams().map(p -&gt; (Details) p)</span>
+<span class="pc" id="L28">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected Details in exception parameters&quot;));</span>
+    }
+
+<span class="fc" id="L31">    public record Details(String resourceName, String identifier) {}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

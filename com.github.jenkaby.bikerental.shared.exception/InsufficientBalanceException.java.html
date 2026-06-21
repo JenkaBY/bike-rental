@@ -3,6 +3,8 @@
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 
+import java.math.BigDecimal;
+
 public class InsufficientBalanceException extends BikeRentalException {
 
     public static final String ERROR_CODE = ErrorCodes.INSUFFICIENT_BALANCE;
@@ -11,7 +13,15 @@ public class InsufficientBalanceException extends BikeRentalException {
             &quot;Insufficient wallet balance. Available: %s, requested deduction: %s&quot;;
 
     public InsufficientBalanceException(Money available, Money requested) {
-<span class="fc" id="L14">        super(MESSAGE_TEMPLATE.formatted(available.amount(), requested.amount()), ERROR_CODE);</span>
-<span class="fc" id="L15">    }</span>
+<span class="fc" id="L16">        super(MESSAGE_TEMPLATE.formatted(available.amount(), requested.amount()), ERROR_CODE,</span>
+<span class="fc" id="L17">                new Details(available.amount(), requested.amount()));</span>
+<span class="fc" id="L18">    }</span>
+
+    public Details getDetails() {
+<span class="fc" id="L21">        return getParams().map(p -&gt; (Details) p)</span>
+<span class="pc" id="L22">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected Details in exception parameters&quot;));</span>
+    }
+
+<span class="fc" id="L25">    public record Details(BigDecimal available, BigDecimal requested) {}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -15,9 +15,9 @@ public class InvalidSpecialTariffTypeException extends BikeRentalException {
 <span class="fc" id="L15">    }</span>
 
     public TariffTypeDetails getDetails() {
-<span class="nc" id="L18">        return getParams()</span>
-<span class="nc" id="L19">                .map(p -&gt; (TariffTypeDetails) p)</span>
-<span class="nc" id="L20">                .orElseThrow(() -&gt; new IllegalStateException(&quot;Expected TariffTypeDetails in exception parameters&quot;));</span>
+<span class="fc" id="L18">        return getParams()</span>
+<span class="fc" id="L19">                .map(p -&gt; (TariffTypeDetails) p)</span>
+<span class="pc" id="L20">                .orElseThrow(() -&gt; new IllegalStateException(&quot;Expected TariffTypeDetails in exception parameters&quot;));</span>
     }
 
 <span class="fc" id="L23">    public record TariffTypeDetails(Long tariffId, String actualPricingType) {</span>

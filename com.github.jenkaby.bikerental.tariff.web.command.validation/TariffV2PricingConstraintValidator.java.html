@@ -17,16 +17,18 @@ public class TariffV2PricingConstraintValidator implements ConstraintValidator&l
 <span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if (req == null) {</span>
 <span class="nc" id="L18">            return true;</span>
         }
-        try {
-<span class="fc" id="L21">            delegate.validate(req.pricingType(), req.params());</span>
-<span class="nc" id="L22">        } catch (RuntimeException ex) {</span>
-<span class="nc" id="L23">            context.disableDefaultConstraintViolation();</span>
-<span class="nc" id="L24">            context.buildConstraintViolationWithTemplate(ex.getMessage())</span>
-<span class="nc" id="L25">                    .addConstraintViolation();</span>
-<span class="nc" id="L26">            return false;</span>
-<span class="fc" id="L27">        }</span>
-
-<span class="fc" id="L29">        return true;</span>
+<span class="fc" id="L20">        var violations = delegate.collectViolations(req.pricingType(), req.params());</span>
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if (violations.isEmpty()) {</span>
+<span class="fc" id="L22">            return true;</span>
+        }
+<span class="nc" id="L24">        context.disableDefaultConstraintViolation();</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        for (var violation : violations) {</span>
+<span class="nc" id="L26">            context.buildConstraintViolationWithTemplate(violation.message())</span>
+<span class="nc" id="L27">                    .addPropertyNode(&quot;params&quot;)</span>
+<span class="nc" id="L28">                    .addPropertyNode(violation.field())</span>
+<span class="nc" id="L29">                    .addConstraintViolation();</span>
+<span class="nc" id="L30">        }</span>
+<span class="nc" id="L31">        return false;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

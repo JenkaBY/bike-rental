@@ -2,12 +2,13 @@
 
 import com.github.jenkaby.bikerental.rental.domain.exception.*;
 import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
+import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.InvalidSpecialTariffTypeException;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -16,137 +17,135 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.UUID;
-
-<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L20">@Slf4j</span>
 @RestControllerAdvice(basePackages = &quot;com.github.jenkaby.bikerental.rental&quot;)
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
-<span class="fc" id="L24">public class RentalRestControllerAdvice {</span>
+@RequiredArgsConstructor
+public class RentalRestControllerAdvice {
+
+    private final CorrelationIdProvider correlationIdProvider;
 
     @ExceptionHandler(InvalidRentalStatusException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInvalidRentalStatus(InvalidRentalStatusException ex) {
-<span class="fc" id="L28">        var correlationId = resolveCorrelationId();</span>
-<span class="fc" id="L29">        log.warn(&quot;[correlationId={}] Invalid rental status: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="fc" id="L30">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="fc" id="L31">        problem.setTitle(&quot;Invalid rental status&quot;);</span>
-<span class="fc" id="L32">        problem.setDetail(ex.getMessage());</span>
-<span class="fc" id="L33">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L34">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="fc" id="L35">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
-<span class="fc" id="L36">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L30">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L31">        log.warn(&quot;[correlationId={}] Invalid rental status: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L32">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="fc" id="L33">        problem.setTitle(&quot;Invalid rental status&quot;);</span>
+<span class="fc" id="L34">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L35">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L36">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L37">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L38">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(RentalNotReadyForActivationException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleRentalNotReadyForActivation(RentalNotReadyForActivationException ex) {
-<span class="nc" id="L41">        var correlationId = resolveCorrelationId();</span>
-<span class="nc" id="L42">        log.warn(&quot;[correlationId={}] Rental not ready for activation: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L43">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="nc" id="L44">        problem.setTitle(&quot;Rental not ready for activation&quot;);</span>
-<span class="nc" id="L45">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L46">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="nc" id="L47">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
-<span class="nc" id="L48">        return ResponseEntity.of(problem).build();</span>
+<span class="nc" id="L43">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L44">        log.warn(&quot;[correlationId={}] Rental not ready for activation: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L45">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="nc" id="L46">        problem.setTitle(&quot;Rental not ready for activation&quot;);</span>
+<span class="nc" id="L47">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L48">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L49">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="nc" id="L50">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(SuitableTariffNotFoundException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleSuitableTariffNotFound(SuitableTariffNotFoundException ex) {
-<span class="fc" id="L53">        var correlationId = resolveCorrelationId();</span>
-<span class="fc" id="L54">        log.warn(&quot;[correlationId={}] Suitable tariff not found: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="fc" id="L55">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
-<span class="fc" id="L56">        problem.setTitle(&quot;Suitable tariff not found&quot;);</span>
-<span class="fc" id="L57">        problem.setDetail(ex.getMessage());</span>
-<span class="fc" id="L58">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L59">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="fc" id="L60">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
-<span class="fc" id="L61">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L55">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L56">        log.warn(&quot;[correlationId={}] Suitable tariff not found: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L57">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
+<span class="fc" id="L58">        problem.setTitle(&quot;Suitable tariff not found&quot;);</span>
+<span class="fc" id="L59">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L60">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L61">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L62">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L63">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(InvalidRentalUpdateException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInvalidRentalUpdate(InvalidRentalUpdateException ex) {
-<span class="nc" id="L66">        var correlationId = resolveCorrelationId();</span>
-<span class="nc" id="L67">        log.warn(&quot;[correlationId={}] Invalid rental update: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L68">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
-<span class="nc" id="L69">        problem.setTitle(&quot;Invalid rental update&quot;);</span>
-<span class="nc" id="L70">        problem.setDetail(ex.getMessage());</span>
-<span class="nc" id="L71">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L72">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="nc" id="L73">        return ResponseEntity.of(problem).build();</span>
+<span class="nc" id="L68">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L69">        log.warn(&quot;[correlationId={}] Invalid rental update: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L70">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L71">        problem.setTitle(&quot;Invalid rental update&quot;);</span>
+<span class="nc" id="L72">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L73">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L74">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L75">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(InsufficientBalanceException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInsufficientBalance(InsufficientBalanceException ex) {
-<span class="fc" id="L78">        var correlationId = resolveCorrelationId();</span>
-<span class="fc" id="L79">        log.warn(&quot;[correlationId={}] Insufficient balance for rental creation: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="fc" id="L80">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="fc" id="L81">        problem.setTitle(&quot;Insufficient funds&quot;);</span>
-<span class="fc" id="L82">        problem.setDetail(ex.getMessage());</span>
-<span class="fc" id="L83">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L84">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.INSUFFICIENT_FUNDS);</span>
-<span class="fc" id="L85">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L80">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L81">        log.warn(&quot;[correlationId={}] Insufficient balance for rental creation: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L82">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="fc" id="L83">        problem.setTitle(&quot;Insufficient funds&quot;);</span>
+<span class="fc" id="L84">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L85">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L86">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.INSUFFICIENT_FUNDS);</span>
+<span class="fc" id="L87">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L88">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(HoldRequiredException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleHoldRequired(HoldRequiredException ex) {
-<span class="nc" id="L90">        var correlationId = resolveCorrelationId();</span>
-<span class="nc" id="L91">        log.warn(&quot;[correlationId={}] Hold required for rental {}: {}&quot;, correlationId, ex.getDetails().rentalId(), ex.getMessage());</span>
-<span class="nc" id="L92">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
-<span class="nc" id="L93">        problem.setTitle(&quot;Hold required&quot;);</span>
-<span class="nc" id="L94">        problem.setDetail(ex.getMessage());</span>
-<span class="nc" id="L95">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L96">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.HOLD_REQUIRED);</span>
-<span class="nc" id="L97">        return ResponseEntity.of(problem).build();</span>
+<span class="nc" id="L93">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L94">        log.warn(&quot;[correlationId={}] Hold required for rental {}: {}&quot;, correlationId, ex.getDetails().rentalId(), ex.getMessage());</span>
+<span class="nc" id="L95">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
+<span class="nc" id="L96">        problem.setTitle(&quot;Hold required&quot;);</span>
+<span class="nc" id="L97">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L98">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L99">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.HOLD_REQUIRED);</span>
+<span class="nc" id="L100">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(InvalidRentalPlannedDurationException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInsufficientPrepayment(InvalidRentalPlannedDurationException ex) {
-<span class="nc" id="L102">        var correlationId = resolveCorrelationId();</span>
-<span class="nc" id="L103">        log.warn(&quot;[correlationId={}] Planned duration is missing for rental {}: {}&quot;, correlationId, ex.getDetails().rentalId(), ex.getMessage());</span>
-<span class="nc" id="L104">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="nc" id="L105">        problem.setTitle(&quot;Invalid rental planned duration&quot;);</span>
-<span class="nc" id="L106">        problem.setDetail(ex.getMessage());</span>
-<span class="nc" id="L107">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L108">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="nc" id="L109">        return ResponseEntity.of(problem).build();</span>
+<span class="nc" id="L105">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L106">        log.warn(&quot;[correlationId={}] Planned duration is missing for rental {}: {}&quot;, correlationId, ex.getDetails().rentalId(), ex.getMessage());</span>
+<span class="nc" id="L107">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="nc" id="L108">        problem.setTitle(&quot;Invalid rental planned duration&quot;);</span>
+<span class="nc" id="L109">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L110">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L111">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L112">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(InvalidSpecialTariffTypeException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInvalidSpecialTariffType(InvalidSpecialTariffTypeException ex) {
-<span class="fc" id="L114">        var correlationId = resolveCorrelationId();</span>
-<span class="fc" id="L115">        log.warn(&quot;[correlationId={}] Invalid special tariff type: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="fc" id="L116">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="fc" id="L117">        problem.setTitle(&quot;Invalid special tariff type&quot;);</span>
-<span class="fc" id="L118">        problem.setDetail(ex.getMessage());</span>
-<span class="fc" id="L119">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L120">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="fc" id="L121">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L117">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L118">        log.warn(&quot;[correlationId={}] Invalid special tariff type: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L119">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="fc" id="L120">        problem.setTitle(&quot;Invalid special tariff type&quot;);</span>
+<span class="fc" id="L121">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L122">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L123">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L124">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L125">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(EquipmentOccupiedException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleEquipmentOccupied(EquipmentOccupiedException ex) {
-<span class="fc" id="L126">        var correlationId = resolveCorrelationId();</span>
-<span class="fc" id="L127">        log.warn(&quot;[correlationId={}] Equipment occupied: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="fc" id="L128">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
-<span class="fc" id="L129">        problem.setTitle(&quot;Equipment not available&quot;);</span>
-<span class="fc" id="L130">        problem.setDetail(ex.getMessage());</span>
-<span class="fc" id="L131">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L132">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.EQUIPMENT_NOT_AVAILABLE);</span>
-<span class="fc" id="L133">        problem.setProperty(&quot;unavailableIds&quot;, ex.getDetails().unavailableIds());</span>
-<span class="fc" id="L134">        return ResponseEntity.of(problem).build();</span>
-    }
-
-    private String resolveCorrelationId() {
-<span class="fc" id="L138">        String correlationId = MDC.get(&quot;correlationId&quot;);</span>
-<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : UUID.randomUUID().toString();</span>
+<span class="fc" id="L130">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L131">        log.warn(&quot;[correlationId={}] Equipment occupied: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L132">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
+<span class="fc" id="L133">        problem.setTitle(&quot;Equipment not available&quot;);</span>
+<span class="fc" id="L134">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L135">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L136">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.EQUIPMENT_NOT_AVAILABLE);</span>
+<span class="fc" id="L137">        problem.setProperty(&quot;unavailableIds&quot;, ex.getDetails().unavailableIds());</span>
+<span class="fc" id="L138">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(InvalidDateRangeException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInvalidDateRange(InvalidDateRangeException ex) {
-<span class="nc" id="L144">        var correlationId = resolveCorrelationId();</span>
-<span class="nc" id="L145">        log.warn(&quot;[correlationId={}] Invalid date range: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L146">        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());</span>
-<span class="nc" id="L147">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L148">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.CONSTRAINT_VIOLATION);</span>
-<span class="nc" id="L149">        return ResponseEntity.of(problem).build();</span>
+<span class="nc" id="L143">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L144">        log.warn(&quot;[correlationId={}] Invalid date range: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L145">        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());</span>
+<span class="nc" id="L146">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L147">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.CONSTRAINT_VIOLATION);</span>
+<span class="nc" id="L148">        return ResponseEntity.of(problem).build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
