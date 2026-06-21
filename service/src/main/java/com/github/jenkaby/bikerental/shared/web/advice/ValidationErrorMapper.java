@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolation;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.method.ParameterValidationResult;
 
 public interface ValidationErrorMapper {
 
@@ -15,4 +16,6 @@ public interface ValidationErrorMapper {
     ValidationError mapObjectError(ObjectError objectError);
 
     ValidationError mapResolvableError(MessageSourceResolvable resolvable);
+
+    ValidationError mapParameterError(ParameterValidationResult result, MessageSourceResolvable error);
 }

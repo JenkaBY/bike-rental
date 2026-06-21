@@ -1,9 +1,13 @@
 package com.github.jenkaby.bikerental.shared.web.advice;
 
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.web.filter.CorrelationIdFilter;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +95,72 @@ class CoreExceptionHandlerAdviceTest {
     }
 
     @Nested
+    class ValidationParams {
+
+        @Test
+        void sizeConstraint_populatesMinAndMaxParams() throws Exception {
+            mockMvc.perform(post("/api/stub/validate-params")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"code\": \"x\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors", hasSize(1)))
+                    .andExpect(jsonPath("$.errors[0].field").value("code"))
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.size"))
+                    .andExpect(jsonPath("$.errors[0].params.min").value(2))
+                    .andExpect(jsonPath("$.errors[0].params.max").value(5));
+        }
+
+        @Test
+        void minConstraint_populatesValueParam() throws Exception {
+            mockMvc.perform(post("/api/stub/validate-params")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"age\": 5}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors", hasSize(1)))
+                    .andExpect(jsonPath("$.errors[0].field").value("age"))
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.min"))
+                    .andExpect(jsonPath("$.errors[0].params.value").value(18));
+        }
+
+        @Test
+        void maxConstraint_populatesValueParam() throws Exception {
+            mockMvc.perform(post("/api/stub/validate-params")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"score\": 200}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors", hasSize(1)))
+                    .andExpect(jsonPath("$.errors[0].field").value("score"))
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.max"))
+                    .andExpect(jsonPath("$.errors[0].params.value").value(120));
+        }
+
+        @Test
+        void requestParamConstraint_populatesParamsAndSinglePrefixedCode() throws Exception {
+            mockMvc.perform(get("/api/stub/validate-param").param("page", "0"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errorCode").value("shared.request.method_parameters_invalid"))
+                    .andExpect(jsonPath("$.errors", hasSize(1)))
+                    .andExpect(jsonPath("$.errors[0].field").value("page"))
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.min"))
+                    .andExpect(jsonPath("$.errors[0].params.value").value(1));
+        }
+    }
+
+    @Nested
+    class ResourceNotFound {
+
+        @Test
+        void returnsParamsWithResourceNameAndIdentifier() throws Exception {
+            mockMvc.perform(get("/api/stub/not-found"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errorCode").value("shared.resource.not_found"))
+                    .andExpect(jsonPath("$.correlationId").exists())
+                    .andExpect(jsonPath("$.params.resourceName").value("Customer"))
+                    .andExpect(jsonPath("$.params.identifier").value("42"));
+        }
+    }
+
+    @Nested
     class ErrorCodes {
 
         @Test
@@ -118,13 +188,29 @@ class CoreExceptionHandlerAdviceTest {
         record StubRequest(@NotBlank String name, @NotBlank String label) {
         }
 
+        record SizedRequest(@Size(min = 2, max = 5) String code, @Min(18) Integer age, @Max(120) Integer score) {
+        }
+
         @PostMapping("/validate")
         void validate(@RequestBody @Valid StubRequest request) {
+        }
+
+        @PostMapping("/validate-params")
+        void validateParams(@RequestBody @Valid SizedRequest request) {
+        }
+
+        @GetMapping("/validate-param")
+        void validateParam(@RequestParam @Min(1) int page) {
         }
 
         @GetMapping("/error")
         void error() {
             throw new RuntimeException("unexpected");
+        }
+
+        @GetMapping("/not-found")
+        void notFound() {
+            throw new ResourceNotFoundException("Customer", "42");
         }
     }
 }

@@ -25,7 +25,7 @@ public class RentalNotReadyForActivationException extends BikeRentalException {
     private final List<String> missingFields;
 
     public RentalNotReadyForActivationException(List<String> missingFields) {
-        super(MESSAGE_TEMPLATE.formatted(String.join(", ", missingFields)), ERROR_CODE);
+        super(MESSAGE_TEMPLATE.formatted(String.join(", ", missingFields)), ERROR_CODE, new MissingFields(missingFields));
         this.missingFields = missingFields;
     }
 

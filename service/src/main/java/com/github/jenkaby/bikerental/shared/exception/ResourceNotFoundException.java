@@ -14,7 +14,7 @@ public class ResourceNotFoundException extends BikeRentalException {
     private final String identifier;
 
     public ResourceNotFoundException(String resourceName, String identifier) {
-        super(MESSAGE_TEMPLATE.formatted(resourceName, identifier), ERROR_CODE);
+        super(MESSAGE_TEMPLATE.formatted(resourceName, identifier), ERROR_CODE, new Details(resourceName, identifier));
         this.resourceName = resourceName;
         this.identifier = identifier;
     }
@@ -22,4 +22,11 @@ public class ResourceNotFoundException extends BikeRentalException {
     public ResourceNotFoundException(@NonNull Class<?> cls, @NonNull Object identifier) {
         this(cls.getSimpleName(), identifier.toString());
     }
+
+    public Details getDetails() {
+        return getParams().map(p -> (Details) p)
+                .orElseThrow(() -> new IllegalArgumentException("Expected Details in exception parameters"));
+    }
+
+    public record Details(String resourceName, String identifier) {}
 }

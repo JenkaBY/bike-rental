@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.support.web;
 import com.github.jenkaby.bikerental.shared.config.CorsProperties;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidCreatorAdapter;
 import com.github.jenkaby.bikerental.shared.web.advice.BaseValidationErrorMapper;
+import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.tariff.web.command.validation.TariffV2PricingValidator;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -14,7 +15,7 @@ import org.springframework.web.client.ApiVersionInserter;
 
 @TestConfiguration
 @EnableConfigurationProperties(CorsProperties.class)
-@Import({UuidCreatorAdapter.class, BaseValidationErrorMapper.class, TariffV2PricingValidator.class})
+@Import({UuidCreatorAdapter.class, BaseValidationErrorMapper.class, CorrelationIdProvider.class, TariffV2PricingValidator.class})
 public class TestingAppConfig {
 
     @TestConfiguration

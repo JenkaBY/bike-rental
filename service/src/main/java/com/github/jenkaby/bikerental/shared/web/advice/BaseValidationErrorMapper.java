@@ -8,9 +8,10 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.method.ParameterValidationResult;
 
-import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -33,26 +34,66 @@ public class BaseValidationErrorMapper implements ValidationErrorMapper {
 
     @Override
     public ValidationError mapFieldError(FieldError fieldError) {
-
-        var field = fieldError.getField();
-        var code = extractConstraint(fieldError.getCodes());
-
-        var params = extractParams(fieldError);
-
-        return new ValidationError(field, code, params);
+        return unwrapViolation(fieldError)
+                .map(violation -> new ValidationError(
+                        fieldError.getField(),
+                        mapConstraintCode(violation),
+                        extractConstraintParams(violation.getConstraintDescriptor())))
+                .orElseGet(() -> new ValidationError(
+                        fieldError.getField(),
+                        extractConstraint(fieldError.getCodes()),
+                        null));
     }
 
     @Override
     public ValidationError mapObjectError(ObjectError objectError) {
-        var code = extractConstraint(objectError.getCodes());
-        return new ValidationError(null, code, null);
+        return unwrapViolation(objectError)
+                .map(violation -> new ValidationError(
+                        null,
+                        mapConstraintCode(violation),
+                        extractConstraintParams(violation.getConstraintDescriptor())))
+                .orElseGet(() -> new ValidationError(
+                        null,
+                        extractConstraint(objectError.getCodes()),
+                        null));
     }
 
     @Override
     public ValidationError mapResolvableError(MessageSourceResolvable resolvable) {
-        var code = extractConstraint(resolvable.getCodes());
-        var params = extractParams(resolvable.getArguments());
-        return new ValidationError(null, prefixCode(code), params);
+        if (resolvable instanceof FieldError fieldError) {
+            return mapFieldError(fieldError);
+        }
+        if (resolvable instanceof ObjectError objectError) {
+            return mapObjectError(objectError);
+        }
+        return new ValidationError(null, extractConstraint(resolvable.getCodes()), null);
+    }
+
+    @Override
+    public ValidationError mapParameterError(ParameterValidationResult result, MessageSourceResolvable error) {
+        return unwrapViolation(result, error)
+                .map(violation -> new ValidationError(
+                        result.getMethodParameter().getParameterName(),
+                        mapConstraintCode(violation),
+                        extractConstraintParams(violation.getConstraintDescriptor())))
+                .orElseGet(() -> mapResolvableError(error));
+    }
+
+    private Optional<ConstraintViolation<?>> unwrapViolation(ObjectError error) {
+        if (error.contains(ConstraintViolation.class)) {
+            ConstraintViolation<?> violation = error.unwrap(ConstraintViolation.class);
+            return Optional.of(violation);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<ConstraintViolation<?>> unwrapViolation(ParameterValidationResult result, MessageSourceResolvable error) {
+        try {
+            ConstraintViolation<?> violation = result.unwrap(error, ConstraintViolation.class);
+            return Optional.ofNullable(violation);
+        } catch (IllegalArgumentException ex) {
+            return Optional.empty();
+        }
     }
 
     private String mapConstraintCode(ConstraintViolation<?> violation) {
@@ -72,37 +113,12 @@ public class BaseValidationErrorMapper implements ValidationErrorMapper {
         return "validation." + code;
     }
 
-    private Map<String, Object> extractParams(FieldError fieldError) {
-        var args = fieldError.getArguments();
-        if (args == null) {
-            return null;
-        }
-        return Arrays.stream(args)
-                .filter(arg -> arg instanceof ConstraintDescriptor<?>)
-                .map(arg -> (ConstraintDescriptor<?>) arg)
-                .findFirst()
-                .map(this::extractConstraintParams)
-                .orElse(null);
-    }
-
     private Map<String, Object> extractConstraintParams(ConstraintDescriptor<?> descriptor) {
         Map<String, Object> attributes = descriptor.getAttributes();
         return attributes.entrySet()
                 .stream()
                 .filter(e -> !isInternalAttribute(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private Map<String, Object> extractParams(Object[] arguments) {
-        if (arguments == null) {
-            return null;
-        }
-        for (Object arg : arguments) {
-            if (arg instanceof ConstraintDescriptor<?> descriptor) {
-                return this.extractConstraintParams(descriptor);
-            }
-        }
-        return null;
     }
 
     private boolean isInternalAttribute(String key) {
