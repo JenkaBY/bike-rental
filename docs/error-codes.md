@@ -157,14 +157,16 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 
 ### `shared.resource.not_found`
 - **HTTP:** 404 · **Trigger:** an entity is not found by id (`ResourceNotFoundException`) or no route matches
-  (`NoResourceFoundException`). · **Extra:** none.
+  (`NoResourceFoundException`).
+- **Extra:** `params` = `{resourceName, identifier}` for `ResourceNotFoundException`; absent for `NoResourceFoundException`.
 
 ```json
 {
   "status": 404,
   "detail": "Customer with identifier '42' not found",
   "correlationId": "018f...",
-  "errorCode": "shared.resource.not_found"
+  "errorCode": "shared.resource.not_found",
+  "params": { "resourceName": "Customer", "identifier": "42" }
 }
 ```
 
@@ -232,14 +234,15 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 
 ### `finance.insufficient_balance`
 - **HTTP:** 422 · **Trigger:** `InsufficientBalanceException` raised by a **finance** endpoint (deposit / withdrawal /
-  adjustment). · **Extra:** none (amounts are in `detail`).
+  adjustment). · **Extra:** `params` = `{available, requested}` as `BigDecimal` amounts.
 
 ```json
 {
   "status": 422,
   "detail": "Insufficient wallet balance. Available: 10.00, requested deduction: 25.00",
   "correlationId": "018f...",
-  "errorCode": "finance.insufficient_balance"
+  "errorCode": "finance.insufficient_balance",
+  "params": { "available": 10.00, "requested": 25.00 }
 }
 ```
 
@@ -257,14 +260,15 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 ### `rental.insufficient_funds`
 - **HTTP:** 422 · **Trigger:** `InsufficientBalanceException` raised by a **rental** endpoint (creation / hold). The
   module-scoped `RentalRestControllerAdvice` overrides the code to this value (vs. `finance.insufficient_balance`).
-- **Extra:** none.
+- **Extra:** `params` = `{available, requested}` as `BigDecimal` amounts (same shape as `finance.insufficient_balance`).
 
 ```json
 {
   "status": 422,
   "detail": "Insufficient wallet balance. Available: 5.00, requested deduction: 12.50",
   "correlationId": "018f...",
-  "errorCode": "rental.insufficient_funds"
+  "errorCode": "rental.insufficient_funds",
+  "params": { "available": 5.00, "requested": 12.50 }
 }
 ```
 

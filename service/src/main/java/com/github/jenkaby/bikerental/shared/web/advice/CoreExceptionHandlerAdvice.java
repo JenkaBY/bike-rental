@@ -191,6 +191,7 @@ public class CoreExceptionHandlerAdvice {
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, ex.getErrorCode());
+        body.setProperty(PARAMS, ex.getDetails());
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 

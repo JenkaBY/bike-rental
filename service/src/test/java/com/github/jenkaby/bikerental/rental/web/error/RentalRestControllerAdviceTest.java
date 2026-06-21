@@ -95,7 +95,9 @@ class RentalRestControllerAdviceTest {
             mockMvc.perform(get("/api/stub/rental/insufficient-balance"))
                     .andExpect(status().isUnprocessableEntity())
                     .andExpect(jsonPath("$.errorCode").value("rental.insufficient_funds"))
-                    .andExpect(jsonPath("$.correlationId").exists());
+                    .andExpect(jsonPath("$.correlationId").exists())
+                    .andExpect(jsonPath("$.params.available").value(5.00))
+                    .andExpect(jsonPath("$.params.requested").value(12.50));
         }
     }
 

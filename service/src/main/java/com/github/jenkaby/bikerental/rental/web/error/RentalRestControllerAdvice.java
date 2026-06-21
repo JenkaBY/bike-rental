@@ -84,6 +84,7 @@ public class RentalRestControllerAdvice {
         problem.setDetail(ex.getMessage());
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.INSUFFICIENT_FUNDS);
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
         return ResponseEntity.of(problem).build();
     }
 

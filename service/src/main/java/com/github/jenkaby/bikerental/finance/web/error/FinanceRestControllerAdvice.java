@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField.CORRELATION_ID;
 import static com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField.ERROR_CODE;
+import static com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField.PARAMS;
 
 @Slf4j
 @RestControllerAdvice(basePackages = "com.github.jenkaby.bikerental.finance")
@@ -30,6 +31,7 @@ public class FinanceRestControllerAdvice {
         var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
         body.setProperty(CORRELATION_ID, correlationId);
         body.setProperty(ERROR_CODE, ex.getErrorCode());
+        body.setProperty(PARAMS, ex.getDetails());
         return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 }

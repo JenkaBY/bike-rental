@@ -32,7 +32,9 @@ class FinanceRestControllerAdviceTest {
                     .andExpect(status().isUnprocessableEntity())
                     .andExpect(jsonPath("$.errorCode").value("finance.insufficient_balance"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.detail").value("Insufficient wallet balance. Available: 10.00, requested deduction: 25.00"));
+                    .andExpect(jsonPath("$.detail").value("Insufficient wallet balance. Available: 10.00, requested deduction: 25.00"))
+                    .andExpect(jsonPath("$.params.available").value(10.00))
+                    .andExpect(jsonPath("$.params.requested").value(25.00));
         }
     }
 

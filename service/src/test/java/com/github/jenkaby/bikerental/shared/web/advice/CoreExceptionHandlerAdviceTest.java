@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.shared.web.advice;
 
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.web.filter.CorrelationIdFilter;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import jakarta.validation.Valid;
@@ -146,6 +147,20 @@ class CoreExceptionHandlerAdviceTest {
     }
 
     @Nested
+    class ResourceNotFound {
+
+        @Test
+        void returnsParamsWithResourceNameAndIdentifier() throws Exception {
+            mockMvc.perform(get("/api/stub/not-found"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errorCode").value("shared.resource.not_found"))
+                    .andExpect(jsonPath("$.correlationId").exists())
+                    .andExpect(jsonPath("$.params.resourceName").value("Customer"))
+                    .andExpect(jsonPath("$.params.identifier").value("42"));
+        }
+    }
+
+    @Nested
     class ErrorCodes {
 
         @Test
@@ -191,6 +206,11 @@ class CoreExceptionHandlerAdviceTest {
         @GetMapping("/error")
         void error() {
             throw new RuntimeException("unexpected");
+        }
+
+        @GetMapping("/not-found")
+        void notFound() {
+            throw new ResourceNotFoundException("Customer", "42");
         }
     }
 }
