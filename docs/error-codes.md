@@ -295,7 +295,7 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
   "detail": "Equipment [7, 8] is occupied by another rental",
   "correlationId": "018f...",
   "errorCode": "rental.equipment.not_available",
-  "unavailableIds": [7, 8]
+  "params": {"unavailableIds": [7, 8]}
 }
 ```
 
