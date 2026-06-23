@@ -1,6 +1,6 @@
-package com.github.jenkaby.bikerental.customer.shared.mapper;
+package com.github.jenkaby.bikerental.shared.mapper;
 
-import com.github.jenkaby.bikerental.customer.domain.model.vo.EmailAddress;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.EmailAddress;
 import org.mapstruct.Mapper;
 
 @Mapper

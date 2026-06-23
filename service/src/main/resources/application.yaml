@@ -42,3 +42,42 @@ app:
   dev:
     virtual-clock:
       sse-interval-ms: 1000
+  security:
+    jwt:
+      issuer: ${OAUTH2_ISSUER}
+      access-token-ttl: PT15M
+      refresh-token-ttl: P14D
+      key-id: bike-rental-identity
+      user-id-claim: uid
+    password:
+      min-length: 8
+      max-length: 20
+    authority:
+      role-prefix: "ROLE_"
+    spa-clients:
+      - client-id: ${ADMIN_SPA_CLIENT_ID}
+        redirect-uris: ${ADMIN_SPA_REDIRECT_URIS}
+        post-logout-redirect-uris: ${ADMIN_SPA_POST_LOGOUT_URIS}
+        scopes: openid,profile
+      - client-id: ${OPERATOR_SPA_CLIENT_ID}
+        redirect-uris: ${OPERATOR_SPA_REDIRECT_URIS}
+        post-logout-redirect-uris: ${OPERATOR_SPA_POST_LOGOUT_URIS}
+        scopes: openid,profile
+    bootstrap:
+      enabled: ${BOOTSTRAP_ENABLED}
+      admin-user:
+        username: ${BOOTSTRAP_ADMIN_USERNAME}
+        email: ${BOOTSTRAP_ADMIN_EMAIL}
+        display-name: Administrator
+        password: ${BOOTSTRAP_ADMIN_PASSWORD}
+
+# Google sign-in (optional): provide credentials to enable the "Sign in with Google" button on the login page.
+# spring:
+#   security:
+#     oauth2:
+#       client:
+#         registration:
+#           google:
+#             client-id: ${GOOGLE_CLIENT_ID}
+#             client-secret: ${GOOGLE_CLIENT_SECRET}
+#             scope: openid,profile,email

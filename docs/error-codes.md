@@ -304,6 +304,90 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 
 ---
 
+## `identity.*` — authentication & accounts
+
+### `identity.authentication.required`
+- **HTTP:** 401 · **Trigger:** a protected `/api/**` endpoint was called without a valid access token
+  (resource-server `AuthenticationEntryPoint`). · **Extra:** none.
+
+```json
+{
+  "status": 401,
+  "detail": "Authentication required",
+  "correlationId": "018f...",
+  "errorCode": "identity.authentication.required"
+}
+```
+
+### `identity.access.denied`
+- **HTTP:** 403 · **Trigger:** the authenticated principal lacks the role required for the endpoint
+  (resource-server `AccessDeniedHandler`, e.g. a non-admin calling `/api/auth/users/**`). · **Extra:** none.
+
+```json
+{
+  "status": 403,
+  "detail": "Access denied",
+  "correlationId": "018f...",
+  "errorCode": "identity.access.denied"
+}
+```
+
+### `identity.username.duplicate`
+- **HTTP:** 409 · **Trigger:** creating an account with an already-used username (`DuplicateUsernameException`).
+- **Extra:** `params` = `{resourceName, identifier}`.
+
+```json
+{
+  "status": 409,
+  "detail": "User with identifier 'j.doe' already exists",
+  "correlationId": "018f...",
+  "errorCode": "identity.username.duplicate",
+  "params": { "resourceName": "User", "identifier": "j.doe" }
+}
+```
+
+### `identity.email.duplicate`
+- **HTTP:** 409 · **Trigger:** creating an account with an already-used email (`DuplicateEmailException`).
+- **Extra:** `params` = `{resourceName, identifier}`.
+
+```json
+{
+  "status": 409,
+  "detail": "User with identifier 'j.doe@example.com' already exists",
+  "correlationId": "018f...",
+  "errorCode": "identity.email.duplicate",
+  "params": { "resourceName": "User", "identifier": "j.doe@example.com" }
+}
+```
+
+### `identity.password.policy_violation`
+- **HTTP:** 422 · **Trigger:** a supplied password fails the policy, e.g. below minimum length
+  (`PasswordPolicyViolationException`). · **Extra:** none.
+
+```json
+{
+  "status": 422,
+  "detail": "Password must be at least 8 characters long",
+  "correlationId": "018f...",
+  "errorCode": "identity.password.policy_violation"
+}
+```
+
+### `identity.password.invalid_current`
+- **HTTP:** 422 · **Trigger:** the current password supplied to `POST /api/auth/password` does not match
+  (`InvalidCurrentPasswordException`). · **Extra:** none.
+
+```json
+{
+  "status": 422,
+  "detail": "Current password is incorrect",
+  "correlationId": "018f...",
+  "errorCode": "identity.password.invalid_current"
+}
+```
+
+---
+
 ## Field-level validation codes (`errors[].code`)
 
 Inside the `errors[]` array each entry's `code` is **not** from `ErrorCodes`; it is derived automatically from the

@@ -69,10 +69,10 @@ dependencies {
     implementation libs.spring.boot.starter.logging
     implementation libs.spring.boot.starter.actuator
 
-//    temporarily disable security to speed up development
-//    implementation libs.spring.boot.starter.security
-//    implementation libs.spring.boot.starter.oauth2.authorization.server
-//    implementation libs.spring.boot.starter.oauth2.resource.server
+    implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.oauth2.authorization.server
+    implementation libs.spring.boot.starter.oauth2.resource.server
+    implementation libs.spring.boot.starter.oauth2.client
     implementation libs.springdoc.starter.webmvc.ui
 
     implementation libs.bundles.spring.modulith

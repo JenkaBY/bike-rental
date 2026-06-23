@@ -4,10 +4,10 @@ import com.github.jenkaby.bikerental.customer.application.mapper.CustomerCommand
 import com.github.jenkaby.bikerental.customer.application.usecase.UpdateCustomerUseCase;
 import com.github.jenkaby.bikerental.customer.domain.exception.DuplicatePhoneException;
 import com.github.jenkaby.bikerental.customer.domain.model.Customer;
-import com.github.jenkaby.bikerental.customer.domain.model.vo.EmailAddress;
 import com.github.jenkaby.bikerental.customer.domain.model.vo.PhoneNumber;
 import com.github.jenkaby.bikerental.customer.domain.repository.CustomerRepository;
 import com.github.jenkaby.bikerental.customer.shared.mapper.PhoneNumberMapper;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.EmailAddress;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -27,6 +27,7 @@ spring-boot-starter-liquibase = { module = "org.springframework.boot:spring-boot
 spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-boot-starter-oauth2-authorization-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-authorization-server" }
 spring-boot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
+spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
 spring-boot-starter-logging = { module = 'org.springframework.boot:spring-boot-starter-logging' }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
@@ -87,7 +88,7 @@ spring-test = [
     'spring-boot-starter-jdbc-test',
     'spring-boot-starter-restclient-test',
     'spring-boot-resttestclient',
-    #    'spring-boot-starter-security-test',
+    'spring-boot-starter-security-test',
     'testcontainers-junit-jupiter',
     'testcontainers-postgresql',
 ]

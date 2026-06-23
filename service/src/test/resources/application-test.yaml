@@ -6,3 +6,22 @@ spring:
 app:
   cors:
     allowed-origins: "*"
+  security:
+    bootstrap:
+      enabled: false
+      admin-user:
+        username: admin
+        email: admin@bike-rental.local
+        display-name: Administrator
+        password: not-a-secret1
+    jwt:
+      issuer: http://localhost:8080
+    spa-clients:
+      - client-id: admin-spa
+        redirect-uris: http://localhost:4200/login/callback
+        post-logout-redirect-uris: http://localhost:4200
+        scopes: openid,profile
+      - client-id: operator-spa
+        redirect-uris: http://localhost:4200/login/callback
+        post-logout-redirect-uris: http://localhost:4200
+        scopes: openid,profile

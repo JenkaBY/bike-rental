@@ -7,13 +7,19 @@ architecture.
 
 ## Architecture
 
-6 business modules under `service/src/main/java/com/github/jenkaby/bikerental/`:
+7 business modules under `service/src/main/java/com/github/jenkaby/bikerental/`:
 
 ```
 customer/  equipment/  tariff/   ← core, independent
+identity/                        ← authentication & accounts (OAuth2/OIDC via Spring Authorization Server)
 rental/    finance/              ← business (depends on core)
 shared/                          ← cross-cutting kernel
 ```
+
+The `identity` module owns all Spring Security configuration: a Spring Authorization Server (OAuth 2.1 / OIDC) issuing
+JWT access + refresh tokens, a resource-server chain protecting `/api/**`, local username/password + optional Google
+federation, and admin-managed user accounts/roles. Other modules never import it — they receive the populated
+`SecurityContext` from the resource-server filter.
 
 Module boundaries enforced by Spring Modulith. Each `package-info.java` carries `@ApplicationModule`. Cross-module
 calls go through **Facade** classes only — never import another module's domain model directly.
