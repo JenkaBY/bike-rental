@@ -28,5 +28,9 @@
     <include relativeToChangelogFile="true" file="data/tariffs_v2-provisioning.xml"/>
     <include relativeToChangelogFile="true" file="data/finance_accounts-provisioning.xml"/>
     <include relativeToChangelogFile="true" file="data/finance_sub_ledgers-provisioning.xml"/>
+    <!--    provisioning test customers' data -->
+    <include relativeToChangelogFile="true" file="data/customers-provisioning.xml"/>
+    <include relativeToChangelogFile="true" file="data/finance_accounts-customers-provisioning.xml"/>
+    <include relativeToChangelogFile="true" file="data/finance_sub_ledgers-customers-provisioning.xml"/>
 
 </databaseChangeLog>
