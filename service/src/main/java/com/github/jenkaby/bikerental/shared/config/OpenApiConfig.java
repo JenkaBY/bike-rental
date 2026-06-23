@@ -1,5 +1,8 @@
 package com.github.jenkaby.bikerental.shared.config;
 
+import io.swagger.v3.core.converter.AnnotatedType;
+import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -32,6 +35,7 @@ public class OpenApiConfig {
         public static final String FINANCE = "Finance";
         public static final String RENTALS = "Rentals";
         public static final String TARIFFS = "Tariffs";
+        public static final String IDENTITY = "Identity";
 
         private Tags() {
         }
@@ -50,7 +54,11 @@ public class OpenApiConfig {
                 .orElse("unknown");
         var version = "commit: " + gitCommit;
 
+        var problemDetailSchema = ModelConverters.getInstance()
+                .resolveAsResolvedSchema(new AnnotatedType(ProblemDetail.class)).schema;
+
         return new OpenAPI()
+                .components(new Components().addSchemas(ProblemDetail.class.getSimpleName(), problemDetailSchema))
                 .info(new Info()
                         .title("Bike Rental API")
                         .version(version)
@@ -63,7 +71,8 @@ public class OpenApiConfig {
                         new Tag().name(Tags.EQUIPMENT_STATUSES).description("Equipment status catalog and allowed transitions"),
                         new Tag().name(Tags.FINANCE).description("Payment recording and history"),
                         new Tag().name(Tags.RENTALS).description("Rental lifecycle management"),
-                        new Tag().name(Tags.TARIFFS).description("Tariff catalog and selection")
+                        new Tag().name(Tags.TARIFFS).description("Tariff catalog and selection"),
+                        new Tag().name(Tags.IDENTITY).description("Identity management")
                 ));
     }
 
@@ -136,6 +145,38 @@ public class OpenApiConfig {
                 .group("tariffs")
                 .displayName(Tags.TARIFFS)
                 .pathsToMatch("/api/tariffs/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi identityGroup() {
+        var unauthorizedResponse = new ApiResponse()
+                .description("Unauthorized — missing or invalid JWT")
+                .content(new Content().addMediaType(
+                        org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                        new MediaType().schema(new Schema<ProblemDetail>().$ref("#/components/schemas/ProblemDetail"))
+                ));
+        var forbiddenResponse = new ApiResponse()
+                .description("Forbidden — insufficient roles")
+                .content(new Content().addMediaType(
+                        org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                        new MediaType().schema(new Schema<ProblemDetail>().$ref("#/components/schemas/ProblemDetail"))
+                ));
+
+        return GroupedOpenApi.builder()
+                .group("identity")
+                .displayName(Tags.IDENTITY)
+                .pathsToMatch("/api/auth/**")
+                .addOperationCustomizer((operation, handlerMethod) -> {
+                    var responses = operation.getResponses();
+                    if (responses == null) {
+                        responses = new ApiResponses();
+                        operation.setResponses(responses);
+                    }
+                    responses.putIfAbsent("401", unauthorizedResponse);
+                    responses.putIfAbsent("403", forbiddenResponse);
+                    return operation;
+                })
                 .build();
     }
 
