@@ -1,9 +1,9 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
-import com.github.jenkaby.bikerental.identity.domain.model.Role;
-import com.github.jenkaby.bikerental.identity.domain.model.UserStatus;
-import com.github.jenkaby.bikerental.identity.infrastructure.persistence.entity.UserJpaEntity;
+import com.github.jenkaby.bikerental.users.domain.model.Role;
+import com.github.jenkaby.bikerental.users.domain.model.UserStatus;
+import com.github.jenkaby.bikerental.users.infrastructure.persistence.entity.UserJpaEntity;
 import io.cucumber.java.DataTableType;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;

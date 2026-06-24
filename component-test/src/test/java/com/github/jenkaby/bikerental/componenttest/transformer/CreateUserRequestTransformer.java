@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.RoleHelper;
-import com.github.jenkaby.bikerental.identity.web.dto.CreateUserRequest;
+import com.github.jenkaby.bikerental.users.web.dto.CreateUserRequest;
 import io.cucumber.java.DataTableType;
 
 import java.util.Map;

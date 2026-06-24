@@ -1,6 +1,6 @@
 package com.github.jenkaby.bikerental.identity.infrastructure.security;
 
-import com.github.jenkaby.bikerental.identity.domain.service.SessionRevoker;
+import com.github.jenkaby.bikerental.users.SessionRevoker;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.stereotype.Component;
 

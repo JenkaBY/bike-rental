@@ -1,9 +1,8 @@
 package com.github.jenkaby.bikerental.identity.infrastructure.security;
 
 import com.github.jenkaby.bikerental.identity.application.config.AuthorityProperties;
-import com.github.jenkaby.bikerental.identity.application.config.JwtProperties;
-import com.github.jenkaby.bikerental.identity.domain.model.Role;
-import com.github.jenkaby.bikerental.identity.domain.repository.UserRepository;
+import com.github.jenkaby.bikerental.users.JwtProperties;
+import com.github.jenkaby.bikerental.users.UserAuthFacade;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -37,7 +36,6 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
@@ -105,7 +103,7 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer(UserRepository userRepository,
+    OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer(UserAuthFacade userAuthFacade,
                                                               AuthorityProperties authorityProperties,
                                                               JwtProperties jwtProperties) {
         return context -> {
@@ -113,13 +111,13 @@ public class AuthorizationServerConfig {
                 return;
             }
             var principalName = context.getPrincipal().getName();
-            var account = userRepository.findByUsername(principalName)
-                    .or(() -> userRepository.findByEmail(principalName));
+            var account = userAuthFacade.findByUsername(principalName)
+                    .or(() -> userAuthFacade.findByEmail(principalName));
             account.ifPresentOrElse(
                     user -> {
-                        context.getClaims().claim("roles", user.getRoles().stream().map(Role::name).toList());
-                        context.getClaims().claim("must_change_password", user.isMustChangePassword());
-                        context.getClaims().claim(jwtProperties.userIdClaim(), user.getId().toString());
+                        context.getClaims().claim("roles", user.roles().stream().toList());
+                        context.getClaims().claim("must_change_password", user.mustChangePassword());
+                        context.getClaims().claim(jwtProperties.userIdClaim(), user.id().toString());
                     },
                     () -> context.getClaims().claim("roles", rolesFromAuthorities(context, authorityProperties)));
         };

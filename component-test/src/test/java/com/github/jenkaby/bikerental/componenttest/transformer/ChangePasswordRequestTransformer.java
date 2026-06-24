@@ -1,6 +1,6 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
-import com.github.jenkaby.bikerental.identity.web.dto.ChangePasswordRequest;
+import com.github.jenkaby.bikerental.users.web.dto.ChangePasswordRequest;
 import io.cucumber.java.DataTableType;
 
 import java.util.Map;

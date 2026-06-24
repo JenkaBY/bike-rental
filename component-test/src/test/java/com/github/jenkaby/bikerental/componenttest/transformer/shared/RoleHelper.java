@@ -1,6 +1,6 @@
 package com.github.jenkaby.bikerental.componenttest.transformer.shared;
 
-import com.github.jenkaby.bikerental.identity.domain.model.Role;
+import com.github.jenkaby.bikerental.users.domain.model.Role;
 import lombok.experimental.UtilityClass;
 
 import java.util.Arrays;

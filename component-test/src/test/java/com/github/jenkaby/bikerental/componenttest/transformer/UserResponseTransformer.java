@@ -1,9 +1,9 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
-import com.github.jenkaby.bikerental.identity.domain.model.Role;
-import com.github.jenkaby.bikerental.identity.domain.model.UserStatus;
-import com.github.jenkaby.bikerental.identity.web.dto.UserResponse;
+import com.github.jenkaby.bikerental.users.domain.model.Role;
+import com.github.jenkaby.bikerental.users.domain.model.UserStatus;
+import com.github.jenkaby.bikerental.users.web.dto.UserResponse;
 import io.cucumber.java.DataTableType;
 
 import java.util.*;

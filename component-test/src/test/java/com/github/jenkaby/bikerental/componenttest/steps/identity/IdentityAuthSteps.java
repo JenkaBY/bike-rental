@@ -1,9 +1,9 @@
 package com.github.jenkaby.bikerental.componenttest.steps.identity;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.identity.application.config.JwtProperties;
-import com.github.jenkaby.bikerental.identity.domain.model.Role;
-import com.github.jenkaby.bikerental.identity.domain.repository.UserRepository;
+import com.github.jenkaby.bikerental.users.application.config.JwtProperties;
+import com.github.jenkaby.bikerental.users.domain.model.Role;
+import com.github.jenkaby.bikerental.users.domain.repository.UserRepository;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import io.cucumber.java.Before;

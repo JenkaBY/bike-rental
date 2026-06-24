@@ -1,7 +1,6 @@
 package com.github.jenkaby.bikerental.identity.infrastructure.security;
 
-import com.github.jenkaby.bikerental.identity.domain.model.Role;
-import com.github.jenkaby.bikerental.identity.domain.model.User;
+import com.github.jenkaby.bikerental.users.UserAuthView;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,20 +28,19 @@ public class IdentityUserPrincipal implements UserDetails {
         this.authorities = authorities;
     }
 
-    public static IdentityUserPrincipal from(User user) {
-        var authorities = user.getRoles().stream()
-                .map(Role::name)
+    public static IdentityUserPrincipal from(UserAuthView view) {
+        var authorities = view.roles().stream()
                 .map(RolePrefixedGrantedAuthority::new)
                 .toList();
-        var password = user.hasPassword()
-                ? user.getPasswordHash()
+        var password = view.passwordHash() != null && !view.passwordHash().isBlank()
+                ? view.passwordHash()
                 : "{noop}" + UUID.randomUUID();
         return new IdentityUserPrincipal(
-                user.getId(),
-                user.getUsername(),
+                view.id(),
+                view.username(),
                 password,
-                user.isActive(),
-                user.isMustChangePassword(),
+                view.active(),
+                view.mustChangePassword(),
                 authorities);
     }
 

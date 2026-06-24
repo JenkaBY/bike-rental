@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.steps.identity;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.identity.web.dto.*;
+import com.github.jenkaby.bikerental.users.web.dto.*;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;

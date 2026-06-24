@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.steps.identity;
 
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.InsertableRepositoryEntityManagerDelegate;
-import com.github.jenkaby.bikerental.identity.infrastructure.persistence.entity.UserJpaEntity;
+import com.github.jenkaby.bikerental.users.infrastructure.persistence.entity.UserJpaEntity;
 import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
