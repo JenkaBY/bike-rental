@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.steps.identity;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.users.application.config.JwtProperties;
+import com.github.jenkaby.bikerental.users.JwtProperties;
 import com.github.jenkaby.bikerental.users.domain.model.Role;
 import com.github.jenkaby.bikerental.users.domain.repository.UserRepository;
 import com.nimbusds.jose.jwk.source.JWKSource;
