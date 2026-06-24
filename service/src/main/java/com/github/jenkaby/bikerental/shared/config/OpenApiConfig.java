@@ -35,7 +35,7 @@ public class OpenApiConfig {
         public static final String FINANCE = "Finance";
         public static final String RENTALS = "Rentals";
         public static final String TARIFFS = "Tariffs";
-        public static final String IDENTITY = "Identity";
+        public static final String USERS = "Users";
 
         private Tags() {
         }
@@ -72,7 +72,7 @@ public class OpenApiConfig {
                         new Tag().name(Tags.FINANCE).description("Payment recording and history"),
                         new Tag().name(Tags.RENTALS).description("Rental lifecycle management"),
                         new Tag().name(Tags.TARIFFS).description("Tariff catalog and selection"),
-                        new Tag().name(Tags.IDENTITY).description("Identity management")
+                        new Tag().name(Tags.USERS).description("Users and self management")
                 ));
     }
 
@@ -165,7 +165,7 @@ public class OpenApiConfig {
 
         return GroupedOpenApi.builder()
                 .group("identity")
-                .displayName(Tags.IDENTITY)
+                .displayName(Tags.USERS)
                 .pathsToMatch("/api/auth/**")
                 .addOperationCustomizer((operation, handlerMethod) -> {
                     var responses = operation.getResponses();
