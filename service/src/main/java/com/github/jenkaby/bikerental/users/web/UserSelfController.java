@@ -1,6 +1,6 @@
 package com.github.jenkaby.bikerental.users.web;
 
-import com.github.jenkaby.bikerental.users.application.config.JwtProperties;
+import com.github.jenkaby.bikerental.users.JwtProperties;
 import com.github.jenkaby.bikerental.users.application.usecase.SelfServiceUseCase;
 import com.github.jenkaby.bikerental.users.web.dto.ChangePasswordRequest;
 import com.github.jenkaby.bikerental.users.web.dto.UserResponse;

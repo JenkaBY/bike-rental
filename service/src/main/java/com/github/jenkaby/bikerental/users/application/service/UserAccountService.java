@@ -11,7 +11,7 @@ import com.github.jenkaby.bikerental.users.domain.exception.PasswordPolicyViolat
 import com.github.jenkaby.bikerental.users.domain.model.User;
 import com.github.jenkaby.bikerental.users.domain.model.UserStatus;
 import com.github.jenkaby.bikerental.users.domain.repository.UserRepository;
-import com.github.jenkaby.bikerental.users.domain.service.SessionRevoker;
+import com.github.jenkaby.bikerental.users.SessionRevoker;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.EmailAddress;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
