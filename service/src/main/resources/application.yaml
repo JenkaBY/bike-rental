@@ -58,11 +58,11 @@ app:
       - client-id: ${ADMIN_SPA_CLIENT_ID}
         redirect-uris: ${ADMIN_SPA_REDIRECT_URIS}
         post-logout-redirect-uris: ${ADMIN_SPA_POST_LOGOUT_URIS}
-        scopes: openid,profile
+        scopes: openid,profile,offline_access
       - client-id: ${OPERATOR_SPA_CLIENT_ID}
         redirect-uris: ${OPERATOR_SPA_REDIRECT_URIS}
         post-logout-redirect-uris: ${OPERATOR_SPA_POST_LOGOUT_URIS}
-        scopes: openid,profile
+        scopes: openid,profile,offline_access
     bootstrap:
       enabled: ${BOOTSTRAP_ENABLED}
       admin-user:

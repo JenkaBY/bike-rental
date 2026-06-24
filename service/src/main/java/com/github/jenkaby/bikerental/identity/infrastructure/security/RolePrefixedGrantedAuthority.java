@@ -1,6 +1,8 @@
 package com.github.jenkaby.bikerental.identity.infrastructure.security;
 
 import org.springframework.security.core.GrantedAuthority;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
@@ -12,6 +14,14 @@ public final class RolePrefixedGrantedAuthority implements GrantedAuthority {
 
     public RolePrefixedGrantedAuthority(String role) {
         this.authority = ROLE_PREFIX + Objects.requireNonNull(role, "role must not be null");
+    }
+
+    @JsonCreator
+    static RolePrefixedGrantedAuthority fromAuthority(@JsonProperty("authority") String fullAuthority) {
+        String role = fullAuthority.startsWith(ROLE_PREFIX)
+                ? fullAuthority.substring(ROLE_PREFIX.length())
+                : fullAuthority;
+        return new RolePrefixedGrantedAuthority(role);
     }
 
     @Override
