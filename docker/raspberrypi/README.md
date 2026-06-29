@@ -22,11 +22,11 @@ docker-compose.yml          Compose stack (single postgres service for now)
 .env.example                Copy to .env and fill in secrets (gitignored)
 postgres/
   Dockerfile                Thin image: adds an entrypoint wrapper
-  entrypoint-wrapper.sh      Renders pg_hba, fixes TLS key perms, log dir
+  entrypoint-wrapper.sh      Renders pg_hba (LAN subnet + app DB list), TLS, log dir
   postgresql.conf           TLS, scram, Pi-sized tuning, logging
-  pg_hba.conf.template       Per-role access rules (__LAN_SUBNET__ substituted)
+  pg_hba.conf.template       Per-role rules (__LAN_SUBNET__, __APP_DATABASES__ substituted)
   init/01-roles.sh           Creates the 4 login roles, sets passwords
-  init/02-grants.sql         Ownership, grants, default privileges
+  init/02-provision-databases.sh  Creates every app DB + applies the privilege model
 certs/generate-cert.sh      One-off self-signed cert generator
 backup/pg-backup.sh         pg_dump -> timestamped gzip, prunes old dumps
 systemd/                    pg-backup.service + .timer (Pi only)
@@ -40,14 +40,60 @@ security/fail2ban/          Filter + jail to ban brute-forcers
 | Role                      | Purpose                                                                   | Privileges                                | Reachable from         |
 |---------------------------|---------------------------------------------------------------------------|-------------------------------------------|------------------------|
 | `bikerental_admin`        | Owner/admin (you)                                                         | DB + schema owner, `ALL`, `CREATEROLE`    | LAN only               |
-| `bikerental_liquibase`    | Future CI/CD migrations                                                   | `CONNECT` + `CREATE` on schema (DDL)      | LAN only               |
-| `bikerental_app`          | Future backend runtime                                                    | DML only (no DDL), via default privileges | LAN only               |
+| `bikerental_liquibase`    | CI/CD migrations                                                          | `CONNECT` + `CREATE` on schema (DDL)      | Internet (`0.0.0.0/0`) |
+| `bikerental_app`          | Backend runtime                                                           | DML only (no DDL), via default privileges | Internet (`0.0.0.0/0`) |
 | `bikerental_app_migrator` | **Used now** by the Render app (Liquibase at startup **and** runtime DML) | DDL + DML                                 | Internet (`0.0.0.0/0`) |
 
-The superuser `postgres` is reachable only over the container's local socket
-(never over TCP). When CI/CD is added, split `app_migrator` into
-`liquibase` (runs migrations) + `app` (runtime) — both already have the right
-default privileges.
+Roles are **cluster-wide** — the same four roles apply to every database in the
+list (see below). The superuser `postgres` is reachable only over the
+container's local socket (never over TCP). When CI/CD is added, split
+`app_migrator` into `liquibase` (runs migrations) + `app` (runtime) — both
+already have the right default privileges.
+
+> ⚠️ Three roles are internet-reachable, so each is a brute-force target. Give
+> **all of them** strong, unique passwords. `bikerental_liquibase` can run DDL,
+> so guard its password especially well.
+
+---
+
+## Databases (dev + remote test)
+
+One PostgreSQL instance hosts multiple databases. `POSTGRES_DB` (default
+`bikerental`) is the primary; `EXTRA_DATABASES` in `.env` is a space-separated
+list of additional databases created with the **same roles and privileges** and
+reachable over the internet for the `liquibase`/`app`/`app_migrator` roles.
+
+```bash
+# .env
+POSTGRES_DB=bikerental
+EXTRA_DATABASES=bikerental_test          # add more, space-separated
+```
+
+`pg_hba.conf` automatically allows the internet-facing roles on every database
+in `POSTGRES_DB + EXTRA_DATABASES` (the entrypoint substitutes the list into
+`__APP_DATABASES__`). To add another database later, just append it to
+`EXTRA_DATABASES`, then create it on the existing cluster (see below) and
+restart — no `pg_hba` edits needed.
+
+### Adding a database to an already-running cluster
+
+Init scripts only run on a **fresh** cluster, so for an existing one create the
+database and apply the privilege model manually (this is exactly what
+`init/02-provision-databases.sh` does on first init):
+
+```bash
+# 1. Add the name to EXTRA_DATABASES in .env, then re-render pg_hba + reload:
+docker compose up -d
+docker exec bike-rental-postgres psql -U postgres -c "SELECT pg_reload_conf();"
+
+# 2. Create the database and apply grants (run from the repo folder on the Pi):
+docker exec -e POSTGRES_USER=postgres -e POSTGRES_DB=bikerental \
+  -e EXTRA_DATABASES=bikerental_test bike-rental-postgres \
+  bash /docker-entrypoint-initdb.d/02-provision-databases.sh
+```
+
+The script is idempotent: it skips databases that already exist and re-applies
+grants safely.
 
 ---
 
@@ -191,6 +237,23 @@ DATASOURCE_SECRET=<BIKERENTAL_APP_MIGRATOR_PASSWORD>
 
 `bikerental_app_migrator` both runs Liquibase at startup and serves runtime
 queries. Redeploy on Render; the app should start, apply migrations, and serve.
+
+### Connecting to the remote test database
+
+The test database is the same host/port, only the database name changes:
+
+```
+jdbc:postgresql://yourname.keenetic.pro:54321/bikerental_test?sslmode=require
+```
+
+Any of the internet-facing roles work (`bikerental_app_migrator` for full
+DDL+DML, `bikerental_app` for runtime-only, `bikerental_liquibase` for
+migrations). psql from a remote machine:
+
+```bash
+psql "host=yourname.keenetic.pro port=54321 dbname=bikerental_test \
+  user=bikerental_app_migrator sslmode=require"
+```
 
 ---
 

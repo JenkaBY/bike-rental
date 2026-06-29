@@ -1,27 +1,28 @@
-# Client authentication rules. The entrypoint substitutes __LAN_SUBNET__ with
-# the LAN_SUBNET value from .env and writes the rendered file to
+# Client authentication rules. The entrypoint substitutes __LAN_SUBNET__ and
+# __APP_DATABASES__ (comma-joined list of POSTGRES_DB + EXTRA_DATABASES, e.g.
+# "bikerental,bikerental_test") and writes the rendered file to
 # /etc/postgresql/pg_hba.conf. All TCP access requires TLS (hostssl) and
 # scram-sha-256; the superuser is reachable only over the local socket.
 #
-# TYPE      DATABASE      USER                      ADDRESS          METHOD
+# TYPE      DATABASE           USER                      ADDRESS          METHOD
 
 # Local unix socket inside the container (used by init, healthcheck, backups).
-local       all           all                                        trust
+local       all                all                                        trust
 
 # Admin role: LAN only, TLS required (most privileged - never exposed).
-hostssl     all           bikerental_admin          __LAN_SUBNET__   scram-sha-256
+hostssl     all                bikerental_admin          __LAN_SUBNET__   scram-sha-256
 
 # liquibase (CI/CD migrations) and app (backend runtime): reachable from anywhere
-# (cloud CI and Render have dynamic egress IPs), TLS required, bikerental DB only.
-hostssl     bikerental    bikerental_liquibase      0.0.0.0/0        scram-sha-256
-hostssl     bikerental    bikerental_liquibase      ::/0             scram-sha-256
-hostssl     bikerental    bikerental_app            0.0.0.0/0        scram-sha-256
-hostssl     bikerental    bikerental_app            ::/0             scram-sha-256
+# (cloud CI and Render have dynamic egress IPs), TLS required, app databases only.
+hostssl     __APP_DATABASES__  bikerental_liquibase      0.0.0.0/0        scram-sha-256
+hostssl     __APP_DATABASES__  bikerental_liquibase      ::/0             scram-sha-256
+hostssl     __APP_DATABASES__  bikerental_app            0.0.0.0/0        scram-sha-256
+hostssl     __APP_DATABASES__  bikerental_app            ::/0             scram-sha-256
 
 # Combined app+migrator role used by the Render backend: reachable from anywhere
-# (Render free tier has a dynamic egress IP), TLS required, bikerental DB only.
-hostssl     bikerental    bikerental_app_migrator   0.0.0.0/0        scram-sha-256
-hostssl     bikerental    bikerental_app_migrator   ::/0             scram-sha-256
+# (Render free tier has a dynamic egress IP), TLS required, app databases only.
+hostssl     __APP_DATABASES__  bikerental_app_migrator   0.0.0.0/0        scram-sha-256
+hostssl     __APP_DATABASES__  bikerental_app_migrator   ::/0             scram-sha-256
 
 # Deny everything else explicitly.
 host        all           all                       0.0.0.0/0        reject

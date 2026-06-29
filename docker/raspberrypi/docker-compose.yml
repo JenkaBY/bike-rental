@@ -15,6 +15,7 @@ services:
       - "${PG_PUBLISHED_PORT:-5432}:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-bikerental}
+      EXTRA_DATABASES: ${EXTRA_DATABASES:-}
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
