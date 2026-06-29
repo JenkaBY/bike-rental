@@ -1,8 +1,9 @@
-# Client authentication rules. The entrypoint substitutes __LAN_SUBNET__ and
-# __APP_DATABASES__ (comma-joined list of POSTGRES_DB + EXTRA_DATABASES, e.g.
-# "bikerental,bikerental_test") and writes the rendered file to
-# /etc/postgresql/pg_hba.conf. All TCP access requires TLS (hostssl) and
+# Client authentication rules. The entrypoint substitutes __LAN_SUBNET__,
+# __ROUTER_IP__ and __APP_DATABASES__ (comma-joined list of POSTGRES_DB +
+# EXTRA_DATABASES, e.g. "bikerental,bikerental_test") and writes the rendered
+# file to /etc/postgresql/pg_hba.conf. All TCP access requires TLS (hostssl) and
 # scram-sha-256; the superuser is reachable only over the local socket.
+# Rules are matched top-to-bottom, first match wins.
 #
 # TYPE      DATABASE           USER                      ADDRESS          METHOD
 
@@ -10,6 +11,10 @@
 local       all                all                                        trust
 
 # Admin role: LAN only, TLS required (most privileged - never exposed).
+# The router source-NATs inbound internet traffic to its own LAN IP, which sits
+# inside __LAN_SUBNET__. Reject admin from the router IP FIRST so the internet
+# path can never reach admin; genuine LAN hosts still match the allow below.
+hostssl     all                bikerental_admin          __ROUTER_IP__    reject
 hostssl     all                bikerental_admin          __LAN_SUBNET__   scram-sha-256
 
 # liquibase (CI/CD migrations) and app (backend runtime): reachable from anywhere

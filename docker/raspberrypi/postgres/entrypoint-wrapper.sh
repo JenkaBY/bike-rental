@@ -13,6 +13,7 @@ if [ -f /etc/postgresql/pg_hba.conf.template ]; then
         app_databases="${app_databases},${extra}"
     done
     sed -e "s#__LAN_SUBNET__#${LAN_SUBNET:-192.168.1.0/24}#g" \
+        -e "s#__ROUTER_IP__#${ROUTER_IP:-192.168.1.1}/32#g" \
         -e "s#__APP_DATABASES__#${app_databases}#g" \
         /etc/postgresql/pg_hba.conf.template > /etc/postgresql/pg_hba.conf
     chown postgres:postgres /etc/postgresql/pg_hba.conf

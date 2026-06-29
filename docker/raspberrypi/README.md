@@ -22,16 +22,20 @@ docker-compose.yml          Compose stack (single postgres service for now)
 .env.example                Copy to .env and fill in secrets (gitignored)
 postgres/
   Dockerfile                Thin image: adds an entrypoint wrapper
-  entrypoint-wrapper.sh      Renders pg_hba (LAN subnet + app DB list), TLS, log dir
+  entrypoint-wrapper.sh      Renders pg_hba (LAN subnet, router IP, app DB list), TLS, log dir
   postgresql.conf           TLS, scram, Pi-sized tuning, logging
-  pg_hba.conf.template       Per-role rules (__LAN_SUBNET__, __APP_DATABASES__ substituted)
+  pg_hba.conf.template       Per-role rules (__LAN_SUBNET__, __ROUTER_IP__, __APP_DATABASES__ substituted)
   init/01-roles.sh           Creates the 4 login roles, sets passwords
   init/02-provision-databases.sh  Creates every app DB + applies the privilege model
 certs/generate-cert.sh      One-off self-signed cert generator
 backup/pg-backup.sh         pg_dump -> timestamped gzip, prunes old dumps
 systemd/                    pg-backup.service + .timer (Pi only)
 security/fail2ban/          Filter + jail to ban brute-forcers
+TESTING.md                  Step-by-step verification guide (run after setup/changes)
 ```
+
+After setup, work through [TESTING.md](TESTING.md) to verify role privileges,
+network access restrictions, storage location, logs, and backups.
 
 ---
 
