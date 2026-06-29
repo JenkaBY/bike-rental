@@ -23,10 +23,11 @@ bin/
 .DS_Store
 
 ### Project related ###
-nocommit.properties
+nocommit*.properties
 
 ### Raspberry Pi PostgreSQL deployment secrets/artifacts ###
-docker/raspberrypi/.env
+**/.env*
+!**/.env.example
 docker/raspberrypi/certs/*.key
 docker/raspberrypi/certs/*.crt
 
