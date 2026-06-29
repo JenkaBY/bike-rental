@@ -8,10 +8,15 @@
 # Local unix socket inside the container (used by init, healthcheck, backups).
 local       all           all                                        trust
 
-# Admin and migration roles: LAN only, TLS required.
+# Admin role: LAN only, TLS required (most privileged - never exposed).
 hostssl     all           bikerental_admin          __LAN_SUBNET__   scram-sha-256
-hostssl     all           bikerental_liquibase      __LAN_SUBNET__   scram-sha-256
-hostssl     bikerental    bikerental_app            __LAN_SUBNET__   scram-sha-256
+
+# liquibase (CI/CD migrations) and app (backend runtime): reachable from anywhere
+# (cloud CI and Render have dynamic egress IPs), TLS required, bikerental DB only.
+hostssl     bikerental    bikerental_liquibase      0.0.0.0/0        scram-sha-256
+hostssl     bikerental    bikerental_liquibase      ::/0             scram-sha-256
+hostssl     bikerental    bikerental_app            0.0.0.0/0        scram-sha-256
+hostssl     bikerental    bikerental_app            ::/0             scram-sha-256
 
 # Combined app+migrator role used by the Render backend: reachable from anywhere
 # (Render free tier has a dynamic egress IP), TLS required, bikerental DB only.
