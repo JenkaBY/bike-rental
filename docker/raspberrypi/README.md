@@ -123,43 +123,40 @@ cd ~/bike-rental/docker/raspberrypi
 
 # 2. Configure secrets
 cp .env.example .env
-# edit .env: set strong passwords (openssl rand -base64 24), LAN_SUBNET, port,
-# and replace YOUR_USERNAME in BACKUP_DIR with your actual Pi username.
+# edit .env: set strong passwords (openssl rand -base64 24), LAN_SUBNET,
+# ROUTER_IP, PG_PUBLISHED_PORT, EXTRA_DATABASES, and replace YOUR_USERNAME in
+# BACKUP_DIR with your actual Pi username.
 
 # 3. Generate the TLS certificate (CN = the hostname clients will use)
-chmod +x ./certs/generate-cert.sh
 ./certs/generate-cert.sh yourname.keenetic.link
 
-# 4. Build and start
+# 4. Create the data directory and the external volume — REQUIRED before the
+#    first start. The pgdata volume is `external`, so Compose will NOT create it;
+#    `docker compose up` fails with "external volume not found" if you skip this.
+sudo mkdir -p /data/postgres && sudo chown 70:70 /data/postgres   # uid 70 = postgres in the container
+docker volume create \
+  --driver local --opt type=none --opt o=bind --opt device=/data/postgres \
+  bike-rental-pgdata
+
+# 5. Build and start
 docker compose up -d --build
 docker compose ps          # postgres should become healthy
 docker compose logs -f postgres
 ```
 
-### Preparing the data directory and volume on the NVMe
+### About the data volume
 
-The `pgdata` volume is marked `external` in the Compose file — Compose never
-creates or deletes it automatically. You create it once with an explicit host
-path binding:
+The `pgdata` volume is marked `external`: you create it once (step 4) and
+Compose only ever attaches to it. This makes the data lifecycle explicit —
+`docker compose down` (without `-v`) leaves it untouched, and no Compose command
+can wipe it; you would have to run `docker volume rm` yourself.
 
-```bash
-# 1. Create the host directory and give ownership to the container's postgres user (uid 70)
-sudo mkdir -p /data/postgres && sudo chown 70:70 /data/postgres
+- Inspect the host path: `docker volume inspect bike-rental-pgdata`
+- The `device` path should match `PGDATA_HOST_PATH` in `.env` (kept as the
+  documented source of truth for where the data lives).
 
-# 2. Create the named volume backed by that directory
-docker volume create \
-  --driver local \
-  --opt type=none \
-  --opt o=bind \
-  --opt device=/data/postgres \
-  bike-rental-pgdata
-```
-
-After this, `docker compose up -d` attaches to the existing volume.
-`docker compose down` (without `-v`) leaves it untouched.
-`docker volume inspect bike-rental-pgdata` shows the host path.
-
-**On Windows** create a plain named volume instead (no host path binding):
+**On Windows** create a plain named volume instead of the bind-backed one in
+step 4 — never bind-mount PostgreSQL data to a Windows host folder:
 ```bash
 docker volume create bike-rental-pgdata
 ```
@@ -195,7 +192,7 @@ docker volume create bike-rental-pgdata
 sudo apt install -y fail2ban
 sudo cp security/fail2ban/filter.d/postgresql.conf /etc/fail2ban/filter.d/
 sudo cp security/fail2ban/jail.d/postgresql.conf   /etc/fail2ban/jail.d/
-# edit the jail's logpath if you cloned somewhere other than /opt/bike-rental
+# edit the jail's logpath if you cloned somewhere other than ~/bike-rental
 sudo systemctl restart fail2ban
 sudo fail2ban-client status postgresql
 ```
@@ -217,8 +214,9 @@ systemctl list-timers pg-backup@${USER}.timer
 ./backup/pg-backup.sh
 ```
 
-Dumps land in `BACKUP_DIR` (default `./backups`). **Copy them off-box
-periodically** (another machine / cloud) — a Pi failure should not lose data.
+Dumps land in `BACKUP_DIR` (set to an absolute path in `.env`). **Copy them
+off-box periodically** (another machine / cloud) — a Pi failure should not lose
+data.
 
 Restore example:
 
