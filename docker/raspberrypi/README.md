@@ -29,7 +29,7 @@ postgres/
   init/02-provision-databases.sh  Creates every app DB + applies the privilege model
 certs/generate-cert.sh      One-off self-signed cert generator
 backup/pg-backup.sh         pg_dump -> timestamped gzip, prunes old dumps
-systemd/                    pg-backup.service + .timer (Pi only)
+systemd/                    pg-backup.service + .timer + install-backup-timer.sh (Pi only)
 security/fail2ban/          Filter + jail to ban brute-forcers
 TESTING.md                  Step-by-step verification guide (run after setup/changes)
 ```
@@ -106,11 +106,18 @@ grants safely.
 1. **Public IP, not CGNAT.** Compare your Keenetic WAN IP (router UI) with
    `https://ifconfig.me` from a LAN machine. If they differ you are behind CGNAT
    and inbound port-forwarding cannot work — stop here.
-2. **Docker Engine + Compose plugin** on the Pi (arm64):
+2. **Docker Engine + Compose plugin** on the Pi (arm64) — use the **official**
+   package, NOT the Ubuntu snap:
    ```bash
    curl -fsSL https://get.docker.com | sh
    sudo usermod -aG docker "$USER"   # re-login afterwards
    ```
+   > ⚠️ **Do not use snap Docker** (`snap install docker`). The snap runs
+   > confined and **cannot bind-mount** host paths like `/data/postgres`, so the
+   > external data volume fails with `failed to mount local volume ... no such
+   > file or directory`. Check with `docker info | grep "Docker Root Dir"` — if
+   > it shows `/var/snap/docker/...`, remove it first: `sudo snap remove docker`,
+   > then install via the script above.
 
 ---
 
@@ -202,28 +209,121 @@ sudo fail2ban-client status postgresql
 ## Backups (do not skip)
 
 ```bash
-# Install the daily timer. The unit uses %i (the instance name) as your username,
-# so enable it as pg-backup@<your-username> to resolve the home directory correctly.
-sudo cp systemd/pg-backup.service /etc/systemd/system/pg-backup@.service
-sudo cp systemd/pg-backup.timer   /etc/systemd/system/pg-backup@.timer
-sudo systemctl daemon-reload
-sudo systemctl enable --now pg-backup@${USER}.timer
-systemctl list-timers pg-backup@${USER}.timer
+# Install the daily timer. The script auto-detects your username, substitutes it
+# into the unit, installs it, and enables the timer.
+./systemd/install-backup-timer.sh
 
 # Run once on demand
 ./backup/pg-backup.sh
 ```
 
+The backup service runs as **your user** (not root), so dumps are owned by you
+and readable without `sudo`. Re-run `install-backup-timer.sh` if you change the
+user or the schedule in `pg-backup.timer`.
+
 Dumps land in `BACKUP_DIR` (set to an absolute path in `.env`). **Copy them
 off-box periodically** (another machine / cloud) — a Pi failure should not lose
 data.
 
-Restore example:
+> The backup script currently dumps only the primary database (`POSTGRES_DB`,
+> i.e. `bikerental`). The `bikerental_test` database is **not** included.
+
+---
+
+## Restoring from a backup
+
+Dumps are **plain SQL, gzipped**, created with `pg_dump --clean --if-exists` —
+each dump DROPs the existing objects and recreates them. Restore with `psql`
+(not `pg_restore`, which is only for custom/directory-format dumps). Run these on
+the Pi from `~/bike-rental/docker/raspberrypi`.
+
+### 1. Find and inspect a backup
 
 ```bash
-gunzip -c backups/bikerental_<timestamp>.sql.gz \
+BACKUP_DIR=$(grep -E '^BACKUP_DIR=' .env | cut -d= -f2)
+ls -lh "$BACKUP_DIR"                              # list dumps, newest last
+
+BACKUP="$BACKUP_DIR/bikerental_<timestamp>.sql.gz"   # pick one
+gunzip -t "$BACKUP" && echo "archive OK"          # verify integrity
+gunzip -c "$BACKUP" | grep -c '^CREATE TABLE'     # sanity: how many tables
+gunzip -c "$BACKUP" | less                         # browse the SQL (q to quit)
+```
+
+### 2A. Restore into a NEW database first (recommended — verify before switching)
+
+Safest path: restore into a scratch database, check it, then decide. This never
+touches your live data.
+
+```bash
+# Create an empty target owned by admin
+docker exec bike-rental-postgres createdb -U postgres -O bikerental_admin bikerental_restore
+
+# Load the dump (stops on first error)
+gunzip -c "$BACKUP" \
+  | docker exec -i bike-rental-postgres psql -v ON_ERROR_STOP=1 -U postgres -d bikerental_restore
+
+# Verify
+docker exec bike-rental-postgres psql -U postgres -d bikerental_restore -c "\dt"
+docker exec bike-rental-postgres psql -U postgres -d bikerental_restore \
+  -c "SELECT count(*) FROM customers;"     # spot-check a known table
+```
+
+When satisfied, either point your app at `bikerental_restore`, or drop the live
+DB and rename (`bikerental` → keep a copy, rename restore in). To clean up the
+scratch DB: `docker exec bike-rental-postgres dropdb -U postgres bikerental_restore`.
+
+### 2B. Restore in place (overwrite the live `bikerental`)
+
+⚠️ This replaces the current contents (the dump's `--clean` drops objects first).
+
+```bash
+# 1. Pause writers: stop the Render service / app so nothing writes mid-restore.
+# 2. Take a safety dump of the current state first:
+./backup/pg-backup.sh
+
+# 3. Restore
+gunzip -c "$BACKUP" \
+  | docker exec -i bike-rental-postgres psql -v ON_ERROR_STOP=1 -U postgres -d bikerental
+```
+
+Roles referenced by the dump (`bikerental_admin`, …) already exist cluster-wide,
+so the ownership statements in the dump apply cleanly. `-v ON_ERROR_STOP=1`
+aborts on the first error instead of continuing with a half-applied restore.
+
+### 3. Extract a single table from a dump
+
+Restore the whole dump into a scratch DB (step 2A), then copy just that table:
+
+```bash
+docker exec bike-rental-postgres pg_dump -U postgres -d bikerental_restore \
+  -t public.my_table --data-only \
   | docker exec -i bike-rental-postgres psql -U postgres -d bikerental
 ```
+
+### 4. Disaster recovery (the Pi died — restore on a fresh machine)
+
+1. Stand up the stack on the new Pi (Setup steps 1–5). The init scripts create
+   the empty databases **and the four roles** on the fresh cluster.
+2. Copy your off-box `*.sql.gz` onto the new Pi.
+3. Restore in place as in **2B** (no need to pause anything — it's a new box).
+
+This is why off-box copies matter: a dump that only lives on the dead Pi is
+worthless.
+
+### 5. Restoring from a remote machine
+
+You can also restore over the network from your laptop using an internet-facing
+role with DDL rights (`bikerental_app_migrator`):
+
+```bash
+gunzip -c bikerental_<timestamp>.sql.gz \
+  | psql "host=yourname.keenetic.pro port=6543 dbname=bikerental_restore \
+          user=bikerental_app_migrator sslmode=require" -v ON_ERROR_STOP=1
+```
+
+The local-socket superuser method (on the Pi) is preferred — it avoids sending
+the whole dump over the wire and sidesteps per-object ownership permission edge
+cases.
 
 ---
 

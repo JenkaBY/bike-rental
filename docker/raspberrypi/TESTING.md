@@ -272,7 +272,7 @@ docker exec bike-rental-postgres psql -U postgres -d "$TESTDB" \
   -c "\dt"                                 # Expect: the bikerental tables appear
 
 # 5. The scheduled timer is active
-systemctl list-timers 'pg-backup@*'
+systemctl list-timers pg-backup.timer
 # Expect: a NEXT run time is listed
 ```
 
