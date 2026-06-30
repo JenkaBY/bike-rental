@@ -23,7 +23,7 @@ docker-compose.yml          Compose stack (single postgres service for now)
 postgres/
   Dockerfile                Thin image: adds an entrypoint wrapper
   entrypoint-wrapper.sh      Renders pg_hba (LAN subnet, router IP, app DB list), TLS, log dir
-  postgresql.conf           TLS, scram, Pi-sized tuning, logging
+  postgresql.conf           TLS, scram, Pi-sized tuning, logging (7-day retention)
   pg_hba.conf.template       Per-role rules (__LAN_SUBNET__, __ROUTER_IP__, __APP_DATABASES__ substituted)
   init/01-roles.sh           Creates the 4 login roles, sets passwords
   init/02-provision-databases.sh  Creates every app DB + applies the privilege model
@@ -220,6 +220,11 @@ sudo fail2ban-client status postgresql
 The backup service runs as **your user** (not root), so dumps are owned by you
 and readable without `sudo`. Re-run `install-backup-timer.sh` if you change the
 user or the schedule in `pg-backup.timer`.
+
+The same daily run also enforces **log retention**: it deletes PostgreSQL log
+files older than `LOG_RETENTION_DAYS` (default 7) — logs are dated one-per-day
+(`postgresql-YYYY-MM-DD.log`) and pruned from inside the container (where they're
+owned by the postgres user). Tune `RETENTION_DAYS` / `LOG_RETENTION_DAYS` in `.env`.
 
 > ⚠️ **`BACKUP_DIR` must be owned by your user.** The timer runs `pg-backup.sh`
 > as your user, so it cannot write into a directory owned by root. If you ever

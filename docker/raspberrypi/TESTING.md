@@ -228,9 +228,10 @@ normal (non-root) user.
 ```bash
 cd ~/bike-rental/docker/raspberrypi
 
-# 1. Log files exist and are world-readable (mode 0644)
+# 1. Log files exist and are world-readable (mode 0644). One dated file per day;
+#    files older than LOG_RETENTION_DAYS (7) are pruned by the daily backup run.
 ls -l logs/
-# Expect: postgresql-YYYY-MM-DD.log with permissions -rw-r--r--
+# Expect: postgresql-YYYY-MM-DD.log files with permissions -rw-r--r--, max ~7 of them
 
 # 2. Readable WITHOUT sudo (proves log_file_mode lets the operator read them)
 tail -n 5 logs/postgresql-$(date -u +%Y-%m-%d).log
