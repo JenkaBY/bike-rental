@@ -5,7 +5,12 @@ Requires=docker.service
 
 [Service]
 Type=oneshot
-# Adjust USER to your Pi username and the path if you cloned elsewhere.
-WorkingDirectory=/home/%i/bike-rental/docker/raspberrypi
-EnvironmentFile=/home/%i/bike-rental/docker/raspberrypi/.env
-ExecStart=/home/%i/bike-rental/docker/raspberrypi/backup/pg-backup.sh
+# __USER__ and __PROJECT_DIR__ are filled in automatically by
+# systemd/install-backup-timer.sh (it detects the user and the repo location).
+# Running as your user (not root) keeps the dump files owned by you and uses your
+# docker group membership. The backup DESTINATION is BACKUP_DIR, read from the
+# EnvironmentFile (.env) at run time — change the destination there, not here.
+User=__USER__
+WorkingDirectory=__PROJECT_DIR__
+EnvironmentFile=__PROJECT_DIR__/.env
+ExecStart=__PROJECT_DIR__/backup/pg-backup.sh

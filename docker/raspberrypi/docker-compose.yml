@@ -15,6 +15,7 @@ services:
       - "${PG_PUBLISHED_PORT:-5432}:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-bikerental}
+      EXTRA_DATABASES: ${EXTRA_DATABASES:-}
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
@@ -23,6 +24,7 @@ services:
       BIKERENTAL_APP_PASSWORD: ${BIKERENTAL_APP_PASSWORD:?set BIKERENTAL_APP_PASSWORD in .env}
       BIKERENTAL_APP_MIGRATOR_PASSWORD: ${BIKERENTAL_APP_MIGRATOR_PASSWORD:?set BIKERENTAL_APP_MIGRATOR_PASSWORD in .env}
       LAN_SUBNET: ${LAN_SUBNET:-192.168.0.0/16}
+      ROUTER_IP: ${ROUTER_IP:-192.168.1.1}
     command:
       - postgres
       - -c

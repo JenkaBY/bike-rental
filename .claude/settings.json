@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "try { $d=[Console]::In.ReadToEnd()|ConvertFrom-Json; $n=($d.tool_input.file_path -split '[\\\\/]')[-1]; if((($n -eq '.env' -or $n -like '.env.*' -or $n -like '*.env') -and $n -ne '.env.example') -or ($n -like 'nocommit*.properties')){ Write-Output '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Reading this file is blocked by policy (.env / nocommit*.properties hold secrets). Only .env.example may be read.\"}}' } } catch {}",
+            "statusMessage": "Checking secrets-file access policy"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "try { $d=[Console]::In.ReadToEnd()|ConvertFrom-Json; $cmd=$d.tool_input.command; $hasSecret=$false; foreach($m in [regex]::Matches($cmd,'[\\w./\\\\-]+')){ $n=($m.Value -split '[\\\\/]')[-1]; if(((($n -eq '.env' -or $n -like '.env.*' -or $n -like '*.env') -and $n -ne '.env.example') -or ($n -like 'nocommit*.properties'))){ $hasSecret=$true } }; $isRead=($cmd -match '(?i)\\b(cat|tac|type|more|less|head|tail|nl|od|xxd|hexdump|strings|bat|batcat|grep|egrep|fgrep|rg|awk|gawk|sed|gc|Get-Content|Select-String|sls|source|cat-file)\\b') -or ($cmd -match '<\\s*[^<\\s]'); if($hasSecret -and $isRead){ Write-Output '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"This command reads a protected secrets file (.env / nocommit*.properties). Reading those via the shell is blocked by policy; only .env.example may be read.\"}}' } } catch {}",
+            "statusMessage": "Checking secrets-file access policy"
+          }
+        ]
+      }
+    ]
+  }
+}
