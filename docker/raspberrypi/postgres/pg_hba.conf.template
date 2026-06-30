@@ -10,6 +10,12 @@
 # Local unix socket inside the container (used by init, healthcheck, backups).
 local       all                all                                        trust
 
+# Host-local access on the Pi. Connecting to the published port from the Pi host
+# arrives via the Docker bridge gateway (e.g. 172.x.0.1) — the container's own
+# subnet. `samenet` matches exactly that, so every role can connect from the Pi
+# itself (TLS still required). External clients never originate from this subnet.
+hostssl     all                all                       samenet          scram-sha-256
+
 # Admin role: LAN only, TLS required (most privileged - never exposed).
 # The router source-NATs inbound internet traffic to its own LAN IP, which sits
 # inside __LAN_SUBNET__. Reject admin from the router IP FIRST so the internet
