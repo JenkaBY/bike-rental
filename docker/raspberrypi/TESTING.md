@@ -9,10 +9,10 @@ volume, or the compose file.
 
 Two deliberate connection paths:
 
-| What we test | How | Why |
-|---|---|---|
-| **Role privileges** (Section A) | Local socket via `docker exec` (no password, `local trust`) | Privileges don't depend on connection source — isolates "what a role may do" |
-| **Network access & TLS** (Section B) | TCP from a **LAN machine** and an **external machine** | `pg_hba.conf` source matching is the thing under test |
+| What we test                         | How                                                         | Why                                                                          |
+|--------------------------------------|-------------------------------------------------------------|------------------------------------------------------------------------------|
+| **Role privileges** (Section A)      | Local socket via `docker exec` (no password, `local trust`) | Privileges don't depend on connection source — isolates "what a role may do" |
+| **Network access & TLS** (Section B) | TCP from a **LAN machine** and an **external machine**      | `pg_hba.conf` source matching is the thing under test                        |
 
 A test **passes** when the actual result matches "Expect". Errors are not
 failures when the test expects them — read each "Expect" carefully.
@@ -335,20 +335,20 @@ docker exec bike-rental-postgres psql -U bikerental_app_migrator -d "$TESTDB" \
 
 ## Results checklist
 
-| # | Check | Pass |
-|---|---|---|
-| A1 | app: DML ok, CREATE/DROP/CREATE ROLE denied | ☐ |
-| A2 | liquibase: DDL ok, CREATE ROLE denied | ☐ |
-| A3 | app_migrator: DDL + DML ok | ☐ |
-| A4 | admin: full + CREATEROLE ok | ☐ |
-| A5 | app inherits DML on admin-created tables | ☐ |
-| B1 | admin + app reachable from LAN (via Pi IP) | ☐ |
-| B2 | app/liquibase/migrator reachable from internet; **admin rejected** | ☐ |
-| B3 | non-TLS connection rejected | ☐ |
-| B4 | superuser rejected over TCP | ☐ |
-| B5 | live connection is TLS-encrypted | ☐ |
-| B6 | passwords stored as SCRAM-SHA-256 | ☐ |
-| C | data files in /data/postgres on the NVMe; writes land there | ☐ |
-| D | logs written to host folder, readable without sudo; real client IP logged | ☐ |
-| E | backup created, owned by operator, valid, restorable; timer active | ☐ |
-| F1–F5 | healthy; persists across recreate; restarts after reboot; firewall tight; DB isolation | ☐ |
+| #     | Check                                                                                  | Pass |
+|-------|----------------------------------------------------------------------------------------|------|
+| A1    | app: DML ok, CREATE/DROP/CREATE ROLE denied                                            | ☐    |
+| A2    | liquibase: DDL ok, CREATE ROLE denied                                                  | ☐    |
+| A3    | app_migrator: DDL + DML ok                                                             | ☐    |
+| A4    | admin: full + CREATEROLE ok                                                            | ☐    |
+| A5    | app inherits DML on admin-created tables                                               | ☐    |
+| B1    | admin + app reachable from LAN (via Pi IP)                                             | ☐    |
+| B2    | app/liquibase/migrator reachable from internet; **admin rejected**                     | ☐    |
+| B3    | non-TLS connection rejected                                                            | ☐    |
+| B4    | superuser rejected over TCP                                                            | ☐    |
+| B5    | live connection is TLS-encrypted                                                       | ☐    |
+| B6    | passwords stored as SCRAM-SHA-256                                                      | ☐    |
+| C     | data files in /data/postgres on the NVMe; writes land there                            | ☐    |
+| D     | logs written to host folder, readable without sudo; real client IP logged              | ☐    |
+| E     | backup created, owned by operator, valid, restorable; timer active                     | ☐    |
+| F1–F5 | healthy; persists across recreate; restarts after reboot; firewall tight; DB isolation | ☐    |

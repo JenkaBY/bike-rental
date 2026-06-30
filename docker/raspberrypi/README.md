@@ -221,6 +221,16 @@ The backup service runs as **your user** (not root), so dumps are owned by you
 and readable without `sudo`. Re-run `install-backup-timer.sh` if you change the
 user or the schedule in `pg-backup.timer`.
 
+> ⚠️ **`BACKUP_DIR` must be owned by your user.** The timer runs `pg-backup.sh`
+> as your user, so it cannot write into a directory owned by root. If you ever
+> ran the script with `sudo`, the folder became root-owned and backups fail with
+> `Permission denied`. Fix the ownership once (adjust the path to your
+> `BACKUP_DIR`):
+> ```bash
+> sudo chown -R {USER}:{USER} /home/{USER}/backups
+> ```
+> Never run `./backup/pg-backup.sh` with `sudo` — it doesn't need root.
+
 Dumps land in `BACKUP_DIR` (set to an absolute path in `.env`). **Copy them
 off-box periodically** (another machine / cloud) — a Pi failure should not lose
 data.
