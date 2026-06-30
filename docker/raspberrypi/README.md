@@ -332,7 +332,7 @@ role with DDL rights (`bikerental_app_migrator`):
 
 ```bash
 gunzip -c bikerental_<timestamp>.sql.gz \
-  | psql "host=yourname.keenetic.pro port=6543 dbname=bikerental_restore \
+  | psql "host=yourname.keenetic.pro port=54321 dbname=bikerental_restore \
           user=bikerental_app_migrator sslmode=require" -v ON_ERROR_STOP=1
 ```
 

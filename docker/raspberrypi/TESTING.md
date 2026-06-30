@@ -29,7 +29,7 @@ Set these once per shell (adjust to your values):
 ```bash
 PIHOST=192.168.1.168            # the Pi's LAN IP (use the IP, NOT the hostname)
 EXTHOST=yourname.keenetic.pro   # KeenDNS hostname
-EXTPORT=6543                    # router's forwarded external port
+EXTPORT=54321                    # router's forwarded external port
 TESTDB=bikerental_test          # use the test DB so dev data is untouched
 ```
 
