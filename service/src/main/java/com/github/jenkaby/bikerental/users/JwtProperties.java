@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.users;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -7,6 +8,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
+import java.util.List;
 
 @Validated
 @ConfigurationProperties(prefix = "app.security.jwt")
@@ -34,6 +36,22 @@ public record JwtProperties(
 
         String privateKeyLocation,
 
-        String publicKeyLocation
+        String publicKeyLocation,
+
+        List<@Valid PreviousKey> previousKeys
 ) {
+
+    public JwtProperties {
+        previousKeys = previousKeys == null ? List.of() : previousKeys;
+    }
+
+    public record PreviousKey(
+
+            @NotBlank
+            String keyId,
+
+            @NotBlank
+            String publicKeyLocation
+    ) {
+    }
 }

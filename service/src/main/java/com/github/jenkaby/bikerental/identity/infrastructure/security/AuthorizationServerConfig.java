@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.identity.infrastructure.security;
 import com.github.jenkaby.bikerental.identity.application.config.AuthorityProperties;
 import com.github.jenkaby.bikerental.users.JwtProperties;
 import com.github.jenkaby.bikerental.users.UserAuthFacade;
+import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -35,8 +36,10 @@ import org.springframework.security.oauth2.server.authorization.client.JdbcRegis
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -61,7 +64,13 @@ public class AuthorizationServerConfig {
                                                                RequestCache requestCache) throws Exception {
         var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
         http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
-                .with(authorizationServerConfigurer, server -> server.oidc(Customizer.withDefaults()))
+                .with(authorizationServerConfigurer, server -> server.oidc(oidc -> oidc
+                        .logoutEndpoint(logout -> logout
+                                .logoutRequestConverters(converters -> {
+                                    converters.clear();
+                                    converters.add(new StatelessOidcLogoutAuthenticationConverter());
+                                })
+                                .logoutResponseHandler(new StatelessOidcLogoutResponseHandler()))))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))
                 .cors(Customizer.withDefaults())
@@ -107,6 +116,7 @@ public class AuthorizationServerConfig {
                                                               AuthorityProperties authorityProperties,
                                                               JwtProperties jwtProperties) {
         return context -> {
+            context.getJwsHeader().keyId(jwtProperties.keyId());
             if (!OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
                 return;
             }
@@ -163,8 +173,11 @@ public class AuthorizationServerConfig {
 
     @Bean
     JWKSource<SecurityContext> jwkSource(JwtProperties jwtProperties, ResourceLoader resourceLoader) {
-        RSAKey rsaKey = buildRsaKey(jwtProperties, resourceLoader);
-        return new ImmutableJWKSet<>(new JWKSet(rsaKey));
+        var jwks = new ArrayList<JWK>();
+        jwks.add(buildActiveRsaKey(jwtProperties, resourceLoader));
+        jwtProperties.previousKeys().forEach(previousKey ->
+                jwks.add(loadPublicRsaKey(previousKey.keyId(), previousKey.publicKeyLocation(), resourceLoader)));
+        return new ImmutableJWKSet<>(new JWKSet(jwks));
     }
 
     @Bean
@@ -172,8 +185,8 @@ public class AuthorizationServerConfig {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
-    private RSAKey buildRsaKey(JwtProperties jwtProperties, ResourceLoader resourceLoader) {
-        if (jwtProperties.privateKeyLocation() != null && jwtProperties.publicKeyLocation() != null) {
+    private RSAKey buildActiveRsaKey(JwtProperties jwtProperties, ResourceLoader resourceLoader) {
+        if (StringUtils.hasText(jwtProperties.privateKeyLocation()) && StringUtils.hasText(jwtProperties.publicKeyLocation())) {
             return loadRsaKey(jwtProperties, resourceLoader);
         }
         return generateRsaKey(jwtProperties.keyId());
@@ -190,6 +203,17 @@ public class AuthorizationServerConfig {
                     .build();
         } catch (IOException ex) {
             throw new IllegalStateException("Unable to load RSA key material for JWT signing", ex);
+        }
+    }
+
+    private RSAKey loadPublicRsaKey(String keyId, String publicKeyLocation, ResourceLoader resourceLoader) {
+        try (InputStream publicKeyStream = resourceLoader.getResource(publicKeyLocation).getInputStream()) {
+            RSAPublicKey publicKey = RsaKeyConverters.x509().convert(publicKeyStream);
+            return new RSAKey.Builder(publicKey)
+                    .keyID(keyId)
+                    .build();
+        } catch (IOException ex) {
+            throw new IllegalStateException("Unable to load RSA public key for JWT verification: " + publicKeyLocation, ex);
         }
     }
 

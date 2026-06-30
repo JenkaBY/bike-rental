@@ -47,8 +47,10 @@ app:
       issuer: ${OAUTH2_ISSUER}
       access-token-ttl: PT15M
       refresh-token-ttl: P14D
-      key-id: bike-rental-identity
+      key-id: ${JWT_KEY_ID:bike-rental-identity}
       user-id-claim: uid
+      private-key-location: ${JWT_PRIVATE_KEY_LOCATION:}
+      public-key-location: ${JWT_PUBLIC_KEY_LOCATION:}
     password:
       min-length: 8
       max-length: 20
