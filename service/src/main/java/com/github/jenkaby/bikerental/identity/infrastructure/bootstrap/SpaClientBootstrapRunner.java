@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.server.authorization.settings.ClientS
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -27,16 +28,28 @@ class SpaClientBootstrapRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        properties.spaClients().forEach(this::registerIfAbsent);
+        properties.spaClients().forEach(this::reconcile);
     }
 
-    private void registerIfAbsent(SpaClientsProperties.SpaClient client) {
-        if (registeredClientRepository.findByClientId(client.clientId()) != null) {
-            return;
-        }
-        var builder = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId(client.clientId())
-                .clientName(client.clientId())
+    private void reconcile(SpaClientsProperties.SpaClient client) {
+        var existing = registeredClientRepository.findByClientId(client.clientId());
+        var builder = existing != null
+                ? RegisteredClient.from(existing)
+                : newClientBuilder(client.clientId());
+        builder.redirectUris(Set::clear);
+        client.redirectUris().forEach(builder::redirectUri);
+        builder.postLogoutRedirectUris(Set::clear);
+        client.postLogoutRedirectUris().forEach(builder::postLogoutRedirectUri);
+        builder.scopes(Set::clear);
+        client.scopes().forEach(builder::scope);
+        registeredClientRepository.save(builder.build());
+        log.info("{} SPA OAuth2 client '{}'", existing != null ? "Reconciled" : "Registered", client.clientId());
+    }
+
+    private RegisteredClient.Builder newClientBuilder(String clientId) {
+        return RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId(clientId)
+                .clientName(clientId)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
@@ -47,10 +60,5 @@ class SpaClientBootstrapRunner implements ApplicationRunner {
                 .tokenSettings(TokenSettings.builder()
                         .reuseRefreshTokens(true)
                         .build());
-        client.redirectUris().forEach(builder::redirectUri);
-        client.postLogoutRedirectUris().forEach(builder::postLogoutRedirectUri);
-        client.scopes().forEach(builder::scope);
-        registeredClientRepository.save(builder.build());
-        log.info("Registered SPA OAuth2 client '{}'", client.clientId());
     }
 }
