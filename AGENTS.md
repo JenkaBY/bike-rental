@@ -32,8 +32,19 @@ username/password + optional Google federation, and CORS on authorization server
 `UserAuthFacade` only — it never imports the `users` domain model directly. Other modules never import either auth
 module — they receive the populated `SecurityContext` from the resource-server filter.
 
+OIDC RP-initiated logout (`/connect/logout`) is **stateless**: `StatelessOidcLogoutAuthenticationConverter` feeds the
+endpoint an anonymous principal so the provider skips the session-bound `sub`/`sid` checks (no `OidcSessionRegistry`,
+no `sid` claim required), while the `post_logout_redirect_uri` allowlist still applies.
+`StatelessOidcLogoutResponseHandler` invalidates the current session and redirects to the validated URI.
+
 JWT access tokens include custom claims: `roles` (list), `must_change_password` (boolean), and a configurable user-id
 claim (default `userId`). `must_change_password` is re-read from the DB on every token issuance via `UserAuthFacade`.
+
+Access + ID tokens are RS256-signed. Provide a persistent RSA key pair via `app.security.jwt.private-key-location` /
+`public-key-location` (otherwise an ephemeral key is generated per startup and tokens break on restart). The JWKSet
+supports rotation: the active key signs (its `kid` is stamped on every token), and `app.security.jwt.previous-keys[]`
+holds retired public keys so already-issued tokens still verify during the overlap window. Full instructions:
+[docs/jwt-keys.md](docs/jwt-keys.md).
 
 Module boundaries enforced by Spring Modulith. Each `package-info.java` carries `@ApplicationModule`. Cross-module
 calls go through **Facade** classes only — never import another module's domain model directly.
@@ -168,8 +179,8 @@ Module-scoped advice classes (e.g. `EquipmentRestControllerAdvice`) use
 ### Configuration Properties
 
 Typed config via `@ConfigurationProperties` records, auto-scanned from `BikeRentalApplication`. Key prefixes:
-`app.rental`, `app.cors`, `app.security.jwt` (JWT signing / issuer / token TTLs, see `users.JwtProperties`), `app`
-(default locale). Always inject via constructor, never `@Value`.
+`app.rental`, `app.cors`, `app.security.jwt` (JWT signing keys / issuer / token TTLs, see `users.JwtProperties` and
+[docs/jwt-keys.md](docs/jwt-keys.md)), `app` (default locale). Always inject via constructor, never `@Value`.
 
 ### Java Style
 
