@@ -55,12 +55,31 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# Load .env so BACKUP_DIR / POSTGRES_DB / etc. match the running stack.
+# Load .env so BACKUP_DIR / POSTGRES_DB / etc. match the running stack. Parse it
+# literally (KEY=VALUE) the way systemd's EnvironmentFile does - never `source`
+# it, or password values containing spaces or shell metacharacters would be
+# executed as commands.
+load_env_file() {
+    local file="$1" line key val
+    while IFS= read -r line || [ -n "$line" ]; do
+        line="${line%$'\r'}"                       # tolerate CRLF endings
+        case "$line" in ''|'#'*) continue ;; esac  # skip blanks and comments
+        [ "$line" != "${line#*=}" ] || continue    # must contain '='
+        key="${line%%=*}"
+        val="${line#*=}"
+        key="${key#"${key%%[![:space:]]*}"}"       # trim leading whitespace
+        key="${key%"${key##*[![:space:]]}"}"       # trim trailing whitespace
+        [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+        case "$val" in                             # strip matching surrounding quotes
+            \"*\") val="${val#\"}"; val="${val%\"}" ;;
+            \'*\') val="${val#\'}"; val="${val%\'}" ;;
+        esac
+        export "$key=$val"
+    done < "$file"
+}
+
 if [ -f "$ENV_FILE" ]; then
-    set -a
-    # shellcheck disable=SC1090
-    . "$ENV_FILE"
-    set +a
+    load_env_file "$ENV_FILE"
     echo "Loaded environment from ${ENV_FILE}"
 else
     echo "No env file at ${ENV_FILE}; relying on current environment and defaults."
