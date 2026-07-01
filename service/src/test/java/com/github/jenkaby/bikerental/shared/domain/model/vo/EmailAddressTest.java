@@ -1,4 +1,4 @@
-package com.github.jenkaby.bikerental.customer.domain.model.vo;
+package com.github.jenkaby.bikerental.shared.domain.model.vo;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

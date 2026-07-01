@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="oauth2_authorization_consent.create-table" author="claude">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="oauth2_authorization_consent"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="oauth2_authorization_consent">
+            <column name="registered_client_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="principal_name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authorities" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="oauth2_authorization_consent"
+                       columnNames="registered_client_id, principal_name"
+                       constraintName="pk_oauth2_authorization_consent"/>
+    </changeSet>
+
+</databaseChangeLog>

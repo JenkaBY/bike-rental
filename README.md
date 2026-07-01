@@ -19,6 +19,11 @@ equipment management, tariff management, and financial transactions.
 The application is built using Java and Spring Boot, with a modular architecture to ensure scalability and
 maintainability.
 
+Authentication is handled via OAuth 2.1 / OIDC (Spring Authorization Server). The `users` module owns user accounts
+and self-service; the `identity` module owns the authorization server and Spring Security configuration. JWT tokens
+carry `roles`, `must_change_password`, and a user-id claim. Tokens are RS256-signed — see
+[docs/jwt-keys.md](docs/jwt-keys.md) for creating and rotating the signing keys.
+
 ## Local development
 
 ### Prerequisites

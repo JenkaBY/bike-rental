@@ -33,4 +33,11 @@
     <include relativeToChangelogFile="true" file="data/finance_accounts-customers-provisioning.xml"/>
     <include relativeToChangelogFile="true" file="data/finance_sub_ledgers-customers-provisioning.xml"/>
 
+    <!--    identity module -->
+    <include relativeToChangelogFile="true" file="v1/users.create-table.xml"/>
+    <include relativeToChangelogFile="true" file="v1/user_roles.create-table.xml"/>
+    <include relativeToChangelogFile="true" file="v1/oauth2_registered_client.create-table.xml"/>
+    <include relativeToChangelogFile="true" file="v1/oauth2_authorization.create-table.xml"/>
+    <include relativeToChangelogFile="true" file="v1/oauth2_authorization_consent.create-table.xml"/>
+
 </databaseChangeLog>

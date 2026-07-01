@@ -148,7 +148,8 @@ class RentalRestControllerAdviceTest {
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.errorCode").value("rental.equipment.not_available"))
                     .andExpect(jsonPath("$.correlationId").exists())
-                    .andExpect(jsonPath("$.unavailableIds").isArray());
+                    .andExpect(jsonPath("$.params.unavailableIds").isArray())
+                    .andExpect(jsonPath("$.params.unavailableIds[0]").value(7));
         }
     }
 

@@ -34,7 +34,10 @@ public class DbSteps {
             "rental_equipments",
             "rentals",
             "finance_transaction_records",
-            "finance_transactions"
+            "finance_transactions",
+            "user_roles",
+            "users",
+            "oauth2_authorization"
     );
 
 

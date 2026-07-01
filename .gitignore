@@ -25,6 +25,11 @@ bin/
 ### Project related ###
 nocommit*.properties
 
+### JWT signing keys — never commit key material (see docs/jwt-keys.md) ###
+*.pem
+service/src/main/resources/keys/
+docker/keys/
+
 ### Raspberry Pi PostgreSQL deployment secrets/artifacts ###
 **/.env*
 !**/.env.example

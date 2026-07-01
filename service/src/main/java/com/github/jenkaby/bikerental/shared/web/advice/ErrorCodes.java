@@ -26,4 +26,10 @@ public class ErrorCodes {
     public static final String INSUFFICIENT_FUNDS = "rental.insufficient_funds";
     public static final String HOLD_REQUIRED = "rental.hold.required";
     public static final String EQUIPMENT_NOT_AVAILABLE = "rental.equipment.not_available";
+    public static final String AUTHENTICATION_REQUIRED = "identity.authentication.required";
+    public static final String ACCESS_DENIED = "identity.access.denied";
+    public static final String USERNAME_DUPLICATE = "identity.username.duplicate";
+    public static final String EMAIL_DUPLICATE = "identity.email.duplicate";
+    public static final String PASSWORD_POLICY_VIOLATION = "identity.password.policy_violation";
+    public static final String CURRENT_PASSWORD_INVALID = "identity.password.invalid_current";
 }

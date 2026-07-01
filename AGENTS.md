@@ -7,13 +7,44 @@ architecture.
 
 ## Architecture
 
-6 business modules under `service/src/main/java/com/github/jenkaby/bikerental/`:
+8 business modules under `service/src/main/java/com/github/jenkaby/bikerental/`:
 
 ```
 customer/  equipment/  tariff/   ← core, independent
+users/                           ← user accounts & self-service (CRUD, password management)
+identity/                        ← OAuth2/OIDC authorization server & Spring Security configs only
 rental/    finance/              ← business (depends on core)
 shared/                          ← cross-cutting kernel
 ```
+
+**Module dependency direction: `identity → users` (never reversed).**
+
+The `users` module owns the user domain: `User` aggregate, roles, account CRUD, self-service password change, and the
+bootstrap admin runner. Its public API (root package only) exposes:
+- `UserAuthFacade` — interface for identity to look up users without crossing module boundaries
+- `UserAuthView` — read-only auth projection (id, username, passwordHash, roles, active, mustChangePassword)
+- `SessionRevoker` — port interface implemented by `JdbcSessionRevoker` inside identity
+- `JwtProperties` — `@ConfigurationProperties(prefix = "app.security.jwt")` record shared via allowed dependency
+
+The `identity` module owns all Spring Security configuration: a Spring Authorization Server (OAuth 2.1 / OIDC) issuing
+JWT access + refresh tokens (with PKCE public client support), a resource-server chain protecting `/api/**`, local
+username/password + optional Google federation, and CORS on authorization server endpoints. It depends on `users` via
+`UserAuthFacade` only — it never imports the `users` domain model directly. Other modules never import either auth
+module — they receive the populated `SecurityContext` from the resource-server filter.
+
+OIDC RP-initiated logout (`/connect/logout`) is **stateless**: `StatelessOidcLogoutAuthenticationConverter` feeds the
+endpoint an anonymous principal so the provider skips the session-bound `sub`/`sid` checks (no `OidcSessionRegistry`,
+no `sid` claim required), while the `post_logout_redirect_uri` allowlist still applies.
+`StatelessOidcLogoutResponseHandler` invalidates the current session and redirects to the validated URI.
+
+JWT access tokens include custom claims: `roles` (list), `must_change_password` (boolean), and a configurable user-id
+claim (default `userId`). `must_change_password` is re-read from the DB on every token issuance via `UserAuthFacade`.
+
+Access + ID tokens are RS256-signed. Provide a persistent RSA key pair via `app.security.jwt.private-key-location` /
+`public-key-location` (otherwise an ephemeral key is generated per startup and tokens break on restart). The JWKSet
+supports rotation: the active key signs (its `kid` is stamped on every token), and `app.security.jwt.previous-keys[]`
+holds retired public keys so already-issued tokens still verify during the overlap window. Full instructions:
+[docs/jwt-keys.md](docs/jwt-keys.md).
 
 Module boundaries enforced by Spring Modulith. Each `package-info.java` carries `@ApplicationModule`. Cross-module
 calls go through **Facade** classes only — never import another module's domain model directly.
@@ -148,7 +179,8 @@ Module-scoped advice classes (e.g. `EquipmentRestControllerAdvice`) use
 ### Configuration Properties
 
 Typed config via `@ConfigurationProperties` records, auto-scanned from `BikeRentalApplication`. Key prefixes:
-`app.rental`, `app.cors`, `app` (default locale). Always inject via constructor, never `@Value`.
+`app.rental`, `app.cors`, `app.security.jwt` (JWT signing keys / issuer / token TTLs, see `users.JwtProperties` and
+[docs/jwt-keys.md](docs/jwt-keys.md)), `app` (default locale). Always inject via constructor, never `@Value`.
 
 ### Java Style
 
@@ -159,11 +191,14 @@ Hard constraints (zero inline comments, records for DTOs, constructor injection,
 
 ## Key Files
 
-| File                                                      | Purpose                                                                                                |
-|-----------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| `overview.md`                                             | a structured component overview document for this project                                              |
-| `architecture.md`                                         | Machine parsable an architecture of the solution                                                       |
-| `requirements/`                                           | A folder containing requirements folders/files with functional requirements and detailed implemntation |
-| `service/src/test/java/.../support/web/ApiTest.java`      | WebMvc test base annotation                                                                            |
-| `shared/web/advice/CoreExceptionHandlerAdvice.java`       | Global exception handler reference                                                                     |
-| `component-test/src/test/java/.../RunComponentTests.java` | Cucumber suite runner                                                                                  |
+| File                                                                | Purpose                                                                                                |
+|---------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| `overview.md`                                                       | a structured component overview document for this project                                              |
+| `architecture.md`                                                   | Machine parsable an architecture of the solution                                                       |
+| `requirements/`                                                     | A folder containing requirements folders/files with functional requirements and detailed implemntation |
+| `service/src/test/java/.../support/web/ApiTest.java`                | WebMvc test base annotation                                                                            |
+| `shared/web/advice/CoreExceptionHandlerAdvice.java`                 | Global exception handler reference                                                                     |
+| `component-test/src/test/java/.../RunComponentTests.java`           | Cucumber suite runner                                                                                  |
+| `users/UserAuthFacade.java`, `UserAuthView.java`, `SessionRevoker.java`, `JwtProperties.java` | Public API of the users module (root package only) |
+| `identity/infrastructure/security/AuthorizationServerConfig.java`   | OAuth2/OIDC authorization server configuration                                                         |
+| `identity/infrastructure/security/WebSecurityConfig.java`           | Resource server & login security filter chains                                                         |

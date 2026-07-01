@@ -1,7 +1,7 @@
 package com.github.jenkaby.bikerental.customer.domain.model;
 
-import com.github.jenkaby.bikerental.customer.domain.model.vo.EmailAddress;
 import com.github.jenkaby.bikerental.customer.domain.model.vo.PhoneNumber;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.EmailAddress;
 import lombok.*;
 
 import java.time.LocalDate;

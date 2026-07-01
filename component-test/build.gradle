@@ -15,6 +15,7 @@ dependencyManagement {
 dependencies {
     testImplementation project(':service')
     testImplementation libs.spring.boot.starter.data.jpa
+    testImplementation libs.spring.boot.starter.oauth2.resource.server
     testImplementation libs.bundles.spring.modulith
 
     testImplementation libs.bundles.spring.test

@@ -25,6 +25,11 @@ public class Aliases {
 //        Operator ids group starts with 22222222-
         ALIASES.put("OP1", "22222222-2222-2222-2222-222222222221");
         ALIASES.put("OP2", "22222222-2222-2222-2222-222222222222");
+//        Identity user (employee) ids group starts with 88888888-
+        ALIASES.put("USR1", "88888888-8888-8888-8888-888888888881");
+        ALIASES.put("USR2", "88888888-8888-8888-8888-888888888882");
+        ALIASES.put("USR3", "88888888-8888-8888-8888-888888888883");
+        ALIASES.put("USR4", "88888888-8888-8888-8888-888888888884");
 //       Payment ids group starts with 33333333-
         ALIASES.put("PAY1", "33333333-3333-3333-3333-333333333331");
         ALIASES.put("PAY2", "33333333-3333-3333-3333-333333333332");
