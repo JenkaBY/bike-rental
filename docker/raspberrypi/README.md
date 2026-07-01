@@ -29,6 +29,7 @@ postgres/
   init/02-provision-databases.sh  Creates every app DB + applies the privilege model
 certs/generate-cert.sh      One-off self-signed cert generator
 backup/pg-backup.sh         pg_dump -> timestamped gzip, prunes old dumps
+backup/pg-restore.sh        Restore a dump into a fresh bikerental_restore_<ts> DB
 systemd/                    pg-backup.service + .timer + install-backup-timer.sh (Pi only)
 security/fail2ban/          Filter + jail to ban brute-forcers
 TESTING.md                  Step-by-step verification guide (run after setup/changes)
@@ -251,6 +252,43 @@ Dumps are **plain SQL, gzipped**, created with `pg_dump --clean --if-exists` —
 each dump DROPs the existing objects and recreates them. Restore with `psql`
 (not `pg_restore`, which is only for custom/directory-format dumps). Run these on
 the Pi from `~/bike-rental/docker/raspberrypi`.
+
+### 0. Automated restore into a fresh database (recommended — `pg-restore.sh`)
+
+`backup/pg-restore.sh` automates the "restore into a scratch database" flow
+(section 2A) end-to-end: it verifies the archive, creates a **new** database
+named `bikerental_restore_<backup_timestamp>`, loads the dump, and grants the
+runtime role `bikerental_app` DML access to the restored tables. Your live
+`bikerental` database is never touched.
+
+```bash
+cd ~/bike-rental/docker/raspberrypi
+
+# Restore the LATEST dump for POSTGRES_DB (from BACKUP_DIR in .env):
+./backup/pg-restore.sh
+
+# Or restore a specific dump:
+./backup/pg-restore.sh /path/to/bikerental_20260701T031500Z.sql.gz
+```
+
+- **Backup file** — the first positional argument. Omit it to auto-select the
+  newest `"<POSTGRES_DB>_*.sql.gz"` in `BACKUP_DIR`.
+- **Target database** — derived from the dump's filename timestamp, lowercased
+  for a quote-free identifier, e.g. the dump above restores into
+  `bikerental_restore_20260701t031500z`. The script **refuses to overwrite** an
+  existing restore database — drop it first if you want to redo it.
+- **Environment** — the script sources `docker/raspberrypi/.env` automatically
+  (override with `--env-file /path/to/.env`), so `POSTGRES_DB`, `BACKUP_DIR`,
+  `PG_CONTAINER`, etc. match the running stack. Variable names are the ones in
+  [.env.example](.env.example).
+- **Access** — after restore, `bikerental_app` can `SELECT/INSERT/UPDATE/DELETE`
+  on every restored table and sequence; the database is owned by
+  `bikerental_admin`.
+
+On completion it prints the new database name, table count, and the commands to
+inspect or drop it. To make the restored data the live database, follow the
+"drop the live DB and rename" note in section 2A, or point the app at the new
+database name. The manual variants below remain available for finer control.
 
 ### 1. Find and inspect a backup
 
