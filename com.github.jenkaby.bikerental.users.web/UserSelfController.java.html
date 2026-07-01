@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserSelfController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.users.web</a> &gt; <span class="el_source">UserSelfController.java</span></div><h1>UserSelfController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.users.web;
+
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import com.github.jenkaby.bikerental.users.JwtProperties;
+import com.github.jenkaby.bikerental.users.application.usecase.SelfServiceUseCase;
+import com.github.jenkaby.bikerental.users.web.dto.ChangePasswordRequest;
+import com.github.jenkaby.bikerental.users.web.dto.UserResponse;
+import com.github.jenkaby.bikerental.users.web.mapper.UsersWebMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@RestController
+@RequestMapping(path = &quot;/api/auth&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = OpenApiConfig.Tags.USERS)
+<span class="fc" id="L30">@Slf4j</span>
+@RequiredArgsConstructor
+class UserSelfController {
+
+    private final SelfServiceUseCase selfService;
+    private final UsersWebMapper mapper;
+    private final JwtProperties jwtProperties;
+
+    @GetMapping(&quot;/me&quot;)
+    @Operation(summary = &quot;Current user&quot;, description = &quot;Returns the profile of the authenticated user&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Profile returned&quot;,
+                    content = @Content(schema = @Schema(implementation = UserResponse.class)))
+    })
+    public ResponseEntity&lt;UserResponse&gt; me(@AuthenticationPrincipal Jwt jwt) {
+<span class="fc" id="L45">        var userId = currentUserId(jwt);</span>
+<span class="fc" id="L46">        log.info(&quot;[GET] Fetching profile for user {}&quot;, userId);</span>
+<span class="fc" id="L47">        var user = selfService.getById(userId);</span>
+<span class="fc" id="L48">        return ResponseEntity.ok(mapper.toResponse(user));</span>
+    }
+
+    @PostMapping(&quot;/password&quot;)
+    @Operation(summary = &quot;Change own password&quot;, description = &quot;Changes the authenticated user's password&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Password changed&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;422&quot;, description = &quot;Wrong current password or password policy violated&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;Void&gt; changePassword(@AuthenticationPrincipal Jwt jwt,
+                                               @Valid @RequestBody ChangePasswordRequest request) {
+<span class="fc" id="L62">        var userId = currentUserId(jwt);</span>
+<span class="fc" id="L63">        log.info(&quot;[POST] Changing password for user {}&quot;, userId);</span>
+<span class="fc" id="L64">        selfService.changeOwnPassword(userId, request.currentPassword(), request.newPassword());</span>
+<span class="fc" id="L65">        return ResponseEntity.noContent().build();</span>
+    }
+
+    private UUID currentUserId(Jwt jwt) {
+<span class="fc" id="L69">        return UUID.fromString(jwt.getClaimAsString(jwtProperties.userIdClaim()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

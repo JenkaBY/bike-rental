@@ -134,7 +134,7 @@ public class RentalRestControllerAdvice {
 <span class="fc" id="L134">        problem.setDetail(ex.getMessage());</span>
 <span class="fc" id="L135">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
 <span class="fc" id="L136">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.EQUIPMENT_NOT_AVAILABLE);</span>
-<span class="fc" id="L137">        problem.setProperty(&quot;unavailableIds&quot;, ex.getDetails().unavailableIds());</span>
+<span class="fc" id="L137">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
 <span class="fc" id="L138">        return ResponseEntity.of(problem).build();</span>
     }
 

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthorizationServerConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.identity.infrastructure.security</a> &gt; <span class="el_source">AuthorizationServerConfig.java</span></div><h1>AuthorizationServerConfig.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.identity.infrastructure.security;
+
+import com.github.jenkaby.bikerental.identity.application.config.AuthorityProperties;
+import com.github.jenkaby.bikerental.users.JwtProperties;
+import com.github.jenkaby.bikerental.users.UserAuthFacade;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.jackson.SecurityJacksonModules;
+import org.springframework.security.oauth2.server.authorization.jackson.OAuth2AuthorizationServerJacksonModule;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.converter.RsaKeyConverters;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2RefreshToken;
+import org.springframework.security.oauth2.core.OAuth2Token;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.authorization.*;
+import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.token.*;
+import org.springframework.util.StringUtils;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+
+@Configuration
+<span class="fc" id="L59">public class AuthorizationServerConfig {</span>
+
+    @Bean
+    @Order(1)
+    SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http,
+                                                               RequestCache requestCache) throws Exception {
+<span class="fc" id="L65">        var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();</span>
+<span class="fc" id="L66">        http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())</span>
+<span class="fc" id="L67">                .with(authorizationServerConfigurer, server -&gt; server.oidc(oidc -&gt; oidc</span>
+<span class="fc" id="L68">                        .logoutEndpoint(logout -&gt; logout</span>
+<span class="fc" id="L69">                                .logoutRequestConverters(converters -&gt; {</span>
+<span class="fc" id="L70">                                    converters.clear();</span>
+<span class="fc" id="L71">                                    converters.add(new StatelessOidcLogoutAuthenticationConverter());</span>
+<span class="fc" id="L72">                                })</span>
+<span class="fc" id="L73">                                .logoutResponseHandler(new StatelessOidcLogoutResponseHandler()))))</span>
+<span class="fc" id="L74">                .authorizeHttpRequests(auth -&gt; auth.anyRequest().authenticated())</span>
+<span class="fc" id="L75">                .csrf(csrf -&gt; csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))</span>
+<span class="fc" id="L76">                .cors(Customizer.withDefaults())</span>
+<span class="fc" id="L77">                .requestCache(cache -&gt; cache.requestCache(requestCache))</span>
+<span class="fc" id="L78">                .exceptionHandling(exceptions -&gt; exceptions.defaultAuthenticationEntryPointFor(</span>
+                        new LoginUrlAuthenticationEntryPoint(&quot;/login&quot;),
+                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
+<span class="fc" id="L81">                .oauth2ResourceServer(resourceServer -&gt; resourceServer.jwt(Customizer.withDefaults()));</span>
+<span class="fc" id="L82">        return http.build();</span>
+    }
+
+    @Bean
+    RegisteredClientRepository registeredClientRepository(JdbcOperations jdbcOperations) {
+<span class="fc" id="L87">        return new JdbcRegisteredClientRepository(jdbcOperations);</span>
+    }
+
+    @Bean
+    OAuth2AuthorizationService authorizationService(JdbcOperations jdbcOperations,
+                                                    RegisteredClientRepository registeredClientRepository) {
+<span class="fc" id="L93">        var validatorBuilder = BasicPolymorphicTypeValidator.builder()</span>
+<span class="fc" id="L94">                .allowIfSubType(Object.class);</span>
+<span class="fc" id="L95">        var classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();</span>
+<span class="fc" id="L96">        var jsonMapper = JsonMapper.builder()</span>
+<span class="fc" id="L97">                .addModules(SecurityJacksonModules.getModules(classLoader, validatorBuilder))</span>
+<span class="fc" id="L98">                .addModule(new OAuth2AuthorizationServerJacksonModule())</span>
+<span class="fc" id="L99">                .addMixIn(IdentityUserPrincipal.class, IdentityUserPrincipalMixin.class)</span>
+<span class="fc" id="L100">                .build();</span>
+<span class="fc" id="L101">        var rowMapper = new JdbcOAuth2AuthorizationService.JsonMapperOAuth2AuthorizationRowMapper(</span>
+                registeredClientRepository, jsonMapper);
+<span class="fc" id="L103">        var service = new JdbcOAuth2AuthorizationService(jdbcOperations, registeredClientRepository);</span>
+<span class="fc" id="L104">        service.setAuthorizationRowMapper(rowMapper);</span>
+<span class="fc" id="L105">        return service;</span>
+    }
+
+    @Bean
+    OAuth2AuthorizationConsentService authorizationConsentService(JdbcOperations jdbcOperations,
+                                                                  RegisteredClientRepository registeredClientRepository) {
+<span class="fc" id="L111">        return new JdbcOAuth2AuthorizationConsentService(jdbcOperations, registeredClientRepository);</span>
+    }
+
+    @Bean
+    OAuth2TokenCustomizer&lt;JwtEncodingContext&gt; tokenCustomizer(UserAuthFacade userAuthFacade,
+                                                              AuthorityProperties authorityProperties,
+                                                              JwtProperties jwtProperties) {
+<span class="fc" id="L118">        return context -&gt; {</span>
+<span class="nc" id="L119">            context.getJwsHeader().keyId(jwtProperties.keyId());</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            if (!OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {</span>
+<span class="nc" id="L121">                return;</span>
+            }
+<span class="nc" id="L123">            var principalName = context.getPrincipal().getName();</span>
+<span class="nc" id="L124">            var account = userAuthFacade.findByUsername(principalName)</span>
+<span class="nc" id="L125">                    .or(() -&gt; userAuthFacade.findByEmail(principalName));</span>
+<span class="nc" id="L126">            account.ifPresentOrElse(</span>
+                    user -&gt; {
+<span class="nc" id="L128">                        context.getClaims().claim(&quot;roles&quot;, user.roles().stream().toList());</span>
+<span class="nc" id="L129">                        context.getClaims().claim(&quot;must_change_password&quot;, user.mustChangePassword());</span>
+<span class="nc" id="L130">                        context.getClaims().claim(jwtProperties.userIdClaim(), user.id().toString());</span>
+<span class="nc" id="L131">                    },</span>
+<span class="nc" id="L132">                    () -&gt; context.getClaims().claim(&quot;roles&quot;, rolesFromAuthorities(context, authorityProperties)));</span>
+<span class="nc" id="L133">        };</span>
+    }
+
+    private static List&lt;String&gt; rolesFromAuthorities(JwtEncodingContext context, AuthorityProperties authorityProperties) {
+<span class="nc" id="L137">        var rolePrefix = authorityProperties.rolePrefix();</span>
+<span class="nc" id="L138">        return context.getPrincipal().getAuthorities().stream()</span>
+<span class="nc" id="L139">                .map(GrantedAuthority::getAuthority)</span>
+<span class="nc" id="L140">                .filter(authority -&gt; authority.startsWith(rolePrefix))</span>
+<span class="nc" id="L141">                .map(authority -&gt; authority.substring(rolePrefix.length()))</span>
+<span class="nc" id="L142">                .toList();</span>
+    }
+
+    @Bean
+    OAuth2TokenGenerator&lt;OAuth2Token&gt; tokenGenerator(JWKSource&lt;SecurityContext&gt; jwkSource,
+                                                     OAuth2TokenCustomizer&lt;JwtEncodingContext&gt; tokenCustomizer) {
+<span class="fc" id="L148">        var jwtGenerator = new JwtGenerator(new NimbusJwtEncoder(jwkSource));</span>
+<span class="fc" id="L149">        jwtGenerator.setJwtCustomizer(tokenCustomizer);</span>
+<span class="fc" id="L150">        var keyGenerator = new Base64StringKeyGenerator(Base64.getUrlEncoder().withoutPadding(), 96);</span>
+<span class="fc" id="L151">        OAuth2TokenGenerator&lt;OAuth2RefreshToken&gt; refreshTokenGenerator = context -&gt; {</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">            if (!OAuth2TokenType.REFRESH_TOKEN.equals(context.getTokenType())) {</span>
+<span class="nc" id="L153">                return null;</span>
+            }
+<span class="nc" id="L155">            if (!context.getRegisteredClient().getAuthorizationGrantTypes()</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">                    .contains(AuthorizationGrantType.REFRESH_TOKEN)) {</span>
+<span class="nc" id="L157">                return null;</span>
+            }
+<span class="nc" id="L159">            var issuedAt = Instant.now();</span>
+<span class="nc" id="L160">            var refreshTokenTimeToLive = context.getRegisteredClient().getTokenSettings().getRefreshTokenTimeToLive();</span>
+<span class="nc" id="L161">            var expiresAt = issuedAt.plus(refreshTokenTimeToLive);</span>
+<span class="nc" id="L162">            return new OAuth2RefreshToken(keyGenerator.generateKey(), issuedAt, expiresAt);</span>
+        };
+<span class="fc" id="L164">        return new DelegatingOAuth2TokenGenerator(jwtGenerator, new OAuth2AccessTokenGenerator(), refreshTokenGenerator);</span>
+    }
+
+    @Bean
+    AuthorizationServerSettings authorizationServerSettings(JwtProperties jwtProperties) {
+<span class="fc" id="L169">        return AuthorizationServerSettings.builder()</span>
+<span class="fc" id="L170">                .issuer(jwtProperties.issuer())</span>
+<span class="fc" id="L171">                .build();</span>
+    }
+
+    @Bean
+    JWKSource&lt;SecurityContext&gt; jwkSource(JwtProperties jwtProperties, ResourceLoader resourceLoader) {
+<span class="fc" id="L176">        var jwks = new ArrayList&lt;JWK&gt;();</span>
+<span class="fc" id="L177">        jwks.add(buildActiveRsaKey(jwtProperties, resourceLoader));</span>
+<span class="fc" id="L178">        jwtProperties.previousKeys().forEach(previousKey -&gt;</span>
+<span class="nc" id="L179">                jwks.add(loadPublicRsaKey(previousKey.keyId(), previousKey.publicKeyLocation(), resourceLoader)));</span>
+<span class="fc" id="L180">        return new ImmutableJWKSet&lt;&gt;(new JWKSet(jwks));</span>
+    }
+
+    @Bean
+    JwtDecoder jwtDecoder(JWKSource&lt;SecurityContext&gt; jwkSource) {
+<span class="fc" id="L185">        return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);</span>
+    }
+
+    private RSAKey buildActiveRsaKey(JwtProperties jwtProperties, ResourceLoader resourceLoader) {
+<span class="pc bpc" id="L189" title="3 of 4 branches missed.">        if (StringUtils.hasText(jwtProperties.privateKeyLocation()) &amp;&amp; StringUtils.hasText(jwtProperties.publicKeyLocation())) {</span>
+<span class="nc" id="L190">            return loadRsaKey(jwtProperties, resourceLoader);</span>
+        }
+<span class="fc" id="L192">        return generateRsaKey(jwtProperties.keyId());</span>
+    }
+
+    private RSAKey loadRsaKey(JwtProperties jwtProperties, ResourceLoader resourceLoader) {
+<span class="nc" id="L196">        try (InputStream privateKeyStream = resourceLoader.getResource(jwtProperties.privateKeyLocation()).getInputStream();</span>
+<span class="nc" id="L197">             InputStream publicKeyStream = resourceLoader.getResource(jwtProperties.publicKeyLocation()).getInputStream()) {</span>
+<span class="nc" id="L198">            RSAPrivateKey privateKey = RsaKeyConverters.pkcs8().convert(privateKeyStream);</span>
+<span class="nc" id="L199">            RSAPublicKey publicKey = RsaKeyConverters.x509().convert(publicKeyStream);</span>
+<span class="nc" id="L200">            return new RSAKey.Builder(publicKey)</span>
+<span class="nc" id="L201">                    .privateKey(privateKey)</span>
+<span class="nc" id="L202">                    .keyID(jwtProperties.keyId())</span>
+<span class="nc" id="L203">                    .build();</span>
+<span class="nc" id="L204">        } catch (IOException ex) {</span>
+<span class="nc" id="L205">            throw new IllegalStateException(&quot;Unable to load RSA key material for JWT signing&quot;, ex);</span>
+        }
+    }
+
+    private RSAKey loadPublicRsaKey(String keyId, String publicKeyLocation, ResourceLoader resourceLoader) {
+<span class="nc" id="L210">        try (InputStream publicKeyStream = resourceLoader.getResource(publicKeyLocation).getInputStream()) {</span>
+<span class="nc" id="L211">            RSAPublicKey publicKey = RsaKeyConverters.x509().convert(publicKeyStream);</span>
+<span class="nc" id="L212">            return new RSAKey.Builder(publicKey)</span>
+<span class="nc" id="L213">                    .keyID(keyId)</span>
+<span class="nc" id="L214">                    .build();</span>
+<span class="nc" id="L215">        } catch (IOException ex) {</span>
+<span class="nc" id="L216">            throw new IllegalStateException(&quot;Unable to load RSA public key for JWT verification: &quot; + publicKeyLocation, ex);</span>
+        }
+    }
+
+    private RSAKey generateRsaKey(String keyId) {
+        try {
+<span class="fc" id="L222">            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(&quot;RSA&quot;);</span>
+<span class="fc" id="L223">            keyPairGenerator.initialize(2048);</span>
+<span class="fc" id="L224">            KeyPair keyPair = keyPairGenerator.generateKeyPair();</span>
+<span class="fc" id="L225">            return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())</span>
+<span class="fc" id="L226">                    .privateKey((RSAPrivateKey) keyPair.getPrivate())</span>
+<span class="fc" id="L227">                    .keyID(keyId)</span>
+<span class="fc" id="L228">                    .build();</span>
+<span class="nc" id="L229">        } catch (Exception ex) {</span>
+<span class="nc" id="L230">            throw new IllegalStateException(&quot;Unable to generate RSA key material for JWT signing&quot;, ex);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

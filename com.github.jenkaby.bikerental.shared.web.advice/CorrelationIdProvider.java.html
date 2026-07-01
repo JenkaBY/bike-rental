@@ -15,7 +15,7 @@ public class CorrelationIdProvider {
 
     public String resolve() {
 <span class="fc" id="L17">        String correlationId = MDC.get(CORRELATION_ID);</span>
-<span class="pc bpc" id="L18" title="1 of 2 branches missed.">        return correlationId != null ? correlationId : uuidGenerator.generate().toString();</span>
+<span class="fc bfc" id="L18" title="All 2 branches covered.">        return correlationId != null ? correlationId : uuidGenerator.generate().toString();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

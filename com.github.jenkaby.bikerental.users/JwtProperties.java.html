@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtProperties.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.users</a> &gt; <span class="el_source">JwtProperties.java</span></div><h1>JwtProperties.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.users;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.validation.annotation.Validated;
+
+import java.time.Duration;
+import java.util.List;
+
+@Validated
+@ConfigurationProperties(prefix = &quot;app.security.jwt&quot;)
+public record JwtProperties(
+
+        @NotBlank
+        @DefaultValue(&quot;http://localhost:8080&quot;)
+        String issuer,
+
+        @NotNull
+        @DefaultValue(&quot;PT15M&quot;)
+        Duration accessTokenTtl,
+
+        @NotNull
+        @DefaultValue(&quot;P14D&quot;)
+        Duration refreshTokenTtl,
+
+        @NotBlank
+        @DefaultValue(&quot;bike-rental-identity&quot;)
+        String keyId,
+
+        @NotBlank
+        @DefaultValue(&quot;uid&quot;)
+        String userIdClaim,
+
+        String privateKeyLocation,
+
+        String publicKeyLocation,
+
+        List&lt;@Valid PreviousKey&gt; previousKeys
+) {
+
+<span class="fc" id="L44">    public JwtProperties {</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        previousKeys = previousKeys == null ? List.of() : previousKeys;</span>
+<span class="fc" id="L46">    }</span>
+
+<span class="nc" id="L48">    public record PreviousKey(</span>
+
+            @NotBlank
+            String keyId,
+
+            @NotBlank
+            String publicKeyLocation
+    ) {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

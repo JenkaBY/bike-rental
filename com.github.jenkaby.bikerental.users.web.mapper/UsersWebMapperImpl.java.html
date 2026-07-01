@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsersWebMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.users.web.mapper</a> &gt; <span class="el_source">UsersWebMapperImpl.java</span></div><h1>UsersWebMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.users.web.mapper;
+
+import com.github.jenkaby.bikerental.shared.mapper.EmailAddressMapper;
+import com.github.jenkaby.bikerental.users.application.usecase.CreateUserCommand;
+import com.github.jenkaby.bikerental.users.application.usecase.UpdateUserCommand;
+import com.github.jenkaby.bikerental.users.application.usecase.UserWithTemporaryPassword;
+import com.github.jenkaby.bikerental.users.domain.model.Role;
+import com.github.jenkaby.bikerental.users.domain.model.User;
+import com.github.jenkaby.bikerental.users.domain.model.UserStatus;
+import com.github.jenkaby.bikerental.users.web.dto.CreateUserRequest;
+import com.github.jenkaby.bikerental.users.web.dto.UpdateUserRequest;
+import com.github.jenkaby.bikerental.users.web.dto.UserCreationResponse;
+import com.github.jenkaby.bikerental.users.web.dto.UserResponse;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-java-compiler-worker-9.6.1.jar, environment: Java 21.0.11 (Amazon.com Inc.)&quot;
+)
+@Component
+public class UsersWebMapperImpl implements UsersWebMapper {
+
+    private final EmailAddressMapper emailAddressMapper;
+
+    @Autowired
+<span class="fc" id="L34">    public UsersWebMapperImpl(EmailAddressMapper emailAddressMapper) {</span>
+
+<span class="fc" id="L36">        this.emailAddressMapper = emailAddressMapper;</span>
+<span class="fc" id="L37">    }</span>
+
+    @Override
+    public UserResponse toResponse(User user) {
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if ( user == null ) {</span>
+<span class="nc" id="L42">            return null;</span>
+        }
+
+<span class="fc" id="L45">        UUID id = null;</span>
+<span class="fc" id="L46">        String username = null;</span>
+<span class="fc" id="L47">        String email = null;</span>
+<span class="fc" id="L48">        String displayName = null;</span>
+<span class="fc" id="L49">        UserStatus status = null;</span>
+<span class="fc" id="L50">        boolean mustChangePassword = false;</span>
+<span class="fc" id="L51">        Set&lt;Role&gt; roles = null;</span>
+<span class="fc" id="L52">        Instant lastLoginAt = null;</span>
+
+<span class="fc" id="L54">        id = user.getId();</span>
+<span class="fc" id="L55">        username = user.getUsername();</span>
+<span class="fc" id="L56">        email = emailAddressMapper.toString( user.getEmail() );</span>
+<span class="fc" id="L57">        displayName = user.getDisplayName();</span>
+<span class="fc" id="L58">        status = user.getStatus();</span>
+<span class="fc" id="L59">        mustChangePassword = user.isMustChangePassword();</span>
+<span class="fc" id="L60">        Set&lt;Role&gt; set = user.getRoles();</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if ( set != null ) {</span>
+<span class="fc" id="L62">            roles = new LinkedHashSet&lt;Role&gt;( set );</span>
+        }
+<span class="fc" id="L64">        lastLoginAt = user.getLastLoginAt();</span>
+
+<span class="fc" id="L66">        UserResponse userResponse = new UserResponse( id, username, email, displayName, status, mustChangePassword, roles, lastLoginAt );</span>
+
+<span class="fc" id="L68">        return userResponse;</span>
+    }
+
+    @Override
+    public List&lt;UserResponse&gt; toResponseList(List&lt;User&gt; users) {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if ( users == null ) {</span>
+<span class="nc" id="L74">            return null;</span>
+        }
+
+<span class="nc" id="L77">        List&lt;UserResponse&gt; list = new ArrayList&lt;UserResponse&gt;( users.size() );</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        for ( User user : users ) {</span>
+<span class="nc" id="L79">            list.add( toResponse( user ) );</span>
+<span class="nc" id="L80">        }</span>
+
+<span class="nc" id="L82">        return list;</span>
+    }
+
+    @Override
+    public UserCreationResponse toCreationResponse(UserWithTemporaryPassword result) {
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if ( result == null ) {</span>
+<span class="nc" id="L88">            return null;</span>
+        }
+
+<span class="fc" id="L91">        UserResponse user = null;</span>
+<span class="fc" id="L92">        String temporaryPassword = null;</span>
+
+<span class="fc" id="L94">        user = toResponse( result.user() );</span>
+<span class="fc" id="L95">        temporaryPassword = result.temporaryPassword();</span>
+
+<span class="fc" id="L97">        UserCreationResponse userCreationResponse = new UserCreationResponse( user, temporaryPassword );</span>
+
+<span class="fc" id="L99">        return userCreationResponse;</span>
+    }
+
+    @Override
+    public CreateUserCommand toCreateCommand(CreateUserRequest request) {
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L105">            return null;</span>
+        }
+
+<span class="fc" id="L108">        String username = null;</span>
+<span class="fc" id="L109">        String email = null;</span>
+<span class="fc" id="L110">        String displayName = null;</span>
+<span class="fc" id="L111">        Set&lt;Role&gt; roles = null;</span>
+<span class="fc" id="L112">        String password = null;</span>
+
+<span class="fc" id="L114">        username = request.username();</span>
+<span class="fc" id="L115">        email = request.email();</span>
+<span class="fc" id="L116">        displayName = request.displayName();</span>
+<span class="fc" id="L117">        Set&lt;Role&gt; set = request.roles();</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if ( set != null ) {</span>
+<span class="fc" id="L119">            roles = new LinkedHashSet&lt;Role&gt;( set );</span>
+        }
+<span class="fc" id="L121">        password = request.password();</span>
+
+<span class="fc" id="L123">        CreateUserCommand createUserCommand = new CreateUserCommand( username, email, displayName, roles, password );</span>
+
+<span class="fc" id="L125">        return createUserCommand;</span>
+    }
+
+    @Override
+    public UpdateUserCommand toUpdateCommand(UpdateUserRequest request) {
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L131">            return null;</span>
+        }
+
+<span class="fc" id="L134">        String displayName = null;</span>
+<span class="fc" id="L135">        Set&lt;Role&gt; roles = null;</span>
+<span class="fc" id="L136">        UserStatus status = null;</span>
+
+<span class="fc" id="L138">        displayName = request.displayName();</span>
+<span class="fc" id="L139">        Set&lt;Role&gt; set = request.roles();</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if ( set != null ) {</span>
+<span class="fc" id="L141">            roles = new LinkedHashSet&lt;Role&gt;( set );</span>
+        }
+<span class="fc" id="L143">        status = request.status();</span>
+
+<span class="fc" id="L145">        UpdateUserCommand updateUserCommand = new UpdateUserCommand( displayName, roles, status );</span>
+
+<span class="fc" id="L147">        return updateUserCommand;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

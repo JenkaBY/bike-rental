@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.users.infrastructure.persistence.adapter</a> &gt; <span class="el_source">UserRepositoryAdapter.java</span></div><h1>UserRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.users.infrastructure.persistence.adapter;
+
+import com.github.jenkaby.bikerental.users.domain.model.User;
+import com.github.jenkaby.bikerental.users.domain.repository.UserRepository;
+import com.github.jenkaby.bikerental.users.infrastructure.persistence.mapper.UserJpaMapper;
+import com.github.jenkaby.bikerental.users.infrastructure.persistence.repository.UserJpaRepository;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Component
+class UserRepositoryAdapter implements UserRepository {
+
+    private final UserJpaRepository repository;
+    private final UserJpaMapper mapper;
+
+<span class="fc" id="L19">    UserRepositoryAdapter(UserJpaRepository repository, UserJpaMapper mapper) {</span>
+<span class="fc" id="L20">        this.repository = repository;</span>
+<span class="fc" id="L21">        this.mapper = mapper;</span>
+<span class="fc" id="L22">    }</span>
+
+    @Override
+    public User save(User user) {
+<span class="fc" id="L26">        var entity = mapper.toEntity(user);</span>
+<span class="fc" id="L27">        var saved = repository.save(entity);</span>
+<span class="fc" id="L28">        return mapper.toDomain(saved);</span>
+    }
+
+    @Override
+    public Optional&lt;User&gt; findById(UUID id) {
+<span class="fc" id="L33">        return repository.findById(id).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public Optional&lt;User&gt; findByUsername(String username) {
+<span class="fc" id="L38">        return repository.findByUsername(username).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public Optional&lt;User&gt; findByEmail(String email) {
+<span class="nc" id="L43">        return repository.findByEmail(email).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+<span class="fc" id="L48">        return repository.existsByUsername(username);</span>
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+<span class="fc" id="L53">        return repository.existsByEmail(email);</span>
+    }
+
+    @Override
+    public boolean isEmpty() {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        return repository.count() == 0;</span>
+    }
+
+    @Override
+    public List&lt;User&gt; findAll() {
+<span class="nc" id="L63">        return repository.findAll().stream()</span>
+<span class="nc" id="L64">                .map(mapper::toDomain)</span>
+<span class="nc" id="L65">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminBootstrapRunner.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.users.infrastructure.bootstrap</a> &gt; <span class="el_source">AdminBootstrapRunner.java</span></div><h1>AdminBootstrapRunner.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.users.infrastructure.bootstrap;
+
+import com.github.jenkaby.bikerental.users.application.config.BootstrapAdminProperties;
+import com.github.jenkaby.bikerental.users.domain.model.Role;
+import com.github.jenkaby.bikerental.users.domain.model.User;
+import com.github.jenkaby.bikerental.users.domain.model.UserStatus;
+import com.github.jenkaby.bikerental.users.domain.repository.UserRepository;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.EmailAddress;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import java.util.Set;
+
+<span class="nc" id="L19">@Slf4j</span>
+@Component
+@ConditionalOnProperty(name = &quot;app.security.bootstrap.enabled&quot;, havingValue = &quot;true&quot;, matchIfMissing = true)
+@RequiredArgsConstructor
+class AdminBootstrapRunner implements ApplicationRunner {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final BootstrapAdminProperties properties;
+
+    @Override
+    public void run(ApplicationArguments args) {
+<span class="nc bnc" id="L31" title="All 4 branches missed.">        if (properties.password() == null || properties.password().isBlank()) {</span>
+<span class="nc" id="L32">            throw new IllegalStateException(&quot;Bootstrap admin is enabled but no password is configured. &quot;</span>
+                    + &quot;Set BOOTSTRAP_ADMIN_PASSWORD, or disable bootstrapping via app.security.bootstrap.enabled=false&quot;);
+        }
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        if (!userRepository.isEmpty()) {</span>
+<span class="nc" id="L36">            return;</span>
+        }
+<span class="nc" id="L38">        var admin = User.builder()</span>
+<span class="nc" id="L39">                .username(properties.username())</span>
+<span class="nc" id="L40">                .email(new EmailAddress(properties.email()))</span>
+<span class="nc" id="L41">                .displayName(properties.displayName())</span>
+<span class="nc" id="L42">                .passwordHash(passwordEncoder.encode(properties.password()))</span>
+<span class="nc" id="L43">                .status(UserStatus.ACTIVE)</span>
+<span class="nc" id="L44">                .mustChangePassword(true)</span>
+<span class="nc" id="L45">                .roles(Set.of(Role.ADMIN, Role.OPERATOR))</span>
+<span class="nc" id="L46">                .build();</span>
+<span class="nc" id="L47">        userRepository.save(admin);</span>
+<span class="nc" id="L48">        log.info(&quot;Bootstrapped initial admin user '{}'&quot;, properties.username());</span>
+<span class="nc" id="L49">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

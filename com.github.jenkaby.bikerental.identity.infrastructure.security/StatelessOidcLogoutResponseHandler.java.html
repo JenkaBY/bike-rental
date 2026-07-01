@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatelessOidcLogoutResponseHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.identity.infrastructure.security</a> &gt; <span class="el_source">StatelessOidcLogoutResponseHandler.java</span></div><h1>StatelessOidcLogoutResponseHandler.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.identity.infrastructure.security;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcLogoutAuthenticationToken;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.io.IOException;
+
+<span class="fc" id="L18">final class StatelessOidcLogoutResponseHandler implements AuthenticationSuccessHandler {</span>
+
+<span class="fc" id="L20">    private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();</span>
+<span class="fc" id="L21">    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();</span>
+
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
+<span class="nc" id="L26">        logoutHandler.logout(request, response, SecurityContextHolder.getContext().getAuthentication());</span>
+<span class="nc" id="L27">        redirectStrategy.sendRedirect(request, response, redirectTarget((OidcLogoutAuthenticationToken) authentication));</span>
+<span class="nc" id="L28">    }</span>
+
+    private String redirectTarget(OidcLogoutAuthenticationToken authentication) {
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (!StringUtils.hasText(authentication.getPostLogoutRedirectUri())) {</span>
+<span class="nc" id="L32">            return &quot;/&quot;;</span>
+        }
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (!StringUtils.hasText(authentication.getState())) {</span>
+<span class="nc" id="L35">            return authentication.getPostLogoutRedirectUri();</span>
+        }
+<span class="nc" id="L37">        return UriComponentsBuilder.fromUriString(authentication.getPostLogoutRedirectUri())</span>
+<span class="nc" id="L38">                .queryParam(OAuth2ParameterNames.STATE, authentication.getState())</span>
+<span class="nc" id="L39">                .toUriString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

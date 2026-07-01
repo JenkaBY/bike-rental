@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserAccountController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.users.web</a> &gt; <span class="el_source">UserAccountController.java</span></div><h1>UserAccountController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.users.web;
+
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import com.github.jenkaby.bikerental.users.application.usecase.UserAccountUseCase;
+import com.github.jenkaby.bikerental.users.web.dto.CreateUserRequest;
+import com.github.jenkaby.bikerental.users.web.dto.UpdateUserRequest;
+import com.github.jenkaby.bikerental.users.web.dto.UserCreationResponse;
+import com.github.jenkaby.bikerental.users.web.dto.UserResponse;
+import com.github.jenkaby.bikerental.users.web.mapper.UsersWebMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@Validated
+@RestController
+@RequestMapping(path = &quot;/api/auth/users&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = OpenApiConfig.Tags.USERS)
+<span class="fc" id="L35">@Slf4j</span>
+@RequiredArgsConstructor
+class UserAccountController {
+
+    private final UserAccountUseCase userAccount;
+    private final UsersWebMapper mapper;
+
+    @PostMapping
+    @Operation(summary = &quot;Create account&quot;, description = &quot;Creates a user account with a temporary password (admin only)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Account created&quot;,
+                    content = @Content(schema = @Schema(implementation = UserCreationResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;409&quot;, description = &quot;Username or email already exists&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;UserCreationResponse&gt; create(@Valid @RequestBody CreateUserRequest request) {
+<span class="fc" id="L53">        log.info(&quot;[POST] Creating account with username: {}&quot;, request.username());</span>
+<span class="fc" id="L54">        var result = userAccount.createUser(mapper.toCreateCommand(request));</span>
+<span class="fc" id="L55">        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toCreationResponse(result));</span>
+    }
+
+    @GetMapping
+    @Operation(summary = &quot;List accounts&quot;, description = &quot;Returns all user accounts (admin only)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Account list returned&quot;,
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserResponse.class))))
+    })
+    public ResponseEntity&lt;List&lt;UserResponse&gt;&gt; list() {
+<span class="nc" id="L65">        return ResponseEntity.ok(mapper.toResponseList(userAccount.listUsers()));</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Get account&quot;, description = &quot;Returns a single user account (admin only)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Account returned&quot;,
+                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Account not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;UserResponse&gt; get(@Parameter(description = &quot;Account ID&quot;) @PathVariable(&quot;id&quot;) UUID id) {
+<span class="nc" id="L77">        return ResponseEntity.ok(mapper.toResponse(userAccount.getUser(id)));</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Update account&quot;, description = &quot;Updates roles, status and display name (admin only)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Account updated&quot;,
+                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Account not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;UserResponse&gt; update(@Parameter(description = &quot;Account ID&quot;) @PathVariable(&quot;id&quot;) UUID id,
+                                               @Valid @RequestBody UpdateUserRequest request) {
+<span class="fc" id="L92">        log.info(&quot;[PUT] Updating account with id: {}&quot;, id);</span>
+<span class="fc" id="L93">        var user = userAccount.updateUser(id, mapper.toUpdateCommand(request));</span>
+<span class="fc" id="L94">        return ResponseEntity.ok(mapper.toResponse(user));</span>
+    }
+
+    @PostMapping(&quot;/{id}/deactivate&quot;)
+    @Operation(summary = &quot;Deactivate account&quot;, description = &quot;Disables a user account and revokes its sessions; accounts are never deleted (admin only)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Account deactivated&quot;,
+                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Account not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;UserResponse&gt; deactivate(@Parameter(description = &quot;Account ID&quot;) @PathVariable(&quot;id&quot;) UUID id) {
+<span class="fc" id="L106">        log.info(&quot;[POST] Deactivating account with id: {}&quot;, id);</span>
+<span class="fc" id="L107">        var user = userAccount.deactivateUser(id);</span>
+<span class="fc" id="L108">        return ResponseEntity.ok(mapper.toResponse(user));</span>
+    }
+
+    @PostMapping(&quot;/{id}/reset-password&quot;)
+    @Operation(summary = &quot;Reset password&quot;, description = &quot;Sets a temporary password, forces change, revokes sessions (admin only)&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Password reset — temporary password returned&quot;,
+                    content = @Content(schema = @Schema(implementation = UserCreationResponse.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Account not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;UserCreationResponse&gt; resetPassword(@Parameter(description = &quot;Account ID&quot;) @PathVariable(&quot;id&quot;) UUID id) {
+<span class="fc" id="L120">        log.info(&quot;[POST] Resetting password for account with id: {}&quot;, id);</span>
+<span class="fc" id="L121">        var result = userAccount.resetPassword(id);</span>
+<span class="fc" id="L122">        return ResponseEntity.ok(mapper.toCreationResponse(result));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
