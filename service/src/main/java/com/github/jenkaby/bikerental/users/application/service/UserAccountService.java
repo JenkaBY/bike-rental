@@ -1,5 +1,8 @@
 package com.github.jenkaby.bikerental.users.application.service;
 
+import com.github.jenkaby.bikerental.shared.domain.model.vo.EmailAddress;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.users.SessionRevoker;
 import com.github.jenkaby.bikerental.users.application.config.PasswordPolicyProperties;
 import com.github.jenkaby.bikerental.users.application.usecase.CreateUserCommand;
 import com.github.jenkaby.bikerental.users.application.usecase.UpdateUserCommand;
@@ -11,9 +14,6 @@ import com.github.jenkaby.bikerental.users.domain.exception.PasswordPolicyViolat
 import com.github.jenkaby.bikerental.users.domain.model.User;
 import com.github.jenkaby.bikerental.users.domain.model.UserStatus;
 import com.github.jenkaby.bikerental.users.domain.repository.UserRepository;
-import com.github.jenkaby.bikerental.users.SessionRevoker;
-import com.github.jenkaby.bikerental.shared.domain.model.vo.EmailAddress;
-import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -71,8 +71,9 @@ class UserAccountService implements UserAccountUseCase {
             user.assignRoles(command.roles());
         }
         if (command.status() != null) {
-            applyStatus(user, command.status());
+            user.applyStatus(command.status());
         }
+
         return userRepository.save(user);
     }
 
@@ -110,13 +111,7 @@ class UserAccountService implements UserAccountUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException(User.class, id));
     }
 
-    private void applyStatus(User user, UserStatus status) {
-        if (status == UserStatus.DISABLED) {
-            user.disable();
-        } else {
-            user.enable();
-        }
-    }
+
 
     private void validatePassword(String password) {
         if (password == null || password.length() < passwordPolicyProperties.minLength()) {
