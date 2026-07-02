@@ -17,9 +17,6 @@ spring:
 logging:
   level:
     root: info
-    org.springframework.security.oauth2.server.authorization: DEBUG
-    org.springframework.security.oauth2.server.authorization.authentication: TRACE
-    org.springframework.security.web: DEBUG
 
 springdoc:
   swagger-ui:
