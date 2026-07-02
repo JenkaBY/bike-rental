@@ -36,6 +36,8 @@ public class ScenarioContext {
     private PricingParams pricingParams;
     private List<PricingParamsRequestTransformer.PricingParamsRequestHolder> pricingParamsHolders;
     private List<CostCalculationV2Request.EquipmentItemRequest> equipmentItems;
+    private String oauth2ClientId;
+    private String oauth2RefreshToken;
 
     @SneakyThrows
     public <T> T getResponseBody(Class<T> clazz) {

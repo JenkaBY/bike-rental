@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.jackson.SecurityJacksonModules;
@@ -46,7 +46,8 @@ import java.util.List;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,7 +62,8 @@ public class AuthorizationServerConfig {
     @Bean
     @Order(1)
     SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http,
-                                                               RequestCache requestCache) throws Exception {
+                                                               RequestCache requestCache,
+                                                               RegisteredClientRepository registeredClientRepository) throws Exception {
         var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
         http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
                 .with(authorizationServerConfigurer, server -> server.oidc(oidc -> oidc
@@ -70,14 +72,21 @@ public class AuthorizationServerConfig {
                                     converters.clear();
                                     converters.add(new StatelessOidcLogoutAuthenticationConverter());
                                 })
-                                .logoutResponseHandler(new StatelessOidcLogoutResponseHandler()))))
+                                .logoutResponseHandler(new StatelessOidcLogoutResponseHandler())))
+                        .clientAuthentication(clientAuthentication -> clientAuthentication
+                                .authenticationConverter(new PublicClientRefreshTokenAuthenticationConverter())
+                                .authenticationProvider(new PublicClientRefreshTokenAuthenticationProvider(registeredClientRepository))))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))
                 .cors(Customizer.withDefaults())
                 .requestCache(cache -> cache.requestCache(requestCache))
-                .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
-                        new LoginUrlAuthenticationEntryPoint("/login"),
-                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
+                .exceptionHandling(exceptions -> exceptions
+                        .defaultAuthenticationEntryPointFor(
+                                new LoginUrlAuthenticationEntryPoint("/login"),
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/oauth2/authorize"))
+                        .defaultAuthenticationEntryPointFor(
+                                new OAuth2ErrorAuthenticationEntryPoint(),
+                                AnyRequestMatcher.INSTANCE))
                 .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()));
         return http.build();
     }
