@@ -54,6 +54,8 @@ public abstract class BatchCalculationMapper {
     @Mapping(target = "discount", source = "discountPercent")
     public abstract RentalCostCalculationV2Command toV2Command(CostCalculationV2Request request);
 
+    @Mapping(target = "startAt", ignore = true)
+    @Mapping(target = "plannedDuration", ignore = true)
     public abstract EquipmentCostItemV2 toV2Item(CostCalculationV2Request.EquipmentItemRequest item);
 
     //    TODO use Mapstruct features

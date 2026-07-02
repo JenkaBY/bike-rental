@@ -4,11 +4,14 @@ import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +26,21 @@ public class RentalEquipmentFactory {
         if (newEquipments.isEmpty()) {
             return List.of();
         }
-
         var costCommand = costCommandMapper.toEstimateCommand(rental, newEquipments);
+        return buildWithCost(newEquipments, costCommand);
+    }
+
+    public List<RentalEquipment> buildActiveWithCost(@NonNull Rental rental, @NonNull List<EquipmentInfo> newEquipments,
+                                                     @NonNull LocalDateTime addedAt) {
+        if (newEquipments.isEmpty()) {
+            return List.of();
+        }
+        var remainingDuration = Duration.between(addedAt, rental.getExpectedReturnAt());
+        var costCommand = costCommandMapper.toMidRentalEstimateCommand(rental, newEquipments, remainingDuration, addedAt);
+        return buildWithCost(newEquipments, costCommand);
+    }
+
+    private List<RentalEquipment> buildWithCost(List<EquipmentInfo> newEquipments, RentalCostCalculationV2Command costCommand) {
         var breakdowns = tariffV2Facade.calculateRentalCostV2(costCommand).equipmentBreakdowns();
 
         var result = new ArrayList<RentalEquipment>();

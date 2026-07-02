@@ -302,6 +302,21 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 > **Sibling code:** equipment that exists but is *out of service* (`EquipmentNotAvailableException`) returns the
 > distinct `shared.equipment.not_available` (HTTP 422) — see the `shared.*` section above.
 
+### `rental.window.elapsed`
+- **HTTP:** 422 · **Trigger:** equipment was requested to be added to an ACTIVE rental whose expected return time
+  has already passed (`RentalWindowElapsedException`), leaving no billable window for the new item.
+- **Extra:** `params` = `{rentalId, expectedReturnAt, now}`.
+
+```json
+{
+  "status": 422,
+  "detail": "Cannot add equipment to rental 10: rental window has elapsed. Expected return at 2026-02-10T10:00, now 2026-02-10T11:00",
+  "correlationId": "018f...",
+  "errorCode": "rental.window.elapsed",
+  "params": {"rentalId": 10, "expectedReturnAt": "2026-02-10T10:00:00", "now": "2026-02-10T11:00:00"}
+}
+```
+
 ---
 
 ## `identity.*` — authentication & accounts

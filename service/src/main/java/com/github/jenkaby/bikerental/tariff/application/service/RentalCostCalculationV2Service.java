@@ -82,28 +82,30 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
     }
 
     private RentalCostCalculationResult executeNormalMode(RentalCostCalculationV2Command command) {
-        LocalDate rentalDate = command.startAt().toLocalDate();
         Duration planned = command.plannedDuration();
 
         List<EquipmentCostBreakdown> breakdowns = new ArrayList<>();
         Money subtotal = Money.zero();
         boolean anyEstimate = false;
-        Map<String, TariffV2> tariffCache = new HashMap<>();
+        Map<TariffLookupKey, TariffV2> tariffCache = new HashMap<>();
 
         for (EquipmentCostItemV2 item : command.equipments()) {
             boolean itemIsEstimate = item.isEstimate();
             anyEstimate |= itemIsEstimate;
 
+            LocalDateTime itemStartAt = item.resolveStartAt(command.startAt());
+            Duration itemPlanned = item.resolvePlannedDuration(planned);
+
             LocalDateTime itemReturnAt = itemIsEstimate
-                    ? command.startAt().plus(planned)
+                    ? itemStartAt.plus(itemPlanned)
                     : item.returnAt();
 
-            Duration actualDuration = Duration.between(command.startAt(), itemReturnAt);
+            Duration actualDuration = Duration.between(itemStartAt, itemReturnAt);
             Duration overtime;
             Duration billedDuration;
             Duration forgiven;
 
-            Duration overtimeDur = actualDuration.minus(planned);
+            Duration overtimeDur = actualDuration.minus(itemPlanned);
             if (overtimeDur.isNegative() || overtimeDur.isZero()) {
                 billedDuration = actualDuration;
                 overtime = Duration.ZERO;
@@ -113,7 +115,7 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
                 long overtimeMinutes = overtimeDur.toMinutes();
                 int thresholdMinutes = rentalProperties.getForgivenessThresholdMinutes();
                 if (overtimeMinutes <= thresholdMinutes) {
-                    billedDuration = planned;
+                    billedDuration = itemPlanned;
                     forgiven = overtimeDur;
                 } else {
                     billedDuration = actualDuration;
@@ -121,12 +123,13 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
                 }
             }
 
-            TariffV2 tariff = tariffCache.computeIfAbsent(item.equipmentType(),
-                    type -> selectTariffUseCase.execute(
-                            new SelectTariffV2UseCase.SelectTariffCommand(type, planned, rentalDate)));
+            TariffLookupKey lookupKey = new TariffLookupKey(item.equipmentType(), itemPlanned, itemStartAt.toLocalDate());
+            TariffV2 tariff = tariffCache.computeIfAbsent(lookupKey,
+                    key -> selectTariffUseCase.execute(
+                            new SelectTariffV2UseCase.SelectTariffCommand(key.equipmentType(), key.plannedDuration(), key.rentalDate())));
 
-            LocalDateTime billingReturnAt = command.startAt().plus(billedDuration);
-            RentalCostV2 cost = tariff.calculateCost(command.startAt(), billingReturnAt);
+            LocalDateTime billingReturnAt = itemStartAt.plus(billedDuration);
+            RentalCostV2 cost = tariff.calculateCost(itemStartAt, billingReturnAt);
 
             breakdowns.add(new EquipmentCostBreakdownV2(
                     item.equipmentId(),
@@ -163,5 +166,8 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
                 anyEstimate,
                 false
         );
+    }
+
+    private record TariffLookupKey(String equipmentType, Duration plannedDuration, LocalDate rentalDate) {
     }
 }

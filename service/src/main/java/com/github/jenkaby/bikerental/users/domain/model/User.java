@@ -62,4 +62,12 @@ public class User {
     public boolean hasPassword() {
         return this.passwordHash != null && !this.passwordHash.isBlank();
     }
+
+    public void applyStatus(UserStatus status) {
+        if (status == UserStatus.DISABLED) {
+            this.disable();
+        } else {
+            this.enable();
+        }
+    }
 }

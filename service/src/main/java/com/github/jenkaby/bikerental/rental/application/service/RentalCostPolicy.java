@@ -1,14 +1,15 @@
 package com.github.jenkaby.bikerental.rental.application.service;
 
 import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
-import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.application.RentalEquipmentCostCalculator;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalPlannedDurationException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,9 @@ public class RentalCostPolicy {
         rental.applyEstimatedCost(results);
     }
 
-    public void calculateFinalCost(Rental rental, List<EquipmentInfo> returningEquipments, Duration billableDuration) {
-        var results = calculator.calculateFinal(rental, returningEquipments, billableDuration);
+    public void calculateFinalCost(Rental rental, List<RentalEquipment> returningEquipments,
+                                   RentalDurationCalculator durationCalculator, LocalDateTime returnTime) {
+        var results = calculator.calculateFinal(rental, returningEquipments, durationCalculator, returnTime);
         rental.applyFinalCost(results);
     }
 }

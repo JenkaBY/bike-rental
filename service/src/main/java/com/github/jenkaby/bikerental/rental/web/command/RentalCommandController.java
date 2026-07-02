@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
+import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
@@ -40,6 +41,7 @@ class RentalCommandController {
     private final CreateOrUpdateDraftRentalUseCase updateDraftRentalUseCase;
     private final UpdateRentalUseCase updateRentalUseCase;
     private final ReturnEquipmentUseCase returnEquipmentUseCase;
+    private final AddEquipmentUseCase addEquipmentUseCase;
     private final RentalCommandMapper commandMapper;
     private final RentalQueryMapper queryMapper;
     private final RentalLifecycleUseCase rentalLifecycleUseCase;
@@ -48,12 +50,14 @@ class RentalCommandController {
             CreateOrUpdateDraftRentalUseCase updateDraftRentalUseCase,
             UpdateRentalUseCase updateRentalUseCase,
             ReturnEquipmentUseCase returnEquipmentUseCase,
+            AddEquipmentUseCase addEquipmentUseCase,
             RentalCommandMapper commandMapper,
             RentalQueryMapper queryMapper,
             RentalLifecycleUseCase rentalLifecycleUseCase) {
         this.updateDraftRentalUseCase = updateDraftRentalUseCase;
         this.updateRentalUseCase = updateRentalUseCase;
         this.returnEquipmentUseCase = returnEquipmentUseCase;
+        this.addEquipmentUseCase = addEquipmentUseCase;
         this.commandMapper = commandMapper;
         this.queryMapper = queryMapper;
         this.rentalLifecycleUseCase = rentalLifecycleUseCase;
@@ -194,6 +198,32 @@ class RentalCommandController {
         var result = returnEquipmentUseCase.execute(command);
         var response = commandMapper.toReturnResponse(result);
         log.info("[POST] Equipments return processed successfully for rentalId=[{}]", result.rental().getId());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{rentalId}/equipments")
+    @Operation(summary = "Add equipment to an active rental",
+            description = "Adds new equipment to an ACTIVE rental. The added equipment starts now and shares the rental's expected return time; the rental's estimated cost is recalculated. No payment is taken until return.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Equipment added, rental returned with recalculated estimate",
+                    content = @Content(schema = @Schema(implementation = RentalResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Rental not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Equipment occupied by another rental",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Rental not active, rental window elapsed, referenced equipment not found, or equipment out of service",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<RentalResponse> addEquipment(
+            @Positive @PathVariable("rentalId") Long rentalId,
+            @Valid @RequestBody AddRentalEquipmentRequest request) {
+        log.info("[POST] Adding equipment to rentalId={}, equipmentIds={}", rentalId, request.equipmentIds());
+        var command = commandMapper.toAddEquipmentCommand(rentalId, request);
+        Rental rental = addEquipmentUseCase.execute(command);
+        var response = queryMapper.toResponse(rental);
+        log.info("[POST] Equipment added successfully to rental {}", rental.getId());
         return ResponseEntity.ok(response);
     }
 
