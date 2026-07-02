@@ -16,12 +16,12 @@ class UserAuthFacadeImpl implements UserAuthFacade {
 
     @Override
     public Optional&lt;UserAuthView&gt; findByUsername(String username) {
-<span class="nc" id="L19">        return userRepository.findByUsername(username).map(this::toView);</span>
+<span class="fc" id="L19">        return userRepository.findByUsername(username).map(this::toView);</span>
     }
 
     @Override
     public Optional&lt;UserAuthView&gt; findByEmail(String email) {
-<span class="nc" id="L24">        return userRepository.findByEmail(email).map(this::toView);</span>
+<span class="fc" id="L24">        return userRepository.findByEmail(email).map(this::toView);</span>
     }
 
     private UserAuthView toView(com.github.jenkaby.bikerental.users.domain.model.User user) {

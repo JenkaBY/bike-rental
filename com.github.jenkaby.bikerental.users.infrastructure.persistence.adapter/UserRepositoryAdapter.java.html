@@ -40,7 +40,7 @@ class UserRepositoryAdapter implements UserRepository {
 
     @Override
     public Optional&lt;User&gt; findByEmail(String email) {
-<span class="nc" id="L43">        return repository.findByEmail(email).map(mapper::toDomain);</span>
+<span class="fc" id="L43">        return repository.findByEmail(email).map(mapper::toDomain);</span>
     }
 
     @Override
