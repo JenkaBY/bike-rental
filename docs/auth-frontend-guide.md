@@ -168,6 +168,10 @@ it once so the admin can hand it to the user; the user must change it on first l
 
 - **Refresh:** the OIDC library auto-refreshes using the `refresh_token` (`automaticSilentRenew`). On `401` from the
   API, attempt a refresh once, then redirect to login if it fails.
+- Since the SPA is a **public client**, the refresh call is `POST /oauth2/token` with
+  `grant_type=refresh_token&client_id=...&refresh_token=...` and **no `client_secret`** — the same
+  `ClientAuthenticationMethod.NONE` used for the authorization-code exchange. A certified OIDC library sends this
+  correctly by default; there is nothing extra to configure.
 - **Logout:** clear local tokens and call `userManager.signoutRedirect()` (RP-initiated logout at
   `/connect/logout`). Note that an admin password-reset or deactivation **revokes the user's refresh tokens** server
   side, so the next refresh fails and the user is sent back to login.
@@ -185,6 +189,13 @@ All API errors are RFC 9457 **ProblemDetail** JSON with a stable `errorCode` —
 | 400 | `shared.method_arguments.validation_failed` | read `errors[].field` / `errors[].code` for field hints |
 
 See [docs/error-codes.md](error-codes.md) for the full catalogue.
+
+> **`/oauth2/authorize` and `/oauth2/token` are not `/api/**` endpoints and do not use this envelope.** They are
+> standard OAuth2/OIDC endpoints and return the standard OAuth2 JSON error shape on failure —
+> `{ "error": "invalid_request", "error_description": "...", "error_uri": "..." }` — with no `errorCode` or
+> `correlationId`. A malformed or unauthenticated `/oauth2/token` call (e.g. a failed refresh) responds `401` with
+> that JSON body rather than redirecting to the login page, so an XHR/fetch-based silent refresh can detect the
+> failure directly from the response status instead of following a redirect.
 
 ---
 

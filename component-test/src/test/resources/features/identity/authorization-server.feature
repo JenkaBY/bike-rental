@@ -35,3 +35,17 @@ Feature: Identity authorization server and access control
     And the response contains
       | path        | value                  |
       | $.errorCode | identity.access.denied |
+
+  Scenario: Public SPA client refreshes its access token without a client secret
+    Given a refresh token has been issued for the SPA client "admin-spa"
+    When the refresh token is exchanged at the "/oauth2/token" endpoint
+    Then the response status is 200
+    And the response contains a new access token
+
+  Scenario: Malformed token request receives a JSON OAuth2 error instead of a login redirect
+    Given no authentication is provided
+    When a POST request has been made to "/oauth2/token" endpoint
+    Then the response status is 401
+    And the response contains
+      | path    | value           |
+      | $.error | invalid_request |
