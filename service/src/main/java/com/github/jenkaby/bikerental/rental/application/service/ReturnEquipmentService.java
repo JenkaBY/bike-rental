@@ -1,13 +1,11 @@
 package com.github.jenkaby.bikerental.rental.application.service;
 
-import com.github.jenkaby.bikerental.equipment.EquipmentFacade;
 import com.github.jenkaby.bikerental.finance.FinanceFacade;
 import com.github.jenkaby.bikerental.finance.SettlementInfo;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalEventMapper;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
-import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
@@ -39,7 +37,6 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
     private final FinanceFacade financeFacade;
     private final RentalEventMapper eventMapper;
     private final EventPublisher eventPublisher;
-    private final EquipmentFacade equipmentFacade;
     private final Clock clock;
     private final RentalCostPolicy costPolicy;
 
@@ -55,13 +52,10 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
             throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);
         }
 
-        var durationResult = rental.calculateActualDuration(durationCalculator, returnTime);
+        rental.calculateActualDuration(durationCalculator, returnTime);
         var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);
-        var equipmentInfos = equipmentFacade.findByIds(equipmentsToReturn.stream()
-                .map(RentalEquipment::getEquipmentId)
-                .toList());
 
-        costPolicy.calculateFinalCost(rental, equipmentInfos, durationResult.billableDuration());
+        costPolicy.calculateFinalCost(rental, equipmentsToReturn, durationCalculator, returnTime);
 
         if (!rental.allEquipmentsReturned()) {
             Rental saved = rentalRepository.save(rental);
@@ -70,7 +64,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
         }
 
         var totalFinalCost = rental.getFinalCost();
-        log.info("Rental [{}] returning equipments {}, final cost [{}]", rental.getId(), equipmentInfos, totalFinalCost);
+        log.info("Rental [{}] returning equipments {}, final cost [{}]", rental.getId(), equipmentsToReturn, totalFinalCost);
         SettlementInfo settlementInfo = null;
         try {
             settlementInfo = financeFacade.settleRental(

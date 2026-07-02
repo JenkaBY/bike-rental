@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.rental.domain.model;
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
 import com.github.jenkaby.bikerental.rental.domain.exception.RentalNotReadyForActivationException;
+import com.github.jenkaby.bikerental.rental.domain.exception.RentalWindowElapsedException;
 import com.github.jenkaby.bikerental.rental.domain.model.vo.EquipmentCostResult;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationResult;
@@ -200,6 +201,24 @@ public class Rental {
             throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
         }
         this.equipments.add(equipment);
+        this.updatedAt = Instant.now();
+    }
+
+    public void ensureCanAddEquipmentAt(LocalDateTime addedAt) {
+        if (this.status != RentalStatus.ACTIVE) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.ACTIVE);
+        }
+        if (this.expectedReturnAt == null || !addedAt.isBefore(this.expectedReturnAt)) {
+            throw new RentalWindowElapsedException(this.id, this.expectedReturnAt, addedAt);
+        }
+    }
+
+    public void addActiveEquipments(List<RentalEquipment> newItems, LocalDateTime addedAt) {
+        ensureCanAddEquipmentAt(addedAt);
+        newItems.forEach(item -> {
+            item.activateFrom(addedAt, this.expectedReturnAt);
+            this.equipments.add(item);
+        });
         this.updatedAt = Instant.now();
     }
 

@@ -37,9 +37,13 @@ public class RentalEquipment {
         if (rental.getExpectedReturnAt() == null) {
             throw new IllegalArgumentException("Rental must have a Expected return at to activate equipment");
         }
+        return this.activateFrom(rental.getStartedAt(), rental.getExpectedReturnAt());
+    }
+
+    public RentalEquipment activateFrom(LocalDateTime activatedAt, LocalDateTime expectedReturnAt) {
         this.setStatus(RentalEquipmentStatus.ACTIVE);
-        this.setStartedAt(rental.getStartedAt());
-        this.setExpectedReturnAt(rental.getExpectedReturnAt());
+        this.setStartedAt(activatedAt);
+        this.setExpectedReturnAt(expectedReturnAt);
         return this;
     }
 

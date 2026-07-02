@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
+import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
@@ -61,6 +62,9 @@ class RentalCommandControllerTest {
     private UpdateRentalUseCase updateRentalUseCase;
     @MockitoBean
     private ReturnEquipmentUseCase returnEquipmentUseCase;
+
+    @MockitoBean
+    private AddEquipmentUseCase addEquipmentUseCase;
 
     @MockitoBean
     private RentalCommandMapper commandMapper;
@@ -1499,6 +1503,173 @@ class RentalCommandControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(
                                         new RentalLifecycleRequest(LifecycleStatus.ACTIVE, "op-1"))))
+                        .andExpect(status().isNotFound());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/rentals/{rentalId}/equipments")
+    class AddEquipment {
+
+        private static final String ADD_EQUIPMENT_URL = API_RENTALS + "/{rentalId}/equipments";
+
+        @Nested
+        @DisplayName("Should return 200 OK")
+        class ShouldReturn200 {
+
+            @Test
+            @DisplayName("when request is valid")
+            void whenRequestIsValid() throws Exception {
+                var request = new AddRentalEquipmentRequest(List.of(1L, 2L), "operator-1");
+
+                given(commandMapper.toAddEquipmentCommand(anyLong(), any(AddRentalEquipmentRequest.class)))
+                        .willReturn(mock(AddEquipmentUseCase.AddEquipmentCommand.class));
+                given(addEquipmentUseCase.execute(any(AddEquipmentUseCase.AddEquipmentCommand.class)))
+                        .willReturn(mock(Rental.class));
+                given(queryMapper.toResponse(any(Rental.class)))
+                        .willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isOk());
+
+                verify(addEquipmentUseCase).execute(any(AddEquipmentUseCase.AddEquipmentCommand.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("Should return 400 Bad Request")
+        class ShouldReturn400 {
+
+            @ParameterizedTest
+            @ValueSource(longs = {0L, -1L})
+            @DisplayName("when rentalId is non-positive")
+            void whenRentalIdIsNonPositive(Long rentalId) throws Exception {
+                var request = new AddRentalEquipmentRequest(List.of(1L), "operator-1");
+
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, rentalId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(addEquipmentUseCase, never()).execute(any(AddEquipmentUseCase.AddEquipmentCommand.class));
+            }
+
+            @Test
+            @DisplayName("when request body is null")
+            void whenRequestBodyIsNull() throws Exception {
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("null"))
+                        .andExpect(status().isBadRequest());
+
+                verify(addEquipmentUseCase, never()).execute(any(AddEquipmentUseCase.AddEquipmentCommand.class));
+            }
+
+            @Test
+            @DisplayName("when equipmentIds is empty")
+            void whenEquipmentIdsIsEmpty() throws Exception {
+                var request = new AddRentalEquipmentRequest(List.of(), "operator-1");
+
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("equipmentIds"));
+
+                verify(addEquipmentUseCase, never()).execute(any(AddEquipmentUseCase.AddEquipmentCommand.class));
+            }
+
+            @Test
+            @DisplayName("when equipmentIds is null")
+            void whenEquipmentIdsIsNull() throws Exception {
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"operatorId\": \"operator-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("equipmentIds"));
+
+                verify(addEquipmentUseCase, never()).execute(any(AddEquipmentUseCase.AddEquipmentCommand.class));
+            }
+
+            @Test
+            @DisplayName("when equipmentIds contains null element")
+            void whenEquipmentIdsContainsNull() throws Exception {
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"equipmentIds\": [1, null], \"operatorId\": \"operator-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("equipmentIds[1]"));
+
+                verify(addEquipmentUseCase, never()).execute(any(AddEquipmentUseCase.AddEquipmentCommand.class));
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = {"0", "-5"})
+            @DisplayName("when equipmentIds contains non-positive values")
+            void whenEquipmentIdsContainsNonPositive(String equipmentId) throws Exception {
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"equipmentIds\": [" + equipmentId + "], \"operatorId\": \"operator-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(addEquipmentUseCase, never()).execute(any(AddEquipmentUseCase.AddEquipmentCommand.class));
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = {"", "   "})
+            @DisplayName("when operatorId is blank")
+            void whenOperatorIdIsBlank(String operatorId) throws Exception {
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"equipmentIds\": [1], \"operatorId\": \"" + operatorId + "\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(addEquipmentUseCase, never()).execute(any(AddEquipmentUseCase.AddEquipmentCommand.class));
+            }
+
+            @Test
+            @DisplayName("when operatorId is missing")
+            void whenOperatorIdIsMissing() throws Exception {
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"equipmentIds\": [1]}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"));
+
+                verify(addEquipmentUseCase, never()).execute(any(AddEquipmentUseCase.AddEquipmentCommand.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("Should return 404 Not Found")
+        class ShouldReturn404 {
+
+            @Test
+            @DisplayName("when rental does not exist")
+            void whenRentalDoesNotExist() throws Exception {
+                var request = new AddRentalEquipmentRequest(List.of(1L), "operator-1");
+
+                given(commandMapper.toAddEquipmentCommand(anyLong(), any(AddRentalEquipmentRequest.class)))
+                        .willReturn(mock(AddEquipmentUseCase.AddEquipmentCommand.class));
+                given(addEquipmentUseCase.execute(any(AddEquipmentUseCase.AddEquipmentCommand.class)))
+                        .willThrow(new ResourceNotFoundException(Rental.class, "99"));
+
+                mockMvc.perform(post(ADD_EQUIPMENT_URL, 99L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isNotFound());
             }
         }

@@ -56,8 +56,8 @@ Feature: Equipment Return
       | id         | customerId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 16.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId   | equipmentUid   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | <equipmentUid> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId   | equipmentUid   | equipmentType | status | startedAt   | expectedReturnAt   | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | <equipmentId> | <equipmentUid> | BICYCLE       | ACTIVE | <startedAt> | <expectedReturnAt> | 16.00         | <startedAt> | <startedAt> |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
       | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
@@ -89,9 +89,9 @@ Feature: Equipment Return
       | L_C_H2    | CUSTOMER_HOLD | DEBIT     | 16.00  |
       | L_S_REV   | REVENUE       | CREDIT    | 16.00  |
     Examples:
-      | identified   | equipmentUid | rentalId | now                 | startedAt           | operator | equipmentId |
-      | rentalId     |              | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | 1           |
-      | equipmentUid | BIKE-001     | 11       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | 1           |
+      | identified   | equipmentUid | rentalId | now                 | startedAt           | expectedReturnAt    | operator | equipmentId |
+      | rentalId     |              | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | OP1      | 1           |
+      | equipmentUid | BIKE-001     | 11       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | OP1      | 1           |
 
   Scenario Outline: Return equipment - with overtime, additional payment (5) required - capture from wallet
     Given now is "<now>"
@@ -99,8 +99,8 @@ Feature: Equipment Return
       | id         | customerId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 16.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt   | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | 16.00         | <startedAt> | <startedAt> |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
       | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
@@ -141,8 +141,8 @@ Feature: Equipment Return
       | L_C_W2    | CUSTOMER_WALLET | DEBIT     | 5.00   |
       | L_S_REV   | REVENUE         | CREDIT    | 5.00   |
     Examples:
-      | rentalId | now                 | startedAt           |
-      | 12       | 2026-02-10T11:30:00 | 2026-02-10T08:30:00 |
+      | rentalId | now                 | startedAt           | expectedReturnAt    |
+      | 12       | 2026-02-10T11:30:00 | 2026-02-10T08:30:00 | 2026-02-10T10:30:00 |
 
   Scenario Outline: Return equipment before expected time - capture from wallet, release hold
     Given now is "<now>"
@@ -150,8 +150,8 @@ Feature: Equipment Return
       | id         | customerId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 16.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt   | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | 16.00         | <startedAt> | <startedAt> |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
       | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
@@ -186,8 +186,8 @@ Feature: Equipment Return
       | L_C_W2    | CUSTOMER_WALLET | CREDIT    | 7.00   |
       | L_C_H2    | CUSTOMER_HOLD   | DEBIT     | 7.00   |
     Examples:
-      | rentalId | now                 | startedAt           |
-      | 12       | 2026-02-10T09:30:00 | 2026-02-10T08:30:00 |
+      | rentalId | now                 | startedAt           | expectedReturnAt    |
+      | 12       | 2026-02-10T09:30:00 | 2026-02-10T08:30:00 | 2026-02-10T10:30:00 |
 
   Scenario Outline: Return equipment - with overtime, additional payment required - DEBT status when wallet balance is insufficient
     Given now is "<now>"
@@ -195,8 +195,8 @@ Feature: Equipment Return
       | id         | customerId   | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | <customerId> | ACTIVE | 9.00          | 60              | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 9.00          | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt   | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | 9.00          | <startedAt> | <startedAt> |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
       | TX2 | HOLD | CASH          | 9.00   | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
@@ -221,8 +221,52 @@ Feature: Equipment Return
       | L_C_W3  | ACC3      | CUSTOMER_WALLET | 10.00   |
       | L_S_REV | ACC_S     | REVENUE         | 0.00    |
     Examples:
-      | rentalId | now                 | startedAt           | customerId |
-      | 12       | 2026-02-10T13:30:00 | 2026-02-10T08:30:00 | CUS3       |
+      | rentalId | now                 | startedAt           | expectedReturnAt    | customerId |
+      | 12       | 2026-02-10T13:30:00 | 2026-02-10T08:30:00 | 2026-02-10T09:30:00 | CUS3       |
+
+  Scenario Outline: Full return of a rental containing equipment added mid-rental - final price billed per equipment's own window
+    Given now is "<now>"
+    And a single rental exists in the database with the following data
+      | id         | customerId | status | estimatedCost   | plannedDuration | startedAt   | expectedReturnAt   | createdAt   | updatedAt   |
+      | <rentalId> | CUS2       | ACTIVE | <estimatedCost> | 120             | <startedAt> | <expectedReturnAt> | <startedAt> | <startedAt> |
+    And rental equipments exist in the database with the following data
+      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt                 | expectedReturnAt   | estimatedCost        | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt>               | <expectedReturnAt> | <originalCost>       | <startedAt> | <startedAt> |
+      | <rentalId> | 2           | BIKE-002     | BICYCLE       | 1        | ACTIVE | <addedEquipmentStartedAt> | <expectedReturnAt> | <addedEquipmentCost> | <startedAt> | <startedAt> |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount         | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
+      | TX2 | HOLD | CASH          | <originalCost> | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
+    And the return equipment request is
+      | rentalId   | equipmentIds | operatorId |
+      | <rentalId> | 1,2          | OP1        |
+    When a POST request has been made to "/api/rentals/return" endpoint
+    Then the response status is 200
+    And the rental return response contains rental
+      | customerId | status    | actualDuration | plannedDuration | estimatedCost   | totalCost   |
+      | CUS2       | COMPLETED | 120            | 120             | <estimatedCost> | <totalCost> |
+    And the rental return response contains rental equipments
+      | equipmentId | equipmentUid | status   | tariffId | finalCost            |
+      | 1           | BIKE-001     | RETURNED | 1        | <originalCost>       |
+      | 2           | BIKE-002     | RETURNED | 1        | <addedEquipmentCost> |
+    And the rental return response does contain settlement info
+    And the following sub-ledger records were persisted in db
+      | id      | accountId | ledgerType      | balance         |
+      | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 0.00            |
+      | L_C_W2  | ACC2      | CUSTOMER_WALLET | <walletBalance> |
+      | L_S_REV | ACC_S     | REVENUE         | <totalCost>     |
+    And the following transactions were persisted in db
+      | customerId | amount              | paymentMethod     | operatorId | type    | recordedAt | sourceId   | sourceType |
+      | CUS2       | <originalCost>      | INTERNAL_TRANSFER | OP1        | CAPTURE | <now>      | <rentalId> | RENTAL     |
+      | CUS2       | <additionalCapture> | INTERNAL_TRANSFER | OP1        | CAPTURE | <now>      | <rentalId> | RENTAL     |
+    And the following transaction records were persisted in db
+      | subLedger | ledgerType      | direction | amount              |
+      | L_C_H2    | CUSTOMER_HOLD   | DEBIT     | <originalCost>      |
+      | L_S_REV   | REVENUE         | CREDIT    | <originalCost>      |
+      | L_C_W2    | CUSTOMER_WALLET | DEBIT     | <additionalCapture> |
+      | L_S_REV   | REVENUE         | CREDIT    | <additionalCapture> |
+    Examples:
+      | rentalId | now                 | startedAt           | addedEquipmentStartedAt | expectedReturnAt    | estimatedCost | originalCost | addedEquipmentCost | totalCost | additionalCapture | walletBalance |
+      | 40       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | 2026-02-10T09:00:00     | 2026-02-10T10:00:00 | 25.00         | 16.00        | 9.00               | 25.00     | 9.00              | 11.00         |
 
   Scenario: Return equipment - rental not found
     And the return equipment request is
@@ -264,9 +308,9 @@ Feature: Equipment Return
       | id         | customerId   | tariffId | status | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | <customerId> | 1        | ACTIVE | 16.00         | 60              | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
-      | <rentalId> | 2           | BIKE-002     | BICYCLE       | 1        | ACTIVE | <startedAt> | <startedAt>      | 8.00          | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt   | expectedReturnAt   | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | 8.00          | <startedAt> | <startedAt> |
+      | <rentalId> | 2           | BIKE-002     | BICYCLE       | 1        | ACTIVE | <startedAt> | <expectedReturnAt> | 8.00          | <startedAt> | <startedAt> |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
       | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
@@ -326,8 +370,8 @@ Feature: Equipment Return
       | L_C_W2    | CUSTOMER_WALLET | CREDIT    | 1.00   |
       | L_C_H2    | CUSTOMER_HOLD   | DEBIT     | 1.00   |
     Examples:
-      | rentalId | now                 | nowReturn           | startedAt           | operator | returnedId | remainingId | customerId |
-      | 20       | 2026-02-10T08:40:00 | 2026-02-10T09:00:00 | 2026-02-10T08:00:00 | OP1      | 1          | 2           | CUS2       |
+      | rentalId | now                 | nowReturn           | startedAt           | expectedReturnAt    | operator | returnedId | remainingId | customerId |
+      | 20       | 2026-02-10T08:40:00 | 2026-02-10T09:00:00 | 2026-02-10T08:00:00 | 2026-02-10T09:00:00 | OP1      | 1          | 2           | CUS2       |
 
   Scenario Outline: Return equipment with discount 10%
     Given now is "<now>"
@@ -335,8 +379,8 @@ Feature: Equipment Return
       | id         | customerId | status | estimatedCost | plannedDuration | discountPercent | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 14.40         | 120             | 10              | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt   | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <expectedReturnAt> | 16.00         | <startedAt> | <startedAt> |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
       | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
@@ -368,8 +412,8 @@ Feature: Equipment Return
       | L_C_H2    | CUSTOMER_HOLD   | DEBIT     | 14.40  |
       | L_S_REV   | REVENUE         | CREDIT    | 14.40  |
     Examples:
-      | rentalId | now                 | startedAt           | operator | equipmentId |
-      | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | 1           |
+      | rentalId | now                 | startedAt           | expectedReturnAt    | operator | equipmentId |
+      | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | OP1      | 1           |
 
   Scenario Outline: Final return with SPECIAL pricing — uses flat special price (10 units)
     Given now is "<now>"
@@ -377,8 +421,8 @@ Feature: Equipment Return
       | id         | customerId | status | specialTariffId | specialPrice | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 5               | 10.00        | 10.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt   | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <expectedReturnAt> | 16.00         | <startedAt> | <startedAt> |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
       | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
@@ -410,8 +454,8 @@ Feature: Equipment Return
       | L_C_H2    | CUSTOMER_HOLD   | DEBIT     | 10.00  |
       | L_S_REV   | REVENUE         | CREDIT    | 10.00  |
     Examples:
-      | rentalId | now                 | startedAt           | operator | equipmentId |
-      | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | 1           |
+      | rentalId | now                 | startedAt           | expectedReturnAt    | operator | equipmentId |
+      | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | OP1      | 1           |
 
   Scenario Outline: Final return with ZERO SPECIAL pricing
     Given now is "<now>"
@@ -419,8 +463,8 @@ Feature: Equipment Return
       | id         | customerId | status | specialTariffId | specialPrice | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 5               | 0.00         | 0.00          | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt   | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <expectedReturnAt> | 16.00         | <startedAt> | <startedAt> |
     And the return equipment request is
       | rentalId   | equipmentIds  | operatorId |
       | <rentalId> | <equipmentId> | <operator> |
@@ -440,8 +484,8 @@ Feature: Equipment Return
       | L_S_REV | ACC_S     | REVENUE         | 0.00    |
     And there are only 0 transactions in db
     Examples:
-      | rentalId | now                 | startedAt           | operator | equipmentId |
-      | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | OP1      | 1           |
+      | rentalId | now                 | startedAt           | expectedReturnAt    | operator | equipmentId |
+      | 10       | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | OP1      | 1           |
 
   Scenario Outline: Return within free period - zero cost releases the full hold back to the customer
     Given now is "<startedAt>"
@@ -449,8 +493,8 @@ Feature: Equipment Return
       | id         | customerId | status | specialTariffId | specialPrice | estimatedCost | plannedDuration | startedAt   | createdAt   | updatedAt   |
       | <rentalId> | CUS2       | ACTIVE | 5               | 0.00         | 16.00         | 120             | <startedAt> | <startedAt> | <startedAt> |
     And rental equipments exist in the database with the following data
-      | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt | estimatedCost | createdAt   | updatedAt   |
-      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <startedAt>      | 16.00         | <startedAt> | <startedAt> |
+      | rentalId   | equipmentId   | equipmentType | status | startedAt   | expectedReturnAt   | estimatedCost | createdAt   | updatedAt   |
+      | <rentalId> | <equipmentId> | BICYCLE       | ACTIVE | <startedAt> | <expectedReturnAt> | 16.00         | <startedAt> | <startedAt> |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId   | recordedAt  | idempotencyKey |
       | TX2 | HOLD | CASH          | 16.00  | CUS2       | OP1        | RENTAL     | <rentalId> | <startedAt> | IDK4           |
@@ -487,5 +531,5 @@ Feature: Equipment Return
       | L_C_H2    | CUSTOMER_HOLD   | DEBIT     | 16.00  |
       | L_C_W2    | CUSTOMER_WALLET | CREDIT    | 16.00  |
     Examples:
-      | rentalId | now                 | startedAt           | operator | equipmentId |
-      | 20       | 2026-02-10T08:03:00 | 2026-02-10T08:00:00 | OP1      | 1           |
+      | rentalId | now                 | startedAt           | expectedReturnAt    | operator | equipmentId |
+      | 20       | 2026-02-10T08:03:00 | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | OP1      | 1           |
