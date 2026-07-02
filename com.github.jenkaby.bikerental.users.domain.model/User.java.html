@@ -62,5 +62,13 @@ public class User {
     public boolean hasPassword() {
 <span class="pc bpc" id="L63" title="2 of 4 branches missed.">        return this.passwordHash != null &amp;&amp; !this.passwordHash.isBlank();</span>
     }
+
+    public void applyStatus(UserStatus status) {
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (status == UserStatus.DISABLED) {</span>
+<span class="fc" id="L68">            this.disable();</span>
+        } else {
+<span class="nc" id="L70">            this.enable();</span>
+        }
+<span class="fc" id="L72">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

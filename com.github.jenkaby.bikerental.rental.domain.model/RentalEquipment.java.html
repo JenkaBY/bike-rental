@@ -37,36 +37,40 @@ public class RentalEquipment {
 <span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (rental.getExpectedReturnAt() == null) {</span>
 <span class="nc" id="L38">            throw new IllegalArgumentException(&quot;Rental must have a Expected return at to activate equipment&quot;);</span>
         }
-<span class="fc" id="L40">        this.setStatus(RentalEquipmentStatus.ACTIVE);</span>
-<span class="fc" id="L41">        this.setStartedAt(rental.getStartedAt());</span>
-<span class="fc" id="L42">        this.setExpectedReturnAt(rental.getExpectedReturnAt());</span>
-<span class="fc" id="L43">        return this;</span>
+<span class="fc" id="L40">        return this.activateFrom(rental.getStartedAt(), rental.getExpectedReturnAt());</span>
+    }
+
+    public RentalEquipment activateFrom(LocalDateTime activatedAt, LocalDateTime expectedReturnAt) {
+<span class="fc" id="L44">        this.setStatus(RentalEquipmentStatus.ACTIVE);</span>
+<span class="fc" id="L45">        this.setStartedAt(activatedAt);</span>
+<span class="fc" id="L46">        this.setExpectedReturnAt(expectedReturnAt);</span>
+<span class="fc" id="L47">        return this;</span>
     }
 
     public RentalEquipment markReturned(LocalDateTime returnAt) {
-<span class="fc" id="L47">        this.setStatus(RentalEquipmentStatus.RETURNED);</span>
-<span class="fc" id="L48">        this.setActualReturnAt(returnAt);</span>
-<span class="fc" id="L49">        return this;</span>
+<span class="fc" id="L51">        this.setStatus(RentalEquipmentStatus.RETURNED);</span>
+<span class="fc" id="L52">        this.setActualReturnAt(returnAt);</span>
+<span class="fc" id="L53">        return this;</span>
     }
 
     public void applyEstimatedCost(Long tariffId, Money estimatedCost) {
-<span class="fc" id="L53">        this.tariffId = tariffId;</span>
-<span class="fc" id="L54">        this.estimatedCost = estimatedCost;</span>
-<span class="fc" id="L55">    }</span>
+<span class="fc" id="L57">        this.tariffId = tariffId;</span>
+<span class="fc" id="L58">        this.estimatedCost = estimatedCost;</span>
+<span class="fc" id="L59">    }</span>
 
     public void applyFinalCost(Long tariffId, Money finalCost, @Nullable RentalEquipmentCostBreakdown breakdown) {
-<span class="fc" id="L58">        this.tariffId = tariffId;</span>
-<span class="fc" id="L59">        this.finalCost = finalCost;</span>
-<span class="fc" id="L60">        this.finalCostBreakdown = breakdown;</span>
-<span class="fc" id="L61">    }</span>
+<span class="fc" id="L62">        this.tariffId = tariffId;</span>
+<span class="fc" id="L63">        this.finalCost = finalCost;</span>
+<span class="fc" id="L64">        this.finalCostBreakdown = breakdown;</span>
+<span class="fc" id="L65">    }</span>
 
     public static RentalEquipment assigned(Long equipmentId, String equipmentUid, String equipmentType) {
-<span class="fc" id="L64">        return RentalEquipment.builder()</span>
-<span class="fc" id="L65">                .equipmentId(equipmentId)</span>
-<span class="fc" id="L66">                .equipmentUid(equipmentUid)</span>
-<span class="fc" id="L67">                .status(RentalEquipmentStatus.ASSIGNED)</span>
-<span class="fc" id="L68">                .equipmentType(equipmentType)</span>
-<span class="fc" id="L69">                .build();</span>
+<span class="fc" id="L68">        return RentalEquipment.builder()</span>
+<span class="fc" id="L69">                .equipmentId(equipmentId)</span>
+<span class="fc" id="L70">                .equipmentUid(equipmentUid)</span>
+<span class="fc" id="L71">                .status(RentalEquipmentStatus.ASSIGNED)</span>
+<span class="fc" id="L72">                .equipmentType(equipmentType)</span>
+<span class="fc" id="L73">                .build();</span>
     }
 }
 

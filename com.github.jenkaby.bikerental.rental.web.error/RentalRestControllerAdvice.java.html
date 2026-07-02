@@ -138,14 +138,27 @@ public class RentalRestControllerAdvice {
 <span class="fc" id="L138">        return ResponseEntity.of(problem).build();</span>
     }
 
+    @ExceptionHandler(RentalWindowElapsedException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleRentalWindowElapsed(RentalWindowElapsedException ex) {
+<span class="fc" id="L143">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L144">        log.warn(&quot;[correlationId={}] Rental window elapsed: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L145">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="fc" id="L146">        problem.setTitle(&quot;Rental window elapsed&quot;);</span>
+<span class="fc" id="L147">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L148">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L149">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L150">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L151">        return ResponseEntity.of(problem).build();</span>
+    }
+
     @ExceptionHandler(InvalidDateRangeException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInvalidDateRange(InvalidDateRangeException ex) {
-<span class="nc" id="L143">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="nc" id="L144">        log.warn(&quot;[correlationId={}] Invalid date range: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L145">        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());</span>
-<span class="nc" id="L146">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L147">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.CONSTRAINT_VIOLATION);</span>
-<span class="nc" id="L148">        return ResponseEntity.of(problem).build();</span>
+<span class="nc" id="L156">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L157">        log.warn(&quot;[correlationId={}] Invalid date range: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L158">        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());</span>
+<span class="nc" id="L159">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L160">        problem.setProperty(ProblemDetailField.ERROR_CODE, ErrorCodes.CONSTRAINT_VIOLATION);</span>
+<span class="nc" id="L161">        return ResponseEntity.of(problem).build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

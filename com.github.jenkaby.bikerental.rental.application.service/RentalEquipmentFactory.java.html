@@ -4,11 +4,14 @@ import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.application.mapper.RentalCostCommandMapper;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,23 +23,36 @@ public class RentalEquipmentFactory {
     private final RentalCostCommandMapper costCommandMapper;
 
     public List&lt;RentalEquipment&gt; buildAssignedWithCost(@NonNull Rental rental, @NonNull List&lt;EquipmentInfo&gt; newEquipments) {
-<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if (newEquipments.isEmpty()) {</span>
-<span class="nc" id="L24">            return List.of();</span>
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (newEquipments.isEmpty()) {</span>
+<span class="nc" id="L27">            return List.of();</span>
         }
+<span class="fc" id="L29">        var costCommand = costCommandMapper.toEstimateCommand(rental, newEquipments);</span>
+<span class="nc" id="L30">        return buildWithCost(newEquipments, costCommand);</span>
+    }
 
-<span class="fc" id="L27">        var costCommand = costCommandMapper.toEstimateCommand(rental, newEquipments);</span>
-<span class="nc" id="L28">        var breakdowns = tariffV2Facade.calculateRentalCostV2(costCommand).equipmentBreakdowns();</span>
-
-<span class="nc" id="L30">        var result = new ArrayList&lt;RentalEquipment&gt;();</span>
-<span class="nc bnc" id="L31" title="All 2 branches missed.">        for (int i = 0; i &lt; newEquipments.size(); i++) {</span>
-<span class="nc" id="L32">            var equipment = newEquipments.get(i);</span>
-<span class="nc" id="L33">            var re = RentalEquipment.assigned(equipment.id(), equipment.uid(), equipment.typeSlug());</span>
-<span class="nc" id="L34">            var details = breakdowns.get(i);</span>
-<span class="nc" id="L35">            re.setEstimatedCost(details.itemCost());</span>
-<span class="nc" id="L36">            re.setTariffId(details.tariffId());</span>
-<span class="nc" id="L37">            result.add(re);</span>
+    public List&lt;RentalEquipment&gt; buildActiveWithCost(@NonNull Rental rental, @NonNull List&lt;EquipmentInfo&gt; newEquipments,
+                                                     @NonNull LocalDateTime addedAt) {
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if (newEquipments.isEmpty()) {</span>
+<span class="nc" id="L36">            return List.of();</span>
         }
-<span class="nc" id="L39">        return result;</span>
+<span class="fc" id="L38">        var remainingDuration = Duration.between(addedAt, rental.getExpectedReturnAt());</span>
+<span class="fc" id="L39">        var costCommand = costCommandMapper.toMidRentalEstimateCommand(rental, newEquipments, remainingDuration, addedAt);</span>
+<span class="fc" id="L40">        return buildWithCost(newEquipments, costCommand);</span>
+    }
+
+    private List&lt;RentalEquipment&gt; buildWithCost(List&lt;EquipmentInfo&gt; newEquipments, RentalCostCalculationV2Command costCommand) {
+<span class="fc" id="L44">        var breakdowns = tariffV2Facade.calculateRentalCostV2(costCommand).equipmentBreakdowns();</span>
+
+<span class="fc" id="L46">        var result = new ArrayList&lt;RentalEquipment&gt;();</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        for (int i = 0; i &lt; newEquipments.size(); i++) {</span>
+<span class="fc" id="L48">            var equipment = newEquipments.get(i);</span>
+<span class="fc" id="L49">            var re = RentalEquipment.assigned(equipment.id(), equipment.uid(), equipment.typeSlug());</span>
+<span class="fc" id="L50">            var details = breakdowns.get(i);</span>
+<span class="fc" id="L51">            re.setEstimatedCost(details.itemCost());</span>
+<span class="fc" id="L52">            re.setTariffId(details.tariffId());</span>
+<span class="fc" id="L53">            result.add(re);</span>
+        }
+<span class="fc" id="L55">        return result;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

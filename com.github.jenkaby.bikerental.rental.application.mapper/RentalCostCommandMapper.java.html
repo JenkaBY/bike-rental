@@ -2,6 +2,8 @@
 
 import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
 import com.github.jenkaby.bikerental.tariff.EquipmentCostItemV2;
 import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
 import org.mapstruct.Mapper;
@@ -14,46 +16,63 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
-<span class="fc" id="L17">public abstract class RentalCostCommandMapper {</span>
+<span class="fc" id="L19">public abstract class RentalCostCommandMapper {</span>
 
     protected Clock clock;
 
     @Autowired
     public void setClock(Clock clock) {
-<span class="fc" id="L23">        this.clock = clock;</span>
-<span class="fc" id="L24">    }</span>
+<span class="fc" id="L25">        this.clock = clock;</span>
+<span class="fc" id="L26">    }</span>
 
     public RentalCostCalculationV2Command toEstimateCommand(Rental rental, List&lt;EquipmentInfo&gt; equipments) {
-<span class="fc" id="L27">        var startAt = LocalDate.now(clock).atStartOfDay();</span>
-<span class="fc" id="L28">        var costItems = equipments.stream()</span>
-<span class="fc" id="L29">                .map(equipment -&gt; new EquipmentCostItemV2(equipment.id(), equipment.typeSlug(), null))</span>
-<span class="fc" id="L30">                .toList();</span>
-<span class="fc" id="L31">        return buildCommand(rental, costItems, startAt);</span>
+<span class="fc" id="L29">        var startAt = LocalDate.now(clock).atStartOfDay();</span>
+<span class="fc" id="L30">        var costItems = equipments.stream()</span>
+<span class="fc" id="L31">                .map(equipment -&gt; new EquipmentCostItemV2(equipment.id(), equipment.typeSlug(), null, null, null))</span>
+<span class="fc" id="L32">                .toList();</span>
+<span class="fc" id="L33">        return buildCommand(rental, costItems, rental.getPlannedDuration(), startAt);</span>
     }
 
-    public RentalCostCalculationV2Command toReturnCommand(Rental rental, List&lt;EquipmentInfo&gt; equipments, Duration billableDuration) {
-<span class="fc" id="L35">        var startAt = rental.getStartedAt();</span>
-<span class="fc" id="L36">        var returnAt = startAt.plus(billableDuration);</span>
-<span class="fc" id="L37">        var costItems = equipments.stream()</span>
-<span class="fc" id="L38">                .map(equipment -&gt; new EquipmentCostItemV2(equipment.id(), equipment.typeSlug(), returnAt))</span>
-<span class="fc" id="L39">                .toList();</span>
-<span class="fc" id="L40">        return buildCommand(rental, costItems, startAt);</span>
+    public RentalCostCalculationV2Command toMidRentalEstimateCommand(Rental rental, List&lt;EquipmentInfo&gt; equipments,
+                                                                     Duration remainingDuration, LocalDateTime startAt) {
+<span class="fc" id="L38">        var costItems = equipments.stream()</span>
+<span class="fc" id="L39">                .map(equipment -&gt; new EquipmentCostItemV2(equipment.id(), equipment.typeSlug(), null, null, null))</span>
+<span class="fc" id="L40">                .toList();</span>
+<span class="fc" id="L41">        return buildCommand(rental, costItems, remainingDuration, startAt);</span>
     }
 
-    private RentalCostCalculationV2Command buildCommand(Rental rental, List&lt;EquipmentCostItemV2&gt; costItems, LocalDateTime startAt) {
-<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (rental.getSpecialTariffId() != null) {</span>
-<span class="fc" id="L45">            return new RentalCostCalculationV2Command(</span>
+    public RentalCostCalculationV2Command toReturnCommand(Rental rental, List&lt;RentalEquipment&gt; returningEquipments,
+                                                          RentalDurationCalculator durationCalculator, LocalDateTime returnTime) {
+<span class="fc" id="L46">        var costItems = returningEquipments.stream()</span>
+<span class="fc" id="L47">                .map(equipment -&gt; toReturnCostItem(equipment, durationCalculator, returnTime))</span>
+<span class="fc" id="L48">                .toList();</span>
+<span class="fc" id="L49">        return buildCommand(rental, costItems, rental.getPlannedDuration(), rental.getStartedAt());</span>
+    }
+
+    private EquipmentCostItemV2 toReturnCostItem(RentalEquipment equipment, RentalDurationCalculator durationCalculator,
+                                                 LocalDateTime returnTime) {
+<span class="fc" id="L54">        var itemStartAt = equipment.getStartedAt();</span>
+<span class="fc" id="L55">        var billableDuration = durationCalculator.calculate(itemStartAt, returnTime).billableDuration();</span>
+<span class="fc" id="L56">        var itemPlannedDuration = Duration.between(itemStartAt, equipment.getExpectedReturnAt());</span>
+<span class="fc" id="L57">        var itemReturnAt = itemStartAt.plus(billableDuration);</span>
+<span class="fc" id="L58">        return new EquipmentCostItemV2(equipment.getEquipmentId(), equipment.getEquipmentType(), itemStartAt, itemPlannedDuration, itemReturnAt);</span>
+    }
+
+    private RentalCostCalculationV2Command buildCommand(Rental rental, List&lt;EquipmentCostItemV2&gt; costItems,
+                                                        Duration plannedDuration, LocalDateTime startAt) {
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (rental.getSpecialTariffId() != null) {</span>
+<span class="fc" id="L64">            return new RentalCostCalculationV2Command(</span>
                     costItems,
-<span class="fc" id="L47">                    rental.getPlannedDuration(),</span>
+                    plannedDuration,
                     null,
-<span class="fc" id="L49">                    rental.getSpecialTariffId(),</span>
-<span class="fc" id="L50">                    rental.getSpecialPrice(),</span>
+<span class="fc" id="L68">                    rental.getSpecialTariffId(),</span>
+<span class="fc" id="L69">                    rental.getSpecialPrice(),</span>
                     startAt);
         }
-<span class="fc" id="L53">        return new RentalCostCalculationV2Command(</span>
+<span class="fc" id="L72">        return new RentalCostCalculationV2Command(</span>
                 costItems,
-<span class="fc" id="L55">                rental.getPlannedDuration(),</span>
-<span class="fc" id="L56">                rental.getDiscountPercent(),</span>
+                plannedDuration,
+<span class="fc" id="L75">                rental.getDiscountPercent(),</span>
                 null,
                 null,
                 startAt);

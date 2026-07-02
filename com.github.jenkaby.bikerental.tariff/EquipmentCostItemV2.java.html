@@ -3,15 +3,26 @@
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
-<span class="fc" id="L8">public record EquipmentCostItemV2(</span>
+<span class="fc" id="L9">public record EquipmentCostItemV2(</span>
         @NonNull Long equipmentId,
         @NonNull String equipmentType,
+        @Nullable LocalDateTime startAt,
+        @Nullable Duration plannedDuration,
         @Nullable LocalDateTime returnAt) {
 
     public boolean isEstimate() {
-<span class="fc bfc" id="L14" title="All 2 branches covered.">        return returnAt() == null;</span>
+<span class="fc bfc" id="L17" title="All 2 branches covered.">        return returnAt() == null;</span>
+    }
+
+    public LocalDateTime resolveStartAt(LocalDateTime commandStartAt) {
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        return startAt != null ? startAt : commandStartAt;</span>
+    }
+
+    public Duration resolvePlannedDuration(Duration commandPlannedDuration) {
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        return plannedDuration != null ? plannedDuration : commandPlannedDuration;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
