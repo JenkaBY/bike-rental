@@ -28,6 +28,10 @@ public class RentalJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Column(name = "customer_id")
     private UUID customerId;
 

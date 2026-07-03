@@ -47,13 +47,15 @@ public class RentalResponseTransformer {
         var specialPrice = DataTableHelper.toBigDecimal(entry, "specialPrice");
         var discountPercent = DataTableHelper.toInt(entry, "discountPercent");
         var finalCost = DataTableHelper.toBigDecimal(entry, "totalCost");
+        var version = DataTableHelper.toLong(entry, "version");
         if (DataTableHelper.toBigDecimal(entry, "finalCost") != null) {
             throw new IllegalArgumentException("finalCost must NOT be provided. It must be total cost for RentalResponse");
         }
         return new RentalResponse(
                 id,
+                version,
                 customerId,
-                new ArrayList<>(),// will be populated later on
+                new ArrayList<>(),
                 status,
                 startedAt,
                 expectedReturnAt,

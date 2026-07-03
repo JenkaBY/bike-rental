@@ -66,6 +66,7 @@ Feature: Rental Management
     And the rental response only contains
       | status |
       | DRAFT  |
+    And the rental response version is 0
 #    Update draft rental
     Given a rental request with the following data
       | customerId   | equipmentIds                 | duration          | operatorId |
@@ -75,6 +76,7 @@ Feature: Rental Management
     And the rental response only contains
       | customerId   | status | plannedDuration   | estimatedCost |
       | <customerId> | DRAFT  | <plannedDuration> | 17.00         |
+    And the rental response version is greater than 0
     And the rental response only contains rental equipments
       | equipmentId    | equipmentUid   | status   | estimatedCost |
       | <equipmentId>  | BIKE-001       | ASSIGNED | 16.00         |

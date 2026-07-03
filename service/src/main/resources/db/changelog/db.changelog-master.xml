@@ -40,4 +40,6 @@
     <include relativeToChangelogFile="true" file="v1/oauth2_authorization.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/oauth2_authorization_consent.create-table.xml"/>
 
+    <include relativeToChangelogFile="true" file="v1/rentals.update-table_add-version-column.xml"/>
+
 </databaseChangeLog>

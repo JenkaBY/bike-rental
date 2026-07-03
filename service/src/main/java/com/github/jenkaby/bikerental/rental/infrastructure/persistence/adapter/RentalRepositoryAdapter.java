@@ -36,7 +36,7 @@ class RentalRepositoryAdapter implements RentalRepository {
     @Transactional
     public Rental save(Rental rental) {
         var entity = mapper.toEntity(rental);
-        var savedEntity = repository.save(entity);
+        var savedEntity = repository.saveAndFlush(entity);
         return mapper.toDomain(savedEntity);
     }
 

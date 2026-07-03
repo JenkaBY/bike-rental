@@ -139,6 +139,22 @@ public class RentalWebSteps {
         scenarioContext.setRequestedObjectId(actualRental.id().toString());
     }
 
+    @Then("the rental response version is {long}")
+    public void theRentalResponseVersionIs(long expectedVersion) {
+        var actualRental = scenarioContext.getResponseBody(RentalResponse.class);
+        assertThat(actualRental.version())
+                .as("Rental version")
+                .isEqualTo(expectedVersion);
+    }
+
+    @Then("the rental response version is greater than {long}")
+    public void theRentalResponseVersionIsGreaterThan(long threshold) {
+        var actualRental = scenarioContext.getResponseBody(RentalResponse.class);
+        assertThat(actualRental.version())
+                .as("Rental version")
+                .isGreaterThan(threshold);
+    }
+
     @Then("the rental response only contains rental equipments")
     public void theRentalResponseOnlyContains(List<EquipmentItemResponseTransformer.EquipmentItemResponseTransformerHolder> holders) {
         var expected = holders.stream()
