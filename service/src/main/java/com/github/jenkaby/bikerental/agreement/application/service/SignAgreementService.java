@@ -23,14 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Base64;
 
 @Slf4j
 @Service
 class SignAgreementService implements SignAgreementUseCase {
 
     private static final String AGREEMENT_EVENTS_DESTINATION = "agreement-events";
-    private static final String PNG_DATA_URI_PREFIX = "data:image/png;base64,";
 
     private final RentalSigningFacade rentalSigningFacade;
     private final AgreementTemplateRepository templateRepository;
@@ -39,6 +37,7 @@ class SignAgreementService implements SignAgreementUseCase {
     private final AgreementPdfRenderer renderer;
     private final ContentHasher contentHasher;
     private final SigningAssemblyMapper assemblyMapper;
+    private final SignatureImageDecoder signatureImageDecoder;
     private final EventPublisher eventPublisher;
     private final Clock clock;
 
@@ -49,6 +48,7 @@ class SignAgreementService implements SignAgreementUseCase {
                          AgreementPdfRenderer renderer,
                          ContentHasher contentHasher,
                          SigningAssemblyMapper assemblyMapper,
+                         SignatureImageDecoder signatureImageDecoder,
                          EventPublisher eventPublisher,
                          Clock clock) {
         this.rentalSigningFacade = rentalSigningFacade;
@@ -58,6 +58,7 @@ class SignAgreementService implements SignAgreementUseCase {
         this.renderer = renderer;
         this.contentHasher = contentHasher;
         this.assemblyMapper = assemblyMapper;
+        this.signatureImageDecoder = signatureImageDecoder;
         this.eventPublisher = eventPublisher;
         this.clock = clock;
     }
@@ -90,7 +91,7 @@ class SignAgreementService implements SignAgreementUseCase {
         Instant signedAt = clock.instant();
         LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, clock.getZone());
 
-        byte[] signaturePng = decodeSignature(command.signaturePngBase64());
+        byte[] signaturePng = signatureImageDecoder.decode(command.signaturePngBase64());
 
         AgreementPdfData pdfData = assemblyMapper.toPdfData(
                 template.getTitle(), template.getContent(), customer, snapshot, startedAt, signaturePng);
@@ -121,17 +122,5 @@ class SignAgreementService implements SignAgreementUseCase {
         log.info("Signed agreement {} for rental {}", saved.getId(), rentalId);
 
         return new SignAgreementResult(saved.getId(), signedAt);
-    }
-
-    // TODO extract into a separate component
-    private byte[] decodeSignature(String signaturePngBase64) {
-        String base64 = signaturePngBase64.startsWith(PNG_DATA_URI_PREFIX)
-                ? signaturePngBase64.substring(PNG_DATA_URI_PREFIX.length())
-                : signaturePngBase64;
-        try {
-            return Base64.getDecoder().decode(base64);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidSignatureImageException();
-        }
     }
 }

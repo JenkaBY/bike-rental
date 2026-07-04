@@ -31,8 +31,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class AgreementRestControllerAdvice {
 
     private static final String CONCURRENT_ACTIVATION_ERROR_CODE = "agreement.template.concurrent_activation";
-    private static final String RENTAL_NOT_AWAITING_SIGNATURE_ERROR_CODE = "agreement.signing.rental_not_awaiting_signature";
-    private static final String RENTAL_VERSION_MISMATCH_ERROR_CODE = "agreement.signing.rental_version_mismatch";
 
     private final CorrelationIdProvider correlationIdProvider;
 
@@ -104,12 +102,12 @@ public class AgreementRestControllerAdvice {
 
     @ExceptionHandler(RentalNotAwaitingSignatureException.class)
     public ResponseEntity<ProblemDetail> handleRentalNotAwaitingSignature(RentalNotAwaitingSignatureException ex) {
-        return conflict(ex.getMessage(), RENTAL_NOT_AWAITING_SIGNATURE_ERROR_CODE, null);
+        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());
     }
 
     @ExceptionHandler(RentalSigningVersionMismatchException.class)
     public ResponseEntity<ProblemDetail> handleRentalSigningVersionMismatch(RentalSigningVersionMismatchException ex) {
-        return conflict(ex.getMessage(), RENTAL_VERSION_MISMATCH_ERROR_CODE, null);
+        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());
     }
 
     @ExceptionHandler(InvalidSignatureImageException.class)

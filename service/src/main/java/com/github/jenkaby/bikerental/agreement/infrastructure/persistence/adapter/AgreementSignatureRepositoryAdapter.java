@@ -42,7 +42,7 @@ class AgreementSignatureRepositoryAdapter implements AgreementSignatureRepositor
     }
 
     @Override
-    public Optional<byte[]> findPdfByRentalId(Long rentalId) {
+    public Optional<byte[]> findDocumentByRentalId(Long rentalId) {
         return repository.findPdfByRentalId(rentalId);
     }
 }

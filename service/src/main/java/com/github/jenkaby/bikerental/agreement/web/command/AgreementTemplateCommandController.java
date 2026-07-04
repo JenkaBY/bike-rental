@@ -133,7 +133,6 @@ class AgreementTemplateCommandController {
             @ApiResponse(responseCode = "500", description = "PDF rendering failed",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    //    TODO Can this endpoint be lazy and returns StreamingResponseBody ? Investigate pros and cons of this approach
     public ResponseEntity<byte[]> previewPdf(@Valid @RequestBody AgreementPdfPreviewRequest request) {
         log.info("[POST] Rendering agreement preview PDF");
         var command = new PreviewAgreementPdfUseCase.PreviewAgreementPdfCommand(request.title(), request.content());

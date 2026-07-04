@@ -92,7 +92,7 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("agreements")
                 .displayName(Tags.AGREEMENTS)
-                .pathsToMatch("/api/agreements/**")
+                .pathsToMatch("/api/agreements/**", "/api/rentals/*/signatures/**")
                 .build();
     }
 

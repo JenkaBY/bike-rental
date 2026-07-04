@@ -520,8 +520,8 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 ### `agreement.signing.rental_version_mismatch`
 - **HTTP:** 409 · **Trigger:** POST `/api/rentals/{rentalId}/signatures` with a stale `rentalVersion`
   (`SigningVersionMismatchException`), or the synchronous `completeSigning` losing the version race
-  (`RentalSigningVersionMismatchException`, rental module API). · **Extra:** for the fencing check `params` =
-  `{rentalId, expectedVersion, actualVersion}`; for the completeSigning race, no `params`.
+  (`RentalSigningVersionMismatchException`, rental module API). · **Extra:** `params` =
+  `{rentalId, expectedVersion, actualVersion}` in both cases.
 
 ```json
 {
@@ -535,14 +535,15 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 
 ### `agreement.signing.rental_not_awaiting_signature`
 - **HTTP:** 409 · **Trigger:** POST `/api/rentals/{rentalId}/signatures` while the rental is not `AWAITING_SIGNATURE`
-  (`RentalNotAwaitingSignatureException`, rental module API). · **Extra:** none.
+  (`RentalNotAwaitingSignatureException`, rental module API). · **Extra:** `params` = `{rentalId, currentStatus}`.
 
 ```json
 {
   "status": 409,
   "detail": "Rental 42 is not awaiting signature. Current status: DRAFT",
   "correlationId": "018f...",
-  "errorCode": "agreement.signing.rental_not_awaiting_signature"
+  "errorCode": "agreement.signing.rental_not_awaiting_signature",
+  "params": { "rentalId": 42, "currentStatus": "DRAFT" }
 }
 ```
 

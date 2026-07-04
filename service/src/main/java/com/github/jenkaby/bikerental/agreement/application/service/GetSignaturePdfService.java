@@ -22,7 +22,7 @@ class GetSignaturePdfService implements GetSignaturePdfUseCase {
     @Override
     public byte[] execute(Long rentalId) {
         log.info("Fetching signature PDF for rental {}", rentalId);
-        return signatureRepository.findPdfByRentalId(rentalId)
+        return signatureRepository.findDocumentByRentalId(rentalId)
                 .orElseThrow(() -> new ResourceNotFoundException(AgreementSignature.class, rentalId.toString()));
     }
 }

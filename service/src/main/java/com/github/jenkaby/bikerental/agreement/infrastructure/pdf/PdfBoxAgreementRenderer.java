@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.agreement.infrastructure.pdf;
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementPdfRenderingException;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
 import com.github.jenkaby.bikerental.agreement.domain.service.AgreementPdfRenderer;
+import com.github.jenkaby.bikerental.shared.application.service.MessageService;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -18,17 +19,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO Review this class. Can it be simplified or refactored?It must support i18n,
-//  all lables must be codes to be substituted via messageConverter. Where's a default locale stored?
 @Component
 class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
 
     private final AgreementPdfProperties properties;
+    private final MessageService messageService;
     private final byte[] fontBytes;
     private final DateTimeFormatter dateTimeFormat;
 
-    PdfBoxAgreementRenderer(AgreementPdfProperties properties) {
+    PdfBoxAgreementRenderer(AgreementPdfProperties properties, MessageService messageService) {
         this.properties = properties;
+        this.messageService = messageService;
         this.fontBytes = readFontBytes(properties.fontLocation());
         this.dateTimeFormat = DateTimeFormatter.ofPattern(properties.dateTimePattern());
     }
@@ -108,22 +109,26 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
         AgreementPdfData.CustomerData customer = data.customer();
         AgreementPdfData.RentalData rental = data.rental();
         float bodyFontSize = properties.bodyFontSize();
-//         TODO these customer's info should be i18n and come from application properties as well
-        cursor.writeLine("Клиент: " + customer.firstName() + " " + customer.lastName(), bodyFontSize);
-        cursor.writeLine("Телефон: " + customer.phone(), bodyFontSize);
-        cursor.writeLine("Дата начала: " + rental.startedAt().format(dateTimeFormat), bodyFontSize);
-        cursor.writeLine("Длительность: " + formatDuration(rental.plannedDuration()), bodyFontSize);
-        cursor.writeLine("Оборудование:", bodyFontSize);
+        String currency = properties.currency();
+        cursor.writeLine(label("agreement.pdf.label.customer") + " " + customer.firstName() + " " + customer.lastName(), bodyFontSize);
+        cursor.writeLine(label("agreement.pdf.label.phone") + " " + customer.phone(), bodyFontSize);
+        cursor.writeLine(label("agreement.pdf.label.started-at") + " " + rental.startedAt().format(dateTimeFormat), bodyFontSize);
+        cursor.writeLine(label("agreement.pdf.label.duration") + " " + formatDuration(rental.plannedDuration()), bodyFontSize);
+        cursor.writeLine(label("agreement.pdf.label.equipment"), bodyFontSize);
         for (AgreementPdfData.EquipmentLine line : rental.equipments()) {
-            cursor.writeLine("  " + line.uid() + " — " + line.name() + " — " + line.estimatedCost(), bodyFontSize);
+            cursor.writeLine("  " + line.uid() + " — " + line.name() + " — " + line.estimatedCost() + " " + currency, bodyFontSize);
         }
         if (rental.discountPercent() != null) {
-            cursor.writeLine("Скидка: " + rental.discountPercent() + "%", bodyFontSize);
+            cursor.writeLine(label("agreement.pdf.label.discount") + " " + rental.discountPercent() + "%", bodyFontSize);
         }
         if (rental.specialPrice() != null) {
-            cursor.writeLine("Специальная цена: " + rental.specialPrice(), bodyFontSize);
+            cursor.writeLine(label("agreement.pdf.label.special-price") + " " + rental.specialPrice() + " " + currency, bodyFontSize);
         }
-        cursor.writeLine("Итого: " + rental.estimatedTotal(), bodyFontSize);
+        cursor.writeLine(label("agreement.pdf.label.total") + " " + rental.estimatedTotal() + " " + currency, bodyFontSize);
+    }
+
+    private String label(String code) {
+        return messageService.getMessage(code);
     }
 
     private String formatDuration(Duration duration) {
@@ -133,7 +138,7 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
     }
 
     private void writeSignature(RenderCursor cursor, PDDocument document, PDType0Font font, byte[] signaturePng) throws IOException {
-        cursor.writeLine("Подпись:", properties.bodyFontSize());
+        cursor.writeLine(label("agreement.pdf.label.signature"), properties.bodyFontSize());
         if (signaturePng != null) {
             PDImageXObject image = PDImageXObject.createFromByteArray(document, signaturePng, "signature");
             cursor.drawImage(image, properties.signatureWidth(), properties.signatureHeight());
@@ -144,8 +149,8 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
     }
 
     private void writeMetadata(RenderCursor cursor, AgreementPdfData data) throws IOException {
-        cursor.writeLine("Дата подписания: " + data.rental().startedAt().format(dateTimeFormat)
-                + "   Аренда №: " + data.rental().rentalId(), properties.bodyFontSize());
+        cursor.writeLine(label("agreement.pdf.label.signed-at") + " " + data.rental().startedAt().format(dateTimeFormat)
+                + "   " + label("agreement.pdf.label.rental-number") + " " + data.rental().rentalId(), properties.bodyFontSize());
     }
 
     private static final class RenderCursor {

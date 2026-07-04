@@ -45,22 +45,16 @@ public class AgreementSigningSteps {
     @Then("the signature list contains")
     public void theSignatureListContains(List<SignatureSummaryResponse> expectedRows) {
         List<SignatureSummaryResponse> actual = scenarioContext.getResponseAsList(SignatureSummaryResponse.class);
-        var softly = new SoftAssertions();
-        softly.assertThat(actual).as("Signature summary list size").hasSize(expectedRows.size());
-//        FIXME use zipSatisfy
-        for (int i = 0; i < expectedRows.size(); i++) {
-            var expected = expectedRows.get(i);
-            var row = actual.get(i);
-            softly.assertThat(row.signatureId()).as("signatureId[%d]", i).isNotNull();
+        assertThat(actual).as("Signature summary list size").hasSize(expectedRows.size());
+        assertThat(actual).zipSatisfy(expectedRows, (row, expected) -> {
+            assertThat(row.signatureId()).as("signatureId").isNotNull();
             if (expected.templateId() != null) {
-                softly.assertThat(row.templateId()).as("templateId[%d]", i).isEqualTo(expected.templateId());
+                assertThat(row.templateId()).as("templateId").isEqualTo(expected.templateId());
             }
             if (expected.templateVersionNumber() != null) {
-                softly.assertThat(row.templateVersionNumber()).as("templateVersionNumber[%d]", i)
-                        .isEqualTo(expected.templateVersionNumber());
+                assertThat(row.templateVersionNumber()).as("templateVersionNumber").isEqualTo(expected.templateVersionNumber());
             }
-            softly.assertThat(row.signedAt()).as("signedAt[%d]", i).isNotNull();
-        }
-        softly.assertAll();
+            assertThat(row.signedAt()).as("signedAt").isNotNull();
+        });
     }
 }

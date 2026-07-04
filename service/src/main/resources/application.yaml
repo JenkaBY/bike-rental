@@ -86,6 +86,7 @@ app:
       signature-height: 80
       signature-placeholder-label: место подписи
       date-time-pattern: dd.MM.yyyy HH:mm
+      currency: BYN
 
 # Google sign-in (optional): provide credentials to enable the "Sign in with Google" button on the login page.
 # spring:

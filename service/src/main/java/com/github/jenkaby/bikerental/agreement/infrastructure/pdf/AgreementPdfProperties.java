@@ -13,5 +13,6 @@ public record AgreementPdfProperties(
         @DefaultValue("180") float signatureWidth,
         @DefaultValue("80") float signatureHeight,
         @DefaultValue("место подписи") String signaturePlaceholderLabel,
-        @DefaultValue("dd.MM.yyyy HH:mm") String dateTimePattern) {
+        @DefaultValue("dd.MM.yyyy HH:mm") String dateTimePattern,
+        @DefaultValue("BYN") String currency) {
 }
