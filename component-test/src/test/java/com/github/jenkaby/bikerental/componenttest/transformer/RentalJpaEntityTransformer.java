@@ -32,9 +32,11 @@ public class RentalJpaEntityTransformer {
         var specialTariffId = DataTableHelper.toLong(entry, "specialTariffId");
         var specialPrice = DataTableHelper.toBigDecimal(entry, "specialPrice");
         var discountPercent = DataTableHelper.toInt(entry, "discountPercent");
+        var version = Optional.ofNullable(DataTableHelper.toLong(entry, "version")).orElse(0L);
 
         return RentalJpaEntity.builder()
                 .id(id)
+                .version(version)
                 .customerId(customerId)
                 .status(status)
                 .startedAt(startedAt)

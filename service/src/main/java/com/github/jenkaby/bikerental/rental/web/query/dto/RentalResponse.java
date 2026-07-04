@@ -11,6 +11,7 @@ import java.util.UUID;
 @Schema(description = "Full rental details")
 public record RentalResponse(
         @Schema(description = "Rental ID", example = "1") @NotNull Long id,
+        @Schema(description = "Optimistic-lock version, starts at 0", example = "0") @NotNull Long version,
         @Schema(description = "Customer UUID") @NotNull UUID customerId,
         @Schema(description = "List of equipment items in this rental") @NotNull List<EquipmentItemResponse> equipmentItems,
         @Schema(description = "Rental status", example = "ACTIVE") @NotNull String status,

@@ -30,6 +30,8 @@ public class Rental {
     @Setter
     private Long id;
 
+    private Long version;
+
     private UUID customerId;
     private List<RentalEquipment> equipments;
 
@@ -356,7 +358,7 @@ public class Rental {
                 throw new IllegalArgumentException(
                         "specialPrice is required when specialTariffId is set");
             }
-            return new Rental(id, customerId, equipments, status, startedAt, expectedReturnAt,
+            return new Rental(id, version, customerId, equipments, status, startedAt, expectedReturnAt,
                     actualReturnAt, plannedDuration, actualDuration, estimatedCost, finalCost,
                     specialTariffId, specialPrice, discountPercent, createdAt, updatedAt);
         }
