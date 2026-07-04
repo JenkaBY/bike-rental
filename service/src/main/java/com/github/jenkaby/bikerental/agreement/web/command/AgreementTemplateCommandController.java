@@ -1,10 +1,6 @@
 package com.github.jenkaby.bikerental.agreement.web.command;
 
-import com.github.jenkaby.bikerental.agreement.application.usecase.ActivateAgreementTemplateUseCase;
-import com.github.jenkaby.bikerental.agreement.application.usecase.CreateAgreementTemplateUseCase;
-import com.github.jenkaby.bikerental.agreement.application.usecase.DeleteAgreementTemplateUseCase;
-import com.github.jenkaby.bikerental.agreement.application.usecase.PreviewAgreementPdfUseCase;
-import com.github.jenkaby.bikerental.agreement.application.usecase.UpdateAgreementTemplateUseCase;
+import com.github.jenkaby.bikerental.agreement.application.usecase.*;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
 import com.github.jenkaby.bikerental.agreement.web.command.dto.AgreementPdfPreviewRequest;
 import com.github.jenkaby.bikerental.agreement.web.command.dto.AgreementTemplateRequest;
@@ -126,6 +122,17 @@ class AgreementTemplateCommandController {
     }
 
     @PostMapping(value = "/preview-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @Operation(summary = "Preview agreement template as PDF",
+            description = "Renders the given title and content into the agreement PDF layout using fixture rental data and a signature placeholder")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Rendered PDF document",
+                    content = @Content(mediaType = MediaType.APPLICATION_PDF_VALUE,
+                            schema = @Schema(type = "string", format = "binary"))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "PDF rendering failed",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<byte[]> previewPdf(@Valid @RequestBody AgreementPdfPreviewRequest request) {
         log.info("[POST] Rendering agreement preview PDF");
         var command = new PreviewAgreementPdfUseCase.PreviewAgreementPdfCommand(request.title(), request.content());
