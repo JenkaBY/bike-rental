@@ -28,6 +28,7 @@ import java.util.Optional;
 public class OpenApiConfig {
 
     public static final class Tags {
+        public static final String AGREEMENTS = "Agreements";
         public static final String CUSTOMERS = "Customers";
         public static final String EQUIPMENT = "Equipments Catalogue";
         public static final String EQUIPMENT_TYPES = "Equipment Types";
@@ -65,6 +66,7 @@ public class OpenApiConfig {
                         .description("REST API for the Bike Rental management system")
                         .contact(new Contact().name("Bike Rental Team")))
                 .tags(List.of(
+                        new Tag().name(Tags.AGREEMENTS).description("Rental agreement template management"),
                         new Tag().name(Tags.CUSTOMERS).description("Customer search and profile management"),
                         new Tag().name(Tags.EQUIPMENT).description("Equipment catalog management"),
                         new Tag().name(Tags.EQUIPMENT_TYPES).description("Equipment type catalog"),
@@ -82,6 +84,15 @@ public class OpenApiConfig {
                 .group("all")
                 .displayName("All")
                 .pathsToMatch("/api/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi agreementsGroup() {
+        return GroupedOpenApi.builder()
+                .group("agreements")
+                .displayName(Tags.AGREEMENTS)
+                .pathsToMatch("/api/agreements/**")
                 .build();
     }
 
