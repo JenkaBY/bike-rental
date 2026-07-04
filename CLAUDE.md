@@ -27,8 +27,8 @@ documents after ad-hoc changes.
 
 - **Templates:** `.spec-workflow/` (`fr_template.md`, `task_file_template.md`, `checklist_file_template.md`)
 - **Rules:** `.claude/rules/` — short path-scoped hard constraints, auto-loaded when matching files are touched
-  (`java-style`, `unit-tests`, `component-tests`, `liquibase`, `workflows`, `error-responses`). They are the single source of truth for
-  those constraints; skills provide the long-form depth behind them.
+  (`java-style`, `unit-tests`, `component-tests`, `liquibase`, `workflows`, `error-responses`, `hexagonal-boundaries`).
+  They are the single source of truth for those constraints; skills provide the long-form depth behind them.
 - **Subagent:** `.claude/agents/dev.md` — literal-minded task executor used by `/spec-implement`
 - **Skills:** `.claude/skills/` — project coding standards (Liquibase, MapStruct, Spring Modulith, DDD persistence,
   Cucumber component tests, WebMvc controller tests, Java/Spring Boot/JUnit best practices). Consult the relevant
