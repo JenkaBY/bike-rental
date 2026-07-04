@@ -403,6 +403,80 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 
 ---
 
+## `agreement.*` — agreement templates
+
+### `agreement.template.not_editable`
+- **HTTP:** 409 · **Trigger:** editing (`PATCH /api/agreements/{id}`) a template that is not `DRAFT`
+  (`AgreementTemplateNotEditableException`). · **Extra:** `params` = `{currentStatus}`.
+
+```json
+{
+  "status": 409,
+  "detail": "Cannot edit agreement template in status ACTIVE. Only DRAFT templates are editable",
+  "correlationId": "018f...",
+  "errorCode": "agreement.template.not_editable",
+  "params": { "currentStatus": "ACTIVE" }
+}
+```
+
+### `agreement.template.not_activatable`
+- **HTTP:** 409 · **Trigger:** activating (`PATCH /api/agreements/{id}/activate`) a template that is
+  not `DRAFT`, or the previously-active template not being `ACTIVE` during the activation flow
+  (`AgreementTemplateNotActivatableException`). · **Extra:** `params` = `{currentStatus}`.
+
+```json
+{
+  "status": 409,
+  "detail": "Cannot activate agreement template in status DEACTIVATED. Only DRAFT templates are activatable",
+  "correlationId": "018f...",
+  "errorCode": "agreement.template.not_activatable",
+  "params": { "currentStatus": "DEACTIVATED" }
+}
+```
+
+### `agreement.template.not_deletable`
+- **HTTP:** 409 · **Trigger:** deleting (`DELETE /api/agreements/{id}`) a template that is not `DRAFT`
+  (`AgreementTemplateNotDeletableException`). · **Extra:** `params` = `{currentStatus}`.
+
+```json
+{
+  "status": 409,
+  "detail": "Cannot delete agreement template in status ACTIVE. Only DRAFT templates are deletable",
+  "correlationId": "018f...",
+  "errorCode": "agreement.template.not_deletable",
+  "params": { "currentStatus": "ACTIVE" }
+}
+```
+
+### `agreement.template.no_active`
+- **HTTP:** 404 · **Trigger:** `GET /api/agreements/active` when no `ACTIVE` template exists
+  (`ActiveAgreementTemplateNotFoundException`). · **Extra:** none.
+
+```json
+{
+  "status": 404,
+  "detail": "No active agreement template exists",
+  "correlationId": "018f...",
+  "errorCode": "agreement.template.no_active"
+}
+```
+
+### `agreement.template.concurrent_activation`
+- **HTTP:** 409 · **Trigger:** two admins activate concurrently and the loser violates the partial
+  unique index `uq_agreement_templates_single_active` (`DataIntegrityViolationException` scoped to the
+  agreement module advice). · **Extra:** none. The client should retry.
+
+```json
+{
+  "status": 409,
+  "detail": "Another agreement template was activated concurrently. Please retry.",
+  "correlationId": "018f...",
+  "errorCode": "agreement.template.concurrent_activation"
+}
+```
+
+---
+
 ## Field-level validation codes (`errors[].code`)
 
 Inside the `errors[]` array each entry's `code` is **not** from `ErrorCodes`; it is derived automatically from the

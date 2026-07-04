@@ -42,4 +42,7 @@
 
     <include relativeToChangelogFile="true" file="v1/rentals.update-table_add-version-column.xml"/>
 
+    <!--    agreement module -->
+    <include relativeToChangelogFile="true" file="v1/agreement_templates.create-table.xml"/>
+
 </databaseChangeLog>
