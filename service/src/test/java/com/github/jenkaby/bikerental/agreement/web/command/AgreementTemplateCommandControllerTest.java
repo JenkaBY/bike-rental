@@ -3,8 +3,10 @@ package com.github.jenkaby.bikerental.agreement.web.command;
 import com.github.jenkaby.bikerental.agreement.application.usecase.ActivateAgreementTemplateUseCase;
 import com.github.jenkaby.bikerental.agreement.application.usecase.CreateAgreementTemplateUseCase;
 import com.github.jenkaby.bikerental.agreement.application.usecase.DeleteAgreementTemplateUseCase;
+import com.github.jenkaby.bikerental.agreement.application.usecase.PreviewAgreementPdfUseCase;
 import com.github.jenkaby.bikerental.agreement.application.usecase.UpdateAgreementTemplateUseCase;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
+import com.github.jenkaby.bikerental.agreement.web.command.dto.AgreementPdfPreviewRequest;
 import com.github.jenkaby.bikerental.agreement.web.command.dto.AgreementTemplateRequest;
 import com.github.jenkaby.bikerental.agreement.web.mapper.AgreementTemplateWebMapper;
 import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateResponse;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -52,6 +55,9 @@ class AgreementTemplateCommandControllerTest {
 
     @MockitoBean
     private DeleteAgreementTemplateUseCase deleteAgreementTemplateUseCase;
+
+    @MockitoBean
+    private PreviewAgreementPdfUseCase previewAgreementPdfUseCase;
 
     @MockitoBean
     private AgreementTemplateWebMapper mapper;
@@ -196,6 +202,57 @@ class AgreementTemplateCommandControllerTest {
                     .andExpect(status().isNoContent());
 
             verify(deleteAgreementTemplateUseCase).execute(5L);
+        }
+    }
+
+    @Nested
+    class PreviewPdf {
+
+        @Test
+        void shouldReturn200AndPdfWhenRequestIsValid() throws Exception {
+            var request = new AgreementPdfPreviewRequest("Rental Agreement", "Вы соглашаетесь с условиями.");
+            byte[] expected = "%PDF-1.7 fake".getBytes();
+            given(previewAgreementPdfUseCase.execute(any(PreviewAgreementPdfUseCase.PreviewAgreementPdfCommand.class)))
+                    .willReturn(expected);
+
+            mockMvc.perform(post("/api/agreements/preview-pdf")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_PDF)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_PDF));
+
+            verify(previewAgreementPdfUseCase).execute(any(PreviewAgreementPdfUseCase.PreviewAgreementPdfCommand.class));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"   ", "\t"})
+        @NullAndEmptySource
+        void shouldReturn400WhenTitleIsBlank(String title) throws Exception {
+            var request = new AgreementPdfPreviewRequest(title, "valid content");
+
+            mockMvc.perform(post("/api/agreements/preview-pdf")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors[0].field").value(containsString("title")));
+
+            verify(previewAgreementPdfUseCase, never()).execute(any());
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"   ", "\t"})
+        @NullAndEmptySource
+        void shouldReturn400WhenContentIsBlank(String content) throws Exception {
+            var request = new AgreementPdfPreviewRequest("valid title", content);
+
+            mockMvc.perform(post("/api/agreements/preview-pdf")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors[0].field").value(containsString("content")));
+
+            verify(previewAgreementPdfUseCase, never()).execute(any());
         }
     }
 }

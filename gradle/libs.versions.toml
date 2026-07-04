@@ -12,6 +12,7 @@ java = "21"
 uuidV7Generator = '6.1.1'
 specification-arg-resolver = '4.1.0'
 jacoco = "0.8.14"
+pdfbox = "3.0.7"
 
 [libraries]
 # BOMs
@@ -50,6 +51,7 @@ postgresql = { module = "org.postgresql:postgresql" }
 
 uuid-v7-generator = { module = "com.github.f4b6a3:uuid-creator", version.ref = 'uuidV7Generator' }
 specification-arg-resolver = { module = "net.kaczmarzyk:specification-arg-resolver", version.ref = "specification-arg-resolver" }
+pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 
 # Test libs
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }

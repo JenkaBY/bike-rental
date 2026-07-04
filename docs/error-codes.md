@@ -461,6 +461,20 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 }
 ```
 
+### `agreement.pdf.rendering_failed`
+- **HTTP:** 500 · **Trigger:** an `IOException` while rendering the agreement PDF
+  (`POST /api/agreements/preview-pdf`, or the FR-05 signing flow) via
+  `AgreementPdfRenderingException`. Not expected in normal operation. · **Extra:** none.
+
+```json
+{
+  "status": 500,
+  "detail": "Failed to render the agreement PDF document",
+  "correlationId": "018f...",
+  "errorCode": "agreement.pdf.rendering_failed"
+}
+```
+
 ### `agreement.template.concurrent_activation`
 - **HTTP:** 409 · **Trigger:** two admins activate concurrently and the loser violates the partial
   unique index `uq_agreement_templates_single_active` (`DataIntegrityViolationException` scoped to the
