@@ -41,6 +41,7 @@ class AgreementTemplateCommandController {
                                        UpdateAgreementTemplateUseCase updateAgreementTemplateUseCase,
                                        ActivateAgreementTemplateUseCase activateAgreementTemplateUseCase,
                                        DeleteAgreementTemplateUseCase deleteAgreementTemplateUseCase,
+                                       PreviewAgreementPdfUseCase previewAgreementPdfUseCase,
                                        AgreementTemplateWebMapper mapper) {
         this.createAgreementTemplateUseCase = createAgreementTemplateUseCase;
         this.updateAgreementTemplateUseCase = updateAgreementTemplateUseCase;
