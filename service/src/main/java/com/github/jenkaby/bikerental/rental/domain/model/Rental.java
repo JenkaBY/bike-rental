@@ -82,6 +82,9 @@ public class Rental {
     }
 
     public void updateEquipments(Collection<EquipmentInfo> incoming) {
+        if (this.status != RentalStatus.DRAFT) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
+        }
         var incomingIds = incoming.stream()
                 .map(EquipmentInfo::id)
                 .collect(Collectors.toSet());
@@ -175,6 +178,41 @@ public class Rental {
         this.status = RentalStatus.ACTIVE;
         this.startedAt = actualStartTime; // Actual start time
         this.expectedReturnAt = actualStartTime.plus(this.plannedDuration);
+
+        equipments.forEach(e -> e.activateForRental(this));
+        this.updatedAt = Instant.now();
+    }
+
+    public void prepareForSigning() {
+        this.status.validateTransitionTo(RentalStatus.AWAITING_SIGNATURE);
+
+        if (!canBeActivated()) {
+            List<String> missingFields = new ArrayList<>();
+            if (customerId == null) missingFields.add("customerId");
+            if (plannedDuration == null) missingFields.add("plannedDuration");
+            if (estimatedCost == null) missingFields.add("estimatedCost");
+            if (equipments == null) missingFields.add("equipmentIds");
+            throw new RentalNotReadyForActivationException(missingFields);
+        }
+
+        this.status = RentalStatus.AWAITING_SIGNATURE;
+        this.updatedAt = Instant.now();
+    }
+
+    public void cancelSigning() {
+        this.status.validateTransitionTo(RentalStatus.DRAFT);
+        this.status = RentalStatus.DRAFT;
+        this.updatedAt = Instant.now();
+    }
+
+    public void completeSigning(LocalDateTime signedAt) {
+        if (this.status != RentalStatus.AWAITING_SIGNATURE) {
+            throw new InvalidRentalStatusException(this.status, RentalStatus.AWAITING_SIGNATURE);
+        }
+
+        this.status = RentalStatus.ACTIVE;
+        this.startedAt = signedAt;
+        this.expectedReturnAt = signedAt.plus(this.plannedDuration);
 
         equipments.forEach(e -> e.activateForRental(this));
         this.updatedAt = Instant.now();

@@ -1445,6 +1445,36 @@ class RentalCommandControllerTest {
                                         new RentalLifecycleRequest(LifecycleStatus.CANCELLED, "op-1"))))
                         .andExpect(status().isOk());
             }
+
+            @Test
+            @DisplayName("when status is AWAITING_SIGNATURE")
+            void whenStatusIsAwaitingSignature() throws Exception {
+                var rental = mock(Rental.class);
+                given(rentalLifecycleUseCase.execute(any(RentalLifecycleUseCase.RentalLifecycleCommand.class)))
+                        .willReturn(rental);
+                given(queryMapper.toResponse(any(Rental.class))).willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(
+                                        new RentalLifecycleRequest(LifecycleStatus.AWAITING_SIGNATURE, "op-1"))))
+                        .andExpect(status().isOk());
+            }
+
+            @Test
+            @DisplayName("when status is DRAFT")
+            void whenStatusIsDraft() throws Exception {
+                var rental = mock(Rental.class);
+                given(rentalLifecycleUseCase.execute(any(RentalLifecycleUseCase.RentalLifecycleCommand.class)))
+                        .willReturn(rental);
+                given(queryMapper.toResponse(any(Rental.class))).willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(
+                                        new RentalLifecycleRequest(LifecycleStatus.DRAFT, "op-1"))))
+                        .andExpect(status().isOk());
+            }
         }
 
         @Nested
@@ -1479,14 +1509,6 @@ class RentalCommandControllerTest {
                         .andExpect(status().isBadRequest());
             }
 
-            @Test
-            @DisplayName("when status is DRAFT")
-            void whenStatusIsDraft() throws Exception {
-                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"status\": \"DRAFT\", \"operatorId\": \"op-1\"}"))
-                        .andExpect(status().isBadRequest());
-            }
         }
 
         @Nested

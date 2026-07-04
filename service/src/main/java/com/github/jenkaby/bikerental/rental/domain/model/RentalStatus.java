@@ -8,6 +8,7 @@ import java.util.Set;
 
 public enum RentalStatus {
     DRAFT,
+    AWAITING_SIGNATURE,
     ACTIVE,
     COMPLETED,
     CANCELLED,
@@ -17,7 +18,8 @@ public enum RentalStatus {
 
     static {
         var map = new EnumMap<RentalStatus, Set<RentalStatus>>(RentalStatus.class);
-        map.put(DRAFT, Set.of(ACTIVE, CANCELLED));
+        map.put(DRAFT, Set.of(ACTIVE, CANCELLED, AWAITING_SIGNATURE));
+        map.put(AWAITING_SIGNATURE, Set.of(ACTIVE, DRAFT));
         map.put(ACTIVE, Set.of(CANCELLED));
         map.put(COMPLETED, Set.of());
         map.put(CANCELLED, Set.of());
