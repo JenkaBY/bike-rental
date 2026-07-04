@@ -13,5 +13,6 @@ public interface AgreementSignatureRepository {
 
     Optional<AgreementSignatureSummary> findSummaryByRentalId(Long rentalId);
 
+    // TODO Remove pdf from the method name name. Make it abstract
     Optional<byte[]> findPdfByRentalId(Long rentalId);
 }

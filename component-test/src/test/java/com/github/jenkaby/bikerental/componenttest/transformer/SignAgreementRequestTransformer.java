@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.agreement.web.command.dto.SignAgreementRequest;
+import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
 import io.cucumber.java.DataTableType;
 
 import java.util.Map;
@@ -16,6 +17,7 @@ public class SignAgreementRequestTransformer {
                 VALID_SIGNATURE_PNG_BASE64,
                 DataTableHelper.toLong(entry, "rentalVersion"),
                 DataTableHelper.toLong(entry, "templateId"),
-                DataTableHelper.getStringOrNull(entry, "operatorId"));
+                Aliases.getOperatorId(entry.get("operatorId"))
+        );
     }
 }

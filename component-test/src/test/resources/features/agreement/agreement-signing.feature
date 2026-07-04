@@ -48,7 +48,7 @@ Feature: Rental Agreement Signing
       | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
     And the sign agreement request is
       | rentalVersion | templateId | operatorId |
-      | 1             | 5          | op-1       |
+      | 1             | 5          | OP1       |
     When a POST request has been made to "/api/rentals/1/signatures" endpoint
     Then the response status is 201
     And the signature response contains a signature id and signed timestamp
@@ -72,7 +72,7 @@ Feature: Rental Agreement Signing
       | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
     And the sign agreement request is
       | rentalVersion | templateId | operatorId |
-      | 1             | 5          | op-1       |
+      | 1             | 5          | OP1       |
     When a POST request has been made to "/api/rentals/1/signatures" endpoint
     Then the response status is 409
     And the response contains
@@ -88,12 +88,12 @@ Feature: Rental Agreement Signing
       | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
     And the sign agreement request is
       | rentalVersion | templateId | operatorId |
-      | 1             | 5          | op-1       |
+      | 1             | 5          | OP1       |
     When a POST request has been made to "/api/rentals/1/signatures" endpoint
     Then the response status is 201
     Given the sign agreement request is
       | rentalVersion | templateId | operatorId |
-      | 1             | 5          | op-1       |
+      | 1             | 5          | OP1       |
     When a POST request has been made to "/api/rentals/1/signatures" endpoint
     Then the response status is 409
     And the response contains
@@ -109,7 +109,7 @@ Feature: Rental Agreement Signing
       | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
     And the sign agreement request is
       | rentalVersion | templateId | operatorId |
-      | 0             | 5          | op-1       |
+      | 0             | 5          | OP1       |
     When a POST request has been made to "/api/rentals/1/signatures" endpoint
     Then the response status is 409
     And the response contains
@@ -125,7 +125,7 @@ Feature: Rental Agreement Signing
       | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
     And the sign agreement request is
       | rentalVersion | templateId | operatorId |
-      | 1             | 99         | op-1       |
+      | 1             | 99         | OP1       |
     When a POST request has been made to "/api/rentals/1/signatures" endpoint
     Then the response status is 409
     And the response contains
@@ -146,7 +146,7 @@ Feature: Rental Agreement Signing
     Then the response status is 404
     Given the sign agreement request is
       | rentalVersion | templateId | operatorId |
-      | 1             | 5          | op-1       |
+      | 1             | 5          | OP1       |
     When a POST request has been made to "/api/rentals/1/signatures" endpoint
     Then the response status is 201
     When a GET request has been made to "/api/rentals/1/signatures" endpoint

@@ -12,16 +12,14 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO Review this class. Can it be simplified or refactored?It must support i18n,
+//  all lables must be codes to be substituted via messageConverter. Where's a default locale stored?
 @Component
 class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
 
@@ -110,6 +108,7 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
         AgreementPdfData.CustomerData customer = data.customer();
         AgreementPdfData.RentalData rental = data.rental();
         float bodyFontSize = properties.bodyFontSize();
+//         TODO these customer's info should be i18n and come from application properties as well
         cursor.writeLine("Клиент: " + customer.firstName() + " " + customer.lastName(), bodyFontSize);
         cursor.writeLine("Телефон: " + customer.phone(), bodyFontSize);
         cursor.writeLine("Дата начала: " + rental.startedAt().format(dateTimeFormat), bodyFontSize);

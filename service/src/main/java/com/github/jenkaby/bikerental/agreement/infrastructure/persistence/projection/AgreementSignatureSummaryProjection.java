@@ -1,4 +1,4 @@
-package com.github.jenkaby.bikerental.agreement.infrastructure.persistence.repository;
+package com.github.jenkaby.bikerental.agreement.infrastructure.persistence.projection;
 
 import java.time.Instant;
 

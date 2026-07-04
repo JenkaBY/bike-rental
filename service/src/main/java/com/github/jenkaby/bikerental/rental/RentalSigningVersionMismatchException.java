@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.rental;
 import lombok.Getter;
 
 @Getter
+// FIXME All exceptions must extend BikeRentalException.
 public class RentalSigningVersionMismatchException extends RuntimeException {
 
     private final Long rentalId;

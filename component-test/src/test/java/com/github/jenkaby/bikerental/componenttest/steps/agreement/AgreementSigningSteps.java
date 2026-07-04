@@ -47,6 +47,7 @@ public class AgreementSigningSteps {
         List<SignatureSummaryResponse> actual = scenarioContext.getResponseAsList(SignatureSummaryResponse.class);
         var softly = new SoftAssertions();
         softly.assertThat(actual).as("Signature summary list size").hasSize(expectedRows.size());
+//        FIXME use zipSatisfy
         for (int i = 0; i < expectedRows.size(); i++) {
             var expected = expectedRows.get(i);
             var row = actual.get(i);

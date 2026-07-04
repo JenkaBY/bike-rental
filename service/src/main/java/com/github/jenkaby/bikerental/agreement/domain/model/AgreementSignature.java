@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -18,7 +19,7 @@ public class AgreementSignature {
 
     private Long rentalId;
 
-    private java.util.UUID customerId;
+    private UUID customerId;
 
     private String operatorId;
 
@@ -40,7 +41,7 @@ public class AgreementSignature {
 
     public static AgreementSignature create(Long templateId,
                                             Long rentalId,
-                                            java.util.UUID customerId,
+                                            UUID customerId,
                                             String operatorId,
                                             SigningSnapshot signingSnapshot,
                                             byte[] pdfDocument,

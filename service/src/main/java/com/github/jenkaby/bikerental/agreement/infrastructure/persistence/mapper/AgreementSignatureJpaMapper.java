@@ -3,7 +3,7 @@ package com.github.jenkaby.bikerental.agreement.infrastructure.persistence.mappe
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementSignature;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementSignatureSummary;
 import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.entity.AgreementSignatureJpaEntity;
-import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.repository.AgreementSignatureSummaryProjection;
+import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.projection.AgreementSignatureSummaryProjection;
 import org.mapstruct.Mapper;
 
 @Mapper

@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.agreement.infrastructure.persistence.repository;
 
 import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.entity.AgreementSignatureJpaEntity;
+import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.projection.AgreementSignatureSummaryProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

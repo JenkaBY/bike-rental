@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import lombok.Getter;
 
 @Getter
+// FIXME All exceptions must extend BikeRentalException.
 public class RentalNotAwaitingSignatureException extends RuntimeException {
 
     private final Long rentalId;

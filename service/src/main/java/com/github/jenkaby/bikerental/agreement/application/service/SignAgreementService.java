@@ -2,11 +2,7 @@ package com.github.jenkaby.bikerental.agreement.application.service;
 
 import com.github.jenkaby.bikerental.agreement.AgreementSignedEvent;
 import com.github.jenkaby.bikerental.agreement.application.usecase.SignAgreementUseCase;
-import com.github.jenkaby.bikerental.agreement.domain.exception.ActiveAgreementTemplateNotFoundException;
-import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementAlreadySignedException;
-import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotActiveException;
-import com.github.jenkaby.bikerental.agreement.domain.exception.InvalidSignatureImageException;
-import com.github.jenkaby.bikerental.agreement.domain.exception.SigningVersionMismatchException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.*;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementSignature;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
@@ -127,6 +123,7 @@ class SignAgreementService implements SignAgreementUseCase {
         return new SignAgreementResult(saved.getId(), signedAt);
     }
 
+    // TODO extract into a separate component
     private byte[] decodeSignature(String signaturePngBase64) {
         String base64 = signaturePngBase64.startsWith(PNG_DATA_URI_PREFIX)
                 ? signaturePngBase64.substring(PNG_DATA_URI_PREFIX.length())
