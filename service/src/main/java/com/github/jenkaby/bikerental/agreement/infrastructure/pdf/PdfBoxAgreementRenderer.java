@@ -23,6 +23,7 @@ import java.util.List;
 
 @Component
 class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
+// FIXME No hardcode. Create a special property group in the application properties and load everything from there
 
     private static final String FONT_LOCATION = "fonts/DejaVuSans.ttf";
     private static final float MARGIN = 50f;
@@ -38,6 +39,7 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
     public byte[] render(AgreementPdfData data) {
         try (PDDocument document = new PDDocument();
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+//           FIXME. Can we cache the loaded font in the PostContruct method or elsewhere?
             PDType0Font font = loadFont(document);
             RenderCursor cursor = new RenderCursor(document, font);
 

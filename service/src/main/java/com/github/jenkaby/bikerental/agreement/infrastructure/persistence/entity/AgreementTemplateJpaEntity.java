@@ -72,8 +72,6 @@ public class AgreementTemplateJpaEntity {
         Instant now = Instant.now();
         if (createdAt == null) {
             createdAt = now;
-        }
-        if (updatedAt == null) {
             updatedAt = now;
         }
     }

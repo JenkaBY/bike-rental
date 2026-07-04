@@ -232,15 +232,17 @@ public class WebRequestSteps {
         return expected;
     }
 
-    @Given("a prepared payload is")
-    public void aPreparedPayloadIs(String payload) {
-        acceptJsonPayload();
-        scenarioContext.setRequestBody(payload);
-    }
-
-    private void acceptJsonPayload() {
-        scenarioContext.replaceHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        scenarioContext.replaceHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+    @When("a {httpMethod} request for {string} content has been made to {string} endpoint")
+    public void requestForContentHasBeenMadeToEndpoint(HttpMethod method, String acceptedMediaType, String endpoint) {
+        scenarioContext.replaceHeader(HttpHeaders.ACCEPT, acceptedMediaType);
+        var request = new HttpEntity<>(scenarioContext.getRequestBody(),
+                HttpHeaders.readOnlyHttpHeaders(scenarioContext.getRequestHeaders()));
+        var uri = UriComponentsBuilder.fromUriString("http://localhost:" + port + endpoint).build().toUri();
+        var binaryResponse = restClient.exchange(uri, method, request, byte[].class);
+        log.info("Binary response status: {}, body length: {}", binaryResponse.getStatusCode(),
+                binaryResponse.getBody() == null ? 0 : binaryResponse.getBody().length);
+        scenarioContext.setBinaryResponse(binaryResponse);
+        scenarioContext.setResponse(new ResponseEntity<>("", binaryResponse.getHeaders(), binaryResponse.getStatusCode()));
     }
 
     @Then("the response contains a UUID at {string}")

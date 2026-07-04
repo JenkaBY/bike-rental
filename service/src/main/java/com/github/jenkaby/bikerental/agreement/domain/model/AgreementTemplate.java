@@ -48,7 +48,7 @@ public class AgreementTemplate {
     }
 
     public void updateContent(String title, String content) {
-        if (this.status != AgreementTemplateStatus.DRAFT) {
+        if (!canBeEdited()) {
             throw new AgreementTemplateNotEditableException(this.status);
         }
         this.title = title;
@@ -57,7 +57,7 @@ public class AgreementTemplate {
     }
 
     public void activate(int versionNumber, String contentSha256, Instant activatedAt) {
-        if (this.status != AgreementTemplateStatus.DRAFT) {
+        if (!canBeActivated()) {
             throw new AgreementTemplateNotActivatableException(this.status);
         }
         this.versionNumber = versionNumber;
@@ -68,7 +68,7 @@ public class AgreementTemplate {
     }
 
     public void deactivate(Instant deactivatedAt) {
-        if (this.status != AgreementTemplateStatus.ACTIVE) {
+        if (!canBeDeactivated()) {
             throw new AgreementTemplateNotActivatableException(this.status);
         }
         this.status = AgreementTemplateStatus.DEACTIVATED;
@@ -77,8 +77,24 @@ public class AgreementTemplate {
     }
 
     public void ensureDeletable() {
-        if (this.status != AgreementTemplateStatus.DRAFT) {
+        if (!canBeDeleted()) {
             throw new AgreementTemplateNotDeletableException(this.status);
         }
+    }
+
+    private boolean canBeEdited() {
+        return this.status == AgreementTemplateStatus.DRAFT;
+    }
+
+    private boolean canBeActivated() {
+        return this.status == AgreementTemplateStatus.DRAFT;
+    }
+
+    private boolean canBeDeactivated() {
+        return this.status == AgreementTemplateStatus.ACTIVE;
+    }
+
+    private boolean canBeDeleted() {
+        return this.status == AgreementTemplateStatus.DRAFT;
     }
 }

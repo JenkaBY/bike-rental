@@ -121,6 +121,7 @@ class AgreementTemplateCommandController {
         return ResponseEntity.noContent().build();
     }
 
+//     FIXME !!! Changes in the initial design. Don't pdf in the url, instead pass header accept: application/pdf
     @PostMapping(value = "/preview-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     @Operation(summary = "Preview agreement template as PDF",
             description = "Renders the given title and content into the agreement PDF layout using fixture rental data and a signature placeholder")
@@ -133,6 +134,7 @@ class AgreementTemplateCommandController {
             @ApiResponse(responseCode = "500", description = "PDF rendering failed",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
+    //    TODO Can this endpoint be lazy and returns StreamingResponseBody ? Investigate pros and cons of this approach
     public ResponseEntity<byte[]> previewPdf(@Valid @RequestBody AgreementPdfPreviewRequest request) {
         log.info("[POST] Rendering agreement preview PDF");
         var command = new PreviewAgreementPdfUseCase.PreviewAgreementPdfCommand(request.title(), request.content());

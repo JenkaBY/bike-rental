@@ -21,5 +21,7 @@ public interface AgreementTemplateJpaRepository extends JpaRepository<AgreementT
                 t.id, t.versionNumber, t.title, t.status, t.createdAt, t.activatedAt, t.deactivatedAt)
             from AgreementTemplateJpaEntity t
             order by t.id desc""")
+//    FIXME It's violation of layers usage. The persistence layer should not know about the domain layer.
+//     The solution is to use a projection interface instead of a DTO class.
     List<AgreementTemplateSummary> findAllSummaries();
 }

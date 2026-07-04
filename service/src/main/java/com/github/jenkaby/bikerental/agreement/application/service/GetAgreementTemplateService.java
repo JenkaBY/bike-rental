@@ -17,7 +17,6 @@ class GetAgreementTemplateService implements GetAgreementTemplateUseCase {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public AgreementTemplate execute(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(AgreementTemplate.class, id.toString()));

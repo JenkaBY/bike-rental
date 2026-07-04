@@ -82,6 +82,8 @@ public class Aliases {
         // Source / Rental aliases — stored as Long string because rental.id is Long
         ALIASES.put("RENT1", "1001");
         ALIASES.put("RENT2", "1002");
+        // Sha256 aliases
+        ALIASES.put("SHA_ZERO", "0000000000000000000000000000000000000000000000000000000000000000");
     }
 
     public static @Nullable UUID getUuid(@NonNull String alias) {
