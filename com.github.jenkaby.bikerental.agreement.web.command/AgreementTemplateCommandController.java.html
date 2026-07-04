@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AgreementTemplateCommandController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.web.command</a> &gt; <span class="el_source">AgreementTemplateCommandController.java</span></div><h1>AgreementTemplateCommandController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.web.command;
+
+import com.github.jenkaby.bikerental.agreement.application.usecase.ActivateAgreementTemplateUseCase;
+import com.github.jenkaby.bikerental.agreement.application.usecase.CreateAgreementTemplateUseCase;
+import com.github.jenkaby.bikerental.agreement.application.usecase.DeleteAgreementTemplateUseCase;
+import com.github.jenkaby.bikerental.agreement.application.usecase.UpdateAgreementTemplateUseCase;
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
+import com.github.jenkaby.bikerental.agreement.web.command.dto.AgreementTemplateRequest;
+import com.github.jenkaby.bikerental.agreement.web.mapper.AgreementTemplateWebMapper;
+import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateResponse;
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+@Validated
+@RestController
+@RequestMapping(path = &quot;/api/agreements&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
+<span class="fc" id="L31">@Slf4j</span>
+@Tag(name = OpenApiConfig.Tags.AGREEMENTS)
+class AgreementTemplateCommandController {
+
+    private final CreateAgreementTemplateUseCase createAgreementTemplateUseCase;
+    private final UpdateAgreementTemplateUseCase updateAgreementTemplateUseCase;
+    private final ActivateAgreementTemplateUseCase activateAgreementTemplateUseCase;
+    private final DeleteAgreementTemplateUseCase deleteAgreementTemplateUseCase;
+    private final AgreementTemplateWebMapper mapper;
+
+    AgreementTemplateCommandController(CreateAgreementTemplateUseCase createAgreementTemplateUseCase,
+                                       UpdateAgreementTemplateUseCase updateAgreementTemplateUseCase,
+                                       ActivateAgreementTemplateUseCase activateAgreementTemplateUseCase,
+                                       DeleteAgreementTemplateUseCase deleteAgreementTemplateUseCase,
+<span class="fc" id="L45">                                       AgreementTemplateWebMapper mapper) {</span>
+<span class="fc" id="L46">        this.createAgreementTemplateUseCase = createAgreementTemplateUseCase;</span>
+<span class="fc" id="L47">        this.updateAgreementTemplateUseCase = updateAgreementTemplateUseCase;</span>
+<span class="fc" id="L48">        this.activateAgreementTemplateUseCase = activateAgreementTemplateUseCase;</span>
+<span class="fc" id="L49">        this.deleteAgreementTemplateUseCase = deleteAgreementTemplateUseCase;</span>
+<span class="fc" id="L50">        this.mapper = mapper;</span>
+<span class="fc" id="L51">    }</span>
+
+    @PostMapping
+    @Operation(summary = &quot;Create agreement template draft&quot;,
+            description = &quot;Creates a new agreement template in DRAFT status&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Template draft created&quot;,
+                    content = @Content(schema = @Schema(implementation = AgreementTemplateResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;AgreementTemplateResponse&gt; create(@Valid @RequestBody AgreementTemplateRequest request) {
+<span class="fc" id="L63">        log.info(&quot;[POST] Creating agreement template draft&quot;);</span>
+<span class="fc" id="L64">        var command = new CreateAgreementTemplateUseCase.CreateAgreementTemplateCommand(request.title(), request.content());</span>
+<span class="fc" id="L65">        AgreementTemplate created = createAgreementTemplateUseCase.execute(command);</span>
+<span class="fc" id="L66">        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(created));</span>
+    }
+
+    @PatchMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Update agreement template draft&quot;,
+            description = &quot;Updates title and content of a DRAFT template; ACTIVE and DEACTIVATED templates are immutable&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Template updated&quot;,
+                    content = @Content(schema = @Schema(implementation = AgreementTemplateResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Template not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;409&quot;, description = &quot;Template is not editable (not in DRAFT status)&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;AgreementTemplateResponse&gt; update(@PathVariable(&quot;id&quot;) @Positive Long id,
+                                                            @Valid @RequestBody AgreementTemplateRequest request) {
+<span class="fc" id="L84">        log.info(&quot;[PATCH] Updating agreement template {}&quot;, id);</span>
+<span class="fc" id="L85">        var command = new UpdateAgreementTemplateUseCase.UpdateAgreementTemplateCommand(id, request.title(), request.content());</span>
+<span class="nc" id="L86">        AgreementTemplate updated = updateAgreementTemplateUseCase.execute(command);</span>
+<span class="nc" id="L87">        return ResponseEntity.ok(mapper.toResponse(updated));</span>
+    }
+
+    @PatchMapping(&quot;/{id}/activate&quot;)
+    @Operation(summary = &quot;Activate agreement template&quot;,
+            description = &quot;Activates a DRAFT template, assigns the next version number and deactivates the previously active one&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Template activated&quot;,
+                    content = @Content(schema = @Schema(implementation = AgreementTemplateResponse.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Template not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;409&quot;, description = &quot;Template is not activatable or concurrent activation detected&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;AgreementTemplateResponse&gt; activate(@PathVariable(&quot;id&quot;) @Positive Long id) {
+<span class="fc" id="L102">        log.info(&quot;[PATCH] Activating agreement template {}&quot;, id);</span>
+<span class="fc" id="L103">        AgreementTemplate activated = activateAgreementTemplateUseCase.execute(id);</span>
+<span class="fc" id="L104">        return ResponseEntity.ok(mapper.toResponse(activated));</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Delete agreement template draft&quot;,
+            description = &quot;Deletes a DRAFT template; ACTIVE and DEACTIVATED templates cannot be deleted&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Template deleted&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Template not found&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;409&quot;, description = &quot;Template is not deletable (not in DRAFT status)&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;Void&gt; delete(@PathVariable(&quot;id&quot;) @Positive Long id) {
+<span class="fc" id="L118">        log.info(&quot;[DELETE] Deleting agreement template {}&quot;, id);</span>
+<span class="nc" id="L119">        deleteAgreementTemplateUseCase.execute(id);</span>
+<span class="nc" id="L120">        return ResponseEntity.noContent().build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

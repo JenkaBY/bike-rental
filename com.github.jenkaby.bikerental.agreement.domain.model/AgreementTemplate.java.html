@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AgreementTemplate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.domain.model</a> &gt; <span class="el_source">AgreementTemplate.java</span></div><h1>AgreementTemplate.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.domain.model;
+
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotActivatableException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotDeletableException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotEditableException;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.Instant;
+
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class AgreementTemplate {
+
+    @Setter
+    private Long id;
+
+    private Long lockVersion;
+
+    private Integer versionNumber;
+
+    private String title;
+
+    private String content;
+
+    private String contentSha256;
+
+    private AgreementTemplateStatus status;
+
+    private Instant createdAt;
+    private Instant updatedAt;
+    private Instant activatedAt;
+    private Instant deactivatedAt;
+
+    public static AgreementTemplate createDraft(String title, String content) {
+<span class="fc" id="L40">        Instant now = Instant.now();</span>
+<span class="fc" id="L41">        return AgreementTemplate.builder()</span>
+<span class="fc" id="L42">                .title(title)</span>
+<span class="fc" id="L43">                .content(content)</span>
+<span class="fc" id="L44">                .status(AgreementTemplateStatus.DRAFT)</span>
+<span class="fc" id="L45">                .createdAt(now)</span>
+<span class="fc" id="L46">                .updatedAt(now)</span>
+<span class="fc" id="L47">                .build();</span>
+    }
+
+    public void updateContent(String title, String content) {
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (this.status != AgreementTemplateStatus.DRAFT) {</span>
+<span class="fc" id="L52">            throw new AgreementTemplateNotEditableException(this.status);</span>
+        }
+<span class="nc" id="L54">        this.title = title;</span>
+<span class="nc" id="L55">        this.content = content;</span>
+<span class="nc" id="L56">        this.updatedAt = Instant.now();</span>
+<span class="nc" id="L57">    }</span>
+
+    public void activate(int versionNumber, String contentSha256, Instant activatedAt) {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (this.status != AgreementTemplateStatus.DRAFT) {</span>
+<span class="fc" id="L61">            throw new AgreementTemplateNotActivatableException(this.status);</span>
+        }
+<span class="fc" id="L63">        this.versionNumber = versionNumber;</span>
+<span class="fc" id="L64">        this.contentSha256 = contentSha256;</span>
+<span class="fc" id="L65">        this.status = AgreementTemplateStatus.ACTIVE;</span>
+<span class="fc" id="L66">        this.activatedAt = activatedAt;</span>
+<span class="fc" id="L67">        this.updatedAt = activatedAt;</span>
+<span class="fc" id="L68">    }</span>
+
+    public void deactivate(Instant deactivatedAt) {
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (this.status != AgreementTemplateStatus.ACTIVE) {</span>
+<span class="nc" id="L72">            throw new AgreementTemplateNotActivatableException(this.status);</span>
+        }
+<span class="fc" id="L74">        this.status = AgreementTemplateStatus.DEACTIVATED;</span>
+<span class="fc" id="L75">        this.deactivatedAt = deactivatedAt;</span>
+<span class="fc" id="L76">        this.updatedAt = deactivatedAt;</span>
+<span class="fc" id="L77">    }</span>
+
+    public void ensureDeletable() {
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if (this.status != AgreementTemplateStatus.DRAFT) {</span>
+<span class="fc" id="L81">            throw new AgreementTemplateNotDeletableException(this.status);</span>
+        }
+<span class="nc" id="L83">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

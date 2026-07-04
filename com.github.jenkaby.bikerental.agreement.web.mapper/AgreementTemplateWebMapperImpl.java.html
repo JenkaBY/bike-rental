@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AgreementTemplateWebMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.web.mapper</a> &gt; <span class="el_source">AgreementTemplateWebMapperImpl.java</span></div><h1>AgreementTemplateWebMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.web.mapper;
+
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplateStatus;
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplateSummary;
+import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateResponse;
+import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateSummaryResponse;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-java-compiler-worker-9.6.1.jar, environment: Java 21.0.11 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L19">public class AgreementTemplateWebMapperImpl implements AgreementTemplateWebMapper {</span>
+
+    @Override
+    public AgreementTemplateResponse toResponse(AgreementTemplate template) {
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if ( template == null ) {</span>
+<span class="nc" id="L24">            return null;</span>
+        }
+
+<span class="fc" id="L27">        Long id = null;</span>
+<span class="fc" id="L28">        Integer versionNumber = null;</span>
+<span class="fc" id="L29">        String title = null;</span>
+<span class="fc" id="L30">        String content = null;</span>
+<span class="fc" id="L31">        AgreementTemplateStatus status = null;</span>
+<span class="fc" id="L32">        Instant createdAt = null;</span>
+<span class="fc" id="L33">        Instant activatedAt = null;</span>
+<span class="fc" id="L34">        Instant deactivatedAt = null;</span>
+
+<span class="fc" id="L36">        id = template.getId();</span>
+<span class="fc" id="L37">        versionNumber = template.getVersionNumber();</span>
+<span class="fc" id="L38">        title = template.getTitle();</span>
+<span class="fc" id="L39">        content = template.getContent();</span>
+<span class="fc" id="L40">        status = template.getStatus();</span>
+<span class="fc" id="L41">        createdAt = template.getCreatedAt();</span>
+<span class="fc" id="L42">        activatedAt = template.getActivatedAt();</span>
+<span class="fc" id="L43">        deactivatedAt = template.getDeactivatedAt();</span>
+
+<span class="fc" id="L45">        AgreementTemplateResponse agreementTemplateResponse = new AgreementTemplateResponse( id, versionNumber, title, content, status, createdAt, activatedAt, deactivatedAt );</span>
+
+<span class="fc" id="L47">        return agreementTemplateResponse;</span>
+    }
+
+    @Override
+    public AgreementTemplateSummaryResponse toSummaryResponse(AgreementTemplateSummary summary) {
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if ( summary == null ) {</span>
+<span class="nc" id="L53">            return null;</span>
+        }
+
+<span class="nc" id="L56">        Long id = null;</span>
+<span class="nc" id="L57">        Integer versionNumber = null;</span>
+<span class="nc" id="L58">        String title = null;</span>
+<span class="nc" id="L59">        AgreementTemplateStatus status = null;</span>
+<span class="nc" id="L60">        Instant createdAt = null;</span>
+<span class="nc" id="L61">        Instant activatedAt = null;</span>
+<span class="nc" id="L62">        Instant deactivatedAt = null;</span>
+
+<span class="nc" id="L64">        id = summary.id();</span>
+<span class="nc" id="L65">        versionNumber = summary.versionNumber();</span>
+<span class="nc" id="L66">        title = summary.title();</span>
+<span class="nc" id="L67">        status = summary.status();</span>
+<span class="nc" id="L68">        createdAt = summary.createdAt();</span>
+<span class="nc" id="L69">        activatedAt = summary.activatedAt();</span>
+<span class="nc" id="L70">        deactivatedAt = summary.deactivatedAt();</span>
+
+<span class="nc" id="L72">        AgreementTemplateSummaryResponse agreementTemplateSummaryResponse = new AgreementTemplateSummaryResponse( id, versionNumber, title, status, createdAt, activatedAt, deactivatedAt );</span>
+
+<span class="nc" id="L74">        return agreementTemplateSummaryResponse;</span>
+    }
+
+    @Override
+    public List&lt;AgreementTemplateSummaryResponse&gt; toSummaryResponses(List&lt;AgreementTemplateSummary&gt; summaries) {
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if ( summaries == null ) {</span>
+<span class="nc" id="L80">            return null;</span>
+        }
+
+<span class="nc" id="L83">        List&lt;AgreementTemplateSummaryResponse&gt; list = new ArrayList&lt;AgreementTemplateSummaryResponse&gt;( summaries.size() );</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        for ( AgreementTemplateSummary agreementTemplateSummary : summaries ) {</span>
+<span class="nc" id="L85">            list.add( toSummaryResponse( agreementTemplateSummary ) );</span>
+<span class="nc" id="L86">        }</span>
+
+<span class="nc" id="L88">        return list;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
