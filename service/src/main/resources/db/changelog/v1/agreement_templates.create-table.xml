@@ -41,10 +41,6 @@
         </createTable>
 
         <sql dbms="postgresql">
-            ALTER TABLE agreement_templates
-                ADD CONSTRAINT ck_agreement_templates_status
-                    CHECK (status IN ('DRAFT', 'ACTIVE', 'DEACTIVATED'));
-
             CREATE UNIQUE INDEX uq_agreement_templates_single_active
                 ON agreement_templates ((true))
                 WHERE status = 'ACTIVE';
