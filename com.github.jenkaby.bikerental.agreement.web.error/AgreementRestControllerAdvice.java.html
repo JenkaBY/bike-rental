@@ -3,6 +3,7 @@
 import com.github.jenkaby.bikerental.agreement.domain.exception.ActiveAgreementTemplateNotFoundException;
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotActivatableException;
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotDeletableException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementPdfRenderingException;
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotEditableException;
 import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
@@ -17,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-<span class="fc" id="L20">@Slf4j</span>
+<span class="fc" id="L21">@Slf4j</span>
 @RestControllerAdvice(basePackages = &quot;com.github.jenkaby.bikerental.agreement&quot;)
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
 @RequiredArgsConstructor
@@ -29,53 +30,65 @@ public class AgreementRestControllerAdvice {
 
     @ExceptionHandler(AgreementTemplateNotEditableException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleNotEditable(AgreementTemplateNotEditableException ex) {
-<span class="fc" id="L32">        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());</span>
+<span class="fc" id="L33">        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());</span>
     }
 
     @ExceptionHandler(AgreementTemplateNotActivatableException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleNotActivatable(AgreementTemplateNotActivatableException ex) {
-<span class="fc" id="L37">        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());</span>
+<span class="fc" id="L38">        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());</span>
     }
 
     @ExceptionHandler(AgreementTemplateNotDeletableException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleNotDeletable(AgreementTemplateNotDeletableException ex) {
-<span class="fc" id="L42">        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());</span>
+<span class="fc" id="L43">        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());</span>
     }
 
     @ExceptionHandler(ActiveAgreementTemplateNotFoundException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleNoActive(ActiveAgreementTemplateNotFoundException ex) {
-<span class="fc" id="L47">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="fc" id="L48">        log.warn(&quot;[correlationId={}] No active agreement template: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="fc" id="L49">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
-<span class="fc" id="L50">        problem.setTitle(&quot;Active agreement template not found&quot;);</span>
-<span class="fc" id="L51">        problem.setDetail(ex.getMessage());</span>
-<span class="fc" id="L52">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L53">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="fc" id="L54">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L48">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L49">        log.warn(&quot;[correlationId={}] No active agreement template: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L50">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
+<span class="fc" id="L51">        problem.setTitle(&quot;Active agreement template not found&quot;);</span>
+<span class="fc" id="L52">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L53">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L54">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L55">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleConcurrentActivation(DataIntegrityViolationException ex) {
-<span class="nc" id="L59">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="nc" id="L60">        log.warn(&quot;[correlationId={}] Concurrent agreement template activation lost the race: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L61">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
-<span class="nc" id="L62">        problem.setTitle(&quot;Concurrent activation&quot;);</span>
-<span class="nc" id="L63">        problem.setDetail(&quot;Another agreement template was activated concurrently. Please retry.&quot;);</span>
-<span class="nc" id="L64">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L65">        problem.setProperty(ProblemDetailField.ERROR_CODE, CONCURRENT_ACTIVATION_ERROR_CODE);</span>
-<span class="nc" id="L66">        return ResponseEntity.of(problem).build();</span>
+<span class="nc" id="L60">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L61">        log.warn(&quot;[correlationId={}] Concurrent agreement template activation lost the race: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L62">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
+<span class="nc" id="L63">        problem.setTitle(&quot;Concurrent activation&quot;);</span>
+<span class="nc" id="L64">        problem.setDetail(&quot;Another agreement template was activated concurrently. Please retry.&quot;);</span>
+<span class="nc" id="L65">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L66">        problem.setProperty(ProblemDetailField.ERROR_CODE, CONCURRENT_ACTIVATION_ERROR_CODE);</span>
+<span class="nc" id="L67">        return ResponseEntity.of(problem).build();</span>
+    }
+
+    @ExceptionHandler(AgreementPdfRenderingException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handlePdfRendering(AgreementPdfRenderingException ex) {
+<span class="nc" id="L72">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L73">        log.error(&quot;[correlationId={}] Agreement PDF rendering failed: {}&quot;, correlationId, ex.getMessage(), ex);</span>
+<span class="nc" id="L74">        var problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="nc" id="L75">        problem.setTitle(&quot;Agreement PDF rendering failed&quot;);</span>
+<span class="nc" id="L76">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L77">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L78">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L79">        return ResponseEntity.of(problem).build();</span>
     }
 
     private ResponseEntity&lt;ProblemDetail&gt; conflict(String detail, String errorCode, Object params) {
-<span class="fc" id="L70">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="fc" id="L71">        log.warn(&quot;[correlationId={}] Agreement template conflict [{}]: {}&quot;, correlationId, errorCode, detail);</span>
-<span class="fc" id="L72">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
-<span class="fc" id="L73">        problem.setTitle(&quot;Agreement template conflict&quot;);</span>
-<span class="fc" id="L74">        problem.setDetail(detail);</span>
-<span class="fc" id="L75">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L76">        problem.setProperty(ProblemDetailField.ERROR_CODE, errorCode);</span>
-<span class="fc" id="L77">        problem.setProperty(ProblemDetailField.PARAMS, params);</span>
-<span class="fc" id="L78">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L83">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L84">        log.warn(&quot;[correlationId={}] Agreement template conflict [{}]: {}&quot;, correlationId, errorCode, detail);</span>
+<span class="fc" id="L85">        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);</span>
+<span class="fc" id="L86">        problem.setTitle(&quot;Agreement template conflict&quot;);</span>
+<span class="fc" id="L87">        problem.setDetail(detail);</span>
+<span class="fc" id="L88">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L89">        problem.setProperty(ProblemDetailField.ERROR_CODE, errorCode);</span>
+<span class="fc" id="L90">        problem.setProperty(ProblemDetailField.PARAMS, params);</span>
+<span class="fc" id="L91">        return ResponseEntity.of(problem).build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
