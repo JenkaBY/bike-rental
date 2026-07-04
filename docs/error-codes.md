@@ -463,7 +463,7 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 
 ### `agreement.pdf.rendering_failed`
 - **HTTP:** 500 · **Trigger:** an `IOException` while rendering the agreement PDF
-  (`POST /api/agreements/preview-pdf`, or the FR-05 signing flow) via
+  (`POST /api/agreements/preview`, or the FR-05 signing flow) via
   `AgreementPdfRenderingException`. Not expected in normal operation. · **Extra:** none.
 
 ```json
@@ -486,6 +486,76 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
   "detail": "Another agreement template was activated concurrently. Please retry.",
   "correlationId": "018f...",
   "errorCode": "agreement.template.concurrent_activation"
+}
+```
+
+### `agreement.signing.already_signed`
+- **HTTP:** 409 · **Trigger:** POST `/api/rentals/{rentalId}/signatures` for a rental that already has a signature
+  (`AgreementAlreadySignedException`). · **Extra:** `params` = `{rentalId}`.
+
+```json
+{
+  "status": 409,
+  "detail": "Rental 42 has already been signed",
+  "correlationId": "018f...",
+  "errorCode": "agreement.signing.already_signed",
+  "params": { "rentalId": 42 }
+}
+```
+
+### `agreement.template.not_active`
+- **HTTP:** 409 · **Trigger:** POST `/api/rentals/{rentalId}/signatures` with a `templateId` that is not the current
+  active template (`AgreementTemplateNotActiveException`). · **Extra:** `params` = `{requestedTemplateId, activeTemplateId}`.
+
+```json
+{
+  "status": 409,
+  "detail": "Template 3 is not the current active template. Active template is 5",
+  "correlationId": "018f...",
+  "errorCode": "agreement.template.not_active",
+  "params": { "requestedTemplateId": 3, "activeTemplateId": 5 }
+}
+```
+
+### `agreement.signing.rental_version_mismatch`
+- **HTTP:** 409 · **Trigger:** POST `/api/rentals/{rentalId}/signatures` with a stale `rentalVersion`
+  (`SigningVersionMismatchException`), or the synchronous `completeSigning` losing the version race
+  (`RentalSigningVersionMismatchException`, rental module API). · **Extra:** for the fencing check `params` =
+  `{rentalId, expectedVersion, actualVersion}`; for the completeSigning race, no `params`.
+
+```json
+{
+  "status": 409,
+  "detail": "Rental 42 version mismatch. Expected: 2, actual: 3",
+  "correlationId": "018f...",
+  "errorCode": "agreement.signing.rental_version_mismatch",
+  "params": { "rentalId": 42, "expectedVersion": 2, "actualVersion": 3 }
+}
+```
+
+### `agreement.signing.rental_not_awaiting_signature`
+- **HTTP:** 409 · **Trigger:** POST `/api/rentals/{rentalId}/signatures` while the rental is not `AWAITING_SIGNATURE`
+  (`RentalNotAwaitingSignatureException`, rental module API). · **Extra:** none.
+
+```json
+{
+  "status": 409,
+  "detail": "Rental 42 is not awaiting signature. Current status: DRAFT",
+  "correlationId": "018f...",
+  "errorCode": "agreement.signing.rental_not_awaiting_signature"
+}
+```
+
+### `agreement.signing.invalid_signature_image`
+- **HTTP:** 400 · **Trigger:** POST `/api/rentals/{rentalId}/signatures` with a `signaturePng` that is not valid
+  base64-encoded PNG data (`InvalidSignatureImageException`). · **Extra:** none.
+
+```json
+{
+  "status": 400,
+  "detail": "The submitted signature image is not valid base64-encoded PNG data",
+  "correlationId": "018f...",
+  "errorCode": "agreement.signing.invalid_signature_image"
 }
 ```
 

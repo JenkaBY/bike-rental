@@ -121,8 +121,7 @@ class AgreementTemplateCommandController {
         return ResponseEntity.noContent().build();
     }
 
-//     FIXME !!! Changes in the initial design. Don't pdf in the url, instead pass header accept: application/pdf
-    @PostMapping(value = "/preview-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @PostMapping(value = "/preview", produces = MediaType.APPLICATION_PDF_VALUE)
     @Operation(summary = "Preview agreement template as PDF",
             description = "Renders the given title and content into the agreement PDF layout using fixture rental data and a signature placeholder")
     @ApiResponses({

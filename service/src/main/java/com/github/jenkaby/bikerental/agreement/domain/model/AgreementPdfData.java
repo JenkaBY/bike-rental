@@ -12,7 +12,7 @@ public record AgreementPdfData(
         String content,
         CustomerData customer,
         RentalData rental,
-        @Nullable byte[] signaturePng) {
+        byte @Nullable [] signaturePng) {
 
     public record CustomerData(String firstName, String lastName, String phone) {
     }
@@ -20,7 +20,10 @@ public record AgreementPdfData(
     public record RentalData(Long rentalId,
                              LocalDateTime startedAt,
                              Duration plannedDuration,
-                             List<EquipmentLine> equipments) {
+                             List<EquipmentLine> equipments,
+                             BigDecimal estimatedTotal,
+                             @Nullable Integer discountPercent,
+                             @Nullable BigDecimal specialPrice) {
     }
 
     public record EquipmentLine(String uid, String name, BigDecimal estimatedCost) {

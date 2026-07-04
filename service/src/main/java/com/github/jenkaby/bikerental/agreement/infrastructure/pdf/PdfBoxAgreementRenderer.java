@@ -12,10 +12,11 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -23,34 +24,40 @@ import java.util.List;
 
 @Component
 class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
-// FIXME No hardcode. Create a special property group in the application properties and load everything from there
 
-    private static final String FONT_LOCATION = "fonts/DejaVuSans.ttf";
-    private static final float MARGIN = 50f;
-    private static final float BODY_FONT_SIZE = 11f;
-    private static final float TITLE_FONT_SIZE = 16f;
-    private static final float LEADING_FACTOR = 1.4f;
-    private static final float SIGNATURE_WIDTH = 180f;
-    private static final float SIGNATURE_HEIGHT = 80f;
-    private static final String SIGNATURE_PLACEHOLDER_LABEL = "место подписи";
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    private final AgreementPdfProperties properties;
+    private final byte[] fontBytes;
+    private final DateTimeFormatter dateTimeFormat;
+
+    PdfBoxAgreementRenderer(AgreementPdfProperties properties) {
+        this.properties = properties;
+        this.fontBytes = readFontBytes(properties.fontLocation());
+        this.dateTimeFormat = DateTimeFormatter.ofPattern(properties.dateTimePattern());
+    }
+
+    private static byte[] readFontBytes(String fontLocation) {
+        try (InputStream fontStream = new ClassPathResource(fontLocation).getInputStream()) {
+            return fontStream.readAllBytes();
+        } catch (IOException ex) {
+            throw new UncheckedIOException("Unable to read agreement font " + fontLocation, ex);
+        }
+    }
 
     @Override
     public byte[] render(AgreementPdfData data) {
         try (PDDocument document = new PDDocument();
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-//           FIXME. Can we cache the loaded font in the PostContruct method or elsewhere?
-            PDType0Font font = loadFont(document);
-            RenderCursor cursor = new RenderCursor(document, font);
+            PDType0Font font = PDType0Font.load(document, new ByteArrayInputStream(fontBytes), true);
+            RenderCursor cursor = new RenderCursor(document, font, properties);
 
-            cursor.writeLine(data.title(), TITLE_FONT_SIZE);
-            cursor.blankLine(TITLE_FONT_SIZE);
+            cursor.writeLine(data.title(), properties.titleFontSize());
+            cursor.blankLine(properties.titleFontSize());
             writeParagraphs(cursor, font, data.content());
-            cursor.blankLine(BODY_FONT_SIZE);
+            cursor.blankLine(properties.bodyFontSize());
             writeDataBlock(cursor, data);
-            cursor.blankLine(BODY_FONT_SIZE);
+            cursor.blankLine(properties.bodyFontSize());
             writeSignature(cursor, document, font, data.signaturePng());
-            cursor.blankLine(BODY_FONT_SIZE);
+            cursor.blankLine(properties.bodyFontSize());
             writeMetadata(cursor, data);
 
             cursor.close();
@@ -61,27 +68,21 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
         }
     }
 
-    private PDType0Font loadFont(PDDocument document) throws IOException {
-        try (InputStream fontStream = new ClassPathResource(FONT_LOCATION).getInputStream()) {
-            return PDType0Font.load(document, fontStream, true);
-        }
-    }
-
     private void writeParagraphs(RenderCursor cursor, PDType0Font font, String content) throws IOException {
         String[] paragraphs = content.split("\n", -1);
         for (String paragraph : paragraphs) {
             if (paragraph.isBlank()) {
-                cursor.blankLine(BODY_FONT_SIZE);
+                cursor.blankLine(properties.bodyFontSize());
                 continue;
             }
             for (String line : wrap(font, paragraph)) {
-                cursor.writeLine(line, BODY_FONT_SIZE);
+                cursor.writeLine(line, properties.bodyFontSize());
             }
         }
     }
 
     private List<String> wrap(PDType0Font font, String paragraph) throws IOException {
-        float maxWidth = PDRectangle.A4.getWidth() - 2 * MARGIN;
+        float maxWidth = PDRectangle.A4.getWidth() - 2 * properties.margin();
         List<String> lines = new ArrayList<>();
         StringBuilder current = new StringBuilder();
         for (String word : paragraph.split(" ")) {
@@ -102,23 +103,28 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
     }
 
     private float stringWidth(PDType0Font font, String text) throws IOException {
-        return font.getStringWidth(text) / 1000f * BODY_FONT_SIZE;
+        return font.getStringWidth(text) / 1000f * properties.bodyFontSize();
     }
 
     private void writeDataBlock(RenderCursor cursor, AgreementPdfData data) throws IOException {
         AgreementPdfData.CustomerData customer = data.customer();
         AgreementPdfData.RentalData rental = data.rental();
-        cursor.writeLine("Клиент: " + customer.firstName() + " " + customer.lastName(), BODY_FONT_SIZE);
-        cursor.writeLine("Телефон: " + customer.phone(), BODY_FONT_SIZE);
-        cursor.writeLine("Дата начала: " + rental.startedAt().format(DATE_TIME_FORMAT), BODY_FONT_SIZE);
-        cursor.writeLine("Длительность: " + formatDuration(rental.plannedDuration()), BODY_FONT_SIZE);
-        cursor.writeLine("Оборудование:", BODY_FONT_SIZE);
-        BigDecimal total = BigDecimal.ZERO;
+        float bodyFontSize = properties.bodyFontSize();
+        cursor.writeLine("Клиент: " + customer.firstName() + " " + customer.lastName(), bodyFontSize);
+        cursor.writeLine("Телефон: " + customer.phone(), bodyFontSize);
+        cursor.writeLine("Дата начала: " + rental.startedAt().format(dateTimeFormat), bodyFontSize);
+        cursor.writeLine("Длительность: " + formatDuration(rental.plannedDuration()), bodyFontSize);
+        cursor.writeLine("Оборудование:", bodyFontSize);
         for (AgreementPdfData.EquipmentLine line : rental.equipments()) {
-            cursor.writeLine("  " + line.uid() + " — " + line.name() + " — " + line.estimatedCost(), BODY_FONT_SIZE);
-            total = total.add(line.estimatedCost());
+            cursor.writeLine("  " + line.uid() + " — " + line.name() + " — " + line.estimatedCost(), bodyFontSize);
         }
-        cursor.writeLine("Итого: " + total, BODY_FONT_SIZE);
+        if (rental.discountPercent() != null) {
+            cursor.writeLine("Скидка: " + rental.discountPercent() + "%", bodyFontSize);
+        }
+        if (rental.specialPrice() != null) {
+            cursor.writeLine("Специальная цена: " + rental.specialPrice(), bodyFontSize);
+        }
+        cursor.writeLine("Итого: " + rental.estimatedTotal(), bodyFontSize);
     }
 
     private String formatDuration(Duration duration) {
@@ -128,31 +134,34 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
     }
 
     private void writeSignature(RenderCursor cursor, PDDocument document, PDType0Font font, byte[] signaturePng) throws IOException {
-        cursor.writeLine("Подпись:", BODY_FONT_SIZE);
+        cursor.writeLine("Подпись:", properties.bodyFontSize());
         if (signaturePng != null) {
             PDImageXObject image = PDImageXObject.createFromByteArray(document, signaturePng, "signature");
-            cursor.drawImage(image, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
+            cursor.drawImage(image, properties.signatureWidth(), properties.signatureHeight());
         } else {
-            cursor.drawPlaceholder(font, SIGNATURE_WIDTH, SIGNATURE_HEIGHT, SIGNATURE_PLACEHOLDER_LABEL);
+            cursor.drawPlaceholder(font, properties.signatureWidth(), properties.signatureHeight(),
+                    properties.signaturePlaceholderLabel());
         }
     }
 
     private void writeMetadata(RenderCursor cursor, AgreementPdfData data) throws IOException {
-        cursor.writeLine("Дата подписания: " + data.rental().startedAt().format(DATE_TIME_FORMAT)
-                + "   Аренда №: " + data.rental().rentalId(), BODY_FONT_SIZE);
+        cursor.writeLine("Дата подписания: " + data.rental().startedAt().format(dateTimeFormat)
+                + "   Аренда №: " + data.rental().rentalId(), properties.bodyFontSize());
     }
 
     private static final class RenderCursor {
 
         private final PDDocument document;
         private final PDType0Font font;
+        private final AgreementPdfProperties properties;
         private PDPage page;
         private PDPageContentStream stream;
         private float y;
 
-        private RenderCursor(PDDocument document, PDType0Font font) throws IOException {
+        private RenderCursor(PDDocument document, PDType0Font font, AgreementPdfProperties properties) throws IOException {
             this.document = document;
             this.font = font;
+            this.properties = properties;
             newPage();
         }
 
@@ -163,28 +172,28 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
             page = new PDPage(PDRectangle.A4);
             document.addPage(page);
             stream = new PDPageContentStream(document, page);
-            y = page.getMediaBox().getHeight() - MARGIN;
+            y = page.getMediaBox().getHeight() - properties.margin();
         }
 
         private void ensureSpace(float needed) throws IOException {
-            if (y - needed < MARGIN) {
+            if (y - needed < properties.margin()) {
                 newPage();
             }
         }
 
         private void writeLine(String text, float fontSize) throws IOException {
-            float leading = fontSize * LEADING_FACTOR;
+            float leading = fontSize * properties.leadingFactor();
             ensureSpace(leading);
             stream.beginText();
             stream.setFont(font, fontSize);
-            stream.newLineAtOffset(MARGIN, y);
+            stream.newLineAtOffset(properties.margin(), y);
             stream.showText(text);
             stream.endText();
             y -= leading;
         }
 
         private void blankLine(float fontSize) throws IOException {
-            float leading = fontSize * LEADING_FACTOR;
+            float leading = fontSize * properties.leadingFactor();
             ensureSpace(leading);
             y -= leading;
         }
@@ -192,17 +201,17 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
         private void drawImage(PDImageXObject image, float width, float height) throws IOException {
             ensureSpace(height);
             y -= height;
-            stream.drawImage(image, MARGIN, y, width, height);
+            stream.drawImage(image, properties.margin(), y, width, height);
         }
 
         private void drawPlaceholder(PDType0Font placeholderFont, float width, float height, String label) throws IOException {
             ensureSpace(height);
             y -= height;
-            stream.addRect(MARGIN, y, width, height);
+            stream.addRect(properties.margin(), y, width, height);
             stream.stroke();
             stream.beginText();
-            stream.setFont(placeholderFont, BODY_FONT_SIZE);
-            stream.newLineAtOffset(MARGIN + 10f, y + height / 2f);
+            stream.setFont(placeholderFont, properties.bodyFontSize());
+            stream.newLineAtOffset(properties.margin() + 10f, y + height / 2f);
             stream.showText(label);
             stream.endText();
         }

@@ -1,10 +1,16 @@
 package com.github.jenkaby.bikerental.agreement.web.error;
 
 import com.github.jenkaby.bikerental.agreement.domain.exception.ActiveAgreementTemplateNotFoundException;
-import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotActivatableException;
-import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotDeletableException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementAlreadySignedException;
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementPdfRenderingException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotActivatableException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotActiveException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotDeletableException;
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotEditableException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.InvalidSignatureImageException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.SigningVersionMismatchException;
+import com.github.jenkaby.bikerental.rental.RentalNotAwaitingSignatureException;
+import com.github.jenkaby.bikerental.rental.RentalSigningVersionMismatchException;
 import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +31,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class AgreementRestControllerAdvice {
 
     private static final String CONCURRENT_ACTIVATION_ERROR_CODE = "agreement.template.concurrent_activation";
+    private static final String RENTAL_NOT_AWAITING_SIGNATURE_ERROR_CODE = "agreement.signing.rental_not_awaiting_signature";
+    private static final String RENTAL_VERSION_MISMATCH_ERROR_CODE = "agreement.signing.rental_version_mismatch";
 
     private final CorrelationIdProvider correlationIdProvider;
 
@@ -73,6 +81,43 @@ public class AgreementRestControllerAdvice {
         log.error("[correlationId={}] Agreement PDF rendering failed: {}", correlationId, ex.getMessage(), ex);
         var problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         problem.setTitle("Agreement PDF rendering failed");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(AgreementAlreadySignedException.class)
+    public ResponseEntity<ProblemDetail> handleAlreadySigned(AgreementAlreadySignedException ex) {
+        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());
+    }
+
+    @ExceptionHandler(AgreementTemplateNotActiveException.class)
+    public ResponseEntity<ProblemDetail> handleTemplateNotActive(AgreementTemplateNotActiveException ex) {
+        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());
+    }
+
+    @ExceptionHandler(SigningVersionMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleSigningVersionMismatch(SigningVersionMismatchException ex) {
+        return conflict(ex.getMessage(), ex.getErrorCode(), ex.getDetails());
+    }
+
+    @ExceptionHandler(RentalNotAwaitingSignatureException.class)
+    public ResponseEntity<ProblemDetail> handleRentalNotAwaitingSignature(RentalNotAwaitingSignatureException ex) {
+        return conflict(ex.getMessage(), RENTAL_NOT_AWAITING_SIGNATURE_ERROR_CODE, null);
+    }
+
+    @ExceptionHandler(RentalSigningVersionMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleRentalSigningVersionMismatch(RentalSigningVersionMismatchException ex) {
+        return conflict(ex.getMessage(), RENTAL_VERSION_MISMATCH_ERROR_CODE, null);
+    }
+
+    @ExceptionHandler(InvalidSignatureImageException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidSignatureImage(InvalidSignatureImageException ex) {
+        var correlationId = correlationIdProvider.resolve();
+        log.warn("[correlationId={}] Invalid signature image [{}]: {}", correlationId, ex.getErrorCode(), ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setTitle("Invalid signature image");
         problem.setDetail(ex.getMessage());
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());

@@ -234,9 +234,10 @@ public class WebRequestSteps {
 
     @When("a {httpMethod} request for {string} content has been made to {string} endpoint")
     public void requestForContentHasBeenMadeToEndpoint(HttpMethod method, String acceptedMediaType, String endpoint) {
-        scenarioContext.replaceHeader(HttpHeaders.ACCEPT, acceptedMediaType);
-        var request = new HttpEntity<>(scenarioContext.getRequestBody(),
-                HttpHeaders.readOnlyHttpHeaders(scenarioContext.getRequestHeaders()));
+        var headers = new HttpHeaders();
+        headers.putAll(scenarioContext.getRequestHeaders());
+        headers.set(HttpHeaders.ACCEPT, acceptedMediaType);
+        var request = new HttpEntity<>(scenarioContext.getRequestBody(), headers);
         var uri = UriComponentsBuilder.fromUriString("http://localhost:" + port + endpoint).build().toUri();
         var binaryResponse = restClient.exchange(uri, method, request, byte[].class);
         log.info("Binary response status: {}, body length: {}", binaryResponse.getStatusCode(),

@@ -52,7 +52,9 @@ class AgreementTemplateRepositoryAdapter implements AgreementTemplateRepository 
 
     @Override
     public List<AgreementTemplateSummary> findAllSummaries() {
-        return repository.findAllSummaries();
+        return repository.findAllSummaries().stream()
+                .map(mapper::toSummary)
+                .toList();
     }
 
     @Override
