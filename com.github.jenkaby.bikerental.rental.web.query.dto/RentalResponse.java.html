@@ -11,6 +11,7 @@ import java.util.UUID;
 @Schema(description = &quot;Full rental details&quot;)
 <span class="fc" id="L12">public record RentalResponse(</span>
         @Schema(description = &quot;Rental ID&quot;, example = &quot;1&quot;) @NotNull Long id,
+        @Schema(description = &quot;Optimistic-lock version, starts at 0&quot;, example = &quot;0&quot;) @NotNull Long version,
         @Schema(description = &quot;Customer UUID&quot;) @NotNull UUID customerId,
         @Schema(description = &quot;List of equipment items in this rental&quot;) @NotNull List&lt;EquipmentItemResponse&gt; equipmentItems,
         @Schema(description = &quot;Rental status&quot;, example = &quot;ACTIVE&quot;) @NotNull String status,
