@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.agreement.web.error;
 import com.github.jenkaby.bikerental.agreement.domain.exception.ActiveAgreementTemplateNotFoundException;
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotActivatableException;
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotDeletableException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementPdfRenderingException;
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotEditableException;
 import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
@@ -63,6 +64,18 @@ public class AgreementRestControllerAdvice {
         problem.setDetail("Another agreement template was activated concurrently. Please retry.");
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, CONCURRENT_ACTIVATION_ERROR_CODE);
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(AgreementPdfRenderingException.class)
+    public ResponseEntity<ProblemDetail> handlePdfRendering(AgreementPdfRenderingException ex) {
+        var correlationId = correlationIdProvider.resolve();
+        log.error("[correlationId={}] Agreement PDF rendering failed: {}", correlationId, ex.getMessage(), ex);
+        var problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        problem.setTitle("Agreement PDF rendering failed");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
         return ResponseEntity.of(problem).build();
     }
 

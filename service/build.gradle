@@ -80,6 +80,7 @@ dependencies {
     implementation libs.mapstruct
     implementation libs.uuid.v7.generator
     implementation libs.specification.arg.resolver
+    implementation libs.pdfbox
 
     compileOnly libs.lombok
     runtimeOnly libs.postgresql
