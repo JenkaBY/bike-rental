@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AgreementSignatureJpaMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.infrastructure.persistence.mapper</a> &gt; <span class="el_source">AgreementSignatureJpaMapperImpl.java</span></div><h1>AgreementSignatureJpaMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.infrastructure.persistence.mapper;
+
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementSignature;
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementSignatureSummary;
+import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.entity.AgreementSignatureJpaEntity;
+import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.projection.AgreementSignatureSummaryProjection;
+import java.time.Instant;
+import java.util.Arrays;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-java-compiler-worker-9.6.1.jar, environment: Java 21.0.11 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L17">public class AgreementSignatureJpaMapperImpl implements AgreementSignatureJpaMapper {</span>
+
+    @Override
+    public AgreementSignatureJpaEntity toEntity(AgreementSignature signature) {
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if ( signature == null ) {</span>
+<span class="nc" id="L22">            return null;</span>
+        }
+
+<span class="fc" id="L25">        AgreementSignatureJpaEntity.AgreementSignatureJpaEntityBuilder agreementSignatureJpaEntity = AgreementSignatureJpaEntity.builder();</span>
+
+<span class="fc" id="L27">        agreementSignatureJpaEntity.id( signature.getId() );</span>
+<span class="fc" id="L28">        agreementSignatureJpaEntity.templateId( signature.getTemplateId() );</span>
+<span class="fc" id="L29">        agreementSignatureJpaEntity.rentalId( signature.getRentalId() );</span>
+<span class="fc" id="L30">        agreementSignatureJpaEntity.customerId( signature.getCustomerId() );</span>
+<span class="fc" id="L31">        agreementSignatureJpaEntity.operatorId( signature.getOperatorId() );</span>
+<span class="fc" id="L32">        agreementSignatureJpaEntity.signingSnapshot( signature.getSigningSnapshot() );</span>
+<span class="fc" id="L33">        byte[] pdfDocument = signature.getPdfDocument();</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if ( pdfDocument != null ) {</span>
+<span class="fc" id="L35">            agreementSignatureJpaEntity.pdfDocument( Arrays.copyOf( pdfDocument, pdfDocument.length ) );</span>
+        }
+<span class="fc" id="L37">        agreementSignatureJpaEntity.pdfSha256( signature.getPdfSha256() );</span>
+<span class="fc" id="L38">        agreementSignatureJpaEntity.templateContentSha256( signature.getTemplateContentSha256() );</span>
+<span class="fc" id="L39">        byte[] signatureImage = signature.getSignatureImage();</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if ( signatureImage != null ) {</span>
+<span class="fc" id="L41">            agreementSignatureJpaEntity.signatureImage( Arrays.copyOf( signatureImage, signatureImage.length ) );</span>
+        }
+<span class="fc" id="L43">        agreementSignatureJpaEntity.signedAt( signature.getSignedAt() );</span>
+<span class="fc" id="L44">        agreementSignatureJpaEntity.ipAddress( signature.getIpAddress() );</span>
+<span class="fc" id="L45">        agreementSignatureJpaEntity.userAgent( signature.getUserAgent() );</span>
+
+<span class="fc" id="L47">        return agreementSignatureJpaEntity.build();</span>
+    }
+
+    @Override
+    public AgreementSignature toDomain(AgreementSignatureJpaEntity entity) {
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L53">            return null;</span>
+        }
+
+<span class="fc" id="L56">        AgreementSignature.AgreementSignatureBuilder agreementSignature = AgreementSignature.builder();</span>
+
+<span class="fc" id="L58">        agreementSignature.id( entity.getId() );</span>
+<span class="fc" id="L59">        agreementSignature.templateId( entity.getTemplateId() );</span>
+<span class="fc" id="L60">        agreementSignature.rentalId( entity.getRentalId() );</span>
+<span class="fc" id="L61">        agreementSignature.customerId( entity.getCustomerId() );</span>
+<span class="fc" id="L62">        agreementSignature.operatorId( entity.getOperatorId() );</span>
+<span class="fc" id="L63">        agreementSignature.signingSnapshot( entity.getSigningSnapshot() );</span>
+<span class="fc" id="L64">        byte[] pdfDocument = entity.getPdfDocument();</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if ( pdfDocument != null ) {</span>
+<span class="fc" id="L66">            agreementSignature.pdfDocument( Arrays.copyOf( pdfDocument, pdfDocument.length ) );</span>
+        }
+<span class="fc" id="L68">        agreementSignature.pdfSha256( entity.getPdfSha256() );</span>
+<span class="fc" id="L69">        agreementSignature.templateContentSha256( entity.getTemplateContentSha256() );</span>
+<span class="fc" id="L70">        byte[] signatureImage = entity.getSignatureImage();</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if ( signatureImage != null ) {</span>
+<span class="fc" id="L72">            agreementSignature.signatureImage( Arrays.copyOf( signatureImage, signatureImage.length ) );</span>
+        }
+<span class="fc" id="L74">        agreementSignature.signedAt( entity.getSignedAt() );</span>
+<span class="fc" id="L75">        agreementSignature.ipAddress( entity.getIpAddress() );</span>
+<span class="fc" id="L76">        agreementSignature.userAgent( entity.getUserAgent() );</span>
+
+<span class="fc" id="L78">        return agreementSignature.build();</span>
+    }
+
+    @Override
+    public AgreementSignatureSummary toSummary(AgreementSignatureSummaryProjection projection) {
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if ( projection == null ) {</span>
+<span class="nc" id="L84">            return null;</span>
+        }
+
+<span class="fc" id="L87">        Long id = null;</span>
+<span class="fc" id="L88">        Long templateId = null;</span>
+<span class="fc" id="L89">        Integer templateVersionNumber = null;</span>
+<span class="fc" id="L90">        Instant signedAt = null;</span>
+
+<span class="fc" id="L92">        id = projection.getId();</span>
+<span class="fc" id="L93">        templateId = projection.getTemplateId();</span>
+<span class="fc" id="L94">        templateVersionNumber = projection.getTemplateVersionNumber();</span>
+<span class="fc" id="L95">        signedAt = projection.getSignedAt();</span>
+
+<span class="fc" id="L97">        AgreementSignatureSummary agreementSignatureSummary = new AgreementSignatureSummary( id, templateId, templateVersionNumber, signedAt );</span>
+
+<span class="fc" id="L99">        return agreementSignatureSummary;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

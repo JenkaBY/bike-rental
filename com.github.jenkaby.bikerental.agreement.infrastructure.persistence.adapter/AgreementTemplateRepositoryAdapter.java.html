@@ -52,18 +52,20 @@ class AgreementTemplateRepositoryAdapter implements AgreementTemplateRepository 
 
     @Override
     public List&lt;AgreementTemplateSummary&gt; findAllSummaries() {
-<span class="nc" id="L55">        return repository.findAllSummaries();</span>
+<span class="nc" id="L55">        return repository.findAllSummaries().stream()</span>
+<span class="nc" id="L56">                .map(mapper::toSummary)</span>
+<span class="nc" id="L57">                .toList();</span>
     }
 
     @Override
     public int nextVersionNumber() {
-<span class="fc" id="L60">        return repository.findMaxVersionNumber() + 1;</span>
+<span class="fc" id="L62">        return repository.findMaxVersionNumber() + 1;</span>
     }
 
     @Override
     @Transactional
     public void deleteById(Long id) {
-<span class="nc" id="L66">        repository.deleteById(id);</span>
-<span class="nc" id="L67">    }</span>
+<span class="nc" id="L68">        repository.deleteById(id);</span>
+<span class="nc" id="L69">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

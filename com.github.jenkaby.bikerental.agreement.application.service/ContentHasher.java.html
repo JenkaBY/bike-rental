@@ -13,12 +13,16 @@ import java.util.HexFormat;
     private static final String SHA_256 = &quot;SHA-256&quot;;
 
     public String sha256(String content) {
+<span class="fc" id="L16">        return sha256(content.getBytes(StandardCharsets.UTF_8));</span>
+    }
+
+    public String sha256(byte[] content) {
         try {
-<span class="fc" id="L17">            MessageDigest digest = MessageDigest.getInstance(SHA_256);</span>
-<span class="fc" id="L18">            byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));</span>
-<span class="fc" id="L19">            return HexFormat.of().formatHex(hash);</span>
-<span class="nc" id="L20">        } catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L21">            throw new IllegalStateException(&quot;SHA-256 algorithm not available&quot;, e);</span>
+<span class="fc" id="L21">            MessageDigest digest = MessageDigest.getInstance(SHA_256);</span>
+<span class="fc" id="L22">            byte[] hash = digest.digest(content);</span>
+<span class="fc" id="L23">            return HexFormat.of().formatHex(hash);</span>
+<span class="nc" id="L24">        } catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L25">            throw new IllegalStateException(&quot;SHA-256 algorithm not available&quot;, e);</span>
         }
     }
 }

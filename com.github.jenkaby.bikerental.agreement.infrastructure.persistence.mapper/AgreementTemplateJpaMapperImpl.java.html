@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AgreementTemplateJpaMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.infrastructure.persistence.mapper</a> &gt; <span class="el_source">AgreementTemplateJpaMapperImpl.java</span></div><h1>AgreementTemplateJpaMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.infrastructure.persistence.mapper;
 
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplateStatus;
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplateSummary;
 import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.entity.AgreementTemplateJpaEntity;
+import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.repository.AgreementTemplateSummaryProjection;
+import java.time.Instant;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
@@ -10,52 +14,79 @@ import org.springframework.stereotype.Component;
     comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-java-compiler-worker-9.6.1.jar, environment: Java 21.0.11 (Amazon.com Inc.)&quot;
 )
 @Component
-<span class="fc" id="L13">public class AgreementTemplateJpaMapperImpl implements AgreementTemplateJpaMapper {</span>
+<span class="fc" id="L17">public class AgreementTemplateJpaMapperImpl implements AgreementTemplateJpaMapper {</span>
 
     @Override
     public AgreementTemplateJpaEntity toEntity(AgreementTemplate template) {
-<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if ( template == null ) {</span>
-<span class="nc" id="L18">            return null;</span>
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if ( template == null ) {</span>
+<span class="nc" id="L22">            return null;</span>
         }
 
-<span class="fc" id="L21">        AgreementTemplateJpaEntity.AgreementTemplateJpaEntityBuilder agreementTemplateJpaEntity = AgreementTemplateJpaEntity.builder();</span>
+<span class="fc" id="L25">        AgreementTemplateJpaEntity.AgreementTemplateJpaEntityBuilder agreementTemplateJpaEntity = AgreementTemplateJpaEntity.builder();</span>
 
-<span class="fc" id="L23">        agreementTemplateJpaEntity.id( template.getId() );</span>
-<span class="fc" id="L24">        agreementTemplateJpaEntity.lockVersion( template.getLockVersion() );</span>
-<span class="fc" id="L25">        agreementTemplateJpaEntity.versionNumber( template.getVersionNumber() );</span>
-<span class="fc" id="L26">        agreementTemplateJpaEntity.title( template.getTitle() );</span>
-<span class="fc" id="L27">        agreementTemplateJpaEntity.content( template.getContent() );</span>
-<span class="fc" id="L28">        agreementTemplateJpaEntity.contentSha256( template.getContentSha256() );</span>
-<span class="fc" id="L29">        agreementTemplateJpaEntity.status( template.getStatus() );</span>
-<span class="fc" id="L30">        agreementTemplateJpaEntity.createdAt( template.getCreatedAt() );</span>
-<span class="fc" id="L31">        agreementTemplateJpaEntity.updatedAt( template.getUpdatedAt() );</span>
-<span class="fc" id="L32">        agreementTemplateJpaEntity.activatedAt( template.getActivatedAt() );</span>
-<span class="fc" id="L33">        agreementTemplateJpaEntity.deactivatedAt( template.getDeactivatedAt() );</span>
+<span class="fc" id="L27">        agreementTemplateJpaEntity.id( template.getId() );</span>
+<span class="fc" id="L28">        agreementTemplateJpaEntity.lockVersion( template.getLockVersion() );</span>
+<span class="fc" id="L29">        agreementTemplateJpaEntity.versionNumber( template.getVersionNumber() );</span>
+<span class="fc" id="L30">        agreementTemplateJpaEntity.title( template.getTitle() );</span>
+<span class="fc" id="L31">        agreementTemplateJpaEntity.content( template.getContent() );</span>
+<span class="fc" id="L32">        agreementTemplateJpaEntity.contentSha256( template.getContentSha256() );</span>
+<span class="fc" id="L33">        agreementTemplateJpaEntity.status( template.getStatus() );</span>
+<span class="fc" id="L34">        agreementTemplateJpaEntity.createdAt( template.getCreatedAt() );</span>
+<span class="fc" id="L35">        agreementTemplateJpaEntity.updatedAt( template.getUpdatedAt() );</span>
+<span class="fc" id="L36">        agreementTemplateJpaEntity.activatedAt( template.getActivatedAt() );</span>
+<span class="fc" id="L37">        agreementTemplateJpaEntity.deactivatedAt( template.getDeactivatedAt() );</span>
 
-<span class="fc" id="L35">        return agreementTemplateJpaEntity.build();</span>
+<span class="fc" id="L39">        return agreementTemplateJpaEntity.build();</span>
     }
 
     @Override
     public AgreementTemplate toDomain(AgreementTemplateJpaEntity entity) {
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if ( entity == null ) {</span>
-<span class="nc" id="L41">            return null;</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L45">            return null;</span>
         }
 
-<span class="fc" id="L44">        AgreementTemplate.AgreementTemplateBuilder agreementTemplate = AgreementTemplate.builder();</span>
+<span class="fc" id="L48">        AgreementTemplate.AgreementTemplateBuilder agreementTemplate = AgreementTemplate.builder();</span>
 
-<span class="fc" id="L46">        agreementTemplate.id( entity.getId() );</span>
-<span class="fc" id="L47">        agreementTemplate.lockVersion( entity.getLockVersion() );</span>
-<span class="fc" id="L48">        agreementTemplate.versionNumber( entity.getVersionNumber() );</span>
-<span class="fc" id="L49">        agreementTemplate.title( entity.getTitle() );</span>
-<span class="fc" id="L50">        agreementTemplate.content( entity.getContent() );</span>
-<span class="fc" id="L51">        agreementTemplate.contentSha256( entity.getContentSha256() );</span>
-<span class="fc" id="L52">        agreementTemplate.status( entity.getStatus() );</span>
-<span class="fc" id="L53">        agreementTemplate.createdAt( entity.getCreatedAt() );</span>
-<span class="fc" id="L54">        agreementTemplate.updatedAt( entity.getUpdatedAt() );</span>
-<span class="fc" id="L55">        agreementTemplate.activatedAt( entity.getActivatedAt() );</span>
-<span class="fc" id="L56">        agreementTemplate.deactivatedAt( entity.getDeactivatedAt() );</span>
+<span class="fc" id="L50">        agreementTemplate.id( entity.getId() );</span>
+<span class="fc" id="L51">        agreementTemplate.lockVersion( entity.getLockVersion() );</span>
+<span class="fc" id="L52">        agreementTemplate.versionNumber( entity.getVersionNumber() );</span>
+<span class="fc" id="L53">        agreementTemplate.title( entity.getTitle() );</span>
+<span class="fc" id="L54">        agreementTemplate.content( entity.getContent() );</span>
+<span class="fc" id="L55">        agreementTemplate.contentSha256( entity.getContentSha256() );</span>
+<span class="fc" id="L56">        agreementTemplate.status( entity.getStatus() );</span>
+<span class="fc" id="L57">        agreementTemplate.createdAt( entity.getCreatedAt() );</span>
+<span class="fc" id="L58">        agreementTemplate.updatedAt( entity.getUpdatedAt() );</span>
+<span class="fc" id="L59">        agreementTemplate.activatedAt( entity.getActivatedAt() );</span>
+<span class="fc" id="L60">        agreementTemplate.deactivatedAt( entity.getDeactivatedAt() );</span>
 
-<span class="fc" id="L58">        return agreementTemplate.build();</span>
+<span class="fc" id="L62">        return agreementTemplate.build();</span>
+    }
+
+    @Override
+    public AgreementTemplateSummary toSummary(AgreementTemplateSummaryProjection projection) {
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if ( projection == null ) {</span>
+<span class="nc" id="L68">            return null;</span>
+        }
+
+<span class="nc" id="L71">        Long id = null;</span>
+<span class="nc" id="L72">        Integer versionNumber = null;</span>
+<span class="nc" id="L73">        String title = null;</span>
+<span class="nc" id="L74">        AgreementTemplateStatus status = null;</span>
+<span class="nc" id="L75">        Instant createdAt = null;</span>
+<span class="nc" id="L76">        Instant activatedAt = null;</span>
+<span class="nc" id="L77">        Instant deactivatedAt = null;</span>
+
+<span class="nc" id="L79">        id = projection.getId();</span>
+<span class="nc" id="L80">        versionNumber = projection.getVersionNumber();</span>
+<span class="nc" id="L81">        title = projection.getTitle();</span>
+<span class="nc" id="L82">        status = projection.getStatus();</span>
+<span class="nc" id="L83">        createdAt = projection.getCreatedAt();</span>
+<span class="nc" id="L84">        activatedAt = projection.getActivatedAt();</span>
+<span class="nc" id="L85">        deactivatedAt = projection.getDeactivatedAt();</span>
+
+<span class="nc" id="L87">        AgreementTemplateSummary agreementTemplateSummary = new AgreementTemplateSummary( id, versionNumber, title, status, createdAt, activatedAt, deactivatedAt );</span>
+
+<span class="nc" id="L89">        return agreementTemplateSummary;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

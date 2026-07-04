@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AgreementPdfFixtureProvider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.application.service</a> &gt; <span class="el_source">AgreementPdfFixtureProvider.java</span></div><h1>AgreementPdfFixtureProvider.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.application.service;
+
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Component
+class AgreementPdfFixtureProvider {
+
+<span class="fc" id="L15">    private static final AgreementPdfData.CustomerData FIXTURE_CUSTOMER =</span>
+            new AgreementPdfData.CustomerData(&quot;Иван&quot;, &quot;Иванов&quot;, &quot;+375291234567&quot;);
+<span class="fc" id="L17">    private static final Long FIXTURE_RENTAL_ID = 0L;</span>
+<span class="fc" id="L18">    private static final Duration FIXTURE_DURATION = Duration.ofHours(2);</span>
+<span class="fc" id="L19">    private static final List&lt;AgreementPdfData.EquipmentLine&gt; FIXTURE_EQUIPMENTS = List.of(</span>
+            new AgreementPdfData.EquipmentLine(&quot;BIKE-001&quot;, &quot;Горный велосипед&quot;, new BigDecimal(&quot;25.00&quot;)),
+            new AgreementPdfData.EquipmentLine(&quot;HELM-014&quot;, &quot;Шлем защитный&quot;, new BigDecimal(&quot;5.00&quot;)));
+<span class="fc" id="L22">    private static final BigDecimal FIXTURE_ESTIMATED_TOTAL = new BigDecimal(&quot;30.00&quot;);</span>
+
+    private final Clock clock;
+
+<span class="fc" id="L26">    AgreementPdfFixtureProvider(Clock clock) {</span>
+<span class="fc" id="L27">        this.clock = clock;</span>
+<span class="fc" id="L28">    }</span>
+
+    AgreementPdfData previewData(String title, String content) {
+<span class="fc" id="L31">        var rental = new AgreementPdfData.RentalData(</span>
+                FIXTURE_RENTAL_ID,
+<span class="fc" id="L33">                LocalDateTime.now(clock),</span>
+                FIXTURE_DURATION,
+                FIXTURE_EQUIPMENTS,
+                FIXTURE_ESTIMATED_TOTAL,
+                null,
+                null);
+<span class="fc" id="L39">        return new AgreementPdfData(title, content, FIXTURE_CUSTOMER, rental, null);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

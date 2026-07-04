@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SigningAssemblyMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.application.service</a> &gt; <span class="el_source">SigningAssemblyMapperImpl.java</span></div><h1>SigningAssemblyMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.application.service;
+
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
+import com.github.jenkaby.bikerental.agreement.domain.model.SigningSnapshot;
+import com.github.jenkaby.bikerental.rental.RentalSigningSnapshot;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-java-compiler-worker-9.6.1.jar, environment: Java 21.0.11 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L17">class SigningAssemblyMapperImpl implements SigningAssemblyMapper {</span>
+
+    @Override
+    public AgreementPdfData.EquipmentLine toPdfEquipmentLine(RentalSigningSnapshot.EquipmentItem item) {
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if ( item == null ) {</span>
+<span class="nc" id="L22">            return null;</span>
+        }
+
+<span class="fc" id="L25">        String uid = null;</span>
+<span class="fc" id="L26">        String name = null;</span>
+<span class="fc" id="L27">        BigDecimal estimatedCost = null;</span>
+
+<span class="fc" id="L29">        uid = item.equipmentUid();</span>
+<span class="fc" id="L30">        name = item.equipmentTypeSlug();</span>
+<span class="fc" id="L31">        estimatedCost = item.estimatedCost();</span>
+
+<span class="fc" id="L33">        AgreementPdfData.EquipmentLine equipmentLine = new AgreementPdfData.EquipmentLine( uid, name, estimatedCost );</span>
+
+<span class="fc" id="L35">        return equipmentLine;</span>
+    }
+
+    @Override
+    public List&lt;AgreementPdfData.EquipmentLine&gt; toPdfEquipmentLines(List&lt;RentalSigningSnapshot.EquipmentItem&gt; items) {
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if ( items == null ) {</span>
+<span class="nc" id="L41">            return null;</span>
+        }
+
+<span class="fc" id="L44">        List&lt;AgreementPdfData.EquipmentLine&gt; list = new ArrayList&lt;AgreementPdfData.EquipmentLine&gt;( items.size() );</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for ( RentalSigningSnapshot.EquipmentItem equipmentItem : items ) {</span>
+<span class="fc" id="L46">            list.add( toPdfEquipmentLine( equipmentItem ) );</span>
+<span class="fc" id="L47">        }</span>
+
+<span class="fc" id="L49">        return list;</span>
+    }
+
+    @Override
+    public SigningSnapshot.EquipmentLine toSnapshotEquipmentLine(RentalSigningSnapshot.EquipmentItem item) {
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if ( item == null ) {</span>
+<span class="nc" id="L55">            return null;</span>
+        }
+
+<span class="fc" id="L58">        String uid = null;</span>
+<span class="fc" id="L59">        String name = null;</span>
+<span class="fc" id="L60">        BigDecimal estimatedCost = null;</span>
+
+<span class="fc" id="L62">        uid = item.equipmentUid();</span>
+<span class="fc" id="L63">        name = item.equipmentTypeSlug();</span>
+<span class="fc" id="L64">        estimatedCost = item.estimatedCost();</span>
+
+<span class="fc" id="L66">        SigningSnapshot.EquipmentLine equipmentLine = new SigningSnapshot.EquipmentLine( uid, name, estimatedCost );</span>
+
+<span class="fc" id="L68">        return equipmentLine;</span>
+    }
+
+    @Override
+    public List&lt;SigningSnapshot.EquipmentLine&gt; toSnapshotEquipmentLines(List&lt;RentalSigningSnapshot.EquipmentItem&gt; items) {
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if ( items == null ) {</span>
+<span class="nc" id="L74">            return null;</span>
+        }
+
+<span class="fc" id="L77">        List&lt;SigningSnapshot.EquipmentLine&gt; list = new ArrayList&lt;SigningSnapshot.EquipmentLine&gt;( items.size() );</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for ( RentalSigningSnapshot.EquipmentItem equipmentItem : items ) {</span>
+<span class="fc" id="L79">            list.add( toSnapshotEquipmentLine( equipmentItem ) );</span>
+<span class="fc" id="L80">        }</span>
+
+<span class="fc" id="L82">        return list;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

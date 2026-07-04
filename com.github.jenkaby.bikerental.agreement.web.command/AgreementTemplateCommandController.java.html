@@ -121,7 +121,7 @@ class AgreementTemplateCommandController {
 <span class="nc" id="L121">        return ResponseEntity.noContent().build();</span>
     }
 
-    @PostMapping(value = &quot;/preview-pdf&quot;, produces = MediaType.APPLICATION_PDF_VALUE)
+    @PostMapping(value = &quot;/preview&quot;, produces = MediaType.APPLICATION_PDF_VALUE)
     @Operation(summary = &quot;Preview agreement template as PDF&quot;,
             description = &quot;Renders the given title and content into the agreement PDF layout using fixture rental data and a signature placeholder&quot;)
     @ApiResponses({

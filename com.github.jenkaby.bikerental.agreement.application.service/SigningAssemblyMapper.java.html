@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SigningAssemblyMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.application.service</a> &gt; <span class="el_source">SigningAssemblyMapper.java</span></div><h1>SigningAssemblyMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.application.service;
+
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
+import com.github.jenkaby.bikerental.agreement.domain.model.SigningSnapshot;
+import com.github.jenkaby.bikerental.customer.CustomerInfo;
+import com.github.jenkaby.bikerental.rental.RentalSigningSnapshot;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Mapper
+interface SigningAssemblyMapper {
+
+    @Mapping(target = &quot;uid&quot;, source = &quot;equipmentUid&quot;)
+    @Mapping(target = &quot;name&quot;, source = &quot;equipmentTypeSlug&quot;)
+    @Mapping(target = &quot;estimatedCost&quot;, source = &quot;estimatedCost&quot;)
+    AgreementPdfData.EquipmentLine toPdfEquipmentLine(RentalSigningSnapshot.EquipmentItem item);
+
+    List&lt;AgreementPdfData.EquipmentLine&gt; toPdfEquipmentLines(List&lt;RentalSigningSnapshot.EquipmentItem&gt; items);
+
+    @Mapping(target = &quot;uid&quot;, source = &quot;equipmentUid&quot;)
+    @Mapping(target = &quot;name&quot;, source = &quot;equipmentTypeSlug&quot;)
+    @Mapping(target = &quot;estimatedCost&quot;, source = &quot;estimatedCost&quot;)
+    SigningSnapshot.EquipmentLine toSnapshotEquipmentLine(RentalSigningSnapshot.EquipmentItem item);
+
+    List&lt;SigningSnapshot.EquipmentLine&gt; toSnapshotEquipmentLines(List&lt;RentalSigningSnapshot.EquipmentItem&gt; items);
+
+    default AgreementPdfData toPdfData(String title,
+                                       String content,
+                                       CustomerInfo customer,
+                                       RentalSigningSnapshot snapshot,
+                                       LocalDateTime startedAt,
+                                       byte[] signaturePng) {
+<span class="fc" id="L36">        var customerData = new AgreementPdfData.CustomerData(</span>
+<span class="fc" id="L37">                customer.firstName(), customer.lastName(), customer.phone());</span>
+<span class="fc" id="L38">        var rentalData = new AgreementPdfData.RentalData(</span>
+<span class="fc" id="L39">                snapshot.rentalId(),</span>
+                startedAt,
+<span class="fc" id="L41">                snapshot.plannedDuration(),</span>
+<span class="fc" id="L42">                toPdfEquipmentLines(snapshot.equipments()),</span>
+<span class="fc" id="L43">                snapshot.estimatedCost(),</span>
+<span class="fc" id="L44">                snapshot.discountPercent(),</span>
+<span class="fc" id="L45">                snapshot.specialPrice());</span>
+<span class="fc" id="L46">        return new AgreementPdfData(title, content, customerData, rentalData, signaturePng);</span>
+    }
+
+    default SigningSnapshot toSigningSnapshot(CustomerInfo customer,
+                                              RentalSigningSnapshot snapshot,
+                                              LocalDateTime startedAt,
+                                              Long templateId,
+                                              Integer templateVersionNumber,
+                                              String templateContentSha256) {
+<span class="fc" id="L55">        var customerPart = new SigningSnapshot.Customer(</span>
+<span class="fc" id="L56">                customer.firstName(), customer.lastName(), customer.phone());</span>
+<span class="fc" id="L57">        var rentalPart = new SigningSnapshot.Rental(</span>
+<span class="fc" id="L58">                snapshot.rentalId(),</span>
+<span class="fc" id="L59">                snapshot.version(),</span>
+<span class="fc" id="L60">                snapshot.plannedDuration(),</span>
+                startedAt,
+<span class="fc" id="L62">                toSnapshotEquipmentLines(snapshot.equipments()),</span>
+<span class="fc" id="L63">                snapshot.estimatedCost(),</span>
+<span class="fc" id="L64">                snapshot.discountPercent(),</span>
+<span class="fc" id="L65">                snapshot.specialPrice());</span>
+<span class="fc" id="L66">        var templatePart = new SigningSnapshot.Template(templateId, templateVersionNumber, templateContentSha256);</span>
+<span class="fc" id="L67">        return new SigningSnapshot(customerPart, rentalPart, templatePart);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

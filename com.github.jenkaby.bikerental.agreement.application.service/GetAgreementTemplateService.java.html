@@ -17,10 +17,9 @@ class GetAgreementTemplateService implements GetAgreementTemplateUseCase {
 <span class="fc" id="L17">    }</span>
 
     @Override
-    @Transactional(readOnly = true)
     public AgreementTemplate execute(Long id) {
-<span class="fc" id="L22">        return repository.findById(id)</span>
-<span class="pc" id="L23">                .orElseThrow(() -&gt; new ResourceNotFoundException(AgreementTemplate.class, id.toString()));</span>
+<span class="fc" id="L21">        return repository.findById(id)</span>
+<span class="pc" id="L22">                .orElseThrow(() -&gt; new ResourceNotFoundException(AgreementTemplate.class, id.toString()));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

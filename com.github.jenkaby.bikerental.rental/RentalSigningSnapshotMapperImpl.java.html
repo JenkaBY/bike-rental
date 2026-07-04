@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalSigningSnapshotMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental</a> &gt; <span class="el_source">RentalSigningSnapshotMapperImpl.java</span></div><h1>RentalSigningSnapshotMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental;
+
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
+import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-java-compiler-worker-9.6.1.jar, environment: Java 21.0.11 (Amazon.com Inc.)&quot;
+)
+@Component
+class RentalSigningSnapshotMapperImpl implements RentalSigningSnapshotMapper {
+
+    private final MoneyMapper moneyMapper;
+    private final DiscountMapper discountMapper;
+
+    @Autowired
+<span class="fc" id="L27">    public RentalSigningSnapshotMapperImpl(MoneyMapper moneyMapper, DiscountMapper discountMapper) {</span>
+
+<span class="fc" id="L29">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L30">        this.discountMapper = discountMapper;</span>
+<span class="fc" id="L31">    }</span>
+
+    @Override
+    public RentalSigningSnapshot toSnapshot(Rental rental) {
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if ( rental == null ) {</span>
+<span class="nc" id="L36">            return null;</span>
+        }
+
+<span class="fc" id="L39">        Long rentalId = null;</span>
+<span class="fc" id="L40">        Long version = null;</span>
+<span class="fc" id="L41">        UUID customerId = null;</span>
+<span class="fc" id="L42">        Duration plannedDuration = null;</span>
+<span class="fc" id="L43">        BigDecimal estimatedCost = null;</span>
+<span class="fc" id="L44">        Integer discountPercent = null;</span>
+<span class="fc" id="L45">        BigDecimal specialPrice = null;</span>
+<span class="fc" id="L46">        List&lt;RentalSigningSnapshot.EquipmentItem&gt; equipments = null;</span>
+
+<span class="fc" id="L48">        rentalId = rental.getId();</span>
+<span class="fc" id="L49">        version = rental.getVersion();</span>
+<span class="fc" id="L50">        customerId = rental.getCustomerId();</span>
+<span class="fc" id="L51">        plannedDuration = rental.getPlannedDuration();</span>
+<span class="fc" id="L52">        estimatedCost = moneyMapper.toBigDecimal( rental.getEstimatedCost() );</span>
+<span class="fc" id="L53">        discountPercent = discountMapper.toInteger( rental.getDiscountPercent() );</span>
+<span class="fc" id="L54">        specialPrice = moneyMapper.toBigDecimal( rental.getSpecialPrice() );</span>
+<span class="fc" id="L55">        equipments = rentalEquipmentListToEquipmentItemList( rental.getEquipments() );</span>
+
+<span class="fc" id="L57">        RentalSigningSnapshot rentalSigningSnapshot = new RentalSigningSnapshot( rentalId, version, customerId, plannedDuration, estimatedCost, discountPercent, specialPrice, equipments );</span>
+
+<span class="fc" id="L59">        return rentalSigningSnapshot;</span>
+    }
+
+    @Override
+    public RentalSigningSnapshot.EquipmentItem toEquipmentItem(RentalEquipment equipment) {
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if ( equipment == null ) {</span>
+<span class="nc" id="L65">            return null;</span>
+        }
+
+<span class="fc" id="L68">        String equipmentTypeSlug = null;</span>
+<span class="fc" id="L69">        Long equipmentId = null;</span>
+<span class="fc" id="L70">        String equipmentUid = null;</span>
+<span class="fc" id="L71">        BigDecimal estimatedCost = null;</span>
+
+<span class="fc" id="L73">        equipmentTypeSlug = equipment.getEquipmentType();</span>
+<span class="fc" id="L74">        equipmentId = equipment.getEquipmentId();</span>
+<span class="fc" id="L75">        equipmentUid = equipment.getEquipmentUid();</span>
+<span class="fc" id="L76">        estimatedCost = moneyMapper.toBigDecimal( equipment.getEstimatedCost() );</span>
+
+<span class="fc" id="L78">        RentalSigningSnapshot.EquipmentItem equipmentItem = new RentalSigningSnapshot.EquipmentItem( equipmentId, equipmentUid, equipmentTypeSlug, estimatedCost );</span>
+
+<span class="fc" id="L80">        return equipmentItem;</span>
+    }
+
+    protected List&lt;RentalSigningSnapshot.EquipmentItem&gt; rentalEquipmentListToEquipmentItemList(List&lt;RentalEquipment&gt; list) {
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L85">            return null;</span>
+        }
+
+<span class="fc" id="L88">        List&lt;RentalSigningSnapshot.EquipmentItem&gt; list1 = new ArrayList&lt;RentalSigningSnapshot.EquipmentItem&gt;( list.size() );</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        for ( RentalEquipment rentalEquipment : list ) {</span>
+<span class="fc" id="L90">            list1.add( toEquipmentItem( rentalEquipment ) );</span>
+<span class="fc" id="L91">        }</span>
+
+<span class="fc" id="L93">        return list1;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -38,19 +38,19 @@ public class CompleteSigningService {
 
     @Transactional
     public void completeSigning(Long rentalId, Long expectedVersion, Instant signedAt) {
-<span class="nc" id="L41">        Rental rental = rentalRepository.findById(rentalId)</span>
-<span class="nc" id="L42">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, rentalId.toString()));</span>
+<span class="fc" id="L41">        Rental rental = rentalRepository.findById(rentalId)</span>
+<span class="pc" id="L42">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, rentalId.toString()));</span>
 
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (!rental.getVersion().equals(expectedVersion)) {</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (!rental.getVersion().equals(expectedVersion)) {</span>
 <span class="nc" id="L45">            throw new RentalSigningVersionMismatchException(rentalId, expectedVersion, rental.getVersion());</span>
         }
 
-<span class="nc" id="L48">        LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, clock.getZone());</span>
-<span class="nc" id="L49">        rental.completeSigning(startedAt);</span>
+<span class="fc" id="L48">        LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, clock.getZone());</span>
+<span class="fc" id="L49">        rental.completeSigning(startedAt);</span>
 
-<span class="nc" id="L51">        Rental saved = rentalRepository.save(rental);</span>
-<span class="nc" id="L52">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalStarted(saved));</span>
-<span class="nc" id="L53">        log.info(&quot;Rental {} signing completed at {}&quot;, saved.getId(), startedAt);</span>
-<span class="nc" id="L54">    }</span>
+<span class="fc" id="L51">        Rental saved = rentalRepository.save(rental);</span>
+<span class="fc" id="L52">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalStarted(saved));</span>
+<span class="fc" id="L53">        log.info(&quot;Rental {} signing completed at {}&quot;, saved.getId(), startedAt);</span>
+<span class="fc" id="L54">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

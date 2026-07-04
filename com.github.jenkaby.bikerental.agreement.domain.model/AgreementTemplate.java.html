@@ -48,7 +48,7 @@ public class AgreementTemplate {
     }
 
     public void updateContent(String title, String content) {
-<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (this.status != AgreementTemplateStatus.DRAFT) {</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (!canBeEdited()) {</span>
 <span class="fc" id="L52">            throw new AgreementTemplateNotEditableException(this.status);</span>
         }
 <span class="nc" id="L54">        this.title = title;</span>
@@ -57,7 +57,7 @@ public class AgreementTemplate {
 <span class="nc" id="L57">    }</span>
 
     public void activate(int versionNumber, String contentSha256, Instant activatedAt) {
-<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (this.status != AgreementTemplateStatus.DRAFT) {</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (!canBeActivated()) {</span>
 <span class="fc" id="L61">            throw new AgreementTemplateNotActivatableException(this.status);</span>
         }
 <span class="fc" id="L63">        this.versionNumber = versionNumber;</span>
@@ -68,7 +68,7 @@ public class AgreementTemplate {
 <span class="fc" id="L68">    }</span>
 
     public void deactivate(Instant deactivatedAt) {
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (this.status != AgreementTemplateStatus.ACTIVE) {</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (!canBeDeactivated()) {</span>
 <span class="nc" id="L72">            throw new AgreementTemplateNotActivatableException(this.status);</span>
         }
 <span class="fc" id="L74">        this.status = AgreementTemplateStatus.DEACTIVATED;</span>
@@ -77,9 +77,25 @@ public class AgreementTemplate {
 <span class="fc" id="L77">    }</span>
 
     public void ensureDeletable() {
-<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if (this.status != AgreementTemplateStatus.DRAFT) {</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if (!canBeDeleted()) {</span>
 <span class="fc" id="L81">            throw new AgreementTemplateNotDeletableException(this.status);</span>
         }
 <span class="nc" id="L83">    }</span>
+
+    private boolean canBeEdited() {
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        return this.status == AgreementTemplateStatus.DRAFT;</span>
+    }
+
+    private boolean canBeActivated() {
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        return this.status == AgreementTemplateStatus.DRAFT;</span>
+    }
+
+    private boolean canBeDeactivated() {
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        return this.status == AgreementTemplateStatus.ACTIVE;</span>
+    }
+
+    private boolean canBeDeleted() {
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        return this.status == AgreementTemplateStatus.DRAFT;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

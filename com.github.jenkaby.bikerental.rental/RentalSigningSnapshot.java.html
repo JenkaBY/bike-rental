@@ -5,16 +5,18 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
-<span class="nc" id="L8">public record RentalSigningSnapshot(</span>
+<span class="fc" id="L8">public record RentalSigningSnapshot(</span>
         Long rentalId,
         Long version,
         UUID customerId,
         Duration plannedDuration,
         BigDecimal estimatedCost,
+        Integer discountPercent,
+        BigDecimal specialPrice,
         List&lt;EquipmentItem&gt; equipments
 ) {
 
-<span class="nc" id="L17">    public record EquipmentItem(</span>
+<span class="fc" id="L19">    public record EquipmentItem(</span>
             Long equipmentId,
             String equipmentUid,
             String equipmentTypeSlug,

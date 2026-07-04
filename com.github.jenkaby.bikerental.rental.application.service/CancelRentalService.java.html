@@ -48,8 +48,8 @@ class CancelRentalService implements CancelRentalUseCase {
 
 <span class="fc" id="L49">        rental.getStatus().validateTransitionTo(RentalStatus.CANCELLED);</span>
 
-<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (rental.getStatus() == RentalStatus.ACTIVE) {</span>
-<span class="fc" id="L52">            log.info(&quot;Releasing hold for ACTIVE rental {}&quot;, rental.getId());</span>
+<span class="pc bpc" id="L51" title="1 of 4 branches missed.">        if (rental.isAwaitingSignature() || rental.hasActiveStatus()) {</span>
+<span class="fc" id="L52">            log.info(&quot;Releasing hold for {} rental {}&quot;, rental.getStatus(), rental.getId());</span>
 <span class="fc" id="L53">            financeFacade.releaseHold(rental.toRentalRef(), command.operatorId());</span>
         }
 

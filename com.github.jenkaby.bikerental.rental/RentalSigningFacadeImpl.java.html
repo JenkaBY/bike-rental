@@ -2,65 +2,43 @@
 
 import com.github.jenkaby.bikerental.rental.application.service.CompleteSigningService;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
-import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
-import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 
 @Service
 class RentalSigningFacadeImpl implements RentalSigningFacade {
 
     private final RentalRepository rentalRepository;
     private final CompleteSigningService completeSigningService;
+    private final RentalSigningSnapshotMapper snapshotMapper;
 
-<span class="fc" id="L22">    RentalSigningFacadeImpl(RentalRepository rentalRepository, CompleteSigningService completeSigningService) {</span>
-<span class="fc" id="L23">        this.rentalRepository = rentalRepository;</span>
-<span class="fc" id="L24">        this.completeSigningService = completeSigningService;</span>
+    RentalSigningFacadeImpl(RentalRepository rentalRepository,
+                            CompleteSigningService completeSigningService,
+<span class="fc" id="L21">                            RentalSigningSnapshotMapper snapshotMapper) {</span>
+<span class="fc" id="L22">        this.rentalRepository = rentalRepository;</span>
+<span class="fc" id="L23">        this.completeSigningService = completeSigningService;</span>
+<span class="fc" id="L24">        this.snapshotMapper = snapshotMapper;</span>
 <span class="fc" id="L25">    }</span>
 
     @Override
     public RentalSigningSnapshot getSigningSnapshot(Long rentalId) {
-<span class="nc" id="L29">        Rental rental = rentalRepository.findById(rentalId)</span>
-<span class="nc" id="L30">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, rentalId.toString()));</span>
+<span class="fc" id="L29">        Rental rental = rentalRepository.findById(rentalId)</span>
+<span class="pc" id="L30">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, rentalId.toString()));</span>
 
-<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (rental.getStatus() != RentalStatus.AWAITING_SIGNATURE) {</span>
-<span class="nc" id="L33">            throw new RentalNotAwaitingSignatureException(rentalId, rental.getStatus());</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (rental.getStatus() != RentalStatus.AWAITING_SIGNATURE) {</span>
+<span class="fc" id="L33">            throw new RentalNotAwaitingSignatureException(rentalId, rental.getStatus());</span>
         }
 
-<span class="nc" id="L36">        List&lt;RentalSigningSnapshot.EquipmentItem&gt; equipments = rental.getEquipments().stream()</span>
-<span class="nc" id="L37">                .map(this::toEquipmentItem)</span>
-<span class="nc" id="L38">                .toList();</span>
-
-<span class="nc" id="L40">        return new RentalSigningSnapshot(</span>
-<span class="nc" id="L41">                rental.getId(),</span>
-<span class="nc" id="L42">                rental.getVersion(),</span>
-<span class="nc" id="L43">                rental.getCustomerId(),</span>
-<span class="nc" id="L44">                rental.getPlannedDuration(),</span>
-<span class="nc" id="L45">                amountOf(rental.getEstimatedCost()),</span>
-                equipments);
+<span class="fc" id="L36">        return snapshotMapper.toSnapshot(rental);</span>
     }
 
     @Override
     public void completeSigning(Long rentalId, Long expectedVersion, Instant signedAt) {
-<span class="nc" id="L51">        completeSigningService.completeSigning(rentalId, expectedVersion, signedAt);</span>
-<span class="nc" id="L52">    }</span>
-
-    private RentalSigningSnapshot.EquipmentItem toEquipmentItem(RentalEquipment equipment) {
-<span class="nc" id="L55">        return new RentalSigningSnapshot.EquipmentItem(</span>
-<span class="nc" id="L56">                equipment.getEquipmentId(),</span>
-<span class="nc" id="L57">                equipment.getEquipmentUid(),</span>
-<span class="nc" id="L58">                equipment.getEquipmentType(),</span>
-<span class="nc" id="L59">                amountOf(equipment.getEstimatedCost()));</span>
-    }
-
-    private BigDecimal amountOf(Money money) {
-<span class="nc bnc" id="L63" title="All 2 branches missed.">        return money == null ? null : money.amount();</span>
-    }
+<span class="fc" id="L41">        completeSigningService.completeSigning(rentalId, expectedVersion, signedAt);</span>
+<span class="fc" id="L42">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

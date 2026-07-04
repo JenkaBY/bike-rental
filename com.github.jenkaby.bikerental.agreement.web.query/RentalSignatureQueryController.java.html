@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalSignatureQueryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.web.query</a> &gt; <span class="el_source">RentalSignatureQueryController.java</span></div><h1>RentalSignatureQueryController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.web.query;
+
+import com.github.jenkaby.bikerental.agreement.application.usecase.FindRentalSignaturesUseCase;
+import com.github.jenkaby.bikerental.agreement.application.usecase.GetSignaturePdfUseCase;
+import com.github.jenkaby.bikerental.agreement.web.mapper.SignatureWebMapper;
+import com.github.jenkaby.bikerental.agreement.web.query.dto.SignatureSummaryResponse;
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@Validated
+@RestController
+@RequestMapping(&quot;/api/rentals/{rentalId}/signatures&quot;)
+<span class="fc" id="L32">@Slf4j</span>
+@Tag(name = OpenApiConfig.Tags.AGREEMENTS)
+class RentalSignatureQueryController {
+
+    private final FindRentalSignaturesUseCase findRentalSignaturesUseCase;
+    private final GetSignaturePdfUseCase getSignaturePdfUseCase;
+    private final SignatureWebMapper mapper;
+
+    RentalSignatureQueryController(FindRentalSignaturesUseCase findRentalSignaturesUseCase,
+                                   GetSignaturePdfUseCase getSignaturePdfUseCase,
+<span class="fc" id="L42">                                   SignatureWebMapper mapper) {</span>
+<span class="fc" id="L43">        this.findRentalSignaturesUseCase = findRentalSignaturesUseCase;</span>
+<span class="fc" id="L44">        this.getSignaturePdfUseCase = getSignaturePdfUseCase;</span>
+<span class="fc" id="L45">        this.mapper = mapper;</span>
+<span class="fc" id="L46">    }</span>
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = &quot;List rental signatures&quot;,
+            description = &quot;Returns the signature summaries for a rental as JSON (0 or 1 entry, since a rental has &quot;
+                    + &quot;at most one signature). Select this representation with Accept: application/json.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Signature summaries&quot;,
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SignatureSummaryResponse.class))))
+    })
+    public ResponseEntity&lt;List&lt;SignatureSummaryResponse&gt;&gt; list(@PathVariable(&quot;rentalId&quot;) @Positive Long rentalId) {
+<span class="fc" id="L57">        log.info(&quot;[GET] Listing signatures for rental {}&quot;, rentalId);</span>
+<span class="fc" id="L58">        var summaries = findRentalSignaturesUseCase.execute(rentalId);</span>
+<span class="fc" id="L59">        return ResponseEntity.ok(mapper.toResponses(summaries));</span>
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_PDF_VALUE)
+    @Operation(summary = &quot;Download the signed agreement PDF&quot;,
+            description = &quot;Returns the signed agreement document for a rental as a PDF attachment. Select this &quot;
+                    + &quot;representation with Accept: application/pdf. There is no signatureId in the path since a &quot;
+                    + &quot;rental has at most one signature.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Signed agreement PDF&quot;,
+                    content = @Content(mediaType = MediaType.APPLICATION_PDF_VALUE,
+                            schema = @Schema(type = &quot;string&quot;, format = &quot;binary&quot;))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Rental has not been signed&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;byte[]&gt; download(@PathVariable(&quot;rentalId&quot;) @Positive Long rentalId) {
+<span class="fc" id="L75">        log.info(&quot;[GET] Downloading signature PDF for rental {}&quot;, rentalId);</span>
+<span class="fc" id="L76">        byte[] pdf = getSignaturePdfUseCase.execute(rentalId);</span>
+<span class="fc" id="L77">        return ResponseEntity.ok()</span>
+<span class="fc" id="L78">                .contentType(MediaType.APPLICATION_PDF)</span>
+<span class="fc" id="L79">                .header(HttpHeaders.CONTENT_DISPOSITION,</span>
+<span class="fc" id="L80">                        &quot;attachment; filename=\&quot;rental-%d-agreement.pdf\&quot;&quot;.formatted(rentalId))</span>
+<span class="fc" id="L81">                .body(pdf);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

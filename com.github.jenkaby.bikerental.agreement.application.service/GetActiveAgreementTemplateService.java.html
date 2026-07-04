@@ -5,22 +5,20 @@ import com.github.jenkaby.bikerental.agreement.domain.exception.ActiveAgreementT
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
 import com.github.jenkaby.bikerental.agreement.domain.repository.AgreementTemplateRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 class GetActiveAgreementTemplateService implements GetActiveAgreementTemplateUseCase {
 
     private final AgreementTemplateRepository repository;
 
-<span class="fc" id="L15">    GetActiveAgreementTemplateService(AgreementTemplateRepository repository) {</span>
-<span class="fc" id="L16">        this.repository = repository;</span>
-<span class="fc" id="L17">    }</span>
+<span class="fc" id="L14">    GetActiveAgreementTemplateService(AgreementTemplateRepository repository) {</span>
+<span class="fc" id="L15">        this.repository = repository;</span>
+<span class="fc" id="L16">    }</span>
 
     @Override
-    @Transactional(readOnly = true)
     public AgreementTemplate execute() {
-<span class="fc" id="L22">        return repository.findActive()</span>
-<span class="fc" id="L23">                .orElseThrow(ActiveAgreementTemplateNotFoundException::new);</span>
+<span class="fc" id="L20">        return repository.findActive()</span>
+<span class="fc" id="L21">                .orElseThrow(ActiveAgreementTemplateNotFoundException::new);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

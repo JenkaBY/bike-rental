@@ -19,11 +19,11 @@ import java.util.Set;
     static {
 <span class="fc" id="L20">        var map = new EnumMap&lt;RentalStatus, Set&lt;RentalStatus&gt;&gt;(RentalStatus.class);</span>
 <span class="fc" id="L21">        map.put(DRAFT, Set.of(ACTIVE, CANCELLED, AWAITING_SIGNATURE));</span>
-<span class="fc" id="L22">        map.put(AWAITING_SIGNATURE, Set.of(ACTIVE, DRAFT));</span>
-<span class="fc" id="L23">        map.put(ACTIVE, Set.of(CANCELLED));</span>
+<span class="fc" id="L22">        map.put(AWAITING_SIGNATURE, Set.of(ACTIVE, DRAFT, CANCELLED));</span>
+<span class="fc" id="L23">        map.put(ACTIVE, Set.of(CANCELLED, COMPLETED, DEBT));</span>
 <span class="fc" id="L24">        map.put(COMPLETED, Set.of());</span>
 <span class="fc" id="L25">        map.put(CANCELLED, Set.of());</span>
-<span class="fc" id="L26">        map.put(DEBT, Set.of());</span>
+<span class="fc" id="L26">        map.put(DEBT, Set.of(COMPLETED));</span>
 <span class="fc" id="L27">        ALLOWED_TRANSITIONS = Map.copyOf(map);</span>
 <span class="fc" id="L28">    }</span>
 
