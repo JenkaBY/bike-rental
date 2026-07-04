@@ -215,7 +215,7 @@ class AgreementTemplateCommandControllerTest {
             given(previewAgreementPdfUseCase.execute(any(PreviewAgreementPdfUseCase.PreviewAgreementPdfCommand.class)))
                     .willReturn(expected);
 
-            mockMvc.perform(post("/api/agreements/preview-pdf")
+            mockMvc.perform(post("/api/agreements/preview")
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_PDF)
                             .content(objectMapper.writeValueAsString(request)))
@@ -231,7 +231,7 @@ class AgreementTemplateCommandControllerTest {
         void shouldReturn400WhenTitleIsBlank(String title) throws Exception {
             var request = new AgreementPdfPreviewRequest(title, "valid content");
 
-            mockMvc.perform(post("/api/agreements/preview-pdf")
+            mockMvc.perform(post("/api/agreements/preview")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -246,7 +246,7 @@ class AgreementTemplateCommandControllerTest {
         void shouldReturn400WhenContentIsBlank(String content) throws Exception {
             var request = new AgreementPdfPreviewRequest("valid title", content);
 
-            mockMvc.perform(post("/api/agreements/preview-pdf")
+            mockMvc.perform(post("/api/agreements/preview")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())

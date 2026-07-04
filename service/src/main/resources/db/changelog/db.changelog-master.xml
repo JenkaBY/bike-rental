@@ -44,5 +44,6 @@
 
     <!--    agreement module -->
     <include relativeToChangelogFile="true" file="v1/agreement_templates.create-table.xml"/>
+    <include relativeToChangelogFile="true" file="v1/agreement_signatures.create-table.xml"/>
 
 </databaseChangeLog>

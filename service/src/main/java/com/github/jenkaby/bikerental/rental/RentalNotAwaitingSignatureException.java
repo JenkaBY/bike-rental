@@ -1,17 +1,24 @@
 package com.github.jenkaby.bikerental.rental;
 
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
-import lombok.Getter;
+import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
 
-@Getter
-public class RentalNotAwaitingSignatureException extends RuntimeException {
+public class RentalNotAwaitingSignatureException extends BikeRentalException {
 
-    private final Long rentalId;
-    private final RentalStatus currentStatus;
+    public static final String ERROR_CODE = "agreement.signing.rental_not_awaiting_signature";
+
+    private static final String MESSAGE_TEMPLATE = "Rental %d is not awaiting signature. Current status: %s";
 
     public RentalNotAwaitingSignatureException(Long rentalId, RentalStatus currentStatus) {
-        super("Rental %d is not awaiting signature. Current status: %s".formatted(rentalId, currentStatus));
-        this.rentalId = rentalId;
-        this.currentStatus = currentStatus;
+        super(MESSAGE_TEMPLATE.formatted(rentalId, currentStatus), ERROR_CODE, new Details(rentalId, currentStatus));
+    }
+
+    public Details getDetails() {
+        return getParams()
+                .map(d -> (Details) d)
+                .orElseThrow(() -> new IllegalArgumentException("Expected Details in exception parameters"));
+    }
+
+    public record Details(Long rentalId, RentalStatus currentStatus) {
     }
 }

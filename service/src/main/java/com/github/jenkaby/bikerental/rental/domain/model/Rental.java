@@ -152,6 +152,10 @@ public class Rental {
         return status == RentalStatus.ACTIVE;
     }
 
+    public boolean isAwaitingSignature() {
+        return status == RentalStatus.AWAITING_SIGNATURE;
+    }
+
     public boolean canBeActivated() {
         boolean hasEquipment = !isEmpty(equipments);
         return status == RentalStatus.DRAFT
@@ -162,9 +166,7 @@ public class Rental {
     }
 
     public void activate(LocalDateTime actualStartTime) {
-        if (this.status != RentalStatus.DRAFT) {
-            throw new InvalidRentalStatusException(this.status, RentalStatus.DRAFT);
-        }
+        this.status.validateTransitionTo(RentalStatus.ACTIVE);
 
         if (!canBeActivated()) {
             List<String> missingFields = new ArrayList<>();
@@ -310,6 +312,7 @@ public class Rental {
     }
 
     public void completeForDebt() {
+        this.status.validateTransitionTo(RentalStatus.COMPLETED);
         if (this.finalCost == null) {
             throw new IllegalArgumentException("Final cost cannot be null");
         }

@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.agreement.application.usecase.FindAgreement
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplateSummary;
 import com.github.jenkaby.bikerental.agreement.domain.repository.AgreementTemplateRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,7 +17,6 @@ class FindAgreementTemplateSummariesService implements FindAgreementTemplateSumm
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<AgreementTemplateSummary> execute() {
         return repository.findAllSummaries();
     }

@@ -30,6 +30,7 @@ public class ScenarioContext {
     private final ObjectMapper mapper = WebConfig.DEFAULT_OBJECT_MAPPER;
     private final Map<String, List<String>> requestHeaders = new HashMap<>();
     private ResponseEntity<String> response;
+    private ResponseEntity<byte[]> binaryResponse;
     private Object requestBody;
     private String requestedObjectId;
     private Set<UUID> persistedIds = new HashSet<>();

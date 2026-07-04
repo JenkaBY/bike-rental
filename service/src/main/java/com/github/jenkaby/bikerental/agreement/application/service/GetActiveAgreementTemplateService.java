@@ -5,7 +5,6 @@ import com.github.jenkaby.bikerental.agreement.domain.exception.ActiveAgreementT
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
 import com.github.jenkaby.bikerental.agreement.domain.repository.AgreementTemplateRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 class GetActiveAgreementTemplateService implements GetActiveAgreementTemplateUseCase {
@@ -17,7 +16,6 @@ class GetActiveAgreementTemplateService implements GetActiveAgreementTemplateUse
     }
 
     @Override
-    @Transactional(readOnly = true)
     public AgreementTemplate execute() {
         return repository.findActive()
                 .orElseThrow(ActiveAgreementTemplateNotFoundException::new);

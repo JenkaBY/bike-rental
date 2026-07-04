@@ -1,13 +1,15 @@
 package com.github.jenkaby.bikerental.componenttest.steps.agreement;
 
 import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.entity.AgreementTemplateJpaEntity;
+import com.github.jenkaby.bikerental.agreement.web.command.dto.AgreementTemplateRequest;
+import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateResponse;
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.InsertableAgreementTemplateRepository;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.jayway.jsonpath.JsonPath;
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.SoftAssertions;
 
 import java.util.List;
 
@@ -31,9 +33,30 @@ public class AgreementTemplateSteps {
         scenarioContext.setRequestedObjectId(inserted.getId().toString());
     }
 
-    @When("the created agreement template id is stored as 'requestedObjectId'")
-    public void theCreatedAgreementTemplateIdIsStoredAsRequestedObjectId() {
-        var id = JsonPath.parse(scenarioContext.getStringResponseBody()).read("$.id").toString();
-        scenarioContext.setRequestedObjectId(id);
+    @Given("the agreement template request is")
+    public void theAgreementTemplateRequestIs(AgreementTemplateRequest request) {
+        log.info("Preparing agreement template request: {}", request);
+        scenarioContext.setRequestBody(request);
+    }
+
+    @Then("the agreement template response contains")
+    public void theAgreementTemplateResponseContains(AgreementTemplateResponse expected) {
+        var actual = scenarioContext.getResponseBody(AgreementTemplateResponse.class);
+        var softly = new SoftAssertions();
+        softly.assertThat(actual.id()).as("Template id").isNotNull();
+        if (expected.title() != null) {
+            softly.assertThat(actual.title()).as("Title").isEqualTo(expected.title());
+        }
+        if (expected.content() != null) {
+            softly.assertThat(actual.content()).as("Content").isEqualTo(expected.content());
+        }
+        if (expected.status() != null) {
+            softly.assertThat(actual.status()).as("Status").isEqualTo(expected.status());
+        }
+        if (expected.versionNumber() != null) {
+            softly.assertThat(actual.versionNumber()).as("Version number").isEqualTo(expected.versionNumber());
+        }
+        softly.assertAll();
+        scenarioContext.setRequestedObjectId(actual.id().toString());
     }
 }

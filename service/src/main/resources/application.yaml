@@ -17,6 +17,9 @@ spring:
 logging:
   level:
     root: info
+#    org.springframework.security.oauth2.server.authorization: DEBUG
+#    org.springframework.security.oauth2.server.authorization.authentication: TRACE
+#    org.springframework.security.web: DEBUG
 
 springdoc:
   swagger-ui:
@@ -72,6 +75,18 @@ app:
         email: ${BOOTSTRAP_ADMIN_EMAIL}
         display-name: Administrator
         password: ${BOOTSTRAP_ADMIN_PASSWORD}
+  agreement:
+    pdf:
+      font-location: fonts/DejaVuSans.ttf
+      margin: 50
+      body-font-size: 11
+      title-font-size: 16
+      leading-factor: 1.4
+      signature-width: 180
+      signature-height: 80
+      signature-placeholder-label: место подписи
+      date-time-pattern: dd.MM.yyyy HH:mm
+      currency: BYN
 
 # Google sign-in (optional): provide credentials to enable the "Sign in with Google" button on the login page.
 # spring:

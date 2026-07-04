@@ -11,6 +11,8 @@ public record RentalSigningSnapshot(
         UUID customerId,
         Duration plannedDuration,
         BigDecimal estimatedCost,
+        Integer discountPercent,
+        BigDecimal specialPrice,
         List<EquipmentItem> equipments
 ) {
 
