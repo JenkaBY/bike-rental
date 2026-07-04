@@ -75,9 +75,9 @@ class TransactionRepositoryAdapter implements TransactionRepository {
 
     @Override
     public boolean existsByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
-<span class="nc" id="L78">        return jpaRepository.existsBySourceTypeAndSourceIdAndTransactionType(</span>
+<span class="fc" id="L78">        return jpaRepository.existsBySourceTypeAndSourceIdAndTransactionType(</span>
                 TransactionSourceType.RENTAL,
-<span class="nc" id="L80">                String.valueOf(rentalRef.id()),</span>
+<span class="fc" id="L80">                String.valueOf(rentalRef.id()),</span>
                 type);
     }
 

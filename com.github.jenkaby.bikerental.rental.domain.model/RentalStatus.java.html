@@ -8,27 +8,29 @@ import java.util.Set;
 
 <span class="fc" id="L9">public enum RentalStatus {</span>
 <span class="fc" id="L10">    DRAFT,</span>
-<span class="fc" id="L11">    ACTIVE,</span>
-<span class="fc" id="L12">    COMPLETED,</span>
-<span class="fc" id="L13">    CANCELLED,</span>
-<span class="fc" id="L14">    DEBT;</span>
+<span class="fc" id="L11">    AWAITING_SIGNATURE,</span>
+<span class="fc" id="L12">    ACTIVE,</span>
+<span class="fc" id="L13">    COMPLETED,</span>
+<span class="fc" id="L14">    CANCELLED,</span>
+<span class="fc" id="L15">    DEBT;</span>
 
     private static final Map&lt;RentalStatus, Set&lt;RentalStatus&gt;&gt; ALLOWED_TRANSITIONS;
 
     static {
-<span class="fc" id="L19">        var map = new EnumMap&lt;RentalStatus, Set&lt;RentalStatus&gt;&gt;(RentalStatus.class);</span>
-<span class="fc" id="L20">        map.put(DRAFT, Set.of(ACTIVE, CANCELLED));</span>
-<span class="fc" id="L21">        map.put(ACTIVE, Set.of(CANCELLED));</span>
-<span class="fc" id="L22">        map.put(COMPLETED, Set.of());</span>
-<span class="fc" id="L23">        map.put(CANCELLED, Set.of());</span>
-<span class="fc" id="L24">        map.put(DEBT, Set.of());</span>
-<span class="fc" id="L25">        ALLOWED_TRANSITIONS = Map.copyOf(map);</span>
-<span class="fc" id="L26">    }</span>
+<span class="fc" id="L20">        var map = new EnumMap&lt;RentalStatus, Set&lt;RentalStatus&gt;&gt;(RentalStatus.class);</span>
+<span class="fc" id="L21">        map.put(DRAFT, Set.of(ACTIVE, CANCELLED, AWAITING_SIGNATURE));</span>
+<span class="fc" id="L22">        map.put(AWAITING_SIGNATURE, Set.of(ACTIVE, DRAFT));</span>
+<span class="fc" id="L23">        map.put(ACTIVE, Set.of(CANCELLED));</span>
+<span class="fc" id="L24">        map.put(COMPLETED, Set.of());</span>
+<span class="fc" id="L25">        map.put(CANCELLED, Set.of());</span>
+<span class="fc" id="L26">        map.put(DEBT, Set.of());</span>
+<span class="fc" id="L27">        ALLOWED_TRANSITIONS = Map.copyOf(map);</span>
+<span class="fc" id="L28">    }</span>
 
     public void validateTransitionTo(RentalStatus target) {
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (!ALLOWED_TRANSITIONS.getOrDefault(this, Set.of()).contains(target)) {</span>
-<span class="nc" id="L30">            throw new InvalidRentalStatusException(this, target);</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (!ALLOWED_TRANSITIONS.getOrDefault(this, Set.of()).contains(target)) {</span>
+<span class="nc" id="L32">            throw new InvalidRentalStatusException(this, target);</span>
         }
-<span class="fc" id="L32">    }</span>
+<span class="fc" id="L34">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

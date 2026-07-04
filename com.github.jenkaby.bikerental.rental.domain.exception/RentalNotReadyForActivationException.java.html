@@ -25,16 +25,16 @@ public class RentalNotReadyForActivationException extends BikeRentalException {
     private final List&lt;String&gt; missingFields;
 
     public RentalNotReadyForActivationException(List&lt;String&gt; missingFields) {
-<span class="nc" id="L28">        super(MESSAGE_TEMPLATE.formatted(String.join(&quot;, &quot;, missingFields)), ERROR_CODE, new MissingFields(missingFields));</span>
-<span class="nc" id="L29">        this.missingFields = missingFields;</span>
-<span class="nc" id="L30">    }</span>
+<span class="fc" id="L28">        super(MESSAGE_TEMPLATE.formatted(String.join(&quot;, &quot;, missingFields)), ERROR_CODE, new MissingFields(missingFields));</span>
+<span class="fc" id="L29">        this.missingFields = missingFields;</span>
+<span class="fc" id="L30">    }</span>
 
     public MissingFields getDetails() {
-<span class="nc" id="L33">        return this.getParams().map(params -&gt; (MissingFields) params)</span>
-<span class="nc" id="L34">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected MissingFields in exception parameters&quot;));</span>
+<span class="fc" id="L33">        return this.getParams().map(params -&gt; (MissingFields) params)</span>
+<span class="pc" id="L34">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected MissingFields in exception parameters&quot;));</span>
     }
 
-<span class="nc" id="L37">    public record MissingFields(List&lt;String&gt; fields) {</span>
+<span class="fc" id="L37">    public record MissingFields(List&lt;String&gt; fields) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

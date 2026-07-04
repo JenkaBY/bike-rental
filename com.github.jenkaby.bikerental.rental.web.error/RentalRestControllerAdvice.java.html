@@ -40,14 +40,14 @@ public class RentalRestControllerAdvice {
 
     @ExceptionHandler(RentalNotReadyForActivationException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleRentalNotReadyForActivation(RentalNotReadyForActivationException ex) {
-<span class="nc" id="L43">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="nc" id="L44">        log.warn(&quot;[correlationId={}] Rental not ready for activation: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L45">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
-<span class="nc" id="L46">        problem.setTitle(&quot;Rental not ready for activation&quot;);</span>
-<span class="nc" id="L47">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L48">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="nc" id="L49">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
-<span class="nc" id="L50">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L43">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L44">        log.warn(&quot;[correlationId={}] Rental not ready for activation: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L45">        var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="fc" id="L46">        problem.setTitle(&quot;Rental not ready for activation&quot;);</span>
+<span class="fc" id="L47">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L48">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L49">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L50">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(SuitableTariffNotFoundException.class)

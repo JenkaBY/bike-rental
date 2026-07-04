@@ -46,7 +46,7 @@ class FinanceFacadeImpl implements FinanceFacade {
 
     @Override
     public boolean hasHold(RentalRef rentalRef) {
-<span class="nc" id="L49">        return transactionRepository.existsByRentalRefAndType(rentalRef, TransactionType.HOLD);</span>
+<span class="fc" id="L49">        return transactionRepository.existsByRentalRefAndType(rentalRef, TransactionType.HOLD);</span>
     }
 
     @Override

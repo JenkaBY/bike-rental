@@ -229,7 +229,7 @@ class RentalCommandController {
 
     @PatchMapping(&quot;/{rentalId}/lifecycles&quot;)
     @Operation(summary = &quot;Transition rental lifecycle status&quot;,
-            description = &quot;Transitions a rental to ACTIVE or CANCELLED status&quot;)
+            description = &quot;Transitions a rental to AWAITING_SIGNATURE, DRAFT, ACTIVE or CANCELLED status. The response carries the rental version used as the signing fencing token.&quot;)
     @ApiResponses({
             @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Rental status updated&quot;,
                     content = @Content(schema = @Schema(implementation = RentalResponse.class))),

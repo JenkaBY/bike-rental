@@ -2,6 +2,8 @@
 
 import com.github.jenkaby.bikerental.rental.application.usecase.ActivateRentalUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.CancelRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.CancelSigningUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.PrepareSigningUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import org.springframework.stereotype.Service;
@@ -11,22 +13,32 @@ class RentalLifecycleService implements RentalLifecycleUseCase {
 
     private final ActivateRentalUseCase activateRentalUseCase;
     private final CancelRentalUseCase cancelRentalUseCase;
+    private final PrepareSigningUseCase prepareSigningUseCase;
+    private final CancelSigningUseCase cancelSigningUseCase;
 
     RentalLifecycleService(ActivateRentalUseCase activateRentalUseCase,
-<span class="fc" id="L16">                           CancelRentalUseCase cancelRentalUseCase) {</span>
-<span class="fc" id="L17">        this.activateRentalUseCase = activateRentalUseCase;</span>
-<span class="fc" id="L18">        this.cancelRentalUseCase = cancelRentalUseCase;</span>
-<span class="fc" id="L19">    }</span>
+                           CancelRentalUseCase cancelRentalUseCase,
+                           PrepareSigningUseCase prepareSigningUseCase,
+<span class="fc" id="L22">                           CancelSigningUseCase cancelSigningUseCase) {</span>
+<span class="fc" id="L23">        this.activateRentalUseCase = activateRentalUseCase;</span>
+<span class="fc" id="L24">        this.cancelRentalUseCase = cancelRentalUseCase;</span>
+<span class="fc" id="L25">        this.prepareSigningUseCase = prepareSigningUseCase;</span>
+<span class="fc" id="L26">        this.cancelSigningUseCase = cancelSigningUseCase;</span>
+<span class="fc" id="L27">    }</span>
 
     @Override
     public Rental execute(RentalLifecycleCommand command) {
-<span class="pc bpc" id="L23" title="1 of 3 branches missed.">        return switch (command.targetStatus()) {</span>
-<span class="fc" id="L24">            case ACTIVE -&gt; activateRentalUseCase.execute(</span>
-<span class="fc" id="L25">                    new ActivateRentalUseCase.ActivateCommand(command.rentalId(), command.operatorId()));</span>
-<span class="fc" id="L26">            case CANCELLED -&gt; cancelRentalUseCase.execute(</span>
-<span class="fc" id="L27">                    new CancelRentalUseCase.CancelCommand(command.rentalId(), command.operatorId()));</span>
-<span class="nc" id="L28">            default -&gt; throw new IllegalArgumentException(</span>
-<span class="nc" id="L29">                    &quot;Unsupported lifecycle target status: &quot; + command.targetStatus());</span>
+<span class="pc bpc" id="L31" title="1 of 5 branches missed.">        return switch (command.targetStatus()) {</span>
+<span class="fc" id="L32">            case ACTIVE -&gt; activateRentalUseCase.execute(</span>
+<span class="fc" id="L33">                    new ActivateRentalUseCase.ActivateCommand(command.rentalId(), command.operatorId()));</span>
+<span class="fc" id="L34">            case CANCELLED -&gt; cancelRentalUseCase.execute(</span>
+<span class="fc" id="L35">                    new CancelRentalUseCase.CancelCommand(command.rentalId(), command.operatorId()));</span>
+<span class="fc" id="L36">            case AWAITING_SIGNATURE -&gt; prepareSigningUseCase.execute(</span>
+<span class="fc" id="L37">                    new PrepareSigningUseCase.PrepareSigningCommand(command.rentalId(), command.operatorId()));</span>
+<span class="fc" id="L38">            case DRAFT -&gt; cancelSigningUseCase.execute(</span>
+<span class="fc" id="L39">                    new CancelSigningUseCase.CancelSigningCommand(command.rentalId(), command.operatorId()));</span>
+<span class="nc" id="L40">            default -&gt; throw new IllegalArgumentException(</span>
+<span class="nc" id="L41">                    &quot;Unsupported lifecycle target status: &quot; + command.targetStatus());</span>
         };
     }
 }

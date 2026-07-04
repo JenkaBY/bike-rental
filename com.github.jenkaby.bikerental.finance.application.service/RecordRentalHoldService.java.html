@@ -44,11 +44,11 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
 
 <span class="fc" id="L45">        var existing = transactionRepository</span>
 <span class="fc" id="L46">                .findByIdempotencyKeyAndCustomerId(idempotencyKey, command.customerRef());</span>
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (existing.isPresent()) {</span>
-<span class="nc" id="L48">            var t = existing.get();</span>
-<span class="nc" id="L49">            log.info(&quot;Hold already recorded for rental={} customer={}, returning existing transaction={}&quot;,</span>
-<span class="nc" id="L50">                    command.rentalRef().id(), command.customerRef().id(), t.getId());</span>
-<span class="nc" id="L51">            return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (existing.isPresent()) {</span>
+<span class="fc" id="L48">            var t = existing.get();</span>
+<span class="fc" id="L49">            log.info(&quot;Hold already recorded for rental={} customer={}, returning existing transaction={}&quot;,</span>
+<span class="fc" id="L50">                    command.rentalRef().id(), command.customerRef().id(), t.getId());</span>
+<span class="fc" id="L51">            return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());</span>
         }
 
 <span class="fc" id="L54">        var customerAccount = accountRepository</span>
