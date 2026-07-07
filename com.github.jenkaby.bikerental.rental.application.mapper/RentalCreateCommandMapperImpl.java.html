@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalCreateCommandMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.application.mapper</a> &gt; <span class="el_source">RentalCreateCommandMapperImpl.java</span></div><h1>RentalCreateCommandMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.application.mapper;
+
+import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.InitRentalForSigningUseCase;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.DiscountPercent;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-java-compiler-worker-9.6.1.jar, environment: Java 21.0.11 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L19">public class RentalCreateCommandMapperImpl implements RentalCreateCommandMapper {</span>
+
+    @Override
+    public CreateOrUpdateDraftRentalUseCase.InitDraftCommand toInitDraftCommand(InitRentalForSigningUseCase.InitRentalForSigningCommand command) {
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if ( command == null ) {</span>
+<span class="nc" id="L24">            return null;</span>
+        }
+
+<span class="fc" id="L27">        UUID customerId = null;</span>
+<span class="fc" id="L28">        List&lt;Long&gt; equipmentIds = null;</span>
+<span class="fc" id="L29">        Duration duration = null;</span>
+<span class="fc" id="L30">        String operatorId = null;</span>
+<span class="fc" id="L31">        Long specialTariffId = null;</span>
+<span class="fc" id="L32">        Money specialPrice = null;</span>
+<span class="fc" id="L33">        DiscountPercent discountPercent = null;</span>
+
+<span class="fc" id="L35">        customerId = command.customerId();</span>
+<span class="fc" id="L36">        List&lt;Long&gt; list = command.equipmentIds();</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if ( list != null ) {</span>
+<span class="fc" id="L38">            equipmentIds = new ArrayList&lt;Long&gt;( list );</span>
+        }
+<span class="fc" id="L40">        duration = command.duration();</span>
+<span class="fc" id="L41">        operatorId = command.operatorId();</span>
+<span class="fc" id="L42">        specialTariffId = command.specialTariffId();</span>
+<span class="fc" id="L43">        specialPrice = command.specialPrice();</span>
+<span class="fc" id="L44">        discountPercent = command.discountPercent();</span>
+
+<span class="fc" id="L46">        CreateOrUpdateDraftRentalUseCase.InitDraftCommand initDraftCommand = new CreateOrUpdateDraftRentalUseCase.InitDraftCommand( customerId, equipmentIds, duration, operatorId, specialTariffId, specialPrice, discountPercent );</span>
+
+<span class="fc" id="L48">        return initDraftCommand;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

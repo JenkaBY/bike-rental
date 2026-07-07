@@ -2,6 +2,7 @@
 
 import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.InitRentalForSigningUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
@@ -16,45 +17,47 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Mapper(uses = {MoneyMapper.class, RentalQueryMapper.class, DiscountMapper.class, DurationMapper.class})
-<span class="fc" id="L19">public abstract class RentalCommandMapper {</span>
+<span class="fc" id="L20">public abstract class RentalCommandMapper {</span>
 
     protected RentalQueryMapper rentalQueryMapper;
     protected SettlementMapper settlementMapper;
 
     @Autowired
     public void setSettlementMapper(SettlementMapper settlementMapper) {
-<span class="fc" id="L26">        this.settlementMapper = settlementMapper;</span>
-<span class="fc" id="L27">    }</span>
+<span class="fc" id="L27">        this.settlementMapper = settlementMapper;</span>
+<span class="fc" id="L28">    }</span>
 
     @Autowired
     public void setQueryMapper(RentalQueryMapper queryMapper) {
-<span class="fc" id="L31">        this.rentalQueryMapper = queryMapper;</span>
-<span class="fc" id="L32">    }</span>
+<span class="fc" id="L32">        this.rentalQueryMapper = queryMapper;</span>
+<span class="fc" id="L33">    }</span>
 
     public abstract CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand toUpdateDraftRentalCommand(Long rentalId, RentalRequest request);
 
     public abstract CreateOrUpdateDraftRentalUseCase.InitDraftCommand toInitDraftRentalCommand(RentalRequest request);
+
+    public abstract InitRentalForSigningUseCase.InitRentalForSigningCommand toInitForSigningCommand(RentalForSigningRequest request);
 
     public abstract ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request);
 
     public abstract AddEquipmentUseCase.AddEquipmentCommand toAddEquipmentCommand(Long rentalId, AddRentalEquipmentRequest request);
 
     public RentalReturnResponse toReturnResponse(ReturnEquipmentUseCase.ReturnEquipmentResult result) {
-<span class="fc" id="L43">        RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());</span>
-<span class="fc" id="L44">        var settlementResponse = settlementMapper.toResponse(result.settlementInfo());</span>
-<span class="fc" id="L45">        return new RentalReturnResponse(rentalResponse, settlementResponse);</span>
+<span class="fc" id="L46">        RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());</span>
+<span class="fc" id="L47">        var settlementResponse = settlementMapper.toResponse(result.settlementInfo());</span>
+<span class="fc" id="L48">        return new RentalReturnResponse(rentalResponse, settlementResponse);</span>
     }
 
     public Map&lt;String, Object&gt; toPatchMap(RentalUpdateJsonPatchRequest request) {
-<span class="fc" id="L49">        Map&lt;String, Object&gt; patch = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L50" title="All 2 branches covered.">        for (RentalPatchOperation operation : request.getOperations()) {</span>
-<span class="fc" id="L51">            String path = operation.getPath();</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">            String fieldName = path.startsWith(&quot;/&quot;) ? path.substring(1) : path;</span>
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">            if (operation.getOp() != null) {</span>
-<span class="fc" id="L54">                patch.put(fieldName, operation.getValue());</span>
+<span class="fc" id="L52">        Map&lt;String, Object&gt; patch = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        for (RentalPatchOperation operation : request.getOperations()) {</span>
+<span class="fc" id="L54">            String path = operation.getPath();</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            String fieldName = path.startsWith(&quot;/&quot;) ? path.substring(1) : path;</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            if (operation.getOp() != null) {</span>
+<span class="fc" id="L57">                patch.put(fieldName, operation.getValue());</span>
             }
-<span class="fc" id="L56">        }</span>
-<span class="fc" id="L57">        return patch;</span>
+<span class="fc" id="L59">        }</span>
+<span class="fc" id="L60">        return patch;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
