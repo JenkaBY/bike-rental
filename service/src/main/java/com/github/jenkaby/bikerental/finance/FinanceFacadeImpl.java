@@ -1,10 +1,10 @@
 package com.github.jenkaby.bikerental.finance;
 
+import com.github.jenkaby.bikerental.finance.application.service.RentalHoldBalanceCalculator;
 import com.github.jenkaby.bikerental.finance.application.usecase.ReleaseHoldUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RentalHoldUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.SettleRentalUseCase;
-import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
-import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
+import com.github.jenkaby.bikerental.shared.domain.ActualRentalRef;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
@@ -17,20 +17,20 @@ class FinanceFacadeImpl implements FinanceFacade {
     private final RentalHoldUseCase rentalHoldUseCase;
     private final ReleaseHoldUseCase releaseHoldUseCase;
     private final SettleRentalUseCase settleRentalUseCase;
-    private final TransactionRepository transactionRepository;
+    private final RentalHoldBalanceCalculator holdBalanceCalculator;
 
     FinanceFacadeImpl(
             RentalHoldUseCase rentalHoldUseCase, ReleaseHoldUseCase releaseHoldUseCase,
             SettleRentalUseCase settleRentalUseCase,
-            TransactionRepository transactionRepository) {
+            RentalHoldBalanceCalculator holdBalanceCalculator) {
         this.rentalHoldUseCase = rentalHoldUseCase;
         this.releaseHoldUseCase = releaseHoldUseCase;
         this.settleRentalUseCase = settleRentalUseCase;
-        this.transactionRepository = transactionRepository;
+        this.holdBalanceCalculator = holdBalanceCalculator;
     }
 
     @Override
-    public HoldInfo holdFunds(@NonNull CustomerRef customerRef, @NonNull RentalRef rentalRef, @NonNull Money plannedCost, @NonNull String operatorId) {
+    public HoldInfo holdFunds(@NonNull CustomerRef customerRef, @NonNull ActualRentalRef rentalRef, @NonNull Money plannedCost, @NonNull String operatorId) {
         var command = new RentalHoldUseCase.RentalHoldCommand(customerRef, rentalRef, plannedCost, operatorId);
         var result = rentalHoldUseCase.execute(command);
         return new HoldInfo(result.transactionRef(), result.recordedAt());
@@ -46,11 +46,11 @@ class FinanceFacadeImpl implements FinanceFacade {
 
     @Override
     public boolean hasHold(RentalRef rentalRef) {
-        return transactionRepository.existsByRentalRefAndType(rentalRef, TransactionType.HOLD);
+        return holdBalanceCalculator.netActiveHold(rentalRef).isPositive();
     }
 
     @Override
-    public ReleaseHoldInfo releaseHold(@NonNull RentalRef rentalRef, @NonNull String operatorId) {
+    public ReleaseHoldInfo releaseHold(@NonNull ActualRentalRef rentalRef, @NonNull String operatorId) {
         var result = this.releaseHoldUseCase.execute(new ReleaseHoldUseCase.ReleaseHoldCommand(rentalRef, operatorId));
         return new ReleaseHoldInfo(result.transactionRef(), result.recordedAt());
     }

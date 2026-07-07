@@ -11,7 +11,7 @@ import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specific
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification.SpecConstant;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
-import com.github.jenkaby.bikerental.shared.domain.RentalRef;
+import com.github.jenkaby.bikerental.shared.domain.RentalId;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Repository
@@ -57,28 +58,20 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
-    public Optional<Transaction> findByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
-        return findAllByRentalRefAndType(rentalRef, type).stream()
+    public Optional<Transaction> findByRentalRefAndType(RentalId rentalRef, TransactionType type) {
+        return findAllByRentalRefAndTypes(rentalRef, Set.of(type)).stream()
                 .findFirst();
     }
 
     @Override
-    public List<Transaction> findAllByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
-        return jpaRepository.findAllBySourceTypeAndSourceIdAndTransactionType(
+    public List<Transaction> findAllByRentalRefAndTypes(RentalId rentalRef, Set<TransactionType> types) {
+        return jpaRepository.findAllBySourceTypeAndSourceIdAndTransactionTypeIn(
                         TransactionSourceType.RENTAL,
                         String.valueOf(rentalRef.id()),
-                        type)
+                        types)
                 .stream()
                 .map(mapper::toDomain)
                 .toList();
-    }
-
-    @Override
-    public boolean existsByRentalRefAndType(RentalRef rentalRef, TransactionType type) {
-        return jpaRepository.existsBySourceTypeAndSourceIdAndTransactionType(
-                TransactionSourceType.RENTAL,
-                String.valueOf(rentalRef.id()),
-                type);
     }
 
     @Override

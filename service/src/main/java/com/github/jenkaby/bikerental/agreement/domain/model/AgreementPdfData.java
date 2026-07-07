@@ -4,12 +4,11 @@ import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public record AgreementPdfData(
-        String title,
-        String content,
+        AgreementTemplate template,
         CustomerData customer,
         RentalData rental,
         byte @Nullable [] signaturePng) {
@@ -18,7 +17,7 @@ public record AgreementPdfData(
     }
 
     public record RentalData(Long rentalId,
-                             LocalDateTime startedAt,
+                             Instant startedAt,
                              Duration plannedDuration,
                              List<EquipmentLine> equipments,
                              BigDecimal estimatedTotal,

@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.agreement;
 import com.github.jenkaby.bikerental.agreement.infrastructure.persistence.entity.AgreementTemplateJpaEntity;
 import com.github.jenkaby.bikerental.agreement.web.command.dto.AgreementTemplateRequest;
 import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateResponse;
+import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateVariableResponse;
 import com.github.jenkaby.bikerental.componenttest.config.db.repository.InsertableAgreementTemplateRepository;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import io.cucumber.java.en.Given;
@@ -12,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,5 +61,16 @@ public class AgreementTemplateSteps {
         }
         softly.assertAll();
         scenarioContext.setRequestedObjectId(actual.id().toString());
+    }
+
+    @Then("the agreement template variables response contains")
+    public void theAgreementTemplateVariablesResponseContains(List<AgreementTemplateVariableResponse> expectedRows) {
+        List<AgreementTemplateVariableResponse> actual = scenarioContext.getResponseAsList(AgreementTemplateVariableResponse.class);
+        assertThat(actual).as("Template variable catalog size").hasSize(expectedRows.size());
+        assertThat(actual).zipSatisfy(expectedRows, (row, expected) -> {
+            assertThat(row.key()).as("key").isEqualTo(expected.key());
+            assertThat(row.description()).as("description").isEqualTo(expected.description());
+            assertThat(row.example()).as("example").isEqualTo(expected.example());
+        });
     }
 }

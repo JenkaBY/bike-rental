@@ -42,10 +42,12 @@ Feature: Rental Signing Lifecycle
     And the pricing params list for tariff request is
       | tariffId | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | hourlyPrice | dailyPrice | overtimeHourlyPrice | issuanceFee | minimumDurationMinutes | minimumDurationSurcharge | price |
       | 10       | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               |             |            |                     |             | 30                     | 1.00                     |       |
+      | 11       | FLAT_FEE          |                |                |                    |             |            |                     | 5.00        |                        |                          |       |
       | 13       | SPECIAL           |                |                |                    |             |            |                     |             |                        |                          | 0     |
     And the following tariff v2 records exist in db
       | id | name                   | description               | equipmentType | pricingType       | status | validFrom  | validTo |
       | 10 | Degressive Hourly Bike | Bicycle degressive hourly | BICYCLE       | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
+      | 11 | Flat Fee Helmet        | Helmet flat fee           | HELMET        | FLAT_FEE          | ACTIVE | 2026-01-01 |         |
       | 13 | Special Group Tariff   | Special zero price        | ANY           | SPECIAL           | ACTIVE | 2025-01-01 |         |
 
   Scenario: Prepare signing holds funds and freezes the rental
@@ -127,6 +129,87 @@ Feature: Rental Signing Lifecycle
       | customerId | status             | plannedDuration |
       | CUS1       | AWAITING_SIGNATURE | 120             |
     And the rental response version is greater than 2
+
+  Scenario: Hold is recreated with the new amount when equipment changes after returning to draft
+    Given a single rental exists in the database with the following data
+      | id | customerId | status | plannedDuration | createdAt           | updatedAt           |
+      | 1  | CUS1       | DRAFT  | 120             | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And rental equipments exist in the database with the following data
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And the lifecycle request is
+      | status             | operatorId |
+      | AWAITING_SIGNATURE | OP1        |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
+    Then the response status is 200
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 284.00  |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 16.00   |
+    And the lifecycle request is
+      | status | operatorId |
+      | DRAFT  | OP1        |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
+    Then the response status is 200
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 300.00  |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 0.00    |
+    And a rental request with the following data
+      | customerId | equipmentIds | duration | operatorId |
+      | CUS1       | 1,3          | 120      | OP1        |
+    When a PUT request has been made to "/api/rentals/{requestedObjectId}" endpoint with context
+    Then the response status is 200
+    And the rental response only contains
+      | customerId | status | estimatedCost | plannedDuration |
+      | CUS1       | DRAFT  | 21.00         | 120             |
+    And the lifecycle request is
+      | status             | operatorId |
+      | AWAITING_SIGNATURE | OP1        |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
+    Then the response status is 200
+    And the rental response only contains
+      | customerId | status             | estimatedCost | plannedDuration |
+      | CUS1       | AWAITING_SIGNATURE | 21.00         | 120             |
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 279.00  |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 21.00   |
+
+  Scenario: Hold is recreated with the same amount across repeated signing cycles
+    Given a single rental exists in the database with the following data
+      | id | customerId | status | plannedDuration | createdAt           | updatedAt           |
+      | 1  | CUS1       | DRAFT  | 120             | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And rental equipments exist in the database with the following data
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And the lifecycle request is
+      | status             | operatorId |
+      | AWAITING_SIGNATURE | OP1        |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
+    Then the response status is 200
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 284.00  |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 16.00   |
+    And the lifecycle request is
+      | status | operatorId |
+      | DRAFT  | OP1        |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
+    Then the response status is 200
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 300.00  |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 0.00    |
+    And the lifecycle request is
+      | status             | operatorId |
+      | AWAITING_SIGNATURE | OP1        |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
+    Then the response status is 200
+    And the following sub-ledger records were persisted in db
+      | id     | accountId | ledgerType      | balance |
+      | L_C_W1 | ACC1      | CUSTOMER_WALLET | 284.00  |
+      | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 16.00   |
 
   Scenario: Prepare signing rejected for incomplete draft
     Given a single rental exists in the database with the following data

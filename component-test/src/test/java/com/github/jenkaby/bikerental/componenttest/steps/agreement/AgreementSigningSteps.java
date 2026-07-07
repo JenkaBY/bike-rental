@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.agreement;
 
 import com.github.jenkaby.bikerental.agreement.web.command.dto.SignAgreementRequest;
 import com.github.jenkaby.bikerental.agreement.web.command.dto.SignatureCreatedResponse;
+import com.github.jenkaby.bikerental.agreement.web.query.dto.RentalAgreementResponse;
 import com.github.jenkaby.bikerental.agreement.web.query.dto.SignatureSummaryResponse;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import io.cucumber.java.en.Given;
@@ -40,6 +41,34 @@ public class AgreementSigningSteps {
     public void theSignatureListHasSize(int expectedSize) {
         List<SignatureSummaryResponse> actual = scenarioContext.getResponseAsList(SignatureSummaryResponse.class);
         assertThat(actual).as("Signature summary list").hasSize(expectedSize);
+    }
+
+    @Then("the rental agreement response contains")
+    public void theRentalAgreementResponseContains(RentalAgreementResponse expected) {
+        var actual = scenarioContext.getResponseBody(RentalAgreementResponse.class);
+        var softly = new SoftAssertions();
+        if (expected.templateId() != null) {
+            softly.assertThat(actual.templateId()).as("templateId").isEqualTo(expected.templateId());
+        }
+        if (expected.versionNumber() != null) {
+            softly.assertThat(actual.versionNumber()).as("versionNumber").isEqualTo(expected.versionNumber());
+        }
+        if (expected.title() != null) {
+            softly.assertThat(actual.title()).as("title").isEqualTo(expected.title());
+        }
+        softly.assertAll();
+    }
+
+    @Then("the rental agreement content contains {string}")
+    public void theRentalAgreementContentContains(String expectedFragment) {
+        var actual = scenarioContext.getResponseBody(RentalAgreementResponse.class);
+        assertThat(actual.content()).as("rendered agreement content").contains(expectedFragment);
+    }
+
+    @Then("the rental agreement content does not contain {string}")
+    public void theRentalAgreementContentDoesNotContain(String unexpectedFragment) {
+        var actual = scenarioContext.getResponseBody(RentalAgreementResponse.class);
+        assertThat(actual.content()).as("rendered agreement content").doesNotContain(unexpectedFragment);
     }
 
     @Then("the signature list contains")

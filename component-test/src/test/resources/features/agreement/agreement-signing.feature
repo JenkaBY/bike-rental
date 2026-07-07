@@ -36,8 +36,8 @@ Feature: Rental Agreement Signing
       | id | name                   | description               | equipmentType | pricingType       | status | validFrom  | validTo |
       | 10 | Degressive Hourly Bike | Bicycle degressive hourly | BICYCLE       | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
     And agreement templates exist in the database with the following data
-      | id | versionNumber | title               | content                                    | contentSha256 | status | createdAt           | updatedAt           | activatedAt         |
-      | 5  | 3             | Rental Agreement v3 | You agree to return the equipment on time. | SHA_ZERO      | ACTIVE | 2026-01-01T09:00:00 | 2026-01-01T09:00:00 | 2026-01-01T09:00:00 |
+      | id | versionNumber | title               | content                                                                            | contentSha256 | status | createdAt           | updatedAt           | activatedAt         |
+      | 5  | 3             | Rental Agreement v3 | Dear {{customer.firstName}} {{customer.lastName}}, you agree to return it on time. | SHA_ZERO      | ACTIVE | 2026-01-01T09:00:00 | 2026-01-01T09:00:00 | 2026-01-01T09:00:00 |
 
   Scenario: Happy path - signing activates the rental and stores the PDF
     Given a single rental exists in the database with the following data
@@ -61,7 +61,9 @@ Feature: Rental Agreement Signing
       | name                | value                                          |
       | Content-Disposition | attachment; filename="rental-1-agreement.pdf" |
     And the PDF body is a valid document containing text "Johnson"
-    And the PDF body is a valid document containing text "BIKE-001"
+    And the PDF body is a valid document containing text "1. BICYCLE(BIKE-001) — 16.00 BYN"
+    And the PDF body is a valid document containing text "02:00 h"
+    And the PDF body is a valid document containing text "Rental Agreement v3 dated 01.01.2026"
 
   Scenario: Version mismatch is rejected
     Given a single rental exists in the database with the following data
@@ -156,3 +158,31 @@ Feature: Rental Agreement Signing
       | 5          | 3                     |
     When a GET request for "application/pdf" content has been made to "/api/rentals/1/signatures" endpoint
     Then the response status is 200
+
+  Scenario: Rendered agreement text has placeholders substituted for the awaiting-signature rental
+    Given a single rental exists in the database with the following data
+      | id | customerId | status             | plannedDuration | version | createdAt           | updatedAt           |
+      | 1  | CUS1       | AWAITING_SIGNATURE | 120             | 1       | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And rental equipments exist in the database with the following data
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    When a GET request has been made to "/api/rentals/1/agreement" endpoint
+    Then the response status is 200
+    And the rental agreement response contains
+      | templateId | versionNumber | title               |
+      | 5          | 3             | Rental Agreement v3 |
+    And the rental agreement content contains "Dear Alex Johnson, you agree to return it on time."
+    And the rental agreement content does not contain "{{"
+
+  Scenario: Rendered agreement text is rejected for a draft rental
+    Given a single rental exists in the database with the following data
+      | id | customerId | status | plannedDuration | version | createdAt           | updatedAt           |
+      | 1  | CUS1       | DRAFT  | 120             | 0       | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And rental equipments exist in the database with the following data
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    When a GET request has been made to "/api/rentals/1/agreement" endpoint
+    Then the response status is 409
+    And the response contains
+      | path        | value                                           |
+      | $.errorCode | agreement.signing.rental_not_awaiting_signature |

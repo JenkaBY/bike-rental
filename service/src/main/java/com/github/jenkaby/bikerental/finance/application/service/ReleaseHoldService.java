@@ -16,6 +16,7 @@ import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,41 +32,42 @@ public class ReleaseHoldService implements ReleaseHoldUseCase {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+    private final RentalHoldBalanceCalculator holdBalanceCalculator;
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
 
     @Override
     @Transactional
     public HoldResult execute(ReleaseHoldCommand command) {
-        log.info("Releasing hold for rental {}", command.rentalRef().id());
-        var idempotencyKey = new IdempotencyKey(
-                uuidGenerator.generateNameBased("%s_%s".formatted(TransactionType.RELEASE.name(), command.rentalRef().id()))
-        );
+        var actualRentalRef = command.rentalRef();
+        log.info("Releasing hold for rental {} version {}", actualRentalRef.id(), actualRentalRef.rentalVersion());
+        var idempotencyKey = getIdempotencyKey(command);
         var existing = transactionRepository.findByIdempotencyKey(idempotencyKey);
         if (existing.isPresent()) {
             var t = existing.get();
-            log.info("Hold already released for rental {}, returning existing transaction {}",
-                    command.rentalRef().id(), t.getId());
+            log.info("Hold already released for rental {} version {}, returning existing transaction {}",
+                    actualRentalRef.id(), actualRentalRef.rentalVersion(), t.getId());
             return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());
         }
 
-        Optional<Transaction> holdOptional = transactionRepository.findByRentalRefAndType(command.rentalRef(), TransactionType.HOLD);
-        if (holdOptional.isEmpty()) {
-            log.debug("No hold found for rental {}, nothing to release", command.rentalRef().id());
+        var rentalRef = actualRentalRef.toRentalRef();
+        Money netHold = holdBalanceCalculator.netActiveHold(rentalRef);
+        if (netHold.isNegativeOrZero()) {
+            log.debug("No active hold for rental {} version {}, nothing to release", actualRentalRef.id(), actualRentalRef.rentalVersion());
             return new HoldResult(null, clock.instant());
         }
-        var holdTxN = holdOptional.get();
-        var customerRef = new CustomerRef(holdTxN.getCustomerId());
+
+        Optional<Transaction> holdOptional = transactionRepository.findByRentalRefAndType(rentalRef, TransactionType.HOLD);
+        var customerRef = new CustomerRef(holdOptional.orElseThrow(() ->
+                new ResourceNotFoundException(Transaction.class, actualRentalRef.id().toString())).getCustomerId());
 
         var now = clock.instant();
         var customerAccount = accountRepository.findByCustomerId(customerRef)
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, customerRef.id()));
 
-        Money releaseHold = holdTxN.getAmount();
-        log.info("Releasing hold amount {} taken from transaction {} for rental {}",
-                releaseHold, holdTxN.getId(), command.rentalRef().id());
-        var debitChange = customerAccount.getWallet().credit(releaseHold);
-        var creditChange = customerAccount.getOnHold().debit(releaseHold);
+        log.info("Releasing net hold amount {} for rental {} version {}", netHold, actualRentalRef.id(), actualRentalRef.rentalVersion());
+        var debitChange = customerAccount.getWallet().credit(netHold);
+        var creditChange = customerAccount.getOnHold().debit(netHold);
 
         accountRepository.save(customerAccount);
         UUID transactionId = uuidGenerator.generate();
@@ -74,11 +76,11 @@ public class ReleaseHoldService implements ReleaseHoldUseCase {
                 .id(transactionId)
                 .type(TransactionType.RELEASE)
                 .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)
-                .amount(releaseHold)
+                .amount(netHold)
                 .customerId(customerRef.id())
                 .operatorId(command.operatorId())
                 .sourceType(TransactionSourceType.RENTAL)
-                .sourceId(String.valueOf(command.rentalRef().id()))
+                .sourceId(String.valueOf(actualRentalRef.id()))
                 .recordedAt(now)
                 .idempotencyKey(idempotencyKey)
                 .reason(null)
@@ -89,8 +91,17 @@ public class ReleaseHoldService implements ReleaseHoldUseCase {
                 .build();
 
         transactionRepository.save(transaction);
-        log.info("Released hold amount {} taken in transaction {} for rental {}",
-                releaseHold, transaction.getId(), command.rentalRef().id());
+        log.info("Released net hold amount {} in transaction {} for rental {} version {}",
+                netHold, transaction.getId(), actualRentalRef.id(), actualRentalRef.rentalVersion());
         return new HoldResult(new TransactionRef(transactionId), now);
+    }
+
+    private @NonNull IdempotencyKey getIdempotencyKey(ReleaseHoldCommand command) {
+        return new IdempotencyKey(
+                uuidGenerator.generateNameBased("%s_%s_%s".formatted(
+                        TransactionType.RELEASE.name(),
+                        command.rentalRef().id(),
+                        command.rentalRef().rentalVersion()))
+        );
     }
 }

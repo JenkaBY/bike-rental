@@ -33,7 +33,7 @@ class PrepareSigningService implements PrepareSigningUseCase {
         if (rental.getEstimatedCost().isPositive()) {
             var holdInfo = financeFacade.holdFunds(
                     new CustomerRef(rental.getCustomerId()),
-                    rental.toRentalRef(),
+                    rental.toActualRentalRef(),
                     rental.getEstimatedCost(),
                     command.operatorId());
             log.info("Funds held for signing of rental {}: transactionId={}, heldAt={}",

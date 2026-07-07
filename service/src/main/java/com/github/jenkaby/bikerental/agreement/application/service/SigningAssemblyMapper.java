@@ -1,12 +1,14 @@
 package com.github.jenkaby.bikerental.agreement.application.service;
 
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
 import com.github.jenkaby.bikerental.agreement.domain.model.SigningSnapshot;
 import com.github.jenkaby.bikerental.customer.CustomerInfo;
 import com.github.jenkaby.bikerental.rental.RentalSigningSnapshot;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,11 +29,10 @@ interface SigningAssemblyMapper {
 
     List<SigningSnapshot.EquipmentLine> toSnapshotEquipmentLines(List<RentalSigningSnapshot.EquipmentItem> items);
 
-    default AgreementPdfData toPdfData(String title,
-                                       String content,
+    default AgreementPdfData toPdfData(AgreementTemplate template,
                                        CustomerInfo customer,
                                        RentalSigningSnapshot snapshot,
-                                       LocalDateTime startedAt,
+                                       Instant startedAt,
                                        byte[] signaturePng) {
         var customerData = new AgreementPdfData.CustomerData(
                 customer.firstName(), customer.lastName(), customer.phone());
@@ -43,7 +44,7 @@ interface SigningAssemblyMapper {
                 snapshot.estimatedCost(),
                 snapshot.discountPercent(),
                 snapshot.specialPrice());
-        return new AgreementPdfData(title, content, customerData, rentalData, signaturePng);
+        return new AgreementPdfData(template, customerData, rentalData, signaturePng);
     }
 
     default SigningSnapshot toSigningSnapshot(CustomerInfo customer,

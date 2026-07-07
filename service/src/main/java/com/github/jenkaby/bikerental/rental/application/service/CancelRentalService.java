@@ -50,7 +50,7 @@ class CancelRentalService implements CancelRentalUseCase {
 
         if (rental.isAwaitingSignature() || rental.hasActiveStatus()) {
             log.info("Releasing hold for {} rental {}", rental.getStatus(), rental.getId());
-            financeFacade.releaseHold(rental.toRentalRef(), command.operatorId());
+            financeFacade.releaseHold(rental.toActualRentalRef(), command.operatorId());
         }
 
         rental.cancel(LocalDateTime.now(clock));

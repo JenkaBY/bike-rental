@@ -8,11 +8,14 @@ public record AgreementPdfProperties(
         @DefaultValue("fonts/DejaVuSans.ttf") String fontLocation,
         @DefaultValue("50") float margin,
         @DefaultValue("11") float bodyFontSize,
+        @DefaultValue("6") float smallFontSize,
         @DefaultValue("16") float titleFontSize,
         @DefaultValue("1.4") float leadingFactor,
         @DefaultValue("180") float signatureWidth,
         @DefaultValue("80") float signatureHeight,
-        @DefaultValue("место подписи") String signaturePlaceholderLabel,
+        @DefaultValue("Signature placeholder") String signaturePlaceholderLabel,
         @DefaultValue("dd.MM.yyyy HH:mm") String dateTimePattern,
+        @DefaultValue("dd.MM.yyyy") String datePattern,
+        @DefaultValue("Europe/Minsk") String zoneId,
         @DefaultValue("BYN") String currency) {
 }

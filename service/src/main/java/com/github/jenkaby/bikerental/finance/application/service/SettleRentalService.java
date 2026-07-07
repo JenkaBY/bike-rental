@@ -18,10 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +27,7 @@ public class SettleRentalService implements SettleRentalUseCase {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+    private final RentalHoldBalanceCalculator holdBalanceCalculator;
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
 
@@ -37,7 +35,7 @@ public class SettleRentalService implements SettleRentalUseCase {
     @Transactional(noRollbackFor = {OverBudgetSettlementException.class})
     public SettlementResult execute(SettleRentalCommand command) {
         log.info("Settlement for rental id=[{}]", command.rentalRef().id());
-        var existingCaptures = transactionRepository.findAllByRentalRefAndType(command.rentalRef(), TransactionType.CAPTURE);
+        var existingCaptures = transactionRepository.findAllByRentalRefAndTypes(command.rentalRef(), Set.of(TransactionType.CAPTURE));
         if (!existingCaptures.isEmpty()) {
             var captureRefs = existingCaptures.stream().map(t -> new TransactionRef(t.getId())).toList();
             var releaseRef = transactionRepository
@@ -52,9 +50,9 @@ public class SettleRentalService implements SettleRentalUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, command.customerRef().id().toString()));
         var systemAccount = accountRepository.getSystemAccount();
 
-        Optional<Transaction> holdOptional = transactionRepository.findByRentalRefAndType(command.rentalRef(), TransactionType.HOLD);
-        if (holdOptional.isEmpty()) {
-            log.debug("No hold found for rental id=[{}], skipping settlement", command.rentalRef().id());
+        Money netHold = holdBalanceCalculator.netActiveHold(command.rentalRef());
+        if (netHold.isNegativeOrZero()) {
+            log.debug("No active hold for rental id=[{}], skipping settlement", command.rentalRef().id());
             return new SettlementResult(List.of(), null, clock.instant());
         }
 
@@ -67,23 +65,21 @@ public class SettleRentalService implements SettleRentalUseCase {
                 return new SettlementResult(List.of(), new TransactionRef(existingRelease.get().getId()), existingRelease.get().getRecordedAt());
             }
             Instant now = clock.instant();
-            var holdAmount = holdOptional.get().getAmount();
-            var releaseRef = commitReleaseTransaction(customerAccount, command, holdAmount, now)
+            var releaseRef = commitReleaseTransaction(customerAccount, command, netHold, now)
                     .map(t -> new TransactionRef(t.getId()))
                     .orElse(null);
             accountRepository.save(customerAccount);
-            log.info("Released full hold [{}] for rental id=[{}], release={}", holdAmount, command.rentalRef().id(), releaseRef);
+            log.info("Released full hold [{}] for rental id=[{}], release={}", netHold, command.rentalRef().id(), releaseRef);
             return new SettlementResult(List.of(), releaseRef, now);
         }
-        var holdTxN = holdOptional.get();
-        var holdTxNAmount = holdTxN.getAmount();
+        var holdTxNAmount = netHold;
 
         Instant now = clock.instant();
         var finalCost = command.finalCost();
 
         String sourceId = String.valueOf(command.rentalRef().id());
         if (holdTxNAmount.isMoreThan(finalCost)) {
-            log.info("Final cost [{}] settlement needed for rental id=[{}] less than actual hold [{}]", finalCost, command.rentalRef().id(), holdTxN.getAmount());
+            log.info("Final cost [{}] settlement needed for rental id=[{}] less than actual hold [{}]", finalCost, command.rentalRef().id(), holdTxNAmount);
             var captureHoldDebit = customerAccount.getOnHold().debit(finalCost);
             var captureRevenueCredit = systemAccount.getRevenue().credit(finalCost);
 

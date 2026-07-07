@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -18,8 +19,8 @@ public interface TransactionJpaRepository extends JpaRepository<TransactionJpaEn
 
     Optional<TransactionJpaEntity> findByIdempotencyKey(UUID idempotencyKey);
 
-    List<TransactionJpaEntity> findAllBySourceTypeAndSourceIdAndTransactionType(
-            TransactionSourceType sourceType, String sourceId, TransactionType transactionType);
+    List<TransactionJpaEntity> findAllBySourceTypeAndSourceIdAndTransactionTypeIn(
+            TransactionSourceType sourceType, String sourceId, Set<TransactionType> transactionTypes);
 
     boolean existsBySourceTypeAndSourceIdAndTransactionType(
             TransactionSourceType sourceType, String sourceId, TransactionType transactionType);

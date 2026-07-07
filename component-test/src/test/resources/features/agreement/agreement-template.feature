@@ -76,6 +76,19 @@ Feature: Agreement Template Management
       | path        | value                              |
       | $.errorCode | agreement.template.not_activatable |
 
+  Scenario: Listing placeholder variables returns the substitution catalog
+    When a GET request has been made to "/api/agreements/variables" endpoint
+    Then the response status is 200
+    And the agreement template variables response contains
+      | key                | description                  | example          |
+      | customer.firstName | Customer's first name        | John             |
+      | customer.lastName  | Customer's last name         | Smith            |
+      | customer.phone     | Customer's phone number      | +375291234567    |
+      | rental.startedAt   | Rental start date and time   | 05.07.2026 14:30 |
+      | rental.duration    | Planned rental duration      | 02:00 h          |
+      | rental.total       | Total estimated rental cost  | 30.00 BYN        |
+      | rental.number      | Rental identifier            | 1024             |
+
   Scenario: No active template returns 404
     Given a single agreement template exists in the database with the following data
       | id | versionNumber | title     | content    | status | createdAt           | updatedAt           |

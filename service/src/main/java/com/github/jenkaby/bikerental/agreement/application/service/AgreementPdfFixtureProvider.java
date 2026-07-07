@@ -1,12 +1,12 @@
 package com.github.jenkaby.bikerental.agreement.application.service;
 
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -28,14 +28,17 @@ class AgreementPdfFixtureProvider {
     }
 
     AgreementPdfData previewData(String title, String content) {
+        var now = clock.instant();
         var rental = new AgreementPdfData.RentalData(
                 FIXTURE_RENTAL_ID,
-                LocalDateTime.now(clock),
+                now,
                 FIXTURE_DURATION,
                 FIXTURE_EQUIPMENTS,
                 FIXTURE_ESTIMATED_TOTAL,
                 null,
                 null);
-        return new AgreementPdfData(title, content, FIXTURE_CUSTOMER, rental, null);
+        var template = AgreementTemplate.createDraft(title, content);
+        template.activate(1, "content_SHA256", now);
+        return new AgreementPdfData(template, FIXTURE_CUSTOMER, rental, null);
     }
 }
