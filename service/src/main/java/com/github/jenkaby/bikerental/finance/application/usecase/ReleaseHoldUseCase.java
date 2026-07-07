@@ -1,6 +1,6 @@
 package com.github.jenkaby.bikerental.finance.application.usecase;
 
-import com.github.jenkaby.bikerental.shared.domain.RentalRef;
+import com.github.jenkaby.bikerental.shared.domain.ActualRentalRef;
 import com.github.jenkaby.bikerental.shared.domain.TransactionRef;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -11,7 +11,7 @@ public interface ReleaseHoldUseCase {
 
     HoldResult execute(ReleaseHoldCommand command);
 
-    record ReleaseHoldCommand(RentalRef rentalRef, String operatorId) {
+    record ReleaseHoldCommand(ActualRentalRef rentalRef, String operatorId) {
     }
 
     record HoldResult(@Nullable TransactionRef transactionRef, @NonNull Instant recordedAt) {

@@ -1,6 +1,6 @@
 package com.github.jenkaby.bikerental.shared.domain;
 
-public record RentalRef(Long id) {
+public record RentalRef(Long id) implements RentalId {
 
     public RentalRef {
         if (id == null) {

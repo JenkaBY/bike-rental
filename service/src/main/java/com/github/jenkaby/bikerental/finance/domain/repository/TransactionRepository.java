@@ -5,12 +5,13 @@ import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilt
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
-import com.github.jenkaby.bikerental.shared.domain.RentalRef;
+import com.github.jenkaby.bikerental.shared.domain.RentalId;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface TransactionRepository {
 
@@ -20,11 +21,9 @@ public interface TransactionRepository {
 
     Optional<Transaction> findByIdempotencyKey(IdempotencyKey idempotencyKey);
 
-    Optional<Transaction> findByRentalRefAndType(RentalRef rentalRef, TransactionType type);
+    Optional<Transaction> findByRentalRefAndType(RentalId rentalRef, TransactionType type);
 
-    List<Transaction> findAllByRentalRefAndType(RentalRef rentalRef, TransactionType type);
-
-    boolean existsByRentalRefAndType(RentalRef rentalRef, TransactionType type);
+    List<Transaction> findAllByRentalRefAndTypes(RentalId rentalRef, Set<TransactionType> types);
 
     Page<Transaction> findTransactionHistory(CustomerRef customerId,
                                              TransactionHistoryFilter filter,

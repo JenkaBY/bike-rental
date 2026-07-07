@@ -7,6 +7,7 @@ import com.github.jenkaby.bikerental.rental.domain.exception.RentalWindowElapsed
 import com.github.jenkaby.bikerental.rental.domain.model.vo.EquipmentCostResult;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationResult;
+import com.github.jenkaby.bikerental.shared.domain.ActualRentalRef;
 import com.github.jenkaby.bikerental.shared.domain.RentalRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.DiscountPercent;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
@@ -146,6 +147,10 @@ public class Rental {
 
     public RentalRef toRentalRef() {
         return new RentalRef(id);
+    }
+
+    public ActualRentalRef toActualRentalRef() {
+        return new ActualRentalRef(id, version);
     }
 
     public boolean hasActiveStatus() {

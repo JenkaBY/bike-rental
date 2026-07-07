@@ -36,18 +36,19 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
     @Override
     @Transactional
     public HoldResult execute(RentalHoldCommand command) {
-        log.info("Recording rental hold for rental={} customer={} amount={}",
-                command.rentalRef().id(), command.customerRef().id(), command.amount());
+        log.info("Recording rental hold for rental={} version={} customer={} amount={}",
+                command.rentalRef().id(), command.rentalRef().rentalVersion(), command.customerRef().id(), command.amount());
         var idempotencyKey = new IdempotencyKey(
-                uuidGenerator.generateNameBased(String.valueOf(command.rentalRef().id()))
+                uuidGenerator.generateNameBased(
+                        "%s_%s".formatted(command.rentalRef().id(), command.rentalRef().rentalVersion()))
         );
 
         var existing = transactionRepository
                 .findByIdempotencyKeyAndCustomerId(idempotencyKey, command.customerRef());
         if (existing.isPresent()) {
             var t = existing.get();
-            log.info("Hold already recorded for rental={} customer={}, returning existing transaction={}",
-                    command.rentalRef().id(), command.customerRef().id(), t.getId());
+            log.info("Hold already recorded for rental={} version={} customer={}, returning existing transaction={}",
+                    command.rentalRef().id(), command.rentalRef().rentalVersion(), command.customerRef().id(), t.getId());
             return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());
         }
 
@@ -87,7 +88,8 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
                 .build();
 
         transactionRepository.save(transaction);
-        log.info("Hold {} recorded for rental={} amount={}", transactionId, command.rentalRef().id(), command.amount());
+        log.info("Hold {} recorded for rental={} version={} amount={}",
+                transactionId, command.rentalRef().id(), command.rentalRef().rentalVersion(), command.amount());
 
         return new HoldResult(new TransactionRef(transactionId), now);
     }
