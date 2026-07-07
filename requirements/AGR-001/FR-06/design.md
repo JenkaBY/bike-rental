@@ -49,13 +49,23 @@ None.
 
 * `PATCH /api/rentals/{id}/lifecycles` with `{"status": "ACTIVE"}` → `400` standard validation
   body (unknown enum value). Allowed values: `AWAITING_SIGNATURE`, `DRAFT`, `CANCELLED`.
+* `POST /api/rentals/awaiting-signature` (new) — request body `RentalForSigningRequest` (mirrors
+  `RentalRequest` but `equipmentIds` is `@NotEmpty`). Creates the rental and moves it to
+  `AWAITING_SIGNATURE` atomically (init-draft validation + `prepareForSigning` hold in one
+  transaction). Responses: `201` `RentalResponse` in `AWAITING_SIGNATURE` carrying `version`;
+  `400` validation (incl. empty `equipmentIds`); `404` customer/equipment; `409` equipment
+  unavailable; `422` not ready / funds cannot be held. On any failure nothing is persisted (no
+  orphan draft). Implemented by `InitRentalForSigningService` orchestrating
+  `CreateOrUpdateDraftRentalUseCase` + `PrepareSigningUseCase`.
 * No other payload changes.
 
 ---
 
 ## 5. Updated Interaction Sequence
 
-1. Operator prepares rental → `AWAITING_SIGNATURE` (hold taken, FR-02).
+1. Operator prepares rental → `AWAITING_SIGNATURE` (hold taken, FR-02). Either the two-step path
+   (`POST /api/rentals` draft, then `PATCH /lifecycles {AWAITING_SIGNATURE}`) or, on the happy path,
+   a single `POST /api/rentals/awaiting-signature` call that does both atomically.
 2. Customer signs → agreement module persists signature and calls `completeSigning` → ACTIVE
    (FR-05).
 3. Return/cancel/debt flows proceed exactly as before from ACTIVE.

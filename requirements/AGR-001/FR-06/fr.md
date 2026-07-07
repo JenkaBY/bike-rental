@@ -21,6 +21,12 @@
     * The deprecated JSON-Patch update path must no longer be able to activate a rental.
     * All existing behavior downstream of ACTIVE (return, debt, cancel with hold release) is
       unchanged.
+    * **Single-call signing entry (frontend adoption):** the operator UI creates a rental directly in
+      `AWAITING_SIGNATURE` via `POST /api/rentals/awaiting-signature` (validated `RentalForSigningRequest`,
+      at least one equipment required). The endpoint runs the `initDraft` + `prepareForSigning` logic
+      atomically in one transaction (funds held, `version` returned), so the happy path skips the
+      intermediate visible `DRAFT` screen. The `DRAFT` state is retained internally only for editing the
+      composition (return to `DRAFT`, edit, re-prepare) — it is no longer a mandatory frontend step.
 
 ## 3. Non-Functional Requirements (NFRs)
 
