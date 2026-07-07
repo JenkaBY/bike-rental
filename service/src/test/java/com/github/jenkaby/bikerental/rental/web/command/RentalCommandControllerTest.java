@@ -2,9 +2,11 @@ package com.github.jenkaby.bikerental.rental.web.command;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.InitRentalForSigningUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
+import com.github.jenkaby.bikerental.rental.domain.exception.RentalNotReadyForActivationException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.command.mapper.RentalCommandMapper;
@@ -74,6 +76,9 @@ class RentalCommandControllerTest {
 
     @MockitoBean
     private RentalLifecycleUseCase rentalLifecycleUseCase;
+
+    @MockitoBean
+    private InitRentalForSigningUseCase initRentalForSigningUseCase;
 
 
     @Nested
@@ -1693,6 +1698,162 @@ class RentalCommandControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isNotFound());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/rentals/awaiting-signature")
+    class InitForSigning {
+
+        private static final String AWAITING_SIGNATURE_URL = "/api/rentals/awaiting-signature";
+
+        @Nested
+        @DisplayName("Should return 201 Created")
+        class ShouldReturn201 {
+
+            @Test
+            @DisplayName("when request is valid with at least one equipment")
+            void whenRequestIsValid() throws Exception {
+                var request = new RentalForSigningRequest(
+                        VALID_CUSTOMER_ID,
+                        List.of(VALID_EQUIPMENT_ID),
+                        VALID_DURATION,
+                        "operator-1",
+                        null,
+                        null,
+                        null
+                );
+
+                Rental rental = mock(Rental.class);
+                given(rental.getId()).willReturn(1L);
+                given(commandMapper.toInitForSigningCommand(any(RentalForSigningRequest.class)))
+                        .willReturn(mock(InitRentalForSigningUseCase.InitRentalForSigningCommand.class));
+                given(initRentalForSigningUseCase.execute(any(InitRentalForSigningUseCase.InitRentalForSigningCommand.class)))
+                        .willReturn(rental);
+                given(queryMapper.toResponse(any(Rental.class)))
+                        .willReturn(mock(RentalResponse.class));
+
+                mockMvc.perform(post(AWAITING_SIGNATURE_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated());
+
+                verify(initRentalForSigningUseCase).execute(any(InitRentalForSigningUseCase.InitRentalForSigningCommand.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("Should return 400 Bad Request")
+        class ShouldReturn400 {
+
+            @Test
+            @DisplayName("when equipmentIds is empty")
+            void whenEquipmentIdsIsEmpty() throws Exception {
+                mockMvc.perform(post(AWAITING_SIGNATURE_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [], \"duration\": 120, \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("equipmentIds"));
+
+                verify(initRentalForSigningUseCase, never()).execute(any(InitRentalForSigningUseCase.InitRentalForSigningCommand.class));
+            }
+
+            @Test
+            @DisplayName("when equipmentIds is null")
+            void whenEquipmentIdsIsNull() throws Exception {
+                mockMvc.perform(post(AWAITING_SIGNATURE_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"duration\": 120, \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("equipmentIds"));
+
+                verify(initRentalForSigningUseCase, never()).execute(any(InitRentalForSigningUseCase.InitRentalForSigningCommand.class));
+            }
+
+            @Test
+            @DisplayName("when customerId is null")
+            void whenCustomerIdIsNull() throws Exception {
+                mockMvc.perform(post(AWAITING_SIGNATURE_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"equipmentIds\": [1], \"duration\": 120, \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"))
+                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                        .andExpect(jsonPath("$.errors[0].field").value("customerId"));
+
+                verify(initRentalForSigningUseCase, never()).execute(any(InitRentalForSigningUseCase.InitRentalForSigningCommand.class));
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = {0, -1, -100})
+            @DisplayName("when duration is non-positive")
+            void whenDurationIsNonPositive(int duration) throws Exception {
+                mockMvc.perform(post(AWAITING_SIGNATURE_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [1], \"duration\": " + duration + ", \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(initRentalForSigningUseCase, never()).execute(any(InitRentalForSigningUseCase.InitRentalForSigningCommand.class));
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = {"", "   "})
+            @DisplayName("when operatorId is blank")
+            void whenOperatorIdIsBlank(String operatorId) throws Exception {
+                mockMvc.perform(post(AWAITING_SIGNATURE_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [1], \"duration\": 120, \"operatorId\": \"" + operatorId + "\"}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(initRentalForSigningUseCase, never()).execute(any(InitRentalForSigningUseCase.InitRentalForSigningCommand.class));
+            }
+
+            @Test
+            @DisplayName("when specialTariffId and discountPercent are both present")
+            void whenSpecialTariffAndDiscountBothPresent() throws Exception {
+                mockMvc.perform(post(AWAITING_SIGNATURE_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": \"" + VALID_CUSTOMER_ID + "\", \"equipmentIds\": [1], \"duration\": 120, \"operatorId\": \"op-1\", \"specialTariffId\": 99, \"specialPrice\": 15.00, \"discountPercent\": 10}"))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.title").value("Bad Request"));
+
+                verify(initRentalForSigningUseCase, never()).execute(any(InitRentalForSigningUseCase.InitRentalForSigningCommand.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("Should propagate downstream errors")
+        class ShouldPropagateErrors {
+
+            @Test
+            @DisplayName("when rental is not ready or funds cannot be held")
+            void whenNotReady() throws Exception {
+                var request = new RentalForSigningRequest(
+                        VALID_CUSTOMER_ID,
+                        List.of(VALID_EQUIPMENT_ID),
+                        VALID_DURATION,
+                        "operator-1",
+                        null,
+                        null,
+                        null
+                );
+
+                given(commandMapper.toInitForSigningCommand(any(RentalForSigningRequest.class)))
+                        .willReturn(mock(InitRentalForSigningUseCase.InitRentalForSigningCommand.class));
+                given(initRentalForSigningUseCase.execute(any(InitRentalForSigningUseCase.InitRentalForSigningCommand.class)))
+                        .willThrow(new RentalNotReadyForActivationException(List.of("estimatedCost")));
+
+                mockMvc.perform(post(AWAITING_SIGNATURE_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isUnprocessableEntity());
             }
         }
     }

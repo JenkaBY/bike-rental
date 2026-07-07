@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.rental.web.command.mapper;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.InitRentalForSigningUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
@@ -34,6 +35,8 @@ public abstract class RentalCommandMapper {
     public abstract CreateOrUpdateDraftRentalUseCase.UpdateDraftRentalCommand toUpdateDraftRentalCommand(Long rentalId, RentalRequest request);
 
     public abstract CreateOrUpdateDraftRentalUseCase.InitDraftCommand toInitDraftRentalCommand(RentalRequest request);
+
+    public abstract InitRentalForSigningUseCase.InitRentalForSigningCommand toInitForSigningCommand(RentalForSigningRequest request);
 
     public abstract ReturnEquipmentUseCase.ReturnEquipmentCommand toReturnCommand(ReturnEquipmentRequest request);
 

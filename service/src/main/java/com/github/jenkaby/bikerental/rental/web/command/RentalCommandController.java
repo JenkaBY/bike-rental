@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.rental.web.command;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.InitRentalForSigningUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.UpdateRentalUseCase;
@@ -45,6 +46,7 @@ class RentalCommandController {
     private final RentalCommandMapper commandMapper;
     private final RentalQueryMapper queryMapper;
     private final RentalLifecycleUseCase rentalLifecycleUseCase;
+    private final InitRentalForSigningUseCase initRentalForSigningUseCase;
 
     RentalCommandController(
             CreateOrUpdateDraftRentalUseCase updateDraftRentalUseCase,
@@ -53,7 +55,8 @@ class RentalCommandController {
             AddEquipmentUseCase addEquipmentUseCase,
             RentalCommandMapper commandMapper,
             RentalQueryMapper queryMapper,
-            RentalLifecycleUseCase rentalLifecycleUseCase) {
+            RentalLifecycleUseCase rentalLifecycleUseCase,
+            InitRentalForSigningUseCase initRentalForSigningUseCase) {
         this.updateDraftRentalUseCase = updateDraftRentalUseCase;
         this.updateRentalUseCase = updateRentalUseCase;
         this.returnEquipmentUseCase = returnEquipmentUseCase;
@@ -61,6 +64,7 @@ class RentalCommandController {
         this.commandMapper = commandMapper;
         this.queryMapper = queryMapper;
         this.rentalLifecycleUseCase = rentalLifecycleUseCase;
+        this.initRentalForSigningUseCase = initRentalForSigningUseCase;
     }
 
     @PutMapping("/{rentalId}")
@@ -124,6 +128,33 @@ class RentalCommandController {
         Rental rental = updateDraftRentalUseCase.execute(command);
         var response = queryMapper.toResponse(rental);
         log.info("[POST] Rental draft created successfully with id: {}", rental.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/awaiting-signature")
+    @Operation(summary = "Create rental directly awaiting signature",
+            description = "Creates a rental and moves it to AWAITING_SIGNATURE in one atomic step: validates, "
+                    + "holds funds and returns the rental with its version (signing fencing token). "
+                    + "Requires at least one equipment.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Rental created awaiting signature",
+                    content = @Content(schema = @Schema(implementation = RentalResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Customer or equipment not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Equipment not available",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Rental not ready or funds cannot be held",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<RentalResponse> initForSigning(@Valid @RequestBody RentalForSigningRequest request) {
+        log.info("[POST] Creating rental awaiting signature for customerId: {}, equipmentIds: {}",
+                request.customerId(), request.equipmentIds());
+        var command = commandMapper.toInitForSigningCommand(request);
+        Rental rental = initRentalForSigningUseCase.execute(command);
+        var response = queryMapper.toResponse(rental);
+        log.info("[POST] Rental {} created in AWAITING_SIGNATURE", rental.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
