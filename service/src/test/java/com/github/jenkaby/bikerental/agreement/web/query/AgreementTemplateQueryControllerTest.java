@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.agreement.web.query;
 
 import com.github.jenkaby.bikerental.agreement.application.usecase.FindAgreementTemplateSummariesUseCase;
+import com.github.jenkaby.bikerental.agreement.application.usecase.FindAgreementTemplateVariablesUseCase;
 import com.github.jenkaby.bikerental.agreement.application.usecase.GetActiveAgreementTemplateUseCase;
 import com.github.jenkaby.bikerental.agreement.application.usecase.GetAgreementTemplateUseCase;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
@@ -19,9 +20,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,6 +38,9 @@ class AgreementTemplateQueryControllerTest {
 
     @MockitoBean
     private GetAgreementTemplateUseCase getAgreementTemplateUseCase;
+
+    @MockitoBean
+    private FindAgreementTemplateVariablesUseCase findAgreementTemplateVariablesUseCase;
 
     @MockitoBean
     private AgreementTemplateWebMapper mapper;
@@ -70,6 +72,22 @@ class AgreementTemplateQueryControllerTest {
                     .andExpect(status().isOk());
 
             verify(getActiveAgreementTemplateUseCase).execute();
+            verify(getAgreementTemplateUseCase, never()).execute(any());
+        }
+    }
+
+    @Nested
+    class GetTemplateVariables {
+
+        @Test
+        void shouldReturn200WithVariableCatalog() throws Exception {
+            given(findAgreementTemplateVariablesUseCase.execute()).willReturn(List.of());
+            given(mapper.toVariableResponses(any())).willReturn(List.of());
+
+            mockMvc.perform(get("/api/agreements/variables"))
+                    .andExpect(status().isOk());
+
+            verify(findAgreementTemplateVariablesUseCase).execute();
             verify(getAgreementTemplateUseCase, never()).execute(any());
         }
     }

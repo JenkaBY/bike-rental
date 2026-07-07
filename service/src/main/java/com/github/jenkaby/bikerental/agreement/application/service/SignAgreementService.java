@@ -2,7 +2,10 @@ package com.github.jenkaby.bikerental.agreement.application.service;
 
 import com.github.jenkaby.bikerental.agreement.AgreementSignedEvent;
 import com.github.jenkaby.bikerental.agreement.application.usecase.SignAgreementUseCase;
-import com.github.jenkaby.bikerental.agreement.domain.exception.*;
+import com.github.jenkaby.bikerental.agreement.domain.exception.ActiveAgreementTemplateNotFoundException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementAlreadySignedException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotActiveException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.SigningVersionMismatchException;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementSignature;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
@@ -93,8 +96,7 @@ class SignAgreementService implements SignAgreementUseCase {
 
         byte[] signaturePng = signatureImageDecoder.decode(command.signaturePngBase64());
 
-        AgreementPdfData pdfData = assemblyMapper.toPdfData(
-                template.getTitle(), template.getContent(), customer, snapshot, startedAt, signaturePng);
+        AgreementPdfData pdfData = assemblyMapper.toPdfData(template, customer, snapshot, signedAt, signaturePng);
         byte[] pdfDocument = renderer.render(pdfData);
         String pdfSha256 = contentHasher.sha256(pdfDocument);
 

@@ -45,4 +45,24 @@ public class AgreementPdfSteps {
             assertThat(document.getNumberOfPages()).isGreaterThan(minimumPages);
         }
     }
+
+    @Then("the PDF body is a valid document not containing text {string}")
+    public void thePdfBodyDoesNotContainText(String unexpectedPhrase) throws IOException {
+        var body = scenarioContext.getBinaryResponse().getBody();
+        assertThat(body).as("PDF body").isNotNull();
+        try (PDDocument document = Loader.loadPDF(body)) {
+            var text = new PDFTextStripper().getText(document);
+            assertThat(text).doesNotContain(unexpectedPhrase);
+        }
+    }
+
+    @Then("the PDF body is a valid document matching pattern {string}")
+    public void thePdfBodyMatchesPattern(String pattern) throws IOException {
+        var body = scenarioContext.getBinaryResponse().getBody();
+        assertThat(body).as("PDF body").isNotNull();
+        try (PDDocument document = Loader.loadPDF(body)) {
+            var text = new PDFTextStripper().getText(document);
+            assertThat(text).containsPattern(pattern);
+        }
+    }
 }

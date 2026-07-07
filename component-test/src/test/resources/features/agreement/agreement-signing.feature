@@ -61,7 +61,9 @@ Feature: Rental Agreement Signing
       | name                | value                                          |
       | Content-Disposition | attachment; filename="rental-1-agreement.pdf" |
     And the PDF body is a valid document containing text "Johnson"
-    And the PDF body is a valid document containing text "BIKE-001"
+    And the PDF body is a valid document containing text "1. BICYCLE(BIKE-001) — 16.00 BYN"
+    And the PDF body is a valid document containing text "02:00 h"
+    And the PDF body is a valid document containing text "Rental Agreement v3 dated 01.01.2026"
 
   Scenario: Version mismatch is rejected
     Given a single rental exists in the database with the following data

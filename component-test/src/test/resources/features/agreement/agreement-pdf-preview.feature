@@ -17,6 +17,21 @@ Feature: Agreement PDF Preview
       | Content-Type | application/pdf |
     And the PDF body is a valid document containing text "соглашаетесь вернуть оборудование"
     And the PDF body is a valid document containing text "Иванов"
+    And the PDF body is a valid document containing text "1. Горный велосипед(BIKE-001) — 25.00 BYN"
+    And the PDF body is a valid document containing text "2. Шлем защитный(HELM-014) — 5.00 BYN"
+    And the PDF body is a valid document containing text "02:00 h"
+    And the PDF body is a valid document containing text "Total: 30.00 BYN"
+    And the PDF body is a valid document containing text "Template Hash content_SHA256"
+    And the PDF body is a valid document matching pattern "Договор аренды dated \d{2}\.\d{2}\.\d{4}"
+
+  Scenario: Template placeholders are substituted with fixture customer and rental data
+    Given the agreement pdf preview request is
+      | title          | content                                                                                                        |
+      | Договор аренды | Уважаемый {{customer.firstName}} {{customer.lastName}}, аренда №{{rental.number}} на сумму {{rental.total}}. |
+    When a POST request for "application/pdf" content has been made to "/api/agreements/preview" endpoint
+    Then the response status is 200
+    And the PDF body is a valid document containing text "Уважаемый Иван Иванов, аренда №0 на сумму 30.00 BYN."
+    And the PDF body is a valid document not containing text "{{customer.firstName}}"
 
   Scenario: Long agreement content paginates to more than one page
     Given the agreement pdf preview request is

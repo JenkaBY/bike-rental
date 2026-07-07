@@ -1,11 +1,13 @@
 package com.github.jenkaby.bikerental.agreement.web.query;
 
 import com.github.jenkaby.bikerental.agreement.application.usecase.FindAgreementTemplateSummariesUseCase;
+import com.github.jenkaby.bikerental.agreement.application.usecase.FindAgreementTemplateVariablesUseCase;
 import com.github.jenkaby.bikerental.agreement.application.usecase.GetActiveAgreementTemplateUseCase;
 import com.github.jenkaby.bikerental.agreement.application.usecase.GetAgreementTemplateUseCase;
 import com.github.jenkaby.bikerental.agreement.web.mapper.AgreementTemplateWebMapper;
 import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateResponse;
 import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateSummaryResponse;
+import com.github.jenkaby.bikerental.agreement.web.query.dto.AgreementTemplateVariableResponse;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -37,15 +39,18 @@ class AgreementTemplateQueryController {
     private final FindAgreementTemplateSummariesUseCase findAgreementTemplateSummariesUseCase;
     private final GetActiveAgreementTemplateUseCase getActiveAgreementTemplateUseCase;
     private final GetAgreementTemplateUseCase getAgreementTemplateUseCase;
+    private final FindAgreementTemplateVariablesUseCase findAgreementTemplateVariablesUseCase;
     private final AgreementTemplateWebMapper mapper;
 
     AgreementTemplateQueryController(FindAgreementTemplateSummariesUseCase findAgreementTemplateSummariesUseCase,
                                      GetActiveAgreementTemplateUseCase getActiveAgreementTemplateUseCase,
                                      GetAgreementTemplateUseCase getAgreementTemplateUseCase,
+                                     FindAgreementTemplateVariablesUseCase findAgreementTemplateVariablesUseCase,
                                      AgreementTemplateWebMapper mapper) {
         this.findAgreementTemplateSummariesUseCase = findAgreementTemplateSummariesUseCase;
         this.getActiveAgreementTemplateUseCase = getActiveAgreementTemplateUseCase;
         this.getAgreementTemplateUseCase = getAgreementTemplateUseCase;
+        this.findAgreementTemplateVariablesUseCase = findAgreementTemplateVariablesUseCase;
         this.mapper = mapper;
     }
 
@@ -75,6 +80,20 @@ class AgreementTemplateQueryController {
         log.info("[GET] Fetching active agreement template");
         var active = getActiveAgreementTemplateUseCase.execute();
         return ResponseEntity.ok(mapper.toResponse(active));
+    }
+
+    @GetMapping("/variables")
+    @Operation(summary = "List template placeholder variables",
+            description = "Returns the catalog of {{key}} placeholders that can be used in agreement template "
+                    + "content and are substituted with customer/rental data when the PDF is rendered")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Placeholder variable catalog",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = AgreementTemplateVariableResponse.class))))
+    })
+    public ResponseEntity<List<AgreementTemplateVariableResponse>> findVariables() {
+        log.info("[GET] Listing agreement template placeholder variables");
+        var variables = findAgreementTemplateVariablesUseCase.execute();
+        return ResponseEntity.ok(mapper.toVariableResponses(variables));
     }
 
     @GetMapping("/{id}")

@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.agreement.infrastructure.pdf;
 
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementPdfRenderingException;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplateVariable;
 import com.github.jenkaby.bikerental.agreement.domain.service.AgreementPdfRenderer;
 import com.github.jenkaby.bikerental.shared.application.service.MessageService;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +29,16 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
     private final MessageService messageService;
     private final byte[] fontBytes;
     private final DateTimeFormatter dateTimeFormat;
+    private final DateTimeFormatter titleDateFormat;
+    private final ZoneId zoneId;
 
     PdfBoxAgreementRenderer(AgreementPdfProperties properties, MessageService messageService) {
         this.properties = properties;
         this.messageService = messageService;
         this.fontBytes = readFontBytes(properties.fontLocation());
         this.dateTimeFormat = DateTimeFormatter.ofPattern(properties.dateTimePattern());
+        this.titleDateFormat = DateTimeFormatter.ofPattern(properties.datePattern());
+        this.zoneId = ZoneId.of(properties.zoneId());
     }
 
     private static byte[] readFontBytes(String fontLocation) {
@@ -48,16 +55,17 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             PDType0Font font = PDType0Font.load(document, new ByteArrayInputStream(fontBytes), true);
             RenderCursor cursor = new RenderCursor(document, font, properties);
+            ZonedDateTime startedAt = ZonedDateTime.ofInstant(data.rental().startedAt(), zoneId);
 
-            cursor.writeLine(data.title(), properties.titleFontSize());
+            writeTitle(cursor, font, data);
             cursor.blankLine(properties.titleFontSize());
-            writeParagraphs(cursor, font, data.content());
+            writeParagraphs(cursor, font, substitutePlaceholders(data.template().getContent(), data, startedAt));
             cursor.blankLine(properties.bodyFontSize());
-            writeDataBlock(cursor, data);
+            writeDataBlock(cursor, data, startedAt);
             cursor.blankLine(properties.bodyFontSize());
             writeSignature(cursor, document, font, data.signaturePng());
             cursor.blankLine(properties.bodyFontSize());
-            writeMetadata(cursor, data);
+            writeMetadata(cursor, data, startedAt);
 
             cursor.close();
             document.save(output);
@@ -67,6 +75,35 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
         }
     }
 
+    private void writeTitle(RenderCursor cursor, PDType0Font font, AgreementPdfData data) throws IOException {
+        ZonedDateTime activatedAt = ZonedDateTime.ofInstant(data.template().getActivatedAt(), zoneId);
+        String composedTitle = data.template().getTitle() + " " + label("agreement.pdf.label.title-from") + " " + activatedAt.format(titleDateFormat);
+        for (String line : wrap(font, composedTitle, properties.titleFontSize())) {
+            cursor.writeLineCentered(line, properties.titleFontSize());
+        }
+    }
+
+    private String substitutePlaceholders(String content, AgreementPdfData data, ZonedDateTime startedAt) {
+        String result = content;
+        for (AgreementTemplateVariable variable : AgreementTemplateVariable.values()) {
+            result = result.replace(variable.placeholder(), resolveVariable(variable, data, startedAt));
+        }
+        return result;
+    }
+
+    private String resolveVariable(AgreementTemplateVariable variable, AgreementPdfData data, ZonedDateTime startedAt) {
+        AgreementPdfData.RentalData rental = data.rental();
+        return switch (variable) {
+            case CUSTOMER_FIRST_NAME -> data.customer().firstName();
+            case CUSTOMER_LAST_NAME -> data.customer().lastName();
+            case CUSTOMER_PHONE -> data.customer().phone();
+            case RENTAL_STARTED_AT -> startedAt.format(dateTimeFormat);
+            case RENTAL_DURATION -> formatDuration(rental.plannedDuration());
+            case RENTAL_TOTAL -> rental.estimatedTotal() + " " + properties.currency();
+            case RENTAL_NUMBER -> String.valueOf(rental.rentalId());
+        };
+    }
+
     private void writeParagraphs(RenderCursor cursor, PDType0Font font, String content) throws IOException {
         String[] paragraphs = content.split("\n", -1);
         for (String paragraph : paragraphs) {
@@ -74,19 +111,19 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
                 cursor.blankLine(properties.bodyFontSize());
                 continue;
             }
-            for (String line : wrap(font, paragraph)) {
+            for (String line : wrap(font, paragraph, properties.bodyFontSize())) {
                 cursor.writeLine(line, properties.bodyFontSize());
             }
         }
     }
 
-    private List<String> wrap(PDType0Font font, String paragraph) throws IOException {
+    private List<String> wrap(PDType0Font font, String paragraph, float fontSize) throws IOException {
         float maxWidth = PDRectangle.A4.getWidth() - 2 * properties.margin();
         List<String> lines = new ArrayList<>();
         StringBuilder current = new StringBuilder();
         for (String word : paragraph.split(" ")) {
             String candidate = current.isEmpty() ? word : current + " " + word;
-            if (stringWidth(font, candidate) <= maxWidth || current.isEmpty()) {
+            if (stringWidth(font, candidate, fontSize) <= maxWidth || current.isEmpty()) {
                 current.setLength(0);
                 current.append(candidate);
             } else {
@@ -101,22 +138,25 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
         return lines;
     }
 
-    private float stringWidth(PDType0Font font, String text) throws IOException {
-        return font.getStringWidth(text) / 1000f * properties.bodyFontSize();
+    private static float stringWidth(PDType0Font font, String text, float fontSize) throws IOException {
+        return font.getStringWidth(text) / 1000f * fontSize;
     }
 
-    private void writeDataBlock(RenderCursor cursor, AgreementPdfData data) throws IOException {
+    private void writeDataBlock(RenderCursor cursor, AgreementPdfData data, ZonedDateTime startedAt) throws IOException {
         AgreementPdfData.CustomerData customer = data.customer();
         AgreementPdfData.RentalData rental = data.rental();
         float bodyFontSize = properties.bodyFontSize();
         String currency = properties.currency();
         cursor.writeLine(label("agreement.pdf.label.customer") + " " + customer.firstName() + " " + customer.lastName(), bodyFontSize);
         cursor.writeLine(label("agreement.pdf.label.phone") + " " + customer.phone(), bodyFontSize);
-        cursor.writeLine(label("agreement.pdf.label.started-at") + " " + rental.startedAt().format(dateTimeFormat), bodyFontSize);
-        cursor.writeLine(label("agreement.pdf.label.duration") + " " + formatDuration(rental.plannedDuration()), bodyFontSize);
+        cursor.writeLine(label("agreement.pdf.label.started-at") + " " + startedAt.format(dateTimeFormat), bodyFontSize);
+        cursor.writeLine(label("agreement.pdf.label.duration") + " " + formatDuration(rental.plannedDuration())
+                + " " + label("agreement.pdf.label.duration-unit"), bodyFontSize);
         cursor.writeLine(label("agreement.pdf.label.equipment"), bodyFontSize);
+        int equipmentNumber = 1;
         for (AgreementPdfData.EquipmentLine line : rental.equipments()) {
-            cursor.writeLine("  " + line.uid() + " — " + line.name() + " — " + line.estimatedCost() + " " + currency, bodyFontSize);
+            cursor.writeLine("  " + equipmentNumber + ". " + line.name()  + "(" + line.uid() + ")" + " — " + line.estimatedCost() + " " + currency, bodyFontSize);
+            equipmentNumber++;
         }
         if (rental.discountPercent() != null) {
             cursor.writeLine(label("agreement.pdf.label.discount") + " " + rental.discountPercent() + "%", bodyFontSize);
@@ -148,9 +188,10 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
         }
     }
 
-    private void writeMetadata(RenderCursor cursor, AgreementPdfData data) throws IOException {
-        cursor.writeLine(label("agreement.pdf.label.signed-at") + " " + data.rental().startedAt().format(dateTimeFormat)
-                + "   " + label("agreement.pdf.label.rental-number") + " " + data.rental().rentalId(), properties.bodyFontSize());
+    private void writeMetadata(RenderCursor cursor, AgreementPdfData data, ZonedDateTime startedAt) throws IOException {
+        cursor.writeLine(label("agreement.pdf.label.signed-at") + " " + startedAt.format(dateTimeFormat)
+                + "   " + label("agreement.pdf.label.rental-number") + " " + data.rental().rentalId()
+                + "  " + label("agreement.pdf.label.template-sha") + " " + data.template().getContentSha256(), properties.smallFontSize());
     }
 
     private static final class RenderCursor {
@@ -191,6 +232,20 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
             stream.beginText();
             stream.setFont(font, fontSize);
             stream.newLineAtOffset(properties.margin(), y);
+            stream.showText(text);
+            stream.endText();
+            y -= leading;
+        }
+
+        private void writeLineCentered(String text, float fontSize) throws IOException {
+            float leading = fontSize * properties.leadingFactor();
+            ensureSpace(leading);
+            float maxWidth = PDRectangle.A4.getWidth() - 2 * properties.margin();
+            float textWidth = stringWidth(font, text, fontSize);
+            float x = properties.margin() + Math.max(0f, (maxWidth - textWidth) / 2f);
+            stream.beginText();
+            stream.setFont(font, fontSize);
+            stream.newLineAtOffset(x, y);
             stream.showText(text);
             stream.endText();
             y -= leading;
