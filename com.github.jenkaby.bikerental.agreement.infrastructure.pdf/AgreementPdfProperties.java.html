@@ -8,12 +8,15 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
         @DefaultValue(&quot;fonts/DejaVuSans.ttf&quot;) String fontLocation,
         @DefaultValue(&quot;50&quot;) float margin,
         @DefaultValue(&quot;11&quot;) float bodyFontSize,
+        @DefaultValue(&quot;6&quot;) float smallFontSize,
         @DefaultValue(&quot;16&quot;) float titleFontSize,
         @DefaultValue(&quot;1.4&quot;) float leadingFactor,
         @DefaultValue(&quot;180&quot;) float signatureWidth,
         @DefaultValue(&quot;80&quot;) float signatureHeight,
-        @DefaultValue(&quot;место подписи&quot;) String signaturePlaceholderLabel,
+        @DefaultValue(&quot;Signature placeholder&quot;) String signaturePlaceholderLabel,
         @DefaultValue(&quot;dd.MM.yyyy HH:mm&quot;) String dateTimePattern,
+        @DefaultValue(&quot;dd.MM.yyyy&quot;) String datePattern,
+        @DefaultValue(&quot;Europe/Minsk&quot;) String zoneId,
         @DefaultValue(&quot;BYN&quot;) String currency) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

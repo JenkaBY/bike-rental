@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AgreementTemplateVariable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.domain.model</a> &gt; <span class="el_source">AgreementTemplateVariable.java</span></div><h1>AgreementTemplateVariable.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.domain.model;
+
+<span class="fc" id="L3">public enum AgreementTemplateVariable {</span>
+
+<span class="fc" id="L5">    CUSTOMER_FIRST_NAME(&quot;customer.firstName&quot;, &quot;customer-first-name&quot;),</span>
+<span class="fc" id="L6">    CUSTOMER_LAST_NAME(&quot;customer.lastName&quot;, &quot;customer-last-name&quot;),</span>
+<span class="fc" id="L7">    CUSTOMER_PHONE(&quot;customer.phone&quot;, &quot;customer-phone&quot;),</span>
+<span class="fc" id="L8">    RENTAL_STARTED_AT(&quot;rental.startedAt&quot;, &quot;rental-started-at&quot;),</span>
+<span class="fc" id="L9">    RENTAL_DURATION(&quot;rental.duration&quot;, &quot;rental-duration&quot;),</span>
+<span class="fc" id="L10">    RENTAL_TOTAL(&quot;rental.total&quot;, &quot;rental-total&quot;),</span>
+<span class="fc" id="L11">    RENTAL_NUMBER(&quot;rental.number&quot;, &quot;rental-number&quot;);</span>
+
+    private final String key;
+    private final String messageCodeFragment;
+
+<span class="fc" id="L16">    AgreementTemplateVariable(String key, String messageCodeFragment) {</span>
+<span class="fc" id="L17">        this.key = key;</span>
+<span class="fc" id="L18">        this.messageCodeFragment = messageCodeFragment;</span>
+<span class="fc" id="L19">    }</span>
+
+    public String key() {
+<span class="fc" id="L22">        return key;</span>
+    }
+
+    public String placeholder() {
+<span class="fc" id="L26">        return &quot;{{&quot; + key + &quot;}}&quot;;</span>
+    }
+
+    public String descriptionCode() {
+<span class="fc" id="L30">        return &quot;agreement.template.variable.&quot; + messageCodeFragment + &quot;.description&quot;;</span>
+    }
+
+    public String exampleCode() {
+<span class="fc" id="L34">        return &quot;agreement.template.variable.&quot; + messageCodeFragment + &quot;.example&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

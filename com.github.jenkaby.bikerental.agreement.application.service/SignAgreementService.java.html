@@ -2,7 +2,10 @@
 
 import com.github.jenkaby.bikerental.agreement.AgreementSignedEvent;
 import com.github.jenkaby.bikerental.agreement.application.usecase.SignAgreementUseCase;
-import com.github.jenkaby.bikerental.agreement.domain.exception.*;
+import com.github.jenkaby.bikerental.agreement.domain.exception.ActiveAgreementTemplateNotFoundException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementAlreadySignedException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementTemplateNotActiveException;
+import com.github.jenkaby.bikerental.agreement.domain.exception.SigningVersionMismatchException;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementSignature;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
@@ -24,7 +27,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-<span class="fc" id="L27">@Slf4j</span>
+<span class="fc" id="L30">@Slf4j</span>
 @Service
 class SignAgreementService implements SignAgreementUseCase {
 
@@ -50,78 +53,77 @@ class SignAgreementService implements SignAgreementUseCase {
                          SigningAssemblyMapper assemblyMapper,
                          SignatureImageDecoder signatureImageDecoder,
                          EventPublisher eventPublisher,
-<span class="fc" id="L53">                         Clock clock) {</span>
-<span class="fc" id="L54">        this.rentalSigningFacade = rentalSigningFacade;</span>
-<span class="fc" id="L55">        this.templateRepository = templateRepository;</span>
-<span class="fc" id="L56">        this.signatureRepository = signatureRepository;</span>
-<span class="fc" id="L57">        this.customerFacade = customerFacade;</span>
-<span class="fc" id="L58">        this.renderer = renderer;</span>
-<span class="fc" id="L59">        this.contentHasher = contentHasher;</span>
-<span class="fc" id="L60">        this.assemblyMapper = assemblyMapper;</span>
-<span class="fc" id="L61">        this.signatureImageDecoder = signatureImageDecoder;</span>
-<span class="fc" id="L62">        this.eventPublisher = eventPublisher;</span>
-<span class="fc" id="L63">        this.clock = clock;</span>
-<span class="fc" id="L64">    }</span>
+<span class="fc" id="L56">                         Clock clock) {</span>
+<span class="fc" id="L57">        this.rentalSigningFacade = rentalSigningFacade;</span>
+<span class="fc" id="L58">        this.templateRepository = templateRepository;</span>
+<span class="fc" id="L59">        this.signatureRepository = signatureRepository;</span>
+<span class="fc" id="L60">        this.customerFacade = customerFacade;</span>
+<span class="fc" id="L61">        this.renderer = renderer;</span>
+<span class="fc" id="L62">        this.contentHasher = contentHasher;</span>
+<span class="fc" id="L63">        this.assemblyMapper = assemblyMapper;</span>
+<span class="fc" id="L64">        this.signatureImageDecoder = signatureImageDecoder;</span>
+<span class="fc" id="L65">        this.eventPublisher = eventPublisher;</span>
+<span class="fc" id="L66">        this.clock = clock;</span>
+<span class="fc" id="L67">    }</span>
 
     @Override
     @Transactional
     public SignAgreementResult execute(SignAgreementCommand command) {
-<span class="fc" id="L69">        Long rentalId = command.rentalId();</span>
-<span class="fc" id="L70">        log.info(&quot;Signing agreement for rental {}&quot;, rentalId);</span>
+<span class="fc" id="L72">        Long rentalId = command.rentalId();</span>
+<span class="fc" id="L73">        log.info(&quot;Signing agreement for rental {}&quot;, rentalId);</span>
 
-<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (signatureRepository.existsByRentalId(rentalId)) {</span>
-<span class="fc" id="L73">            throw new AgreementAlreadySignedException(rentalId);</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (signatureRepository.existsByRentalId(rentalId)) {</span>
+<span class="fc" id="L76">            throw new AgreementAlreadySignedException(rentalId);</span>
         }
 
-<span class="fc" id="L76">        RentalSigningSnapshot snapshot = rentalSigningFacade.getSigningSnapshot(rentalId);</span>
+<span class="fc" id="L79">        RentalSigningSnapshot snapshot = rentalSigningFacade.getSigningSnapshot(rentalId);</span>
 
-<span class="fc" id="L78">        AgreementTemplate template = templateRepository.findActive()</span>
-<span class="fc" id="L79">                .orElseThrow(ActiveAgreementTemplateNotFoundException::new);</span>
-<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (!template.getId().equals(command.templateId())) {</span>
-<span class="fc" id="L81">            throw new AgreementTemplateNotActiveException(command.templateId(), template.getId());</span>
+<span class="fc" id="L81">        AgreementTemplate template = templateRepository.findActive()</span>
+<span class="fc" id="L82">                .orElseThrow(ActiveAgreementTemplateNotFoundException::new);</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (!template.getId().equals(command.templateId())) {</span>
+<span class="fc" id="L84">            throw new AgreementTemplateNotActiveException(command.templateId(), template.getId());</span>
         }
 
-<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (!snapshot.version().equals(command.rentalVersion())) {</span>
-<span class="fc" id="L85">            throw new SigningVersionMismatchException(rentalId, command.rentalVersion(), snapshot.version());</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        if (!snapshot.version().equals(command.rentalVersion())) {</span>
+<span class="fc" id="L88">            throw new SigningVersionMismatchException(rentalId, command.rentalVersion(), snapshot.version());</span>
         }
 
-<span class="fc" id="L88">        CustomerInfo customer = customerFacade.findById(snapshot.customerId())</span>
-<span class="pc" id="L89">                .orElseThrow(() -&gt; new ResourceNotFoundException(CustomerInfo.class, snapshot.customerId().toString()));</span>
+<span class="fc" id="L91">        CustomerInfo customer = customerFacade.findById(snapshot.customerId())</span>
+<span class="pc" id="L92">                .orElseThrow(() -&gt; new ResourceNotFoundException(CustomerInfo.class, snapshot.customerId().toString()));</span>
 
-<span class="fc" id="L91">        Instant signedAt = clock.instant();</span>
-<span class="fc" id="L92">        LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, clock.getZone());</span>
+<span class="fc" id="L94">        Instant signedAt = clock.instant();</span>
+<span class="fc" id="L95">        LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, clock.getZone());</span>
 
-<span class="fc" id="L94">        byte[] signaturePng = signatureImageDecoder.decode(command.signaturePngBase64());</span>
+<span class="fc" id="L97">        byte[] signaturePng = signatureImageDecoder.decode(command.signaturePngBase64());</span>
 
-<span class="fc" id="L96">        AgreementPdfData pdfData = assemblyMapper.toPdfData(</span>
-<span class="fc" id="L97">                template.getTitle(), template.getContent(), customer, snapshot, startedAt, signaturePng);</span>
-<span class="fc" id="L98">        byte[] pdfDocument = renderer.render(pdfData);</span>
-<span class="fc" id="L99">        String pdfSha256 = contentHasher.sha256(pdfDocument);</span>
+<span class="fc" id="L99">        AgreementPdfData pdfData = assemblyMapper.toPdfData(template, customer, snapshot, signedAt, signaturePng);</span>
+<span class="fc" id="L100">        byte[] pdfDocument = renderer.render(pdfData);</span>
+<span class="fc" id="L101">        String pdfSha256 = contentHasher.sha256(pdfDocument);</span>
 
-<span class="fc" id="L101">        SigningSnapshot signingSnapshot = assemblyMapper.toSigningSnapshot(</span>
-<span class="fc" id="L102">                customer, snapshot, startedAt, template.getId(), template.getVersionNumber(), template.getContentSha256());</span>
+<span class="fc" id="L103">        SigningSnapshot signingSnapshot = assemblyMapper.toSigningSnapshot(</span>
+<span class="fc" id="L104">                customer, snapshot, startedAt, template.getId(), template.getVersionNumber(), template.getContentSha256());</span>
 
-<span class="fc" id="L104">        AgreementSignature signature = AgreementSignature.create(</span>
-<span class="fc" id="L105">                template.getId(),</span>
+<span class="fc" id="L106">        AgreementSignature signature = AgreementSignature.create(</span>
+<span class="fc" id="L107">                template.getId(),</span>
                 rentalId,
-<span class="fc" id="L107">                snapshot.customerId(),</span>
-<span class="fc" id="L108">                command.operatorId(),</span>
+<span class="fc" id="L109">                snapshot.customerId(),</span>
+<span class="fc" id="L110">                command.operatorId(),</span>
                 signingSnapshot,
                 pdfDocument,
                 pdfSha256,
-<span class="fc" id="L112">                template.getContentSha256(),</span>
+<span class="fc" id="L114">                template.getContentSha256(),</span>
                 signaturePng,
                 signedAt,
-<span class="fc" id="L115">                command.ipAddress(),</span>
-<span class="fc" id="L116">                command.userAgent());</span>
-<span class="fc" id="L117">        AgreementSignature saved = signatureRepository.save(signature);</span>
+<span class="fc" id="L117">                command.ipAddress(),</span>
+<span class="fc" id="L118">                command.userAgent());</span>
+<span class="fc" id="L119">        AgreementSignature saved = signatureRepository.save(signature);</span>
 
-<span class="fc" id="L119">        rentalSigningFacade.completeSigning(rentalId, command.rentalVersion(), signedAt);</span>
+<span class="fc" id="L121">        rentalSigningFacade.completeSigning(rentalId, command.rentalVersion(), signedAt);</span>
 
-<span class="fc" id="L121">        eventPublisher.publish(AGREEMENT_EVENTS_DESTINATION, new AgreementSignedEvent(rentalId, saved.getId()));</span>
-<span class="fc" id="L122">        log.info(&quot;Signed agreement {} for rental {}&quot;, saved.getId(), rentalId);</span>
+<span class="fc" id="L123">        eventPublisher.publish(AGREEMENT_EVENTS_DESTINATION, new AgreementSignedEvent(rentalId, saved.getId()));</span>
+<span class="fc" id="L124">        log.info(&quot;Signed agreement {} for rental {}&quot;, saved.getId(), rentalId);</span>
 
-<span class="fc" id="L124">        return new SignAgreementResult(saved.getId(), signedAt);</span>
+<span class="fc" id="L126">        return new SignAgreementResult(saved.getId(), signedAt);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -4,21 +4,20 @@ import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 <span class="fc" id="L10">public record AgreementPdfData(</span>
-        String title,
-        String content,
+        AgreementTemplate template,
         CustomerData customer,
         RentalData rental,
         byte @Nullable [] signaturePng) {
 
-<span class="fc" id="L17">    public record CustomerData(String firstName, String lastName, String phone) {</span>
+<span class="fc" id="L16">    public record CustomerData(String firstName, String lastName, String phone) {</span>
     }
 
-<span class="fc" id="L20">    public record RentalData(Long rentalId,</span>
-                             LocalDateTime startedAt,
+<span class="fc" id="L19">    public record RentalData(Long rentalId,</span>
+                             Instant startedAt,
                              Duration plannedDuration,
                              List&lt;EquipmentLine&gt; equipments,
                              BigDecimal estimatedTotal,
@@ -26,7 +25,7 @@ import java.util.List;
                              @Nullable BigDecimal specialPrice) {
     }
 
-<span class="fc" id="L29">    public record EquipmentLine(String uid, String name, BigDecimal estimatedCost) {</span>
+<span class="fc" id="L28">    public record EquipmentLine(String uid, String name, BigDecimal estimatedCost) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

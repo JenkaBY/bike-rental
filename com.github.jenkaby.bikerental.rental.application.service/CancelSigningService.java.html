@@ -31,7 +31,7 @@ class CancelSigningService implements CancelSigningUseCase {
 
 <span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if (financeFacade.hasHold(rental.toRentalRef())) {</span>
 <span class="fc" id="L33">            log.info(&quot;Releasing hold for cancelled signing of rental {}&quot;, rental.getId());</span>
-<span class="fc" id="L34">            financeFacade.releaseHold(rental.toRentalRef(), command.operatorId());</span>
+<span class="fc" id="L34">            financeFacade.releaseHold(rental.toActualRentalRef(), command.operatorId());</span>
         }
 
 <span class="fc" id="L37">        Rental saved = rentalRepository.save(rental);</span>

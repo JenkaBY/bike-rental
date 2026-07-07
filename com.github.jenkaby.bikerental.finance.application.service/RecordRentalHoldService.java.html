@@ -36,60 +36,62 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
     @Override
     @Transactional
     public HoldResult execute(RentalHoldCommand command) {
-<span class="fc" id="L39">        log.info(&quot;Recording rental hold for rental={} customer={} amount={}&quot;,</span>
-<span class="fc" id="L40">                command.rentalRef().id(), command.customerRef().id(), command.amount());</span>
+<span class="fc" id="L39">        log.info(&quot;Recording rental hold for rental={} version={} customer={} amount={}&quot;,</span>
+<span class="fc" id="L40">                command.rentalRef().id(), command.rentalRef().rentalVersion(), command.customerRef().id(), command.amount());</span>
 <span class="fc" id="L41">        var idempotencyKey = new IdempotencyKey(</span>
-<span class="fc" id="L42">                uuidGenerator.generateNameBased(String.valueOf(command.rentalRef().id()))</span>
+<span class="fc" id="L42">                uuidGenerator.generateNameBased(</span>
+<span class="fc" id="L43">                        &quot;%s_%s&quot;.formatted(command.rentalRef().id(), command.rentalRef().rentalVersion()))</span>
         );
 
-<span class="fc" id="L45">        var existing = transactionRepository</span>
-<span class="fc" id="L46">                .findByIdempotencyKeyAndCustomerId(idempotencyKey, command.customerRef());</span>
-<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (existing.isPresent()) {</span>
-<span class="fc" id="L48">            var t = existing.get();</span>
-<span class="fc" id="L49">            log.info(&quot;Hold already recorded for rental={} customer={}, returning existing transaction={}&quot;,</span>
-<span class="fc" id="L50">                    command.rentalRef().id(), command.customerRef().id(), t.getId());</span>
-<span class="fc" id="L51">            return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());</span>
+<span class="fc" id="L46">        var existing = transactionRepository</span>
+<span class="fc" id="L47">                .findByIdempotencyKeyAndCustomerId(idempotencyKey, command.customerRef());</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (existing.isPresent()) {</span>
+<span class="nc" id="L49">            var t = existing.get();</span>
+<span class="nc" id="L50">            log.info(&quot;Hold already recorded for rental={} version={} customer={}, returning existing transaction={}&quot;,</span>
+<span class="nc" id="L51">                    command.rentalRef().id(), command.rentalRef().rentalVersion(), command.customerRef().id(), t.getId());</span>
+<span class="nc" id="L52">            return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());</span>
         }
 
-<span class="fc" id="L54">        var customerAccount = accountRepository</span>
-<span class="fc" id="L55">                .findByCustomerId(command.customerRef())</span>
-<span class="pc" id="L56">                .orElseThrow(() -&gt; new ResourceNotFoundException(</span>
-<span class="nc" id="L57">                        Account.class, command.customerRef().id().toString()));</span>
+<span class="fc" id="L55">        var customerAccount = accountRepository</span>
+<span class="fc" id="L56">                .findByCustomerId(command.customerRef())</span>
+<span class="pc" id="L57">                .orElseThrow(() -&gt; new ResourceNotFoundException(</span>
+<span class="nc" id="L58">                        Account.class, command.customerRef().id().toString()));</span>
 
-<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (!customerAccount.isBalanceSufficient(command.amount())) {</span>
-<span class="fc" id="L60">            throw new InsufficientBalanceException(customerAccount.availableBalance(), command.amount());</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (!customerAccount.isBalanceSufficient(command.amount())) {</span>
+<span class="fc" id="L61">            throw new InsufficientBalanceException(customerAccount.availableBalance(), command.amount());</span>
         }
 
-<span class="fc" id="L63">        var debitChange = customerAccount.getWallet().debit(command.amount());</span>
-<span class="fc" id="L64">        var creditChange = customerAccount.getOnHold().credit(command.amount());</span>
+<span class="fc" id="L64">        var debitChange = customerAccount.getWallet().debit(command.amount());</span>
+<span class="fc" id="L65">        var creditChange = customerAccount.getOnHold().credit(command.amount());</span>
 
-<span class="fc" id="L66">        accountRepository.save(customerAccount);</span>
+<span class="fc" id="L67">        accountRepository.save(customerAccount);</span>
 
-<span class="fc" id="L68">        Instant now = clock.instant();</span>
-<span class="fc" id="L69">        UUID transactionId = uuidGenerator.generate();</span>
+<span class="fc" id="L69">        Instant now = clock.instant();</span>
+<span class="fc" id="L70">        UUID transactionId = uuidGenerator.generate();</span>
 
-<span class="fc" id="L71">        var transaction = Transaction.builder()</span>
-<span class="fc" id="L72">                .id(transactionId)</span>
-<span class="fc" id="L73">                .type(TransactionType.HOLD)</span>
-<span class="fc" id="L74">                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
-<span class="fc" id="L75">                .amount(command.amount())</span>
-<span class="fc" id="L76">                .customerId(command.customerRef().id())</span>
-<span class="fc" id="L77">                .operatorId(command.operatorId())</span>
-<span class="fc" id="L78">                .sourceType(TransactionSourceType.RENTAL)</span>
-<span class="fc" id="L79">                .sourceId(String.valueOf(command.rentalRef().id()))</span>
-<span class="fc" id="L80">                .recordedAt(now)</span>
-<span class="fc" id="L81">                .idempotencyKey(idempotencyKey)</span>
-<span class="fc" id="L82">                .reason(null)</span>
-<span class="fc" id="L83">                .records(List.of(</span>
-<span class="fc" id="L84">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
-<span class="fc" id="L85">                        creditChange.toTransaction(uuidGenerator.generate())</span>
+<span class="fc" id="L72">        var transaction = Transaction.builder()</span>
+<span class="fc" id="L73">                .id(transactionId)</span>
+<span class="fc" id="L74">                .type(TransactionType.HOLD)</span>
+<span class="fc" id="L75">                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
+<span class="fc" id="L76">                .amount(command.amount())</span>
+<span class="fc" id="L77">                .customerId(command.customerRef().id())</span>
+<span class="fc" id="L78">                .operatorId(command.operatorId())</span>
+<span class="fc" id="L79">                .sourceType(TransactionSourceType.RENTAL)</span>
+<span class="fc" id="L80">                .sourceId(String.valueOf(command.rentalRef().id()))</span>
+<span class="fc" id="L81">                .recordedAt(now)</span>
+<span class="fc" id="L82">                .idempotencyKey(idempotencyKey)</span>
+<span class="fc" id="L83">                .reason(null)</span>
+<span class="fc" id="L84">                .records(List.of(</span>
+<span class="fc" id="L85">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L86">                        creditChange.toTransaction(uuidGenerator.generate())</span>
                 ))
-<span class="fc" id="L87">                .build();</span>
+<span class="fc" id="L88">                .build();</span>
 
-<span class="fc" id="L89">        transactionRepository.save(transaction);</span>
-<span class="fc" id="L90">        log.info(&quot;Hold {} recorded for rental={} amount={}&quot;, transactionId, command.rentalRef().id(), command.amount());</span>
+<span class="fc" id="L90">        transactionRepository.save(transaction);</span>
+<span class="fc" id="L91">        log.info(&quot;Hold {} recorded for rental={} version={} amount={}&quot;,</span>
+<span class="fc" id="L92">                transactionId, command.rentalRef().id(), command.rentalRef().rentalVersion(), command.amount());</span>
 
-<span class="fc" id="L92">        return new HoldResult(new TransactionRef(transactionId), now);</span>
+<span class="fc" id="L94">        return new HoldResult(new TransactionRef(transactionId), now);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

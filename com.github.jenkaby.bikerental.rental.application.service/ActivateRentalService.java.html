@@ -52,7 +52,7 @@ class ActivateRentalService implements ActivateRentalUseCase {
 <span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (rental.getEstimatedCost().isPositive()) {</span>
 <span class="fc" id="L53">            var holdInfo = financeFacade.holdFunds(</span>
 <span class="fc" id="L54">                    new CustomerRef(rental.getCustomerId()),</span>
-<span class="fc" id="L55">                    rental.toRentalRef(),</span>
+<span class="fc" id="L55">                    rental.toActualRentalRef(),</span>
 <span class="fc" id="L56">                    rental.getEstimatedCost(),</span>
 <span class="fc" id="L57">                    command.operatorId());</span>
 <span class="fc" id="L58">            log.info(&quot;Funds held for rental {}: transactionId={}, heldAt={}&quot;,</span>
