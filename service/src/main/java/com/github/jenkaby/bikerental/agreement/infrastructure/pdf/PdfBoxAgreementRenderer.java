@@ -2,7 +2,7 @@ package com.github.jenkaby.bikerental.agreement.infrastructure.pdf;
 
 import com.github.jenkaby.bikerental.agreement.domain.exception.AgreementPdfRenderingException;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
-import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplateVariable;
+import com.github.jenkaby.bikerental.agreement.domain.service.AgreementContentRenderer;
 import com.github.jenkaby.bikerental.agreement.domain.service.AgreementPdfRenderer;
 import com.github.jenkaby.bikerental.shared.application.service.MessageService;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -27,14 +27,18 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
 
     private final AgreementPdfProperties properties;
     private final MessageService messageService;
+    private final AgreementContentRenderer contentRenderer;
     private final byte[] fontBytes;
     private final DateTimeFormatter dateTimeFormat;
     private final DateTimeFormatter titleDateFormat;
     private final ZoneId zoneId;
 
-    PdfBoxAgreementRenderer(AgreementPdfProperties properties, MessageService messageService) {
+    PdfBoxAgreementRenderer(AgreementPdfProperties properties,
+                            MessageService messageService,
+                            AgreementContentRenderer contentRenderer) {
         this.properties = properties;
         this.messageService = messageService;
+        this.contentRenderer = contentRenderer;
         this.fontBytes = readFontBytes(properties.fontLocation());
         this.dateTimeFormat = DateTimeFormatter.ofPattern(properties.dateTimePattern());
         this.titleDateFormat = DateTimeFormatter.ofPattern(properties.datePattern());
@@ -59,7 +63,7 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
 
             writeTitle(cursor, font, data);
             cursor.blankLine(properties.titleFontSize());
-            writeParagraphs(cursor, font, substitutePlaceholders(data.template().getContent(), data, startedAt));
+            writeParagraphs(cursor, font, contentRenderer.substitute(data));
             cursor.blankLine(properties.bodyFontSize());
             writeDataBlock(cursor, data, startedAt);
             cursor.blankLine(properties.bodyFontSize());
@@ -81,27 +85,6 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
         for (String line : wrap(font, composedTitle, properties.titleFontSize())) {
             cursor.writeLineCentered(line, properties.titleFontSize());
         }
-    }
-
-    private String substitutePlaceholders(String content, AgreementPdfData data, ZonedDateTime startedAt) {
-        String result = content;
-        for (AgreementTemplateVariable variable : AgreementTemplateVariable.values()) {
-            result = result.replace(variable.placeholder(), resolveVariable(variable, data, startedAt));
-        }
-        return result;
-    }
-
-    private String resolveVariable(AgreementTemplateVariable variable, AgreementPdfData data, ZonedDateTime startedAt) {
-        AgreementPdfData.RentalData rental = data.rental();
-        return switch (variable) {
-            case CUSTOMER_FIRST_NAME -> data.customer().firstName();
-            case CUSTOMER_LAST_NAME -> data.customer().lastName();
-            case CUSTOMER_PHONE -> data.customer().phone();
-            case RENTAL_STARTED_AT -> startedAt.format(dateTimeFormat);
-            case RENTAL_DURATION -> formatDuration(rental.plannedDuration());
-            case RENTAL_TOTAL -> rental.estimatedTotal() + " " + properties.currency();
-            case RENTAL_NUMBER -> String.valueOf(rental.rentalId());
-        };
     }
 
     private void writeParagraphs(RenderCursor cursor, PDType0Font font, String content) throws IOException {
