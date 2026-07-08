@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -38,8 +40,9 @@ class RentalAgreementQueryControllerTest {
 
         @Test
         void shouldReturn200WithRenderedAgreement() throws Exception {
-            var view = new RentalAgreementView(5L, 3, "Rental Agreement", "Dear Alex Johnson");
-            var response = new RentalAgreementResponse(5L, 3, "Rental Agreement", "Dear Alex Johnson");
+            Instant now = Instant.now();
+            var view = new RentalAgreementView(5L, 3, "Rental Agreement", "Dear Alex Johnson", now);
+            var response = new RentalAgreementResponse(5L, 3, "Rental Agreement", "Dear Alex Johnson", now);
             given(findRentalAgreementUseCase.execute(1L)).willReturn(view);
             given(mapper.toRentalAgreementResponse(view)).willReturn(response);
 

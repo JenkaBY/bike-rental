@@ -200,7 +200,6 @@ class RentalCommandController {
             @Valid @RequestBody RentalUpdateJsonPatchRequest request) {
         log.info("[PATCH] Updating rental {} with {} patch operations", id, request.getOperations().size());
 
-        // Convert validated RentalUpdateJsonPatchRequest to Map for use case layer
         Map<String, Object> patch = commandMapper.toPatchMap(request);
 
         Rental rental = updateRentalUseCase.execute(id, patch);
@@ -260,7 +259,7 @@ class RentalCommandController {
 
     @PatchMapping("/{rentalId}/lifecycles")
     @Operation(summary = "Transition rental lifecycle status",
-            description = "Transitions a rental to AWAITING_SIGNATURE, DRAFT, ACTIVE or CANCELLED status. The response carries the rental version used as the signing fencing token.")
+            description = "Transitions a rental to AWAITING_SIGNATURE, DRAFT or CANCELLED status. The response carries the rental version used as the signing fencing token.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Rental status updated",
                     content = @Content(schema = @Schema(implementation = RentalResponse.class))),

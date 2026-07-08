@@ -18,7 +18,7 @@ public enum RentalStatus {
 
     static {
         var map = new EnumMap<RentalStatus, Set<RentalStatus>>(RentalStatus.class);
-        map.put(DRAFT, Set.of(ACTIVE, CANCELLED, AWAITING_SIGNATURE));
+        map.put(DRAFT, Set.of(CANCELLED, AWAITING_SIGNATURE));
         map.put(AWAITING_SIGNATURE, Set.of(ACTIVE, DRAFT, CANCELLED));
         map.put(ACTIVE, Set.of(CANCELLED, COMPLETED, DEBT));
         map.put(COMPLETED, Set.of());

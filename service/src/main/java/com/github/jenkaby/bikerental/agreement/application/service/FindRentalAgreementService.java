@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.agreement.application.service;
 
+import com.github.jenkaby.bikerental.agreement.application.mapper.AgreementTemplateMapper;
 import com.github.jenkaby.bikerental.agreement.application.usecase.FindRentalAgreementUseCase;
 import com.github.jenkaby.bikerental.agreement.domain.exception.ActiveAgreementTemplateNotFoundException;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
@@ -12,6 +13,7 @@ import com.github.jenkaby.bikerental.customer.CustomerInfo;
 import com.github.jenkaby.bikerental.rental.RentalSigningFacade;
 import com.github.jenkaby.bikerental.rental.RentalSigningSnapshot;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import java.time.Clock;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 class FindRentalAgreementService implements FindRentalAgreementUseCase {
 
     private final RentalSigningFacade rentalSigningFacade;
@@ -27,21 +30,8 @@ class FindRentalAgreementService implements FindRentalAgreementUseCase {
     private final CustomerFacade customerFacade;
     private final SigningAssemblyMapper assemblyMapper;
     private final AgreementContentRenderer contentRenderer;
+    private final AgreementTemplateMapper agreementTemplateMapper;
     private final Clock clock;
-
-    FindRentalAgreementService(RentalSigningFacade rentalSigningFacade,
-                               AgreementTemplateRepository templateRepository,
-                               CustomerFacade customerFacade,
-                               SigningAssemblyMapper assemblyMapper,
-                               AgreementContentRenderer contentRenderer,
-                               Clock clock) {
-        this.rentalSigningFacade = rentalSigningFacade;
-        this.templateRepository = templateRepository;
-        this.customerFacade = customerFacade;
-        this.assemblyMapper = assemblyMapper;
-        this.contentRenderer = contentRenderer;
-        this.clock = clock;
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -56,9 +46,10 @@ class FindRentalAgreementService implements FindRentalAgreementUseCase {
         CustomerInfo customer = customerFacade.findById(snapshot.customerId())
                 .orElseThrow(() -> new ResourceNotFoundException(CustomerInfo.class, snapshot.customerId().toString()));
 
-        AgreementPdfData pdfData = assemblyMapper.toPdfData(template, customer, snapshot, clock.instant(), null);
-        String content = contentRenderer.substitute(pdfData);
+        var pdfData = assemblyMapper.toPdfData(template, customer, snapshot, clock.instant(), null);
+        var content = contentRenderer.substitute(pdfData);
+        var title = contentRenderer.substituteTitle(pdfData);
 
-        return new RentalAgreementView(template.getId(), template.getVersionNumber(), template.getTitle(), content);
+        return agreementTemplateMapper.toView(template, content, title);
     }
 }

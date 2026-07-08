@@ -7,9 +7,10 @@ Feature: Rental Lifecycle Management
   Background:
     Given the request header "Content-Type" is "application/vnd.bikerental.v1+json"
     And customers exist in the database with the following data
-      | id   | phone        | firstName | lastName | email            | birthDate  | comments |
-      | CUS1 | +79995551111 | Alex      | Johnson  | null             | null       | null     |
-      | CUS2 | +79991232222 | John      | Doe      | john@example.com | 1922-02-22 | null     |
+      | id   | phone        | firstName | lastName | email             | birthDate  | comments |
+      | CUS1 | +79995551111 | Alex      | Johnson  | null              | null       | null     |
+      | CUS2 | +79991232222 | John      | Doe      | john@example.com  | 1922-02-22 | null     |
+      | CUS3 | +79997773333 | Jamie     | Lee      | jamie@example.com | 1990-05-05 | null     |
     And the following equipment statues exist in the database
       | slug      | name      | description    | transitions      |
       | AVAILABLE | Available | Ready to rent  | RENTED,RESERVED  |
@@ -52,26 +53,29 @@ Feature: Rental Lifecycle Management
       | 10 | Degressive Hourly Bike | Bicycle degressive hourly | BICYCLE       | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
       | 11 | Flat Fee Helmet        | Helmet flat fee           | HELMET        | FLAT_FEE          | ACTIVE | 2026-01-01 |         |
       | 12 | Flat Hourly Scooter    | Scooter flat hourly rate  | SCOOTER       | FLAT_HOURLY       | ACTIVE | 2026-01-01 |         |
+    And agreement templates exist in the database with the following data
+      | id | versionNumber | title               | content                                    | contentSha256 | status | createdAt           | updatedAt           | activatedAt         |
+      | 5  | 3             | Rental Agreement v3 | You agree to return the equipment on time. | SHA_ZERO      | ACTIVE | 2026-01-01T09:00:00 | 2026-01-01T09:00:00 | 2026-01-01T09:00:00 |
 
   Scenario Outline: Activate a DRAFT rental — status becomes ACTIVE, hold placed, event published
     Given now is "<now>"
     And a single rental exists in the database with the following data
-      | id         | customerId | status | plannedDuration | createdAt | updatedAt |
-      | <rentalId> | <customer> | DRAFT  | 120             | <now>     | <now>     |
+      | id         | customerId | status | plannedDuration | createdAt | updatedAt | version |
+      | <rentalId> | <customer> | DRAFT  | 120             | <now>     | <now>     | 1       |
     And rental equipments exist in the database with the following data
       | rentalId   | equipmentId   | equipmentUid   | equipmentType | tariffId   | status   | startedAt           | expectedReturnAt    | estimatedCost   | createdAt           | updatedAt           |
       | <rentalId> | <equipmentId> | <equipmentUid> | BICYCLE       | <tariffId> | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | <estimatedCost> | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
     And the lifecycle request is
-      | status | operatorId |
-      | ACTIVE | OP1        |
+      | status             | operatorId |
+      | AWAITING_SIGNATURE | OP1        |
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
     Then the response status is 200
-    And the rental response only contains
-      | customerId | status | estimatedCost   | plannedDuration   | startedAt |
-      | <customer> | ACTIVE | <estimatedCost> | <plannedDuration> | <now>     |
-    And the rental response only contains rental equipments
-      | equipmentId   | equipmentUid   | status | tariffId   | estimatedCost   | finalCost |
-      | <equipmentId> | <equipmentUid> | ACTIVE | <tariffId> | <estimatedCost> |           |
+    And the sign agreement request is
+      | rentalVersion | templateId | operatorId |
+      | 2             | 5          | OP1        |
+    When a POST request has been made to "/api/rentals/{requestedObjectId}/signatures" endpoint with context
+    Then the response status is 201
+    And the signature response contains a signature id and signed timestamp
     #    rental module
     And rental was persisted in database
       | customerId | status | plannedDuration   |
@@ -91,24 +95,6 @@ Feature: Rental Lifecycle Management
     Examples:
       | rentalId | equipmentUid | equipmentId | tariffId | customer | now                 | plannedDuration | estimatedCost |
       | RENT1    | BIKE-001     | 1           | 10       | CUS1     | 2026-05-01T10:00:00 | 120             | 16.00         |
-
-  Scenario: Attempt to activate a DRAFT rental with insufficient wallet balance
-    Given a single rental exists in the database with the following data
-      | id | customerId | status | plannedDuration | createdAt           | updatedAt           |
-      | 1  | CUS2       | DRAFT  | 120             | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
-    And rental equipments exist in the database with the following data
-      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
-      | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
-    And the lifecycle request is
-      | status | operatorId |
-      | ACTIVE | OP1        |
-    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
-    Then the response status is 422
-    And the response contains
-      | path        | value                                                                     |
-      | $.title     | Insufficient funds                                                        |
-      | $.detail    | Insufficient wallet balance. Available: 10.00, requested deduction: 16.00 |
-      | $.errorCode | rental.insufficient_funds                                                 |
 
   Scenario Outline: Cancel a <rentalStatus> rental without hold — equipment RETURNED, hold balance unchanged
     Given a single rental exists in the database with the following data
@@ -145,16 +131,22 @@ Feature: Rental Lifecycle Management
   Scenario: Cancel an ACTIVE rental with hold — hold released, equipment RETURNED, event published
     Given now is "2026-05-01T10:00:00"
     And a single rental exists in the database with the following data
-      | id | customerId | status | plannedDuration | createdAt           | updatedAt           |
-      | 1  | CUS1       | DRAFT  | 120             | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+      | id | customerId | status | plannedDuration | version | createdAt           | updatedAt           |
+      | 1  | CUS1       | DRAFT  | 120             | 1       | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
     And rental equipments exist in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
       | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
     And the lifecycle request is
-      | status | operatorId |
-      | ACTIVE | OP1        |
+      | status             | operatorId |
+      | AWAITING_SIGNATURE | OP1        |
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
     Then the response status is 200
+    And the sign agreement request is
+      | rentalVersion | templateId | operatorId |
+      | 2             | 5          | OP1        |
+    When a POST request has been made to "/api/rentals/1/signatures" endpoint
+    Then the response status is 201
+    And the signature response contains a signature id and signed timestamp
     #    rental module
     And rental was persisted in database
       | customerId | status |
@@ -192,16 +184,22 @@ Feature: Rental Lifecycle Management
   Scenario: Cancel an ACTIVE rental with hold and 0 on wallet — hold released, equipment RETURNED, event published
     Given now is "2026-05-01T10:00:00"
     And a single rental exists in the database with the following data
-      | id | customerId | status | plannedDuration | createdAt           | updatedAt           |
-      | 1  | CUS3       | DRAFT  | 120             | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+      | id | customerId | status | plannedDuration | createdAt           | updatedAt           | version |
+      | 1  | CUS3       | DRAFT  | 120             | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 | 1       |
     And rental equipments exist in the database with the following data
       | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
       | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
     And the lifecycle request is
-      | status | operatorId |
-      | ACTIVE | OP1        |
+      | status             | operatorId |
+      | AWAITING_SIGNATURE | OP1        |
     When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
     Then the response status is 200
+    And the sign agreement request is
+      | rentalVersion | templateId | operatorId |
+      | 2             | 5          | OP1        |
+    When a POST request has been made to "/api/rentals/1/signatures" endpoint
+    Then the response status is 201
+    And the signature response contains a signature id and signed timestamp
     #    rental module
     And rental was persisted in database
       | customerId | status |

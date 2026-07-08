@@ -13,6 +13,7 @@ public class RentalAgreementResponseTransformer {
                 DataTableHelper.toLong(entry, "templateId"),
                 DataTableHelper.toInt(entry, "versionNumber"),
                 DataTableHelper.getStringOrNull(entry, "title"),
-                DataTableHelper.getStringOrNull(entry, "content"));
+                DataTableHelper.getStringOrNull(entry, "content"),
+                DataTableHelper.parseLocalDateTimeToInstant(entry, "templateActivatedAt"));
     }
 }

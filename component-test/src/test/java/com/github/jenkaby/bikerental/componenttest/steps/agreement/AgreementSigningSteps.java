@@ -56,6 +56,9 @@ public class AgreementSigningSteps {
         if (expected.title() != null) {
             softly.assertThat(actual.title()).as("title").isEqualTo(expected.title());
         }
+        if (expected.templateActivatedAt() != null) {
+            softly.assertThat(actual.templateActivatedAt()).as("templateActivatedAt").isEqualTo(expected.templateActivatedAt());
+        }
         softly.assertAll();
     }
 

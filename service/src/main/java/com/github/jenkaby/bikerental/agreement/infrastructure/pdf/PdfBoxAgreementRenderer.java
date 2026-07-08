@@ -80,8 +80,7 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
     }
 
     private void writeTitle(RenderCursor cursor, PDType0Font font, AgreementPdfData data) throws IOException {
-        ZonedDateTime activatedAt = ZonedDateTime.ofInstant(data.template().getActivatedAt(), zoneId);
-        String composedTitle = data.template().getTitle() + " " + label("agreement.pdf.label.title-from") + " " + activatedAt.format(titleDateFormat);
+        String composedTitle = contentRenderer.substituteTitle(data);
         for (String line : wrap(font, composedTitle, properties.titleFontSize())) {
             cursor.writeLineCentered(line, properties.titleFontSize());
         }

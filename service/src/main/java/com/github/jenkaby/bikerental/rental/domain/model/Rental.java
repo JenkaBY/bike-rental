@@ -170,26 +170,6 @@ public class Rental {
                 && estimatedCost != null;
     }
 
-    public void activate(LocalDateTime actualStartTime) {
-        this.status.validateTransitionTo(RentalStatus.ACTIVE);
-
-        if (!canBeActivated()) {
-            List<String> missingFields = new ArrayList<>();
-            if (customerId == null) missingFields.add("customerId");
-            if (plannedDuration == null) missingFields.add("plannedDuration");
-            if (estimatedCost == null) missingFields.add("estimatedCost");
-            if (equipments == null) missingFields.add("equipmentIds");
-            throw new RentalNotReadyForActivationException(missingFields);
-        }
-
-        this.status = RentalStatus.ACTIVE;
-        this.startedAt = actualStartTime; // Actual start time
-        this.expectedReturnAt = actualStartTime.plus(this.plannedDuration);
-
-        equipments.forEach(e -> e.activateForRental(this));
-        this.updatedAt = Instant.now();
-    }
-
     public void prepareForSigning() {
         this.status.validateTransitionTo(RentalStatus.AWAITING_SIGNATURE);
 
