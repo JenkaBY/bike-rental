@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.agreement.infrastructure.pdf;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplateVariable;
 import com.github.jenkaby.bikerental.agreement.domain.service.AgreementContentRenderer;
+import com.github.jenkaby.bikerental.shared.application.service.MessageService;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -11,16 +12,21 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component
+
 class AgreementPlaceholderRenderer implements AgreementContentRenderer {
 
     private final AgreementPdfProperties properties;
     private final DateTimeFormatter dateTimeFormat;
+    private final DateTimeFormatter titleDateFormat;
+    private final MessageService messageService;
     private final ZoneId zoneId;
 
-    AgreementPlaceholderRenderer(AgreementPdfProperties properties) {
+    AgreementPlaceholderRenderer(AgreementPdfProperties properties, MessageService messageService) {
         this.properties = properties;
         this.dateTimeFormat = DateTimeFormatter.ofPattern(properties.dateTimePattern());
+        this.titleDateFormat = DateTimeFormatter.ofPattern(properties.datePattern());
         this.zoneId = ZoneId.of(properties.zoneId());
+        this.messageService = messageService;
     }
 
     @Override
@@ -31,6 +37,14 @@ class AgreementPlaceholderRenderer implements AgreementContentRenderer {
             result = result.replace(variable.placeholder(), resolveVariable(variable, data, startedAt));
         }
         return result;
+    }
+
+    @Override
+    public String substituteTitle(AgreementPdfData data) {
+        var activatedAt = ZonedDateTime.ofInstant(data.template().getActivatedAt(), zoneId);
+        return "%s %s %s".formatted(data.template().getTitle(),
+                label("agreement.pdf.label.title-from"),
+                activatedAt.format(titleDateFormat));
     }
 
     private String resolveVariable(AgreementTemplateVariable variable, AgreementPdfData data, ZonedDateTime startedAt) {
@@ -50,5 +64,9 @@ class AgreementPlaceholderRenderer implements AgreementContentRenderer {
         long hours = duration.toHours();
         long minutes = duration.toMinutesPart();
         return String.format("%02d:%02d", hours, minutes);
+    }
+
+    private String label(String code) {
+        return messageService.getMessage(code);
     }
 }

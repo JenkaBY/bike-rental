@@ -7,9 +7,10 @@ Feature: Rental Signing Lifecycle
   Background:
     Given the request header "Content-Type" is "application/vnd.bikerental.v1+json"
     And customers exist in the database with the following data
-      | id   | phone        | firstName | lastName | email            | birthDate  | comments |
-      | CUS1 | +79995551111 | Alex      | Johnson  | null             | null       | null     |
-      | CUS2 | +79991232222 | John      | Doe      | john@example.com | 1922-02-22 | null     |
+      | id   | phone        | firstName | lastName | email             | birthDate  | comments |
+      | CUS1 | +79995551111 | Alex      | Johnson  | null              | null       | null     |
+      | CUS2 | +79991232222 | John      | Doe      | john@example.com  | 1922-02-22 | null     |
+      | CUS3 | +79997773333 | Jamie     | Lee      | jamie@example.com | 1990-05-05 | null     |
     And the following equipment statues exist in the database
       | slug      | name      | description    | transitions      |
       | AVAILABLE | Available | Ready to rent  | RENTED,RESERVED  |
@@ -30,12 +31,15 @@ Feature: Rental Signing Lifecycle
       | id   | accountType | customerId |
       | ACC1 | CUSTOMER    | CUS1       |
       | ACC2 | CUSTOMER    | CUS2       |
+      | ACC3 | CUSTOMER    | CUS3       |
     And the following sub-ledger records exist in db
       | id     | accountId | ledgerType      | balance | version | createdAt            | updatedAt            |
       | L_C_W1 | ACC1      | CUSTOMER_WALLET | 300.00  | 2       | 2026-03-27T00:00:00Z | 2026-04-07T10:31:02Z |
       | L_C_H1 | ACC1      | CUSTOMER_HOLD   | 0.00    | 2       | 2026-03-27T00:00:00Z | 2026-04-07T10:30:00Z |
       | L_C_W2 | ACC2      | CUSTOMER_WALLET | 300.00  | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
       | L_C_H2 | ACC2      | CUSTOMER_HOLD   | 0.00    | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
+      | L_C_W3 | ACC3      | CUSTOMER_WALLET | 10.00   | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
+      | L_C_H3 | ACC3      | CUSTOMER_HOLD   | 0.00    | 1       | 2026-03-27T00:00:00Z | 2026-03-27T00:00:00Z |
     And the following transaction records exist in db
       | id  | type    | paymentMethod | amount | customerId | operatorId | sourceType | sourceId | recordedAt          | idempotencyKey |
       | TX1 | DEPOSIT | CASH          | 300.00 | CUS1       | OP1        |            |          | 2026-01-10T10:00:00 | IDK1           |
@@ -248,3 +252,21 @@ Feature: Rental Signing Lifecycle
     And the following sub-ledger records were persisted in db
       | id     | accountId | ledgerType    | balance |
       | L_C_H1 | ACC1      | CUSTOMER_HOLD | 0.00    |
+
+  Scenario: Prepare signing rejected for insufficient wallet balance
+    Given a single rental exists in the database with the following data
+      | id | customerId | status | plannedDuration | createdAt           | updatedAt           |
+      | 1  | CUS3       | DRAFT  | 120             | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And rental equipments exist in the database with the following data
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | createdAt           | updatedAt           |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 10       | ASSIGNED | 2026-04-28T09:00:00 | 2026-04-28T11:00:00 | 16.00         | 2026-04-28T09:00:00 | 2026-04-28T09:00:00 |
+    And the lifecycle request is
+      | status             | operatorId |
+      | AWAITING_SIGNATURE | OP1        |
+    When a PATCH request has been made to "/api/rentals/{requestedObjectId}/lifecycles" endpoint with context
+    Then the response status is 422
+    And the response contains
+      | path        | value                                                                     |
+      | $.title     | Insufficient funds                                                        |
+      | $.detail    | Insufficient wallet balance. Available: 10.00, requested deduction: 16.00 |
+      | $.errorCode | rental.insufficient_funds                                                 |

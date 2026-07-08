@@ -1,3 +1,39 @@
+<task_file_template>
+
+# Task 004: Remove the ACTIVE branch and ActivateRentalUseCase dependency from RentalLifecycleService
+
+> **Applied Skill:** `spring-boot-best-practices` — constructor injection updated in lockstep with the removed
+> dependency; `java-style.md` zero-inline-comments respected (no comment added to explain the removal). Depends on
+> Task 003 (the `ActivateRentalUseCase` interface no longer exists).
+
+## 1. Objective
+
+Remove the `activateRentalUseCase` field, its constructor parameter/assignment, its import, and the `case ACTIVE`
+switch branch from `RentalLifecycleService`. The command's `targetStatus` is `RentalStatus` (domain enum, which
+still has an `ACTIVE` constant), so the `switch` remains valid as a non-exhaustive `switch` with the existing
+`default` arm — do not add a new `default` branch, one already exists.
+
+## 2. File to Modify / Create
+
+* **File Path:** `service/src/main/java/com/github/jenkaby/bikerental/rental/application/service/RentalLifecycleService.java`
+* **Action:** Modify Existing File
+
+## 3. Code Implementation
+
+**Imports Required:**
+
+Remove this import line entirely:
+
+```java
+import com.github.jenkaby.bikerental.rental.application.usecase.ActivateRentalUseCase;
+```
+
+**Code to Add/Replace:**
+
+Replace the ENTIRE file content with EXACTLY this (removes the `activateRentalUseCase` field, constructor parameter,
+assignment, import, and the `case ACTIVE` switch arm; everything else is unchanged):
+
+```java
 package com.github.jenkaby.bikerental.rental.application.service;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.CancelRentalUseCase;
@@ -36,3 +72,14 @@ class RentalLifecycleService implements RentalLifecycleUseCase {
         };
     }
 }
+```
+
+## 4. Validation Steps
+
+Execute the following command. Do NOT run the full application server.
+
+```bash
+./gradlew :service:compileJava "-Dspring.profiles.active=test"
+```
+
+</task_file_template>

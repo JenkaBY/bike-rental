@@ -1422,21 +1422,6 @@ class RentalCommandControllerTest {
         class ShouldReturn200 {
 
             @Test
-            @DisplayName("when status is ACTIVE")
-            void whenStatusIsActive() throws Exception {
-                var rental = mock(Rental.class);
-                given(rentalLifecycleUseCase.execute(any(RentalLifecycleUseCase.RentalLifecycleCommand.class)))
-                        .willReturn(rental);
-                given(queryMapper.toResponse(any(Rental.class))).willReturn(mock(RentalResponse.class));
-
-                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(
-                                        new RentalLifecycleRequest(LifecycleStatus.ACTIVE, "op-1"))))
-                        .andExpect(status().isOk());
-            }
-
-            @Test
             @DisplayName("when status is CANCELLED")
             void whenStatusIsCancelled() throws Exception {
                 var rental = mock(Rental.class);
@@ -1514,6 +1499,15 @@ class RentalCommandControllerTest {
                         .andExpect(status().isBadRequest());
             }
 
+            @Test
+            @DisplayName("when status is ACTIVE")
+            void whenStatusIsActive() throws Exception {
+                mockMvc.perform(patch(LIFECYCLE_URL, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"status\": \"ACTIVE\", \"operatorId\": \"op-1\"}"))
+                        .andExpect(status().isBadRequest());
+            }
+
         }
 
         @Nested
@@ -1529,7 +1523,7 @@ class RentalCommandControllerTest {
                 mockMvc.perform(patch(LIFECYCLE_URL, 99L)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(
-                                        new RentalLifecycleRequest(LifecycleStatus.ACTIVE, "op-1"))))
+                                        new RentalLifecycleRequest(LifecycleStatus.CANCELLED, "op-1"))))
                         .andExpect(status().isNotFound());
             }
         }

@@ -21,8 +21,9 @@ class RentalStatusTest {
 
             static Stream<Arguments> validTransitions() {
                 return Stream.of(
-                        Arguments.of(RentalStatus.DRAFT, RentalStatus.ACTIVE),
+                        Arguments.of(RentalStatus.DRAFT, RentalStatus.AWAITING_SIGNATURE),
                         Arguments.of(RentalStatus.DRAFT, RentalStatus.CANCELLED),
+                        Arguments.of(RentalStatus.AWAITING_SIGNATURE, RentalStatus.ACTIVE),
                         Arguments.of(RentalStatus.ACTIVE, RentalStatus.CANCELLED)
                 );
             }

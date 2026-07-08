@@ -5,4 +5,6 @@ import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
 public interface AgreementContentRenderer {
 
     String substitute(AgreementPdfData data);
+
+    String substituteTitle(AgreementPdfData data);
 }
