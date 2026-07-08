@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AgreementTemplateMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.agreement.application.mapper</a> &gt; <span class="el_source">AgreementTemplateMapperImpl.java</span></div><h1>AgreementTemplateMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.agreement.application.mapper;
+
+import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
+import com.github.jenkaby.bikerental.agreement.domain.model.RentalAgreementView;
+import java.time.Instant;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-java-compiler-worker-9.6.1.jar, environment: Java 21.0.11 (Amazon.com Inc.)&quot;
+)
+@Component
+<span class="fc" id="L14">public class AgreementTemplateMapperImpl implements AgreementTemplateMapper {</span>
+
+    @Override
+    public RentalAgreementView toView(AgreementTemplate source, String content, String title) {
+<span class="pc bpc" id="L18" title="5 of 6 branches missed.">        if ( source == null &amp;&amp; content == null &amp;&amp; title == null ) {</span>
+<span class="nc" id="L19">            return null;</span>
+        }
+
+<span class="fc" id="L22">        Instant templateActivatedAt = null;</span>
+<span class="fc" id="L23">        Long templateId = null;</span>
+<span class="fc" id="L24">        Integer versionNumber = null;</span>
+<span class="pc bpc" id="L25" title="1 of 2 branches missed.">        if ( source != null ) {</span>
+<span class="fc" id="L26">            templateActivatedAt = source.getActivatedAt();</span>
+<span class="fc" id="L27">            templateId = source.getId();</span>
+<span class="fc" id="L28">            versionNumber = source.getVersionNumber();</span>
+        }
+<span class="fc" id="L30">        String content1 = null;</span>
+<span class="fc" id="L31">        content1 = content;</span>
+<span class="fc" id="L32">        String title1 = null;</span>
+<span class="fc" id="L33">        title1 = title;</span>
+
+<span class="fc" id="L35">        RentalAgreementView rentalAgreementView = new RentalAgreementView( templateId, versionNumber, title1, content1, templateActivatedAt );</span>
+
+<span class="fc" id="L37">        return rentalAgreementView;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

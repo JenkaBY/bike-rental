@@ -135,15 +135,17 @@ import org.springframework.stereotype.Component;
 <span class="fc" id="L135">        Integer versionNumber = null;</span>
 <span class="fc" id="L136">        String title = null;</span>
 <span class="fc" id="L137">        String content = null;</span>
+<span class="fc" id="L138">        Instant templateActivatedAt = null;</span>
 
-<span class="fc" id="L139">        templateId = view.templateId();</span>
-<span class="fc" id="L140">        versionNumber = view.versionNumber();</span>
-<span class="fc" id="L141">        title = view.title();</span>
-<span class="fc" id="L142">        content = view.content();</span>
+<span class="fc" id="L140">        templateId = view.templateId();</span>
+<span class="fc" id="L141">        versionNumber = view.versionNumber();</span>
+<span class="fc" id="L142">        title = view.title();</span>
+<span class="fc" id="L143">        content = view.content();</span>
+<span class="fc" id="L144">        templateActivatedAt = view.templateActivatedAt();</span>
 
-<span class="fc" id="L144">        RentalAgreementResponse rentalAgreementResponse = new RentalAgreementResponse( templateId, versionNumber, title, content );</span>
+<span class="fc" id="L146">        RentalAgreementResponse rentalAgreementResponse = new RentalAgreementResponse( templateId, versionNumber, title, content, templateActivatedAt );</span>
 
-<span class="fc" id="L146">        return rentalAgreementResponse;</span>
+<span class="fc" id="L148">        return rentalAgreementResponse;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

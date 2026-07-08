@@ -3,6 +3,7 @@
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplateVariable;
 import com.github.jenkaby.bikerental.agreement.domain.service.AgreementContentRenderer;
+import com.github.jenkaby.bikerental.shared.application.service.MessageService;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -11,45 +12,62 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component
+
 class AgreementPlaceholderRenderer implements AgreementContentRenderer {
 
     private final AgreementPdfProperties properties;
     private final DateTimeFormatter dateTimeFormat;
+    private final DateTimeFormatter titleDateFormat;
+    private final MessageService messageService;
     private final ZoneId zoneId;
 
-<span class="fc" id="L20">    AgreementPlaceholderRenderer(AgreementPdfProperties properties) {</span>
-<span class="fc" id="L21">        this.properties = properties;</span>
-<span class="fc" id="L22">        this.dateTimeFormat = DateTimeFormatter.ofPattern(properties.dateTimePattern());</span>
-<span class="fc" id="L23">        this.zoneId = ZoneId.of(properties.zoneId());</span>
-<span class="fc" id="L24">    }</span>
+<span class="fc" id="L24">    AgreementPlaceholderRenderer(AgreementPdfProperties properties, MessageService messageService) {</span>
+<span class="fc" id="L25">        this.properties = properties;</span>
+<span class="fc" id="L26">        this.dateTimeFormat = DateTimeFormatter.ofPattern(properties.dateTimePattern());</span>
+<span class="fc" id="L27">        this.titleDateFormat = DateTimeFormatter.ofPattern(properties.datePattern());</span>
+<span class="fc" id="L28">        this.zoneId = ZoneId.of(properties.zoneId());</span>
+<span class="fc" id="L29">        this.messageService = messageService;</span>
+<span class="fc" id="L30">    }</span>
 
     @Override
     public String substitute(AgreementPdfData data) {
-<span class="fc" id="L28">        ZonedDateTime startedAt = ZonedDateTime.ofInstant(data.rental().startedAt(), zoneId);</span>
-<span class="fc" id="L29">        String result = data.template().getContent();</span>
-<span class="fc bfc" id="L30" title="All 2 branches covered.">        for (AgreementTemplateVariable variable : AgreementTemplateVariable.values()) {</span>
-<span class="fc" id="L31">            result = result.replace(variable.placeholder(), resolveVariable(variable, data, startedAt));</span>
+<span class="fc" id="L34">        ZonedDateTime startedAt = ZonedDateTime.ofInstant(data.rental().startedAt(), zoneId);</span>
+<span class="fc" id="L35">        String result = data.template().getContent();</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        for (AgreementTemplateVariable variable : AgreementTemplateVariable.values()) {</span>
+<span class="fc" id="L37">            result = result.replace(variable.placeholder(), resolveVariable(variable, data, startedAt));</span>
         }
-<span class="fc" id="L33">        return result;</span>
+<span class="fc" id="L39">        return result;</span>
+    }
+
+    @Override
+    public String substituteTitle(AgreementPdfData data) {
+<span class="fc" id="L44">        var activatedAt = ZonedDateTime.ofInstant(data.template().getActivatedAt(), zoneId);</span>
+<span class="fc" id="L45">        return &quot;%s %s %s&quot;.formatted(data.template().getTitle(),</span>
+<span class="fc" id="L46">                label(&quot;agreement.pdf.label.title-from&quot;),</span>
+<span class="fc" id="L47">                activatedAt.format(titleDateFormat));</span>
     }
 
     private String resolveVariable(AgreementTemplateVariable variable, AgreementPdfData data, ZonedDateTime startedAt) {
-<span class="fc" id="L37">        AgreementPdfData.RentalData rental = data.rental();</span>
-<span class="fc bfc" id="L38" title="All 7 branches covered.">        return switch (variable) {</span>
-<span class="fc" id="L39">            case CUSTOMER_FIRST_NAME -&gt; data.customer().firstName();</span>
-<span class="fc" id="L40">            case CUSTOMER_LAST_NAME -&gt; data.customer().lastName();</span>
-<span class="fc" id="L41">            case CUSTOMER_PHONE -&gt; data.customer().phone();</span>
-<span class="fc" id="L42">            case RENTAL_STARTED_AT -&gt; startedAt.format(dateTimeFormat);</span>
-<span class="fc" id="L43">            case RENTAL_DURATION -&gt; formatDuration(rental.plannedDuration());</span>
-<span class="fc" id="L44">            case RENTAL_TOTAL -&gt; rental.estimatedTotal() + &quot; &quot; + properties.currency();</span>
-<span class="fc" id="L45">            case RENTAL_NUMBER -&gt; String.valueOf(rental.rentalId());</span>
+<span class="fc" id="L51">        AgreementPdfData.RentalData rental = data.rental();</span>
+<span class="fc bfc" id="L52" title="All 7 branches covered.">        return switch (variable) {</span>
+<span class="fc" id="L53">            case CUSTOMER_FIRST_NAME -&gt; data.customer().firstName();</span>
+<span class="fc" id="L54">            case CUSTOMER_LAST_NAME -&gt; data.customer().lastName();</span>
+<span class="fc" id="L55">            case CUSTOMER_PHONE -&gt; data.customer().phone();</span>
+<span class="fc" id="L56">            case RENTAL_STARTED_AT -&gt; startedAt.format(dateTimeFormat);</span>
+<span class="fc" id="L57">            case RENTAL_DURATION -&gt; formatDuration(rental.plannedDuration());</span>
+<span class="fc" id="L58">            case RENTAL_TOTAL -&gt; rental.estimatedTotal() + &quot; &quot; + properties.currency();</span>
+<span class="fc" id="L59">            case RENTAL_NUMBER -&gt; String.valueOf(rental.rentalId());</span>
         };
     }
 
     private String formatDuration(Duration duration) {
-<span class="fc" id="L50">        long hours = duration.toHours();</span>
-<span class="fc" id="L51">        long minutes = duration.toMinutesPart();</span>
-<span class="fc" id="L52">        return String.format(&quot;%02d:%02d&quot;, hours, minutes);</span>
+<span class="fc" id="L64">        long hours = duration.toHours();</span>
+<span class="fc" id="L65">        long minutes = duration.toMinutesPart();</span>
+<span class="fc" id="L66">        return String.format(&quot;%02d:%02d&quot;, hours, minutes);</span>
+    }
+
+    private String label(String code) {
+<span class="fc" id="L70">        return messageService.getMessage(code);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

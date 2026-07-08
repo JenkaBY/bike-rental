@@ -80,102 +80,101 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
     }
 
     private void writeTitle(RenderCursor cursor, PDType0Font font, AgreementPdfData data) throws IOException {
-<span class="fc" id="L83">        ZonedDateTime activatedAt = ZonedDateTime.ofInstant(data.template().getActivatedAt(), zoneId);</span>
-<span class="fc" id="L84">        String composedTitle = data.template().getTitle() + &quot; &quot; + label(&quot;agreement.pdf.label.title-from&quot;) + &quot; &quot; + activatedAt.format(titleDateFormat);</span>
-<span class="fc bfc" id="L85" title="All 2 branches covered.">        for (String line : wrap(font, composedTitle, properties.titleFontSize())) {</span>
-<span class="fc" id="L86">            cursor.writeLineCentered(line, properties.titleFontSize());</span>
-<span class="fc" id="L87">        }</span>
-<span class="fc" id="L88">    }</span>
+<span class="fc" id="L83">        String composedTitle = contentRenderer.substituteTitle(data);</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        for (String line : wrap(font, composedTitle, properties.titleFontSize())) {</span>
+<span class="fc" id="L85">            cursor.writeLineCentered(line, properties.titleFontSize());</span>
+<span class="fc" id="L86">        }</span>
+<span class="fc" id="L87">    }</span>
 
     private void writeParagraphs(RenderCursor cursor, PDType0Font font, String content) throws IOException {
-<span class="fc" id="L91">        String[] paragraphs = content.split(&quot;\n&quot;, -1);</span>
-<span class="fc bfc" id="L92" title="All 2 branches covered.">        for (String paragraph : paragraphs) {</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">            if (paragraph.isBlank()) {</span>
-<span class="nc" id="L94">                cursor.blankLine(properties.bodyFontSize());</span>
-<span class="nc" id="L95">                continue;</span>
+<span class="fc" id="L90">        String[] paragraphs = content.split(&quot;\n&quot;, -1);</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        for (String paragraph : paragraphs) {</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">            if (paragraph.isBlank()) {</span>
+<span class="nc" id="L93">                cursor.blankLine(properties.bodyFontSize());</span>
+<span class="nc" id="L94">                continue;</span>
             }
-<span class="fc bfc" id="L97" title="All 2 branches covered.">            for (String line : wrap(font, paragraph, properties.bodyFontSize())) {</span>
-<span class="fc" id="L98">                cursor.writeLine(line, properties.bodyFontSize());</span>
-<span class="fc" id="L99">            }</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">            for (String line : wrap(font, paragraph, properties.bodyFontSize())) {</span>
+<span class="fc" id="L97">                cursor.writeLine(line, properties.bodyFontSize());</span>
+<span class="fc" id="L98">            }</span>
         }
-<span class="fc" id="L101">    }</span>
+<span class="fc" id="L100">    }</span>
 
     private List&lt;String&gt; wrap(PDType0Font font, String paragraph, float fontSize) throws IOException {
-<span class="fc" id="L104">        float maxWidth = PDRectangle.A4.getWidth() - 2 * properties.margin();</span>
-<span class="fc" id="L105">        List&lt;String&gt; lines = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L106">        StringBuilder current = new StringBuilder();</span>
-<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (String word : paragraph.split(&quot; &quot;)) {</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">            String candidate = current.isEmpty() ? word : current + &quot; &quot; + word;</span>
-<span class="pc bpc" id="L109" title="1 of 4 branches missed.">            if (stringWidth(font, candidate, fontSize) &lt;= maxWidth || current.isEmpty()) {</span>
-<span class="fc" id="L110">                current.setLength(0);</span>
-<span class="fc" id="L111">                current.append(candidate);</span>
+<span class="fc" id="L103">        float maxWidth = PDRectangle.A4.getWidth() - 2 * properties.margin();</span>
+<span class="fc" id="L104">        List&lt;String&gt; lines = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L105">        StringBuilder current = new StringBuilder();</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        for (String word : paragraph.split(&quot; &quot;)) {</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            String candidate = current.isEmpty() ? word : current + &quot; &quot; + word;</span>
+<span class="pc bpc" id="L108" title="1 of 4 branches missed.">            if (stringWidth(font, candidate, fontSize) &lt;= maxWidth || current.isEmpty()) {</span>
+<span class="fc" id="L109">                current.setLength(0);</span>
+<span class="fc" id="L110">                current.append(candidate);</span>
             } else {
-<span class="fc" id="L113">                lines.add(current.toString());</span>
-<span class="fc" id="L114">                current.setLength(0);</span>
-<span class="fc" id="L115">                current.append(word);</span>
+<span class="fc" id="L112">                lines.add(current.toString());</span>
+<span class="fc" id="L113">                current.setLength(0);</span>
+<span class="fc" id="L114">                current.append(word);</span>
             }
         }
-<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if (!current.isEmpty()) {</span>
-<span class="fc" id="L119">            lines.add(current.toString());</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if (!current.isEmpty()) {</span>
+<span class="fc" id="L118">            lines.add(current.toString());</span>
         }
-<span class="fc" id="L121">        return lines;</span>
+<span class="fc" id="L120">        return lines;</span>
     }
 
     private static float stringWidth(PDType0Font font, String text, float fontSize) throws IOException {
-<span class="fc" id="L125">        return font.getStringWidth(text) / 1000f * fontSize;</span>
+<span class="fc" id="L124">        return font.getStringWidth(text) / 1000f * fontSize;</span>
     }
 
     private void writeDataBlock(RenderCursor cursor, AgreementPdfData data, ZonedDateTime startedAt) throws IOException {
-<span class="fc" id="L129">        AgreementPdfData.CustomerData customer = data.customer();</span>
-<span class="fc" id="L130">        AgreementPdfData.RentalData rental = data.rental();</span>
-<span class="fc" id="L131">        float bodyFontSize = properties.bodyFontSize();</span>
-<span class="fc" id="L132">        String currency = properties.currency();</span>
-<span class="fc" id="L133">        cursor.writeLine(label(&quot;agreement.pdf.label.customer&quot;) + &quot; &quot; + customer.firstName() + &quot; &quot; + customer.lastName(), bodyFontSize);</span>
-<span class="fc" id="L134">        cursor.writeLine(label(&quot;agreement.pdf.label.phone&quot;) + &quot; &quot; + customer.phone(), bodyFontSize);</span>
-<span class="fc" id="L135">        cursor.writeLine(label(&quot;agreement.pdf.label.started-at&quot;) + &quot; &quot; + startedAt.format(dateTimeFormat), bodyFontSize);</span>
-<span class="fc" id="L136">        cursor.writeLine(label(&quot;agreement.pdf.label.duration&quot;) + &quot; &quot; + formatDuration(rental.plannedDuration())</span>
-<span class="fc" id="L137">                + &quot; &quot; + label(&quot;agreement.pdf.label.duration-unit&quot;), bodyFontSize);</span>
-<span class="fc" id="L138">        cursor.writeLine(label(&quot;agreement.pdf.label.equipment&quot;), bodyFontSize);</span>
-<span class="fc" id="L139">        int equipmentNumber = 1;</span>
-<span class="fc bfc" id="L140" title="All 2 branches covered.">        for (AgreementPdfData.EquipmentLine line : rental.equipments()) {</span>
-<span class="fc" id="L141">            cursor.writeLine(&quot;  &quot; + equipmentNumber + &quot;. &quot; + line.name()  + &quot;(&quot; + line.uid() + &quot;)&quot; + &quot; — &quot; + line.estimatedCost() + &quot; &quot; + currency, bodyFontSize);</span>
-<span class="fc" id="L142">            equipmentNumber++;</span>
-<span class="fc" id="L143">        }</span>
-<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        if (rental.discountPercent() != null) {</span>
-<span class="nc" id="L145">            cursor.writeLine(label(&quot;agreement.pdf.label.discount&quot;) + &quot; &quot; + rental.discountPercent() + &quot;%&quot;, bodyFontSize);</span>
+<span class="fc" id="L128">        AgreementPdfData.CustomerData customer = data.customer();</span>
+<span class="fc" id="L129">        AgreementPdfData.RentalData rental = data.rental();</span>
+<span class="fc" id="L130">        float bodyFontSize = properties.bodyFontSize();</span>
+<span class="fc" id="L131">        String currency = properties.currency();</span>
+<span class="fc" id="L132">        cursor.writeLine(label(&quot;agreement.pdf.label.customer&quot;) + &quot; &quot; + customer.firstName() + &quot; &quot; + customer.lastName(), bodyFontSize);</span>
+<span class="fc" id="L133">        cursor.writeLine(label(&quot;agreement.pdf.label.phone&quot;) + &quot; &quot; + customer.phone(), bodyFontSize);</span>
+<span class="fc" id="L134">        cursor.writeLine(label(&quot;agreement.pdf.label.started-at&quot;) + &quot; &quot; + startedAt.format(dateTimeFormat), bodyFontSize);</span>
+<span class="fc" id="L135">        cursor.writeLine(label(&quot;agreement.pdf.label.duration&quot;) + &quot; &quot; + formatDuration(rental.plannedDuration())</span>
+<span class="fc" id="L136">                + &quot; &quot; + label(&quot;agreement.pdf.label.duration-unit&quot;), bodyFontSize);</span>
+<span class="fc" id="L137">        cursor.writeLine(label(&quot;agreement.pdf.label.equipment&quot;), bodyFontSize);</span>
+<span class="fc" id="L138">        int equipmentNumber = 1;</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        for (AgreementPdfData.EquipmentLine line : rental.equipments()) {</span>
+<span class="fc" id="L140">            cursor.writeLine(&quot;  &quot; + equipmentNumber + &quot;. &quot; + line.name()  + &quot;(&quot; + line.uid() + &quot;)&quot; + &quot; — &quot; + line.estimatedCost() + &quot; &quot; + currency, bodyFontSize);</span>
+<span class="fc" id="L141">            equipmentNumber++;</span>
+<span class="fc" id="L142">        }</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if (rental.discountPercent() != null) {</span>
+<span class="nc" id="L144">            cursor.writeLine(label(&quot;agreement.pdf.label.discount&quot;) + &quot; &quot; + rental.discountPercent() + &quot;%&quot;, bodyFontSize);</span>
         }
-<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if (rental.specialPrice() != null) {</span>
-<span class="nc" id="L148">            cursor.writeLine(label(&quot;agreement.pdf.label.special-price&quot;) + &quot; &quot; + rental.specialPrice() + &quot; &quot; + currency, bodyFontSize);</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (rental.specialPrice() != null) {</span>
+<span class="nc" id="L147">            cursor.writeLine(label(&quot;agreement.pdf.label.special-price&quot;) + &quot; &quot; + rental.specialPrice() + &quot; &quot; + currency, bodyFontSize);</span>
         }
-<span class="fc" id="L150">        cursor.writeLine(label(&quot;agreement.pdf.label.total&quot;) + &quot; &quot; + rental.estimatedTotal() + &quot; &quot; + currency, bodyFontSize);</span>
-<span class="fc" id="L151">    }</span>
+<span class="fc" id="L149">        cursor.writeLine(label(&quot;agreement.pdf.label.total&quot;) + &quot; &quot; + rental.estimatedTotal() + &quot; &quot; + currency, bodyFontSize);</span>
+<span class="fc" id="L150">    }</span>
 
     private String label(String code) {
-<span class="fc" id="L154">        return messageService.getMessage(code);</span>
+<span class="fc" id="L153">        return messageService.getMessage(code);</span>
     }
 
     private String formatDuration(Duration duration) {
-<span class="fc" id="L158">        long hours = duration.toHours();</span>
-<span class="fc" id="L159">        long minutes = duration.toMinutesPart();</span>
-<span class="fc" id="L160">        return String.format(&quot;%02d:%02d&quot;, hours, minutes);</span>
+<span class="fc" id="L157">        long hours = duration.toHours();</span>
+<span class="fc" id="L158">        long minutes = duration.toMinutesPart();</span>
+<span class="fc" id="L159">        return String.format(&quot;%02d:%02d&quot;, hours, minutes);</span>
     }
 
     private void writeSignature(RenderCursor cursor, PDDocument document, PDType0Font font, byte[] signaturePng) throws IOException {
-<span class="fc" id="L164">        cursor.writeLine(label(&quot;agreement.pdf.label.signature&quot;), properties.bodyFontSize());</span>
-<span class="fc bfc" id="L165" title="All 2 branches covered.">        if (signaturePng != null) {</span>
-<span class="fc" id="L166">            PDImageXObject image = PDImageXObject.createFromByteArray(document, signaturePng, &quot;signature&quot;);</span>
-<span class="fc" id="L167">            cursor.drawImage(image, properties.signatureWidth(), properties.signatureHeight());</span>
-<span class="fc" id="L168">        } else {</span>
-<span class="fc" id="L169">            cursor.drawPlaceholder(font, properties.signatureWidth(), properties.signatureHeight(),</span>
-<span class="fc" id="L170">                    properties.signaturePlaceholderLabel());</span>
+<span class="fc" id="L163">        cursor.writeLine(label(&quot;agreement.pdf.label.signature&quot;), properties.bodyFontSize());</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        if (signaturePng != null) {</span>
+<span class="fc" id="L165">            PDImageXObject image = PDImageXObject.createFromByteArray(document, signaturePng, &quot;signature&quot;);</span>
+<span class="fc" id="L166">            cursor.drawImage(image, properties.signatureWidth(), properties.signatureHeight());</span>
+<span class="fc" id="L167">        } else {</span>
+<span class="fc" id="L168">            cursor.drawPlaceholder(font, properties.signatureWidth(), properties.signatureHeight(),</span>
+<span class="fc" id="L169">                    properties.signaturePlaceholderLabel());</span>
         }
-<span class="fc" id="L172">    }</span>
+<span class="fc" id="L171">    }</span>
 
     private void writeMetadata(RenderCursor cursor, AgreementPdfData data, ZonedDateTime startedAt) throws IOException {
-<span class="fc" id="L175">        cursor.writeLine(label(&quot;agreement.pdf.label.signed-at&quot;) + &quot; &quot; + startedAt.format(dateTimeFormat)</span>
-<span class="fc" id="L176">                + &quot;   &quot; + label(&quot;agreement.pdf.label.rental-number&quot;) + &quot; &quot; + data.rental().rentalId()</span>
-<span class="fc" id="L177">                + &quot;  &quot; + label(&quot;agreement.pdf.label.template-sha&quot;) + &quot; &quot; + data.template().getContentSha256(), properties.smallFontSize());</span>
-<span class="fc" id="L178">    }</span>
+<span class="fc" id="L174">        cursor.writeLine(label(&quot;agreement.pdf.label.signed-at&quot;) + &quot; &quot; + startedAt.format(dateTimeFormat)</span>
+<span class="fc" id="L175">                + &quot;   &quot; + label(&quot;agreement.pdf.label.rental-number&quot;) + &quot; &quot; + data.rental().rentalId()</span>
+<span class="fc" id="L176">                + &quot;  &quot; + label(&quot;agreement.pdf.label.template-sha&quot;) + &quot; &quot; + data.template().getContentSha256(), properties.smallFontSize());</span>
+<span class="fc" id="L177">    }</span>
 
     private static final class RenderCursor {
 
@@ -186,84 +185,84 @@ class PdfBoxAgreementRenderer implements AgreementPdfRenderer {
         private PDPageContentStream stream;
         private float y;
 
-<span class="fc" id="L189">        private RenderCursor(PDDocument document, PDType0Font font, AgreementPdfProperties properties) throws IOException {</span>
-<span class="fc" id="L190">            this.document = document;</span>
-<span class="fc" id="L191">            this.font = font;</span>
-<span class="fc" id="L192">            this.properties = properties;</span>
-<span class="fc" id="L193">            newPage();</span>
-<span class="fc" id="L194">        }</span>
+<span class="fc" id="L188">        private RenderCursor(PDDocument document, PDType0Font font, AgreementPdfProperties properties) throws IOException {</span>
+<span class="fc" id="L189">            this.document = document;</span>
+<span class="fc" id="L190">            this.font = font;</span>
+<span class="fc" id="L191">            this.properties = properties;</span>
+<span class="fc" id="L192">            newPage();</span>
+<span class="fc" id="L193">        }</span>
 
         private void newPage() throws IOException {
-<span class="fc bfc" id="L197" title="All 2 branches covered.">            if (stream != null) {</span>
-<span class="fc" id="L198">                stream.close();</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">            if (stream != null) {</span>
+<span class="fc" id="L197">                stream.close();</span>
             }
-<span class="fc" id="L200">            page = new PDPage(PDRectangle.A4);</span>
-<span class="fc" id="L201">            document.addPage(page);</span>
-<span class="fc" id="L202">            stream = new PDPageContentStream(document, page);</span>
-<span class="fc" id="L203">            y = page.getMediaBox().getHeight() - properties.margin();</span>
-<span class="fc" id="L204">        }</span>
+<span class="fc" id="L199">            page = new PDPage(PDRectangle.A4);</span>
+<span class="fc" id="L200">            document.addPage(page);</span>
+<span class="fc" id="L201">            stream = new PDPageContentStream(document, page);</span>
+<span class="fc" id="L202">            y = page.getMediaBox().getHeight() - properties.margin();</span>
+<span class="fc" id="L203">        }</span>
 
         private void ensureSpace(float needed) throws IOException {
-<span class="fc bfc" id="L207" title="All 2 branches covered.">            if (y - needed &lt; properties.margin()) {</span>
-<span class="fc" id="L208">                newPage();</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">            if (y - needed &lt; properties.margin()) {</span>
+<span class="fc" id="L207">                newPage();</span>
             }
-<span class="fc" id="L210">        }</span>
+<span class="fc" id="L209">        }</span>
 
         private void writeLine(String text, float fontSize) throws IOException {
-<span class="fc" id="L213">            float leading = fontSize * properties.leadingFactor();</span>
-<span class="fc" id="L214">            ensureSpace(leading);</span>
-<span class="fc" id="L215">            stream.beginText();</span>
-<span class="fc" id="L216">            stream.setFont(font, fontSize);</span>
-<span class="fc" id="L217">            stream.newLineAtOffset(properties.margin(), y);</span>
-<span class="fc" id="L218">            stream.showText(text);</span>
-<span class="fc" id="L219">            stream.endText();</span>
-<span class="fc" id="L220">            y -= leading;</span>
-<span class="fc" id="L221">        }</span>
+<span class="fc" id="L212">            float leading = fontSize * properties.leadingFactor();</span>
+<span class="fc" id="L213">            ensureSpace(leading);</span>
+<span class="fc" id="L214">            stream.beginText();</span>
+<span class="fc" id="L215">            stream.setFont(font, fontSize);</span>
+<span class="fc" id="L216">            stream.newLineAtOffset(properties.margin(), y);</span>
+<span class="fc" id="L217">            stream.showText(text);</span>
+<span class="fc" id="L218">            stream.endText();</span>
+<span class="fc" id="L219">            y -= leading;</span>
+<span class="fc" id="L220">        }</span>
 
         private void writeLineCentered(String text, float fontSize) throws IOException {
-<span class="fc" id="L224">            float leading = fontSize * properties.leadingFactor();</span>
-<span class="fc" id="L225">            ensureSpace(leading);</span>
-<span class="fc" id="L226">            float maxWidth = PDRectangle.A4.getWidth() - 2 * properties.margin();</span>
-<span class="fc" id="L227">            float textWidth = stringWidth(font, text, fontSize);</span>
-<span class="fc" id="L228">            float x = properties.margin() + Math.max(0f, (maxWidth - textWidth) / 2f);</span>
-<span class="fc" id="L229">            stream.beginText();</span>
-<span class="fc" id="L230">            stream.setFont(font, fontSize);</span>
-<span class="fc" id="L231">            stream.newLineAtOffset(x, y);</span>
-<span class="fc" id="L232">            stream.showText(text);</span>
-<span class="fc" id="L233">            stream.endText();</span>
-<span class="fc" id="L234">            y -= leading;</span>
-<span class="fc" id="L235">        }</span>
+<span class="fc" id="L223">            float leading = fontSize * properties.leadingFactor();</span>
+<span class="fc" id="L224">            ensureSpace(leading);</span>
+<span class="fc" id="L225">            float maxWidth = PDRectangle.A4.getWidth() - 2 * properties.margin();</span>
+<span class="fc" id="L226">            float textWidth = stringWidth(font, text, fontSize);</span>
+<span class="fc" id="L227">            float x = properties.margin() + Math.max(0f, (maxWidth - textWidth) / 2f);</span>
+<span class="fc" id="L228">            stream.beginText();</span>
+<span class="fc" id="L229">            stream.setFont(font, fontSize);</span>
+<span class="fc" id="L230">            stream.newLineAtOffset(x, y);</span>
+<span class="fc" id="L231">            stream.showText(text);</span>
+<span class="fc" id="L232">            stream.endText();</span>
+<span class="fc" id="L233">            y -= leading;</span>
+<span class="fc" id="L234">        }</span>
 
         private void blankLine(float fontSize) throws IOException {
-<span class="fc" id="L238">            float leading = fontSize * properties.leadingFactor();</span>
-<span class="fc" id="L239">            ensureSpace(leading);</span>
-<span class="fc" id="L240">            y -= leading;</span>
-<span class="fc" id="L241">        }</span>
+<span class="fc" id="L237">            float leading = fontSize * properties.leadingFactor();</span>
+<span class="fc" id="L238">            ensureSpace(leading);</span>
+<span class="fc" id="L239">            y -= leading;</span>
+<span class="fc" id="L240">        }</span>
 
         private void drawImage(PDImageXObject image, float width, float height) throws IOException {
-<span class="fc" id="L244">            ensureSpace(height);</span>
-<span class="fc" id="L245">            y -= height;</span>
-<span class="fc" id="L246">            stream.drawImage(image, properties.margin(), y, width, height);</span>
-<span class="fc" id="L247">        }</span>
+<span class="fc" id="L243">            ensureSpace(height);</span>
+<span class="fc" id="L244">            y -= height;</span>
+<span class="fc" id="L245">            stream.drawImage(image, properties.margin(), y, width, height);</span>
+<span class="fc" id="L246">        }</span>
 
         private void drawPlaceholder(PDType0Font placeholderFont, float width, float height, String label) throws IOException {
-<span class="fc" id="L250">            ensureSpace(height);</span>
-<span class="fc" id="L251">            y -= height;</span>
-<span class="fc" id="L252">            stream.addRect(properties.margin(), y, width, height);</span>
-<span class="fc" id="L253">            stream.stroke();</span>
-<span class="fc" id="L254">            stream.beginText();</span>
-<span class="fc" id="L255">            stream.setFont(placeholderFont, properties.bodyFontSize());</span>
-<span class="fc" id="L256">            stream.newLineAtOffset(properties.margin() + 10f, y + height / 2f);</span>
-<span class="fc" id="L257">            stream.showText(label);</span>
-<span class="fc" id="L258">            stream.endText();</span>
-<span class="fc" id="L259">        }</span>
+<span class="fc" id="L249">            ensureSpace(height);</span>
+<span class="fc" id="L250">            y -= height;</span>
+<span class="fc" id="L251">            stream.addRect(properties.margin(), y, width, height);</span>
+<span class="fc" id="L252">            stream.stroke();</span>
+<span class="fc" id="L253">            stream.beginText();</span>
+<span class="fc" id="L254">            stream.setFont(placeholderFont, properties.bodyFontSize());</span>
+<span class="fc" id="L255">            stream.newLineAtOffset(properties.margin() + 10f, y + height / 2f);</span>
+<span class="fc" id="L256">            stream.showText(label);</span>
+<span class="fc" id="L257">            stream.endText();</span>
+<span class="fc" id="L258">        }</span>
 
         private void close() throws IOException {
-<span class="pc bpc" id="L262" title="1 of 2 branches missed.">            if (stream != null) {</span>
-<span class="fc" id="L263">                stream.close();</span>
-<span class="fc" id="L264">                stream = null;</span>
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">            if (stream != null) {</span>
+<span class="fc" id="L262">                stream.close();</span>
+<span class="fc" id="L263">                stream = null;</span>
             }
-<span class="fc" id="L266">        }</span>
+<span class="fc" id="L265">        }</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
