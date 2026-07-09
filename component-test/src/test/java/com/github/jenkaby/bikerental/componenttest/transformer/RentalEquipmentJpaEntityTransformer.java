@@ -27,8 +27,8 @@ public class RentalEquipmentJpaEntityTransformer {
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
         var finalCost = DataTableHelper.toBigDecimal(entry, "totalCost");
 
-        var createdAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "createdAt");
-        var updatedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "updatedAt");
+        var createdAt = DataTableHelper.toInstantFlexible(entry, "createdAt");
+        var updatedAt = DataTableHelper.toInstantFlexible(entry, "updatedAt");
 
         return RentalEquipmentJpaEntity.builder()
                 .id(id)

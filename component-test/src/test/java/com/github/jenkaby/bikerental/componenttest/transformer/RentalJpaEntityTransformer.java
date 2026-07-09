@@ -26,8 +26,8 @@ public class RentalJpaEntityTransformer {
         var plannedDurationMinutes = DataTableHelper.toInt(entry, "plannedDuration");
         var actualDurationMinutes = DataTableHelper.toInt(entry, "actualDuration");
 
-        var createdAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "createdAt");
-        var updatedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "updatedAt");
+        var createdAt = DataTableHelper.toInstantFlexible(entry, "createdAt");
+        var updatedAt = DataTableHelper.toInstantFlexible(entry, "updatedAt");
 
         var specialTariffId = DataTableHelper.toLong(entry, "specialTariffId");
         var specialPrice = DataTableHelper.toBigDecimal(entry, "specialPrice");

@@ -37,7 +37,7 @@ public class TransactionJpaEntityTransformer {
         String sourceIdStr = DataTableHelper.getStringOrNull(entry, "sourceId");
         entity.setSourceId(sourceIdStr != null ? Aliases.getValueOrDefault(sourceIdStr) : null);
 
-        Instant recordedAt = DataTableHelper.parseLocalDateTimeToInstant(entry, "recordedAt");
+        Instant recordedAt = DataTableHelper.toInstantFlexible(entry, "recordedAt");
         entity.setRecordedAt(recordedAt);
         entity.setReason(DataTableHelper.getStringOrNull(entry, "reason"));
 

@@ -24,6 +24,7 @@ logging:
     com.github.jenkaby.bikerental.componenttest: info
 
 app:
+  zone-id: Europe/Minsk
   cors:
     allowed-origins: http://localhost:4200
   security:

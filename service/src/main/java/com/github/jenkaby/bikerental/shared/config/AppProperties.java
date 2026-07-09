@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.shared.config;
 
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
 
@@ -9,6 +10,9 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "app")
 public record AppProperties(
         @NotBlank
-        String defaultLocale
+        String defaultLocale,
+        @NotBlank
+        @DefaultValue("Europe/Vilnius")
+        String zoneId
 ) {
 }

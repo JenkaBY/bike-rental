@@ -101,6 +101,18 @@ public class DataTableHelper {
         return toInstant(localDateTime);
     }
 
+    public static Instant toInstantFlexible(Map<String, String> entry, String field) {
+        var value = getStringOrNull(entry, field);
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        value = value.trim();
+        if (value.endsWith("Z") || value.matches(".*[+-]\\d{2}:\\d{2}$")) {
+            return Instant.parse(value);
+        }
+        return parseLocalDateTimeToInstant(entry, field);
+    }
+
     public static Set<String> getSetOrDefault(Map<String, String> entry, String field, Set<String> defaultValue) {
         if ("null".equals(entry.get(field))) {
             return null;
