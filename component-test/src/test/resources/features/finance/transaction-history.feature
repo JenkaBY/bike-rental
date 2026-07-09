@@ -122,3 +122,31 @@ Feature: Customer transaction history retrieval
     And the transaction history response only contains entries of
       | id  | amount | direction | type    | sourceType | sourceId |
       | TR3 | 70.00  | DEBIT     | CAPTURE | RENTAL     | RENT1    |
+
+  Scenario: Same-day range honors business timezone near local midnight
+    Given the following transaction records exist in db
+      | id  | type    | paymentMethod | amount | customerId | operatorId | sourceType | sourceId | recordedAt           | idempotencyKey |
+      | TX5 | DEPOSIT | CASH          | 11.00  | CUS2       | OP1        |            |          | 2026-02-07T21:00:00Z | IDK5           |
+      | TX6 | DEPOSIT | CASH          | 12.00  | CUS2       | OP1        |            |          | 2026-02-08T10:00:00Z | IDK6           |
+      | TX7 | DEPOSIT | CASH          | 13.00  | CUS2       | OP1        |            |          | 2026-02-08T20:59:59Z | IDK7           |
+      | TX8 | DEPOSIT | CASH          | 14.00  | CUS2       | OP1        |            |          | 2026-02-08T21:00:00Z | IDK8           |
+    And the following transaction record entries exist in db
+      | id    | transaction | subLedger | ledgerType      | direction | amount |
+      | TRE7  | TX5         | L_C_W2    | CUSTOMER_WALLET | CREDIT    | 11.00  |
+      | TRE8  | TX6         | L_C_W2    | CUSTOMER_WALLET | CREDIT    | 12.00  |
+      | TRE9  | TX7         | L_C_W2    | CUSTOMER_WALLET | CREDIT    | 13.00  |
+      | TRE10 | TX8         | L_C_W2    | CUSTOMER_WALLET | CREDIT    | 14.00  |
+    When a GET request has been made to "/api/finance/customers/{customerId}/transactions" endpoint with query parameters
+      | {customerId} | fromDate   | toDate     |
+      | CUS2         | 2026-02-08 | 2026-02-08 |
+    Then the response status is 200
+    And the response contains
+      | path               | value |
+      | $.totalItems       | 3     |
+      | $.pageRequest.page | 0     |
+      | $.pageRequest.size | 20    |
+    And the transaction history response only contains entries of
+      | amount | type    | recordedAt          |
+      | 13.00  | DEPOSIT | 2026-02-08T20:59:59 |
+      | 12.00  | DEPOSIT | 2026-02-08T10:00:00 |
+      | 11.00  | DEPOSIT | 2026-02-07T21:00:00 |

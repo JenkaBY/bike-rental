@@ -30,6 +30,7 @@ springdoc:
 
 app:
   default-locale: en
+  zone-id: Europe/Vilnius
   customers:
     search-limit-result: 10
   rental:

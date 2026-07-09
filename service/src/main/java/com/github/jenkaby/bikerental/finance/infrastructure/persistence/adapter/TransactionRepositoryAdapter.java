@@ -8,6 +8,7 @@ import com.github.jenkaby.bikerental.finance.domain.repository.TransactionReposi
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.TransactionJpaMapper;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.repository.TransactionJpaRepository;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification.CustomerTransactionsSpec;
+import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification.CustomerTransactionsSpecParamsMapper;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification.SpecConstant;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
@@ -31,10 +32,12 @@ class TransactionRepositoryAdapter implements TransactionRepository {
 
     private final TransactionJpaRepository jpaRepository;
     private final TransactionJpaMapper mapper;
+    private final CustomerTransactionsSpecParamsMapper specParamsMapper;
 
-    TransactionRepositoryAdapter(TransactionJpaRepository jpaRepository, TransactionJpaMapper mapper) {
+    TransactionRepositoryAdapter(TransactionJpaRepository jpaRepository, TransactionJpaMapper mapper, CustomerTransactionsSpecParamsMapper specParamsMapper) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
+        this.specParamsMapper = specParamsMapper;
     }
 
     @Override
@@ -82,7 +85,7 @@ class TransactionRepositoryAdapter implements TransactionRepository {
 
         var txnSpec = SpecificationBuilder.specification(CustomerTransactionsSpec.class)
                 .withParam(SpecConstant.TransactionField.CUSTOMER_ID, customerId.id().toString());
-        filter.toMap().forEach(txnSpec::withParam);
+        specParamsMapper.toParams(filter).forEach(txnSpec::withParam);
         var spec = txnSpec.build();
 
         var springPage = jpaRepository.findAll(spec, pageable);

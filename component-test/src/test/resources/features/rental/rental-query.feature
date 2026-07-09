@@ -258,8 +258,7 @@ Feature: Rental Query
       | path         | value |
       | $.totalItems | 0     |
 
-  @UseUTC
-  Scenario Outline: Filter rentals by from date only
+  Scenario Outline: Filter rentals by 'from' date only
     Given now is "2026-02-20T12:00:00"
     And rentals exist in the database with the following data
       | id | customerId | status | startedAt           | expectedReturnAt    | createdAt  | updatedAt  |
@@ -280,11 +279,10 @@ Feature: Rental Query
       | 2  | CUS2       | 2            | ACTIVE | 2026-02-15T09:00:00 | 2026-02-15T11:00:00 |
       | 3  | CUS1       | 3            | ACTIVE | 2026-02-18T09:00:00 | 2026-02-18T11:00:00 |
     Examples:
-      | early               | boundary            | later               |
-      | 2026-02-10T00:00:00 | 2026-02-15T00:00:00 | 2026-02-18T00:00:00 |
+      | early                | boundary             | later                |
+      | 2026-02-10T00:00:00Z | 2026-02-15T00:00:00Z | 2026-02-18T00:00:00Z |
 
-  @UseUTC
-  Scenario Outline: Filter rentals by to date only
+  Scenario Outline: Filter rentals by 'to' date only
     Given now is "2026-02-20T12:00:00"
     And rentals exist in the database with the following data
       | id | customerId | status | startedAt           | expectedReturnAt    | createdAt  | updatedAt  |
@@ -305,11 +303,10 @@ Feature: Rental Query
       | 1  | CUS1       | 1            | ACTIVE | 2026-02-10T09:00:00 | 2026-02-10T11:00:00 |
       | 2  | CUS2       | 2            | ACTIVE | 2026-02-15T09:00:00 | 2026-02-15T11:00:00 |
     Examples:
-      | early               | boundary            | later               |
-      | 2026-02-10T00:00:00 | 2026-02-15T00:00:00 | 2026-02-18T00:00:00 |
+      | early                | boundary             | later                |
+      | 2026-02-10T00:00:00Z | 2026-02-15T00:00:00Z | 2026-02-18T00:00:00Z |
 
-  @UseUTC
-  Scenario Outline: Filter rentals by from and to date range (same-day inclusive)
+  Scenario Outline: Filter rentals by 'from' and 'to' date range (same-day inclusive)
     Given now is "2026-02-20T12:00:00"
     And rentals exist in the database with the following data
       | id | customerId | status | startedAt           | expectedReturnAt    | createdAt  | updatedAt  |
@@ -329,11 +326,10 @@ Feature: Rental Query
       | id | customerId | equipmentIds | status | startedAt           | expectedReturnAt    |
       | 2  | CUS2       | 2            | ACTIVE | 2026-02-15T09:00:00 | 2026-02-15T11:00:00 |
     Examples:
-      | early               | boundary            | later               |
-      | 2026-02-10T00:00:00 | 2026-02-15T00:00:00 | 2026-02-18T00:00:00 |
+      | early                | boundary             | later                |
+      | 2026-02-10T00:00:00Z | 2026-02-15T00:00:00Z | 2026-02-18T00:00:00Z |
 
-  @UseUTC
-  Scenario Outline: Filter rentals by date range combined with status
+  Scenario Outline: Filter rentals by 'from' and 'to' date range combined with status
     Given now is "2026-02-20T12:00:00"
     And rentals exist in the database with the following data
       | id | customerId | status    | startedAt           | expectedReturnAt    | createdAt    | updatedAt    |
@@ -353,5 +349,32 @@ Feature: Rental Query
       | id | customerId | equipmentIds | status | startedAt           | expectedReturnAt    |
       | 1  | CUS1       | 1            | ACTIVE | 2026-02-15T09:00:00 | 2026-02-15T11:00:00 |
     Examples:
-      | inRange             | outOfRange          |
-      | 2026-02-15T00:00:00 | 2026-02-10T00:00:00 |
+      | inRange              | outOfRange           |
+      | 2026-02-15T00:00:00Z | 2026-02-10T00:00:00Z |
+
+  Scenario: Filter rentals by same-day range honors business timezone near local midnight
+    Given now is "2026-02-20T12:00:00"
+    And rentals exist in the database with the following data
+      | id | customerId | status | startedAt           | expectedReturnAt    | createdAt            | updatedAt            |
+      | 1  | CUS1       | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 | 2026-02-07T21:00:00Z | 2026-02-07T21:00:00Z |
+      | 2  | CUS2       | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 | 2026-02-08T19:29:00Z | 2026-02-08T19:29:00Z |
+      | 3  | CUS1       | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 | 2026-02-08T20:59:59Z | 2026-02-08T20:59:59Z |
+      | 4  | CUS2       | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 | 2026-02-08T21:00:00Z | 2026-02-08T21:00:00Z |
+    And rental equipment exists in the database with the following data
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status | startedAt           | expectedReturnAt    | estimatedCost | finalCost | createdAt            |
+      | 1        | 1           | BIKE-001     | BICYCLE       | 1        | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 | 200.00        |           | 2026-02-07T21:00:00Z |
+      | 2        | 2           | E-BIKE-001   | SCOOTER       | 2        | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 | 200.00        |           | 2026-02-08T19:29:00Z |
+      | 3        | 3           | E-BIKE-002   | SCOOTER       | 2        | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 | 200.00        |           | 2026-02-08T20:59:59Z |
+      | 4        | 4           | E-BIKE-003   | SCOOTER       | 2        | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 | 200.00        |           | 2026-02-08T21:00:00Z |
+    When a GET request has been made to "/api/rentals" endpoint with query parameters
+      | from       | to         |
+      | 2026-02-08 | 2026-02-08 |
+    Then the response status is 200
+    And the rental summary response only contains page of
+      | id | customerId | equipmentIds | status | startedAt           | expectedReturnAt    |
+      | 1  | CUS1       | 1            | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 |
+      | 2  | CUS2       | 2            | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 |
+      | 3  | CUS1       | 3            | ACTIVE | 2026-02-08T09:00:00 | 2026-02-08T11:00:00 |
+    And the response contains
+      | path         | value |
+      | $.totalItems | 3     |

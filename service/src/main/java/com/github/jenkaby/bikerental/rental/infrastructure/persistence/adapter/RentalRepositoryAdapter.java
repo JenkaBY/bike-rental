@@ -7,6 +7,7 @@ import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper.RentalJpaMapper;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.repository.RentalJpaRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.specification.RentalSpec;
+import com.github.jenkaby.bikerental.rental.infrastructure.persistence.specification.RentalSpecParamsMapper;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
@@ -25,11 +26,13 @@ class RentalRepositoryAdapter implements RentalRepository {
     private final RentalJpaRepository repository;
     private final RentalJpaMapper mapper;
     private final PageMapper pageMapper;
+    private final RentalSpecParamsMapper specParamsMapper;
 
-    RentalRepositoryAdapter(RentalJpaRepository repository, RentalJpaMapper mapper, PageMapper pageMapper) {
+    RentalRepositoryAdapter(RentalJpaRepository repository, RentalJpaMapper mapper, PageMapper pageMapper, RentalSpecParamsMapper specParamsMapper) {
         this.repository = repository;
         this.mapper = mapper;
         this.pageMapper = pageMapper;
+        this.specParamsMapper = specParamsMapper;
     }
 
     @Override
@@ -54,7 +57,7 @@ class RentalRepositoryAdapter implements RentalRepository {
     public Page<Rental> findAll(RentalSearchFilter filter, PageRequest pageRequest) {
         var pageable = pageMapper.toSpring(pageRequest);
         var specBuilder = SpecificationBuilder.specification(RentalSpec.class);
-        filter.toMap().forEach(specBuilder::withParam);
+        specParamsMapper.toParams(filter).forEach(specBuilder::withParam);
         var spec = specBuilder.build();
         var page = repository.findAll(spec, pageable);
         return pageMapper.toDomain(page)
