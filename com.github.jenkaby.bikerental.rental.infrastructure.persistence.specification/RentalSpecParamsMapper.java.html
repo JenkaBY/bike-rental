@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalSpecParamsMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.infrastructure.persistence.specification</a> &gt; <span class="el_source">RentalSpecParamsMapper.java</span></div><h1>RentalSpecParamsMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.infrastructure.persistence.specification;
+
+import com.github.jenkaby.bikerental.rental.domain.model.RentalSearchFilter;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
+import org.jspecify.annotations.Nullable;
+import org.mapstruct.InjectionStrategy;
+import org.mapstruct.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
+@Mapper(injectionStrategy = InjectionStrategy.SETTER)
+<span class="fc" id="L18">public abstract class RentalSpecParamsMapper {</span>
+
+    private ZoneId businessZoneId;
+
+    @Autowired
+    public void setBusinessZoneId(ZoneId businessZoneId) {
+<span class="fc" id="L24">        this.businessZoneId = businessZoneId;</span>
+<span class="fc" id="L25">    }</span>
+
+    public Map&lt;String, String[]&gt; toParams(RentalSearchFilter filter) {
+<span class="fc" id="L28">        var result = new HashMap&lt;String, String[]&gt;();</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (!filter.statuses().isEmpty()) {</span>
+<span class="fc" id="L30">            result.put(SpecConstant.RentalField.STATUS, filter.statuses().stream().map(RentalStatus::name).toArray(String[]::new));</span>
+        }
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        putIfPresent(result, SpecConstant.RentalField.CUSTOMER_ID, filter.customerId() != null ? filter.customerId().toString() : null);</span>
+<span class="fc" id="L33">        putIfPresent(result, SpecConstant.RentalField.PARAM_EQUIPMENT_UID, filter.equipmentUid());</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_FROM, filter.from() != null ? formatInstant(toStartOfDay(filter.from())) : null);</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_TO, filter.to() != null ? formatInstant(toStartOfNextDay(filter.to())) : null);</span>
+<span class="fc" id="L36">        return result;</span>
+    }
+
+    private static void putIfPresent(Map&lt;String, String[]&gt; target, String key, @Nullable String value) {
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (value != null) {</span>
+<span class="fc" id="L41">            target.put(key, new String[]{value});</span>
+        }
+<span class="fc" id="L43">    }</span>
+
+    private Instant toStartOfDay(LocalDate date) {
+<span class="fc" id="L46">        return date.atStartOfDay(businessZoneId).toInstant();</span>
+    }
+
+    private Instant toStartOfNextDay(LocalDate date) {
+<span class="fc" id="L50">        return date.plusDays(1).atStartOfDay(businessZoneId).toInstant();</span>
+    }
+
+    private static String formatInstant(Instant instant) {
+<span class="fc" id="L54">        return DateTimeFormatter.ISO_INSTANT.format(instant);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

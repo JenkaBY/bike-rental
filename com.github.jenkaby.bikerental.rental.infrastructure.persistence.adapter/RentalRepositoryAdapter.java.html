@@ -7,6 +7,7 @@ import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.mapper.RentalJpaMapper;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.repository.RentalJpaRepository;
 import com.github.jenkaby.bikerental.rental.infrastructure.persistence.specification.RentalSpec;
+import com.github.jenkaby.bikerental.rental.infrastructure.persistence.specification.RentalSpecParamsMapper;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
@@ -25,49 +26,51 @@ class RentalRepositoryAdapter implements RentalRepository {
     private final RentalJpaRepository repository;
     private final RentalJpaMapper mapper;
     private final PageMapper pageMapper;
+    private final RentalSpecParamsMapper specParamsMapper;
 
-<span class="fc" id="L29">    RentalRepositoryAdapter(RentalJpaRepository repository, RentalJpaMapper mapper, PageMapper pageMapper) {</span>
-<span class="fc" id="L30">        this.repository = repository;</span>
-<span class="fc" id="L31">        this.mapper = mapper;</span>
-<span class="fc" id="L32">        this.pageMapper = pageMapper;</span>
-<span class="fc" id="L33">    }</span>
+<span class="fc" id="L31">    RentalRepositoryAdapter(RentalJpaRepository repository, RentalJpaMapper mapper, PageMapper pageMapper, RentalSpecParamsMapper specParamsMapper) {</span>
+<span class="fc" id="L32">        this.repository = repository;</span>
+<span class="fc" id="L33">        this.mapper = mapper;</span>
+<span class="fc" id="L34">        this.pageMapper = pageMapper;</span>
+<span class="fc" id="L35">        this.specParamsMapper = specParamsMapper;</span>
+<span class="fc" id="L36">    }</span>
 
     @Override
     @Transactional
     public Rental save(Rental rental) {
-<span class="fc" id="L38">        var entity = mapper.toEntity(rental);</span>
-<span class="fc" id="L39">        var savedEntity = repository.saveAndFlush(entity);</span>
-<span class="fc" id="L40">        return mapper.toDomain(savedEntity);</span>
+<span class="fc" id="L41">        var entity = mapper.toEntity(rental);</span>
+<span class="fc" id="L42">        var savedEntity = repository.saveAndFlush(entity);</span>
+<span class="fc" id="L43">        return mapper.toDomain(savedEntity);</span>
     }
 
     @Override
     public Optional&lt;Rental&gt; findById(Long id) {
-<span class="fc" id="L45">        return repository.findById(id).map(mapper::toDomain);</span>
+<span class="fc" id="L48">        return repository.findById(id).map(mapper::toDomain);</span>
     }
 
     @Override
     public boolean existsById(Long id) {
-<span class="nc" id="L50">        return repository.existsById(id);</span>
+<span class="nc" id="L53">        return repository.existsById(id);</span>
     }
 
     @Override
     public Page&lt;Rental&gt; findAll(RentalSearchFilter filter, PageRequest pageRequest) {
-<span class="fc" id="L55">        var pageable = pageMapper.toSpring(pageRequest);</span>
-<span class="fc" id="L56">        var specBuilder = SpecificationBuilder.specification(RentalSpec.class);</span>
-<span class="fc" id="L57">        filter.toMap().forEach(specBuilder::withParam);</span>
-<span class="fc" id="L58">        var spec = specBuilder.build();</span>
-<span class="fc" id="L59">        var page = repository.findAll(spec, pageable);</span>
-<span class="fc" id="L60">        return pageMapper.toDomain(page)</span>
-<span class="fc" id="L61">                .map(mapper::toDomain);</span>
+<span class="fc" id="L58">        var pageable = pageMapper.toSpring(pageRequest);</span>
+<span class="fc" id="L59">        var specBuilder = SpecificationBuilder.specification(RentalSpec.class);</span>
+<span class="fc" id="L60">        specParamsMapper.toParams(filter).forEach(specBuilder::withParam);</span>
+<span class="fc" id="L61">        var spec = specBuilder.build();</span>
+<span class="fc" id="L62">        var page = repository.findAll(spec, pageable);</span>
+<span class="fc" id="L63">        return pageMapper.toDomain(page)</span>
+<span class="fc" id="L64">                .map(mapper::toDomain);</span>
     }
 
     @Override
     public List&lt;Rental&gt; getCustomerDebtRentals(CustomerRef customerRef) {
-<span class="fc" id="L66">        return repository</span>
-<span class="fc" id="L67">                .findAllByCustomerIdAndStatusOrderByCreatedAtAsc(customerRef.id(), RentalStatus.DEBT)</span>
-<span class="fc" id="L68">                .stream()</span>
-<span class="fc" id="L69">                .map(mapper::toDomain)</span>
-<span class="fc" id="L70">                .toList();</span>
+<span class="fc" id="L69">        return repository</span>
+<span class="fc" id="L70">                .findAllByCustomerIdAndStatusOrderByCreatedAtAsc(customerRef.id(), RentalStatus.DEBT)</span>
+<span class="fc" id="L71">                .stream()</span>
+<span class="fc" id="L72">                .map(mapper::toDomain)</span>
+<span class="fc" id="L73">                .toList();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

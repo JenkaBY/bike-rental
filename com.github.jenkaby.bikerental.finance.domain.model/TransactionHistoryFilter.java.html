@@ -2,46 +2,18 @@
 
 import org.jspecify.annotations.Nullable;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
-<span class="fc" id="L13">public record TransactionHistoryFilter(</span>
+<span class="fc" id="L7">public record TransactionHistoryFilter(</span>
         @Nullable LocalDate fromDate,
         @Nullable LocalDate toDate,
         @Nullable String sourceId,
         @Nullable TransactionSourceType sourceType
 ) {
-<span class="fc" id="L19">    private static final TransactionHistoryFilter EMPTY = new TransactionHistoryFilter(null, null, null, null);</span>
+<span class="fc" id="L13">    private static final TransactionHistoryFilter EMPTY = new TransactionHistoryFilter(null, null, null, null);</span>
 
     public static TransactionHistoryFilter empty() {
-<span class="nc" id="L22">        return EMPTY;</span>
-    }
-
-    public Map&lt;String, String&gt; toMap() {
-<span class="fc" id="L26">        var result = new HashMap&lt;String, String&gt;();</span>
-<span class="fc" id="L27">        result.put(&quot;fromDate&quot;, Optional.ofNullable(fromDate).map(this::toInstant).map(TransactionHistoryFilter::toString).orElse(null));</span>
-<span class="fc" id="L28">        result.put(&quot;toDate&quot;, Optional.ofNullable(toDate).map(this::nextDay).map(this::toInstant).map(TransactionHistoryFilter::toString).orElse(null));</span>
-<span class="fc" id="L29">        result.put(&quot;sourceId&quot;, sourceId);</span>
-<span class="fc bfc" id="L30" title="All 2 branches covered.">        result.put(&quot;sourceType&quot;, sourceType != null ? sourceType.name() : null);</span>
-<span class="fc" id="L31">        return result;</span>
-    }
-
-    private LocalDate nextDay(LocalDate date) {
-<span class="fc" id="L35">        return date.plusDays(1);</span>
-    }
-
-    //
-    private Instant toInstant(LocalDate date) {
-<span class="fc" id="L40">        return date.atStartOfDay().toInstant(ZoneOffset.UTC);</span>
-    }
-
-    private static String toString(Instant date) {
-<span class="fc" id="L44">        return DateTimeFormatter.ISO_INSTANT.format(date);</span>
+<span class="nc" id="L16">        return EMPTY;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -4,14 +4,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Clock;
+import java.time.ZoneId;
 
 
 @Configuration
-<span class="fc" id="L10">public class ClockConfig {</span>
+<span class="fc" id="L11">public class ClockConfig {</span>
 
     @Bean
     public Clock applicationClock() {
-<span class="fc" id="L14">        return Clock.systemDefaultZone();</span>
+<span class="fc" id="L15">        return Clock.systemDefaultZone();</span>
+    }
+
+    @Bean
+    public ZoneId businessZoneId(AppProperties appProperties) {
+<span class="fc" id="L20">        return ZoneId.of(appProperties.zoneId());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

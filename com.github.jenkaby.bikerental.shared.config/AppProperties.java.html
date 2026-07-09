@@ -2,14 +2,18 @@
 
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
 
 @Validated
 @ConfigurationProperties(prefix = &quot;app&quot;)
-<span class="fc" id="L10">public record AppProperties(</span>
+<span class="fc" id="L11">public record AppProperties(</span>
         @NotBlank
-        String defaultLocale
+        String defaultLocale,
+        @NotBlank
+        @DefaultValue(&quot;Europe/Vilnius&quot;)
+        String zoneId
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
