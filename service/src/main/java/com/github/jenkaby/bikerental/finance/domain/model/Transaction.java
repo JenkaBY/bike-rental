@@ -8,6 +8,8 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Getter
@@ -31,4 +33,27 @@ public class Transaction {
     @Nullable
     private final String reason;
     private final List<TransactionRecord> records;
+
+    public Money walletBalanceDelta() {
+        return bucketDelta(LedgerType.CUSTOMER_WALLET);
+    }
+
+    public Money holdBalanceDelta() {
+        return bucketDelta(LedgerType.CUSTOMER_HOLD);
+    }
+
+    public Optional<Money> runningBalanceFor(LedgerType ledgerType) {
+        return records.stream()
+                .filter(record -> record.getLedgerType() == ledgerType)
+                .map(TransactionRecord::getRunningBalance)
+                .filter(Objects::nonNull)
+                .findFirst();
+    }
+
+    private Money bucketDelta(LedgerType ledgerType) {
+        return records.stream()
+                .filter(record -> record.getLedgerType() == ledgerType)
+                .map(TransactionRecord::signedAmount)
+                .reduce(Money.zero(), Money::add);
+    }
 }

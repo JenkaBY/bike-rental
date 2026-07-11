@@ -56,6 +56,9 @@ public class TransactionHistoryWebSteps {
         var softly = new SoftAssertions();
         softly.assertThat(actual.amount()).as("amount").isEqualByComparingTo(expected.amount());
         softly.assertThat(actual.type()).as("type").isEqualTo(expected.type());
+        if (expected.direction() != null) {
+            softly.assertThat(actual.direction()).as("direction").isEqualTo(expected.direction());
+        }
         if (expected.paymentMethod() != null) {
             softly.assertThat(actual.paymentMethod()).as("paymentMethod").isEqualTo(expected.paymentMethod());
         }
@@ -68,6 +71,37 @@ public class TransactionHistoryWebSteps {
         if (expected.sourceId() != null) {
             softly.assertThat(actual.sourceId()).as("sourceId").isEqualTo(expected.sourceId());
         }
+        validateDeltas(softly, actual, expected);
+        validateBalances(softly, actual, expected);
         softly.assertAll();
+    }
+
+    private void validateDeltas(SoftAssertions softly, CustomerTransactionResponse actual, CustomerTransactionResponse expected) {
+        var expectedDeltas = expected.deltas();
+        if (expectedDeltas == null) {
+            return;
+        }
+        if (expectedDeltas.wallet() != null) {
+            softly.assertThat(actual.deltas().wallet()).as("deltas.wallet").isEqualByComparingTo(expectedDeltas.wallet());
+        }
+        if (expectedDeltas.hold() != null) {
+            softly.assertThat(actual.deltas().hold()).as("deltas.hold").isEqualByComparingTo(expectedDeltas.hold());
+        }
+        if (expectedDeltas.external() != null) {
+            softly.assertThat(actual.deltas().external()).as("deltas.external").isEqualByComparingTo(expectedDeltas.external());
+        }
+    }
+
+    private void validateBalances(SoftAssertions softly, CustomerTransactionResponse actual, CustomerTransactionResponse expected) {
+        var expectedBalances = expected.balances();
+        if (expectedBalances == null) {
+            return;
+        }
+        if (expectedBalances.wallet() != null) {
+            softly.assertThat(actual.balances().wallet()).as("balances.wallet").isEqualByComparingTo(expectedBalances.wallet());
+        }
+        if (expectedBalances.hold() != null) {
+            softly.assertThat(actual.balances().hold()).as("balances.hold").isEqualByComparingTo(expectedBalances.hold());
+        }
     }
 }

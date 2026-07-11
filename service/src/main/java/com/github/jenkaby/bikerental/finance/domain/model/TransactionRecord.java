@@ -16,4 +16,9 @@ public class TransactionRecord {
     private final LedgerType ledgerType;
     private final EntryDirection direction;
     private final Money amount;
+    private final Money runningBalance;
+
+    public Money signedAmount() {
+        return direction == EntryDirection.CREDIT ? amount : amount.negate();
+    }
 }

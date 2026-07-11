@@ -20,11 +20,19 @@ public class TransactionResponseTransformer {
                 Aliases.getCustomerId(entry.get("customerId")),
                 DataTableHelper.toBigDecimal(entry, "amount"),
                 DataTableHelper.getStringOrNull(entry, "type"),
+                DataTableHelper.getStringOrNull(entry, "direction"),
                 DataTableHelper.parseLocalDateTimeToInstant(entry, "recordedAt"),
                 DataTableHelper.getStringOrNull(entry, "paymentMethod"),
                 DataTableHelper.getStringOrNull(entry, "reason"),
                 DataTableHelper.getStringOrNull(entry, "sourceType"),
-                sourceId
+                sourceId,
+                new CustomerTransactionResponse.Deltas(
+                        DataTableHelper.toBigDecimal(entry, "walletDelta"),
+                        DataTableHelper.toBigDecimal(entry, "holdDelta"),
+                        DataTableHelper.toBigDecimal(entry, "externalDelta")),
+                new CustomerTransactionResponse.Balances(
+                        DataTableHelper.toBigDecimal(entry, "walletBalanceAfter"),
+                        DataTableHelper.toBigDecimal(entry, "holdBalanceAfter"))
         );
     }
 }

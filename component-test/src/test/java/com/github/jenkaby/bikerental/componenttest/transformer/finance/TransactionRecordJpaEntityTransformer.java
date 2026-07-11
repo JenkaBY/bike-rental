@@ -25,6 +25,7 @@ public class TransactionRecordJpaEntityTransformer {
         entity.setLedgerType(LedgerType.valueOf(DataTableHelper.getStringOrNull(entry, "ledgerType")));
         entity.setDirection(EntryDirection.valueOf(DataTableHelper.getStringOrNull(entry, "direction")));
         entity.setAmount(DataTableHelper.toBigDecimal(entry, "amount"));
+        entity.setRunningBalance(DataTableHelper.toBigDecimal(entry, "runningBalance"));
 
         return entity;
     }

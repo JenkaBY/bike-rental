@@ -106,11 +106,16 @@ class AccountQueryControllerTest {
                     CUSTOMER_ID,
                     new BigDecimal("50.00"),
                     TransactionType.DEPOSIT,
+                    "CREDIT",
                     Instant.parse("2026-03-15T10:30:00Z"),
                     null,
                     null,
                     null,
-                    null
+                    null,
+                    new GetTransactionHistoryUseCase.TransactionDto.Deltas(
+                            new BigDecimal("50.00"), new BigDecimal("0.00"), new BigDecimal("50.00")),
+                    new GetTransactionHistoryUseCase.TransactionDto.Balances(
+                            new BigDecimal("50.00"), new BigDecimal("0.00"))
             );
             var pageRequest = new PageRequest(20, 0, null);
             var page = new Page<>(List.of(entry), 1L, pageRequest);
@@ -118,11 +123,16 @@ class AccountQueryControllerTest {
                     CUSTOMER_ID,
                     new BigDecimal("50.00"),
                     "DEPOSIT",
+                    "CREDIT",
                     Instant.parse("2026-03-15T10:30:00Z"),
+                    "CASH",
                     null,
                     null,
                     null,
-                    null
+                    new CustomerTransactionResponse.Deltas(
+                            new BigDecimal("50.00"), new BigDecimal("0.00"), new BigDecimal("50.00")),
+                    new CustomerTransactionResponse.Balances(
+                            new BigDecimal("50.00"), new BigDecimal("0.00"))
             );
 
             given(getTransactionHistoryUseCase.execute(eq(CUSTOMER_ID), any(TransactionHistoryFilter.class), any(PageRequest.class)))
@@ -134,7 +144,13 @@ class AccountQueryControllerTest {
                             .param("size", "20"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.totalItems").value(1))
-                    .andExpect(jsonPath("$.items[0].type").value("DEPOSIT"));
+                    .andExpect(jsonPath("$.items[0].type").value("DEPOSIT"))
+                    .andExpect(jsonPath("$.items[0].direction").value("CREDIT"))
+                    .andExpect(jsonPath("$.items[0].deltas.wallet").value("50.0"))
+                    .andExpect(jsonPath("$.items[0].deltas.hold").value("0.0"))
+                    .andExpect(jsonPath("$.items[0].deltas.external").value("50.0"))
+                    .andExpect(jsonPath("$.items[0].balances.wallet").value("50.0"))
+                    .andExpect(jsonPath("$.items[0].balances.hold").value("0.0"));
         }
 
         @Test

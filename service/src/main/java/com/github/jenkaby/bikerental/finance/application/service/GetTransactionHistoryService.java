@@ -26,6 +26,7 @@ class GetTransactionHistoryService implements GetTransactionHistoryUseCase {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final TransactionMapper transactionMapper;
+    private final RunningBalanceCalculator runningBalanceCalculator;
 
     @Override
     public Page<TransactionDto> execute(UUID customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
@@ -35,9 +36,15 @@ class GetTransactionHistoryService implements GetTransactionHistoryUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException(CustomerAccount.class, customerId));
 
         Page<Transaction> page = transactionRepository.findTransactionHistory(customerRef, filter, pageRequest);
+        List<Transaction> items = page.items();
 
-        List<TransactionDto> entries = page.items().stream()
-                .map(transactionMapper::toEntry)
+        var balancesByTransaction = runningBalanceCalculator.calculate(customerRef, items);
+
+        List<TransactionDto> entries = items.stream()
+                .map(transaction -> {
+                    var balances = balancesByTransaction.get(transaction.getId());
+                    return transactionMapper.toEntry(transaction, balances.wallet(), balances.hold());
+                })
                 .toList();
         log.debug("Found {} transactions (total={}) for customer={}", entries.size(), page.totalItems(), customerId);
 

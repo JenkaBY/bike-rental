@@ -1,9 +1,6 @@
 package com.github.jenkaby.bikerental.finance.infrastructure.persistence.adapter;
 
-import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
-import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
-import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
-import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
+import com.github.jenkaby.bikerental.finance.domain.model.*;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.mapper.TransactionJpaMapper;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.repository.TransactionJpaRepository;
@@ -13,6 +10,7 @@ import com.github.jenkaby.bikerental.finance.infrastructure.persistence.specific
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.RentalId;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +20,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
@@ -93,5 +94,13 @@ class TransactionRepositoryAdapter implements TransactionRepository {
                 .map(mapper::toDomain)
                 .toList();
         return new Page<>(items, springPage.getTotalElements(), pageRequest);
+    }
+
+    @Override
+    public Map<LedgerType, Money> findLatestLedgerBalancesBefore(CustomerRef customerId, Instant before) {
+        return jpaRepository.findLatestCustomerBucketBalancesBefore(customerId.id(), before).stream()
+                .collect(Collectors.toMap(
+                        projection -> LedgerType.valueOf(projection.getLedgerType()),
+                        projection -> Money.of(projection.getRunningBalance())));
     }
 }

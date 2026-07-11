@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="finance_transaction_records.update-table_populate-running-balance" author="claude">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="finance_transaction_records" columnName="running_balance"/>
+        </preConditions>
+
+        <sql>
+            UPDATE finance_transaction_records target
+            SET running_balance = running.running_balance
+            FROM (SELECT rec.id AS id,
+                         SUM(CASE
+                                 WHEN rec.ledger_type IN ('CASH', 'CARD_TERMINAL', 'BANK_TRANSFER')
+                                     THEN CASE rec.direction WHEN 'DEBIT' THEN rec.amount ELSE -rec.amount END
+                                 ELSE CASE rec.direction WHEN 'CREDIT' THEN rec.amount ELSE -rec.amount END
+                             END)
+                             OVER (PARTITION BY rec.sub_ledger_id
+                                 ORDER BY txn.recorded_at, rec.id
+                                 ROWS UNBOUNDED PRECEDING) AS running_balance
+                  FROM finance_transaction_records rec
+                           JOIN finance_transactions txn ON txn.id = rec.transaction_id) running
+            WHERE target.id = running.id;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
