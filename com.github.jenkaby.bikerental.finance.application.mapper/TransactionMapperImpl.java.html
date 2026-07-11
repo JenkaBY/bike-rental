@@ -5,6 +5,7 @@ import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionH
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -23,38 +24,43 @@ public class TransactionMapperImpl implements TransactionMapper {
     private final MoneyMapper moneyMapper;
 
     @Autowired
-<span class="fc" id="L26">    public TransactionMapperImpl(MoneyMapper moneyMapper) {</span>
+<span class="fc" id="L27">    public TransactionMapperImpl(MoneyMapper moneyMapper) {</span>
 
-<span class="fc" id="L28">        this.moneyMapper = moneyMapper;</span>
-<span class="fc" id="L29">    }</span>
+<span class="fc" id="L29">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L30">    }</span>
 
     @Override
-    public GetTransactionHistoryUseCase.TransactionDto toEntry(Transaction tx) {
-<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if ( tx == null ) {</span>
-<span class="nc" id="L34">            return null;</span>
+    public GetTransactionHistoryUseCase.TransactionDto toEntry(Transaction tx, Money walletBalanceAfter, Money holdBalanceAfter) {
+<span class="pc bpc" id="L34" title="5 of 6 branches missed.">        if ( tx == null &amp;&amp; walletBalanceAfter == null &amp;&amp; holdBalanceAfter == null ) {</span>
+<span class="nc" id="L35">            return null;</span>
         }
 
-<span class="fc" id="L37">        UUID customerId = null;</span>
 <span class="fc" id="L38">        BigDecimal amount = null;</span>
-<span class="fc" id="L39">        TransactionType type = null;</span>
-<span class="fc" id="L40">        Instant recordedAt = null;</span>
-<span class="fc" id="L41">        PaymentMethod paymentMethod = null;</span>
-<span class="fc" id="L42">        String reason = null;</span>
-<span class="fc" id="L43">        TransactionSourceType sourceType = null;</span>
-<span class="fc" id="L44">        String sourceId = null;</span>
+<span class="fc" id="L39">        UUID customerId = null;</span>
+<span class="fc" id="L40">        TransactionType type = null;</span>
+<span class="fc" id="L41">        Instant recordedAt = null;</span>
+<span class="fc" id="L42">        PaymentMethod paymentMethod = null;</span>
+<span class="fc" id="L43">        String reason = null;</span>
+<span class="fc" id="L44">        TransactionSourceType sourceType = null;</span>
+<span class="fc" id="L45">        String sourceId = null;</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if ( tx != null ) {</span>
+<span class="fc" id="L47">            amount = moneyMapper.toBigDecimal( tx.getAmount() );</span>
+<span class="fc" id="L48">            customerId = tx.getCustomerId();</span>
+<span class="fc" id="L49">            type = tx.getType();</span>
+<span class="fc" id="L50">            recordedAt = tx.getRecordedAt();</span>
+<span class="fc" id="L51">            paymentMethod = tx.getPaymentMethod();</span>
+<span class="fc" id="L52">            reason = tx.getReason();</span>
+<span class="fc" id="L53">            sourceType = tx.getSourceType();</span>
+<span class="fc" id="L54">            sourceId = tx.getSourceId();</span>
+        }
 
-<span class="fc" id="L46">        customerId = tx.getCustomerId();</span>
-<span class="fc" id="L47">        amount = moneyMapper.toBigDecimal( tx.getAmount() );</span>
-<span class="fc" id="L48">        type = tx.getType();</span>
-<span class="fc" id="L49">        recordedAt = tx.getRecordedAt();</span>
-<span class="fc" id="L50">        paymentMethod = tx.getPaymentMethod();</span>
-<span class="fc" id="L51">        reason = tx.getReason();</span>
-<span class="fc" id="L52">        sourceType = tx.getSourceType();</span>
-<span class="fc" id="L53">        sourceId = tx.getSourceId();</span>
+<span class="fc" id="L57">        String direction = direction(tx);</span>
+<span class="fc" id="L58">        GetTransactionHistoryUseCase.TransactionDto.Deltas deltas = deltas(tx);</span>
+<span class="fc" id="L59">        GetTransactionHistoryUseCase.TransactionDto.Balances balances = balances(walletBalanceAfter, holdBalanceAfter);</span>
 
-<span class="fc" id="L55">        GetTransactionHistoryUseCase.TransactionDto transactionDto = new GetTransactionHistoryUseCase.TransactionDto( customerId, amount, type, recordedAt, paymentMethod, reason, sourceType, sourceId );</span>
+<span class="fc" id="L61">        GetTransactionHistoryUseCase.TransactionDto transactionDto = new GetTransactionHistoryUseCase.TransactionDto( customerId, amount, type, direction, recordedAt, paymentMethod, reason, sourceType, sourceId, deltas, balances );</span>
 
-<span class="fc" id="L57">        return transactionDto;</span>
+<span class="fc" id="L63">        return transactionDto;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

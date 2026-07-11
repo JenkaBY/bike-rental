@@ -8,17 +8,19 @@ import java.util.UUID;
         SubLedgerRef subLedgerRef,
         LedgerType ledgerType,
         EntryDirection direction,
-        Money amount
+        Money amount,
+        Money runningBalance
 ) {
 
     public TransactionRecord toTransaction(UUID id) {
-<span class="fc" id="L15">        return TransactionRecord.builder()</span>
-<span class="fc" id="L16">                .id(id)</span>
-<span class="fc" id="L17">                .subLedgerRef(subLedgerRef())</span>
-<span class="fc" id="L18">                .ledgerType(ledgerType())</span>
-<span class="fc" id="L19">                .direction(direction())</span>
-<span class="fc" id="L20">                .amount(amount())</span>
-<span class="fc" id="L21">                .build();</span>
+<span class="fc" id="L16">        return TransactionRecord.builder()</span>
+<span class="fc" id="L17">                .id(id)</span>
+<span class="fc" id="L18">                .subLedgerRef(subLedgerRef())</span>
+<span class="fc" id="L19">                .ledgerType(ledgerType())</span>
+<span class="fc" id="L20">                .direction(direction())</span>
+<span class="fc" id="L21">                .amount(amount())</span>
+<span class="fc" id="L22">                .runningBalance(runningBalance())</span>
+<span class="fc" id="L23">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

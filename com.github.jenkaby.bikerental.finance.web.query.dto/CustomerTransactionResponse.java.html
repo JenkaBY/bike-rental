@@ -7,21 +7,44 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Schema(description = &quot;A single journal entry line in the transaction history&quot;)
+@Schema(description = &quot;A single business transaction in the customer's history, with per-bucket money movement&quot;)
 <span class="fc" id="L11">public record CustomerTransactionResponse(</span>
         @Schema(description = &quot;Customer id&quot;)
         @NotNull UUID customerId,
-        @Schema(description = &quot;TxN amount&quot;)
+        @Schema(description = &quot;Absolute transaction amount (always positive); use direction/deltas for the sign&quot;)
         @NotNull BigDecimal amount,
-        @Schema(description = &quot;Business transaction type&quot;)
+        @Schema(description = &quot;Business transaction type&quot;,
+                allowableValues = {&quot;DEPOSIT&quot;, &quot;WITHDRAWAL&quot;, &quot;HOLD&quot;, &quot;CAPTURE&quot;, &quot;RELEASE&quot;, &quot;ADJUSTMENT&quot;})
         @NotNull String type,
+        @Schema(description = &quot;Overall direction from the customer's perspective&quot;, allowableValues = {&quot;CREDIT&quot;, &quot;DEBIT&quot;})
+        @NotNull String direction,
         @Schema(description = &quot;When the entry was recorded (UTC ISO-8601)&quot;)
         @NotNull Instant recordedAt,
         @Schema(description = &quot;Payment method, present for deposits and withdrawals&quot;)
         @NotNull String paymentMethod,
         @Schema(description = &quot;Free-text reason, present for adjustments&quot;) String reason,
         @Schema(description = &quot;Source type, e.g. RENTAL&quot;) String sourceType,
-        @Schema(description = &quot;Source identifier&quot;) String sourceId
+        @Schema(description = &quot;Source identifier&quot;) String sourceId,
+        @Schema(description = &quot;Signed change per bucket caused by this transaction&quot;)
+        @NotNull Deltas deltas,
+        @Schema(description = &quot;Customer bucket balances after this transaction was applied&quot;)
+        @NotNull Balances balances
 ) {
+
+    @Schema(description = &quot;Signed per-bucket deltas; external = wallet + hold (money crossing the customer boundary)&quot;)
+<span class="fc" id="L35">    public record Deltas(</span>
+            @Schema(description = &quot;Change to the available (wallet) balance&quot;) @NotNull BigDecimal wallet,
+            @Schema(description = &quot;Change to the reserved (hold) balance&quot;) @NotNull BigDecimal hold,
+            @Schema(description = &quot;Net change of the customer's total money (to/from the external world)&quot;)
+            @NotNull BigDecimal external
+    ) {
+    }
+
+    @Schema(description = &quot;Customer bucket balances after this transaction&quot;)
+<span class="fc" id="L44">    public record Balances(</span>
+            @Schema(description = &quot;Available (wallet) balance after this transaction&quot;) @NotNull BigDecimal wallet,
+            @Schema(description = &quot;Reserved (hold) balance after this transaction&quot;) @NotNull BigDecimal hold
+    ) {
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

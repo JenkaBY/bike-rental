@@ -37,33 +37,35 @@ public class TransactionRecordMapperImpl implements TransactionRecordMapper {
 <span class="fc" id="L37">        transactionRecord.ledgerType( entity.getLedgerType() );</span>
 <span class="fc" id="L38">        transactionRecord.direction( entity.getDirection() );</span>
 <span class="fc" id="L39">        transactionRecord.amount( moneyMapper.toMoney( entity.getAmount() ) );</span>
+<span class="fc" id="L40">        transactionRecord.runningBalance( moneyMapper.toMoney( entity.getRunningBalance() ) );</span>
 
-<span class="fc" id="L41">        return transactionRecord.build();</span>
+<span class="fc" id="L42">        return transactionRecord.build();</span>
     }
 
     @Override
     public TransactionRecordJpaEntity toEntity(TransactionRecord domain) {
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if ( domain == null ) {</span>
-<span class="nc" id="L47">            return null;</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if ( domain == null ) {</span>
+<span class="nc" id="L48">            return null;</span>
         }
 
-<span class="fc" id="L50">        TransactionRecordJpaEntity.TransactionRecordJpaEntityBuilder transactionRecordJpaEntity = TransactionRecordJpaEntity.builder();</span>
+<span class="fc" id="L51">        TransactionRecordJpaEntity.TransactionRecordJpaEntityBuilder transactionRecordJpaEntity = TransactionRecordJpaEntity.builder();</span>
 
-<span class="fc" id="L52">        transactionRecordJpaEntity.subLedgerId( domainSubLedgerRefId( domain ) );</span>
-<span class="fc" id="L53">        transactionRecordJpaEntity.id( domain.getId() );</span>
-<span class="fc" id="L54">        transactionRecordJpaEntity.ledgerType( domain.getLedgerType() );</span>
-<span class="fc" id="L55">        transactionRecordJpaEntity.direction( domain.getDirection() );</span>
-<span class="fc" id="L56">        transactionRecordJpaEntity.amount( moneyMapper.toBigDecimal( domain.getAmount() ) );</span>
+<span class="fc" id="L53">        transactionRecordJpaEntity.subLedgerId( domainSubLedgerRefId( domain ) );</span>
+<span class="fc" id="L54">        transactionRecordJpaEntity.id( domain.getId() );</span>
+<span class="fc" id="L55">        transactionRecordJpaEntity.ledgerType( domain.getLedgerType() );</span>
+<span class="fc" id="L56">        transactionRecordJpaEntity.direction( domain.getDirection() );</span>
+<span class="fc" id="L57">        transactionRecordJpaEntity.amount( moneyMapper.toBigDecimal( domain.getAmount() ) );</span>
+<span class="fc" id="L58">        transactionRecordJpaEntity.runningBalance( moneyMapper.toBigDecimal( domain.getRunningBalance() ) );</span>
 
-<span class="fc" id="L58">        return transactionRecordJpaEntity.build();</span>
+<span class="fc" id="L60">        return transactionRecordJpaEntity.build();</span>
     }
 
     private UUID domainSubLedgerRefId(TransactionRecord transactionRecord) {
-<span class="fc" id="L62">        SubLedgerRef subLedgerRef = transactionRecord.getSubLedgerRef();</span>
-<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if ( subLedgerRef == null ) {</span>
-<span class="nc" id="L64">            return null;</span>
+<span class="fc" id="L64">        SubLedgerRef subLedgerRef = transactionRecord.getSubLedgerRef();</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if ( subLedgerRef == null ) {</span>
+<span class="nc" id="L66">            return null;</span>
         }
-<span class="fc" id="L66">        return subLedgerRef.id();</span>
+<span class="fc" id="L68">        return subLedgerRef.id();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

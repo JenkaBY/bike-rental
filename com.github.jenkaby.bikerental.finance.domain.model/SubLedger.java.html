@@ -24,7 +24,7 @@ public class SubLedger {
 <span class="fc bfc" id="L24" title="All 2 branches covered.">        this.balance = this.ledgerType.isAssetLedger()</span>
 <span class="fc" id="L25">                ? this.balance.subtract(amount)</span>
 <span class="fc" id="L26">                : this.balance.add(amount);</span>
-<span class="fc" id="L27">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount);</span>
+<span class="fc" id="L27">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.CREDIT, amount, this.balance);</span>
     }
 
     private boolean isSufficientBalance(Money amount) {
@@ -38,7 +38,7 @@ public class SubLedger {
 <span class="fc bfc" id="L38" title="All 2 branches covered.">        this.balance = this.ledgerType.isAssetLedger()</span>
 <span class="fc" id="L39">                ? this.balance.add(amount)</span>
 <span class="fc" id="L40">                : this.balance.subtract(amount);</span>
-<span class="fc" id="L41">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.DEBIT, amount);</span>
+<span class="fc" id="L41">        return new TransactionRecordWithoutId(toRef(), this.ledgerType, EntryDirection.DEBIT, amount, this.balance);</span>
     }
 
     private SubLedgerRef toRef() {

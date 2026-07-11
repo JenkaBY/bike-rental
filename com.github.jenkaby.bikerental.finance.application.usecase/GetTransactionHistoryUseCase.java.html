@@ -20,12 +20,21 @@ public interface GetTransactionHistoryUseCase {
             UUID customerId,
             BigDecimal amount,
             TransactionType type,
+            String direction,
             Instant recordedAt,
             @Nullable PaymentMethod paymentMethod,
             @Nullable String reason,
             @Nullable TransactionSourceType sourceType,
-            @Nullable String sourceId
+            @Nullable String sourceId,
+            Deltas deltas,
+            Balances balances
     ) {
+
+<span class="fc" id="L33">        public record Deltas(BigDecimal wallet, BigDecimal hold, BigDecimal external) {</span>
+        }
+
+<span class="fc" id="L36">        public record Balances(BigDecimal wallet, BigDecimal hold) {</span>
+        }
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
