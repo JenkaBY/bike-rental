@@ -150,3 +150,51 @@ Feature: Customer transaction history retrieval
       | 13.00  | DEPOSIT | 2026-02-08T20:59:59 |
       | 12.00  | DEPOSIT | 2026-02-08T10:00:00 |
       | 11.00  | DEPOSIT | 2026-02-07T21:00:00 |
+
+  Scenario: Rental flow exposes per-bucket deltas, direction and running balances
+    Given the following transaction records exist in db
+      | id   | type    | paymentMethod     | amount | customerId | operatorId | sourceType | sourceId | recordedAt          | idempotencyKey |
+      | TX9  | DEPOSIT | CASH              | 100.00 | CUS3       | OP1        |            |          | 2026-05-01T10:00:00 | IDK9           |
+      | TX10 | HOLD    | INTERNAL_TRANSFER | 18.00  | CUS3       | OP1        | RENTAL     | RENT9    | 2026-05-01T11:00:00 | IDK10          |
+      | TX11 | RELEASE | INTERNAL_TRANSFER | 13.00  | CUS3       | OP1        | RENTAL     | RENT9    | 2026-05-01T12:00:00 | IDK11          |
+      | TX12 | CAPTURE | INTERNAL_TRANSFER | 5.00   | CUS3       | OP1        | RENTAL     | RENT9    | 2026-05-01T13:00:00 | IDK12          |
+    And the following transaction record entries exist in db
+      | id    | transaction | subLedger | ledgerType      | direction | amount | runningBalance |
+      | TRE11 | TX9         | L_C_W3    | CUSTOMER_WALLET | CREDIT    | 100.00 | 100.00       |
+      | TRE12 | TX9         | L_S_CASH  | CASH            | DEBIT     | 100.00 |              |
+      | TRE13 | TX10        | L_C_W3    | CUSTOMER_WALLET | DEBIT     | 18.00  | 82.00        |
+      | TRE14 | TX10        | L_C_H3    | CUSTOMER_HOLD   | CREDIT    | 18.00  | 18.00        |
+      | TRE15 | TX11        | L_C_H3    | CUSTOMER_HOLD   | DEBIT     | 13.00  | 5.00         |
+      | TRE16 | TX11        | L_C_W3    | CUSTOMER_WALLET | CREDIT    | 13.00  | 95.00        |
+      | TRE17 | TX12        | L_C_H3    | CUSTOMER_HOLD   | DEBIT     | 5.00   | 0.00         |
+      | TRE18 | TX12        | L_S_REV   | REVENUE         | CREDIT    | 5.00   |              |
+    When a GET request has been made to "/api/finance/customers/{customerId}/transactions" endpoint with
+      | {customerId} |
+      | CUS3         |
+    Then the response status is 200
+    And the response contains
+      | path               | value |
+      | $.totalItems       | 4     |
+      | $.pageRequest.size | 20    |
+    And the transaction history response only contains entries of
+      | type    | amount | direction | walletDelta | holdDelta | externalDelta | walletBalanceAfter | holdBalanceAfter | recordedAt          |
+      | CAPTURE | 5.00   | DEBIT     | 0.00        | -5.00     | -5.00         | 95.00              | 0.00             | 2026-05-01T13:00:00 |
+      | RELEASE | 13.00  | CREDIT    | 13.00       | -13.00    | 0.00          | 95.00              | 5.00             | 2026-05-01T12:00:00 |
+      | HOLD    | 18.00  | DEBIT     | -18.00      | 18.00     | 0.00          | 82.00              | 18.00            | 2026-05-01T11:00:00 |
+      | DEPOSIT | 100.00 | CREDIT    | 100.00      | 0.00      | 100.00        | 100.00             | 0.00             | 2026-05-01T10:00:00 |
+
+  Scenario: Adjustment deduction is reported as a DEBIT with a negative wallet delta
+    Given the following transaction records exist in db
+      | id   | type       | paymentMethod     | amount | customerId | operatorId | recordedAt          | idempotencyKey | reason        |
+      | TX13 | ADJUSTMENT | INTERNAL_TRANSFER | 20.00  | CUS3       | OP1        | 2026-06-01T10:00:00 | IDK13          | manual charge |
+    And the following transaction record entries exist in db
+      | id    | transaction | subLedger | ledgerType      | direction | amount | runningBalance |
+      | TRE19 | TX13        | L_C_W3    | CUSTOMER_WALLET | DEBIT     | 20.00  | -20.00       |
+      | TRE20 | TX13        | L_S_ADJ   | ADJUSTMENT      | CREDIT    | 20.00  |              |
+    When a GET request has been made to "/api/finance/customers/{customerId}/transactions" endpoint with
+      | {customerId} |
+      | CUS3         |
+    Then the response status is 200
+    And the transaction history response only contains entries of
+      | type       | amount | direction | walletDelta | holdDelta | externalDelta | reason        |
+      | ADJUSTMENT | 20.00  | DEBIT     | -20.00      | 0.00      | -20.00        | manual charge |

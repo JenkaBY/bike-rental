@@ -38,4 +38,7 @@ public class TransactionRecordJpaEntity {
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
+
+    @Column(name = "running_balance", precision = 19, scale = 2)
+    private BigDecimal runningBalance;
 }

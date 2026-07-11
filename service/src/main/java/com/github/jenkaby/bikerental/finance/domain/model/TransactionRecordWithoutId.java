@@ -8,7 +8,8 @@ public record TransactionRecordWithoutId(
         SubLedgerRef subLedgerRef,
         LedgerType ledgerType,
         EntryDirection direction,
-        Money amount
+        Money amount,
+        Money runningBalance
 ) {
 
     public TransactionRecord toTransaction(UUID id) {
@@ -18,6 +19,7 @@ public record TransactionRecordWithoutId(
                 .ledgerType(ledgerType())
                 .direction(direction())
                 .amount(amount())
+                .runningBalance(runningBalance())
                 .build();
     }
 }

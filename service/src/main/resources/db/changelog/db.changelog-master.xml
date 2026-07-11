@@ -46,4 +46,7 @@
     <include relativeToChangelogFile="true" file="v1/agreement_templates.create-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/agreement_signatures.create-table.xml"/>
 
+    <include relativeToChangelogFile="true" file="v1/finance_transaction_records.update-table_add-running-balance.xml"/>
+    <include relativeToChangelogFile="true" file="v1/finance_transaction_records.update-table_populate-running-balance.xml"/>
+
 </databaseChangeLog>

@@ -60,6 +60,10 @@ public record Money(BigDecimal amount) implements Comparable<Money> {
         return new Money(amount.abs());
     }
 
+    public Money negate() {
+        return new Money(amount.negate());
+    }
+
     public boolean isMoreThan(Money other) {
         return this.compareTo(other) > 0;
     }

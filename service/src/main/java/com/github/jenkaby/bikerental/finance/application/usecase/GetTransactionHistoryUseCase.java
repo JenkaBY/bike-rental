@@ -20,11 +20,20 @@ public interface GetTransactionHistoryUseCase {
             UUID customerId,
             BigDecimal amount,
             TransactionType type,
+            String direction,
             Instant recordedAt,
             @Nullable PaymentMethod paymentMethod,
             @Nullable String reason,
             @Nullable TransactionSourceType sourceType,
-            @Nullable String sourceId
+            @Nullable String sourceId,
+            Deltas deltas,
+            Balances balances
     ) {
+
+        public record Deltas(BigDecimal wallet, BigDecimal hold, BigDecimal external) {
+        }
+
+        public record Balances(BigDecimal wallet, BigDecimal hold) {
+        }
     }
 }

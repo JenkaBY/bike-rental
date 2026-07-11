@@ -74,7 +74,6 @@ public class SettleRentalService implements SettleRentalUseCase {
         }
         var holdTxNAmount = netHold;
 
-        Instant now = clock.instant();
         var finalCost = command.finalCost();
 
         String sourceId = String.valueOf(command.rentalRef().id());
@@ -84,6 +83,7 @@ public class SettleRentalService implements SettleRentalUseCase {
             var captureRevenueCredit = systemAccount.getRevenue().credit(finalCost);
 
             UUID captureId = uuidGenerator.generate();
+            var captureAt = clock.instant();
             var captureTransaction = Transaction.builder()
                     .id(captureId)
                     .type(TransactionType.CAPTURE)
@@ -93,7 +93,7 @@ public class SettleRentalService implements SettleRentalUseCase {
                     .operatorId(command.operatorId())
                     .sourceType(TransactionSourceType.RENTAL)
                     .sourceId(sourceId)
-                    .recordedAt(now)
+                    .recordedAt(captureAt)
                     .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))
                     .reason(null)
                     .records(List.of(
@@ -105,7 +105,7 @@ public class SettleRentalService implements SettleRentalUseCase {
             log.debug("Capture transaction [{}] persisted for rental id=[{}] amount=[{}]", captureId, command.rentalRef().id(), finalCost);
 
             var excess = holdTxNAmount.subtract(finalCost);
-            var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, now)
+            var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, clock.instant())
                     .map(t -> new TransactionRef(t.getId()))
                     .orElse(null);
 
@@ -113,7 +113,7 @@ public class SettleRentalService implements SettleRentalUseCase {
             accountRepository.save(systemAccount);
 
             log.info("Settlement complete for rental id=[{}]: captured=[{}] released=[{}]", command.rentalRef().id(), finalCost, excess);
-            return new SettlementResult(List.of(new TransactionRef(captureId)), releaseTransactionRef, now);
+            return new SettlementResult(List.of(new TransactionRef(captureId)), releaseTransactionRef, captureAt);
         }
 
         var shortfall = finalCost.subtract(holdTxNAmount);
@@ -125,11 +125,13 @@ public class SettleRentalService implements SettleRentalUseCase {
         }
 
         var captureRefs = new ArrayList<TransactionRef>();
+        Instant lastCaptureAt = clock.instant();
         if (customerAccount.getOnHold().getBalance().isPositive()) {
             log.info("Capturing customer's on hold [{}] for rental id=[{}]", holdTxNAmount.amount(), command.rentalRef().id());
             var holdDebit = customerAccount.getOnHold().debit(holdTxNAmount);
             var holdRevenueCredit = systemAccount.getRevenue().credit(holdTxNAmount);
             UUID holdCaptureId = uuidGenerator.generate();
+            lastCaptureAt = clock.instant();
             transactionRepository.save(Transaction.builder()
                     .id(holdCaptureId)
                     .type(TransactionType.CAPTURE)
@@ -139,7 +141,7 @@ public class SettleRentalService implements SettleRentalUseCase {
                     .operatorId(command.operatorId())
                     .sourceType(TransactionSourceType.RENTAL)
                     .sourceId(sourceId)
-                    .recordedAt(now)
+                    .recordedAt(lastCaptureAt)
                     .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))
                     .reason(null)
                     .records(List.of(
@@ -156,6 +158,7 @@ public class SettleRentalService implements SettleRentalUseCase {
             var walletDebit = customerAccount.getWallet().debit(shortfall);
             var walletRevenueCredit = systemAccount.getRevenue().credit(shortfall);
             UUID walletCaptureId = uuidGenerator.generate();
+            lastCaptureAt = clock.instant();
             transactionRepository.save(Transaction.builder()
                     .id(walletCaptureId)
                     .type(TransactionType.CAPTURE)
@@ -165,7 +168,7 @@ public class SettleRentalService implements SettleRentalUseCase {
                     .operatorId(command.operatorId())
                     .sourceType(TransactionSourceType.RENTAL)
                     .sourceId(sourceId)
-                    .recordedAt(now)
+                    .recordedAt(lastCaptureAt)
                     .idempotencyKey(new IdempotencyKey(uuidGenerator.generate()))
                     .reason(null)
                     .records(List.of(
@@ -182,7 +185,7 @@ public class SettleRentalService implements SettleRentalUseCase {
 
         log.info("Settlement complete (over-hold) for rental id=[{}]: finalCost=[{}] captureRefs={}",
                 command.rentalRef().id(), finalCost, captureRefs);
-        return new SettlementResult(captureRefs, null, now);
+        return new SettlementResult(captureRefs, null, lastCaptureAt);
     }
 
     private Optional<Transaction> commitReleaseTransaction(CustomerAccount account, SettleRentalCommand command, Money excess, Instant now) {
