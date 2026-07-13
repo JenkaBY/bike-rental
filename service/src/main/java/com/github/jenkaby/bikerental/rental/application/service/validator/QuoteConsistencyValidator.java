@@ -61,7 +61,7 @@ public class QuoteConsistencyValidator {
 
         for (EquipmentCostItemV2 item : items) {
             var equipment = equipmentsById.get(item.equipmentId());
-            if (!Objects.equals(equipment.getStartedAt(), item.startAt())) {
+            if (!Objects.equals(equipment.getStartedAt(), item.resolveStartAt(quote.inputs().startAt()))) {
                 throw mismatch(quote, rental,
                         "equipment %d start time differs from the rental".formatted(item.equipmentId()));
             }

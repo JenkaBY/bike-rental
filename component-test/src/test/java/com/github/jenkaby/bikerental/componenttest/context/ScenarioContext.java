@@ -39,6 +39,7 @@ public class ScenarioContext {
     private List<CostCalculationV2Request.EquipmentItemRequest> equipmentItems;
     private String oauth2ClientId;
     private String oauth2RefreshToken;
+    private UUID quoteId;
 
     @SneakyThrows
     public <T> T getResponseBody(Class<T> clazz) {

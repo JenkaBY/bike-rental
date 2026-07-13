@@ -31,6 +31,7 @@ public class DbSteps {
             "equipment_statuses",
             "equipment_types",
             "tariffs_v2",
+            "rental_cost_quotes",
             "rental_equipments",
             "rentals",
             "agreement_signatures",
