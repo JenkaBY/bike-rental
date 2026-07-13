@@ -25,7 +25,7 @@ public class RentalEquipmentJpaEntityTransformer {
         var expectedReturnAt = DataTableHelper.toLocalDateTime(entry, "expectedReturnAt");
         var actualReturnAt = DataTableHelper.toLocalDateTime(entry, "actualReturnAt");
         var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
-        var finalCost = DataTableHelper.toBigDecimal(entry, "totalCost");
+        var finalCost = DataTableHelper.toBigDecimal(entry, "finalCost");
 
         var createdAt = DataTableHelper.toInstantFlexible(entry, "createdAt");
         var updatedAt = DataTableHelper.toInstantFlexible(entry, "updatedAt");

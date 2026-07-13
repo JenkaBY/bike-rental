@@ -23,6 +23,7 @@ public record RentalResponse(
         @Schema(description = "Estimated rental cost", example = "200.00") @NotNull BigDecimal estimatedCost,
         @Schema(description = "Special price applied to this rental (if any)", example = "180.00") BigDecimal specialPrice,
         @Schema(description = "Discount percent applied to this rental (e.g. 10.5)", example = "10.5") Integer discountPercent,
-        @Schema(description = "Final rental cost (null until returned)", example = "250.00") BigDecimal finalCost
+        @Schema(description = "Final rental cost (null until returned)", example = "250.00") BigDecimal finalCost,
+        @Schema(description = "Rental creation time") @NotNull Instant createdAt
 ) {
 }

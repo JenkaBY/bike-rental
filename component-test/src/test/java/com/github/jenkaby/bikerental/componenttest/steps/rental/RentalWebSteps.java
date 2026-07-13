@@ -96,6 +96,16 @@ public class RentalWebSteps {
                     .as("Actual duration minutes")
                     .isEqualTo(expected.actualDurationMinutes());
         }
+        if (expected.estimatedCost() != null) {
+            assertThat(actual.estimatedCost())
+                    .as("Estimated cost")
+                    .isEqualByComparingTo(expected.estimatedCost());
+        }
+        if (expected.finalCost() != null) {
+            assertThat(actual.finalCost())
+                    .as("Final cost")
+                    .isEqualByComparingTo(expected.finalCost());
+        }
         softly.assertAll();
     }
 
