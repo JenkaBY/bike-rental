@@ -21,8 +21,6 @@ public interface EquipmentRepository {
 
     Page<Equipment> findAll(String statusSlug, String typeSlug, String searchText, PageRequest pageRequest);
 
-    boolean existsBySerialNumber(SerialNumber serialNumber);
-
     boolean existsByUid(Uid uid);
 
     Optional<Equipment> findBySerialNumber(SerialNumber serialNumber);
