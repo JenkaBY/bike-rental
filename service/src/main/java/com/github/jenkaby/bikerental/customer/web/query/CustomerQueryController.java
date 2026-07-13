@@ -59,9 +59,9 @@ class CustomerQueryController {
             @ApiResponse(responseCode = "400", description = "Invalid phone search pattern", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<List<CustomerSearchResponse>> getAll(
-            @Parameter(description = "Phone digits to search (4–11 digits)", example = "9161", required = false)
+            @Parameter(description = "Phone digits to search (4–12 digits)", example = "9161", required = false)
             @RequestParam(name = "phone", required = false)
-            @Pattern(regexp = "^\\d{4,11}$", message = "Phone search must be 4 to 11 digits")
+            @Pattern(regexp = "^\\d{4,12}$", message = "Phone search must be 4 to 12 digits")
             @Nullable String phone) {
         log.info("[GET] Searching customers by phone: {}", phone);
         var results = customerQueryUseCase.searchByPhone(phone);

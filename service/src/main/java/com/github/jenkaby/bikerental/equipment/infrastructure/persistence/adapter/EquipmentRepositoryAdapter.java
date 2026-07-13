@@ -98,11 +98,6 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     }
 
     @Override
-    public boolean existsBySerialNumber(SerialNumber serialNumber) {
-        return jpaRepository.existsBySerialNumber(serialNumber.value());
-    }
-
-    @Override
     public boolean existsByUid(Uid uid) {
         return jpaRepository.existsByUid(uid.value());
     }

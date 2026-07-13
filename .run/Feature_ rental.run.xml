@@ -4,7 +4,7 @@
     <envs>
       <env name="SPRING_PROFILES_ACTIVE" value="test,docker" />
     </envs>
-    <option name="FILE_PATH" value="$PROJECT_DIR$/component-test/src/test/resources/features/agreement" />
+    <option name="FILE_PATH" value="$PROJECT_DIR$/component-test/src/test/resources/features/rental/rental-query.feature" />
     <option name="MAIN_CLASS_NAME" value="io.cucumber.core.cli.Main" />
     <module name="bikerent.component-test.test" />
     <option name="PROGRAM_PARAMETERS" value=" --plugin teamcity" />

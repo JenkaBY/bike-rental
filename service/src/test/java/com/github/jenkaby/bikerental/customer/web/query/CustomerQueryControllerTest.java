@@ -74,7 +74,7 @@ class CustomerQueryControllerTest {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"123", "123456789012", "12a4", "+1234"})
+        @ValueSource(strings = {"123", "1234567890123", "12a4", "+1234"})
         void shouldReturn400WhenPhoneIsInvalid(String phone) throws Exception {
             mockMvc.perform(get(API_CUSTOMERS).queryParam("phone", phone))
                     .andExpect(status().isBadRequest())

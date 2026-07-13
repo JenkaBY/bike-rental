@@ -124,7 +124,7 @@ public class EquipmentQueryController {
             @Parameter(description = "Status slug filter", example = "available") @RequestParam(name = "status", required = false) String status,
             @Parameter(description = "Type slug filter", example = "bike") @RequestParam(name = "type", required = false) String type,
             @Parameter(description = "Free-text search: exact match on uid, case-insensitive substring match on serial number and model", example = "BIKE-001") @RequestParam(name = "q", required = false) String q,
-            @PageableDefault(size = 20, sort = "serialNumber", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "uid", direction = Sort.Direction.ASC) Pageable pageable) {
 
         log.info("[GET] Search equipments filters status={} type={} q={}", status, type, q);
         var query = mapper.toSearchQuery(status, type, q, pageable);

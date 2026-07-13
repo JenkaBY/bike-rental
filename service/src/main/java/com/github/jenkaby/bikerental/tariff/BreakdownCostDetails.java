@@ -21,6 +21,18 @@ public abstract class BreakdownCostDetails {
         this.params = params;
     }
 
+    /**
+     * Reconstructs a {@link BreakdownCostDetails} from a previously persisted, already-flattened
+     * {@code (breakdownPatternCode, message, params)} triple — e.g. when loading a {@link RentalCostQuote} snapshot
+     * back out of storage. Unlike the other subtypes, it does not know or care which concrete pricing calculation
+     * originally produced the breakdown; it only carries the flattened data forward unchanged.
+     */
+    public static class Rehydrated extends BreakdownCostDetails {
+        public Rehydrated(@NonNull String breakdownPatternCode, @NonNull String message, @Nullable Object params) {
+            super(breakdownPatternCode, message, params);
+        }
+    }
+
     public static class Special extends BreakdownCostDetails {
         public Special() {
             super(MessageCode.BREAKDOWN_SPECIAL_PRICE, "Special tariff", null);

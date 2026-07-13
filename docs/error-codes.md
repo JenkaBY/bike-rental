@@ -317,6 +317,74 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 }
 ```
 
+### `rental.quote.mismatch`
+- **HTTP:** 409 · **Trigger:** a cost quote presented at return confirmation
+  (`POST /api/rentals/{rentalId}/returns`) is inconsistent with the current state of the rental — the equipment
+  composition, planned duration, discount, or special tariff/price differs, or the quote is an estimate
+  (`QuoteRentalMismatchException`). Indicates a stale quote that must be re-taken.
+- **Extra:** `params` = `{quoteId, rentalId, reason}`.
+
+```json
+{
+  "status": 409,
+  "detail": "Cost quote 'a1b2...' is inconsistent with rental 10: equipment composition differs from the rental",
+  "correlationId": "018f...",
+  "errorCode": "rental.quote.mismatch",
+  "params": {"quoteId": "a1b2c3d4-...", "rentalId": 10, "reason": "equipment composition differs from the rental"}
+}
+```
+
+---
+
+## `tariff.*` — cost quotes
+
+Thrown by the tariff module and surfaced by `RentalRestControllerAdvice` when a quote is fetched or consumed during
+return confirmation.
+
+### `tariff.quote.not_found`
+- **HTTP:** 404 · **Trigger:** no cost quote exists for the supplied id (`QuoteNotFoundException`).
+- **Extra:** `params` = `{quoteId}`.
+
+```json
+{
+  "status": 404,
+  "detail": "Cost quote 'a1b2c3d4-...' not found",
+  "correlationId": "018f...",
+  "errorCode": "tariff.quote.not_found",
+  "params": {"quoteId": "a1b2c3d4-..."}
+}
+```
+
+### `tariff.quote.expired`
+- **HTTP:** 410 · **Trigger:** the cost quote has passed its validity window (`QuoteExpiredException`); the TTL is
+  configured via `app.tariff.quote-ttl` (default 5m).
+- **Extra:** `params` = `{quoteId, expiresAt}`.
+
+```json
+{
+  "status": 410,
+  "detail": "Cost quote 'a1b2c3d4-...' expired at 2026-02-10T10:05:00Z",
+  "correlationId": "018f...",
+  "errorCode": "tariff.quote.expired",
+  "params": {"quoteId": "a1b2c3d4-...", "expiresAt": "2026-02-10T10:05:00Z"}
+}
+```
+
+### `tariff.quote.already_consumed`
+- **HTTP:** 409 · **Trigger:** the quote is single-use and was already consumed by a prior successful confirmation
+  (`QuoteAlreadyConsumedException`).
+- **Extra:** `params` = `{quoteId}`.
+
+```json
+{
+  "status": 409,
+  "detail": "Cost quote 'a1b2c3d4-...' has already been consumed",
+  "correlationId": "018f...",
+  "errorCode": "tariff.quote.already_consumed",
+  "params": {"quoteId": "a1b2c3d4-..."}
+}
+```
+
 ---
 
 ## `identity.*` — authentication & accounts

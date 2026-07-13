@@ -37,6 +37,8 @@ app:
     time-increment: 5m
     forgiveness:
       overtime-duration: 7m
+  tariff:
+    quote-ttl: 5m
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS

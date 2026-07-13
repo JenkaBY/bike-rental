@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.ConfirmReturnUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.InitRentalForSigningUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
@@ -42,6 +43,7 @@ class RentalCommandController {
     private final CreateOrUpdateDraftRentalUseCase updateDraftRentalUseCase;
     private final UpdateRentalUseCase updateRentalUseCase;
     private final ReturnEquipmentUseCase returnEquipmentUseCase;
+    private final ConfirmReturnUseCase confirmReturnUseCase;
     private final AddEquipmentUseCase addEquipmentUseCase;
     private final RentalCommandMapper commandMapper;
     private final RentalQueryMapper queryMapper;
@@ -52,6 +54,7 @@ class RentalCommandController {
             CreateOrUpdateDraftRentalUseCase updateDraftRentalUseCase,
             UpdateRentalUseCase updateRentalUseCase,
             ReturnEquipmentUseCase returnEquipmentUseCase,
+            ConfirmReturnUseCase confirmReturnUseCase,
             AddEquipmentUseCase addEquipmentUseCase,
             RentalCommandMapper commandMapper,
             RentalQueryMapper queryMapper,
@@ -60,6 +63,7 @@ class RentalCommandController {
         this.updateDraftRentalUseCase = updateDraftRentalUseCase;
         this.updateRentalUseCase = updateRentalUseCase;
         this.returnEquipmentUseCase = returnEquipmentUseCase;
+        this.confirmReturnUseCase = confirmReturnUseCase;
         this.addEquipmentUseCase = addEquipmentUseCase;
         this.commandMapper = commandMapper;
         this.queryMapper = queryMapper;
@@ -229,6 +233,36 @@ class RentalCommandController {
         var response = commandMapper.toReturnResponse(result);
         log.info("[POST] Equipments return processed successfully for rentalId=[{}]", result.rental().getId());
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{rentalId}/returns")
+    @Operation(summary = "Confirm final return against a cost quote",
+            description = "Settles the whole rental using the frozen total from a previously created cost quote, so the " +
+                    "operator is charged exactly the figure shown at preview. The quote must cover every piece of " +
+                    "equipment in the rental and is single-use.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Rental returned and completed using the quoted total",
+                    content = @Content(schema = @Schema(implementation = RentalReturnResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Rental or quote not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Quote already consumed or inconsistent with the rental",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "410", description = "Quote expired",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Rental not in active state",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<RentalReturnResponse> confirmReturn(
+            @Positive @PathVariable("rentalId") Long rentalId,
+            @Valid @RequestBody ConfirmReturnRequest request) {
+        log.info("[POST] Confirming return for rentalId={} against quoteId={}", rentalId, request.quoteId());
+        var command = commandMapper.toConfirmReturnCommand(rentalId, request);
+        var result = confirmReturnUseCase.execute(command);
+        var response = commandMapper.toReturnResponse(result);
+        log.info("[POST] Return confirmed for rentalId=[{}]", result.rental().getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/{rentalId}/equipments")

@@ -6,6 +6,9 @@ import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.shared.web.advice.ErrorCodes;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.InvalidSpecialTariffTypeException;
+import com.github.jenkaby.bikerental.tariff.QuoteAlreadyConsumedException;
+import com.github.jenkaby.bikerental.tariff.QuoteExpiredException;
+import com.github.jenkaby.bikerental.tariff.QuoteNotFoundException;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -144,6 +147,58 @@ public class RentalRestControllerAdvice {
         log.warn("[correlationId={}] Rental window elapsed: {}", correlationId, ex.getMessage());
         var problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problem.setTitle("Rental window elapsed");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(QuoteNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleQuoteNotFound(QuoteNotFoundException ex) {
+        var correlationId = correlationIdProvider.resolve();
+        log.warn("[correlationId={}] Cost quote not found: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problem.setTitle("Cost quote not found");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(QuoteExpiredException.class)
+    public ResponseEntity<ProblemDetail> handleQuoteExpired(QuoteExpiredException ex) {
+        var correlationId = correlationIdProvider.resolve();
+        log.warn("[correlationId={}] Cost quote expired: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.GONE);
+        problem.setTitle("Cost quote expired");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(QuoteAlreadyConsumedException.class)
+    public ResponseEntity<ProblemDetail> handleQuoteAlreadyConsumed(QuoteAlreadyConsumedException ex) {
+        var correlationId = correlationIdProvider.resolve();
+        log.warn("[correlationId={}] Cost quote already consumed: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("Cost quote already consumed");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
+        return ResponseEntity.of(problem).build();
+    }
+
+    @ExceptionHandler(QuoteRentalMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleQuoteRentalMismatch(QuoteRentalMismatchException ex) {
+        var correlationId = correlationIdProvider.resolve();
+        log.warn("[correlationId={}] Cost quote inconsistent with rental: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("Cost quote inconsistent with rental");
         problem.setDetail(ex.getMessage());
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());

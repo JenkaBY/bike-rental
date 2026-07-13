@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.tariff;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface TariffV2Facade {
 
@@ -15,4 +16,8 @@ public interface TariffV2Facade {
     RentalCostCalculationResult calculateRentalCost(RentalCostCalculationCommand command);
 
     RentalCostCalculationResult calculateRentalCostV2(RentalCostCalculationV2Command command);
+
+    RentalCostQuote getQuote(UUID quoteId) throws QuoteNotFoundException, QuoteExpiredException;
+
+    RentalCostQuote consumeQuote(UUID quoteId) throws QuoteNotFoundException, QuoteExpiredException, QuoteAlreadyConsumedException;
 }

@@ -86,7 +86,7 @@ public class AccountQueryController {
         var filter = new TransactionHistoryFilter(
                 filterParams.fromDate(), filterParams.toDate(),
                 filterParams.sourceId(), filterParams.sourceType());
-        var pageRequest = new PageRequest(pageable.getPageSize(), pageable.getPageNumber(), null);
+        var pageRequest = new PageRequest(pageable.getPageSize(), pageable.getPageNumber());
         var result = getTransactionHistoryUseCase.execute(customerId, filter, pageRequest);
         return ResponseEntity.ok(result.map(transactionHistoryQueryMapper::toResponse));
     }

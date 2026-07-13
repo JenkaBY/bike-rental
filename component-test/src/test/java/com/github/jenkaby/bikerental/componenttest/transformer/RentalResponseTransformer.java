@@ -65,6 +65,7 @@ public class RentalResponseTransformer {
                 estimatedCost,
                 specialPrice,
                 discountPercent,
-                finalCost);
+                finalCost,
+                null);
     }
 }

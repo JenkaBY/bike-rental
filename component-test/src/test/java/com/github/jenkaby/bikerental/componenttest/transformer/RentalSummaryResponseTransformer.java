@@ -5,6 +5,7 @@ import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryEquipment
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryResponse;
 import io.cucumber.java.DataTableType;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +38,9 @@ public class RentalSummaryResponseTransformer {
         var plannedDuration = DataTableHelper.toInt(entry, "plannedDuration");
         var actualDuration = DataTableHelper.toInt(entry, "actualDuration");
 
+        var estimatedCost = DataTableHelper.toBigDecimal(entry, "estimatedCost");
+        var finalCost = DataTableHelper.toBigDecimal(entry, "finalCost");
+
         return new RentalSummaryResponse(
                 id,
                 customerId,
@@ -46,7 +50,10 @@ public class RentalSummaryResponseTransformer {
                 expectedReturnAt,
                 overdueMinutes,
                 plannedDuration,
-                actualDuration
+                actualDuration,
+                estimatedCost,
+                finalCost,
+                null
         );
     }
 

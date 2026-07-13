@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import com.github.jenkaby.bikerental.tariff.application.usecase.*;
 import com.github.jenkaby.bikerental.tariff.domain.model.DegressiveHourlyTariffV2;
@@ -59,6 +60,9 @@ class TariffV2QueryControllerTest {
     private TariffV2QueryMapper mapper;
 
     @MockitoBean
+    private PageMapper pageMapper;
+
+    @MockitoBean
     private Clock clock;
 
     private static final PricingParams EMPTY_PARAMS = new PricingParams(
@@ -96,7 +100,7 @@ class TariffV2QueryControllerTest {
     @Test
     @DisplayName("GET /api/tariffs returns 200 with page")
     void getAll_returns200() throws Exception {
-        PageRequest pr = new PageRequest(20, 0, null);
+        PageRequest pr = new PageRequest(20, 0);
         given(getAllUseCase.execute(any())).willReturn(Page.empty(pr));
         mockMvc.perform(get(API_V2_TARIFFS))
                 .andExpect(status().isOk())

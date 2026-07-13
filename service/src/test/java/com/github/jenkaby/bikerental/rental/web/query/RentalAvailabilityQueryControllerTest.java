@@ -46,7 +46,7 @@ class RentalAvailabilityQueryControllerTest {
 
         @Test
         void getAvailableEquipments_returnsOk_withResults() throws Exception {
-            var pageRequest = new PageRequest(20, 0, null);
+            var pageRequest = new PageRequest(20, 0);
             var domain = new AvailableForRentalEquipment(1L, "SN-001", "BIKE-001", "mountain-bike", "Trek Marlin");
             var response = new AvailableEquipmentResponse(1L, "BIKE-001", "SN-001", "mountain-bike", "Trek Marlin");
             var domainPage = new Page<>(List.of(domain), 1L, pageRequest);
@@ -66,7 +66,7 @@ class RentalAvailabilityQueryControllerTest {
 
         @Test
         void getAvailableEquipments_returnsOk_withEmptyResult() throws Exception {
-            var pageRequest = new PageRequest(20, 0, null);
+            var pageRequest = new PageRequest(20, 0);
             var emptyPage = Page.<AvailableForRentalEquipment>empty(pageRequest);
 
             given(pageMapper.toPageRequest(any())).willReturn(pageRequest);
@@ -83,7 +83,7 @@ class RentalAvailabilityQueryControllerTest {
 
         @Test
         void getAvailableEquipments_withTextFilter_returnsOk() throws Exception {
-            var pageRequest = new PageRequest(20, 0, null);
+            var pageRequest = new PageRequest(20, 0);
             var domain = new AvailableForRentalEquipment(2L, "SN-002", "MTB-001", "mountain-bike", "Trek MTB");
             var response = new AvailableEquipmentResponse(2L, "MTB-001", "SN-002", "mountain-bike", "Trek MTB");
             var domainPage = new Page<>(List.of(domain), 1L, pageRequest);

@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.tariff.web.query;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import com.github.jenkaby.bikerental.shared.web.support.Id;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetActiveTariffsV2ByEquipmentTypeUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetAllTariffsV2UseCase;
@@ -50,6 +51,7 @@ public class TariffV2QueryController {
     private final GetActiveTariffsV2ByEquipmentTypeUseCase getActiveByTypeUseCase;
     private final SelectTariffV2UseCase selectTariffUseCase;
     private final TariffV2QueryMapper mapper;
+    private final PageMapper pageMapper;
     private final Clock clock;
 
     TariffV2QueryController(GetTariffV2ByIdUseCase getByIdUseCase,
@@ -57,12 +59,14 @@ public class TariffV2QueryController {
                             GetActiveTariffsV2ByEquipmentTypeUseCase getActiveByTypeUseCase,
                             SelectTariffV2UseCase selectTariffUseCase,
                             TariffV2QueryMapper mapper,
+                            PageMapper pageMapper,
                             Clock clock) {
         this.getByIdUseCase = getByIdUseCase;
         this.getAllUseCase = getAllUseCase;
         this.getActiveByTypeUseCase = getActiveByTypeUseCase;
         this.selectTariffUseCase = selectTariffUseCase;
         this.mapper = mapper;
+        this.pageMapper = pageMapper;
         this.clock = clock;
     }
 
@@ -87,11 +91,7 @@ public class TariffV2QueryController {
     public ResponseEntity<Page<TariffV2Response>> getAllTariffs(
             @PageableDefault(size = 20, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
         log.info("[GET] Get all V2 tariffs with pagination");
-        PageRequest pageRequest = new PageRequest(
-                pageable.getPageSize(),
-                pageable.getPageNumber(),
-                pageable.getSort().toString()
-        );
+        PageRequest pageRequest = pageMapper.toPageRequest(pageable);
         Page<TariffV2> tariffs = getAllUseCase.execute(pageRequest);
         Page<TariffV2Response> response = tariffs.map(mapper::toResponse);
         return ResponseEntity.ok(response);
