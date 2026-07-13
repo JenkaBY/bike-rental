@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConfirmReturnService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.application.service</a> &gt; <span class="el_source">ConfirmReturnService.java</span></div><h1>ConfirmReturnService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.application.service;
+
+import com.github.jenkaby.bikerental.rental.application.mapper.RentalEquipmentCostBreakdownMapper;
+import com.github.jenkaby.bikerental.rental.application.service.validator.QuoteConsistencyValidator;
+import com.github.jenkaby.bikerental.rental.application.usecase.ConfirmReturnUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase.ReturnEquipmentResult;
+import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
+import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
+import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.tariff.RentalCostQuote;
+import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+<span class="fc" id="L25">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+class ConfirmReturnService implements ConfirmReturnUseCase {
+
+    private final RentalRepository rentalRepository;
+    private final TariffV2Facade tariffFacade;
+    private final QuoteConsistencyValidator quoteConsistencyValidator;
+    private final RentalDurationCalculator durationCalculator;
+    private final RentalEquipmentCostBreakdownMapper breakdownMapper;
+    private final RentalSettlementFinalizer settlementFinalizer;
+
+    @Override
+    @Transactional
+    public @NonNull ReturnEquipmentResult execute(@NonNull ConfirmReturnCommand command) {
+<span class="fc" id="L40">        log.info(&quot;Confirming return for rentalId={} against quoteId={}&quot;, command.rentalId(), command.quoteId());</span>
+
+<span class="fc" id="L42">        Rental rental = findRental(command.rentalId());</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (!rental.hasActiveStatus()) {</span>
+<span class="nc" id="L44">            throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);</span>
+        }
+
+<span class="fc" id="L47">        RentalCostQuote quote = tariffFacade.getQuote(command.quoteId());</span>
+<span class="fc" id="L48">        quoteConsistencyValidator.validate(rental, quote);</span>
+<span class="fc" id="L49">        tariffFacade.consumeQuote(command.quoteId());</span>
+
+<span class="fc" id="L51">        LocalDateTime frozenReturnTime = quote.resolveReturnTime();</span>
+<span class="fc" id="L52">        rental.calculateActualDuration(durationCalculator, frozenReturnTime);</span>
+<span class="fc" id="L53">        rental.equipmentsToReturn(quote.equipmentIds(), List.of(), frozenReturnTime);</span>
+<span class="fc" id="L54">        rental.applyFinalCost(breakdownMapper.toFrozenCostResults(quote.inputs().equipments().size(), quote.result().equipmentBreakdowns()));</span>
+
+<span class="fc" id="L56">        Money totalFinalCost = quote.result().totalCost();</span>
+<span class="fc" id="L57">        assertChargeMatchesQuote(rental, totalFinalCost);</span>
+<span class="fc" id="L58">        log.info(&quot;Rental [{}] confirming final cost [{}] from quote [{}]&quot;, rental.getId(), totalFinalCost, quote.quoteId());</span>
+
+<span class="fc" id="L60">        return settlementFinalizer.settleAndComplete(rental, totalFinalCost, command.operatorId(), frozenReturnTime);</span>
+    }
+
+    private Rental findRental(Long rentalId) {
+<span class="fc" id="L64">        return rentalRepository.findById(rentalId)</span>
+<span class="pc" id="L65">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, String.valueOf(rentalId)));</span>
+    }
+
+    private void assertChargeMatchesQuote(Rental rental, Money frozenTotal) {
+<span class="fc" id="L69">        Money recomputed = rental.getFinalCost();</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        if (!recomputed.isEqualTo(frozenTotal)) {</span>
+<span class="nc" id="L71">            throw new IllegalStateException(</span>
+<span class="nc" id="L72">                    &quot;Quoted total %s does not match rental recomputed total %s&quot;.formatted(frozenTotal, recomputed));</span>
+        }
+<span class="fc" id="L74">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

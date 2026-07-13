@@ -98,23 +98,18 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     }
 
     @Override
-    public boolean existsBySerialNumber(SerialNumber serialNumber) {
-<span class="nc" id="L102">        return jpaRepository.existsBySerialNumber(serialNumber.value());</span>
-    }
-
-    @Override
     public boolean existsByUid(Uid uid) {
-<span class="fc" id="L107">        return jpaRepository.existsByUid(uid.value());</span>
+<span class="fc" id="L102">        return jpaRepository.existsByUid(uid.value());</span>
     }
 
     @Override
     public Optional&lt;Equipment&gt; findBySerialNumber(SerialNumber serialNumber) {
-<span class="fc" id="L112">        return jpaRepository.findBySerialNumber(serialNumber.value()).map(mapper::toDomain);</span>
+<span class="fc" id="L107">        return jpaRepository.findBySerialNumber(serialNumber.value()).map(mapper::toDomain);</span>
     }
 
     @Override
     public Optional&lt;Equipment&gt; findByUid(Uid uid) {
-<span class="fc" id="L117">        return jpaRepository.findByUid(uid.value()).map(mapper::toDomain);</span>
+<span class="fc" id="L112">        return jpaRepository.findByUid(uid.value()).map(mapper::toDomain);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

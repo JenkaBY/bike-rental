@@ -68,34 +68,38 @@ public record Money(BigDecimal amount) implements Comparable&lt;Money&gt; {
 <span class="fc bfc" id="L68" title="All 2 branches covered.">        return this.compareTo(other) &gt; 0;</span>
     }
 
+    public boolean isEqualTo(Money other) {
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        return this.compareTo(other) == 0;</span>
+    }
+
     public boolean isLessThan(Money other) {
-<span class="fc bfc" id="L72" title="All 2 branches covered.">        return this.compareTo(other) &lt; 0;</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        return this.compareTo(other) &lt; 0;</span>
     }
 
     public Money add(Money other) {
-<span class="fc" id="L76">        return new Money(this.amount.add(other.amount));</span>
+<span class="fc" id="L80">        return new Money(this.amount.add(other.amount));</span>
     }
 
     public Money subtract(Money other) {
-<span class="fc" id="L80">        return new Money(this.amount.subtract(other.amount));</span>
+<span class="fc" id="L84">        return new Money(this.amount.subtract(other.amount));</span>
     }
 
     public Money multiply(BigDecimal multiplier) {
-<span class="fc" id="L84">        return Money.of(this.amount.multiply(multiplier));</span>
+<span class="fc" id="L88">        return Money.of(this.amount.multiply(multiplier));</span>
     }
 
     public Money divide(int divisor) {
-<span class="fc" id="L88">        return Money.of(amount.divide(BigDecimal.valueOf(divisor), MONEY_SCALE, MONEY_ROUNDING_MODE));</span>
+<span class="fc" id="L92">        return Money.of(amount.divide(BigDecimal.valueOf(divisor), MONEY_SCALE, MONEY_ROUNDING_MODE));</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L93">        return amount.stripTrailingZeros().toPlainString();</span>
+<span class="fc" id="L97">        return amount.stripTrailingZeros().toPlainString();</span>
     }
 
     @Override
     public int compareTo(Money o) {
-<span class="fc" id="L98">        return this.amount.compareTo(o.amount);</span>
+<span class="fc" id="L102">        return this.amount.compareTo(o.amount);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

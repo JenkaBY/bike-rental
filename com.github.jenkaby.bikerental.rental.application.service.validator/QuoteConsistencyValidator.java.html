@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuoteConsistencyValidator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.rental.application.service.validator</a> &gt; <span class="el_source">QuoteConsistencyValidator.java</span></div><h1>QuoteConsistencyValidator.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.rental.application.service.validator;
+
+import com.github.jenkaby.bikerental.rental.domain.exception.QuoteRentalMismatchException;
+import com.github.jenkaby.bikerental.rental.domain.model.Rental;
+import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.tariff.EquipmentCostItemV2;
+import com.github.jenkaby.bikerental.tariff.RentalCostQuote;
+import org.jspecify.annotations.Nullable;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+
+@Component
+<span class="fc" id="L19">public class QuoteConsistencyValidator {</span>
+
+    public void validate(Rental rental, RentalCostQuote quote) {
+<span class="fc" id="L22">        var inputs = quote.inputs();</span>
+
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (quote.result().estimate()) {</span>
+<span class="fc" id="L25">            throw mismatch(quote, rental, &quot;quote is an estimate and cannot settle a final return&quot;);</span>
+        }
+
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (!Objects.equals(inputs.startAt(), rental.getStartedAt())) {</span>
+<span class="fc" id="L29">            throw mismatch(quote, rental, &quot;rental start time differs from the rental&quot;);</span>
+        }
+
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (!Objects.equals(inputs.plannedDuration(), rental.getPlannedDuration())) {</span>
+<span class="fc" id="L33">            throw mismatch(quote, rental, &quot;planned duration differs from the rental&quot;);</span>
+        }
+
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (!Objects.equals(inputs.discount(), rental.getDiscountPercent())) {</span>
+<span class="fc" id="L37">            throw mismatch(quote, rental, &quot;discount differs from the rental&quot;);</span>
+        }
+
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (!Objects.equals(inputs.specialTariffId(), rental.getSpecialTariffId())) {</span>
+<span class="fc" id="L41">            throw mismatch(quote, rental, &quot;special tariff differs from the rental&quot;);</span>
+        }
+
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (!moneyEquals(inputs.specialPrice(), rental.getSpecialPrice())) {</span>
+<span class="fc" id="L45">            throw mismatch(quote, rental, &quot;special price differs from the rental&quot;);</span>
+        }
+
+<span class="fc" id="L48">        validateEquipmentLines(rental, quote, inputs.equipments());</span>
+<span class="fc" id="L49">    }</span>
+
+    private void validateEquipmentLines(Rental rental, RentalCostQuote quote, List&lt;EquipmentCostItemV2&gt; items) {
+<span class="fc" id="L52">        var equipmentsById = rental.getEquipments().stream()</span>
+<span class="fc" id="L53">                .collect(Collectors.toMap(RentalEquipment::getEquipmentId, Function.identity()));</span>
+<span class="fc" id="L54">        var quotedEquipmentIds = items.stream()</span>
+<span class="fc" id="L55">                .map(EquipmentCostItemV2::equipmentId)</span>
+<span class="fc" id="L56">                .collect(Collectors.toSet());</span>
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (!equipmentsById.keySet().equals(quotedEquipmentIds)) {</span>
+<span class="fc" id="L59">            throw mismatch(quote, rental, &quot;equipment composition differs from the rental&quot;);</span>
+        }
+
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        for (EquipmentCostItemV2 item : items) {</span>
+<span class="fc" id="L63">            var equipment = equipmentsById.get(item.equipmentId());</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">            if (!Objects.equals(equipment.getStartedAt(), item.resolveStartAt(quote.inputs().startAt()))) {</span>
+<span class="fc" id="L65">                throw mismatch(quote, rental,</span>
+<span class="fc" id="L66">                        &quot;equipment %d start time differs from the rental&quot;.formatted(item.equipmentId()));</span>
+            }
+<span class="pc bpc" id="L68" title="1 of 4 branches missed.">            if (equipment.getActualReturnAt() != null &amp;&amp; !Objects.equals(equipment.getActualReturnAt(), item.returnAt())) {</span>
+<span class="fc" id="L69">                throw mismatch(quote, rental,</span>
+<span class="fc" id="L70">                        &quot;equipment %d was already returned at a different time than quoted&quot;.formatted(item.equipmentId()));</span>
+            }
+<span class="fc" id="L72">        }</span>
+<span class="fc" id="L73">    }</span>
+
+    private QuoteRentalMismatchException mismatch(RentalCostQuote quote, Rental rental, String reason) {
+<span class="fc" id="L76">        return new QuoteRentalMismatchException(quote.quoteId(), rental.getId(), reason);</span>
+    }
+
+    private static boolean moneyEquals(@Nullable Money left, @Nullable Money right) {
+<span class="pc bpc" id="L80" title="1 of 4 branches missed.">        if (left == null || right == null) {</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            return left == right;</span>
+        }
+<span class="fc" id="L83">        return left.isEqualTo(right);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

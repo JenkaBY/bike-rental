@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 public interface DiscountMapper {
     // TODO delete unused code
     default DiscountPercent toDiscount(BigDecimal percent) {
-<span class="nc bnc" id="L12" title="All 2 branches missed.">        return percent == null ? null : new DiscountPercent(percent);</span>
+<span class="pc bpc" id="L12" title="1 of 2 branches missed.">        return percent == null ? null : new DiscountPercent(percent);</span>
     }
 
     default DiscountPercent toDiscount(Integer percent) {

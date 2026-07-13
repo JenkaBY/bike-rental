@@ -21,129 +21,141 @@ public abstract class BreakdownCostDetails {
 <span class="fc" id="L21">        this.params = params;</span>
 <span class="fc" id="L22">    }</span>
 
+    /**
+     * Reconstructs a {@link BreakdownCostDetails} from a previously persisted, already-flattened
+     * {@code (breakdownPatternCode, message, params)} triple — e.g. when loading a {@link RentalCostQuote} snapshot
+     * back out of storage. Unlike the other subtypes, it does not know or care which concrete pricing calculation
+     * originally produced the breakdown; it only carries the flattened data forward unchanged.
+     */
+    public static class Rehydrated extends BreakdownCostDetails {
+        public Rehydrated(@NonNull String breakdownPatternCode, @NonNull String message, @Nullable Object params) {
+<span class="fc" id="L32">            super(breakdownPatternCode, message, params);</span>
+<span class="fc" id="L33">        }</span>
+    }
+
     public static class Special extends BreakdownCostDetails {
         public Special() {
-<span class="nc" id="L26">            super(MessageCode.BREAKDOWN_SPECIAL_PRICE, &quot;Special tariff&quot;, null);</span>
-<span class="nc" id="L27">        }</span>
+<span class="nc" id="L38">            super(MessageCode.BREAKDOWN_SPECIAL_PRICE, &quot;Special tariff&quot;, null);</span>
+<span class="nc" id="L39">        }</span>
     }
 
     public static class SpecialGroup extends BreakdownCostDetails {
         public SpecialGroup() {
-<span class="fc" id="L32">            super(MessageCode.BREAKDOWN_SPECIAL_GROUP, &quot;Special tariff applied to group&quot;, null);</span>
-<span class="fc" id="L33">        }</span>
+<span class="fc" id="L44">            super(MessageCode.BREAKDOWN_SPECIAL_GROUP, &quot;Special tariff applied to group&quot;, null);</span>
+<span class="fc" id="L45">        }</span>
     }
 
     public static class Zero extends BreakdownCostDetails {
         public Zero() {
-<span class="nc" id="L38">            super(MessageCode.BREAKDOWN_ZERO_COST, &quot;0 min: 0.00&quot;, null);</span>
-<span class="nc" id="L39">        }</span>
+<span class="nc" id="L50">            super(MessageCode.BREAKDOWN_ZERO_COST, &quot;0 min: 0.00&quot;, null);</span>
+<span class="nc" id="L51">        }</span>
     }
 
     public static class FlatHourlyMinCost extends BreakdownCostDetails {
         public FlatHourlyMinCost(String message, Details details) {
-<span class="fc" id="L44">            super(MessageCode.BREAKDOWN_FLAT_HOURLY_MIN, message, details);</span>
-<span class="fc" id="L45">        }</span>
+<span class="fc" id="L56">            super(MessageCode.BREAKDOWN_FLAT_HOURLY_MIN, message, details);</span>
+<span class="fc" id="L57">        }</span>
 
-<span class="fc" id="L47">        public record Details(int durationMinutes, String rate, String surcharge, String total) {</span>
+<span class="fc" id="L59">        public record Details(int durationMinutes, String rate, String surcharge, String total) {</span>
         }
     }
 
     public static class FlatHourlyStandard extends BreakdownCostDetails {
         public FlatHourlyStandard(String message, Details details) {
-<span class="fc" id="L53">            super(MessageCode.BREAKDOWN_FLAT_HOURLY_STANDARD, message, details);</span>
-<span class="fc" id="L54">        }</span>
+<span class="fc" id="L65">            super(MessageCode.BREAKDOWN_FLAT_HOURLY_STANDARD, message, details);</span>
+<span class="fc" id="L66">        }</span>
 
-<span class="fc" id="L56">        public record Details(int hours, int minutes, String rate, String total) {</span>
+<span class="fc" id="L68">        public record Details(int hours, int minutes, String rate, String total) {</span>
         }
     }
 
     public static class FlatHourlyMinsOnly extends BreakdownCostDetails {
         public FlatHourlyMinsOnly(String message, Details details) {
-<span class="nc" id="L62">            super(MessageCode.BREAKDOWN_FLAT_HOURLY_MINUTES_ONLY, message, details);</span>
-<span class="nc" id="L63">        }</span>
+<span class="nc" id="L74">            super(MessageCode.BREAKDOWN_FLAT_HOURLY_MINUTES_ONLY, message, details);</span>
+<span class="nc" id="L75">        }</span>
 
-<span class="nc" id="L65">        public record Details(int minutes, String total) {</span>
+<span class="nc" id="L77">        public record Details(int minutes, String total) {</span>
         }
     }
 
     public static class DailyStandard extends BreakdownCostDetails {
         public DailyStandard(String message, Details details) {
-<span class="fc" id="L71">            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);</span>
-<span class="fc" id="L72">        }</span>
+<span class="fc" id="L83">            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);</span>
+<span class="fc" id="L84">        }</span>
 
-<span class="fc" id="L74">        public record Details(int days, String total) {</span>
+<span class="fc" id="L86">        public record Details(int days, String total) {</span>
         }
     }
 
     public static class DailyOvertime extends BreakdownCostDetails {
         public DailyOvertime(String message, Details details) {
-<span class="fc" id="L80">            super(MessageCode.BREAKDOWN_DAILY_OVERTIME, message, details);</span>
-<span class="fc" id="L81">        }</span>
+<span class="fc" id="L92">            super(MessageCode.BREAKDOWN_DAILY_OVERTIME, message, details);</span>
+<span class="fc" id="L93">        }</span>
 
-<span class="fc" id="L83">        public record Details(int days, int hours, int minutes, String total) {</span>
+<span class="fc" id="L95">        public record Details(int days, int hours, int minutes, String total) {</span>
         }
     }
 
     public static class FlatFee extends BreakdownCostDetails {
         public FlatFee(String message, Details details) {
-<span class="fc" id="L89">            super(MessageCode.BREAKDOWN_FLAT_FEE, message, details);</span>
-<span class="fc" id="L90">        }</span>
+<span class="fc" id="L101">            super(MessageCode.BREAKDOWN_FLAT_FEE, message, details);</span>
+<span class="fc" id="L102">        }</span>
 
-<span class="fc" id="L92">        public record Details(String fee, int days, String total) {</span>
+<span class="fc" id="L104">        public record Details(String fee, int days, String total) {</span>
         }
     }
 
     public static class DegressiveHourlyMin extends BreakdownCostDetails {
         public DegressiveHourlyMin(String message, Details details) {
-<span class="fc" id="L98">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MIN, message, details);</span>
-<span class="fc" id="L99">        }</span>
+<span class="fc" id="L110">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MIN, message, details);</span>
+<span class="fc" id="L111">        }</span>
 
-<span class="fc" id="L101">        public record Details(long durationMinutes, String rate, String surcharge, String total) {</span>
+<span class="fc" id="L113">        public record Details(long durationMinutes, String rate, String surcharge, String total) {</span>
         }
     }
 
     public static class DegressiveHourlyStandard extends BreakdownCostDetails {
         public DegressiveHourlyStandard(String message, Details details) {
-<span class="fc" id="L107">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_STANDARD, message, details);</span>
-<span class="fc" id="L108">        }</span>
+<span class="fc" id="L119">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_STANDARD, message, details);</span>
+<span class="fc" id="L120">        }</span>
 
-<span class="fc" id="L110">        public record Details(long hours, long minutes, String rateBreakdown, String total) {</span>
+<span class="fc" id="L122">        public record Details(long hours, long minutes, String rateBreakdown, String total) {</span>
         }
     }
 
     public static class DegressiveHourlyMinutesOnly extends BreakdownCostDetails {
         public DegressiveHourlyMinutesOnly(String message, Details details) {
-<span class="fc" id="L116">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MINUTES_ONLY, message, details);</span>
-<span class="fc" id="L117">        }</span>
+<span class="fc" id="L128">            super(MessageCode.BREAKDOWN_DEGRESSIVE_HOURLY_MINUTES_ONLY, message, details);</span>
+<span class="fc" id="L129">        }</span>
 
-<span class="fc" id="L119">        public record Details(long minutes, String rateBreakdown, String total) {</span>
+<span class="fc" id="L131">        public record Details(long minutes, String rateBreakdown, String total) {</span>
         }
     }
 
     public static class Daily extends BreakdownCostDetails {
         public Daily(String message, Details details) {
-<span class="nc" id="L125">            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);</span>
-<span class="nc" id="L126">        }</span>
+<span class="nc" id="L137">            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);</span>
+<span class="nc" id="L138">        }</span>
 
-<span class="nc" id="L128">        public record Details(int days, int hours, int minutes, String total) {</span>
+<span class="nc" id="L140">        public record Details(int days, int hours, int minutes, String total) {</span>
         }
     }
 
     public static class DailyDaysOnly extends BreakdownCostDetails {
         public DailyDaysOnly(String message, Details details) {
-<span class="nc" id="L134">            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);</span>
-<span class="nc" id="L135">        }</span>
+<span class="nc" id="L146">            super(MessageCode.BREAKDOWN_DAILY_STANDARD, message, details);</span>
+<span class="nc" id="L147">        }</span>
 
-<span class="nc" id="L137">        public record Details(int days, String total) {</span>
+<span class="nc" id="L149">        public record Details(int days, String total) {</span>
         }
     }
 
     public static class DailyWithOvertime extends BreakdownCostDetails {
         public DailyWithOvertime(String message, Details details) {
-<span class="nc" id="L143">            super(MessageCode.BREAKDOWN_DAILY_OVERTIME, message, details);</span>
-<span class="nc" id="L144">        }</span>
+<span class="nc" id="L155">            super(MessageCode.BREAKDOWN_DAILY_OVERTIME, message, details);</span>
+<span class="nc" id="L156">        }</span>
 
-<span class="nc" id="L146">        public record Details(int days, int hours, int minutes, String total) {</span>
+<span class="nc" id="L158">        public record Details(int days, int hours, int minutes, String total) {</span>
         }
     }
 }

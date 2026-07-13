@@ -2,9 +2,9 @@
 
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Sort;
 import org.mapstruct.Mapper;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 @Mapper
 public interface PageMapper {
@@ -13,68 +13,53 @@ public interface PageMapper {
 <span class="fc" id="L13">        return new PageRequest(</span>
 <span class="fc" id="L14">                pageable.getPageSize(),</span>
 <span class="fc" id="L15">                pageable.getPageNumber(),</span>
-<span class="fc bfc" id="L16" title="All 2 branches covered.">                pageable.getSort().isSorted() ?</span>
-<span class="fc" id="L17">                        pageable.getSort().stream()</span>
-<span class="fc" id="L18">                                .map(Sort.Order::getProperty)</span>
-<span class="fc" id="L19">                                .findFirst()</span>
-<span class="fc" id="L20">                                .orElse(null)</span>
-<span class="fc" id="L21">                        : null</span>
-        );
+<span class="fc" id="L16">                toDomainSort(pageable.getSort()));</span>
     }
 
     default org.springframework.data.domain.PageRequest toSpring(PageRequest pageRequest) {
-<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (pageRequest.sortBy() == null) {</span>
-<span class="nc" id="L27">            return org.springframework.data.domain.PageRequest.of(</span>
-<span class="nc" id="L28">                    pageRequest.page(),</span>
-<span class="nc" id="L29">                    pageRequest.size(),</span>
-<span class="nc" id="L30">                    Sort.unsorted()</span>
-            );
-        }
-
-        // Normalize sortBy which may contain direction info in various formats
-<span class="fc" id="L35">        String raw = pageRequest.sortBy().trim();</span>
-<span class="fc" id="L36">        String property = raw;</span>
-<span class="fc" id="L37">        Sort.Direction direction = Sort.Direction.ASC;</span>
-
-        // Support formats: &quot;name: ASC&quot;, &quot;name,asc&quot;, &quot;name asc&quot;, or just &quot;name&quot;
-<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (raw.contains(&quot;:&quot;)) {</span>
-<span class="fc" id="L41">            String[] parts = raw.split(&quot;:&quot;);</span>
-<span class="fc" id="L42">            property = parts[0].trim();</span>
-<span class="pc bpc" id="L43" title="2 of 4 branches missed.">            if (parts.length &gt; 1 &amp;&amp; parts[1].trim().equalsIgnoreCase(&quot;desc&quot;)) {</span>
-<span class="nc" id="L44">                direction = Sort.Direction.DESC;</span>
-            }
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        } else if (raw.contains(&quot;,&quot;)) {</span>
-<span class="nc" id="L47">            String[] parts = raw.split(&quot;,&quot;);</span>
-<span class="nc" id="L48">            property = parts[0].trim();</span>
-<span class="nc bnc" id="L49" title="All 4 branches missed.">            if (parts.length &gt; 1 &amp;&amp; parts[1].trim().equalsIgnoreCase(&quot;desc&quot;)) {</span>
-<span class="nc" id="L50">                direction = Sort.Direction.DESC;</span>
-            }
-<span class="pc bpc" id="L52" title="2 of 4 branches missed.">        } else if (raw.toLowerCase().endsWith(&quot; desc&quot;) || raw.toLowerCase().endsWith(&quot; asc&quot;)) {</span>
-<span class="nc" id="L53">            int idx = raw.lastIndexOf(' ');</span>
-<span class="nc" id="L54">            property = raw.substring(0, idx).trim();</span>
-<span class="nc" id="L55">            String d = raw.substring(idx + 1).trim();</span>
-<span class="nc bnc" id="L56" title="All 2 branches missed.">            if (d.equalsIgnoreCase(&quot;desc&quot;)) {</span>
-<span class="nc" id="L57">                direction = Sort.Direction.DESC;</span>
-            }
-        }
-
-<span class="fc" id="L61">        Sort sort = Sort.by(direction, property);</span>
-<span class="fc" id="L62">        return org.springframework.data.domain.PageRequest.of(</span>
-<span class="fc" id="L63">                pageRequest.page(),</span>
-<span class="fc" id="L64">                pageRequest.size(),</span>
-                sort
-        );
+<span class="fc" id="L20">        return org.springframework.data.domain.PageRequest.of(</span>
+<span class="fc" id="L21">                pageRequest.page(),</span>
+<span class="fc" id="L22">                pageRequest.size(),</span>
+<span class="fc" id="L23">                toSpringSort(pageRequest.sort()));</span>
     }
 
     default &lt;T&gt; Page&lt;? extends T&gt; toDomain(org.springframework.data.domain.Page&lt;T&gt; input) {
-<span class="fc" id="L70">        var pageRequest = new PageRequest(input.getSize(), input.getNumber(),</span>
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">                input.getSort().isSorted() ?</span>
-<span class="fc" id="L72">                        input.getSort().stream()</span>
-<span class="fc" id="L73">                                .map(Sort.Order::getProperty)</span>
-<span class="fc" id="L74">                                .findFirst()</span>
-<span class="fc" id="L75">                                .orElse(null)</span>
-<span class="pc" id="L76">                        : null);</span>
-<span class="fc" id="L77">        return new Page&lt;&gt;(input.getContent(), input.getTotalElements(), pageRequest);</span>
+<span class="fc" id="L27">        var pageRequest = new PageRequest(</span>
+<span class="fc" id="L28">                input.getSize(),</span>
+<span class="fc" id="L29">                input.getNumber(),</span>
+<span class="fc" id="L30">                toDomainSort(input.getSort()));</span>
+<span class="fc" id="L31">        return new Page&lt;&gt;(input.getContent(), input.getTotalElements(), pageRequest);</span>
+    }
+
+    default Sort toDomainSort(org.springframework.data.domain.Sort sort) {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (sort.isUnsorted()) {</span>
+<span class="fc" id="L36">            return Sort.unsorted();</span>
+        }
+<span class="fc" id="L38">        var orders = sort.stream()</span>
+<span class="fc" id="L39">                .map(order -&gt; new Sort.Order(order.getProperty(), toDomainDirection(order.getDirection())))</span>
+<span class="fc" id="L40">                .toList();</span>
+<span class="fc" id="L41">        return new Sort(orders);</span>
+    }
+
+    default org.springframework.data.domain.Sort toSpringSort(Sort sort) {
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if (!sort.isSorted()) {</span>
+<span class="nc" id="L46">            return org.springframework.data.domain.Sort.unsorted();</span>
+        }
+<span class="fc" id="L48">        var orders = sort.orders().stream()</span>
+<span class="fc" id="L49">                .map(order -&gt; new org.springframework.data.domain.Sort.Order(</span>
+<span class="fc" id="L50">                        toSpringDirection(order.direction()), order.property()))</span>
+<span class="fc" id="L51">                .toList();</span>
+<span class="fc" id="L52">        return org.springframework.data.domain.Sort.by(orders);</span>
+    }
+
+    default Sort.Direction toDomainDirection(org.springframework.data.domain.Sort.Direction direction) {
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        return direction.isDescending() ? Sort.Direction.DESC : Sort.Direction.ASC;</span>
+    }
+
+    default org.springframework.data.domain.Sort.Direction toSpringDirection(Sort.Direction direction) {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        return direction.isDescending()</span>
+<span class="fc" id="L61">                ? org.springframework.data.domain.Sort.Direction.DESC</span>
+<span class="fc" id="L62">                : org.springframework.data.domain.Sort.Direction.ASC;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

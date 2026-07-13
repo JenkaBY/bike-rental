@@ -3,12 +3,13 @@
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @Schema(description = &quot;Compact rental summary for list views&quot;)
-<span class="fc" id="L11">public record RentalSummaryResponse(</span>
+<span class="fc" id="L12">public record RentalSummaryResponse(</span>
         @Schema(description = &quot;Rental ID&quot;, example = &quot;1&quot;) @NotNull Long id,
         @Schema(description = &quot;Customer UUID&quot;) @NotNull UUID customerId,
         @Schema(description = &quot;Rented equipment items&quot;) List&lt;RentalSummaryEquipmentResponse&gt; equipments,
@@ -17,7 +18,10 @@ import java.util.UUID;
         @Schema(description = &quot;Expected return time&quot;) Instant expectedReturnAt,
         @Schema(description = &quot;Overdue minutes (null if not overdue)&quot;, example = &quot;10&quot;) Integer overdueMinutes,
         @Schema(description = &quot;Planned duration in minutes&quot;, example = &quot;120&quot;) @NotNull Integer plannedDurationMinutes,
-        @Schema(description = &quot;Actual duration in minutes (null until returned)&quot;, example = &quot;130&quot;) Integer actualDurationMinutes
+        @Schema(description = &quot;Actual duration in minutes (null until returned)&quot;, example = &quot;130&quot;) Integer actualDurationMinutes,
+        @Schema(description = &quot;Estimated rental cost&quot;, example = &quot;200.00&quot;) @NotNull BigDecimal estimatedCost,
+        @Schema(description = &quot;Final rental cost (null until returned)&quot;, example = &quot;250.00&quot;) BigDecimal finalCost,
+        @Schema(description = &quot;Rental creation time&quot;) @NotNull Instant createdAt
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Sort.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.shared.domain.model.vo</a> &gt; <span class="el_source">Sort.java</span></div><h1>Sort.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.shared.domain.model.vo;
+
+import org.jspecify.annotations.NonNull;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+public record Sort(List&lt;Order&gt; orders) {
+
+<span class="fc" id="L11">    private static final Sort UNSORTED = new Sort(List.of());</span>
+
+<span class="fc" id="L13">    public Sort {</span>
+<span class="fc" id="L14">        orders = List.copyOf(orders);</span>
+<span class="fc" id="L15">    }</span>
+
+    public static Sort unsorted() {
+<span class="fc" id="L18">        return UNSORTED;</span>
+    }
+
+    public static Sort by(@NonNull Order... orders) {
+<span class="nc" id="L22">        Objects.requireNonNull(orders, &quot;Orders must not be null&quot;);</span>
+<span class="nc" id="L23">        return new Sort(Arrays.asList(orders));</span>
+    }
+
+    public boolean isSorted() {
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        return !orders.isEmpty();</span>
+    }
+
+<span class="fc" id="L30">    public enum Direction {</span>
+<span class="fc" id="L31">        ASC,</span>
+<span class="fc" id="L32">        DESC;</span>
+
+        public boolean isDescending() {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">            return this == DESC;</span>
+        }
+    }
+
+    public record Order(String property, Direction direction) {
+
+<span class="fc" id="L41">        public Order {</span>
+<span class="fc" id="L42">            Objects.requireNonNull(property, &quot;Sort property must not be null&quot;);</span>
+<span class="fc" id="L43">            Objects.requireNonNull(direction, &quot;Sort direction must not be null&quot;);</span>
+<span class="fc" id="L44">        }</span>
+
+        public static Order asc(String property) {
+<span class="nc" id="L47">            return new Order(property, Direction.ASC);</span>
+        }
+
+        public static Order desc(String property) {
+<span class="nc" id="L51">            return new Order(property, Direction.DESC);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

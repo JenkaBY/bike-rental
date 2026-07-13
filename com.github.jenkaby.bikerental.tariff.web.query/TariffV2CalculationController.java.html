@@ -2,9 +2,11 @@
 
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
+import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostQuoteUseCase;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostQuoteResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.mapper.BatchCalculationMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -21,19 +24,22 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Validated
-<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L27">@Slf4j</span>
 @RestController
 @RequestMapping(path = &quot;/api/tariffs&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.TARIFFS, description = &quot;Tariff V2 API&quot;)
 public class TariffV2CalculationController {
 
     private final TariffV2Facade tariffV2Facade;
+    private final RentalCostQuoteUseCase rentalCostQuoteUseCase;
     private final BatchCalculationMapper requestMapper;
 
-<span class="fc" id="L33">    TariffV2CalculationController(TariffV2Facade tariffV2Facade, BatchCalculationMapper requestMapper) {</span>
-<span class="fc" id="L34">        this.tariffV2Facade = tariffV2Facade;</span>
-<span class="fc" id="L35">        this.requestMapper = requestMapper;</span>
-<span class="fc" id="L36">    }</span>
+    TariffV2CalculationController(TariffV2Facade tariffV2Facade, RentalCostQuoteUseCase rentalCostQuoteUseCase,
+<span class="fc" id="L38">                                  BatchCalculationMapper requestMapper) {</span>
+<span class="fc" id="L39">        this.tariffV2Facade = tariffV2Facade;</span>
+<span class="fc" id="L40">        this.rentalCostQuoteUseCase = rentalCostQuoteUseCase;</span>
+<span class="fc" id="L41">        this.requestMapper = requestMapper;</span>
+<span class="fc" id="L42">    }</span>
 
     @PostMapping(&quot;/calculate&quot;)
     @Operation(summary = &quot;Calculate rental cost for multiple equipment items&quot;,
@@ -49,10 +55,10 @@ public class TariffV2CalculationController {
     })
     @Deprecated(forRemoval = true)
     public ResponseEntity&lt;CostCalculationResponse&gt; calculateCost(@Valid @RequestBody CostCalculationRequest request) {
-<span class="fc" id="L52">        log.info(&quot;[POST] Batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
-<span class="fc" id="L53">        var command = requestMapper.toCommand(request);</span>
-<span class="fc" id="L54">        var result = tariffV2Facade.calculateRentalCost(command);</span>
-<span class="fc" id="L55">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
+<span class="fc" id="L58">        log.info(&quot;[POST] Batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
+<span class="fc" id="L59">        var command = requestMapper.toCommand(request);</span>
+<span class="fc" id="L60">        var result = tariffV2Facade.calculateRentalCost(command);</span>
+<span class="fc" id="L61">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
     }
 
     @PutMapping(&quot;/calculations&quot;)
@@ -67,10 +73,29 @@ public class TariffV2CalculationController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;CostCalculationResponse&gt; costCalculations(@Valid @RequestBody CostCalculationV2Request request) {
-<span class="fc" id="L70">        log.info(&quot;[PUT] V2 batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
-<span class="fc" id="L71">        var command = requestMapper.toV2Command(request);</span>
-<span class="fc" id="L72">        var result = tariffV2Facade.calculateRentalCostV2(command);</span>
-<span class="fc" id="L73">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
+<span class="fc" id="L76">        log.info(&quot;[PUT] V2 batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
+<span class="fc" id="L77">        var command = requestMapper.toV2Command(request);</span>
+<span class="fc" id="L78">        var result = tariffV2Facade.calculateRentalCostV2(command);</span>
+<span class="fc" id="L79">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
+    }
+
+    @PostMapping(&quot;/quotes&quot;)
+    @Operation(summary = &quot;Create a rental cost quote&quot;,
+            description = &quot;Calculates the V2 rental cost and persists it as an immutable, single-use snapshot with a &quot; +
+                    &quot;validity window, so the exact figure can be reused at return confirmation instead of being recalculated&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Cost quote created&quot;,
+                    content = @Content(schema = @Schema(implementation = CostQuoteResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No suitable tariff found for an equipment type&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;CostQuoteResponse&gt; createQuote(@Valid @RequestBody CostCalculationV2Request request) {
+<span class="fc" id="L95">        log.info(&quot;[POST] Creating cost quote for {} equipment item(s)&quot;, request.equipments().size());</span>
+<span class="fc" id="L96">        var command = requestMapper.toV2Command(request);</span>
+<span class="fc" id="L97">        var quote = rentalCostQuoteUseCase.createQuote(command);</span>
+<span class="fc" id="L98">        return ResponseEntity.status(HttpStatus.CREATED).body(requestMapper.toQuoteResponse(quote));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

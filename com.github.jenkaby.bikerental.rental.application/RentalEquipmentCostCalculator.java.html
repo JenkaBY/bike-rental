@@ -52,18 +52,7 @@ public class RentalEquipmentCostCalculator {
 
     private List&lt;EquipmentCostResult&gt; extractFinalResults(List&lt;RentalEquipment&gt; returningEquipments, RentalCostCalculationV2Command command) {
 <span class="fc" id="L54">        var breakdowns = tariffFacade.calculateRentalCostV2(command).equipmentBreakdowns();</span>
-
-<span class="fc" id="L56">        var results = new ArrayList&lt;EquipmentCostResult&gt;();</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (int i = 0; i &lt; returningEquipments.size(); i++) {</span>
-<span class="fc" id="L58">            var breakdown = breakdowns.get(i);</span>
-<span class="fc" id="L59">            results.add(new EquipmentCostResult(</span>
-<span class="fc" id="L60">                    returningEquipments.get(i).getEquipmentId(),</span>
-<span class="fc" id="L61">                    breakdown.tariffId(),</span>
-<span class="fc" id="L62">                    breakdown.itemCost(),</span>
-<span class="fc" id="L63">                    breakdownMapper.toBreakdown(breakdown)</span>
-            ));
-        }
-<span class="fc" id="L66">        return results;</span>
+<span class="fc" id="L55">        return breakdownMapper.toFrozenCostResults(returningEquipments.size(), breakdowns);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
