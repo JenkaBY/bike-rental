@@ -23,7 +23,7 @@ Feature: Automatic DEBT rental settlement on customer deposit
       | id    | customerId | status | estimatedCost | plannedDuration | startedAt           | createdAt           | updatedAt           |
       | RENT1 | CUS2       | DEBT   | 80.00         | 120             | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
     And rental equipments exist in the database with the following data
-      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | totalCost | createdAt           | updatedAt           |
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | finalCost | createdAt           | updatedAt           |
       | RENT1    | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 80.00         | 100       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId | recordedAt          | idempotencyKey |
@@ -70,7 +70,7 @@ Feature: Automatic DEBT rental settlement on customer deposit
       | id    | customerId | status | estimatedCost | plannedDuration | finalCost | startedAt           | createdAt           | updatedAt           |
       | RENT2 | CUS2       | DEBT   | 70.00         | 120             | 280.00    | 2026-03-01T08:00:00 | 2026-03-01T09:00:00 | 2026-03-01T09:00:00 |
     And rental equipments exist in the database with the following data
-      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | totalCost | createdAt           | updatedAt           |
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | finalCost | createdAt           | updatedAt           |
       | RENT2    | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 280       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId | recordedAt          | idempotencyKey |
@@ -112,7 +112,7 @@ Feature: Automatic DEBT rental settlement on customer deposit
       | id    | customerId | status | estimatedCost | plannedDuration | finalCost | startedAt           | createdAt           | updatedAt           |
       | RENT2 | CUS2       | DEBT   | 70.00         | 120             | 280.00    | 2026-03-01T08:00:00 | 2026-03-01T09:00:00 | 2026-03-01T09:00:00 |
     And rental equipments exist in the database with the following data
-      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | totalCost | createdAt           | updatedAt           |
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | finalCost | createdAt           | updatedAt           |
       | RENT2    | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 | 100.00        | 280       | 2026-03-01T08:00:00 | 2026-03-01T08:00:00 |
     And the following transaction records exist in db
       | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId | recordedAt          | idempotencyKey |
