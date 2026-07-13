@@ -49,4 +49,6 @@
     <include relativeToChangelogFile="true" file="v1/finance_transaction_records.update-table_add-running-balance.xml"/>
     <include relativeToChangelogFile="true" file="v1/finance_transaction_records.update-table_populate-running-balance.xml"/>
 
+    <include relativeToChangelogFile="true" file="v1/rental_cost_quotes.create-table.xml"/>
+
 </databaseChangeLog>

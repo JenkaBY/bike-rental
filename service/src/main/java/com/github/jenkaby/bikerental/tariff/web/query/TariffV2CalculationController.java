@@ -2,9 +2,11 @@ package com.github.jenkaby.bikerental.tariff.web.query;
 
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
+import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostQuoteUseCase;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostQuoteResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.mapper.BatchCalculationMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -28,10 +31,13 @@ import org.springframework.web.bind.annotation.*;
 public class TariffV2CalculationController {
 
     private final TariffV2Facade tariffV2Facade;
+    private final RentalCostQuoteUseCase rentalCostQuoteUseCase;
     private final BatchCalculationMapper requestMapper;
 
-    TariffV2CalculationController(TariffV2Facade tariffV2Facade, BatchCalculationMapper requestMapper) {
+    TariffV2CalculationController(TariffV2Facade tariffV2Facade, RentalCostQuoteUseCase rentalCostQuoteUseCase,
+                                  BatchCalculationMapper requestMapper) {
         this.tariffV2Facade = tariffV2Facade;
+        this.rentalCostQuoteUseCase = rentalCostQuoteUseCase;
         this.requestMapper = requestMapper;
     }
 
@@ -71,5 +77,24 @@ public class TariffV2CalculationController {
         var command = requestMapper.toV2Command(request);
         var result = tariffV2Facade.calculateRentalCostV2(command);
         return ResponseEntity.ok(requestMapper.toResponse(result));
+    }
+
+    @PostMapping("/quotes")
+    @Operation(summary = "Create a rental cost quote",
+            description = "Calculates the V2 rental cost and persists it as an immutable, single-use snapshot with a " +
+                    "validity window, so the exact figure can be reused at return confirmation instead of being recalculated")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Cost quote created",
+                    content = @Content(schema = @Schema(implementation = CostQuoteResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "No suitable tariff found for an equipment type",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<CostQuoteResponse> createQuote(@Valid @RequestBody CostCalculationV2Request request) {
+        log.info("[POST] Creating cost quote for {} equipment item(s)", request.equipments().size());
+        var command = requestMapper.toV2Command(request);
+        var quote = rentalCostQuoteUseCase.createQuote(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(requestMapper.toQuoteResponse(quote));
     }
 }

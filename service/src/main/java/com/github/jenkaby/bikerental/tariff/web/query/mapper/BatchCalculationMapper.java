@@ -8,6 +8,7 @@ import com.github.jenkaby.bikerental.tariff.*;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostQuoteResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,15 @@ public abstract class BatchCalculationMapper {
                 durationMapper.toMinutes(result.effectiveDuration()),
                 result.estimate(),
                 result.specialPricingApplied()
+        );
+    }
+
+    public CostQuoteResponse toQuoteResponse(RentalCostQuote quote) {
+        return new CostQuoteResponse(
+                quote.quoteId(),
+                quote.quotedAt(),
+                quote.expiresAt(),
+                toResponse(quote.result())
         );
     }
 }

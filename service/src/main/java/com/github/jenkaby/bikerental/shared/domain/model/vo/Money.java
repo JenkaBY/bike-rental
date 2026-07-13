@@ -68,6 +68,10 @@ public record Money(BigDecimal amount) implements Comparable<Money> {
         return this.compareTo(other) > 0;
     }
 
+    public boolean isEqualTo(Money other) {
+        return this.compareTo(other) == 0;
+    }
+
     public boolean isLessThan(Money other) {
         return this.compareTo(other) < 0;
     }

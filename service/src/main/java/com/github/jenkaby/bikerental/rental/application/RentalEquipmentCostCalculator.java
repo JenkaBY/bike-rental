@@ -52,17 +52,6 @@ public class RentalEquipmentCostCalculator {
 
     private List<EquipmentCostResult> extractFinalResults(List<RentalEquipment> returningEquipments, RentalCostCalculationV2Command command) {
         var breakdowns = tariffFacade.calculateRentalCostV2(command).equipmentBreakdowns();
-
-        var results = new ArrayList<EquipmentCostResult>();
-        for (int i = 0; i < returningEquipments.size(); i++) {
-            var breakdown = breakdowns.get(i);
-            results.add(new EquipmentCostResult(
-                    returningEquipments.get(i).getEquipmentId(),
-                    breakdown.tariffId(),
-                    breakdown.itemCost(),
-                    breakdownMapper.toBreakdown(breakdown)
-            ));
-        }
-        return results;
+        return breakdownMapper.toFrozenCostResults(returningEquipments.size(), breakdowns);
     }
 }

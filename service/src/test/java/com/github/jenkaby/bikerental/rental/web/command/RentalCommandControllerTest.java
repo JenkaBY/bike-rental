@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.rental.web.command;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseCase;
+import com.github.jenkaby.bikerental.rental.application.usecase.ConfirmReturnUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.CreateOrUpdateDraftRentalUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.InitRentalForSigningUseCase;
 import com.github.jenkaby.bikerental.rental.application.usecase.RentalLifecycleUseCase;
@@ -64,6 +65,9 @@ class RentalCommandControllerTest {
     private UpdateRentalUseCase updateRentalUseCase;
     @MockitoBean
     private ReturnEquipmentUseCase returnEquipmentUseCase;
+
+    @MockitoBean
+    private ConfirmReturnUseCase confirmReturnUseCase;
 
     @MockitoBean
     private AddEquipmentUseCase addEquipmentUseCase;
@@ -1849,6 +1853,64 @@ class RentalCommandControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isUnprocessableEntity());
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/rentals/{rentalId}/returns")
+    class ConfirmReturn {
+
+        private static final String CONFIRM_RETURN_URL = "/api/rentals/{rentalId}/returns";
+
+        @Test
+        @DisplayName("returns 201 when confirming against a valid quote")
+        void whenQuoteValid_returns201() throws Exception {
+            var quoteId = UUID.randomUUID();
+            var request = new ConfirmReturnRequest(quoteId, "operator-1");
+            var command = new ConfirmReturnUseCase.ConfirmReturnCommand(10L, quoteId, "operator-1");
+            Rental rental = mock(Rental.class);
+            given(rental.getId()).willReturn(10L);
+            var result = new ReturnEquipmentUseCase.ReturnEquipmentResult(rental, null);
+
+            given(commandMapper.toConfirmReturnCommand(eq(10L), any(ConfirmReturnRequest.class)))
+                    .willReturn(command);
+            given(confirmReturnUseCase.execute(any(ConfirmReturnUseCase.ConfirmReturnCommand.class)))
+                    .willReturn(result);
+            given(commandMapper.toReturnResponse(result))
+                    .willReturn(new RentalReturnResponse(mock(RentalResponse.class), null));
+
+            mockMvc.perform(post(CONFIRM_RETURN_URL, 10L)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated());
+
+            verify(confirmReturnUseCase).execute(any(ConfirmReturnUseCase.ConfirmReturnCommand.class));
+        }
+
+        @Test
+        @DisplayName("returns 400 when quoteId is null")
+        void whenQuoteIdNull_returns400() throws Exception {
+            var request = new ConfirmReturnRequest(null, "operator-1");
+
+            mockMvc.perform(post(CONFIRM_RETURN_URL, 10L)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors[0].field").value("quoteId"))
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.not_null"));
+        }
+
+        @Test
+        @DisplayName("returns 400 when operatorId is blank")
+        void whenOperatorIdBlank_returns400() throws Exception {
+            var request = new ConfirmReturnRequest(UUID.randomUUID(), " ");
+
+            mockMvc.perform(post(CONFIRM_RETURN_URL, 10L)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors[0].field").value("operatorId"))
+                    .andExpect(jsonPath("$.errors[0].code").value("validation.not_blank"));
         }
     }
 }

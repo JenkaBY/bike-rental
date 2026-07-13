@@ -4,13 +4,18 @@ import com.github.jenkaby.bikerental.shared.domain.model.vo.DiscountPercent;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import com.github.jenkaby.bikerental.tariff.DiscountDetail;
+import com.github.jenkaby.bikerental.tariff.QuoteStatus;
+import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
+import com.github.jenkaby.bikerental.tariff.RentalCostQuote;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
+import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostQuoteUseCase;
 import com.github.jenkaby.bikerental.tariff.domain.model.PricingType;
 import com.github.jenkaby.bikerental.tariff.domain.service.BaseEquipmentCostBreakdown;
 import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostCalculationResult;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
+import com.github.jenkaby.bikerental.tariff.web.query.dto.CostQuoteResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.mapper.BatchCalculationMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,7 +32,9 @@ import tools.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -50,8 +57,13 @@ class TariffV2CalculationControllerTest {
         @Autowired
         private ObjectMapper objectMapper;
 
+        private static final String API_V2_QUOTES = "/api/tariffs/quotes";
+
         @MockitoBean
         private TariffV2Facade tariffV2Facade;
+
+        @MockitoBean
+        private RentalCostQuoteUseCase rentalCostQuoteUseCase;
 
         @MockitoBean
         private BatchCalculationMapper batchMapper;
@@ -486,6 +498,198 @@ class TariffV2CalculationControllerTest {
                                         .andExpect(jsonPath("$.detail").value("Validation error"))
                                         .andExpect(jsonPath("$.errors[0].code")
                                                 .value("validation.special_tariff_consistency"));
+                        }
+                }
+        }
+
+        @Nested
+        @DisplayName("POST /api/tariffs/quotes")
+        class CreateQuote {
+
+                @Test
+                @DisplayName("returns 201 with the quote id and frozen calculation")
+                void createQuote_returns201() throws Exception {
+                        var request = new CostCalculationV2Request(
+                                List.of(new CostCalculationV2Request.EquipmentItemRequest(101L, "bicycle",
+                                        Instant.parse("2024-06-01T12:00:00Z"))),
+                                Instant.parse("2024-06-01T10:00:00Z"),
+                                120,
+                                null,
+                                null,
+                                null);
+                        var quoteId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+                        var command = new RentalCostCalculationV2Command(List.of(), Duration.ofMinutes(120),
+                                null, null, null, LocalDateTime.parse("2024-06-01T10:00:00"));
+                        var result = new BaseRentalCostCalculationResult(List.of(), Money.of("28.80"),
+                                DiscountDetail.none(), Money.of("28.80"), Duration.ofMinutes(120), false, false);
+                        var quote = new RentalCostQuote(quoteId, Instant.parse("2024-06-01T12:00:00Z"),
+                                Instant.parse("2024-06-01T12:05:00Z"), QuoteStatus.ACTIVE, command, result);
+                        var calculation = new CostCalculationResponse(List.of(), new BigDecimal("28.80"), null,
+                                new BigDecimal("28.80"), 120, false, false);
+                        var response = new CostQuoteResponse(quoteId, Instant.parse("2024-06-01T12:00:00Z"),
+                                Instant.parse("2024-06-01T12:05:00Z"), calculation);
+
+                        given(batchMapper.toV2Command(any())).willReturn(command);
+                        given(rentalCostQuoteUseCase.createQuote(any())).willReturn(quote);
+                        given(batchMapper.toQuoteResponse(quote)).willReturn(response);
+
+                        mockMvc.perform(post(API_V2_QUOTES)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.quoteId").value(quoteId.toString()))
+                                .andExpect(jsonPath("$.calculation.totalCost").value(28.80));
+                }
+
+                @Nested
+                class ValidationFails {
+
+                        public static Stream<Arguments> invalidEquipmentRequests() {
+                                return Stream.of(
+                                        Arguments.of(
+                                                new CostCalculationV2Request(List.of(),
+                                                        Instant.parse("2024-06-01T10:00:00Z"), 60,
+                                                        null, null, null),
+                                                "equipments",
+                                                "validation.not_empty"),
+                                        Arguments.of(
+                                                new CostCalculationV2Request(
+                                                        List.of(new CostCalculationV2Request.EquipmentItemRequest(
+                                                                1L, " ", null)),
+                                                        Instant.parse("2024-06-01T10:00:00Z"), 60,
+                                                        null, null, null),
+                                                "equipments[0].equipmentType",
+                                                "validation.not_blank"),
+                                        Arguments.of(
+                                                new CostCalculationV2Request(
+                                                        List.of(new CostCalculationV2Request.EquipmentItemRequest(
+                                                                null, "bicycle", null)),
+                                                        Instant.parse("2024-06-01T10:00:00Z"), 60,
+                                                        null, null, null),
+                                                "equipments[0].equipmentId",
+                                                "validation.not_null"));
+                        }
+
+                        @MethodSource("invalidEquipmentRequests")
+                        @ParameterizedTest
+                        void whenEquipmentRequestInvalid_returns400(CostCalculationV2Request request,
+                                                                    String expectedField, String expectedCode) throws Exception {
+                                mockMvc.perform(post(API_V2_QUOTES)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                                        .andExpect(jsonPath("$.errors[0].field").value(expectedField))
+                                        .andExpect(jsonPath("$.errors[0].code").value(expectedCode));
+                        }
+
+                        @Test
+                        @DisplayName("returns 400 when startAt is null")
+                        void whenStartAtNull_returns400() throws Exception {
+                                var request = new CostCalculationV2Request(
+                                        List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null)),
+                                        null,
+                                        60,
+                                        null, null, null);
+
+                                mockMvc.perform(post(API_V2_QUOTES)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                                        .andExpect(jsonPath("$.errors[0].field").value("startAt"))
+                                        .andExpect(jsonPath("$.errors[0].code").value("validation.not_null"));
+                        }
+
+                        @Test
+                        @DisplayName("returns 400 when plannedDurationMinutes is null")
+                        void whenPlannedDurationNull_returns400() throws Exception {
+                                var request = new CostCalculationV2Request(
+                                        List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null)),
+                                        Instant.parse("2024-06-01T10:00:00Z"),
+                                        null,
+                                        null, null, null);
+
+                                mockMvc.perform(post(API_V2_QUOTES)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                                        .andExpect(jsonPath("$.errors[0].field")
+                                                .value("plannedDurationMinutes"))
+                                        .andExpect(jsonPath("$.errors[0].code").value("validation.not_null"));
+                        }
+
+                        public static Stream<Arguments> invalidSpecialTariffConsistency() {
+                                return Stream.of(
+                                        Arguments.of(1L, null),
+                                        Arguments.of(null, new BigDecimal("9.99")));
+                        }
+
+                        @MethodSource("invalidSpecialTariffConsistency")
+                        @ParameterizedTest
+                        void whenSpecialTariffConsistencyInvalid_returns400(Long tariffId, BigDecimal price)
+                                throws Exception {
+                                var request = new CostCalculationV2Request(
+                                        List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null)),
+                                        Instant.parse("2024-06-01T10:00:00Z"),
+                                        60,
+                                        null,
+                                        tariffId,
+                                        price);
+
+                                mockMvc.perform(post(API_V2_QUOTES)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                                        .andExpect(jsonPath("$.errors[0].code")
+                                                .value("validation.special_tariff_consistency"));
+                        }
+
+                        @Test
+                        @DisplayName("returns 400 when specialPrice is negative")
+                        void whenSpecialPriceNegative_returns400() throws Exception {
+                                var request = new CostCalculationV2Request(
+                                        List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null)),
+                                        Instant.parse("2024-06-01T10:00:00Z"),
+                                        60,
+                                        null,
+                                        null,
+                                        new BigDecimal("-1"));
+
+                                mockMvc.perform(post(API_V2_QUOTES)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                                        .andExpect(jsonPath("$.errors[0].field").value("specialPrice"))
+                                        .andExpect(jsonPath("$.errors[0].code").value("validation.decimal_min"));
+                        }
+
+                        @Test
+                        @DisplayName("returns 400 when specialTariffId is zero")
+                        void whenSpecialTariffIdZero_returns400() throws Exception {
+                                var request = new CostCalculationV2Request(
+                                        List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null)),
+                                        Instant.parse("2024-06-01T10:00:00Z"),
+                                        60,
+                                        null,
+                                        0L,
+                                        null);
+
+                                mockMvc.perform(post(API_V2_QUOTES)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.detail").value("Validation error"))
+                                        .andExpect(jsonPath("$.errors[0].field").value("specialTariffId"))
+                                        .andExpect(jsonPath("$.errors[0].code").value("validation.positive"));
                         }
                 }
         }
