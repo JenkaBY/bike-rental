@@ -117,7 +117,7 @@ class AccountQueryControllerTest {
                     new GetTransactionHistoryUseCase.TransactionDto.Balances(
                             new BigDecimal("50.00"), new BigDecimal("0.00"))
             );
-            var pageRequest = new PageRequest(20, 0, null);
+            var pageRequest = new PageRequest(20, 0);
             var page = new Page<>(List.of(entry), 1L, pageRequest);
             var entryResponse = new CustomerTransactionResponse(
                     CUSTOMER_ID,

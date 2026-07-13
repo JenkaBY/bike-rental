@@ -100,7 +100,7 @@ class RentalQueryControllerTest {
         @MethodSource("searchParameterCombinations")
         void getRentals_returnsOk(String description, String status, String customerId, String equipmentUid,
                                   String from, String to) throws Exception {
-            var pageRequest = new PageRequest(20, 0, null);
+            var pageRequest = new PageRequest(20, 0);
             var page = new Page<>(List.of(mock(Rental.class)), 1L, pageRequest);
 
             given(pageMapper.toPageRequest(any())).willReturn(pageRequest);
@@ -120,7 +120,7 @@ class RentalQueryControllerTest {
 
         @Test
         void getRentals_multipleStatuses_returnsOk() throws Exception {
-            var pageRequest = new PageRequest(20, 0, null);
+            var pageRequest = new PageRequest(20, 0);
             var page = new Page<>(List.of(mock(Rental.class)), 1L, pageRequest);
 
             given(pageMapper.toPageRequest(any())).willReturn(pageRequest);
@@ -163,7 +163,7 @@ class RentalQueryControllerTest {
 
         @Test
         void getRentals_fromEqualsTo_returnsOk() throws Exception {
-            var pageRequest = new PageRequest(20, 0, null);
+            var pageRequest = new PageRequest(20, 0);
             var page = new Page<>(List.of(mock(Rental.class)), 1L, pageRequest);
 
             given(pageMapper.toPageRequest(any())).willReturn(pageRequest);

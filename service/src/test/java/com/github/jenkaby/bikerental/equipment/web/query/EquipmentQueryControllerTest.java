@@ -139,7 +139,7 @@ class EquipmentQueryControllerTest {
             given(mapper.toSearchQuery(any(), any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
                     null, null, null, new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, null)));
 
-            var page = new Page<>(List.of(domain), 1L, new PageRequest(20, 0, null));
+            var page = new Page<>(List.of(domain), 1L, new PageRequest(20, 0));
 
             given(searchUseCase.execute(any())).willReturn(page);
             given(mapper.toResponse(domain)).willReturn(response);
@@ -170,7 +170,7 @@ class EquipmentQueryControllerTest {
             given(mapper.toSearchQuery(any(), any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
                     null, null, "bike", new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, null)));
 
-            var page = new Page<>(List.of(domain), 1L, new PageRequest(20, 0, null));
+            var page = new Page<>(List.of(domain), 1L, new PageRequest(20, 0));
 
             given(searchUseCase.execute(any())).willReturn(page);
             given(mapper.toResponse(domain)).willReturn(response);

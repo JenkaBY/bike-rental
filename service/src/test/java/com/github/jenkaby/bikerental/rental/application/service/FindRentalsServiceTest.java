@@ -29,7 +29,7 @@ class FindRentalsServiceTest {
     private static final List<RentalStatus> STATUSES = List.of(RentalStatus.ACTIVE);
     private static final UUID CUSTOMER_ID = UUID.randomUUID();
     private static final String EQUIPMENT_UID = "BIKE-001";
-    private static final PageRequest PAGE_REQUEST = new PageRequest(20, 0, null);
+    private static final PageRequest PAGE_REQUEST = new PageRequest(20, 0);
     private static final LocalDate FROM_DATE = LocalDate.of(2026, 2, 15);
     private static final LocalDate TO_DATE = LocalDate.of(2026, 2, 20);
 

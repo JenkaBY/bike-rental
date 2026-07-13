@@ -87,7 +87,7 @@ class RentalQueryController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @Parameter(description = "Created-at range end (inclusive), format yyyy-MM-dd", example = "2026-02-20") @RequestParam(name = "to", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-            @PageableDefault(size = 20, sort = "expectedReturnAt", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(size = 20, sort = {"expectedReturnAt", "createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("[GET] Get rentals with filters statuses={}, customerId={}, equipmentUid={}, from={}, to={}", statuses, customerId, equipmentUid, from, to);
 
         var pageRequest = pageMapper.toPageRequest(pageable);
