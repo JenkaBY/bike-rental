@@ -28,5 +28,6 @@ public class RentalCostQuoteWebSteps {
                 .ignoringFields("equipmentBreakdowns")
                 .isEqualTo(expected);
         scenarioContext.setQuoteId(actual.quoteId());
+        scenarioContext.setRequestedObjectId(actual.quoteId().toString());
     }
 }

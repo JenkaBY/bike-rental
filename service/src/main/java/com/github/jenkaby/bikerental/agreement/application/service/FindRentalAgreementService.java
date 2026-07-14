@@ -13,6 +13,7 @@ import com.github.jenkaby.bikerental.customer.CustomerInfo;
 import com.github.jenkaby.bikerental.rental.RentalSigningFacade;
 import com.github.jenkaby.bikerental.rental.RentalSigningSnapshot;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ class FindRentalAgreementService implements FindRentalAgreementUseCase {
     private final SigningAssemblyMapper assemblyMapper;
     private final AgreementContentRenderer contentRenderer;
     private final AgreementTemplateMapper agreementTemplateMapper;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional(readOnly = true)
@@ -46,7 +47,7 @@ class FindRentalAgreementService implements FindRentalAgreementUseCase {
         CustomerInfo customer = customerFacade.findById(snapshot.customerId())
                 .orElseThrow(() -> new ResourceNotFoundException(CustomerInfo.class, snapshot.customerId().toString()));
 
-        var pdfData = assemblyMapper.toPdfData(template, customer, snapshot, clock.instant(), null);
+        var pdfData = assemblyMapper.toPdfData(template, customer, snapshot, timeProvider.nowInstant(), null);
         var content = contentRenderer.substitute(pdfData);
         var title = contentRenderer.substituteTitle(pdfData);
 

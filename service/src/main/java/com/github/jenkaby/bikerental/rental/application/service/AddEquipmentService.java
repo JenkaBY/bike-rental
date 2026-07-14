@@ -6,6 +6,7 @@ import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseC
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -24,7 +25,7 @@ class AddEquipmentService implements AddEquipmentUseCase {
     private final EquipmentFacade equipmentFacade;
     private final RequestedEquipmentValidator validator;
     private final RentalEquipmentFactory rentalEquipmentFactory;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -35,7 +36,7 @@ class AddEquipmentService implements AddEquipmentUseCase {
         Rental rental = rentalRepository.findById(command.rentalId())
                 .orElseThrow(() -> new ResourceNotFoundException(Rental.class, command.rentalId().toString()));
 
-        LocalDateTime addedAt = LocalDateTime.now(clock);
+        LocalDateTime addedAt = timeProvider.nowTruncated();
         rental.ensureCanAddEquipmentAt(addedAt);
 
         var equipments = equipmentFacade.findByIds(command.equipmentIds());

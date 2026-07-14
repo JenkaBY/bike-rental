@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.tariff;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
@@ -7,10 +8,9 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public record RentalCostQuote(
-        @NonNull UUID quoteId,
+        @NonNull QuoteRef quoteId,
         @NonNull Instant quotedAt,
         @NonNull Instant expiresAt,
         @NonNull QuoteStatus status,

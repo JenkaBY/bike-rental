@@ -11,8 +11,8 @@ import java.time.ZoneId;
 public class ClockConfig {
 
     @Bean
-    public Clock applicationClock() {
-        return Clock.systemDefaultZone();
+    public Clock applicationClock(ZoneId businessZoneId) {
+        return Clock.system(businessZoneId);
     }
 
     @Bean

@@ -12,6 +12,7 @@ import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.TransactionRef;
 import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -66,7 +67,7 @@ public class RecordRentalHoldService implements RentalHoldUseCase {
 
         accountRepository.save(customerAccount);
 
-        Instant now = clock.instant();
+        Instant now = timeProvider.nowInstant();
         UUID transactionId = uuidGenerator.generate();
 
         var transaction = Transaction.builder()

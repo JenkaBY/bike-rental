@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.tariff.web.query;
 
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostQuoteUseCase;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
@@ -22,6 +23,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Validated
 @Slf4j
@@ -96,5 +99,19 @@ public class TariffV2CalculationController {
         var command = requestMapper.toV2Command(request);
         var quote = rentalCostQuoteUseCase.createQuote(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(requestMapper.toQuoteResponse(quote));
+    }
+
+    @DeleteMapping("/quotes/{id}")
+    @Operation(summary = "Delete a rental cost quote",
+            description = "Removes a cost quote before it is consumed or expires")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Cost quote deleted"),
+            @ApiResponse(responseCode = "404", description = "Cost quote not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<Void> deleteQuote(@PathVariable("id") UUID id) {
+        log.info("[DELETE] Deleting cost quote {}", id);
+        rentalCostQuoteUseCase.deleteQuote(new QuoteRef(id));
+        return ResponseEntity.noContent().build();
     }
 }

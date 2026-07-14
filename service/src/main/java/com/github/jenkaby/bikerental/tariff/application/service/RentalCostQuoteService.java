@@ -1,5 +1,7 @@
 package com.github.jenkaby.bikerental.tariff.application.service;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import com.github.jenkaby.bikerental.tariff.QuoteAlreadyConsumedException;
 import com.github.jenkaby.bikerental.tariff.QuoteExpiredException;
@@ -16,9 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.Instant;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -29,7 +29,7 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
     private final RentalCostQuoteRepository quoteRepository;
     private final QuoteProperties quoteProperties;
     private final UuidGenerator uuidGenerator;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -37,7 +37,7 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
         var result = calculationUseCase.execute(command);
         var quotedAt = now();
         var quote = new RentalCostQuote(
-                uuidGenerator.generate(),
+                new QuoteRef(uuidGenerator.generate()),
                 quotedAt,
                 quotedAt.plus(quoteProperties.quoteTtl()),
                 QuoteStatus.ACTIVE,
@@ -49,26 +49,26 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
     }
 
     @Override
-    public RentalCostQuote getQuote(UUID quoteId) {
+    public RentalCostQuote getQuote(QuoteRef quoteId) {
         var quote = quoteRepository.findById(quoteId)
-                .orElseThrow(() -> new QuoteNotFoundException(quoteId));
+                .orElseThrow(() -> new QuoteNotFoundException(quoteId.id()));
         if (quote.isExpired(now())) {
-            throw new QuoteExpiredException(quoteId, quote.expiresAt());
+            throw new QuoteExpiredException(quoteId.id(), quote.expiresAt());
         }
         return quote;
     }
 
     @Override
     @Transactional
-    public RentalCostQuote consumeQuote(UUID quoteId) {
+    public RentalCostQuote consumeQuote(QuoteRef quoteId) {
         var quote = quoteRepository.findById(quoteId)
-                .orElseThrow(() -> new QuoteNotFoundException(quoteId));
+                .orElseThrow(() -> new QuoteNotFoundException(quoteId.id()));
         var now = now();
         if (quote.isExpired(now)) {
-            throw new QuoteExpiredException(quoteId, quote.expiresAt());
+            throw new QuoteExpiredException(quoteId.id(), quote.expiresAt());
         }
         if (quote.isConsumed() || !quoteRepository.markConsumed(quoteId, now)) {
-            throw new QuoteAlreadyConsumedException(quoteId);
+            throw new QuoteAlreadyConsumedException(quoteId.id());
         }
         log.info("Consumed cost quote {}", quoteId);
         return new RentalCostQuote(
@@ -80,7 +80,16 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
                 quote.result());
     }
 
+    @Override
+    @Transactional
+    public void deleteQuote(QuoteRef quoteId) {
+        quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new QuoteNotFoundException(quoteId.id()));
+        quoteRepository.deleteById(quoteId);
+        log.info("Deleted cost quote {}", quoteId);
+    }
+
     private Instant now() {
-        return Instant.now(clock);
+        return timeProvider.nowInstant();
     }
 }

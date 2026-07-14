@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.tariff.infrastructure.persistence.mapper;
 import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import com.github.jenkaby.bikerental.shared.mapper.QuoteRefMapper;
 import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import com.github.jenkaby.bikerental.tariff.DiscountDetail;
 import com.github.jenkaby.bikerental.tariff.EquipmentCostBreakdown;
@@ -21,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Mapper(uses = {MoneyMapper.class, DurationMapper.class, DiscountMapper.class})
+@Mapper(uses = {MoneyMapper.class, DurationMapper.class, DiscountMapper.class, QuoteRefMapper.class})
 public abstract class RentalCostQuoteJpaMapper {
 
     private MoneyMapper moneyMapper;

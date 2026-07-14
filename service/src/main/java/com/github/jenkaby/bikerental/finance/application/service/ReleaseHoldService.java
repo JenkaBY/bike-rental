@@ -13,6 +13,7 @@ import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.TransactionRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class ReleaseHoldService implements ReleaseHoldUseCase {
     private final TransactionRepository transactionRepository;
     private final RentalHoldBalanceCalculator holdBalanceCalculator;
     private final UuidGenerator uuidGenerator;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -54,14 +55,14 @@ public class ReleaseHoldService implements ReleaseHoldUseCase {
         Money netHold = holdBalanceCalculator.netActiveHold(rentalRef);
         if (netHold.isNegativeOrZero()) {
             log.debug("No active hold for rental {} version {}, nothing to release", actualRentalRef.id(), actualRentalRef.rentalVersion());
-            return new HoldResult(null, clock.instant());
+            return new HoldResult(null, timeProvider.nowInstant());
         }
 
         Optional<Transaction> holdOptional = transactionRepository.findByRentalRefAndType(rentalRef, TransactionType.HOLD);
         var customerRef = new CustomerRef(holdOptional.orElseThrow(() ->
                 new ResourceNotFoundException(Transaction.class, actualRentalRef.id().toString())).getCustomerId());
 
-        var now = clock.instant();
+        var now = timeProvider.nowInstant();
         var customerAccount = accountRepository.findByCustomerId(customerRef)
                 .orElseThrow(() -> new ResourceNotFoundException(Account.class, customerRef.id()));
 

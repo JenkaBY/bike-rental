@@ -338,11 +338,12 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 
 ## `tariff.*` — cost quotes
 
-Thrown by the tariff module and surfaced by `RentalRestControllerAdvice` when a quote is fetched or consumed during
-return confirmation.
+Thrown by the tariff module and surfaced by `RentalRestControllerAdvice` (return confirmation flow) and
+`TariffRestControllerAdvice` (`/api/tariffs/quotes/**` endpoints).
 
 ### `tariff.quote.not_found`
-- **HTTP:** 404 · **Trigger:** no cost quote exists for the supplied id (`QuoteNotFoundException`).
+- **HTTP:** 404 · **Trigger:** no cost quote exists for the supplied id (`QuoteNotFoundException`), thrown when
+  fetching/consuming a quote during return confirmation, or when calling `DELETE /api/tariffs/quotes/{id}`.
 - **Extra:** `params` = `{quoteId}`.
 
 ```json

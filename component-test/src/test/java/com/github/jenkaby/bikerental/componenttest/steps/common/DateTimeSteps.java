@@ -2,9 +2,11 @@ package com.github.jenkaby.bikerental.componenttest.steps.common;
 
 import com.github.jenkaby.bikerental.componenttest.config.ClockTestConfig;
 import com.github.jenkaby.bikerental.shared.config.DevClockConfig;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +18,15 @@ import java.util.TimeZone;
 public class DateTimeSteps {
 
     private final Clock clock;
+    private final TimeProvider timeProvider;
     private TimeZone defaultTimezone;
+
+    @PostConstruct
+    public void setTz() {
+        this.defaultTimezone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone(timeProvider.zoneId()));
+        log.info("Set {} timezone. Default is {}", TimeZone.getDefault(), this.defaultTimezone);
+    }
 
     @Before("@UseUTC")
     public void setUTC() {
@@ -53,7 +63,7 @@ public class DateTimeSteps {
         log.info("Setting current date to {}", date);
         LocalDate today = LocalDate.parse(date);
         log.debug("parsed date: {}", today);
-        var currentTime = today.atStartOfDay().toInstant(ZoneOffset.UTC);
+        var currentTime = today.atStartOfDay().toInstant(timeProvider.zoneOffset());
         log.debug("Set instant: {}", currentTime);
         setCurrentTime(currentTime);
     }
@@ -63,7 +73,7 @@ public class DateTimeSteps {
         log.info("Setting current local datetime to {}", instantString);
         LocalDateTime now = LocalDateTime.parse(instantString);
         log.debug("parsed now: {}", now);
-        var currentTime = now.atZone(ZoneId.systemDefault());
+        var currentTime = now.atZone(timeProvider.zoneId());
         log.debug("Set ZDT: {}", currentTime);
         log.debug("Set instant: {}", currentTime.toInstant());
         log.debug("Set local datetime: {}", currentTime.toLocalDateTime());

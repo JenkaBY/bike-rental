@@ -8,15 +8,17 @@ import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.LocalDateTime;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 class CancelRentalService implements CancelRentalUseCase {
 
     private static final String RENTAL_EVENTS_EXCHANGER = "rental-events";
@@ -25,20 +27,7 @@ class CancelRentalService implements CancelRentalUseCase {
     private final FinanceFacade financeFacade;
     private final EventPublisher eventPublisher;
     private final RentalEventMapper eventMapper;
-    private final Clock clock;
-
-    CancelRentalService(
-            RentalRepository rentalRepository,
-            FinanceFacade financeFacade,
-            EventPublisher eventPublisher,
-            RentalEventMapper eventMapper,
-            Clock clock) {
-        this.rentalRepository = rentalRepository;
-        this.financeFacade = financeFacade;
-        this.eventPublisher = eventPublisher;
-        this.eventMapper = eventMapper;
-        this.clock = clock;
-    }
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -53,7 +42,7 @@ class CancelRentalService implements CancelRentalUseCase {
             financeFacade.releaseHold(rental.toActualRentalRef(), command.operatorId());
         }
 
-        rental.cancel(LocalDateTime.now(clock));
+        rental.cancel(timeProvider.nowTruncated());
 
         Rental saved = rentalRepository.save(rental);
         eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalCancelled(saved));

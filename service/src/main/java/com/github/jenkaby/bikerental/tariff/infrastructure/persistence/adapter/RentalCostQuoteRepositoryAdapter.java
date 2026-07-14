@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.tariff.infrastructure.persistence.adapter;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.tariff.RentalCostQuote;
 import com.github.jenkaby.bikerental.tariff.domain.repository.RentalCostQuoteRepository;
 import com.github.jenkaby.bikerental.tariff.infrastructure.persistence.mapper.RentalCostQuoteJpaMapper;
@@ -8,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 class RentalCostQuoteRepositoryAdapter implements RentalCostQuoteRepository {
@@ -28,12 +28,17 @@ class RentalCostQuoteRepositoryAdapter implements RentalCostQuoteRepository {
     }
 
     @Override
-    public Optional<RentalCostQuote> findById(UUID quoteId) {
-        return jpaRepository.findById(quoteId).map(mapper::toDomain);
+    public Optional<RentalCostQuote> findById(QuoteRef quoteId) {
+        return jpaRepository.findById(quoteId.id()).map(mapper::toDomain);
     }
 
     @Override
-    public boolean markConsumed(UUID quoteId, Instant consumedAt) {
-        return jpaRepository.markConsumed(quoteId, consumedAt) > 0;
+    public boolean markConsumed(QuoteRef quoteId, Instant consumedAt) {
+        return jpaRepository.markConsumed(quoteId.id(), consumedAt) > 0;
+    }
+
+    @Override
+    public void deleteById(QuoteRef quoteId) {
+        jpaRepository.deleteById(quoteId.id());
     }
 }

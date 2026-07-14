@@ -1,12 +1,13 @@
 package com.github.jenkaby.bikerental.tariff;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
 
 import java.util.UUID;
 
 /**
  * Thrown when a cost quote cannot be found. Part of the public API of the tariff module and may be thrown by
- * {@link TariffV2Facade#getQuote(UUID)} / {@link TariffV2Facade#consumeQuote(UUID)}.
+ * {@link TariffV2Facade#getQuote(QuoteRef)} / {@link TariffV2Facade#consumeQuote(QuoteRef)}.
  */
 public class QuoteNotFoundException extends BikeRentalException {
 

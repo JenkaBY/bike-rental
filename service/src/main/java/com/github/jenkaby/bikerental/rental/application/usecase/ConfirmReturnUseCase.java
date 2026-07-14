@@ -1,9 +1,8 @@
 package com.github.jenkaby.bikerental.rental.application.usecase;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase.ReturnEquipmentResult;
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import org.jspecify.annotations.NonNull;
-
-import java.util.UUID;
 
 public interface ConfirmReturnUseCase {
 
@@ -12,7 +11,7 @@ public interface ConfirmReturnUseCase {
 
     record ConfirmReturnCommand(
             Long rentalId,
-            UUID quoteId,
+            QuoteRef quoteId,
             String operatorId
     ) {
     }

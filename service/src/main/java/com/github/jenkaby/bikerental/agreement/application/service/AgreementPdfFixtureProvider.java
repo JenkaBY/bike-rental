@@ -2,6 +2,8 @@ package com.github.jenkaby.bikerental.agreement.application.service;
 
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -10,6 +12,7 @@ import java.time.Duration;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 class AgreementPdfFixtureProvider {
 
     private static final AgreementPdfData.CustomerData FIXTURE_CUSTOMER =
@@ -21,14 +24,11 @@ class AgreementPdfFixtureProvider {
             new AgreementPdfData.EquipmentLine("HELM-014", "Шлем защитный", new BigDecimal("5.00")));
     private static final BigDecimal FIXTURE_ESTIMATED_TOTAL = new BigDecimal("30.00");
 
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
-    AgreementPdfFixtureProvider(Clock clock) {
-        this.clock = clock;
-    }
 
     AgreementPdfData previewData(String title, String content) {
-        var now = clock.instant();
+        var now = timeProvider.nowInstant();
         var rental = new AgreementPdfData.RentalData(
                 FIXTURE_RENTAL_ID,
                 now,

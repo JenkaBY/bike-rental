@@ -7,6 +7,7 @@ import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -26,7 +27,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
     private final RentalDurationCalculator durationCalculator;
     private final RentalCostPolicy costPolicy;
     private final RentalSettlementFinalizer settlementFinalizer;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -34,7 +35,7 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
         log.info("Processing equipment return for rentalId={}, equipmentIds={}, equipmentUids={}",
                 command.rentalId(), command.equipmentIds(), command.equipmentUids());
 
-        LocalDateTime returnTime = LocalDateTime.now(clock);
+        LocalDateTime returnTime = timeProvider.nowTruncated();
         Rental rental = findRental(command);
         if (!rental.hasActiveStatus()) {
             throw new InvalidRentalStatusException(rental.getStatus(), RentalStatus.ACTIVE);

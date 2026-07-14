@@ -6,6 +6,8 @@ import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CompleteSigningService {
 
     private static final String RENTAL_EVENTS_EXCHANGER = "rental-events";
@@ -23,18 +26,7 @@ public class CompleteSigningService {
     private final RentalRepository rentalRepository;
     private final EventPublisher eventPublisher;
     private final RentalEventMapper eventMapper;
-    private final Clock clock;
-
-    CompleteSigningService(
-            RentalRepository rentalRepository,
-            EventPublisher eventPublisher,
-            RentalEventMapper eventMapper,
-            Clock clock) {
-        this.rentalRepository = rentalRepository;
-        this.eventPublisher = eventPublisher;
-        this.eventMapper = eventMapper;
-        this.clock = clock;
-    }
+    private final TimeProvider timeProvider;
 
     @Transactional
     public void completeSigning(Long rentalId, Long expectedVersion, Instant signedAt) {
@@ -45,7 +37,7 @@ public class CompleteSigningService {
             throw new RentalSigningVersionMismatchException(rentalId, expectedVersion, rental.getVersion());
         }
 
-        LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, clock.getZone());
+        LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, timeProvider.zoneId());
         rental.completeSigning(startedAt);
 
         Rental saved = rentalRepository.save(rental);
