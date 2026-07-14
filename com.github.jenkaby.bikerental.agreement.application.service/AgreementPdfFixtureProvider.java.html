@@ -2,6 +2,8 @@
 
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementPdfData;
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -10,25 +12,23 @@ import java.time.Duration;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 class AgreementPdfFixtureProvider {
 
-<span class="fc" id="L15">    private static final AgreementPdfData.CustomerData FIXTURE_CUSTOMER =</span>
+<span class="fc" id="L18">    private static final AgreementPdfData.CustomerData FIXTURE_CUSTOMER =</span>
             new AgreementPdfData.CustomerData(&quot;Иван&quot;, &quot;Иванов&quot;, &quot;+375291234567&quot;);
-<span class="fc" id="L17">    private static final Long FIXTURE_RENTAL_ID = 0L;</span>
-<span class="fc" id="L18">    private static final Duration FIXTURE_DURATION = Duration.ofHours(2);</span>
-<span class="fc" id="L19">    private static final List&lt;AgreementPdfData.EquipmentLine&gt; FIXTURE_EQUIPMENTS = List.of(</span>
+<span class="fc" id="L20">    private static final Long FIXTURE_RENTAL_ID = 0L;</span>
+<span class="fc" id="L21">    private static final Duration FIXTURE_DURATION = Duration.ofHours(2);</span>
+<span class="fc" id="L22">    private static final List&lt;AgreementPdfData.EquipmentLine&gt; FIXTURE_EQUIPMENTS = List.of(</span>
             new AgreementPdfData.EquipmentLine(&quot;BIKE-001&quot;, &quot;Горный велосипед&quot;, new BigDecimal(&quot;25.00&quot;)),
             new AgreementPdfData.EquipmentLine(&quot;HELM-014&quot;, &quot;Шлем защитный&quot;, new BigDecimal(&quot;5.00&quot;)));
-<span class="fc" id="L22">    private static final BigDecimal FIXTURE_ESTIMATED_TOTAL = new BigDecimal(&quot;30.00&quot;);</span>
+<span class="fc" id="L25">    private static final BigDecimal FIXTURE_ESTIMATED_TOTAL = new BigDecimal(&quot;30.00&quot;);</span>
 
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
-<span class="fc" id="L26">    AgreementPdfFixtureProvider(Clock clock) {</span>
-<span class="fc" id="L27">        this.clock = clock;</span>
-<span class="fc" id="L28">    }</span>
 
     AgreementPdfData previewData(String title, String content) {
-<span class="fc" id="L31">        var now = clock.instant();</span>
+<span class="fc" id="L31">        var now = timeProvider.nowInstant();</span>
 <span class="fc" id="L32">        var rental = new AgreementPdfData.RentalData(</span>
                 FIXTURE_RENTAL_ID,
                 now,

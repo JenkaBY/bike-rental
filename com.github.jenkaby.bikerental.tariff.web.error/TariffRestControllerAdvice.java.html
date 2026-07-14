@@ -3,6 +3,7 @@
 import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.InvalidSpecialTariffTypeException;
+import com.github.jenkaby.bikerental.tariff.QuoteNotFoundException;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialPriceException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-<span class="fc" id="L18">@Slf4j</span>
+<span class="fc" id="L19">@Slf4j</span>
 @RestControllerAdvice(basePackages = &quot;com.github.jenkaby.bikerental.tariff&quot;)
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
 @RequiredArgsConstructor
@@ -25,52 +26,65 @@ public class TariffRestControllerAdvice {
 
     @ExceptionHandler(SuitableTariffNotFoundException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleSuitableTariffNotFound(SuitableTariffNotFoundException ex) {
-<span class="fc" id="L28">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="fc" id="L29">        log.warn(&quot;[correlationId={}] Suitable tariff not found: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="fc" id="L30">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
-<span class="fc" id="L31">        problem.setTitle(&quot;Resource not found&quot;);</span>
-<span class="fc" id="L32">        problem.setDetail(&quot;Suitable tariff not found&quot;);</span>
-<span class="fc" id="L33">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L34">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="fc" id="L35">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
-<span class="fc" id="L36">        return ResponseEntity.of(problem).build();</span>
+<span class="fc" id="L29">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L30">        log.warn(&quot;[correlationId={}] Suitable tariff not found: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L31">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
+<span class="fc" id="L32">        problem.setTitle(&quot;Resource not found&quot;);</span>
+<span class="fc" id="L33">        problem.setDetail(&quot;Suitable tariff not found&quot;);</span>
+<span class="fc" id="L34">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L35">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L36">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L37">        return ResponseEntity.of(problem).build();</span>
     }
 
     @ExceptionHandler(InvalidTariffPricingException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInvalidTariffV2Pricing(InvalidTariffPricingException ex) {
-<span class="nc" id="L41">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="nc" id="L42">        log.warn(&quot;[correlationId={}] Invalid tariff V2 pricing: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L43">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
-<span class="nc" id="L44">        problem.setTitle(&quot;Validation error&quot;);</span>
-<span class="nc" id="L45">        problem.setDetail(ex.getMessage());</span>
-<span class="nc" id="L46">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L47">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="nc" id="L48">        return ResponseEntity.badRequest().body(problem);</span>
+<span class="nc" id="L42">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L43">        log.warn(&quot;[correlationId={}] Invalid tariff V2 pricing: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L44">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L45">        problem.setTitle(&quot;Validation error&quot;);</span>
+<span class="nc" id="L46">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L47">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L48">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L49">        return ResponseEntity.badRequest().body(problem);</span>
     }
 
     @ExceptionHandler(InvalidSpecialTariffTypeException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInvalidSpecialTariffType(InvalidSpecialTariffTypeException ex) {
-<span class="nc" id="L53">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="nc" id="L54">        log.warn(&quot;[correlationId={}] Invalid special tariff type: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L55">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
-<span class="nc" id="L56">        problem.setTitle(&quot;Invalid special tariff&quot;);</span>
-<span class="nc" id="L57">        problem.setDetail(ex.getMessage());</span>
-<span class="nc" id="L58">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L59">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="nc" id="L60">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
-<span class="nc" id="L61">        return ResponseEntity.badRequest().body(problem);</span>
+<span class="nc" id="L54">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L55">        log.warn(&quot;[correlationId={}] Invalid special tariff type: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L56">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L57">        problem.setTitle(&quot;Invalid special tariff&quot;);</span>
+<span class="nc" id="L58">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L59">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L60">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L61">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="nc" id="L62">        return ResponseEntity.badRequest().body(problem);</span>
     }
 
     @ExceptionHandler(InvalidSpecialPriceException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleInvalidSpecialPrice(InvalidSpecialPriceException ex) {
-<span class="nc" id="L66">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="nc" id="L67">        log.warn(&quot;[correlationId={}] Invalid special price: {}&quot;, correlationId, ex.getMessage());</span>
-<span class="nc" id="L68">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
-<span class="nc" id="L69">        problem.setTitle(&quot;Invalid special price&quot;);</span>
-<span class="nc" id="L70">        problem.setDetail(ex.getMessage());</span>
-<span class="nc" id="L71">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
-<span class="nc" id="L72">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
-<span class="nc" id="L73">        return ResponseEntity.badRequest().body(problem);</span>
+<span class="nc" id="L67">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L68">        log.warn(&quot;[correlationId={}] Invalid special price: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="nc" id="L69">        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L70">        problem.setTitle(&quot;Invalid special price&quot;);</span>
+<span class="nc" id="L71">        problem.setDetail(ex.getMessage());</span>
+<span class="nc" id="L72">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L73">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L74">        return ResponseEntity.badRequest().body(problem);</span>
+    }
+
+    @ExceptionHandler(QuoteNotFoundException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleQuoteNotFound(QuoteNotFoundException ex) {
+<span class="fc" id="L79">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="fc" id="L80">        log.warn(&quot;[correlationId={}] Cost quote not found: {}&quot;, correlationId, ex.getMessage());</span>
+<span class="fc" id="L81">        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);</span>
+<span class="fc" id="L82">        problem.setTitle(&quot;Cost quote not found&quot;);</span>
+<span class="fc" id="L83">        problem.setDetail(ex.getMessage());</span>
+<span class="fc" id="L84">        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);</span>
+<span class="fc" id="L85">        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());</span>
+<span class="fc" id="L86">        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());</span>
+<span class="fc" id="L87">        return ResponseEntity.of(problem).build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalCostQuoteJpaMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.infrastructure.persistence.mapper</a> &gt; <span class="el_source">RentalCostQuoteJpaMapperImpl.java</span></div><h1>RentalCostQuoteJpaMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.infrastructure.persistence.mapper;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.DiscountPercent;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import com.github.jenkaby.bikerental.shared.mapper.QuoteRefMapper;
 import com.github.jenkaby.bikerental.tariff.DiscountDetail;
 import com.github.jenkaby.bikerental.tariff.EquipmentCostItemV2;
 import com.github.jenkaby.bikerental.tariff.QuoteStatus;
@@ -20,7 +22,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import javax.annotation.processing.Generated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,216 +36,218 @@ public class RentalCostQuoteJpaMapperImpl extends RentalCostQuoteJpaMapper {
     private final MoneyMapper moneyMapper;
     private final DurationMapper durationMapper;
     private final DiscountMapper discountMapper;
+    private final QuoteRefMapper quoteRefMapper;
 
     @Autowired
-<span class="fc" id="L40">    public RentalCostQuoteJpaMapperImpl(MoneyMapper moneyMapper, DurationMapper durationMapper, DiscountMapper discountMapper) {</span>
+<span class="fc" id="L42">    public RentalCostQuoteJpaMapperImpl(MoneyMapper moneyMapper, DurationMapper durationMapper, DiscountMapper discountMapper, QuoteRefMapper quoteRefMapper) {</span>
 
-<span class="fc" id="L42">        this.moneyMapper = moneyMapper;</span>
-<span class="fc" id="L43">        this.durationMapper = durationMapper;</span>
-<span class="fc" id="L44">        this.discountMapper = discountMapper;</span>
-<span class="fc" id="L45">    }</span>
+<span class="fc" id="L44">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L45">        this.durationMapper = durationMapper;</span>
+<span class="fc" id="L46">        this.discountMapper = discountMapper;</span>
+<span class="fc" id="L47">        this.quoteRefMapper = quoteRefMapper;</span>
+<span class="fc" id="L48">    }</span>
 
     @Override
     public RentalCostQuoteJpaEntity toEntity(RentalCostQuote quote) {
-<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if ( quote == null ) {</span>
-<span class="nc" id="L50">            return null;</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if ( quote == null ) {</span>
+<span class="nc" id="L53">            return null;</span>
         }
 
-<span class="fc" id="L53">        RentalCostQuoteJpaEntity.RentalCostQuoteJpaEntityBuilder rentalCostQuoteJpaEntity = RentalCostQuoteJpaEntity.builder();</span>
+<span class="fc" id="L56">        RentalCostQuoteJpaEntity.RentalCostQuoteJpaEntityBuilder rentalCostQuoteJpaEntity = RentalCostQuoteJpaEntity.builder();</span>
 
-<span class="fc" id="L55">        rentalCostQuoteJpaEntity.id( quote.quoteId() );</span>
-<span class="fc" id="L56">        rentalCostQuoteJpaEntity.requestSnapshot( toRequestSnapshot( quote.inputs() ) );</span>
-<span class="fc" id="L57">        rentalCostQuoteJpaEntity.resultSnapshot( toResultSnapshot( quote.result() ) );</span>
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if ( quote.status() != null ) {</span>
-<span class="fc" id="L59">            rentalCostQuoteJpaEntity.status( quote.status().name() );</span>
+<span class="fc" id="L58">        rentalCostQuoteJpaEntity.id( quoteRefMapper.toUUID( quote.quoteId() ) );</span>
+<span class="fc" id="L59">        rentalCostQuoteJpaEntity.requestSnapshot( toRequestSnapshot( quote.inputs() ) );</span>
+<span class="fc" id="L60">        rentalCostQuoteJpaEntity.resultSnapshot( toResultSnapshot( quote.result() ) );</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if ( quote.status() != null ) {</span>
+<span class="fc" id="L62">            rentalCostQuoteJpaEntity.status( quote.status().name() );</span>
         }
-<span class="fc" id="L61">        rentalCostQuoteJpaEntity.quotedAt( quote.quotedAt() );</span>
-<span class="fc" id="L62">        rentalCostQuoteJpaEntity.expiresAt( quote.expiresAt() );</span>
+<span class="fc" id="L64">        rentalCostQuoteJpaEntity.quotedAt( quote.quotedAt() );</span>
+<span class="fc" id="L65">        rentalCostQuoteJpaEntity.expiresAt( quote.expiresAt() );</span>
 
-<span class="fc" id="L64">        return rentalCostQuoteJpaEntity.build();</span>
+<span class="fc" id="L67">        return rentalCostQuoteJpaEntity.build();</span>
     }
 
     @Override
     public RentalCostQuote toDomain(RentalCostQuoteJpaEntity entity) {
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if ( entity == null ) {</span>
-<span class="nc" id="L70">            return null;</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L73">            return null;</span>
         }
 
-<span class="fc" id="L73">        UUID quoteId = null;</span>
-<span class="fc" id="L74">        RentalCostCalculationV2Command inputs = null;</span>
-<span class="fc" id="L75">        RentalCostCalculationResult result = null;</span>
-<span class="fc" id="L76">        Instant quotedAt = null;</span>
-<span class="fc" id="L77">        Instant expiresAt = null;</span>
-<span class="fc" id="L78">        QuoteStatus status = null;</span>
+<span class="fc" id="L76">        QuoteRef quoteId = null;</span>
+<span class="fc" id="L77">        RentalCostCalculationV2Command inputs = null;</span>
+<span class="fc" id="L78">        RentalCostCalculationResult result = null;</span>
+<span class="fc" id="L79">        Instant quotedAt = null;</span>
+<span class="fc" id="L80">        Instant expiresAt = null;</span>
+<span class="fc" id="L81">        QuoteStatus status = null;</span>
 
-<span class="fc" id="L80">        quoteId = entity.getId();</span>
-<span class="fc" id="L81">        inputs = toCommand( entity.getRequestSnapshot() );</span>
-<span class="fc" id="L82">        result = toResult( entity.getResultSnapshot() );</span>
-<span class="fc" id="L83">        quotedAt = entity.getQuotedAt();</span>
-<span class="fc" id="L84">        expiresAt = entity.getExpiresAt();</span>
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if ( entity.getStatus() != null ) {</span>
-<span class="fc" id="L86">            status = Enum.valueOf( QuoteStatus.class, entity.getStatus() );</span>
+<span class="fc" id="L83">        quoteId = quoteRefMapper.fromUUID( entity.getId() );</span>
+<span class="fc" id="L84">        inputs = toCommand( entity.getRequestSnapshot() );</span>
+<span class="fc" id="L85">        result = toResult( entity.getResultSnapshot() );</span>
+<span class="fc" id="L86">        quotedAt = entity.getQuotedAt();</span>
+<span class="fc" id="L87">        expiresAt = entity.getExpiresAt();</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if ( entity.getStatus() != null ) {</span>
+<span class="fc" id="L89">            status = Enum.valueOf( QuoteStatus.class, entity.getStatus() );</span>
         }
 
-<span class="fc" id="L89">        RentalCostQuote rentalCostQuote = new RentalCostQuote( quoteId, quotedAt, expiresAt, status, inputs, result );</span>
+<span class="fc" id="L92">        RentalCostQuote rentalCostQuote = new RentalCostQuote( quoteId, quotedAt, expiresAt, status, inputs, result );</span>
 
-<span class="fc" id="L91">        return rentalCostQuote;</span>
+<span class="fc" id="L94">        return rentalCostQuote;</span>
     }
 
     @Override
     QuoteRequestSnapshot toRequestSnapshot(RentalCostCalculationV2Command command) {
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if ( command == null ) {</span>
-<span class="nc" id="L97">            return null;</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if ( command == null ) {</span>
+<span class="nc" id="L100">            return null;</span>
         }
 
-<span class="fc" id="L100">        Integer plannedDurationMinutes = null;</span>
-<span class="fc" id="L101">        Integer discountPercent = null;</span>
-<span class="fc" id="L102">        List&lt;QuoteRequestSnapshot.Item&gt; equipments = null;</span>
-<span class="fc" id="L103">        Long specialTariffId = null;</span>
-<span class="fc" id="L104">        BigDecimal specialPrice = null;</span>
-<span class="fc" id="L105">        LocalDateTime startAt = null;</span>
+<span class="fc" id="L103">        Integer plannedDurationMinutes = null;</span>
+<span class="fc" id="L104">        Integer discountPercent = null;</span>
+<span class="fc" id="L105">        List&lt;QuoteRequestSnapshot.Item&gt; equipments = null;</span>
+<span class="fc" id="L106">        Long specialTariffId = null;</span>
+<span class="fc" id="L107">        BigDecimal specialPrice = null;</span>
+<span class="fc" id="L108">        LocalDateTime startAt = null;</span>
 
-<span class="fc" id="L107">        plannedDurationMinutes = durationMapper.toMinutes( command.plannedDuration() );</span>
-<span class="fc" id="L108">        discountPercent = discountMapper.toInteger( command.discount() );</span>
-<span class="fc" id="L109">        equipments = equipmentCostItemV2ListToItemList( command.equipments() );</span>
-<span class="fc" id="L110">        specialTariffId = command.specialTariffId();</span>
-<span class="fc" id="L111">        specialPrice = moneyMapper.toBigDecimal( command.specialPrice() );</span>
-<span class="fc" id="L112">        startAt = command.startAt();</span>
+<span class="fc" id="L110">        plannedDurationMinutes = durationMapper.toMinutes( command.plannedDuration() );</span>
+<span class="fc" id="L111">        discountPercent = discountMapper.toInteger( command.discount() );</span>
+<span class="fc" id="L112">        equipments = equipmentCostItemV2ListToItemList( command.equipments() );</span>
+<span class="fc" id="L113">        specialTariffId = command.specialTariffId();</span>
+<span class="fc" id="L114">        specialPrice = moneyMapper.toBigDecimal( command.specialPrice() );</span>
+<span class="fc" id="L115">        startAt = command.startAt();</span>
 
-<span class="fc" id="L114">        QuoteRequestSnapshot quoteRequestSnapshot = new QuoteRequestSnapshot( equipments, plannedDurationMinutes, discountPercent, specialTariffId, specialPrice, startAt );</span>
+<span class="fc" id="L117">        QuoteRequestSnapshot quoteRequestSnapshot = new QuoteRequestSnapshot( equipments, plannedDurationMinutes, discountPercent, specialTariffId, specialPrice, startAt );</span>
 
-<span class="fc" id="L116">        return quoteRequestSnapshot;</span>
+<span class="fc" id="L119">        return quoteRequestSnapshot;</span>
     }
 
     @Override
     RentalCostCalculationV2Command toCommand(QuoteRequestSnapshot snapshot) {
-<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if ( snapshot == null ) {</span>
-<span class="nc" id="L122">            return null;</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        if ( snapshot == null ) {</span>
+<span class="nc" id="L125">            return null;</span>
         }
 
-<span class="fc" id="L125">        Duration plannedDuration = null;</span>
-<span class="fc" id="L126">        DiscountPercent discount = null;</span>
-<span class="fc" id="L127">        List&lt;EquipmentCostItemV2&gt; equipments = null;</span>
-<span class="fc" id="L128">        Long specialTariffId = null;</span>
-<span class="fc" id="L129">        Money specialPrice = null;</span>
-<span class="fc" id="L130">        LocalDateTime startAt = null;</span>
+<span class="fc" id="L128">        Duration plannedDuration = null;</span>
+<span class="fc" id="L129">        DiscountPercent discount = null;</span>
+<span class="fc" id="L130">        List&lt;EquipmentCostItemV2&gt; equipments = null;</span>
+<span class="fc" id="L131">        Long specialTariffId = null;</span>
+<span class="fc" id="L132">        Money specialPrice = null;</span>
+<span class="fc" id="L133">        LocalDateTime startAt = null;</span>
 
-<span class="fc" id="L132">        plannedDuration = durationMapper.toDuration( snapshot.plannedDurationMinutes() );</span>
-<span class="fc" id="L133">        discount = discountMapper.toDiscount( snapshot.discountPercent() );</span>
-<span class="fc" id="L134">        equipments = itemListToEquipmentCostItemV2List( snapshot.equipments() );</span>
-<span class="fc" id="L135">        specialTariffId = snapshot.specialTariffId();</span>
-<span class="fc" id="L136">        specialPrice = moneyMapper.toMoney( snapshot.specialPrice() );</span>
-<span class="fc" id="L137">        startAt = snapshot.startAt();</span>
+<span class="fc" id="L135">        plannedDuration = durationMapper.toDuration( snapshot.plannedDurationMinutes() );</span>
+<span class="fc" id="L136">        discount = discountMapper.toDiscount( snapshot.discountPercent() );</span>
+<span class="fc" id="L137">        equipments = itemListToEquipmentCostItemV2List( snapshot.equipments() );</span>
+<span class="fc" id="L138">        specialTariffId = snapshot.specialTariffId();</span>
+<span class="fc" id="L139">        specialPrice = moneyMapper.toMoney( snapshot.specialPrice() );</span>
+<span class="fc" id="L140">        startAt = snapshot.startAt();</span>
 
-<span class="fc" id="L139">        RentalCostCalculationV2Command rentalCostCalculationV2Command = new RentalCostCalculationV2Command( equipments, plannedDuration, discount, specialTariffId, specialPrice, startAt );</span>
+<span class="fc" id="L142">        RentalCostCalculationV2Command rentalCostCalculationV2Command = new RentalCostCalculationV2Command( equipments, plannedDuration, discount, specialTariffId, specialPrice, startAt );</span>
 
-<span class="fc" id="L141">        return rentalCostCalculationV2Command;</span>
+<span class="fc" id="L144">        return rentalCostCalculationV2Command;</span>
     }
 
     @Override
     QuoteRequestSnapshot.Item toItemSnapshot(EquipmentCostItemV2 item) {
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if ( item == null ) {</span>
-<span class="nc" id="L147">            return null;</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if ( item == null ) {</span>
+<span class="nc" id="L150">            return null;</span>
         }
 
-<span class="fc" id="L150">        Integer plannedDurationMinutes = null;</span>
-<span class="fc" id="L151">        Long equipmentId = null;</span>
-<span class="fc" id="L152">        String equipmentType = null;</span>
-<span class="fc" id="L153">        LocalDateTime startAt = null;</span>
-<span class="fc" id="L154">        LocalDateTime returnAt = null;</span>
+<span class="fc" id="L153">        Integer plannedDurationMinutes = null;</span>
+<span class="fc" id="L154">        Long equipmentId = null;</span>
+<span class="fc" id="L155">        String equipmentType = null;</span>
+<span class="fc" id="L156">        LocalDateTime startAt = null;</span>
+<span class="fc" id="L157">        LocalDateTime returnAt = null;</span>
 
-<span class="fc" id="L156">        plannedDurationMinutes = durationMapper.toMinutes( item.plannedDuration() );</span>
-<span class="fc" id="L157">        equipmentId = item.equipmentId();</span>
-<span class="fc" id="L158">        equipmentType = item.equipmentType();</span>
-<span class="fc" id="L159">        startAt = item.startAt();</span>
-<span class="fc" id="L160">        returnAt = item.returnAt();</span>
+<span class="fc" id="L159">        plannedDurationMinutes = durationMapper.toMinutes( item.plannedDuration() );</span>
+<span class="fc" id="L160">        equipmentId = item.equipmentId();</span>
+<span class="fc" id="L161">        equipmentType = item.equipmentType();</span>
+<span class="fc" id="L162">        startAt = item.startAt();</span>
+<span class="fc" id="L163">        returnAt = item.returnAt();</span>
 
-<span class="fc" id="L162">        QuoteRequestSnapshot.Item item1 = new QuoteRequestSnapshot.Item( equipmentId, equipmentType, startAt, plannedDurationMinutes, returnAt );</span>
+<span class="fc" id="L165">        QuoteRequestSnapshot.Item item1 = new QuoteRequestSnapshot.Item( equipmentId, equipmentType, startAt, plannedDurationMinutes, returnAt );</span>
 
-<span class="fc" id="L164">        return item1;</span>
+<span class="fc" id="L167">        return item1;</span>
     }
 
     @Override
     EquipmentCostItemV2 toItem(QuoteRequestSnapshot.Item item) {
-<span class="pc bpc" id="L169" title="1 of 2 branches missed.">        if ( item == null ) {</span>
-<span class="nc" id="L170">            return null;</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        if ( item == null ) {</span>
+<span class="nc" id="L173">            return null;</span>
         }
 
-<span class="fc" id="L173">        Duration plannedDuration = null;</span>
-<span class="fc" id="L174">        Long equipmentId = null;</span>
-<span class="fc" id="L175">        String equipmentType = null;</span>
-<span class="fc" id="L176">        LocalDateTime startAt = null;</span>
-<span class="fc" id="L177">        LocalDateTime returnAt = null;</span>
+<span class="fc" id="L176">        Duration plannedDuration = null;</span>
+<span class="fc" id="L177">        Long equipmentId = null;</span>
+<span class="fc" id="L178">        String equipmentType = null;</span>
+<span class="fc" id="L179">        LocalDateTime startAt = null;</span>
+<span class="fc" id="L180">        LocalDateTime returnAt = null;</span>
 
-<span class="fc" id="L179">        plannedDuration = durationMapper.toDuration( item.plannedDurationMinutes() );</span>
-<span class="fc" id="L180">        equipmentId = item.equipmentId();</span>
-<span class="fc" id="L181">        equipmentType = item.equipmentType();</span>
-<span class="fc" id="L182">        startAt = item.startAt();</span>
-<span class="fc" id="L183">        returnAt = item.returnAt();</span>
+<span class="fc" id="L182">        plannedDuration = durationMapper.toDuration( item.plannedDurationMinutes() );</span>
+<span class="fc" id="L183">        equipmentId = item.equipmentId();</span>
+<span class="fc" id="L184">        equipmentType = item.equipmentType();</span>
+<span class="fc" id="L185">        startAt = item.startAt();</span>
+<span class="fc" id="L186">        returnAt = item.returnAt();</span>
 
-<span class="fc" id="L185">        EquipmentCostItemV2 equipmentCostItemV2 = new EquipmentCostItemV2( equipmentId, equipmentType, startAt, plannedDuration, returnAt );</span>
+<span class="fc" id="L188">        EquipmentCostItemV2 equipmentCostItemV2 = new EquipmentCostItemV2( equipmentId, equipmentType, startAt, plannedDuration, returnAt );</span>
 
-<span class="fc" id="L187">        return equipmentCostItemV2;</span>
+<span class="fc" id="L190">        return equipmentCostItemV2;</span>
     }
 
     @Override
     QuoteResultSnapshot.Discount toDiscountSnapshot(DiscountDetail discount) {
-<span class="pc bpc" id="L192" title="1 of 2 branches missed.">        if ( discount == null ) {</span>
-<span class="nc" id="L193">            return null;</span>
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">        if ( discount == null ) {</span>
+<span class="nc" id="L196">            return null;</span>
         }
 
-<span class="fc" id="L196">        BigDecimal percent = null;</span>
-<span class="fc" id="L197">        BigDecimal amount = null;</span>
+<span class="fc" id="L199">        BigDecimal percent = null;</span>
+<span class="fc" id="L200">        BigDecimal amount = null;</span>
 
-<span class="fc" id="L199">        percent = discountMapper.toBigDecimal( discount.percent() );</span>
-<span class="fc" id="L200">        amount = moneyMapper.toBigDecimal( discount.amount() );</span>
+<span class="fc" id="L202">        percent = discountMapper.toBigDecimal( discount.percent() );</span>
+<span class="fc" id="L203">        amount = moneyMapper.toBigDecimal( discount.amount() );</span>
 
-<span class="fc" id="L202">        QuoteResultSnapshot.Discount discount1 = new QuoteResultSnapshot.Discount( percent, amount );</span>
+<span class="fc" id="L205">        QuoteResultSnapshot.Discount discount1 = new QuoteResultSnapshot.Discount( percent, amount );</span>
 
-<span class="fc" id="L204">        return discount1;</span>
+<span class="fc" id="L207">        return discount1;</span>
     }
 
     @Override
     DiscountDetail toDiscountDetail(QuoteResultSnapshot.Discount discount) {
-<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        if ( discount == null ) {</span>
-<span class="nc" id="L210">            return null;</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">        if ( discount == null ) {</span>
+<span class="nc" id="L213">            return null;</span>
         }
 
-<span class="fc" id="L213">        DiscountPercent percent = null;</span>
-<span class="fc" id="L214">        Money amount = null;</span>
+<span class="fc" id="L216">        DiscountPercent percent = null;</span>
+<span class="fc" id="L217">        Money amount = null;</span>
 
-<span class="fc" id="L216">        percent = discountMapper.toDiscount( discount.percent() );</span>
-<span class="fc" id="L217">        amount = moneyMapper.toMoney( discount.amount() );</span>
+<span class="fc" id="L219">        percent = discountMapper.toDiscount( discount.percent() );</span>
+<span class="fc" id="L220">        amount = moneyMapper.toMoney( discount.amount() );</span>
 
-<span class="fc" id="L219">        DiscountDetail discountDetail = new DiscountDetail( percent, amount );</span>
+<span class="fc" id="L222">        DiscountDetail discountDetail = new DiscountDetail( percent, amount );</span>
 
-<span class="fc" id="L221">        return discountDetail;</span>
+<span class="fc" id="L224">        return discountDetail;</span>
     }
 
     protected List&lt;QuoteRequestSnapshot.Item&gt; equipmentCostItemV2ListToItemList(List&lt;EquipmentCostItemV2&gt; list) {
-<span class="pc bpc" id="L225" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L226">            return null;</span>
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L229">            return null;</span>
         }
 
-<span class="fc" id="L229">        List&lt;QuoteRequestSnapshot.Item&gt; list1 = new ArrayList&lt;QuoteRequestSnapshot.Item&gt;( list.size() );</span>
-<span class="fc bfc" id="L230" title="All 2 branches covered.">        for ( EquipmentCostItemV2 equipmentCostItemV2 : list ) {</span>
-<span class="fc" id="L231">            list1.add( toItemSnapshot( equipmentCostItemV2 ) );</span>
-<span class="fc" id="L232">        }</span>
+<span class="fc" id="L232">        List&lt;QuoteRequestSnapshot.Item&gt; list1 = new ArrayList&lt;QuoteRequestSnapshot.Item&gt;( list.size() );</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">        for ( EquipmentCostItemV2 equipmentCostItemV2 : list ) {</span>
+<span class="fc" id="L234">            list1.add( toItemSnapshot( equipmentCostItemV2 ) );</span>
+<span class="fc" id="L235">        }</span>
 
-<span class="fc" id="L234">        return list1;</span>
+<span class="fc" id="L237">        return list1;</span>
     }
 
     protected List&lt;EquipmentCostItemV2&gt; itemListToEquipmentCostItemV2List(List&lt;QuoteRequestSnapshot.Item&gt; list) {
-<span class="pc bpc" id="L238" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L239">            return null;</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L242">            return null;</span>
         }
 
-<span class="fc" id="L242">        List&lt;EquipmentCostItemV2&gt; list1 = new ArrayList&lt;EquipmentCostItemV2&gt;( list.size() );</span>
-<span class="fc bfc" id="L243" title="All 2 branches covered.">        for ( QuoteRequestSnapshot.Item item : list ) {</span>
-<span class="fc" id="L244">            list1.add( toItem( item ) );</span>
-<span class="fc" id="L245">        }</span>
+<span class="fc" id="L245">        List&lt;EquipmentCostItemV2&gt; list1 = new ArrayList&lt;EquipmentCostItemV2&gt;( list.size() );</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">        for ( QuoteRequestSnapshot.Item item : list ) {</span>
+<span class="fc" id="L247">            list1.add( toItem( item ) );</span>
+<span class="fc" id="L248">        }</span>
 
-<span class="fc" id="L247">        return list1;</span>
+<span class="fc" id="L250">        return list1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

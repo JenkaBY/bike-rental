@@ -3,6 +3,7 @@
 import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import com.github.jenkaby.bikerental.shared.mapper.QuoteRefMapper;
 import com.github.jenkaby.bikerental.tariff.BreakdownCostDetails;
 import com.github.jenkaby.bikerental.tariff.DiscountDetail;
 import com.github.jenkaby.bikerental.tariff.EquipmentCostBreakdown;
@@ -21,21 +22,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Mapper(uses = {MoneyMapper.class, DurationMapper.class, DiscountMapper.class})
-<span class="fc" id="L25">public abstract class RentalCostQuoteJpaMapper {</span>
+@Mapper(uses = {MoneyMapper.class, DurationMapper.class, DiscountMapper.class, QuoteRefMapper.class})
+<span class="fc" id="L26">public abstract class RentalCostQuoteJpaMapper {</span>
 
     private MoneyMapper moneyMapper;
     private DurationMapper durationMapper;
 
     @Autowired
     public void setMoneyMapper(MoneyMapper moneyMapper) {
-<span class="fc" id="L32">        this.moneyMapper = moneyMapper;</span>
-<span class="fc" id="L33">    }</span>
+<span class="fc" id="L33">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L34">    }</span>
 
     @Autowired
     public void setDurationMapper(DurationMapper durationMapper) {
-<span class="fc" id="L37">        this.durationMapper = durationMapper;</span>
-<span class="fc" id="L38">    }</span>
+<span class="fc" id="L38">        this.durationMapper = durationMapper;</span>
+<span class="fc" id="L39">    }</span>
 
     @Mapping(target = &quot;id&quot;, source = &quot;quoteId&quot;)
     @Mapping(target = &quot;requestSnapshot&quot;, source = &quot;inputs&quot;)
@@ -69,70 +70,70 @@ import java.util.List;
     abstract DiscountDetail toDiscountDetail(QuoteResultSnapshot.Discount discount);
 
     QuoteResultSnapshot toResultSnapshot(RentalCostCalculationResult result) {
-<span class="fc" id="L72">        return new QuoteResultSnapshot(</span>
-<span class="fc" id="L73">                toLineSnapshots(result.equipmentBreakdowns()),</span>
-<span class="fc" id="L74">                moneyMapper.toBigDecimal(result.subtotal()),</span>
-<span class="fc" id="L75">                toDiscountSnapshot(result.discount()),</span>
-<span class="fc" id="L76">                moneyMapper.toBigDecimal(result.totalCost()),</span>
-<span class="fc" id="L77">                durationMapper.toMinutes(result.effectiveDuration()),</span>
-<span class="fc" id="L78">                result.estimate(),</span>
-<span class="fc" id="L79">                result.specialPricingApplied());</span>
+<span class="fc" id="L73">        return new QuoteResultSnapshot(</span>
+<span class="fc" id="L74">                toLineSnapshots(result.equipmentBreakdowns()),</span>
+<span class="fc" id="L75">                moneyMapper.toBigDecimal(result.subtotal()),</span>
+<span class="fc" id="L76">                toDiscountSnapshot(result.discount()),</span>
+<span class="fc" id="L77">                moneyMapper.toBigDecimal(result.totalCost()),</span>
+<span class="fc" id="L78">                durationMapper.toMinutes(result.effectiveDuration()),</span>
+<span class="fc" id="L79">                result.estimate(),</span>
+<span class="fc" id="L80">                result.specialPricingApplied());</span>
     }
 
     RentalCostCalculationResult toResult(QuoteResultSnapshot snapshot) {
-<span class="fc" id="L83">        return new BaseRentalCostCalculationResult(</span>
-<span class="fc" id="L84">                toBreakdowns(snapshot.equipmentBreakdowns()),</span>
-<span class="fc" id="L85">                moneyMapper.toMoney(snapshot.subtotal()),</span>
-<span class="fc" id="L86">                toDiscountDetail(snapshot.discount()),</span>
-<span class="fc" id="L87">                moneyMapper.toMoney(snapshot.totalCost()),</span>
-<span class="fc" id="L88">                durationMapper.toDuration(snapshot.effectiveDurationMinutes()),</span>
-<span class="fc" id="L89">                snapshot.estimate(),</span>
-<span class="fc" id="L90">                snapshot.specialPricingApplied());</span>
+<span class="fc" id="L84">        return new BaseRentalCostCalculationResult(</span>
+<span class="fc" id="L85">                toBreakdowns(snapshot.equipmentBreakdowns()),</span>
+<span class="fc" id="L86">                moneyMapper.toMoney(snapshot.subtotal()),</span>
+<span class="fc" id="L87">                toDiscountDetail(snapshot.discount()),</span>
+<span class="fc" id="L88">                moneyMapper.toMoney(snapshot.totalCost()),</span>
+<span class="fc" id="L89">                durationMapper.toDuration(snapshot.effectiveDurationMinutes()),</span>
+<span class="fc" id="L90">                snapshot.estimate(),</span>
+<span class="fc" id="L91">                snapshot.specialPricingApplied());</span>
     }
 
     private List&lt;QuoteResultSnapshot.Line&gt; toLineSnapshots(List&lt;EquipmentCostBreakdown&gt; breakdowns) {
-<span class="fc" id="L94">        return breakdowns.stream().map(this::toLineSnapshot).toList();</span>
+<span class="fc" id="L95">        return breakdowns.stream().map(this::toLineSnapshot).toList();</span>
     }
 
     private QuoteResultSnapshot.Line toLineSnapshot(EquipmentCostBreakdown breakdown) {
-<span class="fc" id="L98">        var detail = breakdown.calculationBreakdown();</span>
-<span class="fc" id="L99">        var breakdownSnapshot = new QuoteResultSnapshot.Line.Breakdown(</span>
-<span class="fc" id="L100">                detail.getBreakdownPatternCode(),</span>
-<span class="fc" id="L101">                detail.getMessage(),</span>
-<span class="fc" id="L102">                detail.getParams());</span>
-<span class="fc" id="L103">        return new QuoteResultSnapshot.Line(</span>
-<span class="fc" id="L104">                breakdown.equipmentId(),</span>
-<span class="fc" id="L105">                breakdown.equipmentType(),</span>
-<span class="fc" id="L106">                breakdown.tariffId(),</span>
-<span class="fc" id="L107">                breakdown.tariffName(),</span>
-<span class="fc" id="L108">                breakdown.pricingType(),</span>
-<span class="fc" id="L109">                moneyMapper.toBigDecimal(breakdown.itemCost()),</span>
-<span class="fc" id="L110">                durationMapper.toMinutes(breakdown.billedDuration()),</span>
-<span class="fc" id="L111">                durationMapper.toMinutes(breakdown.overtime()),</span>
-<span class="fc" id="L112">                durationMapper.toMinutes(breakdown.forgiven()),</span>
+<span class="fc" id="L99">        var detail = breakdown.calculationBreakdown();</span>
+<span class="fc" id="L100">        var breakdownSnapshot = new QuoteResultSnapshot.Line.Breakdown(</span>
+<span class="fc" id="L101">                detail.getBreakdownPatternCode(),</span>
+<span class="fc" id="L102">                detail.getMessage(),</span>
+<span class="fc" id="L103">                detail.getParams());</span>
+<span class="fc" id="L104">        return new QuoteResultSnapshot.Line(</span>
+<span class="fc" id="L105">                breakdown.equipmentId(),</span>
+<span class="fc" id="L106">                breakdown.equipmentType(),</span>
+<span class="fc" id="L107">                breakdown.tariffId(),</span>
+<span class="fc" id="L108">                breakdown.tariffName(),</span>
+<span class="fc" id="L109">                breakdown.pricingType(),</span>
+<span class="fc" id="L110">                moneyMapper.toBigDecimal(breakdown.itemCost()),</span>
+<span class="fc" id="L111">                durationMapper.toMinutes(breakdown.billedDuration()),</span>
+<span class="fc" id="L112">                durationMapper.toMinutes(breakdown.overtime()),</span>
+<span class="fc" id="L113">                durationMapper.toMinutes(breakdown.forgiven()),</span>
                 breakdownSnapshot);
     }
 
     private List&lt;EquipmentCostBreakdown&gt; toBreakdowns(List&lt;QuoteResultSnapshot.Line&gt; lines) {
-<span class="fc" id="L117">        return lines.stream().map(this::toBreakdown).toList();</span>
+<span class="fc" id="L118">        return lines.stream().map(this::toBreakdown).toList();</span>
     }
 
     private EquipmentCostBreakdown toBreakdown(QuoteResultSnapshot.Line line) {
-<span class="fc" id="L121">        var detail = line.calculationBreakdown();</span>
-<span class="fc" id="L122">        var rehydrated = new BreakdownCostDetails.Rehydrated(</span>
-<span class="fc" id="L123">                detail.breakdownPatternCode(),</span>
-<span class="fc" id="L124">                detail.message(),</span>
-<span class="fc" id="L125">                detail.params());</span>
-<span class="fc" id="L126">        return new EquipmentCostBreakdownV2(</span>
-<span class="fc" id="L127">                line.equipmentId(),</span>
-<span class="fc" id="L128">                line.equipmentType(),</span>
-<span class="fc" id="L129">                line.tariffId(),</span>
-<span class="fc" id="L130">                line.tariffName(),</span>
-<span class="fc" id="L131">                line.pricingType(),</span>
-<span class="fc" id="L132">                moneyMapper.toMoney(line.itemCost()),</span>
-<span class="fc" id="L133">                durationMapper.toDuration(line.billedDurationMinutes()),</span>
-<span class="fc" id="L134">                durationMapper.toDuration(line.overtimeMinutes()),</span>
-<span class="fc" id="L135">                durationMapper.toDuration(line.forgivenMinutes()),</span>
+<span class="fc" id="L122">        var detail = line.calculationBreakdown();</span>
+<span class="fc" id="L123">        var rehydrated = new BreakdownCostDetails.Rehydrated(</span>
+<span class="fc" id="L124">                detail.breakdownPatternCode(),</span>
+<span class="fc" id="L125">                detail.message(),</span>
+<span class="fc" id="L126">                detail.params());</span>
+<span class="fc" id="L127">        return new EquipmentCostBreakdownV2(</span>
+<span class="fc" id="L128">                line.equipmentId(),</span>
+<span class="fc" id="L129">                line.equipmentType(),</span>
+<span class="fc" id="L130">                line.tariffId(),</span>
+<span class="fc" id="L131">                line.tariffName(),</span>
+<span class="fc" id="L132">                line.pricingType(),</span>
+<span class="fc" id="L133">                moneyMapper.toMoney(line.itemCost()),</span>
+<span class="fc" id="L134">                durationMapper.toDuration(line.billedDurationMinutes()),</span>
+<span class="fc" id="L135">                durationMapper.toDuration(line.overtimeMinutes()),</span>
+<span class="fc" id="L136">                durationMapper.toDuration(line.forgivenMinutes()),</span>
                 rehydrated);
     }
 }

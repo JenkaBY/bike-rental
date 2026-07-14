@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RentalCostQuoteService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff.application.service</a> &gt; <span class="el_source">RentalCostQuoteService.java</span></div><h1>RentalCostQuoteService.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff.application.service;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import com.github.jenkaby.bikerental.tariff.QuoteAlreadyConsumedException;
 import com.github.jenkaby.bikerental.tariff.QuoteExpiredException;
@@ -16,9 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.Instant;
-import java.util.UUID;
 
 <span class="fc" id="L23">@Slf4j</span>
 @Service
@@ -29,7 +29,7 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
     private final RentalCostQuoteRepository quoteRepository;
     private final QuoteProperties quoteProperties;
     private final UuidGenerator uuidGenerator;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -37,7 +37,7 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
 <span class="fc" id="L37">        var result = calculationUseCase.execute(command);</span>
 <span class="fc" id="L38">        var quotedAt = now();</span>
 <span class="fc" id="L39">        var quote = new RentalCostQuote(</span>
-<span class="fc" id="L40">                uuidGenerator.generate(),</span>
+<span class="fc" id="L40">                new QuoteRef(uuidGenerator.generate()),</span>
                 quotedAt,
 <span class="fc" id="L42">                quotedAt.plus(quoteProperties.quoteTtl()),</span>
                 QuoteStatus.ACTIVE,
@@ -49,26 +49,26 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
     }
 
     @Override
-    public RentalCostQuote getQuote(UUID quoteId) {
+    public RentalCostQuote getQuote(QuoteRef quoteId) {
 <span class="fc" id="L53">        var quote = quoteRepository.findById(quoteId)</span>
-<span class="pc" id="L54">                .orElseThrow(() -&gt; new QuoteNotFoundException(quoteId));</span>
+<span class="pc" id="L54">                .orElseThrow(() -&gt; new QuoteNotFoundException(quoteId.id()));</span>
 <span class="fc bfc" id="L55" title="All 2 branches covered.">        if (quote.isExpired(now())) {</span>
-<span class="fc" id="L56">            throw new QuoteExpiredException(quoteId, quote.expiresAt());</span>
+<span class="fc" id="L56">            throw new QuoteExpiredException(quoteId.id(), quote.expiresAt());</span>
         }
 <span class="fc" id="L58">        return quote;</span>
     }
 
     @Override
     @Transactional
-    public RentalCostQuote consumeQuote(UUID quoteId) {
+    public RentalCostQuote consumeQuote(QuoteRef quoteId) {
 <span class="fc" id="L64">        var quote = quoteRepository.findById(quoteId)</span>
-<span class="pc" id="L65">                .orElseThrow(() -&gt; new QuoteNotFoundException(quoteId));</span>
+<span class="pc" id="L65">                .orElseThrow(() -&gt; new QuoteNotFoundException(quoteId.id()));</span>
 <span class="fc" id="L66">        var now = now();</span>
 <span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (quote.isExpired(now)) {</span>
-<span class="nc" id="L68">            throw new QuoteExpiredException(quoteId, quote.expiresAt());</span>
+<span class="nc" id="L68">            throw new QuoteExpiredException(quoteId.id(), quote.expiresAt());</span>
         }
 <span class="pc bpc" id="L70" title="1 of 4 branches missed.">        if (quote.isConsumed() || !quoteRepository.markConsumed(quoteId, now)) {</span>
-<span class="fc" id="L71">            throw new QuoteAlreadyConsumedException(quoteId);</span>
+<span class="fc" id="L71">            throw new QuoteAlreadyConsumedException(quoteId.id());</span>
         }
 <span class="fc" id="L73">        log.info(&quot;Consumed cost quote {}&quot;, quoteId);</span>
 <span class="fc" id="L74">        return new RentalCostQuote(</span>
@@ -80,8 +80,17 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
 <span class="fc" id="L80">                quote.result());</span>
     }
 
+    @Override
+    @Transactional
+    public void deleteQuote(QuoteRef quoteId) {
+<span class="fc" id="L86">        quoteRepository.findById(quoteId)</span>
+<span class="fc" id="L87">                .orElseThrow(() -&gt; new QuoteNotFoundException(quoteId.id()));</span>
+<span class="fc" id="L88">        quoteRepository.deleteById(quoteId);</span>
+<span class="fc" id="L89">        log.info(&quot;Deleted cost quote {}&quot;, quoteId);</span>
+<span class="fc" id="L90">    }</span>
+
     private Instant now() {
-<span class="fc" id="L84">        return Instant.now(clock);</span>
+<span class="fc" id="L93">        return timeProvider.nowInstant();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

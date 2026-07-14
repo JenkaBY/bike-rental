@@ -13,6 +13,7 @@ import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.TransactionRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-<span class="fc" id="L28">@Slf4j</span>
+<span class="fc" id="L29">@Slf4j</span>
 @Service
 @RequiredArgsConstructor
 public class ReleaseHoldService implements ReleaseHoldUseCase {
@@ -34,74 +35,74 @@ public class ReleaseHoldService implements ReleaseHoldUseCase {
     private final TransactionRepository transactionRepository;
     private final RentalHoldBalanceCalculator holdBalanceCalculator;
     private final UuidGenerator uuidGenerator;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
     public HoldResult execute(ReleaseHoldCommand command) {
-<span class="fc" id="L42">        var actualRentalRef = command.rentalRef();</span>
-<span class="fc" id="L43">        log.info(&quot;Releasing hold for rental {} version {}&quot;, actualRentalRef.id(), actualRentalRef.rentalVersion());</span>
-<span class="fc" id="L44">        var idempotencyKey = getIdempotencyKey(command);</span>
-<span class="fc" id="L45">        var existing = transactionRepository.findByIdempotencyKey(idempotencyKey);</span>
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if (existing.isPresent()) {</span>
-<span class="nc" id="L47">            var t = existing.get();</span>
-<span class="nc" id="L48">            log.info(&quot;Hold already released for rental {} version {}, returning existing transaction {}&quot;,</span>
-<span class="nc" id="L49">                    actualRentalRef.id(), actualRentalRef.rentalVersion(), t.getId());</span>
-<span class="nc" id="L50">            return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());</span>
+<span class="fc" id="L43">        var actualRentalRef = command.rentalRef();</span>
+<span class="fc" id="L44">        log.info(&quot;Releasing hold for rental {} version {}&quot;, actualRentalRef.id(), actualRentalRef.rentalVersion());</span>
+<span class="fc" id="L45">        var idempotencyKey = getIdempotencyKey(command);</span>
+<span class="fc" id="L46">        var existing = transactionRepository.findByIdempotencyKey(idempotencyKey);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (existing.isPresent()) {</span>
+<span class="nc" id="L48">            var t = existing.get();</span>
+<span class="nc" id="L49">            log.info(&quot;Hold already released for rental {} version {}, returning existing transaction {}&quot;,</span>
+<span class="nc" id="L50">                    actualRentalRef.id(), actualRentalRef.rentalVersion(), t.getId());</span>
+<span class="nc" id="L51">            return new HoldResult(new TransactionRef(t.getId()), t.getRecordedAt());</span>
         }
 
-<span class="fc" id="L53">        var rentalRef = actualRentalRef.toRentalRef();</span>
-<span class="fc" id="L54">        Money netHold = holdBalanceCalculator.netActiveHold(rentalRef);</span>
-<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (netHold.isNegativeOrZero()) {</span>
-<span class="fc" id="L56">            log.debug(&quot;No active hold for rental {} version {}, nothing to release&quot;, actualRentalRef.id(), actualRentalRef.rentalVersion());</span>
-<span class="fc" id="L57">            return new HoldResult(null, clock.instant());</span>
+<span class="fc" id="L54">        var rentalRef = actualRentalRef.toRentalRef();</span>
+<span class="fc" id="L55">        Money netHold = holdBalanceCalculator.netActiveHold(rentalRef);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (netHold.isNegativeOrZero()) {</span>
+<span class="fc" id="L57">            log.debug(&quot;No active hold for rental {} version {}, nothing to release&quot;, actualRentalRef.id(), actualRentalRef.rentalVersion());</span>
+<span class="fc" id="L58">            return new HoldResult(null, timeProvider.nowInstant());</span>
         }
 
-<span class="fc" id="L60">        Optional&lt;Transaction&gt; holdOptional = transactionRepository.findByRentalRefAndType(rentalRef, TransactionType.HOLD);</span>
-<span class="fc" id="L61">        var customerRef = new CustomerRef(holdOptional.orElseThrow(() -&gt;</span>
-<span class="pc" id="L62">                new ResourceNotFoundException(Transaction.class, actualRentalRef.id().toString())).getCustomerId());</span>
+<span class="fc" id="L61">        Optional&lt;Transaction&gt; holdOptional = transactionRepository.findByRentalRefAndType(rentalRef, TransactionType.HOLD);</span>
+<span class="fc" id="L62">        var customerRef = new CustomerRef(holdOptional.orElseThrow(() -&gt;</span>
+<span class="pc" id="L63">                new ResourceNotFoundException(Transaction.class, actualRentalRef.id().toString())).getCustomerId());</span>
 
-<span class="fc" id="L64">        var now = clock.instant();</span>
-<span class="fc" id="L65">        var customerAccount = accountRepository.findByCustomerId(customerRef)</span>
-<span class="pc" id="L66">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, customerRef.id()));</span>
+<span class="fc" id="L65">        var now = timeProvider.nowInstant();</span>
+<span class="fc" id="L66">        var customerAccount = accountRepository.findByCustomerId(customerRef)</span>
+<span class="pc" id="L67">                .orElseThrow(() -&gt; new ResourceNotFoundException(Account.class, customerRef.id()));</span>
 
-<span class="fc" id="L68">        log.info(&quot;Releasing net hold amount {} for rental {} version {}&quot;, netHold, actualRentalRef.id(), actualRentalRef.rentalVersion());</span>
-<span class="fc" id="L69">        var debitChange = customerAccount.getWallet().credit(netHold);</span>
-<span class="fc" id="L70">        var creditChange = customerAccount.getOnHold().debit(netHold);</span>
+<span class="fc" id="L69">        log.info(&quot;Releasing net hold amount {} for rental {} version {}&quot;, netHold, actualRentalRef.id(), actualRentalRef.rentalVersion());</span>
+<span class="fc" id="L70">        var debitChange = customerAccount.getWallet().credit(netHold);</span>
+<span class="fc" id="L71">        var creditChange = customerAccount.getOnHold().debit(netHold);</span>
 
-<span class="fc" id="L72">        accountRepository.save(customerAccount);</span>
-<span class="fc" id="L73">        UUID transactionId = uuidGenerator.generate();</span>
+<span class="fc" id="L73">        accountRepository.save(customerAccount);</span>
+<span class="fc" id="L74">        UUID transactionId = uuidGenerator.generate();</span>
 
-<span class="fc" id="L75">        var transaction = Transaction.builder()</span>
-<span class="fc" id="L76">                .id(transactionId)</span>
-<span class="fc" id="L77">                .type(TransactionType.RELEASE)</span>
-<span class="fc" id="L78">                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
-<span class="fc" id="L79">                .amount(netHold)</span>
-<span class="fc" id="L80">                .customerId(customerRef.id())</span>
-<span class="fc" id="L81">                .operatorId(command.operatorId())</span>
-<span class="fc" id="L82">                .sourceType(TransactionSourceType.RENTAL)</span>
-<span class="fc" id="L83">                .sourceId(String.valueOf(actualRentalRef.id()))</span>
-<span class="fc" id="L84">                .recordedAt(now)</span>
-<span class="fc" id="L85">                .idempotencyKey(idempotencyKey)</span>
-<span class="fc" id="L86">                .reason(null)</span>
-<span class="fc" id="L87">                .records(List.of(</span>
-<span class="fc" id="L88">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
-<span class="fc" id="L89">                        creditChange.toTransaction(uuidGenerator.generate())</span>
+<span class="fc" id="L76">        var transaction = Transaction.builder()</span>
+<span class="fc" id="L77">                .id(transactionId)</span>
+<span class="fc" id="L78">                .type(TransactionType.RELEASE)</span>
+<span class="fc" id="L79">                .paymentMethod(PaymentMethod.INTERNAL_TRANSFER)</span>
+<span class="fc" id="L80">                .amount(netHold)</span>
+<span class="fc" id="L81">                .customerId(customerRef.id())</span>
+<span class="fc" id="L82">                .operatorId(command.operatorId())</span>
+<span class="fc" id="L83">                .sourceType(TransactionSourceType.RENTAL)</span>
+<span class="fc" id="L84">                .sourceId(String.valueOf(actualRentalRef.id()))</span>
+<span class="fc" id="L85">                .recordedAt(now)</span>
+<span class="fc" id="L86">                .idempotencyKey(idempotencyKey)</span>
+<span class="fc" id="L87">                .reason(null)</span>
+<span class="fc" id="L88">                .records(List.of(</span>
+<span class="fc" id="L89">                        debitChange.toTransaction(uuidGenerator.generate()),</span>
+<span class="fc" id="L90">                        creditChange.toTransaction(uuidGenerator.generate())</span>
                 ))
-<span class="fc" id="L91">                .build();</span>
+<span class="fc" id="L92">                .build();</span>
 
-<span class="fc" id="L93">        transactionRepository.save(transaction);</span>
-<span class="fc" id="L94">        log.info(&quot;Released net hold amount {} in transaction {} for rental {} version {}&quot;,</span>
-<span class="fc" id="L95">                netHold, transaction.getId(), actualRentalRef.id(), actualRentalRef.rentalVersion());</span>
-<span class="fc" id="L96">        return new HoldResult(new TransactionRef(transactionId), now);</span>
+<span class="fc" id="L94">        transactionRepository.save(transaction);</span>
+<span class="fc" id="L95">        log.info(&quot;Released net hold amount {} in transaction {} for rental {} version {}&quot;,</span>
+<span class="fc" id="L96">                netHold, transaction.getId(), actualRentalRef.id(), actualRentalRef.rentalVersion());</span>
+<span class="fc" id="L97">        return new HoldResult(new TransactionRef(transactionId), now);</span>
     }
 
     private @NonNull IdempotencyKey getIdempotencyKey(ReleaseHoldCommand command) {
-<span class="fc" id="L100">        return new IdempotencyKey(</span>
-<span class="fc" id="L101">                uuidGenerator.generateNameBased(&quot;%s_%s_%s&quot;.formatted(</span>
-<span class="fc" id="L102">                        TransactionType.RELEASE.name(),</span>
-<span class="fc" id="L103">                        command.rentalRef().id(),</span>
-<span class="fc" id="L104">                        command.rentalRef().rentalVersion()))</span>
+<span class="fc" id="L101">        return new IdempotencyKey(</span>
+<span class="fc" id="L102">                uuidGenerator.generateNameBased(&quot;%s_%s_%s&quot;.formatted(</span>
+<span class="fc" id="L103">                        TransactionType.RELEASE.name(),</span>
+<span class="fc" id="L104">                        command.rentalRef().id(),</span>
+<span class="fc" id="L105">                        command.rentalRef().rentalVersion()))</span>
         );
     }
 }

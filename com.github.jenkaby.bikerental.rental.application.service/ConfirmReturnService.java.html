@@ -37,7 +37,7 @@ class ConfirmReturnService implements ConfirmReturnUseCase {
     @Override
     @Transactional
     public @NonNull ReturnEquipmentResult execute(@NonNull ConfirmReturnCommand command) {
-<span class="fc" id="L40">        log.info(&quot;Confirming return for rentalId={} against quoteId={}&quot;, command.rentalId(), command.quoteId());</span>
+<span class="fc" id="L40">        log.info(&quot;Confirming return for rentalId={} against {}&quot;, command.rentalId(), command.quoteId());</span>
 
 <span class="fc" id="L42">        Rental rental = findRental(command.rentalId());</span>
 <span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (!rental.hasActiveStatus()) {</span>
@@ -55,7 +55,7 @@ class ConfirmReturnService implements ConfirmReturnUseCase {
 
 <span class="fc" id="L56">        Money totalFinalCost = quote.result().totalCost();</span>
 <span class="fc" id="L57">        assertChargeMatchesQuote(rental, totalFinalCost);</span>
-<span class="fc" id="L58">        log.info(&quot;Rental [{}] confirming final cost [{}] from quote [{}]&quot;, rental.getId(), totalFinalCost, quote.quoteId());</span>
+<span class="fc" id="L58">        log.info(&quot;Rental [{}] confirming final cost [{}] from [{}]&quot;, rental.getId(), totalFinalCost, quote.quoteId());</span>
 
 <span class="fc" id="L60">        return settlementFinalizer.settleAndComplete(rental, totalFinalCost, command.operatorId(), frozenReturnTime);</span>
     }

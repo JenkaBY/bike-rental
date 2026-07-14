@@ -6,6 +6,8 @@ import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +16,9 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-<span class="fc" id="L17">@Slf4j</span>
+<span class="fc" id="L19">@Slf4j</span>
 @Service
+@RequiredArgsConstructor
 public class CompleteSigningService {
 
     private static final String RENTAL_EVENTS_EXCHANGER = &quot;rental-events&quot;;
@@ -23,34 +26,23 @@ public class CompleteSigningService {
     private final RentalRepository rentalRepository;
     private final EventPublisher eventPublisher;
     private final RentalEventMapper eventMapper;
-    private final Clock clock;
-
-    CompleteSigningService(
-            RentalRepository rentalRepository,
-            EventPublisher eventPublisher,
-            RentalEventMapper eventMapper,
-<span class="fc" id="L32">            Clock clock) {</span>
-<span class="fc" id="L33">        this.rentalRepository = rentalRepository;</span>
-<span class="fc" id="L34">        this.eventPublisher = eventPublisher;</span>
-<span class="fc" id="L35">        this.eventMapper = eventMapper;</span>
-<span class="fc" id="L36">        this.clock = clock;</span>
-<span class="fc" id="L37">    }</span>
+    private final TimeProvider timeProvider;
 
     @Transactional
     public void completeSigning(Long rentalId, Long expectedVersion, Instant signedAt) {
-<span class="fc" id="L41">        Rental rental = rentalRepository.findById(rentalId)</span>
-<span class="pc" id="L42">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, rentalId.toString()));</span>
+<span class="fc" id="L33">        Rental rental = rentalRepository.findById(rentalId)</span>
+<span class="pc" id="L34">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, rentalId.toString()));</span>
 
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (!rental.getVersion().equals(expectedVersion)) {</span>
-<span class="nc" id="L45">            throw new RentalSigningVersionMismatchException(rentalId, expectedVersion, rental.getVersion());</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if (!rental.getVersion().equals(expectedVersion)) {</span>
+<span class="nc" id="L37">            throw new RentalSigningVersionMismatchException(rentalId, expectedVersion, rental.getVersion());</span>
         }
 
-<span class="fc" id="L48">        LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, clock.getZone());</span>
-<span class="fc" id="L49">        rental.completeSigning(startedAt);</span>
+<span class="fc" id="L40">        LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, timeProvider.zoneId());</span>
+<span class="fc" id="L41">        rental.completeSigning(startedAt);</span>
 
-<span class="fc" id="L51">        Rental saved = rentalRepository.save(rental);</span>
-<span class="fc" id="L52">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalStarted(saved));</span>
-<span class="fc" id="L53">        log.info(&quot;Rental {} signing completed at {}&quot;, saved.getId(), startedAt);</span>
-<span class="fc" id="L54">    }</span>
+<span class="fc" id="L43">        Rental saved = rentalRepository.save(rental);</span>
+<span class="fc" id="L44">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalStarted(saved));</span>
+<span class="fc" id="L45">        log.info(&quot;Rental {} signing completed at {}&quot;, saved.getId(), startedAt);</span>
+<span class="fc" id="L46">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

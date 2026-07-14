@@ -13,6 +13,7 @@ import com.github.jenkaby.bikerental.customer.CustomerInfo;
 import com.github.jenkaby.bikerental.rental.RentalSigningFacade;
 import com.github.jenkaby.bikerental.rental.RentalSigningSnapshot;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 
-<span class="fc" id="L23">@Slf4j</span>
+<span class="fc" id="L24">@Slf4j</span>
 @Service
 @RequiredArgsConstructor
 class FindRentalAgreementService implements FindRentalAgreementUseCase {
@@ -31,26 +32,26 @@ class FindRentalAgreementService implements FindRentalAgreementUseCase {
     private final SigningAssemblyMapper assemblyMapper;
     private final AgreementContentRenderer contentRenderer;
     private final AgreementTemplateMapper agreementTemplateMapper;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional(readOnly = true)
     public RentalAgreementView execute(Long rentalId) {
-<span class="fc" id="L39">        log.info(&quot;Rendering agreement text for rental {}&quot;, rentalId);</span>
+<span class="fc" id="L40">        log.info(&quot;Rendering agreement text for rental {}&quot;, rentalId);</span>
 
-<span class="fc" id="L41">        RentalSigningSnapshot snapshot = rentalSigningFacade.getSigningSnapshot(rentalId);</span>
+<span class="fc" id="L42">        RentalSigningSnapshot snapshot = rentalSigningFacade.getSigningSnapshot(rentalId);</span>
 
-<span class="fc" id="L43">        AgreementTemplate template = templateRepository.findActive()</span>
-<span class="fc" id="L44">                .orElseThrow(ActiveAgreementTemplateNotFoundException::new);</span>
+<span class="fc" id="L44">        AgreementTemplate template = templateRepository.findActive()</span>
+<span class="fc" id="L45">                .orElseThrow(ActiveAgreementTemplateNotFoundException::new);</span>
 
-<span class="fc" id="L46">        CustomerInfo customer = customerFacade.findById(snapshot.customerId())</span>
-<span class="pc" id="L47">                .orElseThrow(() -&gt; new ResourceNotFoundException(CustomerInfo.class, snapshot.customerId().toString()));</span>
+<span class="fc" id="L47">        CustomerInfo customer = customerFacade.findById(snapshot.customerId())</span>
+<span class="pc" id="L48">                .orElseThrow(() -&gt; new ResourceNotFoundException(CustomerInfo.class, snapshot.customerId().toString()));</span>
 
-<span class="fc" id="L49">        var pdfData = assemblyMapper.toPdfData(template, customer, snapshot, clock.instant(), null);</span>
-<span class="fc" id="L50">        var content = contentRenderer.substitute(pdfData);</span>
-<span class="fc" id="L51">        var title = contentRenderer.substituteTitle(pdfData);</span>
+<span class="fc" id="L50">        var pdfData = assemblyMapper.toPdfData(template, customer, snapshot, timeProvider.nowInstant(), null);</span>
+<span class="fc" id="L51">        var content = contentRenderer.substitute(pdfData);</span>
+<span class="fc" id="L52">        var title = contentRenderer.substituteTitle(pdfData);</span>
 
-<span class="fc" id="L53">        return agreementTemplateMapper.toView(template, content, title);</span>
+<span class="fc" id="L54">        return agreementTemplateMapper.toView(template, content, title);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

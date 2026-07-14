@@ -2,6 +2,8 @@
 
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -9,19 +11,17 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-<span class="fc" id="L12">@Slf4j</span>
+<span class="fc" id="L14">@Slf4j</span>
 @Component
+@RequiredArgsConstructor
 public class RentalOverdueCalculator {
 
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
-<span class="fc" id="L18">    public RentalOverdueCalculator(Clock clock) {</span>
-<span class="fc" id="L19">        this.clock = clock;</span>
-<span class="fc" id="L20">    }</span>
-
+//    TODO Create Overdue class for keeping overdue value
     public Integer calculateOverdueMinutes(Rental rental) {
 <span class="pc bpc" id="L23" title="1 of 4 branches missed.">        if (rental.getStatus() == RentalStatus.ACTIVE &amp;&amp; rental.getExpectedReturnAt() != null) {</span>
-<span class="fc" id="L24">            LocalDateTime now = LocalDateTime.now(clock);</span>
+<span class="fc" id="L24">            LocalDateTime now = timeProvider.nowTruncated();</span>
 <span class="fc bfc" id="L25" title="All 2 branches covered.">            if (rental.getExpectedReturnAt().isBefore(now)) {</span>
 <span class="fc" id="L26">                Duration overdueTime = Duration.between(rental.getExpectedReturnAt(), now);</span>
 <span class="fc" id="L27">                return (int) overdueTime.toMinutes();</span>

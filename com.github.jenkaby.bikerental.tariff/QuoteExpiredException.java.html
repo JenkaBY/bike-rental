@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuoteExpiredException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.tariff</a> &gt; <span class="el_source">QuoteExpiredException.java</span></div><h1>QuoteExpiredException.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.tariff;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
 
 import java.time.Instant;
@@ -7,7 +8,7 @@ import java.util.UUID;
 
 /**
  * Thrown when a cost quote has passed its expiry. Part of the public API of the tariff module and may be thrown by
- * {@link TariffV2Facade#getQuote(UUID)} / {@link TariffV2Facade#consumeQuote(UUID)}.
+ * {@link TariffV2Facade#getQuote(QuoteRef)} / {@link TariffV2Facade#consumeQuote(QuoteRef)}.
  */
 public class QuoteExpiredException extends BikeRentalException {
 
@@ -16,15 +17,15 @@ public class QuoteExpiredException extends BikeRentalException {
     private static final String MESSAGE_TEMPLATE = &quot;Cost quote '%s' expired at %s&quot;;
 
     public QuoteExpiredException(UUID quoteId, Instant expiresAt) {
-<span class="fc" id="L19">        super(MESSAGE_TEMPLATE.formatted(quoteId, expiresAt), ERROR_CODE, new Details(quoteId, expiresAt));</span>
-<span class="fc" id="L20">    }</span>
+<span class="fc" id="L20">        super(MESSAGE_TEMPLATE.formatted(quoteId, expiresAt), ERROR_CODE, new Details(quoteId, expiresAt));</span>
+<span class="fc" id="L21">    }</span>
 
     public Details getDetails() {
-<span class="fc" id="L23">        return getParams().map(Details.class::cast)</span>
-<span class="pc" id="L24">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected Details in exception parameters&quot;));</span>
+<span class="fc" id="L24">        return getParams().map(Details.class::cast)</span>
+<span class="pc" id="L25">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected Details in exception parameters&quot;));</span>
     }
 
-<span class="fc" id="L27">    public record Details(UUID quoteId, Instant expiresAt) {</span>
+<span class="fc" id="L28">    public record Details(UUID quoteId, Instant expiresAt) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

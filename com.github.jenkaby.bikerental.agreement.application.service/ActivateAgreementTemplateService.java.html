@@ -4,6 +4,8 @@ import com.github.jenkaby.bikerental.agreement.application.usecase.ActivateAgree
 import com.github.jenkaby.bikerental.agreement.domain.model.AgreementTemplate;
 import com.github.jenkaby.bikerental.agreement.domain.repository.AgreementTemplateRepository;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,40 +13,33 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 
-<span class="fc" id="L14">@Slf4j</span>
+<span class="fc" id="L16">@Slf4j</span>
 @Service
+@RequiredArgsConstructor
 class ActivateAgreementTemplateService implements ActivateAgreementTemplateUseCase {
 
     private final AgreementTemplateRepository repository;
     private final ContentHasher contentHasher;
-    private final Clock clock;
-
-    ActivateAgreementTemplateService(AgreementTemplateRepository repository,
-                                     ContentHasher contentHasher,
-<span class="fc" id="L24">                                     Clock clock) {</span>
-<span class="fc" id="L25">        this.repository = repository;</span>
-<span class="fc" id="L26">        this.contentHasher = contentHasher;</span>
-<span class="fc" id="L27">        this.clock = clock;</span>
-<span class="fc" id="L28">    }</span>
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
     public AgreementTemplate execute(Long id) {
-<span class="fc" id="L33">        var draft = repository.findById(id)</span>
-<span class="pc" id="L34">                .orElseThrow(() -&gt; new ResourceNotFoundException(AgreementTemplate.class, id.toString()));</span>
+<span class="fc" id="L28">        var draft = repository.findById(id)</span>
+<span class="pc" id="L29">                .orElseThrow(() -&gt; new ResourceNotFoundException(AgreementTemplate.class, id.toString()));</span>
 
-<span class="fc" id="L36">        Instant now = clock.instant();</span>
+<span class="fc" id="L31">        Instant now = timeProvider.nowInstant();</span>
 
-<span class="fc" id="L38">        repository.findActive().ifPresent(current -&gt; {</span>
-<span class="fc" id="L39">            current.deactivate(now);</span>
-<span class="fc" id="L40">            repository.saveNow(current);</span>
-<span class="fc" id="L41">            log.info(&quot;Deactivated previously active agreement template {}&quot;, current.getId());</span>
-<span class="fc" id="L42">        });</span>
+<span class="fc" id="L33">        repository.findActive().ifPresent(current -&gt; {</span>
+<span class="fc" id="L34">            current.deactivate(now);</span>
+<span class="fc" id="L35">            repository.saveNow(current);</span>
+<span class="fc" id="L36">            log.info(&quot;Deactivated previously active agreement template {}&quot;, current.getId());</span>
+<span class="fc" id="L37">        });</span>
 
-<span class="fc" id="L44">        draft.activate(repository.nextVersionNumber(), contentHasher.sha256(draft.getContent()), now);</span>
-<span class="fc" id="L45">        var activated = repository.save(draft);</span>
-<span class="fc" id="L46">        log.info(&quot;Activated agreement template {} as version {}&quot;, activated.getId(), activated.getVersionNumber());</span>
-<span class="fc" id="L47">        return activated;</span>
+<span class="fc" id="L39">        draft.activate(repository.nextVersionNumber(), contentHasher.sha256(draft.getContent()), now);</span>
+<span class="fc" id="L40">        var activated = repository.save(draft);</span>
+<span class="fc" id="L41">        log.info(&quot;Activated agreement template {} as version {}&quot;, activated.getId(), activated.getVersionNumber());</span>
+<span class="fc" id="L42">        return activated;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

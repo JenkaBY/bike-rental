@@ -6,6 +6,7 @@ import com.github.jenkaby.bikerental.rental.application.usecase.AddEquipmentUseC
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -15,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.LocalDateTime;
 
-<span class="fc" id="L18">@Slf4j</span>
+<span class="fc" id="L19">@Slf4j</span>
 @Service
 @RequiredArgsConstructor
 class AddEquipmentService implements AddEquipmentUseCase {
@@ -24,31 +25,31 @@ class AddEquipmentService implements AddEquipmentUseCase {
     private final EquipmentFacade equipmentFacade;
     private final RequestedEquipmentValidator validator;
     private final RentalEquipmentFactory rentalEquipmentFactory;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
     public @NonNull Rental execute(@NonNull AddEquipmentCommand command) {
-<span class="fc" id="L32">        log.info(&quot;Adding equipment to rental {}: equipmentIds={}, operatorId={}&quot;,</span>
-<span class="fc" id="L33">                command.rentalId(), command.equipmentIds(), command.operatorId());</span>
+<span class="fc" id="L33">        log.info(&quot;Adding equipment to rental {}: equipmentIds={}, operatorId={}&quot;,</span>
+<span class="fc" id="L34">                command.rentalId(), command.equipmentIds(), command.operatorId());</span>
 
-<span class="fc" id="L35">        Rental rental = rentalRepository.findById(command.rentalId())</span>
-<span class="fc" id="L36">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
+<span class="fc" id="L36">        Rental rental = rentalRepository.findById(command.rentalId())</span>
+<span class="fc" id="L37">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
 
-<span class="fc" id="L38">        LocalDateTime addedAt = LocalDateTime.now(clock);</span>
-<span class="fc" id="L39">        rental.ensureCanAddEquipmentAt(addedAt);</span>
+<span class="fc" id="L39">        LocalDateTime addedAt = timeProvider.nowTruncated();</span>
+<span class="fc" id="L40">        rental.ensureCanAddEquipmentAt(addedAt);</span>
 
-<span class="fc" id="L41">        var equipments = equipmentFacade.findByIds(command.equipmentIds());</span>
-<span class="fc" id="L42">        validator.validateSize(command.equipmentIds(), equipments);</span>
-<span class="fc" id="L43">        validator.validateEquipmentsCondition(equipments);</span>
-<span class="fc" id="L44">        validator.validateAvailability(equipments);</span>
+<span class="fc" id="L42">        var equipments = equipmentFacade.findByIds(command.equipmentIds());</span>
+<span class="fc" id="L43">        validator.validateSize(command.equipmentIds(), equipments);</span>
+<span class="fc" id="L44">        validator.validateEquipmentsCondition(equipments);</span>
+<span class="fc" id="L45">        validator.validateAvailability(equipments);</span>
 
-<span class="fc" id="L46">        var newItems = rentalEquipmentFactory.buildActiveWithCost(rental, equipments, addedAt);</span>
-<span class="fc" id="L47">        rental.addActiveEquipments(newItems, addedAt);</span>
+<span class="fc" id="L47">        var newItems = rentalEquipmentFactory.buildActiveWithCost(rental, equipments, addedAt);</span>
+<span class="fc" id="L48">        rental.addActiveEquipments(newItems, addedAt);</span>
 
-<span class="fc" id="L49">        Rental saved = rentalRepository.save(rental);</span>
-<span class="fc" id="L50">        log.info(&quot;Added {} equipment(s) to rental {}&quot;, newItems.size(), saved.getId());</span>
-<span class="fc" id="L51">        return saved;</span>
+<span class="fc" id="L50">        Rental saved = rentalRepository.save(rental);</span>
+<span class="fc" id="L51">        log.info(&quot;Added {} equipment(s) to rental {}&quot;, newItems.size(), saved.getId());</span>
+<span class="fc" id="L52">        return saved;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -8,15 +8,17 @@ import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.LocalDateTime;
 
-<span class="fc" id="L18">@Slf4j</span>
+<span class="fc" id="L19">@Slf4j</span>
 @Service
+@RequiredArgsConstructor
 class CancelRentalService implements CancelRentalUseCase {
 
     private static final String RENTAL_EVENTS_EXCHANGER = &quot;rental-events&quot;;
@@ -25,40 +27,27 @@ class CancelRentalService implements CancelRentalUseCase {
     private final FinanceFacade financeFacade;
     private final EventPublisher eventPublisher;
     private final RentalEventMapper eventMapper;
-    private final Clock clock;
-
-    CancelRentalService(
-            RentalRepository rentalRepository,
-            FinanceFacade financeFacade,
-            EventPublisher eventPublisher,
-            RentalEventMapper eventMapper,
-<span class="fc" id="L35">            Clock clock) {</span>
-<span class="fc" id="L36">        this.rentalRepository = rentalRepository;</span>
-<span class="fc" id="L37">        this.financeFacade = financeFacade;</span>
-<span class="fc" id="L38">        this.eventPublisher = eventPublisher;</span>
-<span class="fc" id="L39">        this.eventMapper = eventMapper;</span>
-<span class="fc" id="L40">        this.clock = clock;</span>
-<span class="fc" id="L41">    }</span>
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
     public Rental execute(CancelCommand command) {
-<span class="fc" id="L46">        Rental rental = rentalRepository.findById(command.rentalId())</span>
-<span class="pc" id="L47">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
+<span class="fc" id="L35">        Rental rental = rentalRepository.findById(command.rentalId())</span>
+<span class="pc" id="L36">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
 
-<span class="fc" id="L49">        rental.getStatus().validateTransitionTo(RentalStatus.CANCELLED);</span>
+<span class="fc" id="L38">        rental.getStatus().validateTransitionTo(RentalStatus.CANCELLED);</span>
 
-<span class="pc bpc" id="L51" title="1 of 4 branches missed.">        if (rental.isAwaitingSignature() || rental.hasActiveStatus()) {</span>
-<span class="fc" id="L52">            log.info(&quot;Releasing hold for {} rental {}&quot;, rental.getStatus(), rental.getId());</span>
-<span class="fc" id="L53">            financeFacade.releaseHold(rental.toActualRentalRef(), command.operatorId());</span>
+<span class="pc bpc" id="L40" title="1 of 4 branches missed.">        if (rental.isAwaitingSignature() || rental.hasActiveStatus()) {</span>
+<span class="fc" id="L41">            log.info(&quot;Releasing hold for {} rental {}&quot;, rental.getStatus(), rental.getId());</span>
+<span class="fc" id="L42">            financeFacade.releaseHold(rental.toActualRentalRef(), command.operatorId());</span>
         }
 
-<span class="fc" id="L56">        rental.cancel(LocalDateTime.now(clock));</span>
+<span class="fc" id="L45">        rental.cancel(timeProvider.nowTruncated());</span>
 
-<span class="fc" id="L58">        Rental saved = rentalRepository.save(rental);</span>
-<span class="fc" id="L59">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalCancelled(saved));</span>
-<span class="fc" id="L60">        log.info(&quot;Rental {} cancelled&quot;, saved.getId());</span>
-<span class="fc" id="L61">        return saved;</span>
+<span class="fc" id="L47">        Rental saved = rentalRepository.save(rental);</span>
+<span class="fc" id="L48">        eventPublisher.publish(RENTAL_EVENTS_EXCHANGER, eventMapper.toRentalCancelled(saved));</span>
+<span class="fc" id="L49">        log.info(&quot;Rental {} cancelled&quot;, saved.getId());</span>
+<span class="fc" id="L50">        return saved;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

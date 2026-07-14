@@ -74,7 +74,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
     public CostQuoteResponse toQuoteResponse(RentalCostQuote quote) {
 <span class="fc" id="L76">        return new CostQuoteResponse(</span>
-<span class="fc" id="L77">                quote.quoteId(),</span>
+<span class="fc" id="L77">                quote.quoteId().id(),</span>
 <span class="fc" id="L78">                quote.quotedAt(),</span>
 <span class="fc" id="L79">                quote.expiresAt(),</span>
 <span class="fc" id="L80">                toResponse(quote.result())</span>
