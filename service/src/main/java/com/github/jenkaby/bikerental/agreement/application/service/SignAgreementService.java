@@ -19,16 +19,18 @@ import com.github.jenkaby.bikerental.rental.RentalSigningFacade;
 import com.github.jenkaby.bikerental.rental.RentalSigningSnapshot;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.infrastructure.messaging.EventPublisher;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 class SignAgreementService implements SignAgreementUseCase {
 
     private static final String AGREEMENT_EVENTS_DESTINATION = "agreement-events";
@@ -42,29 +44,7 @@ class SignAgreementService implements SignAgreementUseCase {
     private final SigningAssemblyMapper assemblyMapper;
     private final SignatureImageDecoder signatureImageDecoder;
     private final EventPublisher eventPublisher;
-    private final Clock clock;
-
-    SignAgreementService(RentalSigningFacade rentalSigningFacade,
-                         AgreementTemplateRepository templateRepository,
-                         AgreementSignatureRepository signatureRepository,
-                         CustomerFacade customerFacade,
-                         AgreementPdfRenderer renderer,
-                         ContentHasher contentHasher,
-                         SigningAssemblyMapper assemblyMapper,
-                         SignatureImageDecoder signatureImageDecoder,
-                         EventPublisher eventPublisher,
-                         Clock clock) {
-        this.rentalSigningFacade = rentalSigningFacade;
-        this.templateRepository = templateRepository;
-        this.signatureRepository = signatureRepository;
-        this.customerFacade = customerFacade;
-        this.renderer = renderer;
-        this.contentHasher = contentHasher;
-        this.assemblyMapper = assemblyMapper;
-        this.signatureImageDecoder = signatureImageDecoder;
-        this.eventPublisher = eventPublisher;
-        this.clock = clock;
-    }
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -91,8 +71,8 @@ class SignAgreementService implements SignAgreementUseCase {
         CustomerInfo customer = customerFacade.findById(snapshot.customerId())
                 .orElseThrow(() -> new ResourceNotFoundException(CustomerInfo.class, snapshot.customerId().toString()));
 
-        Instant signedAt = clock.instant();
-        LocalDateTime startedAt = LocalDateTime.ofInstant(signedAt, clock.getZone());
+        Instant signedAt = timeProvider.nowInstant();
+        LocalDateTime startedAt = signedAt.atZone(timeProvider.zoneId()).toLocalDateTime();
 
         byte[] signaturePng = signatureImageDecoder.decode(command.signaturePngBase64());
 

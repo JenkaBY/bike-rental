@@ -4,6 +4,7 @@ import com.github.jenkaby.bikerental.equipment.EquipmentInfo;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalEquipment;
 import com.github.jenkaby.bikerental.rental.domain.service.RentalDurationCalculator;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.tariff.EquipmentCostItemV2;
 import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
 import org.mapstruct.Mapper;
@@ -18,15 +19,15 @@ import java.util.List;
 @Mapper
 public abstract class RentalCostCommandMapper {
 
-    protected Clock clock;
+    protected TimeProvider timeProvider;
 
     @Autowired
-    public void setClock(Clock clock) {
-        this.clock = clock;
+    public void setTimeProvider(TimeProvider timeProvider) {
+        this.timeProvider = timeProvider;
     }
 
     public RentalCostCalculationV2Command toEstimateCommand(Rental rental, List<EquipmentInfo> equipments) {
-        var startAt = LocalDate.now(clock).atStartOfDay();
+        var startAt = timeProvider.today().atStartOfDay();
         var costItems = equipments.stream()
                 .map(equipment -> new EquipmentCostItemV2(equipment.id(), equipment.typeSlug(), null, null, null))
                 .toList();

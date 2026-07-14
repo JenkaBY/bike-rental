@@ -10,6 +10,7 @@ import com.github.jenkaby.bikerental.shared.domain.TransactionRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.OverBudgetSettlementException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class SettleRentalService implements SettleRentalUseCase {
     private final TransactionRepository transactionRepository;
     private final RentalHoldBalanceCalculator holdBalanceCalculator;
     private final UuidGenerator uuidGenerator;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional(noRollbackFor = {OverBudgetSettlementException.class})
@@ -53,7 +54,7 @@ public class SettleRentalService implements SettleRentalUseCase {
         Money netHold = holdBalanceCalculator.netActiveHold(command.rentalRef());
         if (netHold.isNegativeOrZero()) {
             log.debug("No active hold for rental id=[{}], skipping settlement", command.rentalRef().id());
-            return new SettlementResult(List.of(), null, clock.instant());
+            return new SettlementResult(List.of(), null, timeProvider.nowInstant());
         }
 
         if (command.finalCost().isZero()) {
@@ -64,7 +65,7 @@ public class SettleRentalService implements SettleRentalUseCase {
                         command.rentalRef().id(), existingRelease.get().getId());
                 return new SettlementResult(List.of(), new TransactionRef(existingRelease.get().getId()), existingRelease.get().getRecordedAt());
             }
-            Instant now = clock.instant();
+            Instant now = timeProvider.nowInstant();
             var releaseRef = commitReleaseTransaction(customerAccount, command, netHold, now)
                     .map(t -> new TransactionRef(t.getId()))
                     .orElse(null);
@@ -83,7 +84,7 @@ public class SettleRentalService implements SettleRentalUseCase {
             var captureRevenueCredit = systemAccount.getRevenue().credit(finalCost);
 
             UUID captureId = uuidGenerator.generate();
-            var captureAt = clock.instant();
+            var captureAt = timeProvider.nowInstant();
             var captureTransaction = Transaction.builder()
                     .id(captureId)
                     .type(TransactionType.CAPTURE)
@@ -105,7 +106,7 @@ public class SettleRentalService implements SettleRentalUseCase {
             log.debug("Capture transaction [{}] persisted for rental id=[{}] amount=[{}]", captureId, command.rentalRef().id(), finalCost);
 
             var excess = holdTxNAmount.subtract(finalCost);
-            var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, clock.instant())
+            var releaseTransactionRef = commitReleaseTransaction(customerAccount, command, excess, timeProvider.nowInstant())
                     .map(t -> new TransactionRef(t.getId()))
                     .orElse(null);
 
@@ -125,13 +126,13 @@ public class SettleRentalService implements SettleRentalUseCase {
         }
 
         var captureRefs = new ArrayList<TransactionRef>();
-        Instant lastCaptureAt = clock.instant();
+        Instant lastCaptureAt = timeProvider.nowInstant();
         if (customerAccount.getOnHold().getBalance().isPositive()) {
             log.info("Capturing customer's on hold [{}] for rental id=[{}]", holdTxNAmount.amount(), command.rentalRef().id());
             var holdDebit = customerAccount.getOnHold().debit(holdTxNAmount);
             var holdRevenueCredit = systemAccount.getRevenue().credit(holdTxNAmount);
             UUID holdCaptureId = uuidGenerator.generate();
-            lastCaptureAt = clock.instant();
+            lastCaptureAt = timeProvider.nowInstant();
             transactionRepository.save(Transaction.builder()
                     .id(holdCaptureId)
                     .type(TransactionType.CAPTURE)
@@ -158,7 +159,7 @@ public class SettleRentalService implements SettleRentalUseCase {
             var walletDebit = customerAccount.getWallet().debit(shortfall);
             var walletRevenueCredit = systemAccount.getRevenue().credit(shortfall);
             UUID walletCaptureId = uuidGenerator.generate();
-            lastCaptureAt = clock.instant();
+            lastCaptureAt = timeProvider.nowInstant();
             transactionRepository.save(Transaction.builder()
                     .id(walletCaptureId)
                     .type(TransactionType.CAPTURE)

@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.tariff.application.service;
 import com.github.jenkaby.bikerental.shared.config.RentalProperties;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.DiscountPercent;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.tariff.*;
 import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostCalculationUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.SelectTariffV2UseCase;
@@ -12,31 +13,22 @@ import com.github.jenkaby.bikerental.tariff.domain.model.TariffV2;
 import com.github.jenkaby.bikerental.tariff.domain.repository.TariffV2Repository;
 import com.github.jenkaby.bikerental.tariff.domain.service.BaseEquipmentCostBreakdown;
 import com.github.jenkaby.bikerental.tariff.domain.service.BaseRentalCostCalculationResult;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 class RentalCostCalculationService implements RentalCostCalculationUseCase {
 
     private final RentalProperties rentalProperties;
     private final TariffV2Repository tariffRepository;
     private final SelectTariffV2UseCase selectTariffUseCase;
-    private final Clock clock;
-
-    RentalCostCalculationService(RentalProperties rentalProperties,
-                                 TariffV2Repository tariffRepository,
-                                 SelectTariffV2UseCase selectTariffUseCase,
-                                 Clock clock) {
-        this.rentalProperties = rentalProperties;
-        this.tariffRepository = tariffRepository;
-        this.selectTariffUseCase = selectTariffUseCase;
-        this.clock = clock;
-    }
+    private final TimeProvider timeProvider;
 
     @Override
     public RentalCostCalculationResult execute(RentalCostCalculationCommand command) {
@@ -85,7 +77,7 @@ class RentalCostCalculationService implements RentalCostCalculationUseCase {
     }
 
     private RentalCostCalculationResult executeNormalMode(RentalCostCalculationCommand command) {
-        LocalDate rentalDate = Optional.ofNullable(command.rentalDate()).orElse(LocalDate.now(clock));
+        LocalDate rentalDate = Optional.ofNullable(command.rentalDate()).orElse(timeProvider.today());
         Duration planned = command.plannedDuration();
         Duration actual = command.actualDuration();
         boolean estimate = actual == null;

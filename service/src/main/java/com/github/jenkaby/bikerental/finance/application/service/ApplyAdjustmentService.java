@@ -12,6 +12,7 @@ import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -78,7 +79,7 @@ public class ApplyAdjustmentService implements ApplyAdjustmentUseCase {
         accountRepository.save(systemAccount);
         accountRepository.save(customerAccount);
 
-        Instant recordedAt = clock.instant();
+        Instant recordedAt = timeProvider.nowInstant();
         UUID transactionId = uuidGenerator.generate();
 
         var transaction = Transaction.builder()

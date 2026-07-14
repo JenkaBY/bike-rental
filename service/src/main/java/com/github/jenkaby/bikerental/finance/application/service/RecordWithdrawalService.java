@@ -9,6 +9,7 @@ import com.github.jenkaby.bikerental.finance.domain.repository.TransactionReposi
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
 import com.github.jenkaby.bikerental.shared.exception.InsufficientBalanceException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final UuidGenerator uuidGenerator;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -63,7 +64,7 @@ public class RecordWithdrawalService implements RecordWithdrawalUseCase {
         accountRepository.save(systemAccount);
         accountRepository.save(customerAccount);
 
-        Instant now = clock.instant();
+        Instant now = timeProvider.nowInstant();
         UUID transactionId = uuidGenerator.generate();
 
         var transaction = Transaction.builder()

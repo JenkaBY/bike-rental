@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.tariff.application.service;
 
+import com.github.jenkaby.bikerental.shared.infrastructure.port.clock.TimeProvider;
 import com.github.jenkaby.bikerental.shared.infrastructure.port.uuid.UuidGenerator;
 import com.github.jenkaby.bikerental.tariff.QuoteAlreadyConsumedException;
 import com.github.jenkaby.bikerental.tariff.QuoteExpiredException;
@@ -29,7 +30,7 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
     private final RentalCostQuoteRepository quoteRepository;
     private final QuoteProperties quoteProperties;
     private final UuidGenerator uuidGenerator;
-    private final Clock clock;
+    private final TimeProvider timeProvider;
 
     @Override
     @Transactional
@@ -81,6 +82,6 @@ class RentalCostQuoteService implements RentalCostQuoteUseCase {
     }
 
     private Instant now() {
-        return Instant.now(clock);
+        return timeProvider.nowInstant();
     }
 }
