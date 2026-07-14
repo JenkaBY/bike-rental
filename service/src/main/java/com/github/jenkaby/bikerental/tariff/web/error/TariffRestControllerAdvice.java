@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.tariff.web.error;
 import com.github.jenkaby.bikerental.shared.web.advice.CorrelationIdProvider;
 import com.github.jenkaby.bikerental.shared.web.advice.ProblemDetailField;
 import com.github.jenkaby.bikerental.tariff.InvalidSpecialTariffTypeException;
+import com.github.jenkaby.bikerental.tariff.QuoteNotFoundException;
 import com.github.jenkaby.bikerental.tariff.SuitableTariffNotFoundException;
 import com.github.jenkaby.bikerental.tariff.domain.exception.InvalidSpecialPriceException;
 import lombok.RequiredArgsConstructor;
@@ -71,5 +72,18 @@ public class TariffRestControllerAdvice {
         problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
         problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
         return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(QuoteNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleQuoteNotFound(QuoteNotFoundException ex) {
+        var correlationId = correlationIdProvider.resolve();
+        log.warn("[correlationId={}] Cost quote not found: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problem.setTitle("Cost quote not found");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
+        return ResponseEntity.of(problem).build();
     }
 }

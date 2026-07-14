@@ -11,13 +11,14 @@ import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
+import com.github.jenkaby.bikerental.shared.mapper.QuoteRefMapper;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Mapper(uses = {MoneyMapper.class, RentalQueryMapper.class, DiscountMapper.class, DurationMapper.class})
+@Mapper(uses = {MoneyMapper.class, RentalQueryMapper.class, DiscountMapper.class, DurationMapper.class, QuoteRefMapper.class})
 public abstract class RentalCommandMapper {
 
     protected RentalQueryMapper rentalQueryMapper;

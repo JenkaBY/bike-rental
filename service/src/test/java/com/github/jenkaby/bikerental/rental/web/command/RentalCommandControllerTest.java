@@ -13,6 +13,7 @@ import com.github.jenkaby.bikerental.rental.web.command.dto.*;
 import com.github.jenkaby.bikerental.rental.web.command.mapper.RentalCommandMapper;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.mapper.RentalQueryMapper;
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import org.junit.jupiter.api.DisplayName;
@@ -1867,7 +1868,7 @@ class RentalCommandControllerTest {
         void whenQuoteValid_returns201() throws Exception {
             var quoteId = UUID.randomUUID();
             var request = new ConfirmReturnRequest(quoteId, "operator-1");
-            var command = new ConfirmReturnUseCase.ConfirmReturnCommand(10L, quoteId, "operator-1");
+            var command = new ConfirmReturnUseCase.ConfirmReturnCommand(10L, new QuoteRef(quoteId), "operator-1");
             Rental rental = mock(Rental.class);
             given(rental.getId()).willReturn(10L);
             var result = new ReturnEquipmentUseCase.ReturnEquipmentResult(rental, null);

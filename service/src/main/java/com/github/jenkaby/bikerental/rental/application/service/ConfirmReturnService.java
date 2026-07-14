@@ -37,7 +37,7 @@ class ConfirmReturnService implements ConfirmReturnUseCase {
     @Override
     @Transactional
     public @NonNull ReturnEquipmentResult execute(@NonNull ConfirmReturnCommand command) {
-        log.info("Confirming return for rentalId={} against quoteId={}", command.rentalId(), command.quoteId());
+        log.info("Confirming return for rentalId={} against {}", command.rentalId(), command.quoteId());
 
         Rental rental = findRental(command.rentalId());
         if (!rental.hasActiveStatus()) {
@@ -55,7 +55,7 @@ class ConfirmReturnService implements ConfirmReturnUseCase {
 
         Money totalFinalCost = quote.result().totalCost();
         assertChargeMatchesQuote(rental, totalFinalCost);
-        log.info("Rental [{}] confirming final cost [{}] from quote [{}]", rental.getId(), totalFinalCost, quote.quoteId());
+        log.info("Rental [{}] confirming final cost [{}] from [{}]", rental.getId(), totalFinalCost, quote.quoteId());
 
         return settlementFinalizer.settleAndComplete(rental, totalFinalCost, command.operatorId(), frozenReturnTime);
     }

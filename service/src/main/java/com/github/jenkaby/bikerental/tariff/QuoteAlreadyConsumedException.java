@@ -1,12 +1,13 @@
 package com.github.jenkaby.bikerental.tariff;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
 
 import java.util.UUID;
 
 /**
  * Thrown when a single-use cost quote has already been consumed. Part of the public API of the tariff module and may be
- * thrown by {@link TariffV2Facade#consumeQuote(UUID)}.
+ * thrown by {@link TariffV2Facade#consumeQuote(QuoteRef)}.
  */
 public class QuoteAlreadyConsumedException extends BikeRentalException {
 

@@ -1,11 +1,13 @@
 package com.github.jenkaby.bikerental.tariff.web.query;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.DiscountPercent;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import com.github.jenkaby.bikerental.tariff.DiscountDetail;
 import com.github.jenkaby.bikerental.tariff.QuoteStatus;
 import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
+import com.github.jenkaby.bikerental.tariff.QuoteNotFoundException;
 import com.github.jenkaby.bikerental.tariff.RentalCostQuote;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostQuoteUseCase;
@@ -39,6 +41,8 @@ import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -522,7 +526,7 @@ class TariffV2CalculationControllerTest {
                                 null, null, null, LocalDateTime.parse("2024-06-01T10:00:00"));
                         var result = new BaseRentalCostCalculationResult(List.of(), Money.of("28.80"),
                                 DiscountDetail.none(), Money.of("28.80"), Duration.ofMinutes(120), false, false);
-                        var quote = new RentalCostQuote(quoteId, Instant.parse("2024-06-01T12:00:00Z"),
+                        var quote = new RentalCostQuote(new QuoteRef(quoteId), Instant.parse("2024-06-01T12:00:00Z"),
                                 Instant.parse("2024-06-01T12:05:00Z"), QuoteStatus.ACTIVE, command, result);
                         var calculation = new CostCalculationResponse(List.of(), new BigDecimal("28.80"), null,
                                 new BigDecimal("28.80"), 120, false, false);
@@ -691,6 +695,33 @@ class TariffV2CalculationControllerTest {
                                         .andExpect(jsonPath("$.errors[0].field").value("specialTariffId"))
                                         .andExpect(jsonPath("$.errors[0].code").value("validation.positive"));
                         }
+                }
+        }
+
+        @Nested
+        @DisplayName("DELETE /api/tariffs/quotes/{id}")
+        class DeleteQuote {
+
+                @Test
+                @DisplayName("returns 204 when the quote is deleted")
+                void deleteQuote_returns204() throws Exception {
+                        var quoteId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+
+                        mockMvc.perform(delete(API_V2_QUOTES + "/" + quoteId))
+                                .andExpect(status().isNoContent());
+                }
+
+                @Test
+                @DisplayName("returns 404 when the quote does not exist")
+                void deleteQuote_notFound_returns404() throws Exception {
+                        var quoteId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+                        willThrow(new QuoteNotFoundException(quoteId))
+                                .given(rentalCostQuoteUseCase).deleteQuote(new QuoteRef(quoteId));
+
+                        mockMvc.perform(delete(API_V2_QUOTES + "/" + quoteId))
+                                .andExpect(status().isNotFound())
+                                .andExpect(jsonPath("$.errorCode").value("tariff.quote.not_found"))
+                                .andExpect(jsonPath("$.params.quoteId").value(quoteId.toString()));
                 }
         }
 

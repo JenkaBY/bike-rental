@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.tariff;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.tariff.application.mapper.TariffV2ToInfoMapper;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetTariffV2ByIdUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostCalculationUseCase;
@@ -8,7 +9,6 @@ import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostQuoteU
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 class TariffV2FacadeImpl implements TariffV2Facade {
@@ -49,12 +49,12 @@ class TariffV2FacadeImpl implements TariffV2Facade {
     }
 
     @Override
-    public RentalCostQuote getQuote(UUID quoteId) {
+    public RentalCostQuote getQuote(QuoteRef quoteId) {
         return rentalCostQuoteUseCase.getQuote(quoteId);
     }
 
     @Override
-    public RentalCostQuote consumeQuote(UUID quoteId) {
+    public RentalCostQuote consumeQuote(QuoteRef quoteId) {
         return rentalCostQuoteUseCase.consumeQuote(quoteId);
     }
 }

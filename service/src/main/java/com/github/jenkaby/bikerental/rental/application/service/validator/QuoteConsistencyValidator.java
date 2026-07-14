@@ -33,31 +33,31 @@ public class QuoteConsistencyValidator {
         var rentalStartedAt = rental.getStartedAt();
         if (!temporalEquals(quoteStartedAt, rentalStartedAt)) {
             log.warn("Rental[{}] start time {} differs from the quote {} quoteId=[{}]",
-                    rental.getId(), rentalStartedAt, quoteStartedAt, quote.quoteId());
+                    rental.getId(), rentalStartedAt, quoteStartedAt, quote.quoteId().id());
             throw mismatch(quote, rental, "rental start time differs from the rental");
         }
 
         if (!Objects.equals(inputs.plannedDuration(), rental.getPlannedDuration())) {
             log.warn("Rental[{}] planned duration {} differs from the quote {} quoteId=[{}]",
-                    rental.getId(), rental.getPlannedDuration(), inputs.plannedDuration(), quote.quoteId());
+                    rental.getId(), rental.getPlannedDuration(), inputs.plannedDuration(), quote.quoteId().id());
             throw mismatch(quote, rental, "planned duration differs from the rental");
         }
 
         if (!Objects.equals(inputs.discount(), rental.getDiscountPercent())) {
             log.warn("Rental[{}] discount {} differs from the quote {} quoteId=[{}]",
-                    rental.getId(), rental.getDiscountPercent(), inputs.discount(), quote.quoteId());
+                    rental.getId(), rental.getDiscountPercent(), inputs.discount(), quote.quoteId().id());
             throw mismatch(quote, rental, "discount differs from the rental");
         }
 
         if (!Objects.equals(inputs.specialTariffId(), rental.getSpecialTariffId())) {
             log.warn("Rental[{}] special tariff {} differs from the quote {} quoteId=[{}]",
-                    rental.getId(), rental.getSpecialTariffId(), inputs.specialTariffId(), quote.quoteId());
+                    rental.getId(), rental.getSpecialTariffId(), inputs.specialTariffId(), quote.quoteId().id());
             throw mismatch(quote, rental, "special tariff differs from the rental");
         }
 
         if (!moneyEquals(inputs.specialPrice(), rental.getSpecialPrice())) {
             log.warn("Rental[{}] special price {} differs from the quote {} quoteId=[{}]",
-                    rental.getId(), rental.getSpecialPrice(), inputs.specialPrice(), quote.quoteId());
+                    rental.getId(), rental.getSpecialPrice(), inputs.specialPrice(), quote.quoteId().id());
             throw mismatch(quote, rental, "special price differs from the rental");
         }
 
@@ -73,7 +73,7 @@ public class QuoteConsistencyValidator {
 
         if (!equipmentsById.keySet().equals(quotedEquipmentIds)) {
             log.warn("Rental[{}] equipment composition {} differs from the quote {} quoteId=[{}]",
-                    rental.getId(), equipmentsById.keySet(), quotedEquipmentIds, quote.quoteId());
+                    rental.getId(), equipmentsById.keySet(), quotedEquipmentIds, quote.quoteId().id());
             throw mismatch(quote, rental, "equipment composition differs from the rental");
         }
 
@@ -81,13 +81,13 @@ public class QuoteConsistencyValidator {
             var equipment = equipmentsById.get(item.equipmentId());
             if (!temporalEquals(equipment.getStartedAt(), item.resolveStartAt(quote.inputs().startAt()))) {
                 log.warn("Rental[{}] equipment {} start time {} differs from the quote {} quoteId=[{}]",
-                        rental.getId(), item.equipmentId(), equipment.getStartedAt(), item.resolveStartAt(quote.inputs().startAt()), quote.quoteId());
+                        rental.getId(), item.equipmentId(), equipment.getStartedAt(), item.resolveStartAt(quote.inputs().startAt()), quote.quoteId().id());
                 throw mismatch(quote, rental,
                         "equipment %d start time differs from the rental".formatted(item.equipmentId()));
             }
             if (equipment.getActualReturnAt() != null && !temporalEquals(equipment.getActualReturnAt(), item.returnAt())) {
                 log.warn("Rental[{}] equipment {} return time {} differs from the quote {} quoteId=[{}]",
-                        rental.getId(), item.equipmentId(), equipment.getActualReturnAt(), item.returnAt(), quote.quoteId());
+                        rental.getId(), item.equipmentId(), equipment.getActualReturnAt(), item.returnAt(), quote.quoteId().id());
                 throw mismatch(quote, rental,
                         "equipment %d was already returned at a different time than quoted".formatted(item.equipmentId()));
             }
@@ -95,7 +95,7 @@ public class QuoteConsistencyValidator {
     }
 
     private QuoteRentalMismatchException mismatch(RentalCostQuote quote, Rental rental, String reason) {
-        return new QuoteRentalMismatchException(quote.quoteId(), rental.getId(), reason);
+        return new QuoteRentalMismatchException(quote.quoteId().id(), rental.getId(), reason);
     }
 
     private static boolean moneyEquals(@Nullable Money left, @Nullable Money right) {

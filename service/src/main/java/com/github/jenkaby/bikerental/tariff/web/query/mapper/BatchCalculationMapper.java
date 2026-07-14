@@ -74,7 +74,7 @@ public abstract class BatchCalculationMapper {
 
     public CostQuoteResponse toQuoteResponse(RentalCostQuote quote) {
         return new CostQuoteResponse(
-                quote.quoteId(),
+                quote.quoteId().id(),
                 quote.quotedAt(),
                 quote.expiresAt(),
                 toResponse(quote.result())

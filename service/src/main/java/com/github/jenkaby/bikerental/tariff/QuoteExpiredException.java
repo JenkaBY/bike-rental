@@ -1,5 +1,6 @@
 package com.github.jenkaby.bikerental.tariff;
 
+import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.shared.exception.BikeRentalException;
 
 import java.time.Instant;
@@ -7,7 +8,7 @@ import java.util.UUID;
 
 /**
  * Thrown when a cost quote has passed its expiry. Part of the public API of the tariff module and may be thrown by
- * {@link TariffV2Facade#getQuote(UUID)} / {@link TariffV2Facade#consumeQuote(UUID)}.
+ * {@link TariffV2Facade#getQuote(QuoteRef)} / {@link TariffV2Facade#consumeQuote(QuoteRef)}.
  */
 public class QuoteExpiredException extends BikeRentalException {
 
