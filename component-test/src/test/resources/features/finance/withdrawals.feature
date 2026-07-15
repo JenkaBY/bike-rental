@@ -21,8 +21,8 @@ Feature: Fund Withdrawal
   Scenario Outline: Successful partial cash withdrawal reduces customer wallet and credits the payout sub-ledger
     Given now is "<now>"
     Given the withdrawal request is prepared with the following data
-      | idempotencyKey | customerId | amount | paymentMethod   | operatorId |
-      | IDK1           | CUS2       | 30     | <paymentMethod> | OP1        |
+      | idempotencyKey | customerId | amount | paymentMethod   | operatorId | source | sourceId |
+      | IDK1           | CUS2       | 30     | <paymentMethod> | OP1        | RENTAL | RENT1    |
     When a POST request has been made to "/api/finance/withdrawals" endpoint
     Then the response status is 201
     And the deposit response contains a transactionId
@@ -32,8 +32,8 @@ Feature: Fund Withdrawal
       | L_C_H2      | ACC2      | CUSTOMER_HOLD   | 2       | 20      |
       | <subLedger> | ACC_S     | <ledgerType>    | 1       | -30     |
     And the following transactions were persisted in db
-      | idempotencyKey | customerId | amount | paymentMethod   | operatorId | type       | recordedAt |
-      | IDK1           | CUS2       | 30     | <paymentMethod> | OP1        | WITHDRAWAL | <now>      |
+      | idempotencyKey | customerId | amount | paymentMethod   | operatorId | type       | recordedAt | sourceType | sourceId |
+      | IDK1           | CUS2       | 30     | <paymentMethod> | OP1        | WITHDRAWAL | <now>      | RENTAL     | RENT1    |
     And the following transaction records were persisted in db
       | subLedger   | ledgerType      | direction | amount |
       | L_C_W2      | CUSTOMER_WALLET | DEBIT     | 30     |

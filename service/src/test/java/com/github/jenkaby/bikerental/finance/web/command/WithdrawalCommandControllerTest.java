@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.finance.web.command;
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase.WithdrawalResult;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.WithdrawalCommandMapper;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
@@ -60,6 +61,8 @@ class WithdrawalCommandControllerTest {
         request.put("amount", "30.00");
         request.put("paymentMethod", "CASH");
         request.put("operatorId", "operator-1");
+        request.put("source", "RENTAL");
+        request.put("sourceId", "1001");
         return request;
     }
 
@@ -75,7 +78,8 @@ class WithdrawalCommandControllerTest {
                     new RecordWithdrawalUseCase.RecordWithdrawalCommand(
                             CUSTOMER_ID, Money.of(new BigDecimal("30.00")),
                             PaymentMethod.CASH, "operator-1",
-                            IdempotencyKey.of(UUID.randomUUID())));
+                            IdempotencyKey.of(UUID.randomUUID()),
+                            TransactionSourceType.RENTAL, "1001"));
             given(recordWithdrawalUseCase.execute(any())).willReturn(new WithdrawalResult(TRANSACTION_ID, now));
             given(mapper.toResponse(any())).willReturn(new TransactionResponse(TRANSACTION_ID, now));
 
@@ -178,7 +182,8 @@ class WithdrawalCommandControllerTest {
                         new RecordWithdrawalUseCase.RecordWithdrawalCommand(
                                 CUSTOMER_ID, Money.of(new BigDecimal("100.00")),
                                 PaymentMethod.CASH, "operator-1",
-                                IdempotencyKey.of(UUID.randomUUID())));
+                                IdempotencyKey.of(UUID.randomUUID()),
+                                TransactionSourceType.RENTAL, "1001"));
                 willThrow(new InsufficientBalanceException(
                         Money.of(new BigDecimal("10.00")),
                         Money.of(new BigDecimal("100.00"))))

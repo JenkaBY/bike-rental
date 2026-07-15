@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.finance.application.usecase;
 
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 
@@ -16,7 +17,9 @@ public interface RecordDepositUseCase {
             Money amount,
             PaymentMethod paymentMethod,
             String operatorId,
-            IdempotencyKey idempotencyKey
+            IdempotencyKey idempotencyKey,
+            TransactionSourceType source,
+            String sourceId
     ) {
     }
 

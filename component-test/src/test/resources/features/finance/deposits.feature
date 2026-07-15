@@ -26,8 +26,8 @@ Feature: Money movement between accounts
   Scenario Outline: Successful cash deposit increases customer wallet balance
     Given now is "<now>"
     Given the deposit request is prepared with the following data
-      | idempotencyKey | customerId | amount | paymentMethod   | operatorId |
-      | IDK1           | CUS2       | 50     | <paymentMethod> | OP1        |
+      | idempotencyKey | customerId | amount | paymentMethod   | operatorId | source | sourceId |
+      | IDK1           | CUS2       | 50     | <paymentMethod> | OP1        | RENTAL | RENT1    |
     When a POST request has been made to "/api/finance/deposits" endpoint
     Then the response status is 201
     And the deposit response contains a transactionId
@@ -37,8 +37,8 @@ Feature: Money movement between accounts
       | L_C_H2      | ACC2      | CUSTOMER_HOLD   | 2       | 0.00    |
       | <subLedger> | ACC_S     | <ledgerType>    | 1       | 50      |
     And the following transactions were persisted in db
-      | idempotencyKey | customerId | amount | paymentMethod   | operatorId | type    | recordedAt |
-      | IDK1           | CUS2       | 50     | <paymentMethod> | OP1        | DEPOSIT | <now>      |
+      | idempotencyKey | customerId | amount | paymentMethod   | operatorId | type    | recordedAt | sourceType | sourceId |
+      | IDK1           | CUS2       | 50     | <paymentMethod> | OP1        | DEPOSIT | <now>      | RENTAL     | RENT1    |
     And the following transaction records were persisted in db
       | subLedger   | ledgerType      | direction | amount |
       | L_C_W2      | CUSTOMER_WALLET | CREDIT    | 50     |

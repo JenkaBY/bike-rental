@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.finance.web.command;
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordDepositUseCase.DepositResult;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.command.mapper.DepositCommandMapper;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
@@ -63,12 +64,15 @@ class DepositCommandControllerTest {
                     "customerId", CUSTOMER_ID.toString(),
                     "amount", "50.00",
                     "paymentMethod", "CASH",
-                    "operatorId", "operator-1"
+                    "operatorId", "operator-1",
+                    "source", "RENTAL",
+                    "sourceId", "1001"
             );
             Instant now = Instant.now();
             given(mapper.toCommand(any())).willReturn(
                     new RecordDepositUseCase.RecordDepositCommand(CUSTOMER_ID, Money.of(new BigDecimal("50.00")),
-                            PaymentMethod.CASH, "operator-1", com.github.jenkaby.bikerental.shared.domain.IdempotencyKey.of(UUID.randomUUID())));
+                            PaymentMethod.CASH, "operator-1", com.github.jenkaby.bikerental.shared.domain.IdempotencyKey.of(UUID.randomUUID()),
+                            TransactionSourceType.RENTAL, "1001"));
             given(recordDepositUseCase.execute(any())).willReturn(new DepositResult(TRANSACTION_ID, now));
             given(mapper.toResponse(any())).willReturn(new TransactionResponse(TRANSACTION_ID, now));
 
