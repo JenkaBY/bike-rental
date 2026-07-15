@@ -42,7 +42,8 @@ public class DepositWebSteps {
         List<RecordDepositRequest> requests = IntStream.range(0, times).mapToObj(i -> {
             return new RecordDepositRequest(
                     UUID.randomUUID(),
-                    Aliases.getCustomerId("CUS2"), new BigDecimal(amount), PaymentMethod.CASH, Aliases.getOperatorId("OP1"));
+                    Aliases.getCustomerId("CUS2"), new BigDecimal(amount), PaymentMethod.CASH, Aliases.getOperatorId("OP1"),
+                    null, null);
 
         }).toList();
         webRequestSteps.parallelRequests(HttpMethod.POST, requests, "/api/finance/deposits", null);

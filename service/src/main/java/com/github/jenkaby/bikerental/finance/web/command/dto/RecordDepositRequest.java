@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.finance.web.command.dto;
 
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.shared.web.support.MoneyAmount;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
@@ -26,6 +27,13 @@ public record RecordDepositRequest(
         @NotNull PaymentMethod paymentMethod,
 
         @Schema(description = "Operator identifier", example = "operator-1")
-        @NotBlank String operatorId
+        @NotBlank String operatorId,
+
+        @Schema(description = "Origin of the transaction", example = "RENTAL")
+        TransactionSourceType source,
+
+        @Schema(description = "Identifier within the source (e.g. rental id when source is RENTAL)",
+                example = "018e2cc3-0000-7000-8000-000000000042")
+        String sourceId
 ) {
 }

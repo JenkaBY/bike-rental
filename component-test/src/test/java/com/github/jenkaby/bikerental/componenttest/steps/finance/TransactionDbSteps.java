@@ -84,6 +84,12 @@ public class TransactionDbSteps {
         if (exp.getReason() != null) {
             softly.assertThat(actual.getReason()).as("Reason").isEqualTo(exp.getReason());
         }
+        if (exp.getSourceType() != null) {
+            softly.assertThat(actual.getSourceType()).as("Source type").isEqualTo(exp.getSourceType());
+        }
+        if (exp.getSourceId() != null) {
+            softly.assertThat(actual.getSourceId()).as("Source id").isEqualTo(exp.getSourceId());
+        }
         // validate records is made in separate step
         softly.assertAll();
     }

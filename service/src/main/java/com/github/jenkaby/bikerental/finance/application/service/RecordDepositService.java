@@ -74,8 +74,8 @@ public class RecordDepositService implements RecordDepositUseCase {
                 .amount(command.amount())
                 .customerId(command.customerId())
                 .operatorId(command.operatorId())
-                .sourceType(null)
-                .sourceId(null)
+                .sourceType(command.source())
+                .sourceId(command.sourceId())
                 .recordedAt(now)
                 .idempotencyKey(command.idempotencyKey())
                 .records(List.of(
