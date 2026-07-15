@@ -169,9 +169,9 @@ Feature: Equipment Return
       | customerId | status | actualDuration | plannedDuration | estimatedCost |
       | CUS2       | ACTIVE | 60             | 120             | 25.00         |
     And the rental return response contains rental equipments
-      | equipmentId | equipmentUid | status   |
-      | 1           | BIKE-001     | RETURNED |
-      | 2           | BIKE-002     | ACTIVE   |
+      | equipmentId | equipmentUid | status   | startedAt           |
+      | 1           | BIKE-001     | RETURNED |                     |
+      | 2           | BIKE-002     | ACTIVE   | 2026-02-10T09:00:00 |
     And the rental return response does not contain settlement info
 #    attempting to complete the rental via the legacy endpoint is rejected
     Given now is "2026-02-10T10:00:00"

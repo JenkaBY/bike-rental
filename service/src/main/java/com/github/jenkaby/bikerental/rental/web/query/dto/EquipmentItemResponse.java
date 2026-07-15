@@ -15,6 +15,7 @@ public record EquipmentItemResponse(
         @Schema(description = "Final cost for this equipment (optional)") BigDecimal finalCost,
         @Schema(description = "Tariff ID", example = "3") Long tariffId,
         @Schema(description = "Status rental equipment", example = "ASSIGNED") @NotNull String status,
+        @Schema(description = "Start time for this equipment; may differ from the rental's own start when the equipment was added mid-rental") @Nullable Instant startedAt,
         @Schema(description = "Actual return time (null if not returned or rental not cancelled)") @Nullable Instant actualReturnAt,
         @Schema(description = "Final cost breakdown; populated only when equipment is returned") @Nullable CostBreakdown breakdown
 ) {

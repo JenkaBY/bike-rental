@@ -577,9 +577,9 @@ Feature: Equipment Return — Confirm via Cost Quote
       | customerId | status    | actualDuration | plannedDuration | estimatedCost | totalCost |
       | CUS2       | COMPLETED | 120            | 120             | 25.00         | 25.00     |
     And the rental return response contains rental equipments
-      | equipmentId | equipmentUid | status   | tariffId | finalCost |
-      | 1           | BIKE-001     | RETURNED | 1        | 16.00     |
-      | 2           | BIKE-002     | RETURNED | 1        | 9.00      |
+      | equipmentId | equipmentUid | status   | tariffId | finalCost | startedAt           |
+      | 1           | BIKE-001     | RETURNED | 1        | 16.00     |                     |
+      | 2           | BIKE-002     | RETURNED | 1        | 9.00      | 2026-02-10T09:00:00 |
     And the rental return response does contain settlement info
     And the following sub-ledger records were persisted in db
       | id      | accountId | ledgerType      | balance |
