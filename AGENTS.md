@@ -166,6 +166,14 @@ validation.
 Module-scoped advice classes (e.g. `EquipmentRestControllerAdvice`) use
 `@RestControllerAdvice(basePackages = "...")` with `@Order(Ordered.LOWEST_PRECEDENCE - 1)`.
 
+### Cost Breakdown Codes
+
+Each equipment line in a rental cost calculation carries a `calculationBreakdown` with a
+`breakdownPatternCode` (i18n key the frontend localizes), a fallback `message`, and typed `params`. Every code
+(description + `params` schema + example per pattern) is catalogued in
+[docs/breakdown-codes.md](docs/breakdown-codes.md) — keep it in sync when changing a `BreakdownCostDetails`
+subtype or a tariff's `calculateCost` message template.
+
 ### Time Types
 
 | Type            | Usage                                                                    |
