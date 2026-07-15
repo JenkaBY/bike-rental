@@ -2,6 +2,7 @@
 
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.RecordWithdrawalUseCase;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.finance.web.command.dto.RecordWithdrawalRequest;
 import com.github.jenkaby.bikerental.finance.web.command.dto.TransactionResponse;
 import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
@@ -25,50 +26,54 @@ public class WithdrawalCommandMapperImpl implements WithdrawalCommandMapper {
     private final IdempotencyKeyMapper idempotencyKeyMapper;
 
     @Autowired
-<span class="fc" id="L28">    public WithdrawalCommandMapperImpl(MoneyMapper moneyMapper, IdempotencyKeyMapper idempotencyKeyMapper) {</span>
+<span class="fc" id="L29">    public WithdrawalCommandMapperImpl(MoneyMapper moneyMapper, IdempotencyKeyMapper idempotencyKeyMapper) {</span>
 
-<span class="fc" id="L30">        this.moneyMapper = moneyMapper;</span>
-<span class="fc" id="L31">        this.idempotencyKeyMapper = idempotencyKeyMapper;</span>
-<span class="fc" id="L32">    }</span>
+<span class="fc" id="L31">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L32">        this.idempotencyKeyMapper = idempotencyKeyMapper;</span>
+<span class="fc" id="L33">    }</span>
 
     @Override
     public RecordWithdrawalUseCase.RecordWithdrawalCommand toCommand(RecordWithdrawalRequest request) {
-<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if ( request == null ) {</span>
-<span class="nc" id="L37">            return null;</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L38">            return null;</span>
         }
 
-<span class="fc" id="L40">        UUID customerId = null;</span>
-<span class="fc" id="L41">        Money amount = null;</span>
-<span class="fc" id="L42">        PaymentMethod paymentMethod = null;</span>
-<span class="fc" id="L43">        String operatorId = null;</span>
-<span class="fc" id="L44">        IdempotencyKey idempotencyKey = null;</span>
+<span class="fc" id="L41">        UUID customerId = null;</span>
+<span class="fc" id="L42">        Money amount = null;</span>
+<span class="fc" id="L43">        PaymentMethod paymentMethod = null;</span>
+<span class="fc" id="L44">        String operatorId = null;</span>
+<span class="fc" id="L45">        IdempotencyKey idempotencyKey = null;</span>
+<span class="fc" id="L46">        TransactionSourceType source = null;</span>
+<span class="fc" id="L47">        String sourceId = null;</span>
 
-<span class="fc" id="L46">        customerId = request.customerId();</span>
-<span class="fc" id="L47">        amount = moneyMapper.toMoney( request.amount() );</span>
-<span class="fc" id="L48">        paymentMethod = request.paymentMethod();</span>
-<span class="fc" id="L49">        operatorId = request.operatorId();</span>
-<span class="fc" id="L50">        idempotencyKey = idempotencyKeyMapper.toIdempotencyKey( request.idempotencyKey() );</span>
+<span class="fc" id="L49">        customerId = request.customerId();</span>
+<span class="fc" id="L50">        amount = moneyMapper.toMoney( request.amount() );</span>
+<span class="fc" id="L51">        paymentMethod = request.paymentMethod();</span>
+<span class="fc" id="L52">        operatorId = request.operatorId();</span>
+<span class="fc" id="L53">        idempotencyKey = idempotencyKeyMapper.toIdempotencyKey( request.idempotencyKey() );</span>
+<span class="fc" id="L54">        source = request.source();</span>
+<span class="fc" id="L55">        sourceId = request.sourceId();</span>
 
-<span class="fc" id="L52">        RecordWithdrawalUseCase.RecordWithdrawalCommand recordWithdrawalCommand = new RecordWithdrawalUseCase.RecordWithdrawalCommand( customerId, amount, paymentMethod, operatorId, idempotencyKey );</span>
+<span class="fc" id="L57">        RecordWithdrawalUseCase.RecordWithdrawalCommand recordWithdrawalCommand = new RecordWithdrawalUseCase.RecordWithdrawalCommand( customerId, amount, paymentMethod, operatorId, idempotencyKey, source, sourceId );</span>
 
-<span class="fc" id="L54">        return recordWithdrawalCommand;</span>
+<span class="fc" id="L59">        return recordWithdrawalCommand;</span>
     }
 
     @Override
     public TransactionResponse toResponse(RecordWithdrawalUseCase.WithdrawalResult result) {
-<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if ( result == null ) {</span>
-<span class="nc" id="L60">            return null;</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if ( result == null ) {</span>
+<span class="nc" id="L65">            return null;</span>
         }
 
-<span class="fc" id="L63">        UUID transactionId = null;</span>
-<span class="fc" id="L64">        Instant recordedAt = null;</span>
+<span class="fc" id="L68">        UUID transactionId = null;</span>
+<span class="fc" id="L69">        Instant recordedAt = null;</span>
 
-<span class="fc" id="L66">        transactionId = result.transactionId();</span>
-<span class="fc" id="L67">        recordedAt = result.recordedAt();</span>
+<span class="fc" id="L71">        transactionId = result.transactionId();</span>
+<span class="fc" id="L72">        recordedAt = result.recordedAt();</span>
 
-<span class="fc" id="L69">        TransactionResponse transactionResponse = new TransactionResponse( transactionId, recordedAt );</span>
+<span class="fc" id="L74">        TransactionResponse transactionResponse = new TransactionResponse( transactionId, recordedAt );</span>
 
-<span class="fc" id="L71">        return transactionResponse;</span>
+<span class="fc" id="L76">        return transactionResponse;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
