@@ -15,12 +15,13 @@ import java.time.Instant;
         @Schema(description = &quot;Final cost for this equipment (optional)&quot;) BigDecimal finalCost,
         @Schema(description = &quot;Tariff ID&quot;, example = &quot;3&quot;) Long tariffId,
         @Schema(description = &quot;Status rental equipment&quot;, example = &quot;ASSIGNED&quot;) @NotNull String status,
+        @Schema(description = &quot;Start time for this equipment; may differ from the rental's own start when the equipment was added mid-rental&quot;) @Nullable Instant startedAt,
         @Schema(description = &quot;Actual return time (null if not returned or rental not cancelled)&quot;) @Nullable Instant actualReturnAt,
         @Schema(description = &quot;Final cost breakdown; populated only when equipment is returned&quot;) @Nullable CostBreakdown breakdown
 ) {
 
     @Schema(description = &quot;Per-equipment final cost breakdown&quot;)
-<span class="fc" id="L23">    public record CostBreakdown(</span>
+<span class="fc" id="L24">    public record CostBreakdown(</span>
             @NotNull String pricingType,
             @NotNull String tariffName,
             @NotNull Integer billedDurationMinutes,
@@ -31,7 +32,7 @@ import java.time.Instant;
     ) {
 
         @Schema(description = &quot;Detailed calculation pattern and parameters&quot;)
-<span class="fc" id="L34">        public record CalculationDetail(</span>
+<span class="fc" id="L35">        public record CalculationDetail(</span>
                 @NotNull String breakdownPatternCode,
                 @NotNull String message,
                 @Nullable Object params

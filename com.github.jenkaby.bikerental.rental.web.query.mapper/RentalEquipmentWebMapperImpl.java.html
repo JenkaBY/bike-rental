@@ -43,20 +43,22 @@ public class RentalEquipmentWebMapperImpl implements RentalEquipmentWebMapper {
 <span class="fc" id="L43">        BigDecimal finalCost = null;</span>
 <span class="fc" id="L44">        Long tariffId = null;</span>
 <span class="fc" id="L45">        String status = null;</span>
-<span class="fc" id="L46">        Instant actualReturnAt = null;</span>
+<span class="fc" id="L46">        Instant startedAt = null;</span>
+<span class="fc" id="L47">        Instant actualReturnAt = null;</span>
 
-<span class="fc" id="L48">        breakdown = toCostBreakdown( equipment.getFinalCostBreakdown() );</span>
-<span class="fc" id="L49">        equipmentId = equipment.getEquipmentId();</span>
-<span class="fc" id="L50">        equipmentUid = equipment.getEquipmentUid();</span>
-<span class="fc" id="L51">        estimatedCost = moneyMapper.toBigDecimal( equipment.getEstimatedCost() );</span>
-<span class="fc" id="L52">        finalCost = moneyMapper.toBigDecimal( equipment.getFinalCost() );</span>
-<span class="fc" id="L53">        tariffId = equipment.getTariffId();</span>
-<span class="fc" id="L54">        status = rentalEquipmentStatusMapper.statusToString( equipment.getStatus() );</span>
-<span class="fc" id="L55">        actualReturnAt = instantMapper.localDateTimeToInstant( equipment.getActualReturnAt() );</span>
+<span class="fc" id="L49">        breakdown = toCostBreakdown( equipment.getFinalCostBreakdown() );</span>
+<span class="fc" id="L50">        equipmentId = equipment.getEquipmentId();</span>
+<span class="fc" id="L51">        equipmentUid = equipment.getEquipmentUid();</span>
+<span class="fc" id="L52">        estimatedCost = moneyMapper.toBigDecimal( equipment.getEstimatedCost() );</span>
+<span class="fc" id="L53">        finalCost = moneyMapper.toBigDecimal( equipment.getFinalCost() );</span>
+<span class="fc" id="L54">        tariffId = equipment.getTariffId();</span>
+<span class="fc" id="L55">        status = rentalEquipmentStatusMapper.statusToString( equipment.getStatus() );</span>
+<span class="fc" id="L56">        startedAt = instantMapper.localDateTimeToInstant( equipment.getStartedAt() );</span>
+<span class="fc" id="L57">        actualReturnAt = instantMapper.localDateTimeToInstant( equipment.getActualReturnAt() );</span>
 
-<span class="fc" id="L57">        EquipmentItemResponse equipmentItemResponse = new EquipmentItemResponse( equipmentId, equipmentUid, estimatedCost, finalCost, tariffId, status, actualReturnAt, breakdown );</span>
+<span class="fc" id="L59">        EquipmentItemResponse equipmentItemResponse = new EquipmentItemResponse( equipmentId, equipmentUid, estimatedCost, finalCost, tariffId, status, startedAt, actualReturnAt, breakdown );</span>
 
-<span class="fc" id="L59">        return equipmentItemResponse;</span>
+<span class="fc" id="L61">        return equipmentItemResponse;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
