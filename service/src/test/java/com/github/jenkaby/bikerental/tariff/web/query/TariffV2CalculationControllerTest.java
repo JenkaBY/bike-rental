@@ -316,9 +316,10 @@ class TariffV2CalculationControllerTest {
                                 List.of(
                                         new CostCalculationV2Request.EquipmentItemRequest(101L,
                                                 "bicycle",
+                                                null,
                                                 Instant.parse("2024-06-01T12:00:00Z")),
                                         new CostCalculationV2Request.EquipmentItemRequest(102L,
-                                                "bicycle", null)),
+                                                "bicycle", null, null)),
                                 Instant.parse("2024-06-01T10:00:00Z"),
                                 120,
                                 null,
@@ -409,7 +410,7 @@ class TariffV2CalculationControllerTest {
                                         Arguments.of(
                                                 new CostCalculationV2Request(
                                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(
-                                                                1L, " ", null)),
+                                                                1L, " ", null, null)),
                                                         Instant.parse("2024-06-01T10:00:00Z"), 60,
                                                         null, null, null),
                                                 "equipments[0].equipmentType",
@@ -417,7 +418,7 @@ class TariffV2CalculationControllerTest {
                                         Arguments.of(
                                                 new CostCalculationV2Request(
                                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(
-                                                                null, "bicycle", null)),
+                                                                null, "bicycle", null, null)),
                                                         Instant.parse("2024-06-01T10:00:00Z"), 60,
                                                         null, null, null),
                                                 "equipments[0].equipmentId",
@@ -442,6 +443,7 @@ class TariffV2CalculationControllerTest {
                         void whenStartAtNull_returns400() throws Exception {
                                 var request = new CostCalculationV2Request(
                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null,
                                                 null)),
                                         null,
                                         60,
@@ -461,6 +463,7 @@ class TariffV2CalculationControllerTest {
                         void whenPlannedDurationNull_returns400() throws Exception {
                                 var request = new CostCalculationV2Request(
                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null,
                                                 null)),
                                         Instant.parse("2024-06-01T10:00:00Z"),
                                         null,
@@ -488,6 +491,7 @@ class TariffV2CalculationControllerTest {
                                 throws Exception {
                                 var request = new CostCalculationV2Request(
                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null,
                                                 null)),
                                         Instant.parse("2024-06-01T10:00:00Z"),
                                         60,
@@ -515,6 +519,7 @@ class TariffV2CalculationControllerTest {
                 void createQuote_returns201() throws Exception {
                         var request = new CostCalculationV2Request(
                                 List.of(new CostCalculationV2Request.EquipmentItemRequest(101L, "bicycle",
+                                        null,
                                         Instant.parse("2024-06-01T12:00:00Z"))),
                                 Instant.parse("2024-06-01T10:00:00Z"),
                                 120,
@@ -559,7 +564,7 @@ class TariffV2CalculationControllerTest {
                                         Arguments.of(
                                                 new CostCalculationV2Request(
                                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(
-                                                                1L, " ", null)),
+                                                                1L, " ", null, null)),
                                                         Instant.parse("2024-06-01T10:00:00Z"), 60,
                                                         null, null, null),
                                                 "equipments[0].equipmentType",
@@ -567,7 +572,7 @@ class TariffV2CalculationControllerTest {
                                         Arguments.of(
                                                 new CostCalculationV2Request(
                                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(
-                                                                null, "bicycle", null)),
+                                                                null, "bicycle", null, null)),
                                                         Instant.parse("2024-06-01T10:00:00Z"), 60,
                                                         null, null, null),
                                                 "equipments[0].equipmentId",
@@ -592,6 +597,7 @@ class TariffV2CalculationControllerTest {
                         void whenStartAtNull_returns400() throws Exception {
                                 var request = new CostCalculationV2Request(
                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null,
                                                 null)),
                                         null,
                                         60,
@@ -611,6 +617,7 @@ class TariffV2CalculationControllerTest {
                         void whenPlannedDurationNull_returns400() throws Exception {
                                 var request = new CostCalculationV2Request(
                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null,
                                                 null)),
                                         Instant.parse("2024-06-01T10:00:00Z"),
                                         null,
@@ -638,6 +645,7 @@ class TariffV2CalculationControllerTest {
                                 throws Exception {
                                 var request = new CostCalculationV2Request(
                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null,
                                                 null)),
                                         Instant.parse("2024-06-01T10:00:00Z"),
                                         60,
@@ -659,6 +667,7 @@ class TariffV2CalculationControllerTest {
                         void whenSpecialPriceNegative_returns400() throws Exception {
                                 var request = new CostCalculationV2Request(
                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null,
                                                 null)),
                                         Instant.parse("2024-06-01T10:00:00Z"),
                                         60,
@@ -680,6 +689,7 @@ class TariffV2CalculationControllerTest {
                         void whenSpecialTariffIdZero_returns400() throws Exception {
                                 var request = new CostCalculationV2Request(
                                         List.of(new CostCalculationV2Request.EquipmentItemRequest(1L, "bicycle",
+                                                null,
                                                 null)),
                                         Instant.parse("2024-06-01T10:00:00Z"),
                                         60,

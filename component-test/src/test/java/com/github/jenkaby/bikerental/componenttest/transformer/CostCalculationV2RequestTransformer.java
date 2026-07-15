@@ -32,6 +32,7 @@ public class CostCalculationV2RequestTransformer {
         return new CostCalculationV2Request.EquipmentItemRequest(
                 toLong(entry, "equipmentId"),
                 getStringOrNull(entry, "equipmentType"),
+                parseLocalDateTimeToInstant(entry, "startAt"),
                 parseLocalDateTimeToInstant(entry, "returnAt")
         );
     }

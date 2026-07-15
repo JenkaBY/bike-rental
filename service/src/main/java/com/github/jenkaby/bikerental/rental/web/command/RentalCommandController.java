@@ -214,13 +214,17 @@ class RentalCommandController {
 
 
     @PostMapping("/return")
-    @Operation(summary = "Return equipment", description = "Completes a rental by returning the rented equipment, calculates final cost and records additional payment if needed")
+    @Operation(summary = "Return equipment", description = "Records a partial return of rented equipment. Returning the " +
+            "last outstanding piece of equipment is rejected — completing a rental must go through the quote-based " +
+            "return flow (POST /api/rentals/{rentalId}/returns)")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Equipment or equipments returned, rental completed or active",
+            @ApiResponse(responseCode = "200", description = "Equipment or equipments returned, rental remains active",
                     content = @Content(schema = @Schema(implementation = RentalReturnResponse.class))),
             @ApiResponse(responseCode = "400", description = "Validation error or rental identifier missing",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Rental or equipment not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Request would return the last outstanding equipment; use the quote-based return flow instead",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "422", description = "Rental not in active state",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))

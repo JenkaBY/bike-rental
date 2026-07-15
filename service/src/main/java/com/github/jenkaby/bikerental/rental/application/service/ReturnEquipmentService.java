@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.rental.application.service;
 
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
+import com.github.jenkaby.bikerental.rental.domain.exception.RentalCompletionFlowViolationException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
@@ -26,7 +27,6 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
     private final RentalRepository rentalRepository;
     private final RentalDurationCalculator durationCalculator;
     private final RentalCostPolicy costPolicy;
-    private final RentalSettlementFinalizer settlementFinalizer;
     private final TimeProvider timeProvider;
 
     @Override
@@ -44,18 +44,15 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
         rental.calculateActualDuration(durationCalculator, returnTime);
         var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);
 
-        costPolicy.calculateFinalCost(rental, equipmentsToReturn, durationCalculator, returnTime);
-
-        if (!rental.allEquipmentsReturned()) {
-            Rental saved = rentalRepository.save(rental);
-            log.info("Partial return recorded for rental {}", saved.getId());
-            return new ReturnEquipmentResult(saved, null);
+        if (rental.allEquipmentsReturned()) {
+            throw new RentalCompletionFlowViolationException(rental.getId());
         }
 
-        var totalFinalCost = rental.getFinalCost();
-        log.info("Rental [{}] returning equipments {}, final cost [{}]", rental.getId(), equipmentsToReturn, totalFinalCost);
+        costPolicy.calculateFinalCost(rental, equipmentsToReturn, durationCalculator, returnTime);
 
-        return settlementFinalizer.settleAndComplete(rental, totalFinalCost, command.operatorId(), returnTime);
+        Rental saved = rentalRepository.save(rental);
+        log.info("Partial return recorded for rental {}", saved.getId());
+        return new ReturnEquipmentResult(saved, null);
     }
 
     private Rental findRental(ReturnEquipmentCommand command) {
