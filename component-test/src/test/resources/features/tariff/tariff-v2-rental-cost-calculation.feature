@@ -10,6 +10,7 @@ Feature: Tariff V2 API rental cost calculation
       | SCOOTER | Scooter | Electric                     |
       | HELMET  | Helmet  | Accessory                    |
       | SPECIAL | Special | It's used for special tariff |
+      | MOPED   | Moped   | Degressive-only, no daily    |
     And the pricing params list for tariff request is
       | tariffId | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | hourlyPrice | dailyPrice | overtimeHourlyPrice | issuanceFee | minimumDurationMinutes | minimumDurationSurcharge | price |
       | 1        | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               |             |            |                     |             | 30                     | 1.00                     |       |
@@ -17,6 +18,7 @@ Feature: Tariff V2 API rental cost calculation
       | 3        | DAILY             |                |                |                    |             | 25.00      | 1.00                |             |                        |                          |       |
       | 4        | FLAT_FEE          |                |                |                    |             |            |                     | 1.00        |                        |                          |       |
       | 5        | SPECIAL           |                |                |                    |             |            |                     |             |                        |                          | 0     |
+      | 6        | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               |             |            |                     |             | 30                     | 1.00                     |       |
     And the following tariff v2 records exist in db
       | id | name                | description             | equipmentType | pricingType       | status | validFrom  | validTo |
       | 1  | Hourly Bicycle      | Degressive hourly       | BICYCLE       | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
@@ -24,6 +26,7 @@ Feature: Tariff V2 API rental cost calculation
       | 3  | Daily Bicycle       | Daily hourly            | BICYCLE       | DAILY             | ACTIVE | 2026-01-01 |         |
       | 4  | Flat Fee Helmet     | Flat fee                | HELMET        | FLAT_FEE          | ACTIVE | 2026-01-01 |         |
       | 5  | Special Tariff      | Apply for any equipment | ANY           | SPECIAL           | ACTIVE | 2025-01-31 |         |
+      | 6  | Hourly Moped        | Degressive hourly       | MOPED         | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
 
 
   Scenario Outline: Get rental cost calculation for a single rental - Template
@@ -79,6 +82,22 @@ Feature: Tariff V2 API rental cost calculation
       | 60              | 60             | 9     | 9.0      | 8.1   | 10              | 0.9            | 0        | 0        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
       | 60              | 60             | 9     | 9.0      | 0     | 100             | 9              | 0        | 0        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
       | 300             | 300            | 25    | 25       | 12.5  | 50              | 12.5           | 240      | 0        | 5h 0min degressive: 9+7+5+3+1 = 25          | breakdown.cost.degressive_hourly.standard |
+
+
+  Scenario Outline: Degressive breakdown collapses repeated floor-rate hours - DEGRESSIVE_HOURLY:<durationMinutes>min
+    Given the rental request is prepared with the following data
+      | equipmentTypes | plannedDurationMinutes | actualDurationMinutes |
+      | MOPED          | <durationMinutes>      | <durationMinutes>     |
+    When a POST request has been made to "/api/tariffs/calculate" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentType | tariffId | tariffName   | pricingType       | itemCost | billedDuration    | overtimeMinutes | forgivenMinutes | pattern                                   | message   |
+      | MOPED         | 6        | Hourly Moped | DEGRESSIVE_HOURLY | <cost>   | <durationMinutes> |                 |                 | breakdown.cost.degressive_hourly.standard | <message> |
+    Examples:
+      | durationMinutes | cost | message                              |
+      | 360             | 26   | 6h 0min degressive: 9+7+5+3+2*1 = 26 |
+      | 420             | 27   | 7h 0min degressive: 9+7+5+3+3*1 = 27 |
+      | 480             | 28   | 8h 0min degressive: 9+7+5+3+4*1 = 28 |
 
 
   Scenario: Multiple rental equipments calculation

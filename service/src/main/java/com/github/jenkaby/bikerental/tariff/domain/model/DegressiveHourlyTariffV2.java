@@ -51,15 +51,10 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
         long hours = duration.toHours();
         long minutes = duration.minusHours(hours).toMinutes();
         Money totalCost = Money.zero();
-        StringBuilder breakdownBuilder = new StringBuilder();
         for (int hour = 1; hour <= hours; hour++) {
-            Money rate = rateForHour(hour);
-            totalCost = totalCost.add(rate);
-            if (hour > 1) {
-                breakdownBuilder.append("+");
-            }
-            breakdownBuilder.append(rate);
+            totalCost = totalCost.add(rateForHour(hour));
         }
+        StringBuilder breakdownBuilder = renderHourlyBreakdown(hours);
         if (minutes > 0) {
             Money nextHourRate = rateForHour((int) hours + 1);
             int intervals = getIntervalMinutes(minutes);
@@ -83,6 +78,28 @@ public final class DegressiveHourlyTariffV2 extends TariffV2 {
                 new BreakdownCostDetails.DegressiveHourlyMinutesOnly(message,
                         new BreakdownCostDetails.DegressiveHourlyMinutesOnly.Details(minutes, breakdownBuilder.toString(), totalCost.toString()))
         );
+    }
+
+    private StringBuilder renderHourlyBreakdown(long hours) {
+        StringBuilder breakdownBuilder = new StringBuilder();
+        int hour = 1;
+        while (hour <= hours) {
+            Money rate = rateForHour(hour);
+            int runLength = 1;
+            while (hour + runLength <= hours && rateForHour(hour + runLength).compareTo(rate) == 0) {
+                runLength++;
+            }
+            if (!breakdownBuilder.isEmpty()) {
+                breakdownBuilder.append("+");
+            }
+            if (runLength > 1) {
+                breakdownBuilder.append(runLength).append("*").append(rate);
+            } else {
+                breakdownBuilder.append(rate);
+            }
+            hour += runLength;
+        }
+        return breakdownBuilder;
     }
 
     private Money rateForHour(int hour) {

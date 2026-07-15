@@ -7,7 +7,7 @@ public class MessageCode {
 
     public static final String BREAKDOWN_SPECIAL_GROUP = "breakdown.cost.special.group";
     public static final String BREAKDOWN_SPECIAL_PRICE = "breakdown.cost.special";
-    public static final String BREAKDOWN_ZERO_COST = "breakdown.cost.special";
+    public static final String BREAKDOWN_ZERO_COST = "breakdown.cost.zero";
     public static final String BREAKDOWN_FLAT_HOURLY_MIN = "breakdown.cost.flat_hourly.minimum";
     public static final String BREAKDOWN_FLAT_HOURLY_STANDARD = "breakdown.cost.flat_hourly.standard";
     public static final String BREAKDOWN_FLAT_HOURLY_MINUTES_ONLY = "breakdown.cost.flat_hourly.minutes_only";
