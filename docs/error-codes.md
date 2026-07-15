@@ -334,6 +334,23 @@ The frontend should branch on `errorCode` (and `errors[].code` for field-level v
 }
 ```
 
+### `rental.completion.flow_violation`
+- **HTTP:** 409 · **Trigger:** `POST /api/rentals/return` was called with the last outstanding piece of equipment on
+  the rental, which would complete it directly (`RentalCompletionFlowViolationException`). Rentals may only be
+  completed via the quote-based return flow (`POST /api/rentals/{rentalId}/returns`); the legacy endpoint still
+  accepts partial returns but rejects the return that would finalize the rental.
+- **Extra:** `params` = `{rentalId}`.
+
+```json
+{
+  "status": 409,
+  "detail": "Rental 10 cannot be completed directly via POST /api/rentals/return; return the last equipment via the quote-based confirmation flow (POST /api/rentals/{rentalId}/returns)",
+  "correlationId": "018f...",
+  "errorCode": "rental.completion.flow_violation",
+  "params": {"rentalId": 10}
+}
+```
+
 ---
 
 ## `tariff.*` — cost quotes

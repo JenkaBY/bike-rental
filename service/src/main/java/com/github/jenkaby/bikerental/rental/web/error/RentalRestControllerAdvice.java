@@ -206,6 +206,19 @@ public class RentalRestControllerAdvice {
         return ResponseEntity.of(problem).build();
     }
 
+    @ExceptionHandler(RentalCompletionFlowViolationException.class)
+    public ResponseEntity<ProblemDetail> handleRentalCompletionFlowViolation(RentalCompletionFlowViolationException ex) {
+        var correlationId = correlationIdProvider.resolve();
+        log.warn("[correlationId={}] Rental completion flow violated: {}", correlationId, ex.getMessage());
+        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("Rental completion flow violated");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
+        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
+        problem.setProperty(ProblemDetailField.PARAMS, ex.getDetails());
+        return ResponseEntity.of(problem).build();
+    }
+
     @ExceptionHandler(InvalidDateRangeException.class)
     public ResponseEntity<ProblemDetail> handleInvalidDateRange(InvalidDateRangeException ex) {
         var correlationId = correlationIdProvider.resolve();
