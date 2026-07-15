@@ -26,6 +26,7 @@ import java.util.List;
 <span class="fc" id="L26">    public record EquipmentItemRequest(</span>
             @NotNull @Positive Long equipmentId,
             @NotBlank String equipmentType,
+            @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startAt,
             @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant returnAt
     ) {
     }

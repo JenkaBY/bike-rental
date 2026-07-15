@@ -2,6 +2,7 @@
 
 import com.github.jenkaby.bikerental.rental.application.usecase.ReturnEquipmentUseCase;
 import com.github.jenkaby.bikerental.rental.domain.exception.InvalidRentalStatusException;
+import com.github.jenkaby.bikerental.rental.domain.exception.RentalCompletionFlowViolationException;
 import com.github.jenkaby.bikerental.rental.domain.model.Rental;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
 import com.github.jenkaby.bikerental.rental.domain.repository.RentalRepository;
@@ -18,7 +19,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 
 
-<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L22">@Slf4j</span>
 @Service
 @RequiredArgsConstructor
 class ReturnEquipmentService implements ReturnEquipmentUseCase {
@@ -26,7 +27,6 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
     private final RentalRepository rentalRepository;
     private final RentalDurationCalculator durationCalculator;
     private final RentalCostPolicy costPolicy;
-    private final RentalSettlementFinalizer settlementFinalizer;
     private final TimeProvider timeProvider;
 
     @Override
@@ -44,23 +44,20 @@ class ReturnEquipmentService implements ReturnEquipmentUseCase {
 <span class="fc" id="L44">        rental.calculateActualDuration(durationCalculator, returnTime);</span>
 <span class="fc" id="L45">        var equipmentsToReturn = rental.equipmentsToReturn(command.getEquipmentIds(), command.getEquipmentUids(), returnTime);</span>
 
-<span class="fc" id="L47">        costPolicy.calculateFinalCost(rental, equipmentsToReturn, durationCalculator, returnTime);</span>
-
-<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (!rental.allEquipmentsReturned()) {</span>
-<span class="fc" id="L50">            Rental saved = rentalRepository.save(rental);</span>
-<span class="fc" id="L51">            log.info(&quot;Partial return recorded for rental {}&quot;, saved.getId());</span>
-<span class="fc" id="L52">            return new ReturnEquipmentResult(saved, null);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (rental.allEquipmentsReturned()) {</span>
+<span class="fc" id="L48">            throw new RentalCompletionFlowViolationException(rental.getId());</span>
         }
 
-<span class="fc" id="L55">        var totalFinalCost = rental.getFinalCost();</span>
-<span class="fc" id="L56">        log.info(&quot;Rental [{}] returning equipments {}, final cost [{}]&quot;, rental.getId(), equipmentsToReturn, totalFinalCost);</span>
+<span class="fc" id="L51">        costPolicy.calculateFinalCost(rental, equipmentsToReturn, durationCalculator, returnTime);</span>
 
-<span class="fc" id="L58">        return settlementFinalizer.settleAndComplete(rental, totalFinalCost, command.operatorId(), returnTime);</span>
+<span class="fc" id="L53">        Rental saved = rentalRepository.save(rental);</span>
+<span class="fc" id="L54">        log.info(&quot;Partial return recorded for rental {}&quot;, saved.getId());</span>
+<span class="fc" id="L55">        return new ReturnEquipmentResult(saved, null);</span>
     }
 
     private Rental findRental(ReturnEquipmentCommand command) {
-<span class="fc" id="L62">        return rentalRepository.findById(command.rentalId())</span>
-<span class="fc" id="L63">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
+<span class="fc" id="L59">        return rentalRepository.findById(command.rentalId())</span>
+<span class="fc" id="L60">                .orElseThrow(() -&gt; new ResourceNotFoundException(Rental.class, command.rentalId().toString()));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

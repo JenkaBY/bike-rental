@@ -109,7 +109,7 @@ import java.util.stream.Collectors;
 <span class="pc bpc" id="L109" title="2 of 4 branches missed.">        if (left == null || right == null) {</span>
 <span class="nc bnc" id="L110" title="All 2 branches missed.">            return left == right;</span>
         }
-<span class="fc" id="L112">        return left.truncatedTo(ChronoUnit.SECONDS).isEqual(right.truncatedTo(ChronoUnit.SECONDS));</span>
+<span class="fc" id="L112">        return left.truncatedTo(ChronoUnit.MILLIS).isEqual(right.truncatedTo(ChronoUnit.MILLIS));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

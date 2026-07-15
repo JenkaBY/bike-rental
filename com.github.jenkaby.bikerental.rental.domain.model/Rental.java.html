@@ -269,8 +269,8 @@ public class Rental {
     }
 
     public List&lt;RentalEquipment&gt; equipmentsToReturn(List&lt;Long&gt; toReturnEquipmentIds, List&lt;String&gt; toReturnEquipmentUids, LocalDateTime returnedAt) {
-<span class="pc bpc" id="L272" title="1 of 4 branches missed.">        var isEmptyRequest = isEmpty(toReturnEquipmentIds) &amp;&amp; isEmpty(toReturnEquipmentUids);</span>
-<span class="fc bfc" id="L273" title="All 2 branches covered.">        Predicate&lt;RentalEquipment&gt; filter = eq -&gt; isEmptyRequest</span>
+<span class="pc bpc" id="L272" title="3 of 4 branches missed.">        var isEmptyRequest = isEmpty(toReturnEquipmentIds) &amp;&amp; isEmpty(toReturnEquipmentUids);</span>
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">        Predicate&lt;RentalEquipment&gt; filter = eq -&gt; isEmptyRequest</span>
 <span class="fc bfc" id="L274" title="All 2 branches covered.">                || toReturnEquipmentIds.contains(eq.getEquipmentId())</span>
 <span class="pc bpc" id="L275" title="1 of 2 branches missed.">                || toReturnEquipmentUids.contains(eq.getEquipmentUid());</span>
 <span class="fc" id="L276">        return rentedEquipments().stream()</span>
@@ -334,7 +334,7 @@ public class Rental {
 <span class="fc" id="L334">    }</span>
 
     private static boolean isEmpty(Collection&lt;?&gt; collection) {
-<span class="pc bpc" id="L337" title="1 of 4 branches missed.">        return collection == null || collection.isEmpty();</span>
+<span class="pc bpc" id="L337" title="2 of 4 branches missed.">        return collection == null || collection.isEmpty();</span>
     }
 
     public void applyEstimatedCost(List&lt;EquipmentCostResult&gt; results) {

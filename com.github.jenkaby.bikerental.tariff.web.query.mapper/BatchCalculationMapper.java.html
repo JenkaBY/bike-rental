@@ -55,29 +55,28 @@ import org.springframework.beans.factory.annotation.Autowired;
     @Mapping(target = &quot;discount&quot;, source = &quot;discountPercent&quot;)
     public abstract RentalCostCalculationV2Command toV2Command(CostCalculationV2Request request);
 
-    @Mapping(target = &quot;startAt&quot;, ignore = true)
     @Mapping(target = &quot;plannedDuration&quot;, ignore = true)
     public abstract EquipmentCostItemV2 toV2Item(CostCalculationV2Request.EquipmentItemRequest item);
 
     //    TODO use Mapstruct features
     public CostCalculationResponse toResponse(RentalCostCalculationResult result) {
-<span class="fc" id="L64">        return new CostCalculationResponse(</span>
-<span class="fc" id="L65">                breakdownMapper.toBreakdownResponses(result.equipmentBreakdowns()),</span>
-<span class="fc" id="L66">                moneyMapper.toBigDecimal(result.subtotal()),</span>
-<span class="fc" id="L67">                discountMapper.toResponse(result.discount()),</span>
-<span class="fc" id="L68">                moneyMapper.toBigDecimal(result.totalCost()),</span>
-<span class="fc" id="L69">                durationMapper.toMinutes(result.effectiveDuration()),</span>
-<span class="fc" id="L70">                result.estimate(),</span>
-<span class="fc" id="L71">                result.specialPricingApplied()</span>
+<span class="fc" id="L63">        return new CostCalculationResponse(</span>
+<span class="fc" id="L64">                breakdownMapper.toBreakdownResponses(result.equipmentBreakdowns()),</span>
+<span class="fc" id="L65">                moneyMapper.toBigDecimal(result.subtotal()),</span>
+<span class="fc" id="L66">                discountMapper.toResponse(result.discount()),</span>
+<span class="fc" id="L67">                moneyMapper.toBigDecimal(result.totalCost()),</span>
+<span class="fc" id="L68">                durationMapper.toMinutes(result.effectiveDuration()),</span>
+<span class="fc" id="L69">                result.estimate(),</span>
+<span class="fc" id="L70">                result.specialPricingApplied()</span>
         );
     }
 
     public CostQuoteResponse toQuoteResponse(RentalCostQuote quote) {
-<span class="fc" id="L76">        return new CostQuoteResponse(</span>
-<span class="fc" id="L77">                quote.quoteId().id(),</span>
-<span class="fc" id="L78">                quote.quotedAt(),</span>
-<span class="fc" id="L79">                quote.expiresAt(),</span>
-<span class="fc" id="L80">                toResponse(quote.result())</span>
+<span class="fc" id="L75">        return new CostQuoteResponse(</span>
+<span class="fc" id="L76">                quote.quoteId().id(),</span>
+<span class="fc" id="L77">                quote.quotedAt(),</span>
+<span class="fc" id="L78">                quote.expiresAt(),</span>
+<span class="fc" id="L79">                toResponse(quote.result())</span>
         );
     }
 }

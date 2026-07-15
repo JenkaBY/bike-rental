@@ -117,44 +117,45 @@ public class BatchCalculationMapperImpl extends BatchCalculationMapper {
 
 <span class="fc" id="L118">        Long equipmentId = null;</span>
 <span class="fc" id="L119">        String equipmentType = null;</span>
-<span class="fc" id="L120">        LocalDateTime returnAt = null;</span>
+<span class="fc" id="L120">        LocalDateTime startAt = null;</span>
+<span class="fc" id="L121">        LocalDateTime returnAt = null;</span>
 
-<span class="fc" id="L122">        equipmentId = item.equipmentId();</span>
-<span class="fc" id="L123">        equipmentType = item.equipmentType();</span>
-<span class="fc" id="L124">        returnAt = instantMapper.instantToLocalDateTime( item.returnAt() );</span>
+<span class="fc" id="L123">        equipmentId = item.equipmentId();</span>
+<span class="fc" id="L124">        equipmentType = item.equipmentType();</span>
+<span class="fc" id="L125">        startAt = instantMapper.instantToLocalDateTime( item.startAt() );</span>
+<span class="fc" id="L126">        returnAt = instantMapper.instantToLocalDateTime( item.returnAt() );</span>
 
-<span class="fc" id="L126">        LocalDateTime startAt = null;</span>
-<span class="fc" id="L127">        Duration plannedDuration = null;</span>
+<span class="fc" id="L128">        Duration plannedDuration = null;</span>
 
-<span class="fc" id="L129">        EquipmentCostItemV2 equipmentCostItemV2 = new EquipmentCostItemV2( equipmentId, equipmentType, startAt, plannedDuration, returnAt );</span>
+<span class="fc" id="L130">        EquipmentCostItemV2 equipmentCostItemV2 = new EquipmentCostItemV2( equipmentId, equipmentType, startAt, plannedDuration, returnAt );</span>
 
-<span class="fc" id="L131">        return equipmentCostItemV2;</span>
+<span class="fc" id="L132">        return equipmentCostItemV2;</span>
     }
 
     protected List&lt;EquipmentCostItem&gt; equipmentItemRequestListToEquipmentCostItemList(List&lt;CostCalculationRequest.EquipmentItemRequest&gt; list) {
-<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L136">            return null;</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L137">            return null;</span>
         }
 
-<span class="fc" id="L139">        List&lt;EquipmentCostItem&gt; list1 = new ArrayList&lt;EquipmentCostItem&gt;( list.size() );</span>
-<span class="fc bfc" id="L140" title="All 2 branches covered.">        for ( CostCalculationRequest.EquipmentItemRequest equipmentItemRequest : list ) {</span>
-<span class="fc" id="L141">            list1.add( toItem( equipmentItemRequest ) );</span>
-<span class="fc" id="L142">        }</span>
+<span class="fc" id="L140">        List&lt;EquipmentCostItem&gt; list1 = new ArrayList&lt;EquipmentCostItem&gt;( list.size() );</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        for ( CostCalculationRequest.EquipmentItemRequest equipmentItemRequest : list ) {</span>
+<span class="fc" id="L142">            list1.add( toItem( equipmentItemRequest ) );</span>
+<span class="fc" id="L143">        }</span>
 
-<span class="fc" id="L144">        return list1;</span>
+<span class="fc" id="L145">        return list1;</span>
     }
 
     protected List&lt;EquipmentCostItemV2&gt; equipmentItemRequestListToEquipmentCostItemV2List(List&lt;CostCalculationV2Request.EquipmentItemRequest&gt; list) {
-<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L149">            return null;</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L150">            return null;</span>
         }
 
-<span class="fc" id="L152">        List&lt;EquipmentCostItemV2&gt; list1 = new ArrayList&lt;EquipmentCostItemV2&gt;( list.size() );</span>
-<span class="fc bfc" id="L153" title="All 2 branches covered.">        for ( CostCalculationV2Request.EquipmentItemRequest equipmentItemRequest : list ) {</span>
-<span class="fc" id="L154">            list1.add( toV2Item( equipmentItemRequest ) );</span>
-<span class="fc" id="L155">        }</span>
+<span class="fc" id="L153">        List&lt;EquipmentCostItemV2&gt; list1 = new ArrayList&lt;EquipmentCostItemV2&gt;( list.size() );</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        for ( CostCalculationV2Request.EquipmentItemRequest equipmentItemRequest : list ) {</span>
+<span class="fc" id="L155">            list1.add( toV2Item( equipmentItemRequest ) );</span>
+<span class="fc" id="L156">        }</span>
 
-<span class="fc" id="L157">        return list1;</span>
+<span class="fc" id="L158">        return list1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
