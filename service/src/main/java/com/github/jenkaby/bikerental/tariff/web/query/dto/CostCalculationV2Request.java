@@ -26,6 +26,7 @@ public record CostCalculationV2Request(
     public record EquipmentItemRequest(
             @NotNull @Positive Long equipmentId,
             @NotBlank String equipmentType,
+            @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startAt,
             @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant returnAt
     ) {
     }
