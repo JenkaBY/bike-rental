@@ -57,6 +57,7 @@ public class OpenApiConfig {
 
         var problemDetailSchema = ModelConverters.getInstance()
                 .resolveAsResolvedSchema(new AnnotatedType(ProblemDetail.class)).schema;
+        normalizeAdditionalProperties(problemDetailSchema);
 
         return new OpenAPI()
                 .components(new Components().addSchemas(ProblemDetail.class.getSimpleName(), problemDetailSchema))
@@ -76,6 +77,18 @@ public class OpenApiConfig {
                         new Tag().name(Tags.TARIFFS).description("Tariff catalog and selection"),
                         new Tag().name(Tags.USERS).description("Users and self management")
                 ));
+    }
+
+    private static void normalizeAdditionalProperties(Schema<?> schema) {
+        if (schema == null || schema.getProperties() == null) {
+            return;
+        }
+        schema.getProperties().values().forEach(propertySchema -> {
+            if (propertySchema.getAdditionalProperties() instanceof Schema) {
+                propertySchema.setAdditionalProperties(Boolean.TRUE);
+            }
+            normalizeAdditionalProperties(propertySchema);
+        });
     }
 
     @Bean
