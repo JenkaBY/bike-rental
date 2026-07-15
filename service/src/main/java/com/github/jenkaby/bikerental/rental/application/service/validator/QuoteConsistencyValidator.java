@@ -109,6 +109,6 @@ public class QuoteConsistencyValidator {
         if (left == null || right == null) {
             return left == right;
         }
-        return left.truncatedTo(ChronoUnit.SECONDS).isEqual(right.truncatedTo(ChronoUnit.SECONDS));
+        return left.truncatedTo(ChronoUnit.MILLIS).isEqual(right.truncatedTo(ChronoUnit.MILLIS));
     }
 }
