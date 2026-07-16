@@ -27,7 +27,7 @@ public class DebtSettlementEventListener {
         var debtRentals = rentalRepository.getCustomerDebtRentals(customerRef);
 
         if (debtRentals.isEmpty()) {
-            log.info("No DEBT rentals found for customerId={}", event.customerId());
+            log.debug("No DEBT rentals found for customerId={}", event.customerId());
             return;
         }
 
@@ -41,7 +41,7 @@ public class DebtSettlementEventListener {
             );
             var result = settleDebtUseCase.execute(command);
             if (!result.settled()) {
-                return;
+                log.warn("Failed to settle DEBT rental {} for customerId={}", rental.getId(), event.customerId());
             }
         }
     }

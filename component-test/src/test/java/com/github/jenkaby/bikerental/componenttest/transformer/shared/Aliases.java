@@ -66,6 +66,7 @@ public class Aliases {
         ALIASES.put("IDK7", "44444444-4444-4444-4444-444444444447");
         ALIASES.put("IDK8", "44444444-4444-4444-4444-444444444448");
         // Transaction ids group starts with 66666666-
+        ALIASES.put("TX0", "66666666-6666-6666-6666-666666666660");
         ALIASES.put("TX1", "66666666-6666-6666-6666-666666666661");
         ALIASES.put("TX2", "66666666-6666-6666-6666-666666666662");
         ALIASES.put("TX3", "66666666-6666-6666-6666-666666666663");
@@ -109,6 +110,7 @@ public class Aliases {
         ALIASES.put("TRE19", "77777777-7777-7777-7777-777777777783");
         ALIASES.put("TRE20", "77777777-7777-7777-7777-777777777784");
         // Source / Rental aliases — stored as Long string because rental.id is Long
+        ALIASES.put("RENT0", "1000");
         ALIASES.put("RENT1", "1001");
         ALIASES.put("RENT2", "1002");
         // Sha256 aliases

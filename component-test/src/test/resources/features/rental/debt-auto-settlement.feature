@@ -106,6 +106,50 @@ Feature: Automatic DEBT rental settlement on customer deposit
       | L_C_W2    | CUSTOMER_WALLET | DEBIT     | 20.00  |
       | L_S_REV   | REVENUE         | CREDIT    | 20.00  |
 
+  Scenario: Older larger DEBT rental does not block settling a newer smaller one
+    Given now is "2026-03-28T10:00:00"
+    And rental exists in the database with the following data
+      | id    | customerId | status | estimatedCost | plannedDuration | finalCost | startedAt           | createdAt           | updatedAt           |
+      | RENT0 | CUS2       | DEBT   | 300.00        | 120             | 300.00    | 2026-03-01T07:00:00 | 2026-03-01T07:00:00 | 2026-03-01T07:00:00 |
+    And rental equipments exist in the database with the following data
+      | rentalId | equipmentId | equipmentUid | equipmentType | tariffId | status   | startedAt           | expectedReturnAt    | estimatedCost | finalCost | createdAt           | updatedAt           |
+      | RENT0    | 1           | BIKE-001     | BICYCLE       | 1        | RETURNED | 2026-03-01T07:00:00 | 2026-03-01T07:00:00 | 300.00        | 300       | 2026-03-01T07:00:00 | 2026-03-01T07:00:00 |
+    And the following transaction records exist in db
+      | id  | type | paymentMethod | amount | customerId | operatorId | sourceType | sourceId | recordedAt          | idempotencyKey |
+      | TX0 | HOLD | CASH          | 70.00  | CUS2       | OP1        | RENTAL     | RENT0    | 2026-03-21T09:00:00 | IDK5           |
+    And the deposit request is prepared with the following data
+      | idempotencyKey | customerId | amount | paymentMethod | operatorId |
+      | IDK1           | CUS2       | 20     | CASH          | OP1        |
+    When a POST request has been made to "/api/finance/deposits" endpoint
+    Then the response status is 201
+    And rentals were persisted in database
+      | id    | customerId | status    |
+# oldest debt (230) exceeds the deposit and stays DEBT, but must not block the newer one
+      | RENT0 | CUS2       | DEBT      |
+# newer, smaller debt (20) is settled although it is processed after the failed older one
+      | RENT1 | CUS2       | COMPLETED |
+    And the following sub-ledger records were persisted in db
+      | id      | accountId | ledgerType      | balance |
+#      RENT0 hold (70) remains, RENT1 hold (80) captured: 150 - 80
+      | L_C_H2  | ACC2      | CUSTOMER_HOLD   | 70.00   |
+#      10 (initial) + 20 (deposit) - 20 (RENT1 shortfall)
+      | L_C_W2  | ACC2      | CUSTOMER_WALLET | 10.00   |
+#      RENT1 finalCost captured as revenue
+      | L_S_REV | ACC_S     | REVENUE         | 100.00  |
+    And the following transactions were persisted in db
+      | customerId | amount | paymentMethod     | operatorId | type    | sourceId | sourceType |
+      | CUS2       | 20.00  | CASH              | OP1        | DEPOSIT |          |            |
+      | CUS2       | 80.00  | INTERNAL_TRANSFER | OP1        | CAPTURE | RENT1    | RENTAL     |
+      | CUS2       | 20.00  | INTERNAL_TRANSFER | OP1        | CAPTURE | RENT1    | RENTAL     |
+    And the following transaction records were persisted in db
+      | subLedger | ledgerType      | direction | amount |
+      | L_C_W2    | CUSTOMER_WALLET | CREDIT    | 20.00  |
+      | L_S_CASH  | CASH            | DEBIT     | 20.00  |
+      | L_C_H2    | CUSTOMER_HOLD   | DEBIT     | 80.00  |
+      | L_S_REV   | REVENUE         | CREDIT    | 80.00  |
+      | L_C_W2    | CUSTOMER_WALLET | DEBIT     | 20.00  |
+      | L_S_REV   | REVENUE         | CREDIT    | 20.00  |
+
   Scenario: Deposit covers all DEBT rentals
     Given now is "2026-03-28T10:00:00"
     And rental exists in the database with the following data
