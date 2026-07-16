@@ -72,24 +72,14 @@ Feature: Equipment management endpoints
       | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A |                | Good           | GOOD      |
       | EQ-005       | BIKE-003 | AVAILABLE | BICYCLE | Model C |                | Fair           | GOOD      |
 
-  Scenario: Search equipments by search text in serial number and model
+  Scenario: Search equipments by search text in serial number(excluded from search) and model
     When a GET request has been made to "/api/equipments" endpoint with query parameters
       | q    |
       | 0066 |
     Then the response status is 200
     And the equipment response only contains list of
       | serialNumber | uid       | status    | type    | model      | commissionedAt | conditionNotes | condition |
-      | EQ-0066      | BIKE-00-  | AVAILABLE | BICYCLE | Model 1    |                | Good           | GOOD      |
       | EQ-009       | BIKE-009  | RENTED    | BICYCLE | Model 0066 |                | Good           | GOOD      |
-
-  Scenario: Search equipments by status and search text in serial number and model
-    When a GET request has been made to "/api/equipments" endpoint with query parameters
-      | q    | status    |
-      | 0066 | AVAILABLE |
-    Then the response status is 200
-    And the equipment response only contains list of
-      | serialNumber | uid      | status    | type    | model   | commissionedAt | conditionNotes | condition |
-      | EQ-0066      | BIKE-00- | AVAILABLE | BICYCLE | Model 1 |                | Good           | GOOD      |
 
   Scenario: Search equipments by exact uid
     When a GET request has been made to "/api/equipments" endpoint with query parameters

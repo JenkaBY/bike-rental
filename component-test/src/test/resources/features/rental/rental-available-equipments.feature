@@ -24,7 +24,7 @@ Feature: Available equipment query
       | 3  | EQ-005       | BIKE-003   | AVAILABLE | BICYCLE | Model C    | GOOD      |
       | 4  | EQ-004       | BIKE-002   | AVAILABLE | BICYCLE | Model C    | BROKEN    |
       | 5  | EQ-0066      | BIKE-00-   | AVAILABLE | BICYCLE | Model 1    | GOOD      |
-      | 6  | EQ-007       | BIKE-0066  | AVAILABLE | BICYCLE | Model 2    | GOOD      |
+      | 6  | BIKE-00-     | BIKE-0066  | AVAILABLE | BICYCLE | Model 2    | GOOD      |
       | 7  | EQ-009       | BIKE-009   | RENTED    | BICYCLE | Model 0066 | GOOD      |
     And rentals exist in the database with the following data
       | id | customerId | status | startedAt           | expectedReturnAt    | createdAt           | updatedAt           |
@@ -43,7 +43,7 @@ Feature: Available equipment query
       | 1  | BIKE-001  | EQ-001       | BICYCLE | Model A |
       | 3  | BIKE-003  | EQ-005       | BICYCLE | Model C |
       | 5  | BIKE-00-  | EQ-0066      | BICYCLE | Model 1 |
-      | 6  | BIKE-0066 | EQ-007       | BICYCLE | Model 2 |
+      | 6  | BIKE-0066 | BIKE-00-     | BICYCLE | Model 2 |
     And the response contains
       | path               | value |
       | $.totalItems       | 4     |
@@ -53,7 +53,7 @@ Feature: Available equipment query
   Scenario: Filters by query text and excludes occupied equipment from results
     When a GET request has been made to "/api/rentals/available-equipments" endpoint with query parameters
       | q    |
-      | 0066 |
+      | BIKE-00- |
     Then the response status is 200
     And the available equipment response only contains page of
       | id | uid      | serialNumber | type    | model   |

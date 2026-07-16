@@ -14,7 +14,6 @@ import org.springframework.data.jpa.domain.Specification;
 })
 @Or({
         @Spec(path = EquipmentSpecConstant.UID, params = EquipmentSpecConstant.SEARCH, spec = Equal.class),
-        @Spec(path = EquipmentSpecConstant.SERIAL_NUMBER, params = EquipmentSpecConstant.SEARCH, spec = LikeIgnoreCase.class),
         @Spec(path = EquipmentSpecConstant.MODEL, params = EquipmentSpecConstant.SEARCH, spec = LikeIgnoreCase.class)
 })
 public interface EquipmentSpec extends Specification<EquipmentJpaEntity> {
