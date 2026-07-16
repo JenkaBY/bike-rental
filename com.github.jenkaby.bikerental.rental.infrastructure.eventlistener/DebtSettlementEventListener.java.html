@@ -27,7 +27,7 @@ public class DebtSettlementEventListener {
 <span class="fc" id="L27">        var debtRentals = rentalRepository.getCustomerDebtRentals(customerRef);</span>
 
 <span class="fc bfc" id="L29" title="All 2 branches covered.">        if (debtRentals.isEmpty()) {</span>
-<span class="fc" id="L30">            log.info(&quot;No DEBT rentals found for customerId={}&quot;, event.customerId());</span>
+<span class="fc" id="L30">            log.debug(&quot;No DEBT rentals found for customerId={}&quot;, event.customerId());</span>
 <span class="fc" id="L31">            return;</span>
         }
 
@@ -41,7 +41,7 @@ public class DebtSettlementEventListener {
             );
 <span class="fc" id="L42">            var result = settleDebtUseCase.execute(command);</span>
 <span class="fc bfc" id="L43" title="All 2 branches covered.">            if (!result.settled()) {</span>
-<span class="fc" id="L44">                return;</span>
+<span class="fc" id="L44">                log.warn(&quot;Failed to settle DEBT rental {} for customerId={}&quot;, rental.getId(), event.customerId());</span>
             }
 <span class="fc" id="L46">        }</span>
 <span class="fc" id="L47">    }</span>
