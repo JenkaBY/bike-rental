@@ -13,6 +13,5 @@ public class EquipmentSpecConstant {
     public static final String TYPE_SLUG = "typeSlug";
     public static final String CONDITION_SLUG = "conditionSlug";
     public static final String UID = "uid";
-    public static final String SERIAL_NUMBER = "serialNumber";
     public static final String MODEL = "model";
 }
