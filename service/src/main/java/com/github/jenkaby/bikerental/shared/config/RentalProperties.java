@@ -18,15 +18,26 @@ public record RentalProperties(
 ) {
     public record ForgivenessProperties(
             @NotNull
-            Duration overtimeDuration
+            Duration overtimeDuration,
+
+            @NotNull
+            Duration earlyReturnWindow
     ) {
         public int overtimeDurationMinutes() {
             return (int) overtimeDuration.toMinutes();
+        }
+
+        public int earlyReturnWindowMinutes() {
+            return (int) earlyReturnWindow.toMinutes();
         }
     }
 
     public int getForgivenessThresholdMinutes() {
         return forgiveness.overtimeDurationMinutes();
+    }
+
+    public int getEarlyReturnWindowMinutes() {
+        return forgiveness.earlyReturnWindowMinutes();
     }
 
     public int getTimeIncrementMinutes() {

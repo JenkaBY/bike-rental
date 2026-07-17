@@ -262,6 +262,69 @@ Feature: Tariff V2 API rental cost calculation
       | 40          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 15       | 60             | 5               | 5               | breakdown.cost.flat_hourly.standard | 1h 0min flat: 1*15 + partial = 15    |
       | 41          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 16.25    | 68             | 8               | 0               | breakdown.cost.flat_hourly.standard | 1h 8min flat: 1*15 + partial = 16.25 |
 
+  # ---------------------------------------------------------------------------
+  # Early-return free window (app.rental.forgiveness.early-return-window = 10m):
+  # an item returned within 10 minutes of ITS OWN start is free (no charge,
+  # no minimum-duration surcharge, no penalty).
+  # ---------------------------------------------------------------------------
+
+  Scenario Outline: V2 early return within the free window is not charged - returned at <returnAt>
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt   |
+      | 1           | SCOOTER       | <returnAt> |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 60                     |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal   | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | <total>   | <subtotal> | <billedDuration>         | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
+      | 1           | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
+    Examples:
+      | returnAt         | billedDuration | cost | subtotal | total | overtime | forgiven | message                             | pattern                            |
+      | 2026-06-01T09:05 | 5              | 0    | 0        | 0     | 0        | 0        | Early return within 10min: free = 0 | breakdown.cost.early_return_free   |
+      | 2026-06-01T09:10 | 10             | 0    | 0        | 0     | 0        | 0        | Early return within 10min: free = 0 | breakdown.cost.early_return_free   |
+      | 2026-06-01T09:11 | 11             | 8.5  | 8.5      | 8.5   | 0        | 0        | 30min minimum: 15/2 + 1 = 8.5       | breakdown.cost.flat_hourly.minimum |
+
+  Scenario: V2 all equipment returned within the free window is fully free
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt         |
+      | 70          | SCOOTER       | 2026-06-01T09:05 |
+      | 71          | SCOOTER       | 2026-06-01T09:08 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 60                     |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 0         | 0        | 8                        | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                          | message                             |
+      | 70          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 0        | 5              | 0               | 0               | breakdown.cost.early_return_free | Early return within 10min: free = 0 |
+      | 71          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 0        | 8              | 0               | 0               | breakdown.cost.early_return_free | Early return within 10min: free = 0 |
+
+  Scenario: V2 equipment taken mid-rental and returned within the free window of its own start is not charged
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | startAt          | returnAt         |
+      | 80          | SCOOTER       |                  | 2026-06-01T11:00 |
+      | 81          | SCOOTER       | 2026-06-01T10:55 | 2026-06-01T11:00 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 120                    |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 30        | 30       | 120                      | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                             | message                             |
+      | 80          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 30       | 120            | 0               | 0               | breakdown.cost.flat_hourly.standard | 2h 0min flat: 2*15 + partial = 30   |
+      | 81          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 0        | 5              | 0               | 0               | breakdown.cost.early_return_free    | Early return within 10min: free = 0 |
+
   Scenario: V2 global discount is applied to the combined subtotal
     Given the equipment items for cost calculation request are
       | equipmentId | equipmentType | returnAt         |
@@ -356,7 +419,7 @@ Feature: Tariff V2 API rental cost calculation
       | BICYCLE       | 1        | Hourly Bicycle | DEGRESSIVE_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
       | returnAt         | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                                     | pattern                                   |
-      | 2026-06-01T00:05 | 5              | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  |
+      | 2026-06-01T00:05 | 5              | 0     | 0        | 0     | 0               | 0              |          |          | Early return within 10min: free = 0         | breakdown.cost.early_return_free          |
       | 2026-06-01T00:20 | 20             | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  |
       | 2026-06-01T01:00 | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |          |          | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
       | 2026-06-01T01:05 | 60             | 9.00  | 9.00     | 9.0   | 0               | 0              | 5        | 5        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
@@ -389,7 +452,7 @@ Feature: Tariff V2 API rental cost calculation
       | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
       | returnAt         | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                               | pattern                             |
-      | 2026-06-01T00:05 | 5              | 8.5   | 8.5      | 8.5   | 0               | 0              |          |          | 30min minimum: 15/2 + 1 = 8.5         | breakdown.cost.flat_hourly.minimum  |
+      | 2026-06-01T00:05 | 5              | 0     | 0        | 0     | 0               | 0              |          |          | Early return within 10min: free = 0   | breakdown.cost.early_return_free    |
       | 2026-06-01T00:20 | 20             | 8.5   | 8.5      | 8.5   | 0               | 0              |          |          | 30min minimum: 15/2 + 1 = 8.5         | breakdown.cost.flat_hourly.minimum  |
       | 2026-06-01T01:00 | 60             | 15    | 15       | 15    | 0               | 0              |          |          | 1h 0min flat: 1*15 + partial = 15     | breakdown.cost.flat_hourly.standard |
       | 2026-06-01T01:05 | 60             | 15    | 15       | 15    | 0               | 0              | 5        | 5        | 1h 0min flat: 1*15 + partial = 15     | breakdown.cost.flat_hourly.standard |
@@ -446,8 +509,8 @@ Feature: Tariff V2 API rental cost calculation
       | HELMET        | 4        | Flat Fee Helmet | FLAT_FEE    | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
       | returnAt         | billedDuration | cost | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message            | pattern                 |
-      | 2026-06-01T00:05 | 5              | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
-      | 2026-06-01T00:10 | 10             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
+      | 2026-06-01T00:05 | 5              | 0    | 0        | 0     | 0               | 0              | 0        |          | Early return within 10min: free = 0 | breakdown.cost.early_return_free |
+      | 2026-06-01T00:10 | 10             | 0    | 0        | 0     | 0               | 0              | 0        |          | Early return within 10min: free = 0 | breakdown.cost.early_return_free |
       | 2026-06-01T01:00 | 60             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
       | 2026-06-01T01:07 | 60             | 1    | 1        | 1     | 0               | 0              | 7        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
       | 2026-06-02T00:00 | 1440           | 2    | 2        | 2     | 0               | 0              | 1380     |          | Flat fee: 1*2d = 2 | breakdown.cost.flat_fee |

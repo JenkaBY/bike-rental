@@ -37,6 +37,7 @@ app:
     time-increment: 5m
     forgiveness:
       overtime-duration: 7m
+      early-return-window: 10m
   tariff:
     quote-ttl: 5m
   cors:

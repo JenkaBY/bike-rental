@@ -51,6 +51,15 @@ public abstract class BreakdownCostDetails {
         }
     }
 
+    public static class EarlyReturnFree extends BreakdownCostDetails {
+        public EarlyReturnFree(String message, Details details) {
+            super(MessageCode.BREAKDOWN_EARLY_RETURN_FREE, message, details);
+        }
+
+        public record Details(int withinMinutes, int actualMinutes, String total) {
+        }
+    }
+
     public static class FlatHourlyMinCost extends BreakdownCostDetails {
         public FlatHourlyMinCost(String message, Details details) {
             super(MessageCode.BREAKDOWN_FLAT_HOURLY_MIN, message, details);
