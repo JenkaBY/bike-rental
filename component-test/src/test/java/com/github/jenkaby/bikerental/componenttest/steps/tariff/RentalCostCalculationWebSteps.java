@@ -1,10 +1,8 @@
 package com.github.jenkaby.bikerental.componenttest.steps.tariff;
 
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
-import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +21,6 @@ public class RentalCostCalculationWebSteps {
 
     public static final Comparator<CostCalculationResponse.EquipmentCostBreakdownResponse> DEFAULT_COMPARATOR = Comparator.comparing(CostCalculationResponse.EquipmentCostBreakdownResponse::equipmentType);
     private final ScenarioContext scenarioContext;
-
-    @Given("the rental request is prepared with the following data")
-    public void theRentalRequestIsPreparedWithTheFollowingData(CostCalculationRequest request) {
-        log.info("Set rental cost calculation request body: {}", request);
-        scenarioContext.setRequestBody(request);
-    }
 
     @Then("the rental cost calculation response only contains")
     public void theRentalCostCalculationResponseContains(CostCalculationResponse expected) {
