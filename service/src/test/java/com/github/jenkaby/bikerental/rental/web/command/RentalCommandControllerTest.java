@@ -574,32 +574,6 @@ class RentalCommandControllerTest {
     }
 
     @Nested
-    @DisplayName("POST /api/rentals/draft")
-    class PostDraft {
-
-        @Nested
-        @DisplayName("Should return 201 Created")
-        class ShouldReturn201 {
-
-            @Test
-            @DisplayName("when creating draft rental")
-            void whenCreatingDraftRental() throws Exception {
-                Rental rental = mock(Rental.class);
-                given(rental.getId()).willReturn(1L);
-                given(updateDraftRentalUseCase.execute(any(CreateOrUpdateDraftRentalUseCase.CreateDraftCommand.class)))
-                        .willReturn(rental);
-                given(queryMapper.toResponse(any(Rental.class)))
-                        .willReturn(mock(RentalResponse.class));
-
-                mockMvc.perform(post(API_RENTALS + "/draft"))
-                        .andExpect(status().isCreated());
-
-                verify(updateDraftRentalUseCase).execute(any(CreateOrUpdateDraftRentalUseCase.CreateDraftCommand.class));
-            }
-        }
-    }
-
-    @Nested
     @DisplayName("POST /api/rentals")
     class PostInitializeDraft {
 

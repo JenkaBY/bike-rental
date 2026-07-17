@@ -53,20 +53,10 @@ Feature: Rental Management
       | 12 | Flat Hourly Scooter    | Scooter flat hourly rate   | SCOOTER       | FLAT_HOURLY       | ACTIVE | 2026-01-01 |         |
       | 13 | Special Group Tariff   | Special pricing for groups | ANY           | SPECIAL           | ACTIVE | 2025-01-01 |         |
 
-  Scenario: Create rental draft
-    When a POST request has been made to "/api/rentals/draft" endpoint
-    Then the response status is 201
-    And the rental response only contains
-      | status | estimatedCost |
-      | DRAFT  | 0             |
-
   Scenario Outline: Update rental with all required fields (tariff autoselect)
-    Given a POST request has been made to "/api/rentals/draft" endpoint
-    Then the response status is 201
-    And the rental response only contains
-      | status |
-      | DRAFT  |
-    And the rental response version is 0
+    Given a single rental exists in the database with the following data
+      | customerId | status | createdAt           | updatedAt           |
+      | CUS1       | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
 #    Update draft rental
     Given a rental request with the following data
       | customerId   | equipmentIds                 | duration          | operatorId |

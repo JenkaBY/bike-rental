@@ -13,8 +13,6 @@ public interface CreateOrUpdateDraftRentalUseCase {
 
     Rental execute(UpdateDraftRentalCommand command);
 
-    Rental execute(CreateDraftCommand command);
-
     Rental execute(InitDraftCommand command);
 
     record UpdateDraftRentalCommand(
@@ -27,9 +25,6 @@ public interface CreateOrUpdateDraftRentalUseCase {
             Money specialPrice,
             DiscountPercent discountPercent
     ) {
-    }
-
-    record CreateDraftCommand() {
     }
 
     record InitDraftCommand(UUID customerId,

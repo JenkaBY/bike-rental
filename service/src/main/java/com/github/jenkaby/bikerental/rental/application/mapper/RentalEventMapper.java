@@ -12,11 +12,6 @@ import java.time.LocalDateTime;
 @Mapper(uses = {RentalEquipmentMapper.class, RentalEquipmentMapper.class})
 public interface RentalEventMapper {
 
-    @Mapping(target = "rentalId", source = "id")
-    @Mapping(target = "status", source = "status")
-    @Mapping(target = "equipmentIds", source = "equipments")
-    RentalCreated toRentalCreated(Rental rental);
-
     @Mapping(target = "equipmentIds", source = "equipments")
     @Mapping(target = "rentalId", source = "id")
     RentalStarted toRentalStarted(Rental rental);

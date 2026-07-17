@@ -95,25 +95,6 @@ class RentalCommandController {
         return ResponseEntity.ok(response);
     }
 
-    @Deprecated(forRemoval = true)
-    @PostMapping("/draft")
-    @Operation(summary = "Create rental draft (Draft Path)", description = "Creates an empty rental draft to be filled step by step")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Draft created",
-                    content = @Content(schema = @Schema(implementation = RentalResponse.class))),
-            @ApiResponse(responseCode = "409", description = "Equipment not available",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    })
-    public ResponseEntity<RentalResponse> createDraft() {
-        log.info("[POST] Creating new rental draft");
-        var command = new CreateOrUpdateDraftRentalUseCase.CreateDraftCommand();
-        Rental rental = updateDraftRentalUseCase.execute(command);
-        var response = queryMapper.toResponse(rental);
-        log.info("[POST] Rental draft created successfully with id: {}", rental.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-
     @PostMapping()
     @Operation(summary = "Initialize rental draft", description = "Creates a rental draft with prefilled data")
     @ApiResponses({
