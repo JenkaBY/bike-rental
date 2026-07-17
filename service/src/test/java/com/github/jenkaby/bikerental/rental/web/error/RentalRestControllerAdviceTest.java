@@ -76,18 +76,6 @@ class RentalRestControllerAdviceTest {
     }
 
     @Nested
-    class InvalidRentalUpdate {
-
-        @Test
-        void returnsProblemDetailWithBadRequestStatus() throws Exception {
-            mockMvc.perform(get("/api/stub/rental/invalid-update"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("rental.update.invalid"))
-                    .andExpect(jsonPath("$.correlationId").exists());
-        }
-    }
-
-    @Nested
     class InsufficientBalance {
 
         @Test
@@ -182,11 +170,6 @@ class RentalRestControllerAdviceTest {
         @GetMapping("/tariff-not-found")
         void tariffNotFound() {
             throw new SuitableTariffNotFoundException("BICYCLE", LocalDate.of(2025, 1, 1), null);
-        }
-
-        @GetMapping("/invalid-update")
-        void invalidUpdate() {
-            throw new InvalidRentalUpdateException("Update not allowed in current status");
         }
 
         @GetMapping("/insufficient-balance")

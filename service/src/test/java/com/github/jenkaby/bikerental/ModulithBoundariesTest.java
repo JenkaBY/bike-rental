@@ -111,8 +111,6 @@ class ModulithBoundariesTest {
                 .ignoreDependency(resideInAnyPackage("com.github.jenkaby.bikerental.tariff", "com.github.jenkaby.bikerental.rental"), resideInAnyPackage("..shared.exception.."))
                 // Allow ModuleApi (root module packages) to reuse Shared value-object mappers (cross-cutting concern)
                 .ignoreDependency(resideInAnyPackage("com.github.jenkaby.bikerental.rental"), resideInAnyPackage("..shared.mapper.."))
-                // Allow Application to access Infrastructure (for utilities like PatchValueParser)
-                .ignoreDependency(resideInAnyPackage("..application.."), resideInAnyPackage("..infrastructure.util.."))
                 // Exclude package-info classes from layer checks (they're metadata annotations, not actual classes)
                 .ignoreDependency(simpleName("package-info"), resideInAnyPackage(".."))
 

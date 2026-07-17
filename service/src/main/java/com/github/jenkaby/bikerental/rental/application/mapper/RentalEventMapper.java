@@ -21,16 +21,6 @@ public interface RentalEventMapper {
     @Mapping(target = "returnedEquipmentIds", source = "rental.equipments", qualifiedByName = "RentalEquipment.returnedEquipmentIds")
     RentalCompleted toRentalCompleted(Rental rental, LocalDateTime returnTime, Money totalCost);
 
-    @Mapping(target = "previousState", source = "previous")
-    @Mapping(target = "currentState", source = "current")
-    @Mapping(target = "rentalId", source = "rental.id")
-    @Mapping(target = "customerId", source = "rental.customerId")
-    RentalUpdated toRentalUpdated(Rental rental, RentalUpdated.RentalState previous, RentalUpdated.RentalState current);
-
-    @Mapping(target = "rentalStatus", source = "status")
-    @Mapping(target = "equipmentIds", source = "equipments")
-    RentalUpdated.RentalState toRentalState(Rental source);
-
     @Mapping(target = "rentalId", source = "id")
     @Mapping(target = "equipmentIds", source = "equipments")
     RentalCancelled toRentalCancelled(Rental rental);

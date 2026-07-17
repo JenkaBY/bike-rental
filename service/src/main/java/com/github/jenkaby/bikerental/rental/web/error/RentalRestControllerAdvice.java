@@ -66,18 +66,6 @@ public class RentalRestControllerAdvice {
         return ResponseEntity.of(problem).build();
     }
 
-    @ExceptionHandler(InvalidRentalUpdateException.class)
-    public ResponseEntity<ProblemDetail> handleInvalidRentalUpdate(InvalidRentalUpdateException ex) {
-        var correlationId = correlationIdProvider.resolve();
-        log.warn("[correlationId={}] Invalid rental update: {}", correlationId, ex.getMessage());
-        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        problem.setTitle("Invalid rental update");
-        problem.setDetail(ex.getMessage());
-        problem.setProperty(ProblemDetailField.CORRELATION_ID, correlationId);
-        problem.setProperty(ProblemDetailField.ERROR_CODE, ex.getErrorCode());
-        return ResponseEntity.of(problem).build();
-    }
-
     @ExceptionHandler(InsufficientBalanceException.class)
     public ResponseEntity<ProblemDetail> handleInsufficientBalance(InsufficientBalanceException ex) {
         var correlationId = correlationIdProvider.resolve();
