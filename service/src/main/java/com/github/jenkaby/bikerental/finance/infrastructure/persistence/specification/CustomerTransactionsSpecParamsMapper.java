@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification;
 
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
+import com.github.jenkaby.bikerental.shared.infrastructure.persistence.BusinessDayBoundaryResolver;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;

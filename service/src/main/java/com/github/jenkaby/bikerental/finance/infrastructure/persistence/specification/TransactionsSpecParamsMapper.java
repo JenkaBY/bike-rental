@@ -1,6 +1,7 @@
 package com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification;
 
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionFilter;
+import com.github.jenkaby.bikerental.shared.infrastructure.persistence.BusinessDayBoundaryResolver;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

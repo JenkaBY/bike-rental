@@ -2,26 +2,23 @@ package com.github.jenkaby.bikerental.rental.infrastructure.persistence.specific
 
 import com.github.jenkaby.bikerental.rental.domain.model.RentalSearchFilter;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
+import com.github.jenkaby.bikerental.shared.infrastructure.persistence.BusinessDayBoundaryResolver;
 import org.jspecify.annotations.Nullable;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 @Mapper(injectionStrategy = InjectionStrategy.SETTER)
 public abstract class RentalSpecParamsMapper {
 
-    private ZoneId businessZoneId;
+    private BusinessDayBoundaryResolver boundaryResolver;
 
     @Autowired
-    public void setBusinessZoneId(ZoneId businessZoneId) {
-        this.businessZoneId = businessZoneId;
+    public void setBoundaryResolver(BusinessDayBoundaryResolver boundaryResolver) {
+        this.boundaryResolver = boundaryResolver;
     }
 
     public Map<String, String[]> toParams(RentalSearchFilter filter) {
@@ -31,8 +28,8 @@ public abstract class RentalSpecParamsMapper {
         }
         putIfPresent(result, SpecConstant.RentalField.CUSTOMER_ID, filter.customerId() != null ? filter.customerId().toString() : null);
         putIfPresent(result, SpecConstant.RentalField.PARAM_EQUIPMENT_UID, filter.equipmentUid());
-        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_FROM, filter.from() != null ? formatInstant(toStartOfDay(filter.from())) : null);
-        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_TO, filter.to() != null ? formatInstant(toStartOfNextDay(filter.to())) : null);
+        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_FROM, filter.from() != null ? boundaryResolver.startOfDay(filter.from()) : null);
+        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_TO, filter.to() != null ? boundaryResolver.startOfNextDay(filter.to()) : null);
         return result;
     }
 
@@ -40,17 +37,5 @@ public abstract class RentalSpecParamsMapper {
         if (value != null) {
             target.put(key, new String[]{value});
         }
-    }
-
-    private Instant toStartOfDay(LocalDate date) {
-        return date.atStartOfDay(businessZoneId).toInstant();
-    }
-
-    private Instant toStartOfNextDay(LocalDate date) {
-        return date.plusDays(1).atStartOfDay(businessZoneId).toInstant();
-    }
-
-    private static String formatInstant(Instant instant) {
-        return DateTimeFormatter.ISO_INSTANT.format(instant);
     }
 }
