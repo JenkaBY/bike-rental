@@ -32,7 +32,6 @@ public class OpenApiConfig {
         public static final String CUSTOMERS = "Customers";
         public static final String EQUIPMENT = "Equipments Catalogue";
         public static final String EQUIPMENT_TYPES = "Equipment Types";
-        public static final String EQUIPMENT_STATUSES = "Equipment Statuses";
         public static final String FINANCE = "Finance";
         public static final String RENTALS = "Rentals";
         public static final String TARIFFS = "Tariffs";
@@ -71,7 +70,6 @@ public class OpenApiConfig {
                         new Tag().name(Tags.CUSTOMERS).description("Customer search and profile management"),
                         new Tag().name(Tags.EQUIPMENT).description("Equipment catalog management"),
                         new Tag().name(Tags.EQUIPMENT_TYPES).description("Equipment type catalog"),
-                        new Tag().name(Tags.EQUIPMENT_STATUSES).description("Equipment status catalog and allowed transitions"),
                         new Tag().name(Tags.FINANCE).description("Payment recording and history"),
                         new Tag().name(Tags.RENTALS).description("Rental lifecycle management"),
                         new Tag().name(Tags.TARIFFS).description("Tariff catalog and selection"),
@@ -133,15 +131,6 @@ public class OpenApiConfig {
                 .group("equipment-types")
                 .displayName(Tags.EQUIPMENT_TYPES)
                 .pathsToMatch("/api/equipment-types/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi equipmentStatusesGroup() {
-        return GroupedOpenApi.builder()
-                .group("equipment-statuses")
-                .displayName(Tags.EQUIPMENT_STATUSES)
-                .pathsToMatch("/api/equipment-statuses/**")
                 .build();
     }
 

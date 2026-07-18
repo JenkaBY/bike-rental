@@ -12,7 +12,6 @@ public interface UpdateEquipmentUseCase {
             String serialNumber,
             String uid,
             String typeSlug,
-            String statusSlug,
             String model,
             LocalDate commissionedAt,
             String condition,

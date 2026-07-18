@@ -29,9 +29,6 @@ public class EquipmentJpaEntity {
     @Column(name = "type_slug", nullable = false, length = 50)
     private String typeSlug;
 
-    @Column(name = "status_slug", nullable = false, length = 50)
-    private String statusSlug;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "condition_slug", nullable = false, length = 50)
     private Condition conditionSlug;

@@ -19,7 +19,7 @@ public interface EquipmentRepository {
 
     List<Equipment> findByIds(Collection<Long> ids);
 
-    Page<Equipment> findAll(String statusSlug, String typeSlug, String searchText, PageRequest pageRequest);
+    Page<Equipment> findAll(String typeSlug, String searchText, PageRequest pageRequest);
 
     boolean existsByUid(Uid uid);
 

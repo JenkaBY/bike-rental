@@ -8,7 +8,6 @@ public interface SearchEquipmentsUseCase {
     Page<Equipment> execute(SearchEquipmentsQuery query);
 
     record SearchEquipmentsQuery(
-            String statusSlug,
             String typeSlug,
             String searchText,
             PageRequest pageRequest

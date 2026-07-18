@@ -51,10 +51,10 @@ Feature: Equipment type endpoints
       | slug    | name        | description        |
       | SCOOTER | Big Trailer | Heavy-duty trailer |
 
-  Scenario: Update equipment type by slug when no status exists
-    Given the equipment status request is prepared with the following data
-      | slug       | name |
-      | NOT_EXISTS | any  |
+  Scenario: Update equipment type by slug when no type exists
+    Given the 'equipment type' request is prepared with the following data
+      | name |
+      | any  |
     When a PUT request has been made to "/api/equipment-types/NOT_EXISTS" endpoint
     Then the response status is 404
     And the response contains

@@ -72,7 +72,6 @@ public class EquipmentWebSteps {
             softly.assertThat(actual.uid()).as("UID").isEqualTo(expectedResponse.uid());
             softly.assertThat(actual.type()).as("Equipment type slug").isEqualTo(expectedResponse.type());
             softly.assertThat(actual.model()).as("Model").isEqualTo(expectedResponse.model());
-            softly.assertThat(actual.status()).as("Status slug").isEqualTo(expectedResponse.status());
             softly.assertThat(actual.commissionedAt()).as("Commissioned date").isEqualTo(expectedResponse.commissionedAt());
             softly.assertThat(actual.conditionNotes()).as("Condition notes").isEqualTo(expectedResponse.conditionNotes());
             softly.assertThat(actual.condition()).as("Condition slug").isEqualTo(expectedResponse.condition());
@@ -123,7 +122,6 @@ public class EquipmentWebSteps {
                 softly.assertThat(act.uid()).as("UID").isEqualTo(exp.uid());
                 softly.assertThat(act.type()).as("Equipment type slug").isEqualTo(exp.type());
                 softly.assertThat(act.model()).as("Model").isEqualTo(exp.model());
-                softly.assertThat(act.status()).as("Status slug").isEqualTo(exp.status());
                 softly.assertThat(act.commissionedAt()).as("Commissioned date").isEqualTo(exp.commissionedAt());
                 softly.assertThat(act.conditionNotes()).as("Condition notes").isEqualTo(exp.conditionNotes());
                 softly.assertThat(act.condition()).as("Condition slug").isEqualTo(exp.condition());

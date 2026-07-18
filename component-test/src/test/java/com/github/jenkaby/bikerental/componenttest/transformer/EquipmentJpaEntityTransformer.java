@@ -16,7 +16,6 @@ public class EquipmentJpaEntityTransformer {
         entity.setId(Optional.ofNullable(entry.get("id")).map(Long::parseLong).orElse(null));
         entity.setSerialNumber(entry.get("serialNumber"));
         entity.setUid(entry.get("uid"));
-        entity.setStatusSlug(entry.get("status"));
         entity.setTypeSlug(entry.get("type"));
         entity.setModel(entry.getOrDefault("model", null));
         String commissionedAtStr = entry.get("commissionedAt");

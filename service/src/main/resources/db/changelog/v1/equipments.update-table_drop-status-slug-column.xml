@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="equipments.update-table_drop-status-slug-column" author="claude">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="equipments" columnName="status_slug"/>
+        </preConditions>
+
+        <dropColumn tableName="equipments" columnName="status_slug"/>
+    </changeSet>
+
+</databaseChangeLog>

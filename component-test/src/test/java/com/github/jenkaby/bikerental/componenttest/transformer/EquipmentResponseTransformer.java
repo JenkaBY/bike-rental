@@ -18,7 +18,6 @@ public class EquipmentResponseTransformer {
 
         var uid = DataTableHelper.getStringOrNull(entry, "uid");
         var equipmentTypeSlug = DataTableHelper.getStringOrNull(entry, "type");
-        var statusSlug = DataTableHelper.getStringOrNull(entry, "status");
         var model = DataTableHelper.getStringOrNull(entry, "model");
         var commissionedAtString = DataTableHelper.getStringOrNull(entry, "commissionedAt");
         var commissionedAt = commissionedAtString != null ? LocalDate.parse(commissionedAtString) : null;
@@ -30,7 +29,6 @@ public class EquipmentResponseTransformer {
                 entry.get("serialNumber"),
                 uid,
                 equipmentTypeSlug,
-                statusSlug,
                 model,
                 commissionedAt,
                 conditionNotes,

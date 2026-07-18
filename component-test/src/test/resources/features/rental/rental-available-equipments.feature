@@ -8,24 +8,19 @@ Feature: Available equipment query
     And customers exist in the database with the following data
       | id   | phone        | firstName | lastName | email | birthDate | comments |
       | CUS1 | +79995551111 | Alex      | Johnson  | null  | null      | null     |
-    And the following equipment statues exist in the database
-      | slug      | name      | description       | transitions      |
-      | BROKEN    | Broken    | Not Ready to rent | AVAILABLE        |
-      | AVAILABLE | Available | Ready to rent     | BROKEN,RENTED    |
-      | RENTED    | Rented    | In use already    | AVAILABLE,BROKEN |
     And the following equipment types exist in the database
       | slug    | name    | description |
       | BICYCLE | Bicycle | Two-wheeled |
       | SCOOTER | Scooter | Electric    |
     And the following equipment records exist in db
-      | id | serialNumber | uid        | status    | type    | model      | condition |
-      | 1  | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A    | GOOD      |
-      | 2  | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B    | GOOD      |
-      | 3  | EQ-005       | BIKE-003   | AVAILABLE | BICYCLE | Model C    | GOOD      |
-      | 4  | EQ-004       | BIKE-002   | AVAILABLE | BICYCLE | Model C    | BROKEN    |
-      | 5  | EQ-0066      | BIKE-00-   | AVAILABLE | BICYCLE | Model 1    | GOOD      |
-      | 6  | BIKE-00-     | BIKE-0066  | AVAILABLE | BICYCLE | Model 2    | GOOD      |
-      | 7  | EQ-009       | BIKE-009   | RENTED    | BICYCLE | Model 0066 | GOOD      |
+      | id | serialNumber | uid        | type    | model      | condition |
+      | 1  | EQ-001       | BIKE-001   | BICYCLE | Model A    | GOOD      |
+      | 2  | EQ-002       | E-BIKE-001 | SCOOTER | Model B    | GOOD      |
+      | 3  | EQ-005       | BIKE-003   | BICYCLE | Model C    | GOOD      |
+      | 4  | EQ-004       | BIKE-002   | BICYCLE | Model C    | BROKEN    |
+      | 5  | EQ-0066      | BIKE-00-   | BICYCLE | Model 1    | GOOD      |
+      | 6  | BIKE-00-     | BIKE-0066  | BICYCLE | Model 2    | GOOD      |
+      | 7  | EQ-009       | BIKE-009   | BICYCLE | Model 0066 | GOOD      |
     And rentals exist in the database with the following data
       | id | customerId | status | startedAt           | expectedReturnAt    | createdAt           | updatedAt           |
       | 1  | CUS1       | ACTIVE | 2026-01-01T10:00:00 | 2026-01-01T12:00:00 | 2026-01-01T10:00:00 | 2026-01-01T10:00:00 |

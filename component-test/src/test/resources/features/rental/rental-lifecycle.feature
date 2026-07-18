@@ -11,11 +11,6 @@ Feature: Rental Lifecycle Management
       | CUS1 | +79995551111 | Alex      | Johnson  | null              | null       | null     |
       | CUS2 | +79991232222 | John      | Doe      | john@example.com  | 1922-02-22 | null     |
       | CUS3 | +79997773333 | Jamie     | Lee      | jamie@example.com | 1990-05-05 | null     |
-    And the following equipment statues exist in the database
-      | slug      | name      | description    | transitions      |
-      | AVAILABLE | Available | Ready to rent  | RENTED,RESERVED  |
-      | RESERVED  | Reserved  | Ready to rent  | AVAILABLE,RENTED |
-      | RENTED    | Rented    | In use already | AVAILABLE        |
     And the following equipment types exist in the database
       | slug    | name    | description |
       | BICYCLE | Bicycle | Two-wheeled |
@@ -23,10 +18,10 @@ Feature: Rental Lifecycle Management
       | HELMET  | Helmet  | Helmet      |
       | OTHER   | Other   | Other       |
     And the following equipment records exist in db
-      | id | serialNumber | uid            | status    | type    | model   | conditionNotes | condition |
-      | 1  | EQ-001       | BIKE-001       | AVAILABLE | BICYCLE | Model A | Good           | GOOD      |
-      | 2  | EQ-002       | E-BIKE-001     | AVAILABLE | SCOOTER | Model B | Excellent      | GOOD      |
-      | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | HELMET  | Model B | Excellent      | GOOD      |
+      | id | serialNumber | uid            | type    | model   | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001       | BICYCLE | Model A | Good           | GOOD      |
+      | 2  | EQ-002       | E-BIKE-001     | SCOOTER | Model B | Excellent      | GOOD      |
+      | 3  | EQ-003       | HELM-ADULT-001 | HELMET  | Model B | Excellent      | GOOD      |
     And the following account records exist in db
       | id   | accountType | customerId |
       | ACC1 | CUSTOMER    | CUS1       |

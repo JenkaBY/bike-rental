@@ -81,7 +81,6 @@ class EquipmentCommandControllerTest {
                         "SN-101",
                         "uid",
                         "BICYCLE",
-                        "AVAILABLE",
                         null,
                         null,
                         null,
@@ -110,7 +109,6 @@ class EquipmentCommandControllerTest {
                         longSerialNumber,
                         "UID-100",
                         "bicycle",
-                        "available",
                         "ModelA",
                         LocalDate.of(2024, 1, 1),
                         "good",
@@ -132,7 +130,6 @@ class EquipmentCommandControllerTest {
                         "SN-100",
                         longUid,
                         "bicycle",
-                        "available",
                         "ModelA",
                         LocalDate.of(2024, 1, 1),
                         "good",
@@ -155,7 +152,6 @@ class EquipmentCommandControllerTest {
                         "SN-100",
                         "UID-100",
                         typeSlug,
-                        "available",
                         "ModelA",
                         LocalDate.of(2024, 1, 1),
                         "good",
@@ -170,29 +166,6 @@ class EquipmentCommandControllerTest {
                         .andExpect(jsonPath("$.errors[?(@.field=='typeSlug')].code").value(hasItem("validation.not_blank")));
             }
 
-            @ParameterizedTest
-            @ValueSource(strings = {"   ", "\t"})
-            @NullAndEmptySource
-            void whenStatusSlugIsBlank(String statusSlug) throws Exception {
-                EquipmentRequest request = new EquipmentRequest(
-                        "SN-100",
-                        "UID-100",
-                        "bicycle",
-                        statusSlug,
-                        "ModelA",
-                        LocalDate.of(2024, 1, 1),
-                        "good",
-                        "GOOD"
-                );
-
-                mockMvc.perform(post(API_EQUIPMENTS)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.errors[?(@.field=='statusSlug')].code").value(hasItem("validation.not_blank")));
-            }
-
             @Test
             void whenModelExceedsMaxLength() throws Exception {
                 String longModel = "M".repeat(201);
@@ -200,7 +173,6 @@ class EquipmentCommandControllerTest {
                         "SN-100",
                         "UID-100",
                         "bicycle",
-                        "available",
                         longModel,
                         LocalDate.of(2024, 1, 1),
                         "good",
@@ -237,7 +209,6 @@ class EquipmentCommandControllerTest {
                     "SN-100",
                     "UID-100",
                     "BICYCLE",
-                    "AVAILABLE",
                     "ModelA",
                     LocalDate.of(2024, 1, 1),
                     "good",
@@ -286,7 +257,6 @@ class EquipmentCommandControllerTest {
                         longSerialNumber,
                         "UID-200",
                         "bicycle",
-                        "available",
                         "ModelB",
                         LocalDate.of(2024, 2, 1),
                         "good",
@@ -309,7 +279,6 @@ class EquipmentCommandControllerTest {
                         "SN-200",
                         longUid,
                         "bicycle",
-                        "available",
                         "ModelB",
                         LocalDate.of(2024, 2, 1),
                         "good",
@@ -333,7 +302,6 @@ class EquipmentCommandControllerTest {
                         "SN-200",
                         "UID-200",
                         typeSlug,
-                        "available",
                         "ModelB",
                         LocalDate.of(2024, 2, 1),
                         "good",
@@ -348,30 +316,6 @@ class EquipmentCommandControllerTest {
                         .andExpect(jsonPath("$.errors[?(@.field=='typeSlug')].code").value(hasItem("validation.not_blank")));
             }
 
-            @ParameterizedTest
-            @ValueSource(strings = {"   ", "\t"})
-            @NullAndEmptySource
-            void whenStatusSlugIsBlank(String statusSlug) throws Exception {
-                Long equipmentId = 1L;
-                EquipmentRequest request = new EquipmentRequest(
-                        "SN-200",
-                        "UID-200",
-                        "bicycle",
-                        statusSlug,
-                        "ModelB",
-                        LocalDate.of(2024, 2, 1),
-                        "good",
-                        "GOOD"
-                );
-
-                mockMvc.perform(put(API_EQUIPMENTS + "/{id}", equipmentId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.title").value("Bad Request"))
-                        .andExpect(jsonPath("$.errors[?(@.field=='statusSlug')].code").value(hasItem("validation.not_blank")));
-            }
-
             @Test
             void whenModelExceedsMaxLength() throws Exception {
                 Long equipmentId = 1L;
@@ -380,7 +324,6 @@ class EquipmentCommandControllerTest {
                         "SN-200",
                         "UID-200",
                         "bicycle",
-                        "available",
                         longModel,
                         LocalDate.of(2024, 2, 1),
                         "good",
@@ -431,7 +374,6 @@ class EquipmentCommandControllerTest {
                     "SN-200",
                     "UID-200",
                     "SCOOTER",
-                    "MAINTENANCE",
                     "ModelB",
                     LocalDate.of(2024, 2, 1),
                     "fair",

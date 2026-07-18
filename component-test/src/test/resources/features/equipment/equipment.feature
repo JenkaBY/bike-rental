@@ -4,25 +4,19 @@ Feature: Equipment management endpoints
   So that I can create, update, view and search equipment details
 
   Background:
-    Given the following equipment statues exist in the database
-      | slug        | name        | description       | transitions               |
-      | BROKEN      | Broken      | Not Ready to rent | AVAILABLE,MAINTENANCE     |
-      | AVAILABLE   | Available   | Ready to rent     | BROKEN,MAINTENANCE,RENTED |
-      | MAINTENANCE | Maintenance | null              | AVAILABLE                 |
-      | RENTED      | Rented      | In use already    | AVAILABLE,BROKEN          |
-    And the following equipment types exist in the database
+    Given the following equipment types exist in the database
       | slug    | name    | description |
       | BICYCLE | Bicycle | Two-wheeled |
       | SCOOTER | Scooter | Electric    |
     And the following equipment records exist in db
-      | id | serialNumber | uid        | status    | type    | model      | commissionedAt | conditionNotes | condition |
-      | 1  | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A    |                | Good           | GOOD      |
-      | 2  | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B    |                | Excellent      | GOOD      |
-      | 3  | EQ-005       | BIKE-003   | AVAILABLE | BICYCLE | Model C    |                | Fair           | GOOD      |
-      | 4  | EQ-004       | BIKE-002   | BROKEN    | BICYCLE | Model C    | 2026-01-30     | Fair           | BROKEN    |
-      | 5  | EQ-0066      | BIKE-00-   | AVAILABLE | BICYCLE | Model 1    |                | Good           | GOOD      |
-      | 6  | EQ-007       | BIKE-0066  | AVAILABLE | BICYCLE | Model 2    |                | Good           | GOOD      |
-      | 7  | EQ-009       | BIKE-009   | RENTED    | BICYCLE | Model 0066 |                | Good           | GOOD      |
+      | id | serialNumber | uid        | type    | model      | commissionedAt | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001   | BICYCLE | Model A    |                | Good           | GOOD      |
+      | 2  | EQ-002       | E-BIKE-001 | SCOOTER | Model B    |                | Excellent      | GOOD      |
+      | 3  | EQ-005       | BIKE-003   | BICYCLE | Model C    |                | Fair           | GOOD      |
+      | 4  | EQ-004       | BIKE-002   | BICYCLE | Model C    | 2026-01-30     | Fair           | BROKEN    |
+      | 5  | EQ-0066      | BIKE-00-   | BICYCLE | Model 1    |                | Good           | GOOD      |
+      | 6  | EQ-007       | BIKE-0066  | BICYCLE | Model 2    |                | Good           | GOOD      |
+      | 7  | EQ-009       | BIKE-009   | BICYCLE | Model 0066 |                | Good           | GOOD      |
 
   Scenario Outline: Get equipment by ID
     When a GET request has been made to "/api/equipments/{id}" endpoint with
@@ -30,8 +24,8 @@ Feature: Equipment management endpoints
       | <id> |
     Then the response status is 200
     And the equipment response only contains
-      | id   | serialNumber | uid      | status    | type    | model   | commissionedAt | conditionNotes | condition |
-      | <id> | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A |                | Good           | GOOD      |
+      | id   | serialNumber | uid      | type    | model   | commissionedAt | conditionNotes | condition |
+      | <id> | EQ-001       | BIKE-001 | BICYCLE | Model A |                | Good           | GOOD      |
     Examples:
       | id |
       | 1  |
@@ -53,24 +47,14 @@ Feature: Equipment management endpoints
     When a GET request has been made to "/api/equipments" endpoint
     Then the response status is 200
     And the equipment response only contains list of
-      | serialNumber | uid        | status    | type    | model      | commissionedAt | conditionNotes | condition |
-      | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A    |                | Good           | GOOD      |
-      | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B    |                | Excellent      | GOOD      |
-      | EQ-005       | BIKE-003   | AVAILABLE | BICYCLE | Model C    |                | Fair           | GOOD      |
-      | EQ-004       | BIKE-002   | BROKEN    | BICYCLE | Model C    | 2026-01-30     | Fair           | BROKEN    |
-      | EQ-0066      | BIKE-00-   | AVAILABLE | BICYCLE | Model 1    |                | Good           | GOOD      |
-      | EQ-007       | BIKE-0066  | AVAILABLE | BICYCLE | Model 2    |                | Good           | GOOD      |
-      | EQ-009       | BIKE-009   | RENTED    | BICYCLE | Model 0066 |                | Good           | GOOD      |
-
-  Scenario: Search equipments by status and pagination
-    When a GET request has been made to "/api/equipments" endpoint with query parameters
-      | status    | page | size | sort             |
-      | AVAILABLE | 0    | 2    | serialNumber,asc |
-    Then the response status is 200
-    And the equipment response only contains list of
-      | serialNumber | uid      | status    | type    | model   | commissionedAt | conditionNotes | condition |
-      | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A |                | Good           | GOOD      |
-      | EQ-005       | BIKE-003 | AVAILABLE | BICYCLE | Model C |                | Fair           | GOOD      |
+      | serialNumber | uid        | type    | model      | commissionedAt | conditionNotes | condition |
+      | EQ-001       | BIKE-001   | BICYCLE | Model A    |                | Good           | GOOD      |
+      | EQ-002       | E-BIKE-001 | SCOOTER | Model B    |                | Excellent      | GOOD      |
+      | EQ-005       | BIKE-003   | BICYCLE | Model C    |                | Fair           | GOOD      |
+      | EQ-004       | BIKE-002   | BICYCLE | Model C    | 2026-01-30     | Fair           | BROKEN    |
+      | EQ-0066      | BIKE-00-   | BICYCLE | Model 1    |                | Good           | GOOD      |
+      | EQ-007       | BIKE-0066  | BICYCLE | Model 2    |                | Good           | GOOD      |
+      | EQ-009       | BIKE-009   | BICYCLE | Model 0066 |                | Good           | GOOD      |
 
   Scenario: Search equipments by search text in serial number(excluded from search) and model
     When a GET request has been made to "/api/equipments" endpoint with query parameters
@@ -78,8 +62,8 @@ Feature: Equipment management endpoints
       | 0066 |
     Then the response status is 200
     And the equipment response only contains list of
-      | serialNumber | uid       | status    | type    | model      | commissionedAt | conditionNotes | condition |
-      | EQ-009       | BIKE-009  | RENTED    | BICYCLE | Model 0066 |                | Good           | GOOD      |
+      | serialNumber | uid       | type    | model      | commissionedAt | conditionNotes | condition |
+      | EQ-009       | BIKE-009  | BICYCLE | Model 0066 |                | Good           | GOOD      |
 
   Scenario: Search equipments by exact uid
     When a GET request has been made to "/api/equipments" endpoint with query parameters
@@ -87,8 +71,8 @@ Feature: Equipment management endpoints
       | BIKE-0066 |
     Then the response status is 200
     And the equipment response only contains list of
-      | serialNumber | uid       | status    | type    | model   | commissionedAt | conditionNotes | condition |
-      | EQ-007       | BIKE-0066 | AVAILABLE | BICYCLE | Model 2 |                | Good           | GOOD      |
+      | serialNumber | uid       | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-007       | BIKE-0066 | BICYCLE | Model 2 |                | Good           | GOOD      |
 
   Scenario: Search equipments by partial uid returns no match
     When a GET request has been made to "/api/equipments" endpoint with query parameters
@@ -96,7 +80,7 @@ Feature: Equipment management endpoints
       | BIKE-00 |
     Then the response status is 200
     And the equipment response only contains list of
-      | serialNumber | uid | status | type | model | commissionedAt | conditionNotes | condition |
+      | serialNumber | uid | type | model | commissionedAt | conditionNotes | condition |
 
   Scenario: Search equipments by type
     When a GET request has been made to "/api/equipments" endpoint with query parameters
@@ -104,8 +88,8 @@ Feature: Equipment management endpoints
       | SCOOTER |
     Then the response status is 200
     And the equipment response only contains list of
-      | serialNumber | uid        | status | type    | model   | commissionedAt | conditionNotes | condition |
-      | EQ-002       | E-BIKE-001 | RENTED | SCOOTER | Model B |                | Excellent      | GOOD      |
+      | serialNumber | uid        | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-002       | E-BIKE-001 | SCOOTER | Model B |                | Excellent      | GOOD      |
 
   Scenario: Retrieve equipment by serial number
     When a GET request has been made to "/api/equipments/by-serial/{serialNumber}" endpoint with
@@ -113,8 +97,8 @@ Feature: Equipment management endpoints
       | EQ-005         |
     Then the response status is 200
     And the equipment response only contains
-      | serialNumber | uid      | status    | type    | model   | commissionedAt | conditionNotes | condition |
-      | EQ-005       | BIKE-003 | AVAILABLE | BICYCLE | Model C |                | Fair           | GOOD      |
+      | serialNumber | uid      | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-005       | BIKE-003 | BICYCLE | Model C |                | Fair           | GOOD      |
 
   Scenario: Retrieve equipment by uid
     When a GET request has been made to "/api/equipments/by-uid/{uid}" endpoint with
@@ -122,34 +106,34 @@ Feature: Equipment management endpoints
       | E-BIKE-001 |
     Then the response status is 200
     And the equipment response only contains
-      | serialNumber | uid        | status | type    | model   | commissionedAt | conditionNotes | condition |
-      | EQ-002       | E-BIKE-001 | RENTED | SCOOTER | Model B |                | Excellent      | GOOD      |
+      | serialNumber | uid        | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-002       | E-BIKE-001 | SCOOTER | Model B |                | Excellent      | GOOD      |
 
   Scenario Outline: Create new equipment
     Given the equipment request is prepared with the following data
-      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | conditionNotes   | condition   |
-      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
     When a POST request has been made to "/api/equipments" endpoint
     Then the response status is 201
     And the equipment response contains
-      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | conditionNotes   | condition   |
-      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
     And the following equipment record was persisted in db
-      | serialNumber   | uid   | status   | type            | model   | commissionedAt   | conditionNotes   | condition   |
-      | <serialNumber> | <uid> | <status> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
     Examples:
-      | serialNumber | uid          | equipmentType | status      | model   | commissionedAt | conditionNotes | condition |
-      | EQ-999       | BIKE-999-NEW | BICYCLE       | MAINTENANCE | Model X | 2026-01-15     | Excellent      | BROKEN    |
+      | serialNumber | uid          | equipmentType | model   | commissionedAt | conditionNotes | condition |
+      | EQ-999       | BIKE-999-NEW | BICYCLE       | Model X | 2026-01-15     | Excellent      | BROKEN    |
 
   Scenario Outline: Create equipments the same serialNumber
     Given the equipment request is prepared with the following data
-      | serialNumber   | uid      | type    | status    | model   | commissionedAt | condition |
-      | <serialNumber> | unique-1 | BICYCLE | AVAILABLE | Model X | 2026-01-15     | GOOD      |
+      | serialNumber   | uid      | type    | model   | commissionedAt | condition |
+      | <serialNumber> | unique-1 | BICYCLE | Model X | 2026-01-15     | GOOD      |
     When a POST request has been made to "/api/equipments" endpoint
     Then the response status is 201
     Given the equipment request is prepared with the following data
-      | serialNumber   | uid      | type    | status    | model   | commissionedAt | condition |
-      | <serialNumber> | unique-2 | BICYCLE | AVAILABLE | Model X | 2026-01-15     | GOOD      |
+      | serialNumber   | uid      | type    | model   | commissionedAt | condition |
+      | <serialNumber> | unique-2 | BICYCLE | Model X | 2026-01-15     | GOOD      |
     When a POST request has been made to "/api/equipments" endpoint
     Then the response status is 201
     Examples:
@@ -158,89 +142,56 @@ Feature: Equipment management endpoints
 
   Scenario Outline: Update existing equipment
     Given the equipment being updated is
-      | serialNumber | uid          | type    | status | model   | commissionedAt | conditionNotes | condition   |
-      | EQ-TO-UPDATE | EQ-TO-UPDATE | BICYCLE | RENTED | Model C | 2026-01-30     | New            | <condition> |
+      | serialNumber | uid          | type    | model   | commissionedAt | conditionNotes | condition   |
+      | EQ-TO-UPDATE | EQ-TO-UPDATE | BICYCLE | Model C | 2026-01-30     | New            | <condition> |
     And the equipment request is prepared with the following data
-      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | conditionNotes   | condition   |
-      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
     When a PUT request has been made to "/api/equipments/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the equipment response contains
-      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | conditionNotes   | condition   |
-      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
     And the following equipment record was persisted in db
-      | serialNumber   | uid   | status   | type            | model   | commissionedAt   | conditionNotes   | condition   |
-      | <serialNumber> | <uid> | <status> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
     Examples:
-      | serialNumber | uid             | equipmentType | status | model     | commissionedAt | conditionNotes | condition   |
-      | EQ-001-UPD   | BIKE-001-UPDATE | SCOOTER       | BROKEN | Model A++ | 2026-01-20     | Fair           | MAINTENANCE |
+      | serialNumber | uid             | equipmentType | model     | commissionedAt | conditionNotes | condition   |
+      | EQ-001-UPD   | BIKE-001-UPDATE | SCOOTER       | Model A++ | 2026-01-20     | Fair           | MAINTENANCE |
 
   Scenario Outline: Update equipment with the existing serialNumber
     Given the equipment being updated is
-      | serialNumber | uid          | type    | status | model   | commissionedAt | conditionNotes | condition   |
-      | EQ-TO-UPDATE | EQ-TO-UPDATE | BICYCLE | RENTED | Model C | 2026-01-30     | New            | <condition> |
+      | serialNumber | uid          | type    | model   | commissionedAt | conditionNotes | condition   |
+      | EQ-TO-UPDATE | EQ-TO-UPDATE | BICYCLE | Model C | 2026-01-30     | New            | <condition> |
     And the equipment request is prepared with the following data
-      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | conditionNotes   | condition   |
-      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
     When a PUT request has been made to "/api/equipments/{requestedObjectId}" endpoint with context
     Then the response status is 200
     And the equipment response contains
-      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | conditionNotes   | condition   |
-      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
     And the following equipment record was persisted in db
-      | serialNumber   | uid   | status   | type            | model   | commissionedAt   | conditionNotes   | condition   |
-      | <serialNumber> | <uid> | <status> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | conditionNotes   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <conditionNotes> | <condition> |
     Examples:
-      | serialNumber | uid             | equipmentType | status | model     | commissionedAt | conditionNotes | condition   |
-      | EQ-001       | BIKE-001-UPDATE | SCOOTER       | BROKEN | Model A++ | 2026-01-20     | Fair           | MAINTENANCE |
-
-  Scenario Outline: Create new equipment with not existing status
-    Given the equipment request is prepared with the following data
-      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | condition   |
-      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <condition> |
-    When a POST request has been made to "/api/equipments" endpoint
-    Then the response status is 422
-    And the response contains
-      | path     | value                                                                 |
-      | $.title  | Unprocessable Content                                                 |
-      | $.detail | Referenced EquipmentStatus with identifier 'DOES_NOT_EXIST' not found |
-    Examples:
-      | serialNumber | uid          | equipmentType | status         | model   | commissionedAt | condition |
-      | EQ-999       | BIKE-999-NEW | BICYCLE       | DOES_NOT_EXIST | Model X | 2026-01-15     | GOOD      |
+      | serialNumber | uid             | equipmentType | model     | commissionedAt | conditionNotes | condition   |
+      | EQ-001       | BIKE-001-UPDATE | SCOOTER       | Model A++ | 2026-01-20     | Fair           | MAINTENANCE |
 
   Scenario Outline: Create new equipment with not existing condition
     Given the equipment request is prepared with the following data
-      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | condition   |
-      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <condition> |
+      | serialNumber   | uid   | type            | model   | commissionedAt   | condition   |
+      | <serialNumber> | <uid> | <equipmentType> | <model> | <commissionedAt> | <condition> |
     When a POST request has been made to "/api/equipments" endpoint
     Then the response status is 500
     Examples:
-      | serialNumber | uid          | equipmentType | status | model   | commissionedAt | condition |
-      | EQ-999       | BIKE-999-NEW | BICYCLE       | BROKEN | Model X | 2026-01-15     | EXCELLENT |
-
-  Scenario Outline: Update existing equipment with violation of allowed status transitions
-    Given the equipment being updated is
-      | serialNumber | uid          | type    | status      | model   | commissionedAt | condition   |
-      | EQ-TO-UPDATE | EQ-TO-UPDATE | BICYCLE | MAINTENANCE | Model C | 2026-01-30     | <condition> |
-    And the equipment request is prepared with the following data
-      | serialNumber   | uid   | type            | status   | model   | commissionedAt   | condition   |
-      | <serialNumber> | <uid> | <equipmentType> | <status> | <model> | <commissionedAt> | <condition> |
-    When a PUT request has been made to "/api/equipments/{requestedObjectId}" endpoint with context
-    Then the response status is 422
-    And the response contains
-      | path                | value                               |
-      | $.title             | Invalid status transition           |
-      | $.errorCode         | equipment.status.invalid_transition |
-      | $.params.fromStatus | MAINTENANCE                         |
-      | $.params.toStatus   | BROKEN                              |
-    Examples:
-      | serialNumber | uid             | equipmentType | status | model     | commissionedAt | condition |
-      | EQ-001-UPD   | BIKE-001-UPDATE | SCOOTER       | BROKEN | Model A++ | 2026-01-20     | GOOD      |
+      | serialNumber | uid          | equipmentType | model   | commissionedAt | condition |
+      | EQ-999       | BIKE-999-NEW | BICYCLE       | Model X | 2026-01-15     | EXCELLENT |
 
   Scenario Outline: Create new equipment when <violation> unique constraints are violated
     Given the equipment request is prepared with the following data
-      | serialNumber   | uid   | type    | status    | model   | commissionedAt | condition |
-      | <serialNumber> | <uid> | BICYCLE | AVAILABLE | Model X | 2026-01-15     | GOOD      |
+      | serialNumber   | uid   | type    | model   | commissionedAt | condition |
+      | <serialNumber> | <uid> | BICYCLE | Model X | 2026-01-15     | GOOD      |
     When a POST request has been made to "/api/equipments" endpoint
     Then the response status is 409
     And the response contains
@@ -253,8 +204,8 @@ Feature: Equipment management endpoints
 
   Scenario: Update equipment with non-existent ID
     Given the equipment request is prepared with the following data
-      | serialNumber | uid             | type    | status | model   | commissionedAt | condition |
-      | EQ-999-UPD   | BIKE-999-UPDATE | SCOOTER | BROKEN | Model X | 2026-01-20     | GOOD      |
+      | serialNumber | uid             | type    | model   | commissionedAt | condition |
+      | EQ-999-UPD   | BIKE-999-UPDATE | SCOOTER | Model X | 2026-01-20     | GOOD      |
     When a PUT request has been made to "/api/equipments/{id}" endpoint with
       | {id} |
       | 999  |
@@ -270,9 +221,9 @@ Feature: Equipment management endpoints
       | 1,2 |
     Then the response status is 200
     And the batch equipment response contains
-      | serialNumber | uid        | status    | type    | model   | commissionedAt | conditionNotes | condition |
-      | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A |                | Good           | GOOD      |
-      | EQ-002       | E-BIKE-001 | RENTED    | SCOOTER | Model B |                | Excellent      | GOOD      |
+      | serialNumber | uid        | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-001       | BIKE-001   | BICYCLE | Model A |                | Good           | GOOD      |
+      | EQ-002       | E-BIKE-001 | SCOOTER | Model B |                | Excellent      | GOOD      |
 
   Scenario: Batch fetch silently omits non-existent IDs
     When a GET request has been made to "/api/equipments/batch" endpoint with query parameters
@@ -280,8 +231,8 @@ Feature: Equipment management endpoints
       | 1,99,100 |
     Then the response status is 200
     And the batch equipment response contains
-      | serialNumber | uid      | status    | type    | model   | commissionedAt | conditionNotes | condition |
-      | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A |                | Good           | GOOD      |
+      | serialNumber | uid      | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-001       | BIKE-001 | BICYCLE | Model A |                | Good           | GOOD      |
 
   Scenario: Batch fetch returns empty list when no IDs match any record
     When a GET request has been made to "/api/equipments/batch" endpoint with query parameters
@@ -296,5 +247,5 @@ Feature: Equipment management endpoints
       | 4,4,4 |
     Then the response status is 200
     And the batch equipment response contains
-      | serialNumber | uid      | status | type    | model   | commissionedAt | conditionNotes | condition |
-      | EQ-004       | BIKE-002 | BROKEN | BICYCLE | Model C | 2026-01-30     | Fair           | BROKEN    |
+      | serialNumber | uid      | type    | model   | commissionedAt | conditionNotes | condition |
+      | EQ-004       | BIKE-002 | BICYCLE | Model C | 2026-01-30     | Fair           | BROKEN    |

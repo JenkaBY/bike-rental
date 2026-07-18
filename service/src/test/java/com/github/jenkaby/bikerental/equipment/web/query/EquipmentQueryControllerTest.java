@@ -137,8 +137,8 @@ class EquipmentQueryControllerTest {
             var domain = mock(Equipment.class);
 
             var response = mock(EquipmentResponse.class);
-            given(mapper.toSearchQuery(any(), any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
-                    null, null, null, new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, Sort.unsorted())));
+            given(mapper.toSearchQuery(any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
+                    null, null, new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, Sort.unsorted())));
 
             var page = new Page<>(List.of(domain), 1L, new PageRequest(20, 0));
 
@@ -151,8 +151,8 @@ class EquipmentQueryControllerTest {
 
         @Test
         void searchEquipments_empty() throws Exception {
-            given(mapper.toSearchQuery(any(), any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
-                    null, null, null, new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, Sort.unsorted())));
+            given(mapper.toSearchQuery(any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
+                    null, null, new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, Sort.unsorted())));
 
             given(searchUseCase.execute(any())).willReturn(com.github.jenkaby.bikerental.shared.domain.model.vo.Page.empty(new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, Sort.unsorted())));
 
@@ -166,8 +166,8 @@ class EquipmentQueryControllerTest {
         void searchEquipments_withQ_returnsOk() throws Exception {
             var domain = mock(Equipment.class);
             var response = mock(EquipmentResponse.class);
-            given(mapper.toSearchQuery(any(), any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
-                    null, null, "bike", new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, Sort.unsorted())));
+            given(mapper.toSearchQuery(any(), any(), any())).willReturn(new com.github.jenkaby.bikerental.equipment.application.usecase.SearchEquipmentsUseCase.SearchEquipmentsQuery(
+                    null, "bike", new com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest(20, 0, Sort.unsorted())));
 
             var page = new Page<>(List.of(domain), 1L, new PageRequest(20, 0));
 

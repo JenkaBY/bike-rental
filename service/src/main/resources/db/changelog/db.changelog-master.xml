@@ -51,4 +51,8 @@
 
     <include relativeToChangelogFile="true" file="v1/rental_cost_quotes.create-table.xml"/>
 
+    <include relativeToChangelogFile="true" file="v1/equipments.update-table_drop-status-slug-column.xml"/>
+    <include relativeToChangelogFile="true" file="v1/equipment_status_transition_rules.drop-table.xml"/>
+    <include relativeToChangelogFile="true" file="v1/equipment_statuses.drop-table.xml"/>
+
 </databaseChangeLog>
