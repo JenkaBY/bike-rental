@@ -124,7 +124,7 @@ public class WebRequestSteps {
                     if (key.startsWith("{") && key.endsWith("}")) {
                         return;
                     }
-                    uriBuilder.queryParam(key, Aliases.getValueOrDefault(value));
+                    uriBuilder.queryParam(key, resolveAliasList(value));
                 });
         var uri = uriBuilder.build().toUri();
 
@@ -173,6 +173,16 @@ public class WebRequestSteps {
             }
         }
         return response;
+    }
+
+    private static String resolveAliasList(String value) {
+        if (value == null || !value.contains(",")) {
+            return Aliases.getValueOrDefault(value);
+        }
+        return java.util.Arrays.stream(value.split(","))
+                .map(String::trim)
+                .map(Aliases::getValueOrDefault)
+                .collect(java.util.stream.Collectors.joining(","));
     }
 
     @Then("the response status is {int}")

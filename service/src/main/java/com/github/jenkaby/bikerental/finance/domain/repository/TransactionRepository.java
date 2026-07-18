@@ -2,6 +2,7 @@ package com.github.jenkaby.bikerental.finance.domain.repository;
 
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionFilter;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.shared.domain.CustomerRef;
@@ -32,6 +33,8 @@ public interface TransactionRepository {
     Page<Transaction> findTransactionHistory(CustomerRef customerId,
                                              TransactionHistoryFilter filter,
                                              PageRequest pageRequest);
+
+    Page<Transaction> findTransactions(TransactionFilter filter, PageRequest pageRequest);
 
     Map<LedgerType, Money> findLatestLedgerBalancesBefore(CustomerRef customerId, Instant before);
 }

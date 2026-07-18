@@ -55,4 +55,7 @@
     <include relativeToChangelogFile="true" file="v1/equipment_status_transition_rules.drop-table.xml"/>
     <include relativeToChangelogFile="true" file="v1/equipment_statuses.drop-table.xml"/>
 
+    <include relativeToChangelogFile="true" file="v1/finance_transactions.create-index_recorded-at.xml"/>
+    <include relativeToChangelogFile="true" file="v1/finance_transaction_records.create-index_ledger-type.xml"/>
+
 </databaseChangeLog>
