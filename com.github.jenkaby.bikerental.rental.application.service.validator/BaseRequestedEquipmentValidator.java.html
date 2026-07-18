@@ -35,13 +35,13 @@ public class BaseRequestedEquipmentValidator implements RequestedEquipmentValida
 
     @Override
     public void validateSize(List&lt;Long&gt; requestedEquipmentIds, List&lt;EquipmentInfo&gt; equipments) {
-<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (equipments.size() != requestedEquipmentIds.size()) {</span>
-<span class="fc" id="L39">            var foundIds = equipments.stream()</span>
-<span class="fc" id="L40">                    .map(EquipmentInfo::id)</span>
-<span class="fc" id="L41">                    .collect(Collectors.toCollection(ArrayList::new));</span>
-<span class="fc" id="L42">            var missingIds = new ArrayList&lt;&gt;(requestedEquipmentIds);</span>
-<span class="fc" id="L43">            missingIds.removeAll(foundIds);</span>
-<span class="fc" id="L44">            throw new ReferenceNotFoundException(&quot;Equipment&quot;, missingIds.toString());</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        if (equipments.size() != requestedEquipmentIds.size()) {</span>
+<span class="nc" id="L39">            var foundIds = equipments.stream()</span>
+<span class="nc" id="L40">                    .map(EquipmentInfo::id)</span>
+<span class="nc" id="L41">                    .collect(Collectors.toCollection(ArrayList::new));</span>
+<span class="nc" id="L42">            var missingIds = new ArrayList&lt;&gt;(requestedEquipmentIds);</span>
+<span class="nc" id="L43">            missingIds.removeAll(foundIds);</span>
+<span class="nc" id="L44">            throw new ReferenceNotFoundException(&quot;Equipment&quot;, missingIds.toString());</span>
         }
 <span class="fc" id="L46">    }</span>
 

@@ -13,19 +13,19 @@ public class ReferenceNotFoundException extends BikeRentalException {
     private static final String MESSAGE_TEMPLATE = &quot;Referenced %s with identifier '%s' not found&quot;;
 
     public ReferenceNotFoundException(String resourceName, String identifier) {
-<span class="fc" id="L16">        super(MESSAGE_TEMPLATE.formatted(resourceName, identifier), ERROR_CODE, new ResourceDetails(resourceName, identifier));</span>
-<span class="fc" id="L17">    }</span>
+<span class="nc" id="L16">        super(MESSAGE_TEMPLATE.formatted(resourceName, identifier), ERROR_CODE, new ResourceDetails(resourceName, identifier));</span>
+<span class="nc" id="L17">    }</span>
 
     public ReferenceNotFoundException(@NonNull Class&lt;?&gt; cls, @NonNull Object identifier) {
-<span class="fc" id="L20">        this(cls.getSimpleName(), identifier.toString());</span>
-<span class="fc" id="L21">    }</span>
+<span class="nc" id="L20">        this(cls.getSimpleName(), identifier.toString());</span>
+<span class="nc" id="L21">    }</span>
 
     public ResourceDetails getDetails() {
-<span class="fc" id="L24">        return getParams().map(params -&gt; (ResourceDetails) params)</span>
-<span class="pc" id="L25">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected ResourceDetails in exception parameters&quot;));</span>
+<span class="nc" id="L24">        return getParams().map(params -&gt; (ResourceDetails) params)</span>
+<span class="nc" id="L25">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expected ResourceDetails in exception parameters&quot;));</span>
     }
 
-<span class="fc" id="L28">    public record ResourceDetails(String resourceName, String identifier) {</span>
+<span class="nc" id="L28">    public record ResourceDetails(String resourceName, String identifier) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

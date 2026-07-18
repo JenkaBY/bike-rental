@@ -23,11 +23,6 @@ import java.time.LocalDate;
         @Slug
         String typeSlug,
 
-        @Schema(description = &quot;Equipment status slug&quot;, example = &quot;available&quot;)
-        @Slug
-        @Deprecated(forRemoval = true)
-        String statusSlug,
-
         @Schema(description = &quot;Model name&quot;, example = &quot;Trek Marlin 5&quot;)
         @Size(max = 200, message = &quot;Model must not exceed 200 characters&quot;)
         String model,

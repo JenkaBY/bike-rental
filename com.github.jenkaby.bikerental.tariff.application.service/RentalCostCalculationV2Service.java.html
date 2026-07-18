@@ -101,63 +101,69 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
 <span class="fc" id="L101">                    : item.returnAt();</span>
 
 <span class="fc" id="L103">            Duration actualDuration = Duration.between(itemStartAt, itemReturnAt);</span>
+
+<span class="fc" id="L105">            TariffLookupKey lookupKey = new TariffLookupKey(item.equipmentType(), itemPlanned, itemStartAt.toLocalDate());</span>
+<span class="fc" id="L106">            TariffV2 tariff = tariffCache.computeIfAbsent(lookupKey,</span>
+<span class="fc" id="L107">                    key -&gt; selectTariffUseCase.execute(</span>
+<span class="fc" id="L108">                            new SelectTariffV2UseCase.SelectTariffCommand(key.equipmentType(), key.plannedDuration(), key.rentalDate())));</span>
+
+<span class="fc bfc" id="L110" title="All 2 branches covered.">            if (isEarlyReturn(itemIsEstimate, actualDuration)) {</span>
+<span class="fc" id="L111">                breakdowns.add(buildEarlyReturnBreakdown(item, tariff, actualDuration));</span>
+<span class="fc" id="L112">                continue;</span>
+            }
+
             Duration overtime;
             Duration billedDuration;
             Duration forgiven;
 
-<span class="fc" id="L108">            Duration overtimeDur = actualDuration.minus(itemPlanned);</span>
-<span class="fc bfc" id="L109" title="All 4 branches covered.">            if (overtimeDur.isNegative() || overtimeDur.isZero()) {</span>
-<span class="fc" id="L110">                billedDuration = actualDuration;</span>
-<span class="fc" id="L111">                overtime = Duration.ZERO;</span>
-<span class="fc" id="L112">                forgiven = Duration.ZERO;</span>
+<span class="fc" id="L119">            Duration overtimeDur = actualDuration.minus(itemPlanned);</span>
+<span class="fc bfc" id="L120" title="All 4 branches covered.">            if (overtimeDur.isNegative() || overtimeDur.isZero()) {</span>
+<span class="fc" id="L121">                billedDuration = actualDuration;</span>
+<span class="fc" id="L122">                overtime = Duration.ZERO;</span>
+<span class="fc" id="L123">                forgiven = Duration.ZERO;</span>
             } else {
-<span class="fc" id="L114">                overtime = overtimeDur;</span>
-<span class="fc" id="L115">                long overtimeMinutes = overtimeDur.toMinutes();</span>
-<span class="fc" id="L116">                int thresholdMinutes = rentalProperties.getForgivenessThresholdMinutes();</span>
-<span class="fc bfc" id="L117" title="All 2 branches covered.">                if (overtimeMinutes &lt;= thresholdMinutes) {</span>
-<span class="fc" id="L118">                    billedDuration = itemPlanned;</span>
-<span class="fc" id="L119">                    forgiven = overtimeDur;</span>
+<span class="fc" id="L125">                overtime = overtimeDur;</span>
+<span class="fc" id="L126">                long overtimeMinutes = overtimeDur.toMinutes();</span>
+<span class="fc" id="L127">                int thresholdMinutes = rentalProperties.getForgivenessThresholdMinutes();</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">                if (overtimeMinutes &lt;= thresholdMinutes) {</span>
+<span class="fc" id="L129">                    billedDuration = itemPlanned;</span>
+<span class="fc" id="L130">                    forgiven = overtimeDur;</span>
                 } else {
-<span class="fc" id="L121">                    billedDuration = actualDuration;</span>
-<span class="fc" id="L122">                    forgiven = Duration.ZERO;</span>
+<span class="fc" id="L132">                    billedDuration = actualDuration;</span>
+<span class="fc" id="L133">                    forgiven = Duration.ZERO;</span>
                 }
             }
 
-<span class="fc" id="L126">            TariffLookupKey lookupKey = new TariffLookupKey(item.equipmentType(), itemPlanned, itemStartAt.toLocalDate());</span>
-<span class="fc" id="L127">            TariffV2 tariff = tariffCache.computeIfAbsent(lookupKey,</span>
-<span class="fc" id="L128">                    key -&gt; selectTariffUseCase.execute(</span>
-<span class="fc" id="L129">                            new SelectTariffV2UseCase.SelectTariffCommand(key.equipmentType(), key.plannedDuration(), key.rentalDate())));</span>
+<span class="fc" id="L137">            LocalDateTime billingReturnAt = itemStartAt.plus(billedDuration);</span>
+<span class="fc" id="L138">            RentalCostV2 cost = tariff.calculateCost(itemStartAt, billingReturnAt);</span>
 
-<span class="fc" id="L131">            LocalDateTime billingReturnAt = itemStartAt.plus(billedDuration);</span>
-<span class="fc" id="L132">            RentalCostV2 cost = tariff.calculateCost(itemStartAt, billingReturnAt);</span>
-
-<span class="fc" id="L134">            breakdowns.add(new EquipmentCostBreakdownV2(</span>
-<span class="fc" id="L135">                    item.equipmentId(),</span>
-<span class="fc" id="L136">                    item.equipmentType(),</span>
-<span class="fc" id="L137">                    tariff.getId(),</span>
-<span class="fc" id="L138">                    tariff.getName(),</span>
-<span class="fc" id="L139">                    tariff.getPricingType().name(),</span>
-<span class="fc" id="L140">                    cost.totalCost(),</span>
+<span class="fc" id="L140">            breakdowns.add(new EquipmentCostBreakdownV2(</span>
+<span class="fc" id="L141">                    item.equipmentId(),</span>
+<span class="fc" id="L142">                    item.equipmentType(),</span>
+<span class="fc" id="L143">                    tariff.getId(),</span>
+<span class="fc" id="L144">                    tariff.getName(),</span>
+<span class="fc" id="L145">                    tariff.getPricingType().name(),</span>
+<span class="fc" id="L146">                    cost.totalCost(),</span>
                     billedDuration,
                     overtime,
                     forgiven,
-<span class="fc" id="L144">                    cost.calculationBreakdown()</span>
+<span class="fc" id="L150">                    cost.calculationBreakdown()</span>
             ));
-<span class="fc" id="L146">            subtotal = subtotal.add(cost.totalCost());</span>
-<span class="fc" id="L147">        }</span>
+<span class="fc" id="L152">            subtotal = subtotal.add(cost.totalCost());</span>
+<span class="fc" id="L153">        }</span>
 
-<span class="fc" id="L149">        DiscountPercent discount = Optional.ofNullable(command.discount()).orElse(DiscountPercent.zero());</span>
-<span class="fc" id="L150">        Money discountAmount = discount.multiply(subtotal);</span>
-<span class="fc" id="L151">        Money totalCost = subtotal.subtract(discountAmount);</span>
+<span class="fc" id="L155">        DiscountPercent discount = Optional.ofNullable(command.discount()).orElse(DiscountPercent.zero());</span>
+<span class="fc" id="L156">        Money discountAmount = discount.multiply(subtotal);</span>
+<span class="fc" id="L157">        Money totalCost = subtotal.subtract(discountAmount);</span>
 
-<span class="fc bfc" id="L153" title="All 2 branches covered.">        Duration effectiveDuration = anyEstimate</span>
-<span class="fc" id="L154">                ? planned</span>
-<span class="fc" id="L155">                : breakdowns.stream()</span>
-<span class="fc" id="L156">                .map(EquipmentCostBreakdown::billedDuration)</span>
-<span class="fc" id="L157">                .max(Comparator.naturalOrder())</span>
-<span class="fc" id="L158">                .orElse(planned);</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        Duration effectiveDuration = anyEstimate</span>
+<span class="fc" id="L160">                ? planned</span>
+<span class="fc" id="L161">                : breakdowns.stream()</span>
+<span class="fc" id="L162">                .map(EquipmentCostBreakdown::billedDuration)</span>
+<span class="fc" id="L163">                .max(Comparator.naturalOrder())</span>
+<span class="fc" id="L164">                .orElse(planned);</span>
 
-<span class="fc" id="L160">        return new BaseRentalCostCalculationResult(</span>
+<span class="fc" id="L166">        return new BaseRentalCostCalculationResult(</span>
                 breakdowns,
                 subtotal,
                 new DiscountDetail(discount, discountAmount),
@@ -168,7 +174,33 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
         );
     }
 
-<span class="fc" id="L171">    private record TariffLookupKey(String equipmentType, Duration plannedDuration, LocalDate rentalDate) {</span>
+    private boolean isEarlyReturn(boolean itemIsEstimate, Duration actualDuration) {
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        return !itemIsEstimate</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">                &amp;&amp; !actualDuration.isNegative()</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">                &amp;&amp; actualDuration.toMinutes() &lt;= rentalProperties.getEarlyReturnWindowMinutes();</span>
+    }
+
+    private EquipmentCostBreakdownV2 buildEarlyReturnBreakdown(EquipmentCostItemV2 item, TariffV2 tariff, Duration actualDuration) {
+<span class="fc" id="L184">        int windowMinutes = rentalProperties.getEarlyReturnWindowMinutes();</span>
+<span class="fc" id="L185">        int actualMinutes = (int) actualDuration.toMinutes();</span>
+<span class="fc" id="L186">        Money total = Money.zero();</span>
+<span class="fc" id="L187">        String message = String.format(&quot;Early return within %dmin: free = %s&quot;, windowMinutes, total);</span>
+<span class="fc" id="L188">        return new EquipmentCostBreakdownV2(</span>
+<span class="fc" id="L189">                item.equipmentId(),</span>
+<span class="fc" id="L190">                item.equipmentType(),</span>
+<span class="fc" id="L191">                tariff.getId(),</span>
+<span class="fc" id="L192">                tariff.getName(),</span>
+<span class="fc" id="L193">                tariff.getPricingType().name(),</span>
+                total,
+                actualDuration,
+                Duration.ZERO,
+                Duration.ZERO,
+                new BreakdownCostDetails.EarlyReturnFree(message,
+<span class="fc" id="L199">                        new BreakdownCostDetails.EarlyReturnFree.Details(windowMinutes, actualMinutes, total.toString()))</span>
+        );
+    }
+
+<span class="fc" id="L203">    private record TariffLookupKey(String equipmentType, Duration plannedDuration, LocalDate rentalDate) {</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

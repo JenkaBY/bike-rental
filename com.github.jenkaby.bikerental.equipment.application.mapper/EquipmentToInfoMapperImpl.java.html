@@ -36,21 +36,19 @@ public class EquipmentToInfoMapperImpl implements EquipmentToInfoMapper {
 <span class="fc" id="L36">        String uid = null;</span>
 <span class="fc" id="L37">        Long id = null;</span>
 <span class="fc" id="L38">        String typeSlug = null;</span>
-<span class="fc" id="L39">        String statusSlug = null;</span>
-<span class="fc" id="L40">        String model = null;</span>
-<span class="fc" id="L41">        Condition conditionSlug = null;</span>
+<span class="fc" id="L39">        String model = null;</span>
+<span class="fc" id="L40">        Condition conditionSlug = null;</span>
 
-<span class="fc" id="L43">        serialNumber = serialNumberMapper.toString( equipment.getSerialNumber() );</span>
-<span class="fc" id="L44">        uid = uidMapper.toString( equipment.getUid() );</span>
-<span class="fc" id="L45">        id = equipment.getId();</span>
-<span class="fc" id="L46">        typeSlug = equipment.getTypeSlug();</span>
-<span class="fc" id="L47">        statusSlug = equipment.getStatusSlug();</span>
-<span class="fc" id="L48">        model = equipment.getModel();</span>
-<span class="fc" id="L49">        conditionSlug = equipment.getConditionSlug();</span>
+<span class="fc" id="L42">        serialNumber = serialNumberMapper.toString( equipment.getSerialNumber() );</span>
+<span class="fc" id="L43">        uid = uidMapper.toString( equipment.getUid() );</span>
+<span class="fc" id="L44">        id = equipment.getId();</span>
+<span class="fc" id="L45">        typeSlug = equipment.getTypeSlug();</span>
+<span class="fc" id="L46">        model = equipment.getModel();</span>
+<span class="fc" id="L47">        conditionSlug = equipment.getConditionSlug();</span>
 
-<span class="fc" id="L51">        EquipmentInfo equipmentInfo = new EquipmentInfo( id, serialNumber, uid, typeSlug, statusSlug, model, conditionSlug );</span>
+<span class="fc" id="L49">        EquipmentInfo equipmentInfo = new EquipmentInfo( id, serialNumber, uid, typeSlug, model, conditionSlug );</span>
 
-<span class="fc" id="L53">        return equipmentInfo;</span>
+<span class="fc" id="L51">        return equipmentInfo;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

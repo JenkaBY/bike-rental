@@ -23,10 +23,10 @@ public class RentalEquipmentFactory {
     private final RentalCostCommandMapper costCommandMapper;
 
     public List&lt;RentalEquipment&gt; buildAssignedWithCost(@NonNull Rental rental, @NonNull List&lt;EquipmentInfo&gt; newEquipments) {
-<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (newEquipments.isEmpty()) {</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (newEquipments.isEmpty()) {</span>
 <span class="nc" id="L27">            return List.of();</span>
         }
-<span class="fc" id="L29">        var costCommand = costCommandMapper.toEstimateCommand(rental, newEquipments);</span>
+<span class="nc" id="L29">        var costCommand = costCommandMapper.toEstimateCommand(rental, newEquipments);</span>
 <span class="nc" id="L30">        return buildWithCost(newEquipments, costCommand);</span>
     }
 

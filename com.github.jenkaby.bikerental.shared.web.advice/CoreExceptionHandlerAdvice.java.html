@@ -41,25 +41,25 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity&lt;ProblemDetail&gt; handleError(MethodArgumentNotValidException ex) {
-<span class="fc" id="L44">        var fieldErrors = ex.getBindingResult().getFieldErrors().stream()</span>
-<span class="fc" id="L45">                .map(validationErrorMapper::mapFieldError)</span>
-<span class="fc" id="L46">                .toList();</span>
+<span class="nc" id="L44">        var fieldErrors = ex.getBindingResult().getFieldErrors().stream()</span>
+<span class="nc" id="L45">                .map(validationErrorMapper::mapFieldError)</span>
+<span class="nc" id="L46">                .toList();</span>
 
-<span class="fc" id="L48">        var globalErrors = ex.getBindingResult().getGlobalErrors().stream()</span>
-<span class="fc" id="L49">                .map(validationErrorMapper::mapObjectError)</span>
-<span class="fc" id="L50">                .toList();</span>
+<span class="nc" id="L48">        var globalErrors = ex.getBindingResult().getGlobalErrors().stream()</span>
+<span class="nc" id="L49">                .map(validationErrorMapper::mapObjectError)</span>
+<span class="nc" id="L50">                .toList();</span>
 
-<span class="fc" id="L52">        var errors = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L53">        errors.addAll(fieldErrors);</span>
-<span class="fc" id="L54">        errors.addAll(globalErrors);</span>
+<span class="nc" id="L52">        var errors = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L53">        errors.addAll(fieldErrors);</span>
+<span class="nc" id="L54">        errors.addAll(globalErrors);</span>
 
-<span class="fc" id="L56">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, &quot;Validation error&quot;);</span>
-<span class="fc" id="L57">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="fc" id="L58">        body.setProperty(CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L59">        body.setProperty(ERROR_CODE, METHOD_ARGUMENTS_VALIDATION_FAILED);</span>
-<span class="fc" id="L60">        body.setProperty(ERRORS, errors);</span>
-<span class="fc" id="L61">        log.warn(&quot;[correlationId={}] Bad request for MethodArgumentNotValidException&quot;, correlationId, ex);</span>
-<span class="fc" id="L62">        return ResponseEntity.of(body).build();</span>
+<span class="nc" id="L56">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, &quot;Validation error&quot;);</span>
+<span class="nc" id="L57">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L58">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L59">        body.setProperty(ERROR_CODE, METHOD_ARGUMENTS_VALIDATION_FAILED);</span>
+<span class="nc" id="L60">        body.setProperty(ERRORS, errors);</span>
+<span class="nc" id="L61">        log.warn(&quot;[correlationId={}] Bad request for MethodArgumentNotValidException&quot;, correlationId, ex);</span>
+<span class="nc" id="L62">        return ResponseEntity.of(body).build();</span>
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -197,14 +197,14 @@ public class CoreExceptionHandlerAdvice {
 
     @ExceptionHandler(ReferenceNotFoundException.class)
     public ResponseEntity&lt;ProblemDetail&gt; handleReferenceNotFoundException(ReferenceNotFoundException ex) {
-<span class="fc" id="L200">        var correlationId = correlationIdProvider.resolve();</span>
-<span class="fc" id="L201">        var details = ex.getDetails();</span>
-<span class="fc" id="L202">        log.warn(&quot;[correlationId={}] The referenced resource '{}[{}]' not found in DB&quot;, correlationId, details.resourceName(), details.identifier());</span>
-<span class="fc" id="L203">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());</span>
-<span class="fc" id="L204">        body.setProperty(CORRELATION_ID, correlationId);</span>
-<span class="fc" id="L205">        body.setProperty(ERROR_CODE, ex.getErrorCode());</span>
-<span class="fc" id="L206">        body.setProperty(PARAMS, details);</span>
-<span class="fc" id="L207">        return new ResponseEntity&lt;&gt;(body, HttpStatus.UNPROCESSABLE_CONTENT);</span>
+<span class="nc" id="L200">        var correlationId = correlationIdProvider.resolve();</span>
+<span class="nc" id="L201">        var details = ex.getDetails();</span>
+<span class="nc" id="L202">        log.warn(&quot;[correlationId={}] The referenced resource '{}[{}]' not found in DB&quot;, correlationId, details.resourceName(), details.identifier());</span>
+<span class="nc" id="L203">        var body = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());</span>
+<span class="nc" id="L204">        body.setProperty(CORRELATION_ID, correlationId);</span>
+<span class="nc" id="L205">        body.setProperty(ERROR_CODE, ex.getErrorCode());</span>
+<span class="nc" id="L206">        body.setProperty(PARAMS, details);</span>
+<span class="nc" id="L207">        return new ResponseEntity&lt;&gt;(body, HttpStatus.UNPROCESSABLE_CONTENT);</span>
     }
 
     @ExceptionHandler(ResourceConflictException.class)

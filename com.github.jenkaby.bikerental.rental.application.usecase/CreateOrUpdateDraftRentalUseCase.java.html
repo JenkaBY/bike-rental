@@ -13,11 +13,9 @@ public interface CreateOrUpdateDraftRentalUseCase {
 
     Rental execute(UpdateDraftRentalCommand command);
 
-    Rental execute(CreateDraftCommand command);
-
     Rental execute(InitDraftCommand command);
 
-<span class="fc" id="L20">    record UpdateDraftRentalCommand(</span>
+<span class="fc" id="L18">    record UpdateDraftRentalCommand(</span>
             Long rentalId,
             UUID customerId,
             List&lt;Long&gt; equipmentIds,
@@ -29,10 +27,7 @@ public interface CreateOrUpdateDraftRentalUseCase {
     ) {
     }
 
-<span class="fc" id="L32">    record CreateDraftCommand() {</span>
-    }
-
-<span class="fc" id="L35">    record InitDraftCommand(UUID customerId,</span>
+<span class="fc" id="L30">    record InitDraftCommand(UUID customerId,</span>
                             List&lt;Long&gt; equipmentIds,
                             Duration duration,
                             String operatorId,

@@ -32,7 +32,6 @@ public class OpenApiConfig {
         public static final String CUSTOMERS = &quot;Customers&quot;;
         public static final String EQUIPMENT = &quot;Equipments Catalogue&quot;;
         public static final String EQUIPMENT_TYPES = &quot;Equipment Types&quot;;
-        public static final String EQUIPMENT_STATUSES = &quot;Equipment Statuses&quot;;
         public static final String FINANCE = &quot;Finance&quot;;
         public static final String RENTALS = &quot;Rentals&quot;;
         public static final String TARIFFS = &quot;Tariffs&quot;;
@@ -44,188 +43,178 @@ public class OpenApiConfig {
 
     private final Optional&lt;BuildProperties&gt; buildProperties;
 
-<span class="fc" id="L47">    public OpenApiConfig(Optional&lt;BuildProperties&gt; buildProperties) {</span>
-<span class="fc" id="L48">        this.buildProperties = buildProperties;</span>
-<span class="fc" id="L49">    }</span>
+<span class="fc" id="L46">    public OpenApiConfig(Optional&lt;BuildProperties&gt; buildProperties) {</span>
+<span class="fc" id="L47">        this.buildProperties = buildProperties;</span>
+<span class="fc" id="L48">    }</span>
 
     @Bean
     public OpenAPI bikeRentalOpenAPI() {
-<span class="fc" id="L53">        var gitCommit = buildProperties</span>
-<span class="fc" id="L54">                .map(bp -&gt; bp.get(&quot;git.commit&quot;))</span>
-<span class="fc" id="L55">                .orElse(&quot;unknown&quot;);</span>
-<span class="fc" id="L56">        var version = &quot;commit: &quot; + gitCommit;</span>
+<span class="fc" id="L52">        var gitCommit = buildProperties</span>
+<span class="fc" id="L53">                .map(bp -&gt; bp.get(&quot;git.commit&quot;))</span>
+<span class="fc" id="L54">                .orElse(&quot;unknown&quot;);</span>
+<span class="fc" id="L55">        var version = &quot;commit: &quot; + gitCommit;</span>
 
-<span class="fc" id="L58">        var problemDetailSchema = ModelConverters.getInstance()</span>
-<span class="fc" id="L59">                .resolveAsResolvedSchema(new AnnotatedType(ProblemDetail.class)).schema;</span>
-<span class="fc" id="L60">        normalizeAdditionalProperties(problemDetailSchema);</span>
+<span class="fc" id="L57">        var problemDetailSchema = ModelConverters.getInstance()</span>
+<span class="fc" id="L58">                .resolveAsResolvedSchema(new AnnotatedType(ProblemDetail.class)).schema;</span>
+<span class="fc" id="L59">        normalizeAdditionalProperties(problemDetailSchema);</span>
 
-<span class="fc" id="L62">        return new OpenAPI()</span>
-<span class="fc" id="L63">                .components(new Components().addSchemas(ProblemDetail.class.getSimpleName(), problemDetailSchema))</span>
-<span class="fc" id="L64">                .info(new Info()</span>
-<span class="fc" id="L65">                        .title(&quot;Bike Rental API&quot;)</span>
-<span class="fc" id="L66">                        .version(version)</span>
-<span class="fc" id="L67">                        .description(&quot;REST API for the Bike Rental management system&quot;)</span>
-<span class="fc" id="L68">                        .contact(new Contact().name(&quot;Bike Rental Team&quot;)))</span>
-<span class="fc" id="L69">                .tags(List.of(</span>
-<span class="fc" id="L70">                        new Tag().name(Tags.AGREEMENTS).description(&quot;Rental agreement template management&quot;),</span>
-<span class="fc" id="L71">                        new Tag().name(Tags.CUSTOMERS).description(&quot;Customer search and profile management&quot;),</span>
-<span class="fc" id="L72">                        new Tag().name(Tags.EQUIPMENT).description(&quot;Equipment catalog management&quot;),</span>
-<span class="fc" id="L73">                        new Tag().name(Tags.EQUIPMENT_TYPES).description(&quot;Equipment type catalog&quot;),</span>
-<span class="fc" id="L74">                        new Tag().name(Tags.EQUIPMENT_STATUSES).description(&quot;Equipment status catalog and allowed transitions&quot;),</span>
-<span class="fc" id="L75">                        new Tag().name(Tags.FINANCE).description(&quot;Payment recording and history&quot;),</span>
-<span class="fc" id="L76">                        new Tag().name(Tags.RENTALS).description(&quot;Rental lifecycle management&quot;),</span>
-<span class="fc" id="L77">                        new Tag().name(Tags.TARIFFS).description(&quot;Tariff catalog and selection&quot;),</span>
-<span class="fc" id="L78">                        new Tag().name(Tags.USERS).description(&quot;Users and self management&quot;)</span>
+<span class="fc" id="L61">        return new OpenAPI()</span>
+<span class="fc" id="L62">                .components(new Components().addSchemas(ProblemDetail.class.getSimpleName(), problemDetailSchema))</span>
+<span class="fc" id="L63">                .info(new Info()</span>
+<span class="fc" id="L64">                        .title(&quot;Bike Rental API&quot;)</span>
+<span class="fc" id="L65">                        .version(version)</span>
+<span class="fc" id="L66">                        .description(&quot;REST API for the Bike Rental management system&quot;)</span>
+<span class="fc" id="L67">                        .contact(new Contact().name(&quot;Bike Rental Team&quot;)))</span>
+<span class="fc" id="L68">                .tags(List.of(</span>
+<span class="fc" id="L69">                        new Tag().name(Tags.AGREEMENTS).description(&quot;Rental agreement template management&quot;),</span>
+<span class="fc" id="L70">                        new Tag().name(Tags.CUSTOMERS).description(&quot;Customer search and profile management&quot;),</span>
+<span class="fc" id="L71">                        new Tag().name(Tags.EQUIPMENT).description(&quot;Equipment catalog management&quot;),</span>
+<span class="fc" id="L72">                        new Tag().name(Tags.EQUIPMENT_TYPES).description(&quot;Equipment type catalog&quot;),</span>
+<span class="fc" id="L73">                        new Tag().name(Tags.FINANCE).description(&quot;Payment recording and history&quot;),</span>
+<span class="fc" id="L74">                        new Tag().name(Tags.RENTALS).description(&quot;Rental lifecycle management&quot;),</span>
+<span class="fc" id="L75">                        new Tag().name(Tags.TARIFFS).description(&quot;Tariff catalog and selection&quot;),</span>
+<span class="fc" id="L76">                        new Tag().name(Tags.USERS).description(&quot;Users and self management&quot;)</span>
                 ));
     }
 
     private static void normalizeAdditionalProperties(Schema&lt;?&gt; schema) {
-<span class="pc bpc" id="L83" title="1 of 4 branches missed.">        if (schema == null || schema.getProperties() == null) {</span>
-<span class="fc" id="L84">            return;</span>
+<span class="pc bpc" id="L81" title="1 of 4 branches missed.">        if (schema == null || schema.getProperties() == null) {</span>
+<span class="fc" id="L82">            return;</span>
         }
-<span class="fc" id="L86">        schema.getProperties().values().forEach(propertySchema -&gt; {</span>
-<span class="fc bfc" id="L87" title="All 2 branches covered.">            if (propertySchema.getAdditionalProperties() instanceof Schema) {</span>
-<span class="fc" id="L88">                propertySchema.setAdditionalProperties(Boolean.TRUE);</span>
+<span class="fc" id="L84">        schema.getProperties().values().forEach(propertySchema -&gt; {</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            if (propertySchema.getAdditionalProperties() instanceof Schema) {</span>
+<span class="fc" id="L86">                propertySchema.setAdditionalProperties(Boolean.TRUE);</span>
             }
-<span class="fc" id="L90">            normalizeAdditionalProperties(propertySchema);</span>
-<span class="fc" id="L91">        });</span>
-<span class="fc" id="L92">    }</span>
+<span class="fc" id="L88">            normalizeAdditionalProperties(propertySchema);</span>
+<span class="fc" id="L89">        });</span>
+<span class="fc" id="L90">    }</span>
 
     @Bean
     public GroupedOpenApi allGroup() {
-<span class="fc" id="L96">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L97">                .group(&quot;all&quot;)</span>
-<span class="fc" id="L98">                .displayName(&quot;All&quot;)</span>
-<span class="fc" id="L99">                .pathsToMatch(&quot;/api/**&quot;)</span>
-<span class="fc" id="L100">                .build();</span>
+<span class="fc" id="L94">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L95">                .group(&quot;all&quot;)</span>
+<span class="fc" id="L96">                .displayName(&quot;All&quot;)</span>
+<span class="fc" id="L97">                .pathsToMatch(&quot;/api/**&quot;)</span>
+<span class="fc" id="L98">                .build();</span>
     }
 
     @Bean
     public GroupedOpenApi agreementsGroup() {
-<span class="fc" id="L105">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L106">                .group(&quot;agreements&quot;)</span>
-<span class="fc" id="L107">                .displayName(Tags.AGREEMENTS)</span>
-<span class="fc" id="L108">                .pathsToMatch(&quot;/api/agreements/**&quot;, &quot;/api/rentals/*/signatures/**&quot;, &quot;/api/rentals/*/agreement&quot;)</span>
-<span class="fc" id="L109">                .build();</span>
+<span class="fc" id="L103">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L104">                .group(&quot;agreements&quot;)</span>
+<span class="fc" id="L105">                .displayName(Tags.AGREEMENTS)</span>
+<span class="fc" id="L106">                .pathsToMatch(&quot;/api/agreements/**&quot;, &quot;/api/rentals/*/signatures/**&quot;, &quot;/api/rentals/*/agreement&quot;)</span>
+<span class="fc" id="L107">                .build();</span>
     }
 
     @Bean
     public GroupedOpenApi customersGroup() {
-<span class="fc" id="L114">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L115">                .group(&quot;customers&quot;)</span>
-<span class="fc" id="L116">                .displayName(Tags.CUSTOMERS)</span>
-<span class="fc" id="L117">                .pathsToMatch(&quot;/api/customers/**&quot;)</span>
-<span class="fc" id="L118">                .build();</span>
+<span class="fc" id="L112">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L113">                .group(&quot;customers&quot;)</span>
+<span class="fc" id="L114">                .displayName(Tags.CUSTOMERS)</span>
+<span class="fc" id="L115">                .pathsToMatch(&quot;/api/customers/**&quot;)</span>
+<span class="fc" id="L116">                .build();</span>
     }
 
     @Bean
     public GroupedOpenApi equipmentGroup() {
-<span class="fc" id="L123">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L124">                .group(&quot;equipment&quot;)</span>
-<span class="fc" id="L125">                .displayName(Tags.EQUIPMENT)</span>
-<span class="fc" id="L126">                .pathsToMatch(&quot;/api/equipments/**&quot;)</span>
-<span class="fc" id="L127">                .build();</span>
+<span class="fc" id="L121">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L122">                .group(&quot;equipment&quot;)</span>
+<span class="fc" id="L123">                .displayName(Tags.EQUIPMENT)</span>
+<span class="fc" id="L124">                .pathsToMatch(&quot;/api/equipments/**&quot;)</span>
+<span class="fc" id="L125">                .build();</span>
     }
 
     @Bean
     public GroupedOpenApi equipmentTypesGroup() {
-<span class="fc" id="L132">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L133">                .group(&quot;equipment-types&quot;)</span>
-<span class="fc" id="L134">                .displayName(Tags.EQUIPMENT_TYPES)</span>
-<span class="fc" id="L135">                .pathsToMatch(&quot;/api/equipment-types/**&quot;)</span>
-<span class="fc" id="L136">                .build();</span>
-    }
-
-    @Bean
-    public GroupedOpenApi equipmentStatusesGroup() {
-<span class="fc" id="L141">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L142">                .group(&quot;equipment-statuses&quot;)</span>
-<span class="fc" id="L143">                .displayName(Tags.EQUIPMENT_STATUSES)</span>
-<span class="fc" id="L144">                .pathsToMatch(&quot;/api/equipment-statuses/**&quot;)</span>
-<span class="fc" id="L145">                .build();</span>
+<span class="fc" id="L130">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L131">                .group(&quot;equipment-types&quot;)</span>
+<span class="fc" id="L132">                .displayName(Tags.EQUIPMENT_TYPES)</span>
+<span class="fc" id="L133">                .pathsToMatch(&quot;/api/equipment-types/**&quot;)</span>
+<span class="fc" id="L134">                .build();</span>
     }
 
     @Bean
     public GroupedOpenApi financeGroup() {
-<span class="fc" id="L150">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L151">                .group(&quot;finance&quot;)</span>
-<span class="fc" id="L152">                .displayName(Tags.FINANCE)</span>
-<span class="fc" id="L153">                .pathsToMatch(&quot;/api/finance/**&quot;)</span>
-<span class="fc" id="L154">                .build();</span>
+<span class="fc" id="L139">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L140">                .group(&quot;finance&quot;)</span>
+<span class="fc" id="L141">                .displayName(Tags.FINANCE)</span>
+<span class="fc" id="L142">                .pathsToMatch(&quot;/api/finance/**&quot;)</span>
+<span class="fc" id="L143">                .build();</span>
     }
 
     @Bean
     public GroupedOpenApi rentalsGroup() {
-<span class="fc" id="L159">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L160">                .group(&quot;rentals&quot;)</span>
-<span class="fc" id="L161">                .displayName(Tags.RENTALS)</span>
-<span class="fc" id="L162">                .pathsToMatch(&quot;/api/rentals/**&quot;)</span>
-<span class="fc" id="L163">                .build();</span>
+<span class="fc" id="L148">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L149">                .group(&quot;rentals&quot;)</span>
+<span class="fc" id="L150">                .displayName(Tags.RENTALS)</span>
+<span class="fc" id="L151">                .pathsToMatch(&quot;/api/rentals/**&quot;)</span>
+<span class="fc" id="L152">                .build();</span>
     }
 
     @Bean
     public GroupedOpenApi tariffsGroup() {
-<span class="fc" id="L168">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L169">                .group(&quot;tariffs&quot;)</span>
-<span class="fc" id="L170">                .displayName(Tags.TARIFFS)</span>
-<span class="fc" id="L171">                .pathsToMatch(&quot;/api/tariffs/**&quot;)</span>
-<span class="fc" id="L172">                .build();</span>
+<span class="fc" id="L157">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L158">                .group(&quot;tariffs&quot;)</span>
+<span class="fc" id="L159">                .displayName(Tags.TARIFFS)</span>
+<span class="fc" id="L160">                .pathsToMatch(&quot;/api/tariffs/**&quot;)</span>
+<span class="fc" id="L161">                .build();</span>
     }
 
     @Bean
     public GroupedOpenApi identityGroup() {
-<span class="fc" id="L177">        var unauthorizedResponse = new ApiResponse()</span>
-<span class="fc" id="L178">                .description(&quot;Unauthorized — missing or invalid JWT&quot;)</span>
-<span class="fc" id="L179">                .content(new Content().addMediaType(</span>
+<span class="fc" id="L166">        var unauthorizedResponse = new ApiResponse()</span>
+<span class="fc" id="L167">                .description(&quot;Unauthorized — missing or invalid JWT&quot;)</span>
+<span class="fc" id="L168">                .content(new Content().addMediaType(</span>
                         org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-<span class="fc" id="L181">                        new MediaType().schema(new Schema&lt;ProblemDetail&gt;().$ref(&quot;#/components/schemas/ProblemDetail&quot;))</span>
+<span class="fc" id="L170">                        new MediaType().schema(new Schema&lt;ProblemDetail&gt;().$ref(&quot;#/components/schemas/ProblemDetail&quot;))</span>
                 ));
-<span class="fc" id="L183">        var forbiddenResponse = new ApiResponse()</span>
-<span class="fc" id="L184">                .description(&quot;Forbidden — insufficient roles&quot;)</span>
-<span class="fc" id="L185">                .content(new Content().addMediaType(</span>
+<span class="fc" id="L172">        var forbiddenResponse = new ApiResponse()</span>
+<span class="fc" id="L173">                .description(&quot;Forbidden — insufficient roles&quot;)</span>
+<span class="fc" id="L174">                .content(new Content().addMediaType(</span>
                         org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-<span class="fc" id="L187">                        new MediaType().schema(new Schema&lt;ProblemDetail&gt;().$ref(&quot;#/components/schemas/ProblemDetail&quot;))</span>
+<span class="fc" id="L176">                        new MediaType().schema(new Schema&lt;ProblemDetail&gt;().$ref(&quot;#/components/schemas/ProblemDetail&quot;))</span>
                 ));
 
-<span class="fc" id="L190">        return GroupedOpenApi.builder()</span>
-<span class="fc" id="L191">                .group(&quot;identity&quot;)</span>
-<span class="fc" id="L192">                .displayName(Tags.USERS)</span>
-<span class="fc" id="L193">                .pathsToMatch(&quot;/api/auth/**&quot;)</span>
-<span class="fc" id="L194">                .addOperationCustomizer((operation, handlerMethod) -&gt; {</span>
-<span class="nc" id="L195">                    var responses = operation.getResponses();</span>
-<span class="nc bnc" id="L196" title="All 2 branches missed.">                    if (responses == null) {</span>
-<span class="nc" id="L197">                        responses = new ApiResponses();</span>
-<span class="nc" id="L198">                        operation.setResponses(responses);</span>
+<span class="fc" id="L179">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L180">                .group(&quot;identity&quot;)</span>
+<span class="fc" id="L181">                .displayName(Tags.USERS)</span>
+<span class="fc" id="L182">                .pathsToMatch(&quot;/api/auth/**&quot;)</span>
+<span class="fc" id="L183">                .addOperationCustomizer((operation, handlerMethod) -&gt; {</span>
+<span class="nc" id="L184">                    var responses = operation.getResponses();</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                    if (responses == null) {</span>
+<span class="nc" id="L186">                        responses = new ApiResponses();</span>
+<span class="nc" id="L187">                        operation.setResponses(responses);</span>
                     }
-<span class="nc" id="L200">                    responses.putIfAbsent(&quot;401&quot;, unauthorizedResponse);</span>
-<span class="nc" id="L201">                    responses.putIfAbsent(&quot;403&quot;, forbiddenResponse);</span>
-<span class="nc" id="L202">                    return operation;</span>
+<span class="nc" id="L189">                    responses.putIfAbsent(&quot;401&quot;, unauthorizedResponse);</span>
+<span class="nc" id="L190">                    responses.putIfAbsent(&quot;403&quot;, forbiddenResponse);</span>
+<span class="nc" id="L191">                    return operation;</span>
                 })
-<span class="fc" id="L204">                .build();</span>
+<span class="fc" id="L193">                .build();</span>
     }
 
     @Bean
     public GlobalOpenApiCustomizer globalOpenApiCustomizer() {
-<span class="fc" id="L209">        var internalErrorResponse = new ApiResponse()</span>
-<span class="fc" id="L210">                .description(&quot;Internal server error&quot;)</span>
-<span class="fc" id="L211">                .content(new Content().addMediaType(</span>
+<span class="fc" id="L198">        var internalErrorResponse = new ApiResponse()</span>
+<span class="fc" id="L199">                .description(&quot;Internal server error&quot;)</span>
+<span class="fc" id="L200">                .content(new Content().addMediaType(</span>
                         org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-<span class="fc" id="L213">                        new MediaType().schema(new Schema&lt;ProblemDetail&gt;().$ref(&quot;#/components/schemas/ProblemDetail&quot;))</span>
+<span class="fc" id="L202">                        new MediaType().schema(new Schema&lt;ProblemDetail&gt;().$ref(&quot;#/components/schemas/ProblemDetail&quot;))</span>
                 ));
 
-<span class="fc" id="L216">        return openApi -&gt; {</span>
-<span class="nc bnc" id="L217" title="All 2 branches missed.">            if (openApi.getPaths() == null) return;</span>
-<span class="nc" id="L218">            openApi.getPaths().values().forEach(pathItem -&gt;</span>
-<span class="nc" id="L219">                    pathItem.readOperations().forEach(operation -&gt; {</span>
-<span class="nc" id="L220">                        ApiResponses responses = operation.getResponses();</span>
-<span class="nc bnc" id="L221" title="All 2 branches missed.">                        if (responses == null) {</span>
-<span class="nc" id="L222">                            responses = new ApiResponses();</span>
-<span class="nc" id="L223">                            operation.setResponses(responses);</span>
+<span class="fc" id="L205">        return openApi -&gt; {</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">            if (openApi.getPaths() == null) return;</span>
+<span class="nc" id="L207">            openApi.getPaths().values().forEach(pathItem -&gt;</span>
+<span class="nc" id="L208">                    pathItem.readOperations().forEach(operation -&gt; {</span>
+<span class="nc" id="L209">                        ApiResponses responses = operation.getResponses();</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">                        if (responses == null) {</span>
+<span class="nc" id="L211">                            responses = new ApiResponses();</span>
+<span class="nc" id="L212">                            operation.setResponses(responses);</span>
                         }
-<span class="nc" id="L225">                        responses.putIfAbsent(&quot;500&quot;, internalErrorResponse);</span>
-<span class="nc" id="L226">                    })</span>
+<span class="nc" id="L214">                        responses.putIfAbsent(&quot;500&quot;, internalErrorResponse);</span>
+<span class="nc" id="L215">                    })</span>
             );
-<span class="nc" id="L228">        };</span>
+<span class="nc" id="L217">        };</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

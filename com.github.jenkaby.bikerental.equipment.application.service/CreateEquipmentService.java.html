@@ -4,11 +4,8 @@ import com.github.jenkaby.bikerental.equipment.application.mapper.EquipmentComma
 import com.github.jenkaby.bikerental.equipment.application.usecase.CreateEquipmentUseCase;
 import com.github.jenkaby.bikerental.equipment.domain.exception.DuplicateSerialNumberException;
 import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
-import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentStatus;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
-import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentStatusRepository;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
-import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,23 +17,18 @@ class CreateEquipmentService implements CreateEquipmentUseCase {
     private final EquipmentRepository repository;
     private final EquipmentCommandToDomainMapper mapper;
     private final UidMapper uidMapper;
-    private final EquipmentStatusRepository statusRepository;
 
     @Override
     @Transactional
     public Equipment execute(CreateEquipmentCommand command) {
-<span class="fc" id="L28">        var uid = uidMapper.toUid(command.uid());</span>
-<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (repository.existsByUid(uid)) {</span>
-<span class="fc" id="L30">            throw new DuplicateSerialNumberException(Equipment.class, uid.value());</span>
+<span class="fc" id="L24">        var uid = uidMapper.toUid(command.uid());</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        if (repository.existsByUid(uid)) {</span>
+<span class="fc" id="L26">            throw new DuplicateSerialNumberException(Equipment.class, uid.value());</span>
         }
 
-<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (!statusRepository.existsBySlug(command.statusSlug())) {</span>
-<span class="fc" id="L34">            throw new ReferenceNotFoundException(EquipmentStatus.class, command.statusSlug());</span>
-        }
+<span class="fc" id="L29">        Equipment equipment = mapper.toEquipment(command);</span>
 
-<span class="fc" id="L37">        Equipment equipment = mapper.toEquipment(command);</span>
-
-<span class="fc" id="L39">        return repository.save(equipment);</span>
+<span class="fc" id="L31">        return repository.save(equipment);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -6,14 +6,10 @@ import com.github.jenkaby.bikerental.shared.mapper.DiscountMapper;
 import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
-import com.github.jenkaby.bikerental.tariff.EquipmentCostItem;
 import com.github.jenkaby.bikerental.tariff.EquipmentCostItemV2;
-import com.github.jenkaby.bikerental.tariff.RentalCostCalculationCommand;
 import com.github.jenkaby.bikerental.tariff.RentalCostCalculationV2Command;
-import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,128 +30,73 @@ public class BatchCalculationMapperImpl extends BatchCalculationMapper {
     private final InstantMapper instantMapper;
 
     @Autowired
-<span class="fc" id="L37">    public BatchCalculationMapperImpl(MoneyMapper moneyMapper, DurationMapper durationMapper, DiscountMapper discountMapper, InstantMapper instantMapper) {</span>
+<span class="fc" id="L33">    public BatchCalculationMapperImpl(MoneyMapper moneyMapper, DurationMapper durationMapper, DiscountMapper discountMapper, InstantMapper instantMapper) {</span>
 
-<span class="fc" id="L39">        this.moneyMapper = moneyMapper;</span>
-<span class="fc" id="L40">        this.durationMapper = durationMapper;</span>
-<span class="fc" id="L41">        this.discountMapper = discountMapper;</span>
-<span class="fc" id="L42">        this.instantMapper = instantMapper;</span>
-<span class="fc" id="L43">    }</span>
-
-    @Override
-    public RentalCostCalculationCommand toCommand(CostCalculationRequest request) {
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if ( request == null ) {</span>
-<span class="nc" id="L48">            return null;</span>
-        }
-
-<span class="fc" id="L51">        List&lt;EquipmentCostItem&gt; equipments = null;</span>
-<span class="fc" id="L52">        Duration plannedDuration = null;</span>
-<span class="fc" id="L53">        DiscountPercent discount = null;</span>
-<span class="fc" id="L54">        Duration actualDuration = null;</span>
-<span class="fc" id="L55">        Long specialTariffId = null;</span>
-<span class="fc" id="L56">        Money specialPrice = null;</span>
-<span class="fc" id="L57">        LocalDate rentalDate = null;</span>
-
-<span class="fc" id="L59">        equipments = equipmentItemRequestListToEquipmentCostItemList( request.equipments() );</span>
-<span class="fc" id="L60">        plannedDuration = durationMapper.toDuration( request.plannedDurationMinutes() );</span>
-<span class="fc" id="L61">        discount = discountMapper.toDiscount( request.discountPercent() );</span>
-<span class="fc" id="L62">        actualDuration = durationMapper.toDuration( request.actualDurationMinutes() );</span>
-<span class="fc" id="L63">        specialTariffId = request.specialTariffId();</span>
-<span class="fc" id="L64">        specialPrice = moneyMapper.toMoney( request.specialPrice() );</span>
-<span class="fc" id="L65">        rentalDate = request.rentalDate();</span>
-
-<span class="fc" id="L67">        RentalCostCalculationCommand rentalCostCalculationCommand = new RentalCostCalculationCommand( equipments, plannedDuration, actualDuration, discount, specialTariffId, specialPrice, rentalDate );</span>
-
-<span class="fc" id="L69">        return rentalCostCalculationCommand;</span>
-    }
-
-    @Override
-    public EquipmentCostItem toItem(CostCalculationRequest.EquipmentItemRequest item) {
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if ( item == null ) {</span>
-<span class="nc" id="L75">            return null;</span>
-        }
-
-<span class="fc" id="L78">        String equipmentType = null;</span>
-
-<span class="fc" id="L80">        equipmentType = item.equipmentType();</span>
-
-<span class="fc" id="L82">        EquipmentCostItem equipmentCostItem = new EquipmentCostItem( equipmentType );</span>
-
-<span class="fc" id="L84">        return equipmentCostItem;</span>
-    }
+<span class="fc" id="L35">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L36">        this.durationMapper = durationMapper;</span>
+<span class="fc" id="L37">        this.discountMapper = discountMapper;</span>
+<span class="fc" id="L38">        this.instantMapper = instantMapper;</span>
+<span class="fc" id="L39">    }</span>
 
     @Override
     public RentalCostCalculationV2Command toV2Command(CostCalculationV2Request request) {
-<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if ( request == null ) {</span>
-<span class="nc" id="L90">            return null;</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if ( request == null ) {</span>
+<span class="nc" id="L44">            return null;</span>
         }
 
-<span class="fc" id="L93">        Duration plannedDuration = null;</span>
-<span class="fc" id="L94">        DiscountPercent discount = null;</span>
-<span class="fc" id="L95">        List&lt;EquipmentCostItemV2&gt; equipments = null;</span>
-<span class="fc" id="L96">        Long specialTariffId = null;</span>
-<span class="fc" id="L97">        Money specialPrice = null;</span>
-<span class="fc" id="L98">        LocalDateTime startAt = null;</span>
+<span class="fc" id="L47">        Duration plannedDuration = null;</span>
+<span class="fc" id="L48">        DiscountPercent discount = null;</span>
+<span class="fc" id="L49">        List&lt;EquipmentCostItemV2&gt; equipments = null;</span>
+<span class="fc" id="L50">        Long specialTariffId = null;</span>
+<span class="fc" id="L51">        Money specialPrice = null;</span>
+<span class="fc" id="L52">        LocalDateTime startAt = null;</span>
 
-<span class="fc" id="L100">        plannedDuration = durationMapper.toDuration( request.plannedDurationMinutes() );</span>
-<span class="fc" id="L101">        discount = discountMapper.toDiscount( request.discountPercent() );</span>
-<span class="fc" id="L102">        equipments = equipmentItemRequestListToEquipmentCostItemV2List( request.equipments() );</span>
-<span class="fc" id="L103">        specialTariffId = request.specialTariffId();</span>
-<span class="fc" id="L104">        specialPrice = moneyMapper.toMoney( request.specialPrice() );</span>
-<span class="fc" id="L105">        startAt = instantMapper.instantToLocalDateTime( request.startAt() );</span>
+<span class="fc" id="L54">        plannedDuration = durationMapper.toDuration( request.plannedDurationMinutes() );</span>
+<span class="fc" id="L55">        discount = discountMapper.toDiscount( request.discountPercent() );</span>
+<span class="fc" id="L56">        equipments = equipmentItemRequestListToEquipmentCostItemV2List( request.equipments() );</span>
+<span class="fc" id="L57">        specialTariffId = request.specialTariffId();</span>
+<span class="fc" id="L58">        specialPrice = moneyMapper.toMoney( request.specialPrice() );</span>
+<span class="fc" id="L59">        startAt = instantMapper.instantToLocalDateTime( request.startAt() );</span>
 
-<span class="fc" id="L107">        RentalCostCalculationV2Command rentalCostCalculationV2Command = new RentalCostCalculationV2Command( equipments, plannedDuration, discount, specialTariffId, specialPrice, startAt );</span>
+<span class="fc" id="L61">        RentalCostCalculationV2Command rentalCostCalculationV2Command = new RentalCostCalculationV2Command( equipments, plannedDuration, discount, specialTariffId, specialPrice, startAt );</span>
 
-<span class="fc" id="L109">        return rentalCostCalculationV2Command;</span>
+<span class="fc" id="L63">        return rentalCostCalculationV2Command;</span>
     }
 
     @Override
     public EquipmentCostItemV2 toV2Item(CostCalculationV2Request.EquipmentItemRequest item) {
-<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if ( item == null ) {</span>
-<span class="nc" id="L115">            return null;</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if ( item == null ) {</span>
+<span class="nc" id="L69">            return null;</span>
         }
 
-<span class="fc" id="L118">        Long equipmentId = null;</span>
-<span class="fc" id="L119">        String equipmentType = null;</span>
-<span class="fc" id="L120">        LocalDateTime startAt = null;</span>
-<span class="fc" id="L121">        LocalDateTime returnAt = null;</span>
+<span class="fc" id="L72">        Long equipmentId = null;</span>
+<span class="fc" id="L73">        String equipmentType = null;</span>
+<span class="fc" id="L74">        LocalDateTime startAt = null;</span>
+<span class="fc" id="L75">        LocalDateTime returnAt = null;</span>
 
-<span class="fc" id="L123">        equipmentId = item.equipmentId();</span>
-<span class="fc" id="L124">        equipmentType = item.equipmentType();</span>
-<span class="fc" id="L125">        startAt = instantMapper.instantToLocalDateTime( item.startAt() );</span>
-<span class="fc" id="L126">        returnAt = instantMapper.instantToLocalDateTime( item.returnAt() );</span>
+<span class="fc" id="L77">        equipmentId = item.equipmentId();</span>
+<span class="fc" id="L78">        equipmentType = item.equipmentType();</span>
+<span class="fc" id="L79">        startAt = instantMapper.instantToLocalDateTime( item.startAt() );</span>
+<span class="fc" id="L80">        returnAt = instantMapper.instantToLocalDateTime( item.returnAt() );</span>
 
-<span class="fc" id="L128">        Duration plannedDuration = null;</span>
+<span class="fc" id="L82">        Duration plannedDuration = null;</span>
 
-<span class="fc" id="L130">        EquipmentCostItemV2 equipmentCostItemV2 = new EquipmentCostItemV2( equipmentId, equipmentType, startAt, plannedDuration, returnAt );</span>
+<span class="fc" id="L84">        EquipmentCostItemV2 equipmentCostItemV2 = new EquipmentCostItemV2( equipmentId, equipmentType, startAt, plannedDuration, returnAt );</span>
 
-<span class="fc" id="L132">        return equipmentCostItemV2;</span>
-    }
-
-    protected List&lt;EquipmentCostItem&gt; equipmentItemRequestListToEquipmentCostItemList(List&lt;CostCalculationRequest.EquipmentItemRequest&gt; list) {
-<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L137">            return null;</span>
-        }
-
-<span class="fc" id="L140">        List&lt;EquipmentCostItem&gt; list1 = new ArrayList&lt;EquipmentCostItem&gt;( list.size() );</span>
-<span class="fc bfc" id="L141" title="All 2 branches covered.">        for ( CostCalculationRequest.EquipmentItemRequest equipmentItemRequest : list ) {</span>
-<span class="fc" id="L142">            list1.add( toItem( equipmentItemRequest ) );</span>
-<span class="fc" id="L143">        }</span>
-
-<span class="fc" id="L145">        return list1;</span>
+<span class="fc" id="L86">        return equipmentCostItemV2;</span>
     }
 
     protected List&lt;EquipmentCostItemV2&gt; equipmentItemRequestListToEquipmentCostItemV2List(List&lt;CostCalculationV2Request.EquipmentItemRequest&gt; list) {
-<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L150">            return null;</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L91">            return null;</span>
         }
 
-<span class="fc" id="L153">        List&lt;EquipmentCostItemV2&gt; list1 = new ArrayList&lt;EquipmentCostItemV2&gt;( list.size() );</span>
-<span class="fc bfc" id="L154" title="All 2 branches covered.">        for ( CostCalculationV2Request.EquipmentItemRequest equipmentItemRequest : list ) {</span>
-<span class="fc" id="L155">            list1.add( toV2Item( equipmentItemRequest ) );</span>
-<span class="fc" id="L156">        }</span>
+<span class="fc" id="L94">        List&lt;EquipmentCostItemV2&gt; list1 = new ArrayList&lt;EquipmentCostItemV2&gt;( list.size() );</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        for ( CostCalculationV2Request.EquipmentItemRequest equipmentItemRequest : list ) {</span>
+<span class="fc" id="L96">            list1.add( toV2Item( equipmentItemRequest ) );</span>
+<span class="fc" id="L97">        }</span>
 
-<span class="fc" id="L158">        return list1;</span>
+<span class="fc" id="L99">        return list1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

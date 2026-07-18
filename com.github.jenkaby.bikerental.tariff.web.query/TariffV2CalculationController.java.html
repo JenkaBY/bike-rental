@@ -4,7 +4,6 @@ import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.tariff.TariffV2Facade;
 import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostQuoteUseCase;
-import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostQuoteResponse;
@@ -27,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Validated
-<span class="fc" id="L30">@Slf4j</span>
+<span class="fc" id="L29">@Slf4j</span>
 @RestController
 @RequestMapping(path = &quot;/api/tariffs&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = OpenApiConfig.Tags.TARIFFS, description = &quot;Tariff V2 API&quot;)
@@ -38,31 +37,11 @@ public class TariffV2CalculationController {
     private final BatchCalculationMapper requestMapper;
 
     TariffV2CalculationController(TariffV2Facade tariffV2Facade, RentalCostQuoteUseCase rentalCostQuoteUseCase,
-<span class="fc" id="L41">                                  BatchCalculationMapper requestMapper) {</span>
-<span class="fc" id="L42">        this.tariffV2Facade = tariffV2Facade;</span>
-<span class="fc" id="L43">        this.rentalCostQuoteUseCase = rentalCostQuoteUseCase;</span>
-<span class="fc" id="L44">        this.requestMapper = requestMapper;</span>
-<span class="fc" id="L45">    }</span>
-
-    @PostMapping(&quot;/calculate&quot;)
-    @Operation(summary = &quot;Calculate rental cost for multiple equipment items&quot;,
-            deprecated = true,
-            description = &quot;Supports normal mode (auto-select tariffs, apply discount) and SPECIAL mode (fixed group price)&quot;)
-    @ApiResponses({
-            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Cost calculation result&quot;,
-                    content = @Content(schema = @Schema(implementation = CostCalculationResponse.class))),
-            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Validation error&quot;,
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No suitable tariff found for an equipment type&quot;,
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    })
-    @Deprecated(forRemoval = true)
-    public ResponseEntity&lt;CostCalculationResponse&gt; calculateCost(@Valid @RequestBody CostCalculationRequest request) {
-<span class="fc" id="L61">        log.info(&quot;[POST] Batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
-<span class="fc" id="L62">        var command = requestMapper.toCommand(request);</span>
-<span class="fc" id="L63">        var result = tariffV2Facade.calculateRentalCost(command);</span>
-<span class="fc" id="L64">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
-    }
+<span class="fc" id="L40">                                  BatchCalculationMapper requestMapper) {</span>
+<span class="fc" id="L41">        this.tariffV2Facade = tariffV2Facade;</span>
+<span class="fc" id="L42">        this.rentalCostQuoteUseCase = rentalCostQuoteUseCase;</span>
+<span class="fc" id="L43">        this.requestMapper = requestMapper;</span>
+<span class="fc" id="L44">    }</span>
 
     @PutMapping(&quot;/calculations&quot;)
     @Operation(summary = &quot;Calculate V2 rental cost with per-equipment return timestamps&quot;,
@@ -76,10 +55,10 @@ public class TariffV2CalculationController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;CostCalculationResponse&gt; costCalculations(@Valid @RequestBody CostCalculationV2Request request) {
-<span class="fc" id="L79">        log.info(&quot;[PUT] V2 batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
-<span class="fc" id="L80">        var command = requestMapper.toV2Command(request);</span>
-<span class="fc" id="L81">        var result = tariffV2Facade.calculateRentalCostV2(command);</span>
-<span class="fc" id="L82">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
+<span class="fc" id="L58">        log.info(&quot;[PUT] V2 batch cost calculation for {} equipment item(s)&quot;, request.equipments().size());</span>
+<span class="fc" id="L59">        var command = requestMapper.toV2Command(request);</span>
+<span class="fc" id="L60">        var result = tariffV2Facade.calculateRentalCostV2(command);</span>
+<span class="fc" id="L61">        return ResponseEntity.ok(requestMapper.toResponse(result));</span>
     }
 
     @PostMapping(&quot;/quotes&quot;)
@@ -95,10 +74,10 @@ public class TariffV2CalculationController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;CostQuoteResponse&gt; createQuote(@Valid @RequestBody CostCalculationV2Request request) {
-<span class="fc" id="L98">        log.info(&quot;[POST] Creating cost quote for {} equipment item(s)&quot;, request.equipments().size());</span>
-<span class="fc" id="L99">        var command = requestMapper.toV2Command(request);</span>
-<span class="fc" id="L100">        var quote = rentalCostQuoteUseCase.createQuote(command);</span>
-<span class="fc" id="L101">        return ResponseEntity.status(HttpStatus.CREATED).body(requestMapper.toQuoteResponse(quote));</span>
+<span class="fc" id="L77">        log.info(&quot;[POST] Creating cost quote for {} equipment item(s)&quot;, request.equipments().size());</span>
+<span class="fc" id="L78">        var command = requestMapper.toV2Command(request);</span>
+<span class="fc" id="L79">        var quote = rentalCostQuoteUseCase.createQuote(command);</span>
+<span class="fc" id="L80">        return ResponseEntity.status(HttpStatus.CREATED).body(requestMapper.toQuoteResponse(quote));</span>
     }
 
     @DeleteMapping(&quot;/quotes/{id}&quot;)
@@ -110,9 +89,9 @@ public class TariffV2CalculationController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity&lt;Void&gt; deleteQuote(@PathVariable(&quot;id&quot;) UUID id) {
-<span class="fc" id="L113">        log.info(&quot;[DELETE] Deleting cost quote {}&quot;, id);</span>
-<span class="fc" id="L114">        rentalCostQuoteUseCase.deleteQuote(new QuoteRef(id));</span>
-<span class="fc" id="L115">        return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L92">        log.info(&quot;[DELETE] Deleting cost quote {}&quot;, id);</span>
+<span class="fc" id="L93">        rentalCostQuoteUseCase.deleteQuote(new QuoteRef(id));</span>
+<span class="fc" id="L94">        return ResponseEntity.noContent().build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

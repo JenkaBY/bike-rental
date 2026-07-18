@@ -7,14 +7,12 @@ import com.github.jenkaby.bikerental.shared.domain.model.Condition;
         String serialNumber,
         String uid,
         String typeSlug,
-        @Deprecated(forRemoval = true)
-        String statusSlug,
         String model,
         Condition conditionSlug
 ) {
 
     public boolean isAvailableForRental() {
-<span class="fc bfc" id="L17" title="All 2 branches covered.">        return conditionSlug == Condition.GOOD;</span>
+<span class="fc bfc" id="L15" title="All 2 branches covered.">        return conditionSlug == Condition.GOOD;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

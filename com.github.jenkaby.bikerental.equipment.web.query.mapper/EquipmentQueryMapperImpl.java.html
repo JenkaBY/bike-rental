@@ -40,65 +40,61 @@ public class EquipmentQueryMapperImpl implements EquipmentQueryMapper {
 <span class="nc" id="L40">            return null;</span>
         }
 
-<span class="fc" id="L43">        String status = null;</span>
-<span class="fc" id="L44">        String type = null;</span>
-<span class="fc" id="L45">        String conditionNotes = null;</span>
-<span class="fc" id="L46">        String condition = null;</span>
-<span class="fc" id="L47">        Long id = null;</span>
-<span class="fc" id="L48">        String serialNumber = null;</span>
-<span class="fc" id="L49">        String uid = null;</span>
-<span class="fc" id="L50">        String model = null;</span>
-<span class="fc" id="L51">        LocalDate commissionedAt = null;</span>
+<span class="fc" id="L43">        String type = null;</span>
+<span class="fc" id="L44">        String conditionNotes = null;</span>
+<span class="fc" id="L45">        String condition = null;</span>
+<span class="fc" id="L46">        Long id = null;</span>
+<span class="fc" id="L47">        String serialNumber = null;</span>
+<span class="fc" id="L48">        String uid = null;</span>
+<span class="fc" id="L49">        String model = null;</span>
+<span class="fc" id="L50">        LocalDate commissionedAt = null;</span>
 
-<span class="fc" id="L53">        status = equipment.getStatusSlug();</span>
-<span class="fc" id="L54">        type = equipment.getTypeSlug();</span>
-<span class="fc" id="L55">        conditionNotes = equipment.getCondition();</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if ( equipment.getConditionSlug() != null ) {</span>
-<span class="fc" id="L57">            condition = equipment.getConditionSlug().name();</span>
+<span class="fc" id="L52">        type = equipment.getTypeSlug();</span>
+<span class="fc" id="L53">        conditionNotes = equipment.getCondition();</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if ( equipment.getConditionSlug() != null ) {</span>
+<span class="fc" id="L55">            condition = equipment.getConditionSlug().name();</span>
         }
-<span class="fc" id="L59">        id = equipment.getId();</span>
-<span class="fc" id="L60">        serialNumber = serialNumberMapper.toString( equipment.getSerialNumber() );</span>
-<span class="fc" id="L61">        uid = uidMapper.toString( equipment.getUid() );</span>
-<span class="fc" id="L62">        model = equipment.getModel();</span>
-<span class="fc" id="L63">        commissionedAt = equipment.getCommissionedAt();</span>
+<span class="fc" id="L57">        id = equipment.getId();</span>
+<span class="fc" id="L58">        serialNumber = serialNumberMapper.toString( equipment.getSerialNumber() );</span>
+<span class="fc" id="L59">        uid = uidMapper.toString( equipment.getUid() );</span>
+<span class="fc" id="L60">        model = equipment.getModel();</span>
+<span class="fc" id="L61">        commissionedAt = equipment.getCommissionedAt();</span>
 
-<span class="fc" id="L65">        EquipmentResponse equipmentResponse = new EquipmentResponse( id, serialNumber, uid, type, status, model, commissionedAt, conditionNotes, condition );</span>
+<span class="fc" id="L63">        EquipmentResponse equipmentResponse = new EquipmentResponse( id, serialNumber, uid, type, model, commissionedAt, conditionNotes, condition );</span>
 
-<span class="fc" id="L67">        return equipmentResponse;</span>
+<span class="fc" id="L65">        return equipmentResponse;</span>
     }
 
     @Override
     public List&lt;EquipmentResponse&gt; toResponses(List&lt;Equipment&gt; equipments) {
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if ( equipments == null ) {</span>
-<span class="nc" id="L73">            return null;</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        if ( equipments == null ) {</span>
+<span class="nc" id="L71">            return null;</span>
         }
 
-<span class="fc" id="L76">        List&lt;EquipmentResponse&gt; list = new ArrayList&lt;EquipmentResponse&gt;( equipments.size() );</span>
-<span class="fc bfc" id="L77" title="All 2 branches covered.">        for ( Equipment equipment : equipments ) {</span>
-<span class="fc" id="L78">            list.add( toResponse( equipment ) );</span>
-<span class="fc" id="L79">        }</span>
+<span class="fc" id="L74">        List&lt;EquipmentResponse&gt; list = new ArrayList&lt;EquipmentResponse&gt;( equipments.size() );</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        for ( Equipment equipment : equipments ) {</span>
+<span class="fc" id="L76">            list.add( toResponse( equipment ) );</span>
+<span class="fc" id="L77">        }</span>
 
-<span class="fc" id="L81">        return list;</span>
+<span class="fc" id="L79">        return list;</span>
     }
 
     @Override
-    public SearchEquipmentsUseCase.SearchEquipmentsQuery toSearchQuery(String status, String type, String searchText, Pageable pageable) {
-<span class="pc bpc" id="L86" title="1 of 8 branches missed.">        if ( status == null &amp;&amp; type == null &amp;&amp; searchText == null &amp;&amp; pageable == null ) {</span>
-<span class="nc" id="L87">            return null;</span>
+    public SearchEquipmentsUseCase.SearchEquipmentsQuery toSearchQuery(String type, String searchText, Pageable pageable) {
+<span class="pc bpc" id="L84" title="1 of 6 branches missed.">        if ( type == null &amp;&amp; searchText == null &amp;&amp; pageable == null ) {</span>
+<span class="nc" id="L85">            return null;</span>
         }
 
-<span class="fc" id="L90">        String statusSlug = null;</span>
-<span class="fc" id="L91">        statusSlug = status;</span>
-<span class="fc" id="L92">        String typeSlug = null;</span>
-<span class="fc" id="L93">        typeSlug = type;</span>
-<span class="fc" id="L94">        String searchText1 = null;</span>
-<span class="fc" id="L95">        searchText1 = searchText;</span>
-<span class="fc" id="L96">        PageRequest pageRequest = null;</span>
-<span class="fc" id="L97">        pageRequest = pageMapper.toPageRequest( pageable );</span>
+<span class="fc" id="L88">        String typeSlug = null;</span>
+<span class="fc" id="L89">        typeSlug = type;</span>
+<span class="fc" id="L90">        String searchText1 = null;</span>
+<span class="fc" id="L91">        searchText1 = searchText;</span>
+<span class="fc" id="L92">        PageRequest pageRequest = null;</span>
+<span class="fc" id="L93">        pageRequest = pageMapper.toPageRequest( pageable );</span>
 
-<span class="fc" id="L99">        SearchEquipmentsUseCase.SearchEquipmentsQuery searchEquipmentsQuery = new SearchEquipmentsUseCase.SearchEquipmentsQuery( statusSlug, typeSlug, searchText1, pageRequest );</span>
+<span class="fc" id="L95">        SearchEquipmentsUseCase.SearchEquipmentsQuery searchEquipmentsQuery = new SearchEquipmentsUseCase.SearchEquipmentsQuery( typeSlug, searchText1, pageRequest );</span>
 
-<span class="fc" id="L101">        return searchEquipmentsQuery;</span>
+<span class="fc" id="L97">        return searchEquipmentsQuery;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

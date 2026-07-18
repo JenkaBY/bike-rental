@@ -206,12 +206,12 @@ public class Rental {
 <span class="fc" id="L206">    }</span>
 
     public List&lt;Long&gt; getNewEquipmentIds(Set&lt;Long&gt; incomingIds) {
-<span class="fc" id="L209">        var existingIds = equipments.stream()</span>
-<span class="fc" id="L210">                .map(RentalEquipment::getEquipmentId)</span>
-<span class="fc" id="L211">                .collect(Collectors.toSet());</span>
-<span class="fc" id="L212">        return incomingIds.stream()</span>
-<span class="pc bpc" id="L213" title="1 of 2 branches missed.">                .filter(id -&gt; !existingIds.contains(id))</span>
-<span class="fc" id="L214">                .toList();</span>
+<span class="nc" id="L209">        var existingIds = equipments.stream()</span>
+<span class="nc" id="L210">                .map(RentalEquipment::getEquipmentId)</span>
+<span class="nc" id="L211">                .collect(Collectors.toSet());</span>
+<span class="nc" id="L212">        return incomingIds.stream()</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">                .filter(id -&gt; !existingIds.contains(id))</span>
+<span class="nc" id="L214">                .toList();</span>
     }
 
     public void replaceEquipments(List&lt;RentalEquipment&gt; toAdd, Set&lt;Long&gt; incomingIds) {

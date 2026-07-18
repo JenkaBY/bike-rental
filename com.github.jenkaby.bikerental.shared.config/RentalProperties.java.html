@@ -18,19 +18,30 @@ import java.time.Duration;
 ) {
 <span class="fc" id="L19">    public record ForgivenessProperties(</span>
             @NotNull
-            Duration overtimeDuration
+            Duration overtimeDuration,
+
+            @NotNull
+            Duration earlyReturnWindow
     ) {
         public int overtimeDurationMinutes() {
-<span class="fc" id="L24">            return (int) overtimeDuration.toMinutes();</span>
+<span class="fc" id="L27">            return (int) overtimeDuration.toMinutes();</span>
+        }
+
+        public int earlyReturnWindowMinutes() {
+<span class="fc" id="L31">            return (int) earlyReturnWindow.toMinutes();</span>
         }
     }
 
     public int getForgivenessThresholdMinutes() {
-<span class="fc" id="L29">        return forgiveness.overtimeDurationMinutes();</span>
+<span class="fc" id="L36">        return forgiveness.overtimeDurationMinutes();</span>
+    }
+
+    public int getEarlyReturnWindowMinutes() {
+<span class="fc" id="L40">        return forgiveness.earlyReturnWindowMinutes();</span>
     }
 
     public int getTimeIncrementMinutes() {
-<span class="nc" id="L33">        return (int) timeIncrement.toMinutes();</span>
+<span class="nc" id="L44">        return (int) timeIncrement.toMinutes();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

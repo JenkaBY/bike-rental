@@ -3,7 +3,6 @@
 import com.github.jenkaby.bikerental.shared.domain.QuoteRef;
 import com.github.jenkaby.bikerental.tariff.application.mapper.TariffV2ToInfoMapper;
 import com.github.jenkaby.bikerental.tariff.application.usecase.GetTariffV2ByIdUseCase;
-import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostCalculationUseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostCalculationV2UseCase;
 import com.github.jenkaby.bikerental.tariff.application.usecase.RentalCostQuoteUseCase;
 import org.springframework.stereotype.Service;
@@ -15,47 +14,38 @@ class TariffV2FacadeImpl implements TariffV2Facade {
 
     private final GetTariffV2ByIdUseCase getTariffV2ByIdUseCase;
     private final TariffV2ToInfoMapper tariffV2ToInfoMapper;
-    private final RentalCostCalculationUseCase rentalCostCalculationUseCase;
     private final RentalCostCalculationV2UseCase rentalCostCalculationV2UseCase;
     private final RentalCostQuoteUseCase rentalCostQuoteUseCase;
 
     TariffV2FacadeImpl(GetTariffV2ByIdUseCase getTariffV2ByIdUseCase,
                        TariffV2ToInfoMapper tariffV2ToInfoMapper,
-                       RentalCostCalculationUseCase rentalCostCalculationUseCase,
                        RentalCostCalculationV2UseCase rentalCostCalculationV2UseCase,
-<span class="fc" id="L26">                       RentalCostQuoteUseCase rentalCostQuoteUseCase) {</span>
-<span class="fc" id="L27">        this.getTariffV2ByIdUseCase = getTariffV2ByIdUseCase;</span>
-<span class="fc" id="L28">        this.tariffV2ToInfoMapper = tariffV2ToInfoMapper;</span>
-<span class="fc" id="L29">        this.rentalCostCalculationUseCase = rentalCostCalculationUseCase;</span>
-<span class="fc" id="L30">        this.rentalCostCalculationV2UseCase = rentalCostCalculationV2UseCase;</span>
-<span class="fc" id="L31">        this.rentalCostQuoteUseCase = rentalCostQuoteUseCase;</span>
-<span class="fc" id="L32">    }</span>
+<span class="fc" id="L23">                       RentalCostQuoteUseCase rentalCostQuoteUseCase) {</span>
+<span class="fc" id="L24">        this.getTariffV2ByIdUseCase = getTariffV2ByIdUseCase;</span>
+<span class="fc" id="L25">        this.tariffV2ToInfoMapper = tariffV2ToInfoMapper;</span>
+<span class="fc" id="L26">        this.rentalCostCalculationV2UseCase = rentalCostCalculationV2UseCase;</span>
+<span class="fc" id="L27">        this.rentalCostQuoteUseCase = rentalCostQuoteUseCase;</span>
+<span class="fc" id="L28">    }</span>
 
     @Override
     public Optional&lt;TariffV2Info&gt; findById(Long tariffId) {
-<span class="nc" id="L36">        return getTariffV2ByIdUseCase.execute(tariffId)</span>
-<span class="nc" id="L37">                .map(tariffV2ToInfoMapper::toTariffV2Info);</span>
-    }
-
-    @Deprecated(forRemoval = true)
-    @Override
-    public RentalCostCalculationResult calculateRentalCost(RentalCostCalculationCommand command) {
-<span class="fc" id="L43">        return rentalCostCalculationUseCase.execute(command);</span>
+<span class="nc" id="L32">        return getTariffV2ByIdUseCase.execute(tariffId)</span>
+<span class="nc" id="L33">                .map(tariffV2ToInfoMapper::toTariffV2Info);</span>
     }
 
     @Override
     public RentalCostCalculationResult calculateRentalCostV2(RentalCostCalculationV2Command command) {
-<span class="fc" id="L48">        return rentalCostCalculationV2UseCase.execute(command);</span>
+<span class="fc" id="L38">        return rentalCostCalculationV2UseCase.execute(command);</span>
     }
 
     @Override
     public RentalCostQuote getQuote(QuoteRef quoteId) {
-<span class="fc" id="L53">        return rentalCostQuoteUseCase.getQuote(quoteId);</span>
+<span class="fc" id="L43">        return rentalCostQuoteUseCase.getQuote(quoteId);</span>
     }
 
     @Override
     public RentalCostQuote consumeQuote(QuoteRef quoteId) {
-<span class="fc" id="L58">        return rentalCostQuoteUseCase.consumeQuote(quoteId);</span>
+<span class="fc" id="L48">        return rentalCostQuoteUseCase.consumeQuote(quoteId);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

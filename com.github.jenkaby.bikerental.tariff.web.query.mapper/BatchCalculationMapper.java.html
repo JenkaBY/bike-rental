@@ -5,7 +5,6 @@ import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import com.github.jenkaby.bikerental.tariff.*;
-import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostQuoteResponse;
@@ -15,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(uses = {MoneyMapper.class, DurationMapper.class, DiscountMapper.class, InstantMapper.class,
         CalculationBreakdownMapper.class})
-<span class="fc" id="L18">public abstract class BatchCalculationMapper {</span>
+<span class="fc" id="L17">public abstract class BatchCalculationMapper {</span>
 
     private MoneyMapper moneyMapper;
     private DurationMapper durationMapper;
@@ -24,32 +23,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 
     @Autowired
     public void setDiscountMapper(DiscountDetailMapper discountMapper) {
-<span class="fc" id="L27">        this.discountMapper = discountMapper;</span>
-<span class="fc" id="L28">    }</span>
+<span class="fc" id="L26">        this.discountMapper = discountMapper;</span>
+<span class="fc" id="L27">    }</span>
 
     @Autowired
     public void setBreakdownMapper(CalculationBreakdownMapper breakdownMapper) {
-<span class="fc" id="L32">        this.breakdownMapper = breakdownMapper;</span>
-<span class="fc" id="L33">    }</span>
+<span class="fc" id="L31">        this.breakdownMapper = breakdownMapper;</span>
+<span class="fc" id="L32">    }</span>
 
     @Autowired
     public void setMoneyMapper(MoneyMapper moneyMapper) {
-<span class="fc" id="L37">        this.moneyMapper = moneyMapper;</span>
-<span class="fc" id="L38">    }</span>
+<span class="fc" id="L36">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L37">    }</span>
 
     @Autowired
     public void setDurationMapper(DurationMapper durationMapper) {
-<span class="fc" id="L42">        this.durationMapper = durationMapper;</span>
-<span class="fc" id="L43">    }</span>
-
-    @Mapping(target = &quot;equipments&quot;, source = &quot;equipments&quot;)
-    @Mapping(target = &quot;plannedDuration&quot;, source = &quot;plannedDurationMinutes&quot;)
-    @Mapping(target = &quot;discount&quot;, source = &quot;discountPercent&quot;)
-    @Mapping(target = &quot;actualDuration&quot;, source = &quot;actualDurationMinutes&quot;)
-    public abstract RentalCostCalculationCommand toCommand(CostCalculationRequest request);
-
-
-    public abstract EquipmentCostItem toItem(CostCalculationRequest.EquipmentItemRequest item);
+<span class="fc" id="L41">        this.durationMapper = durationMapper;</span>
+<span class="fc" id="L42">    }</span>
 
     @Mapping(target = &quot;plannedDuration&quot;, source = &quot;plannedDurationMinutes&quot;)
     @Mapping(target = &quot;discount&quot;, source = &quot;discountPercent&quot;)
@@ -60,23 +50,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 
     //    TODO use Mapstruct features
     public CostCalculationResponse toResponse(RentalCostCalculationResult result) {
-<span class="fc" id="L63">        return new CostCalculationResponse(</span>
-<span class="fc" id="L64">                breakdownMapper.toBreakdownResponses(result.equipmentBreakdowns()),</span>
-<span class="fc" id="L65">                moneyMapper.toBigDecimal(result.subtotal()),</span>
-<span class="fc" id="L66">                discountMapper.toResponse(result.discount()),</span>
-<span class="fc" id="L67">                moneyMapper.toBigDecimal(result.totalCost()),</span>
-<span class="fc" id="L68">                durationMapper.toMinutes(result.effectiveDuration()),</span>
-<span class="fc" id="L69">                result.estimate(),</span>
-<span class="fc" id="L70">                result.specialPricingApplied()</span>
+<span class="fc" id="L53">        return new CostCalculationResponse(</span>
+<span class="fc" id="L54">                breakdownMapper.toBreakdownResponses(result.equipmentBreakdowns()),</span>
+<span class="fc" id="L55">                moneyMapper.toBigDecimal(result.subtotal()),</span>
+<span class="fc" id="L56">                discountMapper.toResponse(result.discount()),</span>
+<span class="fc" id="L57">                moneyMapper.toBigDecimal(result.totalCost()),</span>
+<span class="fc" id="L58">                durationMapper.toMinutes(result.effectiveDuration()),</span>
+<span class="fc" id="L59">                result.estimate(),</span>
+<span class="fc" id="L60">                result.specialPricingApplied()</span>
         );
     }
 
     public CostQuoteResponse toQuoteResponse(RentalCostQuote quote) {
-<span class="fc" id="L75">        return new CostQuoteResponse(</span>
-<span class="fc" id="L76">                quote.quoteId().id(),</span>
-<span class="fc" id="L77">                quote.quotedAt(),</span>
-<span class="fc" id="L78">                quote.expiresAt(),</span>
-<span class="fc" id="L79">                toResponse(quote.result())</span>
+<span class="fc" id="L65">        return new CostQuoteResponse(</span>
+<span class="fc" id="L66">                quote.quoteId().id(),</span>
+<span class="fc" id="L67">                quote.quotedAt(),</span>
+<span class="fc" id="L68">                quote.expiresAt(),</span>
+<span class="fc" id="L69">                toResponse(quote.result())</span>
         );
     }
 }
