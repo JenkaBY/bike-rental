@@ -1,6 +1,5 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
-import com.github.jenkaby.bikerental.finance.application.mapper.TransactionListMapper;
 import com.github.jenkaby.bikerental.finance.application.usecase.FindTransactionsUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionFilter;
@@ -17,13 +16,12 @@ import org.springframework.stereotype.Service;
 class FindTransactionsService implements FindTransactionsUseCase {
 
     private final TransactionRepository transactionRepository;
-    private final TransactionListMapper transactionListMapper;
 
     @Override
-    public Page<TransactionListItemDto> execute(TransactionFilter filter, PageRequest pageRequest) {
+    public Page<Transaction> execute(TransactionFilter filter, PageRequest pageRequest) {
         log.debug("Finding transactions filter={} page={}", filter, pageRequest);
-        Page<Transaction> page = transactionRepository.findTransactions(filter, pageRequest);
+        var page = transactionRepository.findTransactions(filter, pageRequest);
         log.debug("Found {} transactions (total={})", page.items().size(), page.totalItems());
-        return page.map(transactionListMapper::toDto);
+        return page;
     }
 }
