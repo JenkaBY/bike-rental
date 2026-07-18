@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionQueryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.web.query</a> &gt; <span class="el_source">TransactionQueryController.java</span></div><h1>TransactionQueryController.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.web.query;
+
+import com.github.jenkaby.bikerental.finance.application.usecase.FindTransactionsUseCase;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionFilterParams;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionSummaryResponse;
+import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionQueryMapper;
+import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
+import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Validated
+@RestController
+@RequestMapping(path = &quot;/api/finance/transactions&quot;, produces = {MediaType.APPLICATION_JSON_VALUE})
+@Tag(name = OpenApiConfig.Tags.FINANCE)
+<span class="fc" id="L34">@Slf4j</span>
+class TransactionQueryController {
+
+    private final FindTransactionsUseCase findTransactionsUseCase;
+    private final TransactionQueryMapper mapper;
+    private final PageMapper pageMapper;
+
+    TransactionQueryController(FindTransactionsUseCase findTransactionsUseCase,
+                               TransactionQueryMapper mapper,
+<span class="fc" id="L43">                               PageMapper pageMapper) {</span>
+<span class="fc" id="L44">        this.findTransactionsUseCase = findTransactionsUseCase;</span>
+<span class="fc" id="L45">        this.mapper = mapper;</span>
+<span class="fc" id="L46">        this.pageMapper = pageMapper;</span>
+<span class="fc" id="L47">    }</span>
+
+    @GetMapping
+    @Operation(summary = &quot;List transactions across customers with the full double-entry breakdown&quot;,
+            description = &quot;Returns a paged list of business transactions filtered by any combination of customer ids, &quot;
+                    + &quot;recorded-at date range, source, and affected ledger types. Sortable by recordedAt, amount or type; &quot;
+                    + &quot;defaults to recordedAt descending.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Transactions page retrieved&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request parameters&quot;,
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity&lt;Page&lt;TransactionSummaryResponse&gt;&gt; findTransactions(
+            @Valid @ModelAttribute TransactionFilterParams filterParams,
+            @PageableDefault(size = 20, sort = &quot;recordedAt&quot;, direction = Sort.Direction.DESC) Pageable pageable) {
+
+<span class="fc" id="L63">        log.info(&quot;[GET] Transactions page={} size={} sort={} filter={}&quot;,</span>
+<span class="fc" id="L64">                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort(), filterParams);</span>
+<span class="fc" id="L65">        var filter = mapper.toFilter(filterParams);</span>
+<span class="fc" id="L66">        var pageRequest = pageMapper.toPageRequest(pageable);</span>
+<span class="fc" id="L67">        var result = findTransactionsUseCase.execute(filter, pageRequest);</span>
+<span class="fc" id="L68">        return ResponseEntity.ok(result.map(mapper::toResponse));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

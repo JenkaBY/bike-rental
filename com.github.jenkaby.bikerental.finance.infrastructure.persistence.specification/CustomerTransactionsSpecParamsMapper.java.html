@@ -1,50 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerTransactionsSpecParamsMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification</a> &gt; <span class="el_source">CustomerTransactionsSpecParamsMapper.java</span></div><h1>CustomerTransactionsSpecParamsMapper.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.infrastructure.persistence.specification;
 
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
+import com.github.jenkaby.bikerental.shared.infrastructure.persistence.BusinessDayBoundaryResolver;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Mapper(injectionStrategy = InjectionStrategy.SETTER)
-<span class="fc" id="L17">public abstract class CustomerTransactionsSpecParamsMapper {</span>
+<span class="fc" id="L14">public abstract class CustomerTransactionsSpecParamsMapper {</span>
 
     private static final String PARAM_FROM_DATE = &quot;fromDate&quot;;
     private static final String PARAM_TO_DATE = &quot;toDate&quot;;
 
-    private ZoneId businessZoneId;
+    private BusinessDayBoundaryResolver boundaryResolver;
 
     @Autowired
-    public void setBusinessZoneId(ZoneId businessZoneId) {
-<span class="fc" id="L26">        this.businessZoneId = businessZoneId;</span>
-<span class="fc" id="L27">    }</span>
+    public void setBoundaryResolver(BusinessDayBoundaryResolver boundaryResolver) {
+<span class="fc" id="L23">        this.boundaryResolver = boundaryResolver;</span>
+<span class="fc" id="L24">    }</span>
 
     public Map&lt;String, String&gt; toParams(TransactionHistoryFilter filter) {
-<span class="fc" id="L30">        var result = new HashMap&lt;String, String&gt;();</span>
-<span class="fc" id="L31">        result.put(PARAM_FROM_DATE, Optional.ofNullable(filter.fromDate()).map(this::toStartOfDay).map(this::formatInstant).orElse(null));</span>
-<span class="fc" id="L32">        result.put(PARAM_TO_DATE, Optional.ofNullable(filter.toDate()).map(this::toStartOfNextDay).map(this::formatInstant).orElse(null));</span>
-<span class="fc" id="L33">        result.put(SpecConstant.TransactionField.SOURCE_ID, filter.sourceId());</span>
-<span class="fc bfc" id="L34" title="All 2 branches covered.">        result.put(SpecConstant.TransactionField.SOURCE_TYPE, filter.sourceType() != null ? filter.sourceType().name() : null);</span>
-<span class="fc" id="L35">        return result;</span>
-    }
-
-    private Instant toStartOfDay(LocalDate date) {
-<span class="fc" id="L39">        return date.atStartOfDay(businessZoneId).toInstant();</span>
-    }
-
-    private Instant toStartOfNextDay(LocalDate date) {
-<span class="fc" id="L43">        return date.plusDays(1).atStartOfDay(businessZoneId).toInstant();</span>
-    }
-
-    private String formatInstant(Instant instant) {
-<span class="fc" id="L47">        return DateTimeFormatter.ISO_INSTANT.format(instant);</span>
+<span class="fc" id="L27">        var result = new HashMap&lt;String, String&gt;();</span>
+<span class="fc" id="L28">        result.put(PARAM_FROM_DATE, Optional.ofNullable(filter.fromDate()).map(boundaryResolver::startOfDay).orElse(null));</span>
+<span class="fc" id="L29">        result.put(PARAM_TO_DATE, Optional.ofNullable(filter.toDate()).map(boundaryResolver::startOfNextDay).orElse(null));</span>
+<span class="fc" id="L30">        result.put(SpecConstant.TransactionField.SOURCE_ID, filter.sourceId());</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        result.put(SpecConstant.TransactionField.SOURCE_TYPE, filter.sourceType() != null ? filter.sourceType().name() : null);</span>
+<span class="fc" id="L32">        return result;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -2,56 +2,41 @@
 
 import com.github.jenkaby.bikerental.rental.domain.model.RentalSearchFilter;
 import com.github.jenkaby.bikerental.rental.domain.model.RentalStatus;
+import com.github.jenkaby.bikerental.shared.infrastructure.persistence.BusinessDayBoundaryResolver;
 import org.jspecify.annotations.Nullable;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 @Mapper(injectionStrategy = InjectionStrategy.SETTER)
-<span class="fc" id="L18">public abstract class RentalSpecParamsMapper {</span>
+<span class="fc" id="L15">public abstract class RentalSpecParamsMapper {</span>
 
-    private ZoneId businessZoneId;
+    private BusinessDayBoundaryResolver boundaryResolver;
 
     @Autowired
-    public void setBusinessZoneId(ZoneId businessZoneId) {
-<span class="fc" id="L24">        this.businessZoneId = businessZoneId;</span>
-<span class="fc" id="L25">    }</span>
+    public void setBoundaryResolver(BusinessDayBoundaryResolver boundaryResolver) {
+<span class="fc" id="L21">        this.boundaryResolver = boundaryResolver;</span>
+<span class="fc" id="L22">    }</span>
 
     public Map&lt;String, String[]&gt; toParams(RentalSearchFilter filter) {
-<span class="fc" id="L28">        var result = new HashMap&lt;String, String[]&gt;();</span>
-<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (!filter.statuses().isEmpty()) {</span>
-<span class="fc" id="L30">            result.put(SpecConstant.RentalField.STATUS, filter.statuses().stream().map(RentalStatus::name).toArray(String[]::new));</span>
+<span class="fc" id="L25">        var result = new HashMap&lt;String, String[]&gt;();</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (!filter.statuses().isEmpty()) {</span>
+<span class="fc" id="L27">            result.put(SpecConstant.RentalField.STATUS, filter.statuses().stream().map(RentalStatus::name).toArray(String[]::new));</span>
         }
-<span class="fc bfc" id="L32" title="All 2 branches covered.">        putIfPresent(result, SpecConstant.RentalField.CUSTOMER_ID, filter.customerId() != null ? filter.customerId().toString() : null);</span>
-<span class="fc" id="L33">        putIfPresent(result, SpecConstant.RentalField.PARAM_EQUIPMENT_UID, filter.equipmentUid());</span>
-<span class="fc bfc" id="L34" title="All 2 branches covered.">        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_FROM, filter.from() != null ? formatInstant(toStartOfDay(filter.from())) : null);</span>
-<span class="fc bfc" id="L35" title="All 2 branches covered.">        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_TO, filter.to() != null ? formatInstant(toStartOfNextDay(filter.to())) : null);</span>
-<span class="fc" id="L36">        return result;</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        putIfPresent(result, SpecConstant.RentalField.CUSTOMER_ID, filter.customerId() != null ? filter.customerId().toString() : null);</span>
+<span class="fc" id="L30">        putIfPresent(result, SpecConstant.RentalField.PARAM_EQUIPMENT_UID, filter.equipmentUid());</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_FROM, filter.from() != null ? boundaryResolver.startOfDay(filter.from()) : null);</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        putIfPresent(result, SpecConstant.RentalField.PARAM_CREATED_TO, filter.to() != null ? boundaryResolver.startOfNextDay(filter.to()) : null);</span>
+<span class="fc" id="L33">        return result;</span>
     }
 
     private static void putIfPresent(Map&lt;String, String[]&gt; target, String key, @Nullable String value) {
-<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (value != null) {</span>
-<span class="fc" id="L41">            target.put(key, new String[]{value});</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (value != null) {</span>
+<span class="fc" id="L38">            target.put(key, new String[]{value});</span>
         }
-<span class="fc" id="L43">    }</span>
-
-    private Instant toStartOfDay(LocalDate date) {
-<span class="fc" id="L46">        return date.atStartOfDay(businessZoneId).toInstant();</span>
-    }
-
-    private Instant toStartOfNextDay(LocalDate date) {
-<span class="fc" id="L50">        return date.plusDays(1).atStartOfDay(businessZoneId).toInstant();</span>
-    }
-
-    private static String formatInstant(Instant instant) {
-<span class="fc" id="L54">        return DateTimeFormatter.ISO_INSTANT.format(instant);</span>
-    }
+<span class="fc" id="L40">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
