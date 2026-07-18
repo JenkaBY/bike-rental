@@ -96,18 +96,12 @@ flowchart TB
 
 ### 3.2 Модуль Equipment (FR-EQ-001 - FR-EQ-005)
 
-**Ответственность:** Каталог оборудования и управление статусами
+**Ответственность:** Каталог оборудования и его физическое состояние
 
 **Ключевые сущности:**
 
-- `Equipment` - единица оборудования (порядковый номер, QR/NFC UID, тип, статус)
-  - Хранит `statusSlug: String` (Value Object), не ссылку на Entity
-  - Использует порт `StatusTransitionPolicy` для валидации переходов
+- `Equipment` - единица оборудования (порядковый номер, QR/NFC UID, тип, физическое состояние)
 - `EquipmentType` - тип оборудования (велосипед, самокат) - Reference Data Aggregate
-- `EquipmentStatus` - Reference Data Aggregate (не enum)
-  - Управляется через CRUD операции
-  - Содержит правила переходов: `allowedTransitions: Set<String>`
-  - Статусы: AVAILABLE, RENTED, MAINTENANCE, DECOMMISSIONED (по slug)
 
 **API для других модулей:**
 

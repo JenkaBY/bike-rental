@@ -15,9 +15,6 @@ import com.github.jenkaby.bikerental.shared.mapper.QuoteRefMapper;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Mapper(uses = {MoneyMapper.class, RentalQueryMapper.class, DiscountMapper.class, DurationMapper.class, QuoteRefMapper.class})
 public abstract class RentalCommandMapper {
 
@@ -50,17 +47,5 @@ public abstract class RentalCommandMapper {
         RentalResponse rentalResponse = rentalQueryMapper.toResponse(result.rental());
         var settlementResponse = settlementMapper.toResponse(result.settlementInfo());
         return new RentalReturnResponse(rentalResponse, settlementResponse);
-    }
-
-    public Map<String, Object> toPatchMap(RentalUpdateJsonPatchRequest request) {
-        Map<String, Object> patch = new HashMap<>();
-        for (RentalPatchOperation operation : request.getOperations()) {
-            String path = operation.getPath();
-            String fieldName = path.startsWith("/") ? path.substring(1) : path;
-            if (operation.getOp() != null) {
-                patch.put(fieldName, operation.getValue());
-            }
-        }
-        return patch;
     }
 }

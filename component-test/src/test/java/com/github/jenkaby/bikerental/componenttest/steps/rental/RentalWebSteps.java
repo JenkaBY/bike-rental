@@ -3,9 +3,7 @@ package com.github.jenkaby.bikerental.componenttest.steps.rental;
 import com.github.jenkaby.bikerental.componenttest.context.ScenarioContext;
 import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentCostBreakdownTransformer;
 import com.github.jenkaby.bikerental.componenttest.transformer.EquipmentItemResponseTransformer;
-import com.github.jenkaby.bikerental.rental.web.command.dto.RentalPatchOperation;
 import com.github.jenkaby.bikerental.rental.web.command.dto.RentalRequest;
-import com.github.jenkaby.bikerental.rental.web.command.dto.RentalUpdateJsonPatchRequest;
 import com.github.jenkaby.bikerental.rental.web.query.dto.EquipmentItemResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalResponse;
 import com.github.jenkaby.bikerental.rental.web.query.dto.RentalSummaryEquipmentResponse;
@@ -33,13 +31,6 @@ public class RentalWebSteps {
     private static final Comparator<RentalSummaryEquipmentResponse> COMPARING_SUMMARY_EQUIPMENT_BY_ID = Comparator.comparing(RentalSummaryEquipmentResponse::equipmentId);
     public static final Comparator<RentalSummaryResponse> COMPARING_BY_ID = Comparator.comparing(RentalSummaryResponse::id);
     private final ScenarioContext scenarioContext;
-
-    @Given("the rental update request is")
-    public void theRentalUpdateRequestBodyIs(List<RentalPatchOperation> ops) {
-        log.info("Preparing rental update request with {} operations: {}", ops.size(), ops);
-        RentalUpdateJsonPatchRequest body = new RentalUpdateJsonPatchRequest(ops);
-        scenarioContext.setRequestBody(body);
-    }
 
     @Given("a rental request with the following data")
     public void aRentalRequestWithTheFollowingData(RentalRequest request) {

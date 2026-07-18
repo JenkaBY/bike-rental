@@ -101,6 +101,17 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
                     : item.returnAt();
 
             Duration actualDuration = Duration.between(itemStartAt, itemReturnAt);
+
+            TariffLookupKey lookupKey = new TariffLookupKey(item.equipmentType(), itemPlanned, itemStartAt.toLocalDate());
+            TariffV2 tariff = tariffCache.computeIfAbsent(lookupKey,
+                    key -> selectTariffUseCase.execute(
+                            new SelectTariffV2UseCase.SelectTariffCommand(key.equipmentType(), key.plannedDuration(), key.rentalDate())));
+
+            if (isEarlyReturn(itemIsEstimate, actualDuration)) {
+                breakdowns.add(buildEarlyReturnBreakdown(item, tariff, actualDuration));
+                continue;
+            }
+
             Duration overtime;
             Duration billedDuration;
             Duration forgiven;
@@ -122,11 +133,6 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
                     forgiven = Duration.ZERO;
                 }
             }
-
-            TariffLookupKey lookupKey = new TariffLookupKey(item.equipmentType(), itemPlanned, itemStartAt.toLocalDate());
-            TariffV2 tariff = tariffCache.computeIfAbsent(lookupKey,
-                    key -> selectTariffUseCase.execute(
-                            new SelectTariffV2UseCase.SelectTariffCommand(key.equipmentType(), key.plannedDuration(), key.rentalDate())));
 
             LocalDateTime billingReturnAt = itemStartAt.plus(billedDuration);
             RentalCostV2 cost = tariff.calculateCost(itemStartAt, billingReturnAt);
@@ -165,6 +171,32 @@ class RentalCostCalculationV2Service implements RentalCostCalculationV2UseCase {
                 effectiveDuration,
                 anyEstimate,
                 false
+        );
+    }
+
+    private boolean isEarlyReturn(boolean itemIsEstimate, Duration actualDuration) {
+        return !itemIsEstimate
+                && !actualDuration.isNegative()
+                && actualDuration.toMinutes() <= rentalProperties.getEarlyReturnWindowMinutes();
+    }
+
+    private EquipmentCostBreakdownV2 buildEarlyReturnBreakdown(EquipmentCostItemV2 item, TariffV2 tariff, Duration actualDuration) {
+        int windowMinutes = rentalProperties.getEarlyReturnWindowMinutes();
+        int actualMinutes = (int) actualDuration.toMinutes();
+        Money total = Money.zero();
+        String message = String.format("Early return within %dmin: free = %s", windowMinutes, total);
+        return new EquipmentCostBreakdownV2(
+                item.equipmentId(),
+                item.equipmentType(),
+                tariff.getId(),
+                tariff.getName(),
+                tariff.getPricingType().name(),
+                total,
+                actualDuration,
+                Duration.ZERO,
+                Duration.ZERO,
+                new BreakdownCostDetails.EarlyReturnFree(message,
+                        new BreakdownCostDetails.EarlyReturnFree.Details(windowMinutes, actualMinutes, total.toString()))
         );
     }
 

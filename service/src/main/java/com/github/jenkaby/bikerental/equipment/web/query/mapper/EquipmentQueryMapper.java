@@ -16,7 +16,6 @@ import java.util.List;
 @Mapper(uses = {UidMapper.class, SerialNumberMapper.class, PageMapper.class})
 public interface EquipmentQueryMapper {
 
-    @Mapping(target = "status", source = "statusSlug")
     @Mapping(target = "type", source = "typeSlug")
     @Mapping(target = "conditionNotes", source = "condition")
     @Mapping(target = "condition", source = "conditionSlug")
@@ -25,10 +24,8 @@ public interface EquipmentQueryMapper {
     List<EquipmentResponse> toResponses(List<Equipment> equipments);
 
     @Mapping(target = "typeSlug", source = "type")
-    @Mapping(target = "statusSlug", source = "status")
     @Mapping(target = "pageRequest", source = "pageable")
     SearchEquipmentsUseCase.SearchEquipmentsQuery toSearchQuery(
-            String status,
             String type,
             String searchText,
             Pageable pageable);

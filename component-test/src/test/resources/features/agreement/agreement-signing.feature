@@ -9,19 +9,14 @@ Feature: Rental Agreement Signing
     And customers exist in the database with the following data
       | id   | phone        | firstName | lastName | email | birthDate | comments |
       | CUS1 | +79995551111 | Alex      | Johnson  | null  | null      | null     |
-    And the following equipment statues exist in the database
-      | slug      | name      | description   | transitions      |
-      | AVAILABLE | Available | Ready to rent | RENTED,RESERVED  |
-      | RESERVED  | Reserved  | Ready to rent | AVAILABLE,RENTED |
-      | RENTED    | Rented    | In use        | AVAILABLE        |
     And the following equipment types exist in the database
       | slug    | name    | description |
       | BICYCLE | Bicycle | Two-wheeled |
       | HELMET  | Helmet  | Helmet      |
       | OTHER   | Other   | Other       |
     And the following equipment records exist in db
-      | id | serialNumber | uid      | status    | type    | model   | conditionNotes | condition |
-      | 1  | EQ-001       | BIKE-001 | AVAILABLE | BICYCLE | Model A | Good           | GOOD      |
+      | id | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     And the following account records exist in db
       | id   | accountType | customerId |
       | ACC1 | CUSTOMER    | CUS1       |

@@ -10,11 +10,6 @@ Feature: Rental Management
       | id   | phone        | firstName | lastName | email            | birthDate  | comments |
       | CUS1 | +79995551111 | Alex      | Johnson  | null             | null       | null     |
       | CUS2 | +79991232222 | John      | Doe      | john@example.com | 1922-02-22 | null     |
-    And the following equipment statues exist in the database
-      | slug      | name      | description    | transitions      |
-      | AVAILABLE | Available | Ready to rent  | RENTED,RESERVED  |
-      | RESERVED  | Reserved  | Ready to rent  | AVAILABLE,RENTED |
-      | RENTED    | Rented    | In use already | AVAILABLE        |
     And the following equipment types exist in the database
       | slug    | name    | description |
       | BICYCLE | Bicycle | Two-wheeled |
@@ -22,10 +17,10 @@ Feature: Rental Management
       | HELMET  | Helmet  | Helmet      |
       | OTHER   | Other   | Other       |
     And the following equipment records exist in db
-      | id | serialNumber | uid            | status    | type    | model   | conditionNotes | condition |
-      | 1  | EQ-001       | BIKE-001       | AVAILABLE | BICYCLE | Model A | Good           | GOOD      |
-      | 2  | EQ-002       | E-BIKE-001     | AVAILABLE | SCOOTER | Model B | Excellent      | GOOD      |
-      | 3  | EQ-003       | HELM-ADULT-001 | AVAILABLE | HELMET  | Model B | Excellent      | GOOD      |
+      | id | serialNumber | uid            | type    | model   | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001       | BICYCLE | Model A | Good           | GOOD      |
+      | 2  | EQ-002       | E-BIKE-001     | SCOOTER | Model B | Excellent      | GOOD      |
+      | 3  | EQ-003       | HELM-ADULT-001 | HELMET  | Model B | Excellent      | GOOD      |
     And the following account records exist in db
       | id   | accountType | customerId |
       | ACC1 | CUSTOMER    | CUS1       |
@@ -53,20 +48,10 @@ Feature: Rental Management
       | 12 | Flat Hourly Scooter    | Scooter flat hourly rate   | SCOOTER       | FLAT_HOURLY       | ACTIVE | 2026-01-01 |         |
       | 13 | Special Group Tariff   | Special pricing for groups | ANY           | SPECIAL           | ACTIVE | 2025-01-01 |         |
 
-  Scenario: Create rental draft
-    When a POST request has been made to "/api/rentals/draft" endpoint
-    Then the response status is 201
-    And the rental response only contains
-      | status | estimatedCost |
-      | DRAFT  | 0             |
-
   Scenario Outline: Update rental with all required fields (tariff autoselect)
-    Given a POST request has been made to "/api/rentals/draft" endpoint
-    Then the response status is 201
-    And the rental response only contains
-      | status |
-      | DRAFT  |
-    And the rental response version is 0
+    Given a single rental exists in the database with the following data
+      | customerId | status | createdAt           | updatedAt           |
+      | CUS1       | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
 #    Update draft rental
     Given a rental request with the following data
       | customerId   | equipmentIds                 | duration          | operatorId |
@@ -142,8 +127,8 @@ Feature: Rental Management
       | CUS1       | DRAFT  | 2026-02-06T10:00:00 | 2026-02-06T10:00:00 |
     Given today is "2026-02-09"
     And the following equipment records exist in db
-      | id | serialNumber | uid       | status    | type  | model   | conditionNotes | condition |
-      | 4  | EQ-005       | OTHER-004 | AVAILABLE | OTHER | Other X | Good           | GOOD      |
+      | id | serialNumber | uid       | type  | model   | conditionNotes | condition |
+      | 4  | EQ-005       | OTHER-004 | OTHER | Other X | Good           | GOOD      |
     And a rental request with the following data
       | customerId | equipmentIds | duration | tariffId | operatorId |
       | CUS1       | 4            | 120      |          | OP1        |

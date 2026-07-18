@@ -64,11 +64,10 @@ class EquipmentRepositoryAdapter implements EquipmentRepository {
     }
 
     @Override
-    public Page<Equipment> findAll(String statusSlug, String typeSlug, String searchText, PageRequest request) {
+    public Page<Equipment> findAll(String typeSlug, String searchText, PageRequest request) {
         var pageRequest = pageMapper.toSpring(request);
 
         var spec = SpecificationBuilder.specification(EquipmentSpec.class)
-                .withParam(EquipmentSpecConstant.STATUS, statusSlug)
                 .withParam(EquipmentSpecConstant.TYPE, typeSlug)
                 .withParam(EquipmentSpecConstant.SEARCH, searchText)
                 .build();

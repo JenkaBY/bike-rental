@@ -9,18 +9,12 @@ Feature: Equipment Return — Confirm via Cost Quote
     And customers exist in the database with the following data
       | id   | phone       | firstName | lastName | email            | birthDate  | comments |
       | CUS2 | +3706861555 | John      | Doe      | john@example.com | 1922-02-22 | null     |
-    And the following equipment statues exist in the database
-      | slug        | name        | description       | transitions               |
-      | BROKEN      | Broken      | Not Ready to rent | AVAILABLE,MAINTENANCE     |
-      | AVAILABLE   | Available   | Ready to rent     | BROKEN,MAINTENANCE,RENTED |
-      | MAINTENANCE | Maintenance | null              | AVAILABLE                 |
-      | RENTED      | Rented      | In use already    | AVAILABLE,BROKEN          |
     And the following equipment types exist in the database
       | slug    | name    | description |
       | BICYCLE | Bicycle | Two-wheeled |
     And the following equipment records exist in db
-      | id | serialNumber | uid      | status | type    | model   | conditionNotes | condition |
-      | 1  | EQ-001       | BIKE-001 | RENTED | BICYCLE | Model A | Good           | GOOD      |
+      | id | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001 | BICYCLE | Model A | Good           | GOOD      |
     And the pricing params list for tariff request is
       | tariffId | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | minimumDurationMinutes | minimumDurationSurcharge | price |
       | 1        | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               | 30                     | 1.00                     |       |
@@ -544,8 +538,8 @@ Feature: Equipment Return — Confirm via Cost Quote
   Scenario: Confirm full return of a rental containing equipment added mid-rental - billed per equipment's own window
     Given now is "2026-02-10T10:00:00"
     And the following equipment records exist in db
-      | id | serialNumber | uid      | status | type    | model   | conditionNotes | condition |
-      | 2  | EQ-002       | BIKE-002 | RENTED | BICYCLE | Model A | Good           | GOOD      |
+      | id | serialNumber | uid      | type    | model   | conditionNotes | condition |
+      | 2  | EQ-002       | BIKE-002 | BICYCLE | Model A | Good           | GOOD      |
     And a single rental exists in the database with the following data
       | id  | customerId | status | estimatedCost | plannedDuration | startedAt           | expectedReturnAt    | createdAt           | updatedAt           |
       | 116 | CUS2       | ACTIVE | 25.00         | 120             | 2026-02-10T08:00:00 | 2026-02-10T10:00:00 | 2026-02-10T08:00:00 | 2026-02-10T08:00:00 |

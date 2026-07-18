@@ -23,11 +23,6 @@ public record EquipmentRequest(
         @Slug
         String typeSlug,
 
-        @Schema(description = "Equipment status slug", example = "available")
-        @Slug
-        @Deprecated(forRemoval = true)
-        String statusSlug,
-
         @Schema(description = "Model name", example = "Trek Marlin 5")
         @Size(max = 200, message = "Model must not exceed 200 characters")
         String model,

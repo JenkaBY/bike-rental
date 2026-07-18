@@ -10,22 +10,16 @@ Feature: Rental Query
       | id   | phone        | firstName | lastName | email            | birthDate  | comments |
       | CUS1 | +79995551111 | Alex      | Johnson  | null             | null       | null     |
       | CUS2 | +79991232222 | John      | Doe      | john@example.com | 1922-02-22 | null     |
-    And the following equipment statues exist in the database
-      | slug        | name        | description       | transitions               |
-      | BROKEN      | Broken      | Not Ready to rent | AVAILABLE,MAINTENANCE     |
-      | AVAILABLE   | Available   | Ready to rent     | BROKEN,MAINTENANCE,RENTED |
-      | MAINTENANCE | Maintenance | null              | AVAILABLE                 |
-      | RENTED      | Rented      | In use already    | AVAILABLE,BROKEN          |
     And the following equipment types exist in the database
       | slug    | name    | description |
       | BICYCLE | Bicycle | Two-wheeled |
       | SCOOTER | Scooter | Scooter     |
     And the following equipment records exist in db
-      | id | serialNumber | uid        | status    | type    | model   | conditionNotes | condition |
-      | 1  | EQ-001       | BIKE-001   | AVAILABLE | BICYCLE | Model A | Good           | GOOD      |
-      | 2  | EQ-002       | E-BIKE-001 | AVAILABLE | SCOOTER | Model B | Excellent      | GOOD      |
-      | 3  | EQ-003       | E-BIKE-002 | AVAILABLE | SCOOTER | Model B | Excellent      | GOOD      |
-      | 4  | EQ-004       | E-BIKE-003 | AVAILABLE | SCOOTER | Model B | Excellent      | GOOD      |
+      | id | serialNumber | uid        | type    | model   | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001   | BICYCLE | Model A | Good           | GOOD      |
+      | 2  | EQ-002       | E-BIKE-001 | SCOOTER | Model B | Excellent      | GOOD      |
+      | 3  | EQ-003       | E-BIKE-002 | SCOOTER | Model B | Excellent      | GOOD      |
+      | 4  | EQ-004       | E-BIKE-003 | SCOOTER | Model B | Excellent      | GOOD      |
     And the pricing params list for tariff request is
       | tariffId | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | hourlyPrice | dailyPrice | overtimeHourlyPrice | issuanceFee | minimumDurationMinutes | minimumDurationSurcharge | price |
       | 1        | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               |             |            |                     |             | 30                     | 1.00                     |       |

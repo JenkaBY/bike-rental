@@ -5,7 +5,6 @@ import com.github.jenkaby.bikerental.shared.mapper.DurationMapper;
 import com.github.jenkaby.bikerental.shared.mapper.InstantMapper;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import com.github.jenkaby.bikerental.tariff.*;
-import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationRequest;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationResponse;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostCalculationV2Request;
 import com.github.jenkaby.bikerental.tariff.web.query.dto.CostQuoteResponse;
@@ -41,15 +40,6 @@ public abstract class BatchCalculationMapper {
     public void setDurationMapper(DurationMapper durationMapper) {
         this.durationMapper = durationMapper;
     }
-
-    @Mapping(target = "equipments", source = "equipments")
-    @Mapping(target = "plannedDuration", source = "plannedDurationMinutes")
-    @Mapping(target = "discount", source = "discountPercent")
-    @Mapping(target = "actualDuration", source = "actualDurationMinutes")
-    public abstract RentalCostCalculationCommand toCommand(CostCalculationRequest request);
-
-
-    public abstract EquipmentCostItem toItem(CostCalculationRequest.EquipmentItemRequest item);
 
     @Mapping(target = "plannedDuration", source = "plannedDurationMinutes")
     @Mapping(target = "discount", source = "discountPercent")

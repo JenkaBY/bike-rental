@@ -29,167 +29,6 @@ Feature: Tariff V2 API rental cost calculation
       | 6  | Hourly Moped        | Degressive hourly       | MOPED         | DEGRESSIVE_HOURLY | ACTIVE | 2026-01-01 |         |
 
 
-  Scenario Outline: Get rental cost calculation for a single rental - Template
-    Given the rental request is prepared with the following data
-      | equipmentTypes  | plannedDurationMinutes | actualDurationMinutes | discountPercent   | specialTariffId   | specialPrice   | rentalDate   |
-      | <equipmentType> | <durationMinutes>      | <durationMinutes>     | <discountPercent> | <specialTariffId> | <specialPrice> | <rentalDate> |
-    When a POST request has been made to "/api/tariffs/calculate" endpoint
-    Then the response status is 200
-    And the rental cost calculation response only contains
-      | totalCost  | subtotal | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate   | specialPricingApplied |
-      | <subtotal> | <total>  | <discountAmount> | <discountPercent> | <durationMinutes>        | <estimate> | <special>             |
-    And the rental cost calculation response only contains the breakdown with the following data
-      | equipmentType   | tariffId   | tariffName   | pricingType   | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
-      | <equipmentType> | <tariffId> | <tariffName> | <pricingType> | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
-    Examples:
-      | pricingType       | equipmentType | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | specialTariffId | specialPrice | rentalDate | tariffId | tariffName          | overtime | forgiven | message                           | pattern                                   | special | estimate |
-      | DEGRESSIVE_HOURLY | BICYCLE       | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |                 |              |            | 1        | Hourly Bicycle      |          |          | 1h 0min degressive: 9 = 9         | breakdown.cost.degressive_hourly.standard | false   | false    |
-      | FLAT_HOURLY       | SCOOTER       | 60              | 60             | 15.00 | 15.00    | 15.00 | 0               | 0              |                 |              |            | 2        | Flat Hourly Scooter |          |          | 1h 0min flat: 1*15 + partial = 15 | breakdown.cost.flat_hourly.standard       | false   | false    |
-      | DAILY             | BICYCLE       | 480             | 480            | 25.00 | 25.00    | 25.00 | 0               | 0              |                 |              |            | 3        | Daily Bicycle       |          |          | 1d = 25                           | breakdown.cost.daily.standard             | false   | false    |
-      | FLAT_FEE          | HELMET        | 60              | 60             | 1     | 1        | 1     | 0               | 0              |                 |              |            | 4        | Flat Fee Helmet     |          |          | Flat fee: 1*1d = 1                | breakdown.cost.flat_fee                   | false   | false    |
-      | SPECIAL           | ANY           | 60              | 60             | 0     | 666      | 666   | 0               | 0              | 5               | 666          |            | 5        | Special Tariff      |          |          | Special tariff applied to group   | breakdown.cost.special.group              | true    | false    |
-
-
-  Scenario Outline: Get rental cost calculation for a single rental - DEGRESSIVE_HOURLY:<durationMinutes>min
-    Given the rental request is prepared with the following data
-      | equipmentTypes | plannedDurationMinutes | actualDurationMinutes | discountPercent   |
-      | BICYCLE        | 60                     | <durationMinutes>     | <discountPercent> |
-    When a POST request has been made to "/api/tariffs/calculate" endpoint
-    Then the response status is 200
-    And the rental cost calculation response only contains
-      | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate |
-      | <total>   | <subtotal> | <discountAmount> | <discountPercent> | <durationMinutes>        | false    |
-    And the rental cost calculation response only contains the breakdown with the following data
-      | equipmentType | tariffId | tariffName     | pricingType       | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
-      | BICYCLE       | 1        | Hourly Bicycle | DEGRESSIVE_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
-    Examples:
-      | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                                     | pattern                                   |
-      | 5               | 5              | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  |
-      | 20              | 20             | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  |
-      | 60              | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |          |          | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
-      | 65              | 60             | 9.00  | 9.00     | 9.0   | 0               | 0              | 5        | 5        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
-      | 68              | 68             | 9.58  | 9.58     | 9.58  | 0               | 0              | 8        | 0        | 1h 8min degressive: 9+1*(7/12) = 9.58       | breakdown.cost.degressive_hourly.standard |
-      | 70              | 70             | 10.16 | 10.16    | 10.16 | 0               | 0              | 10       | 0        | 1h 10min degressive: 9+2*(7/12) = 10.16     | breakdown.cost.degressive_hourly.standard |
-      | 120             | 120            | 16    | 16       | 16    | 0               | 0              | 60       | 0        | 2h 0min degressive: 9+7 = 16                | breakdown.cost.degressive_hourly.standard |
-      | 180             | 180            | 21    | 21       | 21    | 0               | 0              | 120      | 0        | 3h 0min degressive: 9+7+5 = 21              | breakdown.cost.degressive_hourly.standard |
-      | 240             | 240            | 24    | 24       | 24    | 0               | 0              | 180      | 0        | 4h 0min degressive: 9+7+5+3 = 24            | breakdown.cost.degressive_hourly.standard |
-      | 300             | 300            | 25    | 25       | 25    | 0               | 0              | 240      | 0        | 5h 0min degressive: 9+7+5+3+1 = 25          | breakdown.cost.degressive_hourly.standard |
-      | 304             | 304            | 25    | 25       | 25    | 0               | 0              | 244      | 0        | 5h 4min degressive: 9+7+5+3+1+0*(1/12) = 25 | breakdown.cost.degressive_hourly.standard |
-      # starts the next DAILY tariff
-      # | 360             | 360            | 25    | 25       | 25    | 0               | 0              | 300      | 0        | 24h daily: 25.0                                | breakdown.cost.daily.standard             |
-      #
-      #     Discount applied
-      | 60              | 60             | 9     | 9.0      | 8.1   | 10              | 0.9            | 0        | 0        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
-      | 60              | 60             | 9     | 9.0      | 0     | 100             | 9              | 0        | 0        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
-      | 300             | 300            | 25    | 25       | 12.5  | 50              | 12.5           | 240      | 0        | 5h 0min degressive: 9+7+5+3+1 = 25          | breakdown.cost.degressive_hourly.standard |
-
-
-  Scenario Outline: Degressive breakdown collapses repeated floor-rate hours - DEGRESSIVE_HOURLY:<durationMinutes>min
-    Given the rental request is prepared with the following data
-      | equipmentTypes | plannedDurationMinutes | actualDurationMinutes |
-      | MOPED          | <durationMinutes>      | <durationMinutes>     |
-    When a POST request has been made to "/api/tariffs/calculate" endpoint
-    Then the response status is 200
-    And the rental cost calculation response only contains the breakdown with the following data
-      | equipmentType | tariffId | tariffName   | pricingType       | itemCost | billedDuration    | overtimeMinutes | forgivenMinutes | pattern                                   | message   |
-      | MOPED         | 6        | Hourly Moped | DEGRESSIVE_HOURLY | <cost>   | <durationMinutes> |                 |                 | breakdown.cost.degressive_hourly.standard | <message> |
-    Examples:
-      | durationMinutes | cost | message                              |
-      | 360             | 26   | 6h 0min degressive: 9+7+5+3+2*1 = 26 |
-      | 420             | 27   | 7h 0min degressive: 9+7+5+3+3*1 = 27 |
-      | 480             | 28   | 8h 0min degressive: 9+7+5+3+4*1 = 28 |
-
-
-  Scenario: Multiple rental equipments calculation
-    Given the rental request is prepared with the following data
-      | equipmentTypes         | plannedDurationMinutes |
-      | BICYCLE,HELMET,BICYCLE | 60                     |
-    When a POST request has been made to "/api/tariffs/calculate" endpoint
-    Then the response status is 200
-    And the rental cost calculation response only contains
-      | totalCost | subtotal | effectiveDurationMinutes | estimate |
-      | 19        | 19       | 60                       | true     |
-    And the rental cost calculation response only contains the breakdown with the following data
-      | equipmentType | tariffId | tariffName      | pricingType       | itemCost | billedDuration |
-      | BICYCLE       | 1        | Hourly Bicycle  | DEGRESSIVE_HOURLY | 9        | 60             |
-      | BICYCLE       | 1        | Hourly Bicycle  | DEGRESSIVE_HOURLY | 9        | 60             |
-      | HELMET        | 4        | Flat Fee Helmet | FLAT_FEE          | 1        | 60             |
-
-  Scenario Outline: Get rental cost calculation for a single rental - FLAT_HOURLY:<durationMinutes>min
-    Given the rental request is prepared with the following data
-      | equipmentTypes | plannedDurationMinutes | actualDurationMinutes | discountPercent   |
-      | SCOOTER        | 60                     | <durationMinutes>     | <discountPercent> |
-    When a POST request has been made to "/api/tariffs/calculate" endpoint
-    Then the response status is 200
-    And the rental cost calculation response only contains
-      | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate |
-      | <total>   | <subtotal> | <discountAmount> | <discountPercent> | <durationMinutes>        | false    |
-    And the rental cost calculation response only contains the breakdown with the following data
-      | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
-      | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
-    Examples:
-      | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                               | pattern                             |
-      | 5               | 5              | 8.5   | 8.5      | 8.5   | 0               | 0              |          |          | 30min minimum: 15/2 + 1 = 8.5         | breakdown.cost.flat_hourly.minimum  |
-      | 20              | 20             | 8.5   | 8.5      | 8.5   | 0               | 0              |          |          | 30min minimum: 15/2 + 1 = 8.5         | breakdown.cost.flat_hourly.minimum  |
-      | 60              | 60             | 15    | 15       | 15    | 0               | 0              |          |          | 1h 0min flat: 1*15 + partial = 15     | breakdown.cost.flat_hourly.standard |
-      | 65              | 60             | 15    | 15       | 15    | 0               | 0              | 5        | 5        | 1h 0min flat: 1*15 + partial = 15     | breakdown.cost.flat_hourly.standard |
-      | 68              | 68             | 16.25 | 16.25    | 16.25 | 0               | 0              | 8        | 0        | 1h 8min flat: 1*15 + partial = 16.25  | breakdown.cost.flat_hourly.standard |
-      | 120             | 120            | 30    | 30       | 30    | 0               | 0              | 60       | 0        | 2h 0min flat: 2*15 + partial = 30     | breakdown.cost.flat_hourly.standard |
-      | 300             | 300            | 75    | 75       | 75    | 0               | 0              | 240      | 0        | 5h 0min flat: 5*15 + partial = 75     | breakdown.cost.flat_hourly.standard |
-      | 304             | 304            | 75    | 75       | 75    | 0               | 0              | 244      | 0        | 5h 4min flat: 5*15 + partial = 75     | breakdown.cost.flat_hourly.standard |
-      | 315             | 315            | 78.75 | 78.75    | 78.75 | 0               | 0              | 255      | 0        | 5h 15min flat: 5*15 + partial = 78.75 | breakdown.cost.flat_hourly.standard |
-      #     Discount applied
-      | 60              | 60             | 15    | 15       | 13.5  | 10              | 1.5            | 0        | 0        | 1h 0min flat: 1*15 + partial = 15     | breakdown.cost.flat_hourly.standard |
-      | 300             | 300            | 75.0  | 75.0     | 37.50 | 50              | 37.50          | 240      | 0        | 5h 0min flat: 5*15 + partial = 75     | breakdown.cost.flat_hourly.standard |
-
-  Scenario Outline: Get rental cost calculation for a single rental - DAILY:<durationMinutes>min
-    Given the rental request is prepared with the following data
-      | equipmentTypes | plannedDurationMinutes | actualDurationMinutes | discountPercent   |
-      | BICYCLE        | 310                    | <durationMinutes>     | <discountPercent> |
-    When a POST request has been made to "/api/tariffs/calculate" endpoint
-    Then the response status is 200
-    And the rental cost calculation response only contains
-      | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate |
-      | <total>   | <subtotal> | <discountAmount> | <discountPercent> | <durationMinutes>        | false    |
-    And the rental cost calculation response only contains the breakdown with the following data
-      | equipmentType | tariffId | tariffName    | pricingType | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
-      | BICYCLE       | 3        | Daily Bicycle | DAILY       | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
-    Examples:
-      | durationMinutes | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message               | pattern                       |
-      | 305             | 305            | 25    | 25       | 25    | 0               | 0              | 0        |          | 1d = 25               | breakdown.cost.daily.standard |
-      | 315             | 310            | 25.0  | 25.0     | 25.0  | 0               | 0              | 5        | 5        | 1d = 25               | breakdown.cost.daily.standard |
-      | 1440            | 1440           | 25.0  | 25.0     | 25.0  | 0               | 0              | 1130     | 0        | 1d = 25               | breakdown.cost.daily.standard |
-      | 1500            | 1500           | 26.0  | 26.0     | 26.0  | 0               | 0              | 1190     | 0        | 1d + 1h 0min = 26     | breakdown.cost.daily.overtime |
-      | 1535            | 1535           | 26.56 | 26.56    | 26.56 | 0               | 0              | 1225     | 0        | 1d + 1h 35min = 26.56 | breakdown.cost.daily.overtime |
-      | 2880            | 2880           | 50    | 50       | 50    | 0               | 0              | 2570     | 0        | 2d = 50               | breakdown.cost.daily.standard |
-      | 2890            | 2890           | 50.16 | 50.16    | 50.16 | 0               | 0              | 2580     | 0        | 2d + 0h 10min = 50.16 | breakdown.cost.daily.overtime |
-      #     Discount applied
-      | 305             | 305            | 25    | 25       | 22.5  | 10              | 2.5            | 0        | 0        | 1d = 25               | breakdown.cost.daily.standard |
-
-  Scenario Outline: Get rental cost calculation for a single rental - FLAT_FEE:<durationMinutes>min
-    Given the rental request is prepared with the following data
-      | equipmentTypes | plannedDurationMinutes | actualDurationMinutes | discountPercent   |
-      | HELMET         | 60                     | <durationMinutes>     | <discountPercent> |
-    When a POST request has been made to "/api/tariffs/calculate" endpoint
-    Then the response status is 200
-    And the rental cost calculation response only contains
-      | totalCost | subtotal   | discountAmount   | discountPercent   | effectiveDurationMinutes | estimate |
-      | <total>   | <subtotal> | <discountAmount> | <discountPercent> | <durationMinutes>        | false    |
-    And the rental cost calculation response only contains the breakdown with the following data
-      | equipmentType | tariffId | tariffName      | pricingType | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
-      | HELMET        | 4        | Flat Fee Helmet | FLAT_FEE    | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
-    Examples:
-      | durationMinutes | billedDuration | cost | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message            | pattern                 |
-      | 5               | 5              | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
-      | 10              | 10             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
-      | 60              | 60             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
-      | 67              | 60             | 1    | 1        | 1     | 0               | 0              | 7        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
-      | 1440            | 1440           | 2    | 2        | 2     | 0               | 0              | 1380     |          | Flat fee: 1*2d = 2 | breakdown.cost.flat_fee |
-      | 1441            | 1441           | 2    | 2        | 2     | 0               | 0              | 1381     |          | Flat fee: 1*2d = 2 | breakdown.cost.flat_fee |
-      #     Discount applied
-      | 305             | 305            | 1    | 1        | 0.9   | 10              | 0.1            | 245      | 0        | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
-
-
   # ---------------------------------------------------------------------------
   # V2 endpoint: PUT /api/tariffs/calculations (per-equipment return timestamps)
   # ---------------------------------------------------------------------------
@@ -261,6 +100,69 @@ Feature: Tariff V2 API rental cost calculation
       | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                             | message                              |
       | 40          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 15       | 60             | 5               | 5               | breakdown.cost.flat_hourly.standard | 1h 0min flat: 1*15 + partial = 15    |
       | 41          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 16.25    | 68             | 8               | 0               | breakdown.cost.flat_hourly.standard | 1h 8min flat: 1*15 + partial = 16.25 |
+
+  # ---------------------------------------------------------------------------
+  # Early-return free window (app.rental.forgiveness.early-return-window = 10m):
+  # an item returned within 10 minutes of ITS OWN start is free (no charge,
+  # no minimum-duration surcharge, no penalty).
+  # ---------------------------------------------------------------------------
+
+  Scenario Outline: V2 early return within the free window is not charged - returned at <returnAt>
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt   |
+      | 1           | SCOOTER       | <returnAt> |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 60                     |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal   | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | <total>   | <subtotal> | <billedDuration>         | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration   | overtimeMinutes | forgivenMinutes | pattern   | message   |
+      | 1           | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
+    Examples:
+      | returnAt         | billedDuration | cost | subtotal | total | overtime | forgiven | message                             | pattern                            |
+      | 2026-06-01T09:05 | 5              | 0    | 0        | 0     | 0        | 0        | Early return within 10min: free = 0 | breakdown.cost.early_return_free   |
+      | 2026-06-01T09:10 | 10             | 0    | 0        | 0     | 0        | 0        | Early return within 10min: free = 0 | breakdown.cost.early_return_free   |
+      | 2026-06-01T09:11 | 11             | 8.5  | 8.5      | 8.5   | 0        | 0        | 30min minimum: 15/2 + 1 = 8.5       | breakdown.cost.flat_hourly.minimum |
+
+  Scenario: V2 all equipment returned within the free window is fully free
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | returnAt         |
+      | 70          | SCOOTER       | 2026-06-01T09:05 |
+      | 71          | SCOOTER       | 2026-06-01T09:08 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 60                     |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 0         | 0        | 8                        | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                          | message                             |
+      | 70          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 0        | 5              | 0               | 0               | breakdown.cost.early_return_free | Early return within 10min: free = 0 |
+      | 71          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 0        | 8              | 0               | 0               | breakdown.cost.early_return_free | Early return within 10min: free = 0 |
+
+  Scenario: V2 equipment taken mid-rental and returned within the free window of its own start is not charged
+    Given the equipment items for cost calculation request are
+      | equipmentId | equipmentType | startAt          | returnAt         |
+      | 80          | SCOOTER       |                  | 2026-06-01T11:00 |
+      | 81          | SCOOTER       | 2026-06-01T10:55 | 2026-06-01T11:00 |
+    And the rental cost calculation request is prepared with the following data
+      | startAt          | plannedDurationMinutes |
+      | 2026-06-01T09:00 | 120                    |
+    When a PUT request has been made to "/api/tariffs/calculations" endpoint
+    Then the response status is 200
+    And the rental cost calculation response only contains
+      | totalCost | subtotal | effectiveDurationMinutes | estimate | specialPricingApplied |
+      | 30        | 30       | 120                      | false    | false                 |
+    And the rental cost calculation response only contains the breakdown with the following data
+      | equipmentId | equipmentType | tariffId | tariffName          | pricingType | itemCost | billedDuration | overtimeMinutes | forgivenMinutes | pattern                             | message                             |
+      | 80          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 30       | 120            | 0               | 0               | breakdown.cost.flat_hourly.standard | 2h 0min flat: 2*15 + partial = 30   |
+      | 81          | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | 0        | 5              | 0               | 0               | breakdown.cost.early_return_free    | Early return within 10min: free = 0 |
 
   Scenario: V2 global discount is applied to the combined subtotal
     Given the equipment items for cost calculation request are
@@ -356,7 +258,7 @@ Feature: Tariff V2 API rental cost calculation
       | BICYCLE       | 1        | Hourly Bicycle | DEGRESSIVE_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
       | returnAt         | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                                     | pattern                                   |
-      | 2026-06-01T00:05 | 5              | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  |
+      | 2026-06-01T00:05 | 5              | 0     | 0        | 0     | 0               | 0              |          |          | Early return within 10min: free = 0         | breakdown.cost.early_return_free          |
       | 2026-06-01T00:20 | 20             | 5.5   | 5.5      | 5.5   | 0               | 0              |          |          | 30min minimum: 9/2 + 1 = 5.5                | breakdown.cost.degressive_hourly.minimum  |
       | 2026-06-01T01:00 | 60             | 9.00  | 9.00     | 9.00  | 0               | 0              |          |          | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
       | 2026-06-01T01:05 | 60             | 9.00  | 9.00     | 9.0   | 0               | 0              | 5        | 5        | 1h 0min degressive: 9 = 9                   | breakdown.cost.degressive_hourly.standard |
@@ -389,7 +291,7 @@ Feature: Tariff V2 API rental cost calculation
       | SCOOTER       | 2        | Flat Hourly Scooter | FLAT_HOURLY | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
       | returnAt         | billedDuration | cost  | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message                               | pattern                             |
-      | 2026-06-01T00:05 | 5              | 8.5   | 8.5      | 8.5   | 0               | 0              |          |          | 30min minimum: 15/2 + 1 = 8.5         | breakdown.cost.flat_hourly.minimum  |
+      | 2026-06-01T00:05 | 5              | 0     | 0        | 0     | 0               | 0              |          |          | Early return within 10min: free = 0   | breakdown.cost.early_return_free    |
       | 2026-06-01T00:20 | 20             | 8.5   | 8.5      | 8.5   | 0               | 0              |          |          | 30min minimum: 15/2 + 1 = 8.5         | breakdown.cost.flat_hourly.minimum  |
       | 2026-06-01T01:00 | 60             | 15    | 15       | 15    | 0               | 0              |          |          | 1h 0min flat: 1*15 + partial = 15     | breakdown.cost.flat_hourly.standard |
       | 2026-06-01T01:05 | 60             | 15    | 15       | 15    | 0               | 0              | 5        | 5        | 1h 0min flat: 1*15 + partial = 15     | breakdown.cost.flat_hourly.standard |
@@ -446,8 +348,8 @@ Feature: Tariff V2 API rental cost calculation
       | HELMET        | 4        | Flat Fee Helmet | FLAT_FEE    | <cost>   | <billedDuration> | <overtime>      | <forgiven>      | <pattern> | <message> |
     Examples:
       | returnAt         | billedDuration | cost | subtotal | total | discountPercent | discountAmount | overtime | forgiven | message            | pattern                 |
-      | 2026-06-01T00:05 | 5              | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
-      | 2026-06-01T00:10 | 10             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
+      | 2026-06-01T00:05 | 5              | 0    | 0        | 0     | 0               | 0              | 0        |          | Early return within 10min: free = 0 | breakdown.cost.early_return_free |
+      | 2026-06-01T00:10 | 10             | 0    | 0        | 0     | 0               | 0              | 0        |          | Early return within 10min: free = 0 | breakdown.cost.early_return_free |
       | 2026-06-01T01:00 | 60             | 1    | 1        | 1     | 0               | 0              | 0        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
       | 2026-06-01T01:07 | 60             | 1    | 1        | 1     | 0               | 0              | 7        |          | Flat fee: 1*1d = 1 | breakdown.cost.flat_fee |
       | 2026-06-02T00:00 | 1440           | 2    | 2        | 2     | 0               | 0              | 1380     |          | Flat fee: 1*2d = 2 | breakdown.cost.flat_fee |

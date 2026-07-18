@@ -10,21 +10,15 @@ Feature: Add Equipment to an Active Rental
       | id   | phone        | firstName | lastName | email            | birthDate  | comments |
       | CUS1 | +79995551111 | Alex      | Johnson  | null             | null       | null     |
       | CUS2 | +3706861555  | John      | Doe      | john@example.com | 1922-02-22 | null     |
-    And the following equipment statues exist in the database
-      | slug        | name        | description       | transitions               |
-      | BROKEN      | Broken      | Not Ready to rent | AVAILABLE,MAINTENANCE     |
-      | AVAILABLE   | Available   | Ready to rent     | BROKEN,MAINTENANCE,RENTED |
-      | MAINTENANCE | Maintenance | null              | AVAILABLE                 |
-      | RENTED      | Rented      | In use already    | AVAILABLE,BROKEN          |
     And the following equipment types exist in the database
       | slug    | name    | description |
       | BICYCLE | Bicycle | Two-wheeled |
       | HELMET  | Helmet  | Head gear   |
     And the following equipment records exist in db
-      | id | serialNumber | uid        | status    | type    | model   | conditionNotes | condition |
-      | 1  | EQ-001       | BIKE-001   | RENTED    | BICYCLE | Model A | Good           | GOOD      |
-      | 2  | EQ-002       | HELMET-001 | AVAILABLE | HELMET  | Model H | Good           | GOOD      |
-      | 3  | EQ-003       | BIKE-003   | BROKEN    | BICYCLE | Model A | Damaged        | BROKEN    |
+      | id | serialNumber | uid        | type    | model   | conditionNotes | condition |
+      | 1  | EQ-001       | BIKE-001   | BICYCLE | Model A | Good           | GOOD      |
+      | 2  | EQ-002       | HELMET-001 | HELMET  | Model H | Good           | GOOD      |
+      | 3  | EQ-003       | BIKE-003   | BICYCLE | Model A | Damaged        | BROKEN    |
     And the pricing params list for tariff request is
       | tariffId | pricingType       | firstHourPrice | hourlyDiscount | minimumHourlyPrice | minimumDurationMinutes | minimumDurationSurcharge | issuanceFee |
       | 1        | DEGRESSIVE_HOURLY | 9.00           | 2.00           | 1.00               | 30                     | 1.00                     |             |

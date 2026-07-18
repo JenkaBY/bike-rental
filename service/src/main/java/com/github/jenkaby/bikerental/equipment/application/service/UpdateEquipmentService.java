@@ -7,16 +7,13 @@ import com.github.jenkaby.bikerental.equipment.domain.model.Equipment;
 import com.github.jenkaby.bikerental.equipment.domain.model.EquipmentType;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentRepository;
 import com.github.jenkaby.bikerental.equipment.domain.repository.EquipmentTypeRepository;
-import com.github.jenkaby.bikerental.equipment.domain.service.StatusTransitionPolicy;
 import com.github.jenkaby.bikerental.equipment.shared.mapper.UidMapper;
 import com.github.jenkaby.bikerental.shared.exception.ReferenceNotFoundException;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 class UpdateEquipmentService implements UpdateEquipmentUseCase {
@@ -25,7 +22,6 @@ class UpdateEquipmentService implements UpdateEquipmentUseCase {
     private final EquipmentCommandToDomainMapper mapper;
     private final UidMapper uidMapper;
     private final EquipmentTypeRepository typeRepository;
-    private final StatusTransitionPolicy statusTransitionPolicy;
 
     @Override
     @Transactional
@@ -47,12 +43,6 @@ class UpdateEquipmentService implements UpdateEquipmentUseCase {
             }
         }
 
-        // validate status exists if changed
-        String newStatusSlug = command.statusSlug();
-        if (!newStatusSlug.equals(existing.getStatusSlug())) {
-            log.info("Changing status of equipment with id {} from {} to {}", existing.getId(), existing.getStatusSlug(), newStatusSlug);
-            existing.changeStatusTo(newStatusSlug, statusTransitionPolicy);
-        }
         var updated = mapper.toEquipment(existing, command);
 
         return repository.save(updated);
