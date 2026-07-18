@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="finance_transactions.create-index_recorded-at" author="claude">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_finance_transactions_recorded_at"/>
+            </not>
+        </preConditions>
+
+        <createIndex indexName="idx_finance_transactions_recorded_at"
+                     tableName="finance_transactions">
+            <column name="recorded_at" descending="true"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

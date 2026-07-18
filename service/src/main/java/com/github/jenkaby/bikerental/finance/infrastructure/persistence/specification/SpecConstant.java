@@ -9,7 +9,10 @@ public class SpecConstant {
 
     public class TransactionField {
         public static final String CUSTOMER_ID = "customerId";
+        public static final String CUSTOMER_IDS = "customerIds";
         public static final String RECORDED_AT = "recordedAt";
+        public static final String AMOUNT = "amount";
+        public static final String TRANSACTION_TYPE = "transactionType";
         public static final String SOURCE_ID = "sourceId";
         public static final String SOURCE_TYPE = "sourceType";
         public static final String LEDGER_TYPE = "ledgerType";
