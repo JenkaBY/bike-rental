@@ -2,6 +2,8 @@ package com.github.jenkaby.bikerental.componenttest.transformer;
 
 import com.github.jenkaby.bikerental.componenttest.transformer.shared.Aliases;
 import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionBalancesResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDeltasResponse;
 import io.cucumber.java.DataTableType;
 
 import java.util.Map;
@@ -26,11 +28,11 @@ public class TransactionResponseTransformer {
                 DataTableHelper.getStringOrNull(entry, "reason"),
                 DataTableHelper.getStringOrNull(entry, "sourceType"),
                 sourceId,
-                new CustomerTransactionResponse.Deltas(
+                new TransactionDeltasResponse(
                         DataTableHelper.toBigDecimal(entry, "walletDelta"),
                         DataTableHelper.toBigDecimal(entry, "holdDelta"),
                         DataTableHelper.toBigDecimal(entry, "externalDelta")),
-                new CustomerTransactionResponse.Balances(
+                new TransactionBalancesResponse(
                         DataTableHelper.toBigDecimal(entry, "walletBalanceAfter"),
                         DataTableHelper.toBigDecimal(entry, "holdBalanceAfter"))
         );

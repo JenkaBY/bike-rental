@@ -1,6 +1,8 @@
 package com.github.jenkaby.bikerental.finance.web.query;
 
 import com.github.jenkaby.bikerental.finance.application.usecase.FindTransactionsUseCase;
+import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionDetailsUseCase;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDetailsResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionFilterParams;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionSummaryResponse;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionQueryMapper;
@@ -24,8 +26,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @Validated
 @RestController
@@ -35,13 +40,16 @@ import org.springframework.web.bind.annotation.RestController;
 class TransactionQueryController {
 
     private final FindTransactionsUseCase findTransactionsUseCase;
+    private final GetTransactionDetailsUseCase getTransactionDetailsUseCase;
     private final TransactionQueryMapper mapper;
     private final PageMapper pageMapper;
 
     TransactionQueryController(FindTransactionsUseCase findTransactionsUseCase,
+                               GetTransactionDetailsUseCase getTransactionDetailsUseCase,
                                TransactionQueryMapper mapper,
                                PageMapper pageMapper) {
         this.findTransactionsUseCase = findTransactionsUseCase;
+        this.getTransactionDetailsUseCase = getTransactionDetailsUseCase;
         this.mapper = mapper;
         this.pageMapper = pageMapper;
     }
@@ -66,5 +74,22 @@ class TransactionQueryController {
         var pageRequest = pageMapper.toPageRequest(pageable);
         var result = findTransactionsUseCase.execute(filter, pageRequest);
         return ResponseEntity.ok(result.map(mapper::toResponse));
+    }
+
+    @GetMapping("/{transactionId}")
+    @Operation(summary = "Get a single transaction with its full double-entry breakdown",
+            description = "Returns the transaction identified by the path id, including every ledger leg with its "
+                    + "signed movement and running balance, plus the customer-side deltas and resulting bucket balances.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Transaction retrieved"),
+            @ApiResponse(responseCode = "400", description = "Malformed transaction id",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Transaction not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<TransactionDetailsResponse> getTransactionDetails(@PathVariable("transactionId") UUID transactionId) {
+        log.info("[GET] Transaction details id={}", transactionId);
+        var details = getTransactionDetailsUseCase.execute(transactionId);
+        return ResponseEntity.ok(mapper.toDetailsResponse(details));
     }
 }

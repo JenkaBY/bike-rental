@@ -18,7 +18,13 @@ public class TransactionRecord {
     private final Money amount;
     private final Money runningBalance;
 
-    public Money signedAmount() {
-        return direction == EntryDirection.CREDIT ? amount : amount.negate();
+    public Money signedBalanceDelta() {
+        return increasesLedgerBalance() ? amount : amount.negate();
+    }
+
+    private boolean increasesLedgerBalance() {
+        return ledgerType.isAssetLedger()
+                ? direction == EntryDirection.DEBIT
+                : direction == EntryDirection.CREDIT;
     }
 }

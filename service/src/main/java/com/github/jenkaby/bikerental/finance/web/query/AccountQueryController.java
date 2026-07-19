@@ -7,7 +7,7 @@ import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerAccountBalanc
 import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionHistoryFilterParams;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.AccountQueryMapper;
-import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionHistoryQueryMapper;
+import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionQueryMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
@@ -39,16 +39,16 @@ public class AccountQueryController {
     private final GetCustomerAccountBalancesUseCase getCustomerAccountBalancesUseCase;
     private final AccountQueryMapper mapper;
     private final GetTransactionHistoryUseCase getTransactionHistoryUseCase;
-    private final TransactionHistoryQueryMapper transactionHistoryQueryMapper;
+    private final TransactionQueryMapper transactionQueryMapper;
 
     public AccountQueryController(GetCustomerAccountBalancesUseCase getCustomerAccountBalancesUseCase,
                                   AccountQueryMapper mapper,
                                   GetTransactionHistoryUseCase getTransactionHistoryUseCase,
-                                  TransactionHistoryQueryMapper transactionHistoryQueryMapper) {
+                                  TransactionQueryMapper transactionQueryMapper) {
         this.getCustomerAccountBalancesUseCase = getCustomerAccountBalancesUseCase;
         this.mapper = mapper;
         this.getTransactionHistoryUseCase = getTransactionHistoryUseCase;
-        this.transactionHistoryQueryMapper = transactionHistoryQueryMapper;
+        this.transactionQueryMapper = transactionQueryMapper;
     }
 
     @GetMapping("/{customerId}/balances")
@@ -88,6 +88,6 @@ public class AccountQueryController {
                 filterParams.sourceId(), filterParams.sourceType());
         var pageRequest = new PageRequest(pageable.getPageSize(), pageable.getPageNumber());
         var result = getTransactionHistoryUseCase.execute(customerId, filter, pageRequest);
-        return ResponseEntity.ok(result.map(transactionHistoryQueryMapper::toResponse));
+        return ResponseEntity.ok(result.map(transactionQueryMapper::toCustomerTransactionResponse));
     }
 }
