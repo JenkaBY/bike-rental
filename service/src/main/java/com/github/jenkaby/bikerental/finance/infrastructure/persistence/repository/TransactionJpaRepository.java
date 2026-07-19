@@ -3,6 +3,7 @@ package com.github.jenkaby.bikerental.finance.infrastructure.persistence.reposit
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.infrastructure.persistence.entity.TransactionJpaEntity;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,9 @@ import java.util.UUID;
 
 @Repository
 public interface TransactionJpaRepository extends JpaRepository<TransactionJpaEntity, UUID>, JpaSpecificationExecutor<TransactionJpaEntity> {
+
+    @EntityGraph(attributePaths = "records")
+    Optional<TransactionJpaEntity> findWithRecordsById(UUID id);
 
     Optional<TransactionJpaEntity> findByIdempotencyKeyAndCustomerId(UUID idempotencyKey, UUID customerId);
 

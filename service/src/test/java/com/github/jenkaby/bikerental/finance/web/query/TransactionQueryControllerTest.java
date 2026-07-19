@@ -2,13 +2,19 @@ package com.github.jenkaby.bikerental.finance.web.query;
 
 import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.FindTransactionsUseCase;
+import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionDetailsUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.EntryDirection;
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.SubLedgerRef;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionDetails;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionFilter;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionRecord;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionBalancesResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDeltasResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDetailsResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDetailsResponse.TransactionDetailEntryResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionSummaryResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionSummaryResponse.TransactionEntryResponse;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionQueryMapper;
@@ -16,6 +22,7 @@ import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
+import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
 import com.github.jenkaby.bikerental.shared.mapper.PageMapper;
 import com.github.jenkaby.bikerental.support.web.ApiTest;
 import org.junit.jupiter.api.Nested;
@@ -30,6 +37,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -46,6 +54,8 @@ class TransactionQueryControllerTest {
 
     @MockitoBean
     private FindTransactionsUseCase findTransactionsUseCase;
+    @MockitoBean
+    private GetTransactionDetailsUseCase getTransactionDetailsUseCase;
     @MockitoBean
     private TransactionQueryMapper mapper;
     @MockitoBean
@@ -150,6 +160,87 @@ class TransactionQueryControllerTest {
             @Test
             void whenLedgerTypeIsUnrecognised() throws Exception {
                 mockMvc.perform(get(TRANSACTIONS_ENDPOINT).param("ledgerTypes", "UNKNOWN_LEDGER"))
+                        .andExpect(status().isBadRequest());
+            }
+        }
+    }
+
+    @Nested
+    class GetTransactionDetails {
+
+        private static final String DETAILS_ENDPOINT = TRANSACTIONS_ENDPOINT + "/{transactionId}";
+        private static final UUID TRANSACTION_ID = UUID.fromString("018e2cc3-0002-7000-8000-000000000002");
+
+        @Test
+        void shouldReturn200WithFullBreakdown() throws Exception {
+            var transaction = Transaction.builder()
+                    .id(TRANSACTION_ID)
+                    .type(TransactionType.DEPOSIT)
+                    .paymentMethod(PaymentMethod.CASH)
+                    .amount(Money.of("50.00"))
+                    .customerId(CUSTOMER_ID)
+                    .operatorId("operator-1")
+                    .recordedAt(Instant.parse("2026-03-15T10:30:00Z"))
+                    .idempotencyKey(IdempotencyKey.of(UUID.fromString("018e2cc3-0003-7000-8000-000000000003")))
+                    .records(List.of())
+                    .build();
+            var details = new TransactionDetails(transaction, Money.of("50.00"), Money.of("0.00"));
+            var response = new TransactionDetailsResponse(
+                    TRANSACTION_ID,
+                    CUSTOMER_ID,
+                    new BigDecimal("50.00"),
+                    "DEPOSIT",
+                    Instant.parse("2026-03-15T10:30:00Z"),
+                    "CASH",
+                    null,
+                    null,
+                    null,
+                    "operator-1",
+                    new TransactionDeltasResponse(
+                            new BigDecimal("50.00"), new BigDecimal("0.00"), new BigDecimal("50.00")),
+                    new TransactionBalancesResponse(new BigDecimal("50.00"), new BigDecimal("0.00")),
+                    List.of(
+                            new TransactionDetailEntryResponse("CUSTOMER_WALLET", "CREDIT", new BigDecimal("50.00"),
+                                    new BigDecimal("50.00"), new BigDecimal("50.00"), false),
+                            new TransactionDetailEntryResponse("CASH", "DEBIT", new BigDecimal("50.00"),
+                                    new BigDecimal("50.00"), null, true)));
+
+            given(getTransactionDetailsUseCase.execute(TRANSACTION_ID)).willReturn(details);
+            given(mapper.toDetailsResponse(details)).willReturn(response);
+
+            mockMvc.perform(get(DETAILS_ENDPOINT, TRANSACTION_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(TRANSACTION_ID.toString()))
+                    .andExpect(jsonPath("$.type").value("DEPOSIT"))
+                    .andExpect(jsonPath("$.deltas.wallet").value(50.00))
+                    .andExpect(jsonPath("$.deltas.hold").value(0.00))
+                    .andExpect(jsonPath("$.deltas.external").value(50.00))
+                    .andExpect(jsonPath("$.balances.wallet").value(50.00))
+                    .andExpect(jsonPath("$.balances.hold").value(0.00))
+                    .andExpect(jsonPath("$.entries.length()").value(2))
+                    .andExpect(jsonPath("$.entries[1].ledgerType").value("CASH"))
+                    .andExpect(jsonPath("$.entries[1].signedDelta").value(50.00))
+                    .andExpect(jsonPath("$.entries[1].systemLedger").value(true))
+                    .andExpect(jsonPath("$.entries[0].systemLedger").value(false));
+        }
+
+        @Test
+        void shouldReturn404WhenTransactionDoesNotExist() throws Exception {
+            given(getTransactionDetailsUseCase.execute(eq(TRANSACTION_ID)))
+                    .willThrow(new ResourceNotFoundException(Transaction.class, TRANSACTION_ID));
+
+            mockMvc.perform(get(DETAILS_ENDPOINT, TRANSACTION_ID))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errorCode").value(ResourceNotFoundException.ERROR_CODE))
+                    .andExpect(jsonPath("$.params.resourceName").value("Transaction"));
+        }
+
+        @Nested
+        class BadRequest {
+
+            @Test
+            void whenTransactionIdIsNotValidUuid() throws Exception {
+                mockMvc.perform(get(DETAILS_ENDPOINT, "not-a-uuid"))
                         .andExpect(status().isBadRequest());
             }
         }

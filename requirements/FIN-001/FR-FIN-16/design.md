@@ -53,6 +53,7 @@ balances/deltas (details endpoint owns those).
 
 * WebMvc: `TransactionQueryControllerTest` — 200 with legs, empty page, and `400` cases (bad UUID, unknown
   `sourceType`, unknown `ledgerTypes`).
-* Component: `features/finance/transactions-list.feature` — cross-customer, single/multi customer, ledger-type,
+* Component: `features/finance/transactions.feature` — cross-customer, single/multi customer, ledger-type,
   sourceType, date-range, HOLD-listed-once, empty. New `TransactionResponseRowTransformer` +
   `TransactionsWebSteps`; shared `WebRequestSteps` now resolves comma-separated alias lists in query params.
+  (This feature file was later merged with the FR-FIN-17 transaction-details scenarios — see that design doc.)

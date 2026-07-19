@@ -1,9 +1,9 @@
 package com.github.jenkaby.bikerental.finance.application.service;
 
-import com.github.jenkaby.bikerental.finance.application.mapper.TransactionMapper;
 import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionHistoryUseCase;
 import com.github.jenkaby.bikerental.finance.domain.model.CustomerAccount;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionDetails;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
 import com.github.jenkaby.bikerental.finance.domain.repository.AccountRepository;
 import com.github.jenkaby.bikerental.finance.domain.repository.TransactionRepository;
@@ -25,11 +25,10 @@ class GetTransactionHistoryService implements GetTransactionHistoryUseCase {
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
-    private final TransactionMapper transactionMapper;
-    private final RunningBalanceCalculator runningBalanceCalculator;
+    private final TransactionDetailsAssembler transactionDetailsAssembler;
 
     @Override
-    public Page<TransactionDto> execute(UUID customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
+    public Page<TransactionDetails> execute(UUID customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
         log.debug("Fetching transaction history for customer={} filter={} page={}", customerId, filter, pageRequest);
         var customerRef = CustomerRef.of(customerId);
         accountRepository.findByCustomerId(customerRef)
@@ -38,13 +37,9 @@ class GetTransactionHistoryService implements GetTransactionHistoryUseCase {
         Page<Transaction> page = transactionRepository.findTransactionHistory(customerRef, filter, pageRequest);
         List<Transaction> items = page.items();
 
-        var balancesByTransaction = runningBalanceCalculator.calculate(customerRef, items);
-
-        List<TransactionDto> entries = items.stream()
-                .map(transaction -> {
-                    var balances = balancesByTransaction.get(transaction.getId());
-                    return transactionMapper.toEntry(transaction, balances.wallet(), balances.hold());
-                })
+        var detailsByTransaction = transactionDetailsAssembler.assemble(customerRef, items);
+        List<TransactionDetails> entries = items.stream()
+                .map(transaction -> detailsByTransaction.get(transaction.getId()))
                 .toList();
         log.debug("Found {} transactions (total={}) for customer={}", entries.size(), page.totalItems(), customerId);
 

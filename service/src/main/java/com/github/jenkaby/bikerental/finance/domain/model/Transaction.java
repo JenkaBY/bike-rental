@@ -53,7 +53,7 @@ public class Transaction {
     private Money bucketDelta(LedgerType ledgerType) {
         return records.stream()
                 .filter(record -> record.getLedgerType() == ledgerType)
-                .map(TransactionRecord::signedAmount)
+                .map(TransactionRecord::signedBalanceDelta)
                 .reduce(Money.zero(), Money::add);
     }
 }

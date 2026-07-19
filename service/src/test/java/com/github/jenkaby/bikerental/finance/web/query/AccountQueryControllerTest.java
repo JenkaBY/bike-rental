@@ -1,14 +1,21 @@
 package com.github.jenkaby.bikerental.finance.web.query;
 
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.application.usecase.GetCustomerAccountBalancesUseCase;
 import com.github.jenkaby.bikerental.finance.application.usecase.GetCustomerAccountBalancesUseCase.CustomerAccountBalances;
 import com.github.jenkaby.bikerental.finance.application.usecase.GetTransactionHistoryUseCase;
+import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionDetails;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionHistoryFilter;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
 import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerAccountBalancesResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionBalancesResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDeltasResponse;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.AccountQueryMapper;
-import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionHistoryQueryMapper;
+import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionQueryMapper;
+import com.github.jenkaby.bikerental.shared.domain.IdempotencyKey;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
 import com.github.jenkaby.bikerental.shared.exception.ResourceNotFoundException;
@@ -49,7 +56,7 @@ class AccountQueryControllerTest {
     @MockitoBean
     private GetTransactionHistoryUseCase getTransactionHistoryUseCase;
     @MockitoBean
-    private TransactionHistoryQueryMapper transactionHistoryQueryMapper;
+    private TransactionQueryMapper transactionQueryMapper;
 
     @Nested
     class GetBalances {
@@ -102,21 +109,18 @@ class AccountQueryControllerTest {
 
         @Test
         void shouldReturn200WithPagedEntries() throws Exception {
-            var entry = new GetTransactionHistoryUseCase.TransactionDto(
-                    CUSTOMER_ID,
-                    new BigDecimal("50.00"),
-                    TransactionType.DEPOSIT,
-                    "CREDIT",
-                    Instant.parse("2026-03-15T10:30:00Z"),
-                    null,
-                    null,
-                    null,
-                    null,
-                    new GetTransactionHistoryUseCase.TransactionDto.Deltas(
-                            new BigDecimal("50.00"), new BigDecimal("0.00"), new BigDecimal("50.00")),
-                    new GetTransactionHistoryUseCase.TransactionDto.Balances(
-                            new BigDecimal("50.00"), new BigDecimal("0.00"))
-            );
+            var transaction = Transaction.builder()
+                    .id(UUID.fromString("018e2cc3-0002-7000-8000-000000000002"))
+                    .type(TransactionType.DEPOSIT)
+                    .paymentMethod(PaymentMethod.CASH)
+                    .amount(Money.of("50.00"))
+                    .customerId(CUSTOMER_ID)
+                    .operatorId("operator-1")
+                    .recordedAt(Instant.parse("2026-03-15T10:30:00Z"))
+                    .idempotencyKey(IdempotencyKey.of(UUID.fromString("018e2cc3-0003-7000-8000-000000000003")))
+                    .records(List.of())
+                    .build();
+            var entry = new TransactionDetails(transaction, Money.of("50.00"), Money.of("0.00"));
             var pageRequest = new PageRequest(20, 0);
             var page = new Page<>(List.of(entry), 1L, pageRequest);
             var entryResponse = new CustomerTransactionResponse(
@@ -129,15 +133,15 @@ class AccountQueryControllerTest {
                     null,
                     null,
                     null,
-                    new CustomerTransactionResponse.Deltas(
+                    new TransactionDeltasResponse(
                             new BigDecimal("50.00"), new BigDecimal("0.00"), new BigDecimal("50.00")),
-                    new CustomerTransactionResponse.Balances(
+                    new TransactionBalancesResponse(
                             new BigDecimal("50.00"), new BigDecimal("0.00"))
             );
 
             given(getTransactionHistoryUseCase.execute(eq(CUSTOMER_ID), any(TransactionHistoryFilter.class), any(PageRequest.class)))
                     .willReturn(page);
-            given(transactionHistoryQueryMapper.toResponse(entry)).willReturn(entryResponse);
+            given(transactionQueryMapper.toCustomerTransactionResponse(entry)).willReturn(entryResponse);
 
             mockMvc.perform(get(TRANSACTIONS_ENDPOINT, CUSTOMER_ID)
                             .param("page", "0")

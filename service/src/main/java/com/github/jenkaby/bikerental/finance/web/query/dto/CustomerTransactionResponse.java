@@ -26,24 +26,8 @@ public record CustomerTransactionResponse(
         @Schema(description = "Source type, e.g. RENTAL") String sourceType,
         @Schema(description = "Source identifier") String sourceId,
         @Schema(description = "Signed change per bucket caused by this transaction")
-        @NotNull Deltas deltas,
+        @NotNull TransactionDeltasResponse deltas,
         @Schema(description = "Customer bucket balances after this transaction was applied")
-        @NotNull Balances balances
+        @NotNull TransactionBalancesResponse balances
 ) {
-
-    @Schema(description = "Signed per-bucket deltas; external = wallet + hold (money crossing the customer boundary)")
-    public record Deltas(
-            @Schema(description = "Change to the available (wallet) balance") @NotNull BigDecimal wallet,
-            @Schema(description = "Change to the reserved (hold) balance") @NotNull BigDecimal hold,
-            @Schema(description = "Net change of the customer's total money (to/from the external world)")
-            @NotNull BigDecimal external
-    ) {
-    }
-
-    @Schema(description = "Customer bucket balances after this transaction")
-    public record Balances(
-            @Schema(description = "Available (wallet) balance after this transaction") @NotNull BigDecimal wallet,
-            @Schema(description = "Reserved (hold) balance after this transaction") @NotNull BigDecimal hold
-    ) {
-    }
 }

@@ -67,6 +67,13 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Transaction> findById(UUID id) {
+        return jpaRepository.findWithRecordsById(id)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<Transaction> findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, CustomerRef customerId) {
         return jpaRepository.findByIdempotencyKeyAndCustomerId(idempotencyKey.id(), customerId.id())
                 .map(mapper::toDomain);
