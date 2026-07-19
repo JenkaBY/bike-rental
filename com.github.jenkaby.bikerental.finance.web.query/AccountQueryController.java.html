@@ -7,7 +7,7 @@ import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerAccountBalanc
 import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionHistoryFilterParams;
 import com.github.jenkaby.bikerental.finance.web.query.mapper.AccountQueryMapper;
-import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionHistoryQueryMapper;
+import com.github.jenkaby.bikerental.finance.web.query.mapper.TransactionQueryMapper;
 import com.github.jenkaby.bikerental.shared.config.OpenApiConfig;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.Page;
 import com.github.jenkaby.bikerental.shared.domain.model.vo.PageRequest;
@@ -39,16 +39,16 @@ public class AccountQueryController {
     private final GetCustomerAccountBalancesUseCase getCustomerAccountBalancesUseCase;
     private final AccountQueryMapper mapper;
     private final GetTransactionHistoryUseCase getTransactionHistoryUseCase;
-    private final TransactionHistoryQueryMapper transactionHistoryQueryMapper;
+    private final TransactionQueryMapper transactionQueryMapper;
 
     public AccountQueryController(GetCustomerAccountBalancesUseCase getCustomerAccountBalancesUseCase,
                                   AccountQueryMapper mapper,
                                   GetTransactionHistoryUseCase getTransactionHistoryUseCase,
-<span class="fc" id="L47">                                  TransactionHistoryQueryMapper transactionHistoryQueryMapper) {</span>
+<span class="fc" id="L47">                                  TransactionQueryMapper transactionQueryMapper) {</span>
 <span class="fc" id="L48">        this.getCustomerAccountBalancesUseCase = getCustomerAccountBalancesUseCase;</span>
 <span class="fc" id="L49">        this.mapper = mapper;</span>
 <span class="fc" id="L50">        this.getTransactionHistoryUseCase = getTransactionHistoryUseCase;</span>
-<span class="fc" id="L51">        this.transactionHistoryQueryMapper = transactionHistoryQueryMapper;</span>
+<span class="fc" id="L51">        this.transactionQueryMapper = transactionQueryMapper;</span>
 <span class="fc" id="L52">    }</span>
 
     @GetMapping(&quot;/{customerId}/balances&quot;)
@@ -88,7 +88,7 @@ public class AccountQueryController {
 <span class="fc" id="L88">                filterParams.sourceId(), filterParams.sourceType());</span>
 <span class="fc" id="L89">        var pageRequest = new PageRequest(pageable.getPageSize(), pageable.getPageNumber());</span>
 <span class="fc" id="L90">        var result = getTransactionHistoryUseCase.execute(customerId, filter, pageRequest);</span>
-<span class="fc" id="L91">        return ResponseEntity.ok(result.map(transactionHistoryQueryMapper::toResponse));</span>
+<span class="fc" id="L91">        return ResponseEntity.ok(result.map(transactionQueryMapper::toCustomerTransactionResponse));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

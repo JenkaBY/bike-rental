@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionQueryMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.web.query.mapper</a> &gt; <span class="el_source">TransactionQueryMapperImpl.java</span></div><h1>TransactionQueryMapperImpl.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.web.query.mapper;
 
+import com.github.jenkaby.bikerental.finance.PaymentMethod;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionDetails;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionRecord;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionSourceType;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionType;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionBalancesResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDeltasResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDetailsResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionSummaryResponse;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -23,86 +32,305 @@ public class TransactionQueryMapperImpl implements TransactionQueryMapper {
     private final MoneyMapper moneyMapper;
 
     @Autowired
-<span class="fc" id="L26">    public TransactionQueryMapperImpl(MoneyMapper moneyMapper) {</span>
+<span class="fc" id="L35">    public TransactionQueryMapperImpl(MoneyMapper moneyMapper) {</span>
 
-<span class="fc" id="L28">        this.moneyMapper = moneyMapper;</span>
-<span class="fc" id="L29">    }</span>
+<span class="fc" id="L37">        this.moneyMapper = moneyMapper;</span>
+<span class="fc" id="L38">    }</span>
 
     @Override
     public TransactionSummaryResponse toResponse(Transaction transaction) {
-<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
-<span class="nc" id="L34">            return null;</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L43">            return null;</span>
         }
 
-<span class="fc" id="L37">        List&lt;TransactionSummaryResponse.TransactionEntryResponse&gt; entries = null;</span>
-<span class="fc" id="L38">        UUID id = null;</span>
-<span class="fc" id="L39">        UUID customerId = null;</span>
-<span class="fc" id="L40">        BigDecimal amount = null;</span>
-<span class="fc" id="L41">        String type = null;</span>
-<span class="fc" id="L42">        Instant recordedAt = null;</span>
-<span class="fc" id="L43">        String paymentMethod = null;</span>
-<span class="fc" id="L44">        String reason = null;</span>
-<span class="fc" id="L45">        String sourceType = null;</span>
-<span class="fc" id="L46">        String sourceId = null;</span>
-<span class="fc" id="L47">        String operatorId = null;</span>
+<span class="fc" id="L46">        List&lt;TransactionSummaryResponse.TransactionEntryResponse&gt; entries = null;</span>
+<span class="fc" id="L47">        UUID id = null;</span>
+<span class="fc" id="L48">        UUID customerId = null;</span>
+<span class="fc" id="L49">        BigDecimal amount = null;</span>
+<span class="fc" id="L50">        String type = null;</span>
+<span class="fc" id="L51">        Instant recordedAt = null;</span>
+<span class="fc" id="L52">        String paymentMethod = null;</span>
+<span class="fc" id="L53">        String reason = null;</span>
+<span class="fc" id="L54">        String sourceType = null;</span>
+<span class="fc" id="L55">        String sourceId = null;</span>
+<span class="fc" id="L56">        String operatorId = null;</span>
 
-<span class="fc" id="L49">        entries = transactionRecordListToTransactionEntryResponseList( transaction.getRecords() );</span>
-<span class="fc" id="L50">        id = transaction.getId();</span>
-<span class="fc" id="L51">        customerId = transaction.getCustomerId();</span>
-<span class="fc" id="L52">        amount = moneyMapper.toBigDecimal( transaction.getAmount() );</span>
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if ( transaction.getType() != null ) {</span>
-<span class="fc" id="L54">            type = transaction.getType().name();</span>
+<span class="fc" id="L58">        entries = transactionRecordListToTransactionEntryResponseList( transaction.getRecords() );</span>
+<span class="fc" id="L59">        id = transaction.getId();</span>
+<span class="fc" id="L60">        customerId = transaction.getCustomerId();</span>
+<span class="fc" id="L61">        amount = moneyMapper.toBigDecimal( transaction.getAmount() );</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if ( transaction.getType() != null ) {</span>
+<span class="fc" id="L63">            type = transaction.getType().name();</span>
         }
-<span class="fc" id="L56">        recordedAt = transaction.getRecordedAt();</span>
-<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if ( transaction.getPaymentMethod() != null ) {</span>
-<span class="fc" id="L58">            paymentMethod = transaction.getPaymentMethod().name();</span>
+<span class="fc" id="L65">        recordedAt = transaction.getRecordedAt();</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if ( transaction.getPaymentMethod() != null ) {</span>
+<span class="fc" id="L67">            paymentMethod = transaction.getPaymentMethod().name();</span>
         }
-<span class="fc" id="L60">        reason = transaction.getReason();</span>
-<span class="fc bfc" id="L61" title="All 2 branches covered.">        if ( transaction.getSourceType() != null ) {</span>
-<span class="fc" id="L62">            sourceType = transaction.getSourceType().name();</span>
+<span class="fc" id="L69">        reason = transaction.getReason();</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if ( transaction.getSourceType() != null ) {</span>
+<span class="fc" id="L71">            sourceType = transaction.getSourceType().name();</span>
         }
-<span class="fc" id="L64">        sourceId = transaction.getSourceId();</span>
-<span class="fc" id="L65">        operatorId = transaction.getOperatorId();</span>
+<span class="fc" id="L73">        sourceId = transaction.getSourceId();</span>
+<span class="fc" id="L74">        operatorId = transaction.getOperatorId();</span>
 
-<span class="fc" id="L67">        TransactionSummaryResponse transactionSummaryResponse = new TransactionSummaryResponse( id, customerId, amount, type, recordedAt, paymentMethod, reason, sourceType, sourceId, operatorId, entries );</span>
+<span class="fc" id="L76">        TransactionSummaryResponse transactionSummaryResponse = new TransactionSummaryResponse( id, customerId, amount, type, recordedAt, paymentMethod, reason, sourceType, sourceId, operatorId, entries );</span>
 
-<span class="fc" id="L69">        return transactionSummaryResponse;</span>
+<span class="fc" id="L78">        return transactionSummaryResponse;</span>
     }
 
     @Override
     public TransactionSummaryResponse.TransactionEntryResponse toEntryResponse(TransactionRecord record) {
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if ( record == null ) {</span>
-<span class="nc" id="L75">            return null;</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if ( record == null ) {</span>
+<span class="nc" id="L84">            return null;</span>
         }
 
-<span class="fc" id="L78">        String ledgerType = null;</span>
-<span class="fc" id="L79">        String direction = null;</span>
-<span class="fc" id="L80">        BigDecimal amount = null;</span>
+<span class="fc" id="L87">        String ledgerType = null;</span>
+<span class="fc" id="L88">        String direction = null;</span>
+<span class="fc" id="L89">        BigDecimal amount = null;</span>
 
-<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if ( record.getLedgerType() != null ) {</span>
-<span class="fc" id="L83">            ledgerType = record.getLedgerType().name();</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if ( record.getLedgerType() != null ) {</span>
+<span class="fc" id="L92">            ledgerType = record.getLedgerType().name();</span>
         }
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if ( record.getDirection() != null ) {</span>
-<span class="fc" id="L86">            direction = record.getDirection().name();</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if ( record.getDirection() != null ) {</span>
+<span class="fc" id="L95">            direction = record.getDirection().name();</span>
         }
-<span class="fc" id="L88">        amount = moneyMapper.toBigDecimal( record.getAmount() );</span>
+<span class="fc" id="L97">        amount = moneyMapper.toBigDecimal( record.getAmount() );</span>
 
-<span class="fc" id="L90">        TransactionSummaryResponse.TransactionEntryResponse transactionEntryResponse = new TransactionSummaryResponse.TransactionEntryResponse( ledgerType, direction, amount );</span>
+<span class="fc" id="L99">        TransactionSummaryResponse.TransactionEntryResponse transactionEntryResponse = new TransactionSummaryResponse.TransactionEntryResponse( ledgerType, direction, amount );</span>
 
-<span class="fc" id="L92">        return transactionEntryResponse;</span>
+<span class="fc" id="L101">        return transactionEntryResponse;</span>
+    }
+
+    @Override
+    public TransactionDetailsResponse toDetailsResponse(TransactionDetails details) {
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if ( details == null ) {</span>
+<span class="nc" id="L107">            return null;</span>
+        }
+
+<span class="fc" id="L110">        UUID id = null;</span>
+<span class="fc" id="L111">        UUID customerId = null;</span>
+<span class="fc" id="L112">        BigDecimal amount = null;</span>
+<span class="fc" id="L113">        String type = null;</span>
+<span class="fc" id="L114">        Instant recordedAt = null;</span>
+<span class="fc" id="L115">        String paymentMethod = null;</span>
+<span class="fc" id="L116">        String reason = null;</span>
+<span class="fc" id="L117">        String sourceType = null;</span>
+<span class="fc" id="L118">        String sourceId = null;</span>
+<span class="fc" id="L119">        String operatorId = null;</span>
+<span class="fc" id="L120">        List&lt;TransactionDetailsResponse.TransactionDetailEntryResponse&gt; entries = null;</span>
+
+<span class="fc" id="L122">        id = detailsTransactionId( details );</span>
+<span class="fc" id="L123">        customerId = detailsTransactionCustomerId( details );</span>
+<span class="fc" id="L124">        amount = moneyMapper.toBigDecimal( detailsTransactionAmount( details ) );</span>
+<span class="fc" id="L125">        TransactionType type1 = detailsTransactionType( details );</span>
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        if ( type1 != null ) {</span>
+<span class="fc" id="L127">            type = type1.name();</span>
+        }
+<span class="fc" id="L129">        recordedAt = detailsTransactionRecordedAt( details );</span>
+<span class="fc" id="L130">        PaymentMethod paymentMethod1 = detailsTransactionPaymentMethod( details );</span>
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if ( paymentMethod1 != null ) {</span>
+<span class="fc" id="L132">            paymentMethod = paymentMethod1.name();</span>
+        }
+<span class="fc" id="L134">        reason = detailsTransactionReason( details );</span>
+<span class="fc" id="L135">        TransactionSourceType sourceType1 = detailsTransactionSourceType( details );</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if ( sourceType1 != null ) {</span>
+<span class="fc" id="L137">            sourceType = sourceType1.name();</span>
+        }
+<span class="fc" id="L139">        sourceId = detailsTransactionSourceId( details );</span>
+<span class="fc" id="L140">        operatorId = detailsTransactionOperatorId( details );</span>
+<span class="fc" id="L141">        List&lt;TransactionRecord&gt; records = detailsTransactionRecords( details );</span>
+<span class="fc" id="L142">        entries = transactionRecordListToTransactionDetailEntryResponseList( records );</span>
+
+<span class="fc" id="L144">        TransactionDeltasResponse deltas = deltas(details.transaction());</span>
+<span class="fc" id="L145">        TransactionBalancesResponse balances = balances(details);</span>
+
+<span class="fc" id="L147">        TransactionDetailsResponse transactionDetailsResponse = new TransactionDetailsResponse( id, customerId, amount, type, recordedAt, paymentMethod, reason, sourceType, sourceId, operatorId, deltas, balances, entries );</span>
+
+<span class="fc" id="L149">        return transactionDetailsResponse;</span>
+    }
+
+    @Override
+    public CustomerTransactionResponse toCustomerTransactionResponse(TransactionDetails details) {
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if ( details == null ) {</span>
+<span class="nc" id="L155">            return null;</span>
+        }
+
+<span class="fc" id="L158">        UUID customerId = null;</span>
+<span class="fc" id="L159">        BigDecimal amount = null;</span>
+<span class="fc" id="L160">        String type = null;</span>
+<span class="fc" id="L161">        Instant recordedAt = null;</span>
+<span class="fc" id="L162">        String paymentMethod = null;</span>
+<span class="fc" id="L163">        String reason = null;</span>
+<span class="fc" id="L164">        String sourceType = null;</span>
+<span class="fc" id="L165">        String sourceId = null;</span>
+
+<span class="fc" id="L167">        customerId = detailsTransactionCustomerId( details );</span>
+<span class="fc" id="L168">        amount = moneyMapper.toBigDecimal( detailsTransactionAmount( details ) );</span>
+<span class="fc" id="L169">        TransactionType type1 = detailsTransactionType( details );</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if ( type1 != null ) {</span>
+<span class="fc" id="L171">            type = type1.name();</span>
+        }
+<span class="fc" id="L173">        recordedAt = detailsTransactionRecordedAt( details );</span>
+<span class="fc" id="L174">        PaymentMethod paymentMethod1 = detailsTransactionPaymentMethod( details );</span>
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        if ( paymentMethod1 != null ) {</span>
+<span class="fc" id="L176">            paymentMethod = paymentMethod1.name();</span>
+        }
+<span class="fc" id="L178">        reason = detailsTransactionReason( details );</span>
+<span class="fc" id="L179">        TransactionSourceType sourceType1 = detailsTransactionSourceType( details );</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        if ( sourceType1 != null ) {</span>
+<span class="fc" id="L181">            sourceType = sourceType1.name();</span>
+        }
+<span class="fc" id="L183">        sourceId = detailsTransactionSourceId( details );</span>
+
+<span class="fc" id="L185">        String direction = direction(details.transaction());</span>
+<span class="fc" id="L186">        TransactionDeltasResponse deltas = deltas(details.transaction());</span>
+<span class="fc" id="L187">        TransactionBalancesResponse balances = balances(details);</span>
+
+<span class="fc" id="L189">        CustomerTransactionResponse customerTransactionResponse = new CustomerTransactionResponse( customerId, amount, type, direction, recordedAt, paymentMethod, reason, sourceType, sourceId, deltas, balances );</span>
+
+<span class="fc" id="L191">        return customerTransactionResponse;</span>
+    }
+
+    @Override
+    public TransactionDetailsResponse.TransactionDetailEntryResponse toDetailEntryResponse(TransactionRecord entry) {
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">        if ( entry == null ) {</span>
+<span class="nc" id="L197">            return null;</span>
+        }
+
+<span class="fc" id="L200">        BigDecimal balanceAfter = null;</span>
+<span class="fc" id="L201">        String ledgerType = null;</span>
+<span class="fc" id="L202">        String direction = null;</span>
+<span class="fc" id="L203">        BigDecimal amount = null;</span>
+
+<span class="fc" id="L205">        balanceAfter = moneyMapper.toBigDecimal( entry.getRunningBalance() );</span>
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">        if ( entry.getLedgerType() != null ) {</span>
+<span class="fc" id="L207">            ledgerType = entry.getLedgerType().name();</span>
+        }
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        if ( entry.getDirection() != null ) {</span>
+<span class="fc" id="L210">            direction = entry.getDirection().name();</span>
+        }
+<span class="fc" id="L212">        amount = moneyMapper.toBigDecimal( entry.getAmount() );</span>
+
+<span class="fc" id="L214">        BigDecimal signedDelta = entry.signedBalanceDelta().amount();</span>
+<span class="fc" id="L215">        boolean systemLedger = entry.getLedgerType().isSystemLedger();</span>
+
+<span class="fc" id="L217">        TransactionDetailsResponse.TransactionDetailEntryResponse transactionDetailEntryResponse = new TransactionDetailsResponse.TransactionDetailEntryResponse( ledgerType, direction, amount, signedDelta, balanceAfter, systemLedger );</span>
+
+<span class="fc" id="L219">        return transactionDetailEntryResponse;</span>
     }
 
     protected List&lt;TransactionSummaryResponse.TransactionEntryResponse&gt; transactionRecordListToTransactionEntryResponseList(List&lt;TransactionRecord&gt; list) {
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if ( list == null ) {</span>
-<span class="nc" id="L97">            return null;</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L224">            return null;</span>
         }
 
-<span class="fc" id="L100">        List&lt;TransactionSummaryResponse.TransactionEntryResponse&gt; list1 = new ArrayList&lt;TransactionSummaryResponse.TransactionEntryResponse&gt;( list.size() );</span>
-<span class="fc bfc" id="L101" title="All 2 branches covered.">        for ( TransactionRecord transactionRecord : list ) {</span>
-<span class="fc" id="L102">            list1.add( toEntryResponse( transactionRecord ) );</span>
-<span class="fc" id="L103">        }</span>
+<span class="fc" id="L227">        List&lt;TransactionSummaryResponse.TransactionEntryResponse&gt; list1 = new ArrayList&lt;TransactionSummaryResponse.TransactionEntryResponse&gt;( list.size() );</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">        for ( TransactionRecord transactionRecord : list ) {</span>
+<span class="fc" id="L229">            list1.add( toEntryResponse( transactionRecord ) );</span>
+<span class="fc" id="L230">        }</span>
 
-<span class="fc" id="L105">        return list1;</span>
+<span class="fc" id="L232">        return list1;</span>
+    }
+
+    private UUID detailsTransactionId(TransactionDetails transactionDetails) {
+<span class="fc" id="L236">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L238">            return null;</span>
+        }
+<span class="fc" id="L240">        return transaction.getId();</span>
+    }
+
+    private UUID detailsTransactionCustomerId(TransactionDetails transactionDetails) {
+<span class="fc" id="L244">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L246">            return null;</span>
+        }
+<span class="fc" id="L248">        return transaction.getCustomerId();</span>
+    }
+
+    private Money detailsTransactionAmount(TransactionDetails transactionDetails) {
+<span class="fc" id="L252">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L254">            return null;</span>
+        }
+<span class="fc" id="L256">        return transaction.getAmount();</span>
+    }
+
+    private TransactionType detailsTransactionType(TransactionDetails transactionDetails) {
+<span class="fc" id="L260">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L262">            return null;</span>
+        }
+<span class="fc" id="L264">        return transaction.getType();</span>
+    }
+
+    private Instant detailsTransactionRecordedAt(TransactionDetails transactionDetails) {
+<span class="fc" id="L268">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L269" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L270">            return null;</span>
+        }
+<span class="fc" id="L272">        return transaction.getRecordedAt();</span>
+    }
+
+    private PaymentMethod detailsTransactionPaymentMethod(TransactionDetails transactionDetails) {
+<span class="fc" id="L276">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L278">            return null;</span>
+        }
+<span class="fc" id="L280">        return transaction.getPaymentMethod();</span>
+    }
+
+    private String detailsTransactionReason(TransactionDetails transactionDetails) {
+<span class="fc" id="L284">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L286">            return null;</span>
+        }
+<span class="fc" id="L288">        return transaction.getReason();</span>
+    }
+
+    private TransactionSourceType detailsTransactionSourceType(TransactionDetails transactionDetails) {
+<span class="fc" id="L292">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L294">            return null;</span>
+        }
+<span class="fc" id="L296">        return transaction.getSourceType();</span>
+    }
+
+    private String detailsTransactionSourceId(TransactionDetails transactionDetails) {
+<span class="fc" id="L300">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L302">            return null;</span>
+        }
+<span class="fc" id="L304">        return transaction.getSourceId();</span>
+    }
+
+    private String detailsTransactionOperatorId(TransactionDetails transactionDetails) {
+<span class="fc" id="L308">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L310">            return null;</span>
+        }
+<span class="fc" id="L312">        return transaction.getOperatorId();</span>
+    }
+
+    private List&lt;TransactionRecord&gt; detailsTransactionRecords(TransactionDetails transactionDetails) {
+<span class="fc" id="L316">        Transaction transaction = transactionDetails.transaction();</span>
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">        if ( transaction == null ) {</span>
+<span class="nc" id="L318">            return null;</span>
+        }
+<span class="fc" id="L320">        return transaction.getRecords();</span>
+    }
+
+    protected List&lt;TransactionDetailsResponse.TransactionDetailEntryResponse&gt; transactionRecordListToTransactionDetailEntryResponseList(List&lt;TransactionRecord&gt; list) {
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L325">            return null;</span>
+        }
+
+<span class="fc" id="L328">        List&lt;TransactionDetailsResponse.TransactionDetailEntryResponse&gt; list1 = new ArrayList&lt;TransactionDetailsResponse.TransactionDetailEntryResponse&gt;( list.size() );</span>
+<span class="fc bfc" id="L329" title="All 2 branches covered.">        for ( TransactionRecord transactionRecord : list ) {</span>
+<span class="fc" id="L330">            list1.add( toDetailEntryResponse( transactionRecord ) );</span>
+<span class="fc" id="L331">        }</span>
+
+<span class="fc" id="L333">        return list1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

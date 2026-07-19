@@ -18,8 +18,14 @@ public class TransactionRecord {
     private final Money amount;
     private final Money runningBalance;
 
-    public Money signedAmount() {
-<span class="fc bfc" id="L22" title="All 2 branches covered.">        return direction == EntryDirection.CREDIT ? amount : amount.negate();</span>
+    public Money signedBalanceDelta() {
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        return increasesLedgerBalance() ? amount : amount.negate();</span>
+    }
+
+    private boolean increasesLedgerBalance() {
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        return ledgerType.isAssetLedger()</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">                ? direction == EntryDirection.DEBIT</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">                : direction == EntryDirection.CREDIT;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionDetailsResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">component-test</a> &gt; <a href="index.source.html" class="el_package">com.github.jenkaby.bikerental.finance.web.query.dto</a> &gt; <span class="el_source">TransactionDetailsResponse.java</span></div><h1>TransactionDetailsResponse.java</h1><pre class="source lang-java linenums">package com.github.jenkaby.bikerental.finance.web.query.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+@Schema(description = &quot;Full details of a single business transaction: its double-entry legs with per-ledger movement &quot;
+        + &quot;and running balances, plus the customer-side deltas and resulting bucket balances&quot;)
+<span class="fc" id="L13">public record TransactionDetailsResponse(</span>
+        @Schema(description = &quot;Transaction id&quot;)
+        @NotNull UUID id,
+        @Schema(description = &quot;Owning customer id&quot;)
+        @NotNull UUID customerId,
+        @Schema(description = &quot;Absolute transaction amount (always positive)&quot;)
+        @NotNull BigDecimal amount,
+        @Schema(description = &quot;Business transaction type&quot;,
+                allowableValues = {&quot;DEPOSIT&quot;, &quot;WITHDRAWAL&quot;, &quot;HOLD&quot;, &quot;CAPTURE&quot;, &quot;RELEASE&quot;, &quot;ADJUSTMENT&quot;})
+        @NotNull String type,
+        @Schema(description = &quot;When the transaction was recorded (UTC ISO-8601)&quot;)
+        @NotNull Instant recordedAt,
+        @Schema(description = &quot;Payment method&quot;)
+        @NotNull String paymentMethod,
+        @Schema(description = &quot;Free-text reason, present for adjustments&quot;) String reason,
+        @Schema(description = &quot;Source type, e.g. RENTAL&quot;) String sourceType,
+        @Schema(description = &quot;Source identifier&quot;) String sourceId,
+        @Schema(description = &quot;Operator that recorded the transaction&quot;)
+        @NotNull String operatorId,
+        @Schema(description = &quot;Signed per-bucket change caused by this transaction&quot;)
+        @NotNull TransactionDeltasResponse deltas,
+        @Schema(description = &quot;Customer bucket balances after this transaction&quot;)
+        @NotNull TransactionBalancesResponse balances,
+        @Schema(description = &quot;All double-entry legs of this transaction with their movement and running balance&quot;)
+        @NotNull List&lt;TransactionDetailEntryResponse&gt; entries
+) {
+
+    @Schema(description = &quot;A single ledger leg of the double-entry transaction&quot;)
+<span class="fc" id="L41">    public record TransactionDetailEntryResponse(</span>
+            @Schema(description = &quot;Affected ledger&quot;,
+                    allowableValues = {&quot;CASH&quot;, &quot;CARD_TERMINAL&quot;, &quot;BANK_TRANSFER&quot;, &quot;REVENUE&quot;, &quot;ADJUSTMENT&quot;,
+                            &quot;CUSTOMER_WALLET&quot;, &quot;CUSTOMER_HOLD&quot;})
+            @NotNull String ledgerType,
+            @Schema(description = &quot;Entry direction on that ledger&quot;, allowableValues = {&quot;CREDIT&quot;, &quot;DEBIT&quot;})
+            @NotNull String direction,
+            @Schema(description = &quot;Absolute amount of this leg (always positive)&quot;)
+            @NotNull BigDecimal amount,
+            @Schema(description = &quot;Signed change to this ledger's balance (asset ledgers increase on debit)&quot;)
+            @NotNull BigDecimal signedDelta,
+            @Schema(description = &quot;This ledger's running balance after the leg; null when not tracked for the ledger&quot;,
+                    nullable = true)
+            BigDecimal balanceAfter,
+            @Schema(description = &quot;Whether this is a system (house) ledger rather than a customer ledger&quot;)
+            boolean systemLedger
+    ) {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

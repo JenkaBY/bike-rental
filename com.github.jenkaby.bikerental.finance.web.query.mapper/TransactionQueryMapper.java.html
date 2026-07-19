@@ -2,10 +2,16 @@
 
 import com.github.jenkaby.bikerental.finance.domain.model.LedgerType;
 import com.github.jenkaby.bikerental.finance.domain.model.Transaction;
+import com.github.jenkaby.bikerental.finance.domain.model.TransactionDetails;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionFilter;
 import com.github.jenkaby.bikerental.finance.domain.model.TransactionRecord;
+import com.github.jenkaby.bikerental.finance.web.query.dto.CustomerTransactionResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionBalancesResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDeltasResponse;
+import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionDetailsResponse;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionFilterParams;
 import com.github.jenkaby.bikerental.finance.web.query.dto.TransactionSummaryResponse;
+import com.github.jenkaby.bikerental.shared.domain.model.vo.Money;
 import com.github.jenkaby.bikerental.shared.mapper.MoneyMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,20 +22,73 @@ import java.util.UUID;
 @Mapper(uses = {MoneyMapper.class})
 public interface TransactionQueryMapper {
 
+    String CREDIT = &quot;CREDIT&quot;;
+    String DEBIT = &quot;DEBIT&quot;;
+
     @Mapping(target = &quot;entries&quot;, source = &quot;records&quot;)
     TransactionSummaryResponse toResponse(Transaction transaction);
 
     TransactionSummaryResponse.TransactionEntryResponse toEntryResponse(TransactionRecord record);
 
+    @Mapping(target = &quot;id&quot;, source = &quot;transaction.id&quot;)
+    @Mapping(target = &quot;customerId&quot;, source = &quot;transaction.customerId&quot;)
+    @Mapping(target = &quot;amount&quot;, source = &quot;transaction.amount&quot;)
+    @Mapping(target = &quot;type&quot;, source = &quot;transaction.type&quot;)
+    @Mapping(target = &quot;recordedAt&quot;, source = &quot;transaction.recordedAt&quot;)
+    @Mapping(target = &quot;paymentMethod&quot;, source = &quot;transaction.paymentMethod&quot;)
+    @Mapping(target = &quot;reason&quot;, source = &quot;transaction.reason&quot;)
+    @Mapping(target = &quot;sourceType&quot;, source = &quot;transaction.sourceType&quot;)
+    @Mapping(target = &quot;sourceId&quot;, source = &quot;transaction.sourceId&quot;)
+    @Mapping(target = &quot;operatorId&quot;, source = &quot;transaction.operatorId&quot;)
+    @Mapping(target = &quot;entries&quot;, source = &quot;transaction.records&quot;)
+    @Mapping(target = &quot;deltas&quot;, expression = &quot;java(deltas(details.transaction()))&quot;)
+    @Mapping(target = &quot;balances&quot;, expression = &quot;java(balances(details))&quot;)
+    TransactionDetailsResponse toDetailsResponse(TransactionDetails details);
+
+    @Mapping(target = &quot;customerId&quot;, source = &quot;transaction.customerId&quot;)
+    @Mapping(target = &quot;amount&quot;, source = &quot;transaction.amount&quot;)
+    @Mapping(target = &quot;type&quot;, source = &quot;transaction.type&quot;)
+    @Mapping(target = &quot;recordedAt&quot;, source = &quot;transaction.recordedAt&quot;)
+    @Mapping(target = &quot;paymentMethod&quot;, source = &quot;transaction.paymentMethod&quot;)
+    @Mapping(target = &quot;reason&quot;, source = &quot;transaction.reason&quot;)
+    @Mapping(target = &quot;sourceType&quot;, source = &quot;transaction.sourceType&quot;)
+    @Mapping(target = &quot;sourceId&quot;, source = &quot;transaction.sourceId&quot;)
+    @Mapping(target = &quot;direction&quot;, expression = &quot;java(direction(details.transaction()))&quot;)
+    @Mapping(target = &quot;deltas&quot;, expression = &quot;java(deltas(details.transaction()))&quot;)
+    @Mapping(target = &quot;balances&quot;, expression = &quot;java(balances(details))&quot;)
+    CustomerTransactionResponse toCustomerTransactionResponse(TransactionDetails details);
+
+    @Mapping(target = &quot;balanceAfter&quot;, source = &quot;entry.runningBalance&quot;)
+    @Mapping(target = &quot;signedDelta&quot;, expression = &quot;java(entry.signedBalanceDelta().amount())&quot;)
+    @Mapping(target = &quot;systemLedger&quot;, expression = &quot;java(entry.getLedgerType().isSystemLedger())&quot;)
+    TransactionDetailsResponse.TransactionDetailEntryResponse toDetailEntryResponse(TransactionRecord entry);
+
+    default TransactionDeltasResponse deltas(Transaction transaction) {
+<span class="fc" id="L67">        Money wallet = transaction.walletBalanceDelta();</span>
+<span class="fc" id="L68">        Money hold = transaction.holdBalanceDelta();</span>
+<span class="fc" id="L69">        return new TransactionDeltasResponse(wallet.amount(), hold.amount(), wallet.add(hold).amount());</span>
+    }
+
+    default TransactionBalancesResponse balances(TransactionDetails details) {
+<span class="fc" id="L73">        return new TransactionBalancesResponse(</span>
+<span class="fc" id="L74">                details.walletBalanceAfter().amount(), details.holdBalanceAfter().amount());</span>
+    }
+
+    default String direction(Transaction transaction) {
+<span class="fc" id="L78">        Money walletDelta = transaction.walletBalanceDelta();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        Money decisive = walletDelta.isZero() ? walletDelta.add(transaction.holdBalanceDelta()) : walletDelta;</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        return decisive.isNegative() ? DEBIT : CREDIT;</span>
+    }
+
     default TransactionFilter toFilter(TransactionFilterParams params) {
-<span class="fc bfc" id="L25" title="All 2 branches covered.">        Set&lt;UUID&gt; customerIds = params.customerIds() == null ? Set.of() : params.customerIds();</span>
-<span class="fc bfc" id="L26" title="All 2 branches covered.">        Set&lt;LedgerType&gt; ledgerTypes = params.ledgerTypes() == null ? Set.of() : params.ledgerTypes();</span>
-<span class="fc" id="L27">        return new TransactionFilter(</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        Set&lt;UUID&gt; customerIds = params.customerIds() == null ? Set.of() : params.customerIds();</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        Set&lt;LedgerType&gt; ledgerTypes = params.ledgerTypes() == null ? Set.of() : params.ledgerTypes();</span>
+<span class="fc" id="L86">        return new TransactionFilter(</span>
                 customerIds,
-<span class="fc" id="L29">                params.fromDate(),</span>
-<span class="fc" id="L30">                params.toDate(),</span>
-<span class="fc" id="L31">                params.sourceId(),</span>
-<span class="fc" id="L32">                params.sourceType(),</span>
+<span class="fc" id="L88">                params.fromDate(),</span>
+<span class="fc" id="L89">                params.toDate(),</span>
+<span class="fc" id="L90">                params.sourceId(),</span>
+<span class="fc" id="L91">                params.sourceType(),</span>
                 ledgerTypes);
     }
 }

@@ -53,7 +53,7 @@ public class Transaction {
     private Money bucketDelta(LedgerType ledgerType) {
 <span class="fc" id="L54">        return records.stream()</span>
 <span class="fc bfc" id="L55" title="All 2 branches covered.">                .filter(record -&gt; record.getLedgerType() == ledgerType)</span>
-<span class="fc" id="L56">                .map(TransactionRecord::signedAmount)</span>
+<span class="fc" id="L56">                .map(TransactionRecord::signedBalanceDelta)</span>
 <span class="fc" id="L57">                .reduce(Money.zero(), Money::add);</span>
     }
 }

@@ -67,97 +67,104 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional&lt;Transaction&gt; findById(UUID id) {
+<span class="fc" id="L72">        return jpaRepository.findWithRecordsById(id)</span>
+<span class="fc" id="L73">                .map(mapper::toDomain);</span>
+    }
+
+    @Override
     public Optional&lt;Transaction&gt; findByIdempotencyKeyAndCustomerId(IdempotencyKey idempotencyKey, CustomerRef customerId) {
-<span class="fc" id="L71">        return jpaRepository.findByIdempotencyKeyAndCustomerId(idempotencyKey.id(), customerId.id())</span>
-<span class="fc" id="L72">                .map(mapper::toDomain);</span>
+<span class="fc" id="L78">        return jpaRepository.findByIdempotencyKeyAndCustomerId(idempotencyKey.id(), customerId.id())</span>
+<span class="fc" id="L79">                .map(mapper::toDomain);</span>
     }
 
     @Override
     public Optional&lt;Transaction&gt; findByIdempotencyKey(IdempotencyKey idempotencyKey) {
-<span class="fc" id="L77">        return jpaRepository.findByIdempotencyKey(idempotencyKey.id())</span>
-<span class="fc" id="L78">                .map(mapper::toDomain);</span>
+<span class="fc" id="L84">        return jpaRepository.findByIdempotencyKey(idempotencyKey.id())</span>
+<span class="fc" id="L85">                .map(mapper::toDomain);</span>
     }
 
     @Override
     public Optional&lt;Transaction&gt; findByRentalRefAndType(RentalId rentalRef, TransactionType type) {
-<span class="fc" id="L83">        return findAllByRentalRefAndTypes(rentalRef, Set.of(type)).stream()</span>
-<span class="fc" id="L84">                .findFirst();</span>
+<span class="fc" id="L90">        return findAllByRentalRefAndTypes(rentalRef, Set.of(type)).stream()</span>
+<span class="fc" id="L91">                .findFirst();</span>
     }
 
     @Override
     public List&lt;Transaction&gt; findAllByRentalRefAndTypes(RentalId rentalRef, Set&lt;TransactionType&gt; types) {
-<span class="fc" id="L89">        return jpaRepository.findAllBySourceTypeAndSourceIdAndTransactionTypeIn(</span>
+<span class="fc" id="L96">        return jpaRepository.findAllBySourceTypeAndSourceIdAndTransactionTypeIn(</span>
                         TransactionSourceType.RENTAL,
-<span class="fc" id="L91">                        String.valueOf(rentalRef.id()),</span>
+<span class="fc" id="L98">                        String.valueOf(rentalRef.id()),</span>
                         types)
-<span class="fc" id="L93">                .stream()</span>
-<span class="fc" id="L94">                .map(mapper::toDomain)</span>
-<span class="fc" id="L95">                .toList();</span>
+<span class="fc" id="L100">                .stream()</span>
+<span class="fc" id="L101">                .map(mapper::toDomain)</span>
+<span class="fc" id="L102">                .toList();</span>
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page&lt;Transaction&gt; findTransactionHistory(CustomerRef customerId, TransactionHistoryFilter filter, PageRequest pageRequest) {
-<span class="fc" id="L101">        var pageable = org.springframework.data.domain.PageRequest.of(pageRequest.page(), pageRequest.size(),</span>
-<span class="fc" id="L102">                Sort.by(Sort.Direction.DESC, SpecConstant.TransactionField.RECORDED_AT));</span>
+<span class="fc" id="L108">        var pageable = org.springframework.data.domain.PageRequest.of(pageRequest.page(), pageRequest.size(),</span>
+<span class="fc" id="L109">                Sort.by(Sort.Direction.DESC, SpecConstant.TransactionField.RECORDED_AT));</span>
 
-<span class="fc" id="L104">        var txnSpec = SpecificationBuilder.specification(CustomerTransactionsSpec.class)</span>
-<span class="fc" id="L105">                .withParam(SpecConstant.TransactionField.CUSTOMER_ID, customerId.id().toString());</span>
-<span class="fc" id="L106">        specParamsMapper.toParams(filter).forEach(txnSpec::withParam);</span>
-<span class="fc" id="L107">        var spec = txnSpec.build();</span>
+<span class="fc" id="L111">        var txnSpec = SpecificationBuilder.specification(CustomerTransactionsSpec.class)</span>
+<span class="fc" id="L112">                .withParam(SpecConstant.TransactionField.CUSTOMER_ID, customerId.id().toString());</span>
+<span class="fc" id="L113">        specParamsMapper.toParams(filter).forEach(txnSpec::withParam);</span>
+<span class="fc" id="L114">        var spec = txnSpec.build();</span>
 
-<span class="fc" id="L109">        var springPage = jpaRepository.findAll(spec, pageable);</span>
-<span class="fc" id="L110">        var items = springPage.getContent().stream()</span>
-<span class="fc" id="L111">                .map(mapper::toDomain)</span>
-<span class="fc" id="L112">                .toList();</span>
-<span class="fc" id="L113">        return new Page&lt;&gt;(items, springPage.getTotalElements(), pageRequest);</span>
+<span class="fc" id="L116">        var springPage = jpaRepository.findAll(spec, pageable);</span>
+<span class="fc" id="L117">        var items = springPage.getContent().stream()</span>
+<span class="fc" id="L118">                .map(mapper::toDomain)</span>
+<span class="fc" id="L119">                .toList();</span>
+<span class="fc" id="L120">        return new Page&lt;&gt;(items, springPage.getTotalElements(), pageRequest);</span>
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page&lt;Transaction&gt; findTransactions(TransactionFilter filter, PageRequest pageRequest) {
-<span class="fc" id="L119">        var pageable = org.springframework.data.domain.PageRequest.of(</span>
-<span class="fc" id="L120">                pageRequest.page(), pageRequest.size(), toEntitySort(pageRequest.sort()));</span>
+<span class="fc" id="L126">        var pageable = org.springframework.data.domain.PageRequest.of(</span>
+<span class="fc" id="L127">                pageRequest.page(), pageRequest.size(), toEntitySort(pageRequest.sort()));</span>
 
-<span class="fc" id="L122">        var specBuilder = SpecificationBuilder.specification(TransactionsSpec.class);</span>
-<span class="fc" id="L123">        transactionsSpecParamsMapper.toParams(filter).forEach(specBuilder::withParam);</span>
-<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (!filter.customerIds().isEmpty()) {</span>
-<span class="fc" id="L125">            specBuilder.withParam(SpecConstant.TransactionField.CUSTOMER_IDS, toStringArray(filter.customerIds()));</span>
+<span class="fc" id="L129">        var specBuilder = SpecificationBuilder.specification(TransactionsSpec.class);</span>
+<span class="fc" id="L130">        transactionsSpecParamsMapper.toParams(filter).forEach(specBuilder::withParam);</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (!filter.customerIds().isEmpty()) {</span>
+<span class="fc" id="L132">            specBuilder.withParam(SpecConstant.TransactionField.CUSTOMER_IDS, toStringArray(filter.customerIds()));</span>
         }
-<span class="fc" id="L127">        Specification&lt;TransactionJpaEntity&gt; spec = specBuilder.build();</span>
-<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (!filter.ledgerTypes().isEmpty()) {</span>
-<span class="fc" id="L129">            spec = spec.and(LedgerTypeExistsSpecification.forLedgerTypes(filter.ledgerTypes()));</span>
+<span class="fc" id="L134">        Specification&lt;TransactionJpaEntity&gt; spec = specBuilder.build();</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        if (!filter.ledgerTypes().isEmpty()) {</span>
+<span class="fc" id="L136">            spec = spec.and(LedgerTypeExistsSpecification.forLedgerTypes(filter.ledgerTypes()));</span>
         }
 
-<span class="fc" id="L132">        var springPage = jpaRepository.findAll(spec, pageable);</span>
-<span class="fc" id="L133">        var items = springPage.getContent().stream()</span>
-<span class="fc" id="L134">                .map(mapper::toDomain)</span>
-<span class="fc" id="L135">                .toList();</span>
-<span class="fc" id="L136">        return new Page&lt;&gt;(items, springPage.getTotalElements(), pageRequest);</span>
+<span class="fc" id="L139">        var springPage = jpaRepository.findAll(spec, pageable);</span>
+<span class="fc" id="L140">        var items = springPage.getContent().stream()</span>
+<span class="fc" id="L141">                .map(mapper::toDomain)</span>
+<span class="fc" id="L142">                .toList();</span>
+<span class="fc" id="L143">        return new Page&lt;&gt;(items, springPage.getTotalElements(), pageRequest);</span>
     }
 
     private Sort toEntitySort(com.github.jenkaby.bikerental.shared.domain.model.vo.Sort sort) {
-<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if (!sort.isSorted()) {</span>
-<span class="nc" id="L141">            return Sort.by(Sort.Direction.DESC, SpecConstant.TransactionField.RECORDED_AT);</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if (!sort.isSorted()) {</span>
+<span class="nc" id="L148">            return Sort.by(Sort.Direction.DESC, SpecConstant.TransactionField.RECORDED_AT);</span>
         }
-<span class="fc" id="L143">        var orders = sort.orders().stream()</span>
-<span class="fc" id="L144">                .map(order -&gt; new Sort.Order(</span>
-<span class="pc bpc" id="L145" title="1 of 2 branches missed.">                        order.direction().isDescending() ? Sort.Direction.DESC : Sort.Direction.ASC,</span>
-<span class="fc" id="L146">                        ENTITY_PROPERTY_BY_SORT_FIELD.getOrDefault(order.property(), order.property())))</span>
-<span class="fc" id="L147">                .toList();</span>
-<span class="fc" id="L148">        return Sort.by(orders);</span>
+<span class="fc" id="L150">        var orders = sort.orders().stream()</span>
+<span class="fc" id="L151">                .map(order -&gt; new Sort.Order(</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">                        order.direction().isDescending() ? Sort.Direction.DESC : Sort.Direction.ASC,</span>
+<span class="fc" id="L153">                        ENTITY_PROPERTY_BY_SORT_FIELD.getOrDefault(order.property(), order.property())))</span>
+<span class="fc" id="L154">                .toList();</span>
+<span class="fc" id="L155">        return Sort.by(orders);</span>
     }
 
     private String[] toStringArray(Collection&lt;UUID&gt; ids) {
-<span class="fc" id="L152">        return ids.stream().map(UUID::toString).toArray(String[]::new);</span>
+<span class="fc" id="L159">        return ids.stream().map(UUID::toString).toArray(String[]::new);</span>
     }
 
     @Override
     public Map&lt;LedgerType, Money&gt; findLatestLedgerBalancesBefore(CustomerRef customerId, Instant before) {
-<span class="fc" id="L157">        return jpaRepository.findLatestCustomerBucketBalancesBefore(customerId.id(), before).stream()</span>
-<span class="fc" id="L158">                .collect(Collectors.toMap(</span>
-<span class="nc" id="L159">                        projection -&gt; LedgerType.valueOf(projection.getLedgerType()),</span>
-<span class="nc" id="L160">                        projection -&gt; Money.of(projection.getRunningBalance())));</span>
+<span class="fc" id="L164">        return jpaRepository.findLatestCustomerBucketBalancesBefore(customerId.id(), before).stream()</span>
+<span class="fc" id="L165">                .collect(Collectors.toMap(</span>
+<span class="fc" id="L166">                        projection -&gt; LedgerType.valueOf(projection.getLedgerType()),</span>
+<span class="fc" id="L167">                        projection -&gt; Money.of(projection.getRunningBalance())));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
